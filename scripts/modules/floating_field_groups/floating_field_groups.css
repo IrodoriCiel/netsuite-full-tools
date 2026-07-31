@@ -1,0 +1,27 @@
+html.nsft-ffg-on {
+    --nsft-ffg-top: 0px;
+    --nsft-ffg-top-nested: 0px;
+}
+
+html.nsft-ffg-on tr:is(
+    :has(> .uir-field-arrangement--title-bar),
+    :has(> [data-nsps-type="fieldgroup"]),
+    :has(> .fgroup_title),
+    :has(> td.fgroup_title)
+) {
+    position: sticky;
+    top: var(--nsft-ffg-top, 7px);
+    z-index: 3;
+}
+
+html.nsft-ffg-on .nltabcontent tr:has(> .fgroup_title),
+html.nsft-ffg-on .nltabcontent tr:has(> td.fgroup_title),
+html.nsft-ffg-on .nlsubtabcontent tr:has(> .fgroup_title),
+html.nsft-ffg-on .nlsubtabcontent tr:has(> td.fgroup_title) {
+    top: var(--nsft-ffg-top-nested, 42px);
+}
+
+html.nsft-ffg-on .dropdownDiv {
+    z-index: 10 !important;
+}
+

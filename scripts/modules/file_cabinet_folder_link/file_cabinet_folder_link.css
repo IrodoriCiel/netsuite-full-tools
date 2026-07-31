@@ -1,0 +1,45 @@
+.nsft-fcfl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px !important;
+    margin-left: 10px;
+    height: 21px;
+    vertical-align: middle;
+    cursor: pointer;
+    color: #1d4ed8;
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    border-radius: 999px;
+    font-size: 11px !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    user-select: none;
+}
+
+.nsft-fcfl-btn:hover {
+    color: #1e40af;
+    background: #dbeafe;
+    border-color: #2563eb;
+}
+
+.nsft-fcfl-btn svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
+.nsft-fcfl-label {
+    font-weight: 600;
+    font-size: 11px !important;
+    line-height: 1 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.nsft-fcfl-btn.nsft-fcfl-copied {
+    color: #15803d;
+    background: #f0fdf4;
+    border-color: #86efac;
+}

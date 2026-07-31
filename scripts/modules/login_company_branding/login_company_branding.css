@@ -1,0 +1,55 @@
+
+html.nsft-lcb-on #companyLogo {
+    display: block;
+    margin: 0 auto 16px auto;
+    max-width: 100%;
+    max-height: 80px;
+    height: auto;
+    transition: transform 200ms ease;
+}
+
+html.nsft-lcb-on #companyLogo:hover {
+    transform: scale(1.04);
+}
+
+html.nsft-lcb-on .nsft-lcb-lastvisit {
+    margin: 2px 0 10px;
+    font-size: 12px;
+    text-align: center;
+    color: light-dark(#64748b, #94a3b8);
+}
+
+html.nsft-lcb-on #companyLogo:not(.transparent) {
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px #ffffff;
+    border-radius: 4px;
+}
+
+html.nsft-lcb-on #companyName {
+    display: block;
+    width: 100%;
+    margin: 0 0 12px 0;
+    font-size: 19px !important;
+    line-height: 28px;
+    color: light-dark(#4d5f79, #e5e7eb);
+    font-weight: bold;
+    text-align: center !important;
+}
+
+html.nsft-lcb-on .login-page-box-logo-link:has(+ #companyLogo) {
+    display: none !important;
+}
+
+html.nsft-lcb-on .login-page-box-logos {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+html.nsft-lcb-on .login-page-box-logos > * {
+    margin-block: 0 !important;
+    margin-inline: auto;
+}
+
+html.nsft-lcb-on .login-page-box-logo-link > svg {
+    height: 42px;
+}

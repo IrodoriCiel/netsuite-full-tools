@@ -1,0 +1,355 @@
+.nsft-cmdp-overlay {
+    --cmdp-backdrop: rgba(17, 24, 39, 0.35);
+    --cmdp-panel-bg: #ffffff;
+    --cmdp-panel-border: #e5e7eb;
+    --cmdp-panel-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --cmdp-text-primary: #111827;
+    --cmdp-text-secondary: #374151;
+    --cmdp-text-muted: #9ca3af;
+    --cmdp-text-subtle: #6b7280;
+    --cmdp-divider: #f3f4f6;
+    --cmdp-footer-bg: #fafafa;
+    --cmdp-selected-bg: #f0f7ff;
+    --cmdp-selected-label: #0056b3;
+    --cmdp-selected-cat: #0070f3;
+    --cmdp-kbd-bg: #ffffff;
+    --cmdp-kbd-border: #d1d5db;
+    --cmdp-kbd-text: #374151;
+    --cmdp-kbd-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    --cmdp-toast-bg: #333333;
+    --cmdp-toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--cmdp-backdrop);
+    z-index: 2147483646;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 12vh;
+    animation: nsft-cmdp-fade 120ms ease-out;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.nsft-cmdp-overlay[data-theme="dark"] {
+    --cmdp-backdrop: rgba(0, 0, 0, 0.55);
+    --cmdp-panel-bg: var(--nsft-dk-panel);
+    --cmdp-panel-border: var(--nsft-dk-border);
+    --cmdp-panel-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --cmdp-text-primary: #E6EBF2;
+    --cmdp-text-secondary: #C6CEDB;
+    --cmdp-text-muted: #9AA4B5;
+    --cmdp-text-subtle: #9AA4B5;
+    --cmdp-divider: #1C222C;
+    --cmdp-footer-bg: var(--nsft-dk-deepest);
+    --cmdp-selected-bg: rgba(110, 124, 245, 0.18);
+    --cmdp-selected-label: #8FA3FF;
+    --cmdp-selected-cat: #B3C1FF;
+    --cmdp-kbd-bg: var(--nsft-dk-hover);
+    --cmdp-kbd-border: var(--nsft-dk-border2);
+    --cmdp-kbd-text: #C6CEDB;
+    --cmdp-kbd-shadow: none;
+    --cmdp-toast-bg: var(--nsft-dk-hover);
+    --cmdp-toast-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+@keyframes nsft-cmdp-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.nsft-cmdp-panel {
+    width: 640px;
+    max-width: 92vw;
+    max-height: 70vh;
+    background: var(--cmdp-panel-bg);
+    color: var(--cmdp-text-primary);
+    border: 1px solid var(--cmdp-panel-border);
+    border-radius: 8px;
+    box-shadow: var(--cmdp-panel-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: nsft-cmdp-pop 140ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+@keyframes nsft-cmdp-pop {
+    from { transform: translateY(-6px) scale(0.99); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.nsft-cmdp-input-wrap {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--cmdp-panel-bg);
+    border-bottom: 1px solid var(--cmdp-divider);
+    gap: 10px;
+    height: 44px;
+    box-sizing: border-box;
+}
+
+.nsft-cmdp-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--cmdp-text-muted);
+    flex-shrink: 0;
+}
+
+.nsft-cmdp-overlay .nsft-cmdp-input {
+    flex: 1;
+    border: none !important;
+    outline: none !important;
+    font-size: 14px;
+    background: transparent !important;
+    color: var(--cmdp-text-primary) !important;
+    -webkit-text-fill-color: var(--cmdp-text-primary) !important;
+    caret-color: var(--cmdp-text-primary);
+    padding: 2px 0;
+    font-family: inherit;
+    letter-spacing: -0.01em;
+    box-shadow: none !important;
+}
+
+.nsft-cmdp-overlay .nsft-cmdp-input::placeholder {
+    color: var(--cmdp-text-muted) !important;
+    -webkit-text-fill-color: var(--cmdp-text-muted) !important;
+    opacity: 1;
+}
+
+.nsft-cmdp-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 0;
+    min-height: 0;
+    background: var(--cmdp-panel-bg);
+}
+
+.nsft-cmdp-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 12.5px;
+    line-height: 1.4;
+    transition: background-color 80ms ease;
+    gap: 10px;
+    color: var(--cmdp-text-secondary);
+}
+
+.nsft-cmdp-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--cmdp-text-muted);
+}
+
+.nsft-cmdp-item-icon svg {
+    width: 14px;
+    height: 14px;
+}
+
+.nsft-cmdp-selected .nsft-cmdp-item-icon {
+    color: var(--cmdp-selected-cat);
+}
+
+.nsft-cmdp-item-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    gap: 1px;
+}
+
+.nsft-cmdp-item-label {
+    color: var(--cmdp-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.nsft-cmdp-item-desc {
+    color: var(--cmdp-text-muted);
+    font-size: 11px;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+.nsft-cmdp-selected .nsft-cmdp-item-desc {
+    color: var(--cmdp-text-subtle);
+}
+
+.nsft-cmdp-item-label mark.nsft-cmdp-match {
+    background: rgba(255, 220, 80, 0.32);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0;
+}
+
+.nsft-cmdp-overlay[data-theme="dark"] .nsft-cmdp-item-label mark.nsft-cmdp-match {
+    background: rgba(255, 220, 80, 0.18);
+}
+
+.nsft-cmdp-item-cat {
+    color: var(--cmdp-text-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    font-weight: 600;
+}
+
+.nsft-cmdp-item-pin {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--cmdp-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 80ms ease, background-color 80ms ease, color 80ms ease;
+}
+
+.nsft-cmdp-item-pin svg {
+    width: 13px;
+    height: 13px;
+}
+
+.nsft-cmdp-item:hover .nsft-cmdp-item-pin,
+.nsft-cmdp-selected .nsft-cmdp-item-pin,
+.nsft-cmdp-item-pin.is-pinned {
+    opacity: 1;
+}
+
+.nsft-cmdp-item-pin:hover {
+    background: var(--cmdp-divider);
+    color: var(--cmdp-text-secondary);
+}
+
+.nsft-cmdp-item-pin.is-pinned {
+    color: var(--cmdp-selected-cat);
+}
+
+.nsft-cmdp-item-kbd {
+    display: inline-flex;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.nsft-cmdp-item-kbd kbd {
+    display: inline-block;
+    padding: 1px 5px;
+    background: var(--cmdp-kbd-bg);
+    border: 1px solid var(--cmdp-kbd-border);
+    border-radius: 3px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+    font-size: 10px;
+    color: var(--cmdp-kbd-text);
+    box-shadow: var(--cmdp-kbd-shadow);
+    line-height: 1.3;
+}
+
+.nsft-cmdp-selected {
+    background: var(--cmdp-selected-bg);
+}
+
+.nsft-cmdp-overlay[data-theme="dark"] .nsft-cmdp-selected {
+    box-shadow: inset 3px 0 0 #6E7CF5;
+}
+
+.nsft-cmdp-selected .nsft-cmdp-item-label {
+    color: var(--cmdp-selected-label);
+}
+
+.nsft-cmdp-selected .nsft-cmdp-item-cat {
+    color: var(--cmdp-selected-cat);
+}
+
+.nsft-cmdp-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--cmdp-text-muted);
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+.nsft-cmdp-slash-header {
+    padding: 10px 14px 6px;
+    font-size: 10.5px;
+    color: var(--cmdp-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+}
+
+.nsft-cmdp-footer {
+    display: flex;
+    gap: 14px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--cmdp-divider);
+    background: var(--cmdp-footer-bg);
+    font-size: 11px;
+    color: var(--cmdp-text-subtle);
+}
+
+.nsft-cmdp-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nsft-cmdp-hint kbd {
+    display: inline-block;
+    padding: 1px 5px;
+    background: var(--cmdp-kbd-bg);
+    border: 1px solid var(--cmdp-kbd-border);
+    border-radius: 3px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+    font-size: 10px;
+    color: var(--cmdp-kbd-text);
+    box-shadow: var(--cmdp-kbd-shadow);
+}
+
+.nsft-cmdp-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--cmdp-toast-bg, #333333);
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-shadow: var(--cmdp-toast-shadow, 0 4px 12px rgba(0, 0, 0, 0.15));
+    z-index: 2147483647;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.nsft-cmdp-toast-error {
+    background: #c0392b;
+}
+
+.nsft-cmdp-toast-visible {
+    opacity: 1;
+    transform: translateY(0);
+}

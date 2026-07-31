@@ -1,0 +1,161 @@
+
+.nsft-sss-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 42vw;
+    min-width: 320px;
+    background: #ffffff;
+    box-shadow: -4px 0 18px rgba(0, 0, 0, 0.18);
+    z-index: 2147482000;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.nsft-sss-handle {
+    position: absolute;
+    left: -3px;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    cursor: col-resize;
+    background: transparent;
+    z-index: 2;
+}
+
+.nsft-sss-handle:hover {
+    background: rgba(37, 99, 235, 0.35);
+}
+
+.nsft-sss-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f7f8fa;
+    flex: 0 0 auto;
+}
+
+.nsft-sss-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.nsft-sss-input {
+    flex: 1 1 auto;
+    min-width: 80px;
+    padding: 5px 9px;
+    border: 1px solid #cfd6df;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #222;
+    background: #fff;
+}
+
+.nsft-sss-input::placeholder {
+    color: #98a2b3;
+}
+
+.nsft-sss-go {
+    flex: 0 0 auto;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 5px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.nsft-sss-go:hover {
+    background: #1d4ed8;
+}
+
+.nsft-sss-close {
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: #6b7280;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.nsft-sss-close:hover {
+    background: #eceff3;
+    color: #111827;
+}
+
+.nsft-sss-iframe {
+    flex: 1 1 auto;
+    width: 100%;
+    border: none;
+    background: #fff;
+}
+
+.nsft-sss-panel.nsft-sss-dragging .nsft-sss-iframe {
+    pointer-events: none;
+}
+
+
+.nsft-sss-panel[data-theme="dark"] {
+    background: var(--nsft-dk-panel);
+    box-shadow: -4px 0 18px rgba(0, 0, 0, 0.55);
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-handle:hover {
+    background: rgba(110, 124, 245, 0.5);
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-head {
+    background: var(--nsft-dk-surface);
+    border-bottom-color: #1C222C;
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-title {
+    color: #E6EBF2;
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-input {
+    background: var(--nsft-dk-surface);
+    border-color: var(--nsft-dk-border);
+    color: #E6EBF2;
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-input:focus {
+    outline: none;
+    border-color: #6E7CF5;
+    box-shadow: 0 0 0 2px rgba(110, 124, 245, 0.18);
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-input::placeholder {
+    color: #5A6475;
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-go {
+    background: #6E7CF5;
+    color: #fff;
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-go:hover {
+    background: #7E8BF7;
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-close {
+    color: #9AA4B5;
+}
+
+.nsft-sss-panel[data-theme="dark"] .nsft-sss-close:hover {
+    background: var(--nsft-dk-hover);
+    color: #E6EBF2;
+}

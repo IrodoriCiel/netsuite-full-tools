@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+        <meta charset="UTF-8">
+        <title>Changelog</title>
+        <script src="../scripts/modules/_shared/nsft_page_theme.js"></script>
+        <link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
+        <style>
+                body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                        background-color: #f9f9f9;
+                        color: #333;
+                        line-height: 1.6;
+                        margin: 0;
+                        padding: 20px;
+                }
+
+                .container {
+                        max-width: 800px;
+                        margin: 0 auto;
+                        background: white;
+                        padding: 30px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+                }
+
+                h1 {
+                        color: #2c3e50;
+                        border-bottom: 2px solid #eaeaea;
+                        padding-bottom: 10px;
+                        margin-bottom: 20px;
+                }
+
+                h2 {
+                        color: #34495e;
+                        margin-top: 30px;
+                        border-bottom: 1px solid #eee;
+                        padding-bottom: 5px;
+                }
+
+                h3 {
+                        color: #2c3e50;
+                        margin-top: 20px;
+                        margin-bottom: 10px;
+                        font-size: 1.1em;
+                        border-bottom: 1px dotted #ccc;
+                }
+
+                ul {
+                        padding-left: 20px;
+                        margin-top: 5px;
+                }
+
+                li {
+                        margin-bottom: 5px;
+                }
+
+                .date {
+                        color: #7f8c8d;
+                        font-size: 0.9em;
+                        margin-left: 10px;
+                        font-weight: normal;
+                }
+
+                /* Nota de agradecimiento a quien reporta y sugiere: se lee como
+                   una nota personal —cursiva, con filete de acento— y no como
+                   otra línea del listado de cambios. */
+                .thanks {
+                        margin: 0 0 18px;
+                        padding: 8px 12px;
+                        border-left: 3px solid #2c3e50;
+                        background: #f4f6f8;
+                        border-radius: 0 6px 6px 0;
+                        font-style: italic;
+                        font-size: 0.93em;
+                        color: #4b5563;
+                }
+
+                /* ---- Modo oscuro ----
+                   Cuelga del atributo que estampa nsft_page_theme.js a partir
+                   del toggle del popup. Los tonos salen de las constantes
+                   --nsft-dk-* de design_tokens.css, que es la fuente única de
+                   la paleta oscura de toda la extensión. */
+                html[data-nsft-theme="dark"] body {
+                        background-color: var(--nsft-dk-deepest, #0D0E10);
+                        color: #C6CEDB;
+                }
+
+                html[data-nsft-theme="dark"] .container {
+                        background: var(--nsft-dk-panel, #111215);
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+                }
+
+                html[data-nsft-theme="dark"] .container > div:first-child {
+                        border-bottom-color: var(--nsft-dk-border, #282A30) !important;
+                }
+
+                html[data-nsft-theme="dark"] h1,
+                html[data-nsft-theme="dark"] h3 {
+                        color: #E6EBF2;
+                }
+
+                html[data-nsft-theme="dark"] h2 {
+                        color: #B3C1FF;
+                }
+
+                html[data-nsft-theme="dark"] h1,
+                html[data-nsft-theme="dark"] h2 {
+                        border-bottom-color: var(--nsft-dk-border, #282A30);
+                }
+
+                html[data-nsft-theme="dark"] h3 {
+                        border-bottom-color: var(--nsft-dk-border2, #34373E);
+                }
+
+                html[data-nsft-theme="dark"] strong {
+                        color: #E6EBF2;
+                }
+
+                html[data-nsft-theme="dark"] .date {
+                        color: #8A93A3;
+                }
+
+                html[data-nsft-theme="dark"] .thanks {
+                        background: var(--nsft-dk-surface, #141519);
+                        border-left-color: #B3C1FF;
+                        color: #9AA4B5;
+                }
+        </style>
+</head>
+
+<body>
+        <div class="container">
+                <div
+                        style="display: flex; align-items: center; border-bottom: 2px solid #eaeaea; margin-bottom: 20px; padding-bottom: 10px;">
+                        <img src="../assets/icons/icon48.png" data-i18n-alt="changelog_logo_alt"
+                                alt="NetSuite Full Tools Logo" style="width: 32px; height: 32px; margin-right: 15px;">
+                        <h1 style="border: none; margin: 0; padding: 0;" data-i18n="changelog_title"></h1>
+                </div>
+
+
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_6_2_1"></span> <span class="date" data-i18n="cl_date_6_2_1"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_search"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_2_1_sql_cols_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_1_sql_cols_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_1_ff_modal_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_1_ff_modal_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_1_ff_copy_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_1_ff_copy_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_6_2_0"></span> <span class="date" data-i18n="cl_date_6_2_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_2_0_sql_logs_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_sql_logs_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_sql_logs_ai_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_sql_logs_ai_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_2_0_recent_shared_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_recent_shared_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_search"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_2_0_sql_status_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_sql_status_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_sql_progress_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_sql_progress_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_sql_logs_resize_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_sql_logs_resize_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_sql_hl_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_sql_hl_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_ai_mode_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_ai_mode_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_ai_vars_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_ai_vars_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_ai_incremental_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_ai_incremental_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_ai_noclobber_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_ai_noclobber_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_ai_nofreeze_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_ai_nofreeze_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_ai_progress_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_ai_progress_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_ai_continue_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_ai_continue_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_2_0_prodpos_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_prodpos_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_sublist_pin_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_sublist_pin_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_bulk_restore_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_bulk_restore_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_2_0_bulk_confirm_title"></span>:</strong>
+                                        <span data-i18n="cl_6_2_0_bulk_confirm_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_6_1_0"></span> <span class="date" data-i18n="cl_date_6_1_0"></span>
+                        </h2>
+
+                        <p class="thanks" data-i18n="cl_thanks"></p>
+
+                        <h3 data-i18n="cl_cat_search"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_1_0_shortcuts_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_shortcuts_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_ai_split_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_ai_split_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_runvars_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_runvars_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_copy_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_copy_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_single_table_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_single_table_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_catalog_exact_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_catalog_exact_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_hints_contains_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_hints_contains_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_erd_single_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_erd_single_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_perf_stability"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_boot_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_boot_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_ai_level_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_ai_level_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_hints_dark_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_hints_dark_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_filter_icon_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_filter_icon_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_site_link_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_site_link_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_cmdp_accents_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_cmdp_accents_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_sql_restore_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_sql_restore_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_ghb_autolist_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_ghb_autolist_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_security"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_1_0_ghb_optperm_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_ghb_optperm_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_1_0_ghb_nopwd_title"></span>:</strong>
+                                        <span data-i18n="cl_6_1_0_ghb_nopwd_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_6_0_0"></span> <span class="date" data-i18n="cl_date_6_0_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_0_0_prod_banner_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_prod_banner_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_page_perf_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_page_perf_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_dark_mode_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_dark_mode_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_theme_unified_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_theme_unified_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_sql_panels_memory_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sql_panels_memory_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_sql_cache_manage_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sql_cache_manage_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_split_search_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_split_search_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_fc_zip_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_fc_zip_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_turbo_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_turbo_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_rtrail_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_rtrail_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_shortcut_hints_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_shortcut_hints_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_0_0_gotorecord_combo_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_gotorecord_combo_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_search"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_0_0_sql_vars_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sql_vars_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_sql_snippets_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sql_snippets_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_sql_export_res_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sql_export_res_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_sql_catalog_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sql_catalog_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_sql_erd_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sql_erd_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_askai_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_askai_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_ai_scope_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_ai_scope_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_ai_privacy_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_ai_privacy_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_ai_control_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_ai_control_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_ghbackup_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_ghbackup_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_0_0_sublist_filter_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sublist_filter_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_sublist_line_ids_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_sublist_line_ids_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_cred_clear_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_cred_clear_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_popup_home_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_popup_home_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_no_autoreload_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_no_autoreload_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_scripting"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_6_0_0_log_viewer_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_log_viewer_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_6_0_0_log_viewer_all_title"></span>:</strong>
+                                        <span data-i18n="cl_6_0_0_log_viewer_all_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_5_1_1"></span> <span class="date" data-i18n="cl_date_5_1_1"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_1_1_ai_faq_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_1_ai_faq_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_1_1_update_notice_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_1_update_notice_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_perf_stability"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_1_1_vro_search_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_1_vro_search_desc"></span>
+                                        <br><em style="color: #777; font-size: 13px;"
+                                                data-i18n="cl_5_1_1_note"></em>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_1_1_sql_redesign_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_1_sql_redesign_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_1_1_sql_dark_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_1_sql_dark_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_1_1_sql_fullscreen_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_1_sql_fullscreen_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_5_1_0"></span> <span class="date" data-i18n="cl_date_5_1_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_1_0_ai_assistant_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_0_ai_assistant_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_1_0_ai_providers_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_0_ai_providers_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_1_0_ai_context_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_0_ai_context_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_1_0_ai_prefs_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_0_ai_prefs_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_perf_stability"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_1_0_rr_instant_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_0_rr_instant_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_1_0_fip_stuck_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_0_fip_stuck_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_1_0_profile_tab_title"></span>:</strong>
+                                        <span data-i18n="cl_5_1_0_profile_tab_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_5_0_0"></span> <span class="date" data-i18n="cl_date_5_0_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_0_0_field_info_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_field_info_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_account_links_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_account_links_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_recent_records_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_recent_records_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_sandbox_num_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_sandbox_num_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_open_in_env_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_open_in_env_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_field_audit_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_field_audit_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_schema_export_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_schema_export_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_env_badge_colors_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_env_badge_colors_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_ns_version_click_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_ns_version_click_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_ns_version_new_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_ns_version_new_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_record_obj_hide_empty_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_record_obj_hide_empty_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_record_obj_export_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_record_obj_export_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_record_obj_split_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_record_obj_split_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_record_obj_diff_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_record_obj_diff_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_json_tools_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_json_tools_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_sql_excel_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_sql_excel_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_sql_controls_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_sql_controls_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_sql_chart_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_sql_chart_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_0_0_sublist_edit_field_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_sublist_edit_field_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_record_obj_stale_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_record_obj_stale_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_sr_logs_prettify_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_sr_logs_prettify_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_sr_logs_live_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_sr_logs_live_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_record_actions_menu_mode_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_record_actions_menu_mode_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_record_actions_polish_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_record_actions_polish_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_sublist_buttons_polish_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_sublist_buttons_polish_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_editor_toggles_split_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_editor_toggles_split_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_0_0_copy_ids_field_info_choice_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_copy_ids_field_info_choice_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_tools_menu_shortcuts_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_tools_menu_shortcuts_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_cheatsheet_upgrade_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_cheatsheet_upgrade_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_cheatsheet_extras_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_cheatsheet_extras_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_cheatsheet_interactive_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_cheatsheet_interactive_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_theme_consistency_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_theme_consistency_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_profile_edit_font_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_profile_edit_font_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_suiteql_position_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_suiteql_position_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_welcome_redwood_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_welcome_redwood_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_color_presets_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_color_presets_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_color_contrast_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_color_contrast_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_color_hex_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_color_hex_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_color_sync_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_color_sync_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_color_primary_btn_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_color_primary_btn_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_gt_user_renames_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_gt_user_renames_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_gt_config_polish_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_gt_config_polish_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_gt_company_name_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_gt_company_name_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_gt_rename_aware_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_gt_rename_aware_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_gt_productivity_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_gt_productivity_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_gt_ux_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_gt_ux_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_cmdp_templates_robust_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_cmdp_templates_robust_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_cmdp_visual_polish_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_cmdp_visual_polish_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_cmdp_smart_filters_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_cmdp_smart_filters_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_cmdp_popup_config_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_cmdp_popup_config_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_perf_stability"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_5_0_0_optimizations_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_optimizations_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_5_0_0_bugfixes_title"></span>:</strong>
+                                        <span data-i18n="cl_5_0_0_bugfixes_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_4_1_0"></span> <span class="date" data-i18n="cl_date_4_1_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_4_1_0_redwood_compat_title"></span>:</strong>
+                                        <span data-i18n="cl_4_1_0_redwood_compat_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_4_0_3"></span> <span class="date" data-i18n="cl_date_4_0_3"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_4_0_3_rnl_view_only_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_3_rnl_view_only_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_4_0_2"></span> <span class="date" data-i18n="cl_date_4_0_2"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_scripting"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_4_0_2_vsr_client_fix_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_2_vsr_client_fix_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_4_0_1"></span> <span class="date" data-i18n="cl_date_4_0_1"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_perf_stability"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_4_0_1_nvb_fix_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_1_nvb_fix_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_4_0_0"></span> <span class="date" data-i18n="cl_date_4_0_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_4_0_0_gotorecord_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_gotorecord_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_fieldpreview_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_fieldpreview_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sfv_sublist_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sfv_sublist_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_mainmenu_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_mainmenu_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_search"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_shortcuts_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_shortcuts_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_builtin_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_builtin_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_tree_fix_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_tree_fix_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_history_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_history_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_export_res_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_export_res_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_lint_unknown_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_lint_unknown_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_builtin_i18n_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_builtin_i18n_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_perf_stability"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_4_0_0_logout_observer_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_logout_observer_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_vro_toggle_fix_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_vro_toggle_fix_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_perf_lightweight_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_perf_lightweight_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_envbadge_restore_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_envbadge_restore_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sr_user_tab_only_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sr_user_tab_only_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_sidebar_noflicker_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_sidebar_noflicker_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_shortcuts_intl_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_shortcuts_intl_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_native_links_multi_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_native_links_multi_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sfv_native_list_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sfv_native_list_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_4_0_0_settings_iocfg_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_settings_iocfg_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_cmdp_kbd_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_cmdp_kbd_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_cheatsheet_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_cheatsheet_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_darkaudit_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_darkaudit_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_i18n_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_i18n_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_popup_search_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_popup_search_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_clipboard_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_clipboard_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_welcome_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_welcome_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_sidebar_polish_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_sidebar_polish_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_toast_topright_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_toast_topright_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_welcome_redwood_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_welcome_redwood_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_sql_fav_rename_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_sql_fav_rename_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_4_0_0_editor_theme_noflash_title"></span>:</strong>
+                                        <span data-i18n="cl_4_0_0_editor_theme_noflash_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_3_0_2"></span> <span class="date" data-i18n="cl_date_3_0_2"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_3_0_2_beta_on_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_2_beta_on_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_2_sql_resize_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_2_sql_resize_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_3_0_1"></span> <span class="date" data-i18n="cl_date_3_0_1"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_technical"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_3_0_1_defaults_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_1_defaults_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_3_0_0"></span> <span class="date" data-i18n="cl_date_3_0_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_3_0_0_file_cabinet_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_file_cabinet_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_fc_actions_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_fc_actions_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_folder_link_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_folder_link_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_master_switches_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_master_switches_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_3_0_0_theme_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_theme_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_reorg_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_reorg_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_all_count_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_all_count_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_3_0_0_fields_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_fields_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_sublist_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sublist_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_account"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_3_0_0_login_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_login_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_version_badge_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_version_badge_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_search"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_3_0_0_sql_hints_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sql_hints_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_sql_explorer_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sql_explorer_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_sql_join_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sql_join_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_sql_lint_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sql_lint_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_sql_favorites_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sql_favorites_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_sql_import_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sql_import_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_sql_cache_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sql_cache_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_3_0_0_sql_sample_title"></span>:</strong>
+                                        <span data-i18n="cl_3_0_0_sql_sample_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_2_3_0"></span> <span class="date" data-i18n="cl_date_2_3_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_3_0_refresh_sublist_title"></span>:</strong>
+                                        <span data-i18n="cl_2_3_0_refresh_sublist_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_3_0_full_logs_title"></span>:</strong>
+                                        <span data-i18n="cl_2_3_0_full_logs_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_search"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_3_0_export_search_tabs_title"></span>:</strong>
+                                        <span data-i18n="cl_2_3_0_export_search_tabs_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_3_0_row_id_copy_title"></span>:</strong>
+                                        <span data-i18n="cl_2_3_0_row_id_copy_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_3_0_code_prettier_title"></span>:</strong>
+                                        <span data-i18n="cl_2_3_0_code_prettier_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_scripting"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_3_0_log_prettier_title"></span>:</strong>
+                                        <span data-i18n="cl_2_3_0_log_prettier_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_2_2_1"></span> <span class="date" data-i18n="cl_date_2_2_1"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_2_1_delete_order_title"></span>:</strong>
+                                        <span data-i18n="cl_2_2_1_delete_order_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_2_2_0"></span> <span class="date" data-i18n="cl_date_2_2_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_2_0_report_bug_title"></span>:</strong>
+                                        <span data-i18n="cl_2_2_0_report_bug_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_2_0_feature_request_title"></span>:</strong>
+                                        <span data-i18n="cl_2_2_0_feature_request_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_2_1_0"></span> <span class="date" data-i18n="cl_date_2_1_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_1_0_split_title"></span>:</strong>
+                                        <span data-i18n="cl_2_1_0_split_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="enableSaveAndEditButtonLabel"></span>:</strong>
+                                        <span data-i18n="enableSaveAndEditButtonDesc"></span>
+                                </li>
+                                <li><strong><span data-i18n="enableEditAndSaveButtonLabel"></span>:</strong>
+                                        <span data-i18n="enableEditAndSaveButtonDesc"></span>
+                                </li>
+                                <li><strong><span data-i18n="enableDeleteRecordButtonLabel"></span>:</strong>
+                                        <span data-i18n="enableDeleteRecordButtonDesc"></span>
+                                </li>
+                                <li><strong><span data-i18n="enableCancelOverrideLabel"></span>:</strong>
+                                        <span data-i18n="enableCancelOverrideDesc"></span>
+                                </li>
+                                <li><strong><span data-i18n="enableRecordOptionsMenuLabel"></span>:</strong>
+                                        <span data-i18n="enableRecordOptionsMenuDesc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_perf_stability"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_1_0_startup_freeze_title"></span>:</strong>
+                                        <span data-i18n="cl_2_1_0_startup_freeze_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_2_0_0"></span> <span class="date" data-i18n="cl_date_2_0_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_2_0_0_h_new_modules"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_0_0_json_formatter_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_json_formatter_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_advanced_pdf_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_advanced_pdf_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_csv_viewer_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_csv_viewer_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_discreet_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_discreet_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_load_n_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_load_n_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_quick_search_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_quick_search_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_role_finder_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_role_finder_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_script_upload_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_script_upload_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_in_search_preview_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_in_search_preview_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_wf_colored_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_wf_colored_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_wf_searcher_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_wf_searcher_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_0_0_open_custrec_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_open_custrec_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_autogen_prefix_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_autogen_prefix_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_cmd_palette_expansion_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_cmd_palette_expansion_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_suitelet_fab_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_suitelet_fab_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_0_0_popup_rework_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_popup_rework_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_popup_reorder_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_popup_reorder_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_cmd_palette_urls_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_cmd_palette_urls_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_security"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_0_0_xss_audit_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_xss_audit_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_perf_stability"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_2_0_0_perf_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_perf_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_resilience_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_resilience_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_2_0_0_stability_title"></span>:</strong>
+                                        <span data-i18n="cl_2_0_0_stability_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_1_2_1"></span> <span class="date" data-i18n="cl_date_1_2_1"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_technical"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_1_2_1_colorthemes_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_1_colorthemes_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_1_2_0"></span> <span class="date" data-i18n="cl_date_1_2_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_new"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_1_2_0_cmd_palette_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_cmd_palette_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_1_2_0_env_badge_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_env_badge_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_1_2_0_sql_tabs_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_sql_tabs_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_1_2_0_sql_fav_hist_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_sql_fav_hist_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_1_2_0_sfv_templates_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_sfv_templates_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_1_2_0_popup_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_popup_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_1_2_0_dark_mode_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_dark_mode_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_1_2_0_auto_code_theme_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_auto_code_theme_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_1_2_0_sr_counters_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_sr_counters_desc"></span>
+                                </li>
+                                <li><strong><span data-i18n="cl_1_2_0_log_filter_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_log_filter_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_1_2_0_copy_snippet_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_copy_snippet_desc"></span>
+                                </li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_technical"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="cl_1_2_0_memleak_title"></span>:</strong>
+                                        <span data-i18n="cl_1_2_0_memleak_desc"></span>
+                                </li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_1_0_3"></span> <span class="date" data-i18n="cl_date_1_0_3"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_scripting"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableEditorThemeLabel"></span>:</strong> <span
+                                                data-i18n="cl_1_0_3_desc_editor_tab_close"></span></li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableSetFieldValuesLabel"></span>:</strong> <span
+                                                data-i18n="cl_1_0_3_desc_set_field_values_txn"></span></li>
+                                <li><strong><span data-i18n="enableEditAndSaveButtonLabel"></span>:</strong> <span
+                                                data-i18n="cl_1_0_3_desc_record_options_edit_save_label"></span></li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_1_0_2"></span> <span class="date" data-i18n="cl_date_1_0_2"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableColorThemesLabel"></span>:</strong> <span
+                                                data-i18n="cl_1_0_2_desc_themes"></span></li>
+                                <li><strong><span data-i18n="enableGroupedTabsLabel"></span>:</strong> <span
+                                                data-i18n="cl_1_0_2_desc_tabs"></span></li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_1_0_1"></span> <span class="date" data-i18n="cl_date_1_0_1"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableSetFieldValuesLabel"></span>:</strong> <span
+                                                data-i18n="cl_1_0_1_desc"></span></li>
+                                <li><strong><span data-i18n="enableScriptedRecordsLabel"></span>:</strong> <span
+                                                data-i18n="cl_1_0_1_desc_scripted_records"></span></li>
+                        </ul>
+                </div>
+
+                <div class="version">
+                        <h2><span data-i18n="cl_ver_1_0_0"></span> <span class="date" data-i18n="cl_date_1_0_0"></span>
+                        </h2>
+
+                        <h3 data-i18n="cl_cat_record"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableRecordObjectLabel"></span>:</strong> <span
+                                                data-i18n="enableRecordObjectDesc"></span></li>
+                                <li><strong><span data-i18n="enableScriptedRecordsLabel"></span>:</strong> <span
+                                                data-i18n="enableScriptedRecordsDesc"></span></li>
+                                <li><strong><span data-i18n="enableRecordOptionsMenuLabel"></span>:</strong> <span
+                                                data-i18n="enableRecordOptionsMenuDesc"></span></li>
+                                <li><strong><span data-i18n="enableFieldAndSublistIdsLabel"></span>:</strong> <span
+                                                data-i18n="enableFieldAndSublistIdsDesc"></span></li>
+                                <li><strong><span data-i18n="enableSetFieldValuesLabel"></span>:</strong> <span
+                                                data-i18n="enableSetFieldValuesDesc"></span></li>
+                                <li><strong><span data-i18n="enableFindFieldByIdLabel"></span>:</strong> <span
+                                                data-i18n="enableFindFieldByIdDesc"></span></li>
+                                <li><strong><span data-i18n="enableLoadRecordConsoleLabel"></span>:</strong> <span
+                                                data-i18n="enableLoadRecordConsoleDesc"></span></li>
+                                <li><strong><span data-i18n="enableRelatedNativeLinksLabel"></span>:</strong> <span
+                                                data-i18n="enableRelatedNativeLinksDesc"></span></li>
+                                <li><strong><span data-i18n="enableJsonPrettyLabel"></span>:</strong> <span
+                                                data-i18n="enableJsonPrettyDesc"></span></li>
+                                <li><strong><span data-i18n="enableSqlFormatLabel"></span>:</strong> <span
+                                                data-i18n="enableSqlFormatDesc"></span></li>
+                                <li><strong><span data-i18n="enableAutogenerateIdsLabel"></span>:</strong> <span
+                                                data-i18n="enableAutogenerateIdsDesc"></span></li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_scripting"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableScriptFormatterLabel"></span>:</strong> <span
+                                                data-i18n="enableScriptFormatterDesc"></span></li>
+                                <li><strong><span data-i18n="enableScriptLiveModeLabel"></span>:</strong> <span
+                                                data-i18n="enableScriptLiveModeDesc"></span></li>
+                                <li><strong><span data-i18n="enableEditorThemeLabel"></span>:</strong> <span
+                                                data-i18n="enableEditorThemeDesc"></span></li>
+                                <li><strong><span data-i18n="enableSuiteletToolsLabel"></span>:</strong> <span
+                                                data-i18n="enableSuiteletToolsDesc"></span></li>
+                                <li><strong><span data-i18n="enableScriptAutofillLabel"></span>:</strong> <span
+                                                data-i18n="enableScriptAutofillDesc"></span></li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_search"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableSuiteQLRunnerLabel"></span>:</strong> <span
+                                                data-i18n="enableSuiteQLRunnerDesc"></span></li>
+                                <li><strong><span data-i18n="enableSearchFieldsFinderLabel"></span>:</strong> <span
+                                                data-i18n="enableSearchFieldsFinderDesc"></span></li>
+                                <li><strong><span data-i18n="enableExportSearchLabel"></span>:</strong> <span
+                                                data-i18n="enableExportSearchDesc"></span></li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_account"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableCopyAccountIdLabel"></span>:</strong> <span
+                                                data-i18n="enableCopyAccountIdDesc"></span></li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_files"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableFileCabinetUtilsLabel"></span>:</strong> <span
+                                                data-i18n="enableFileCabinetUtilsDesc"></span></li>
+                        </ul>
+
+                        <h3 data-i18n="cl_cat_ui"></h3>
+                        <ul>
+                                <li><strong><span data-i18n="enableColorThemesLabel"></span>:</strong> <span
+                                                data-i18n="enableColorThemesDesc"></span></li>
+                                <li><strong><span data-i18n="enableGroupedTabsLabel"></span>:</strong> <span
+                                                data-i18n="enableGroupedTabsDesc"></span></li>
+                                <li><strong><span data-i18n="enableGroupedTabsAutomaticLabel"></span>:</strong> <span
+                                                data-i18n="enableGroupedTabsAutomaticDesc"></span></li>
+                                <li><strong><span data-i18n="enableBetterPageTitlesLabel"></span>:</strong> <span
+                                                data-i18n="enableBetterPageTitlesDesc"></span></li>
+                                <li><strong><span data-i18n="enableFixedSublistColumnLabel"></span>:</strong> <span
+                                                data-i18n="enableFixedSublistColumnDesc"></span></li>
+                                <li><strong><span data-i18n="enableFixedSublistHeadersLabel"></span>:</strong> <span
+                                                data-i18n="enableFixedSublistHeadersDesc"></span></li>
+                                <li><strong><span data-i18n="enableFixedTabsLabel"></span>:</strong> <span
+                                                data-i18n="enableFixedTabsDesc"></span></li>
+                                <li><strong><span data-i18n="enableSmallerDropdownOptionsLabel"></span>:</strong> <span
+                                                data-i18n="enableSmallerDropdownOptionsDesc"></span></li>
+                                <li><strong><span data-i18n="enableSmallerNavigationOptionsLabel"></span>:</strong>
+                                        <span data-i18n="enableSmallerNavigationOptionsDesc"></span>
+                                </li>
+                                <li><strong><span data-i18n="enableProfileButtonLabel"></span>:</strong> <span
+                                                data-i18n="enableProfileButtonDesc"></span></li>
+                                <li><strong><span data-i18n="enableSmallerSublistHeadersLabel"></span>:</strong> <span
+                                                data-i18n="enableSmallerSublistHeadersDesc"></span></li>
+                                <li><strong><span data-i18n="enableAutoRefreshLabel"></span>:</strong> <span
+                                                data-i18n="enableAutoRefreshDesc"></span></li>
+                        </ul>
+                </div>
+        </div>
+        <script src="changelog.js"></script>
+</body>
+
+</html>

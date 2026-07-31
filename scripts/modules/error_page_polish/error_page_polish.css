@@ -1,0 +1,20 @@
+
+html.nsft-epp-on body.error-page {
+    margin: 12px 14px !important;
+}
+
+html.nsft-epp-on body.error-page .uir-logo {
+    max-width: 210px;
+    margin-right: 20px !important;
+}
+
+html.nsft-epp-on body.error-page .pgBntB .bntBgT {
+    color: #ffffff;
+}
+
+html.nsft-epp-on body.error-page .uir-error-page--button {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}

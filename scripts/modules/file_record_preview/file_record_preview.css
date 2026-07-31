@@ -1,0 +1,135 @@
+#nsft-frp-preview {
+    margin: 20px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+}
+
+#nsft-frp-preview .nsft-frp-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 13px;
+}
+
+#nsft-frp-preview .nsft-frp-title {
+    flex: 1;
+    font-weight: 600;
+    color: #1f2937;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#nsft-frp-preview .nsft-frp-badge {
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #4338ca;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 4px;
+}
+
+#nsft-frp-preview .nsft-frp-copy {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+#nsft-frp-preview .nsft-frp-copy:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+#nsft-frp-preview .nsft-frp-copy.nsft-frp-copied {
+    color: #15803d;
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+#nsft-frp-preview .nsft-frp-body {
+    max-height: 560px;
+    overflow: auto;
+    background: #fafafa;
+}
+
+#nsft-frp-preview .nsft-frp-pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+    tab-size: 2;
+}
+
+#nsft-frp-preview .nsft-frp-code {
+    display: block;
+    white-space: pre;
+    word-break: normal;
+    padding: 14px 16px;
+}
+
+
+#nsft-frp-preview .nsft-frp-msg {
+    padding: 18px 16px;
+    color: #6b7280;
+    font-size: 13px;
+    font-style: italic;
+    text-align: center;
+}
+
+#nsft-frp-preview .nsft-frp-body.nsft-frp-body-embed {
+    max-height: none;
+    height: 720px;
+    background: #f3f4f6;
+    padding: 0;
+}
+
+#nsft-frp-preview .nsft-frp-iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+#nsft-frp-preview .nsft-frp-body.nsft-frp-body-image {
+    max-height: 720px;
+    background: repeating-conic-gradient(#f3f4f6 0% 25%, #ffffff 0% 50%) 50% / 20px 20px;
+    padding: 20px;
+    text-align: center;
+}
+
+#nsft-frp-preview .nsft-frp-img {
+    max-width: 100%;
+    max-height: 680px;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.1);
+}
+
+#nsft-frp-preview .nsft-frp-body.nsft-frp-body-media {
+    padding: 20px;
+    text-align: center;
+    background: #0f172a;
+}
+
+#nsft-frp-preview .nsft-frp-media {
+    width: 100%;
+    max-width: 720px;
+    outline: none;
+}

@@ -1,0 +1,31 @@
+
+.CodeMirror-hints {
+    max-width: 560px !important;
+    padding: 4px !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06),
+                0 10px 30px rgba(15, 23, 42, 0.08) !important;
+    font-family: 'SF Mono', 'Consolas', 'Segoe UI Mono', monospace !important;
+    font-size: 12.5px !important;
+    color: #334155 !important;
+}
+
+.CodeMirror-hint {
+    padding: 5px 10px !important;
+    border-radius: 5px !important;
+    color: #475569 !important;
+    overflow: visible !important;
+    transition: background 0.1s ease, color 0.1s ease;
+}
+
+.CodeMirror-hint:hover {
+    background: #f0f5fa !important;
+    color: #1e3a5f !important;
+}
+
+.CodeMirror-hint-active {
+    background: #4c87b3 !important;
+    color: #ffffff !important;
+}

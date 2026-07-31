@@ -1,0 +1,154 @@
+
+.nsft-eas-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.nsft-eas-modal-content {
+    background: #ffffff;
+    width: 400px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: #111827;
+}
+
+.nsft-eas-modal-header {
+    background: #ffffff;
+    color: #111827;
+    padding: 8px 14px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.nsft-eas-modal-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.nsft-eas-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 11px;
+    color: #9ca3af;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.nsft-eas-close-btn:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.nsft-eas-modal-body {
+    padding: 20px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #4b5563;
+}
+
+.nsft-eas-modal-footer {
+    padding: 10px 14px;
+    background: #ffffff;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+.nsft-eas-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.nsft-eas-btn-primary {
+    border: none;
+    background: #007bff;
+    color: #fff;
+}
+
+.nsft-eas-btn-primary:hover {
+    background: #0056b3;
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-modal-overlay {
+    background: rgba(0, 0, 0, 0.65);
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-modal-content {
+    background: var(--nsft-dk-surface);
+    color: #E6EBF2;
+    border-color: var(--nsft-dk-border);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-modal-header {
+    background: var(--nsft-dk-panel);
+    color: #E6EBF2;
+    border-bottom-color: var(--nsft-dk-border);
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-modal-title {
+    color: #E6EBF2;
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-close-btn {
+    color: #9AA4B5;
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-close-btn:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #F0708A;
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-modal-body {
+    background: var(--nsft-dk-surface);
+    color: #C6CEDB;
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-modal-footer {
+    background: var(--nsft-dk-panel);
+    border-top-color: var(--nsft-dk-border);
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-btn-primary {
+    background: #6E7CF5;
+}
+
+html[data-nsft-theme="dark"] .nsft-eas-btn-primary:hover {
+    background: #7E8BF7;
+}

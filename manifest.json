@@ -1,0 +1,1160 @@
+{
+    "manifest_version": 3,
+    "name": "NetSuite Full Tools",
+    "version": "6.2.1",
+    "description": "__MSG_extDescription__",
+    "default_locale": "es",
+    "icons": {
+        "16": "assets/icons/icon16.png",
+        "48": "assets/icons/icon48.png",
+        "128": "assets/icons/icon128.png"
+    },
+    "permissions": [
+        "clipboardWrite",
+        "storage",
+        "unlimitedStorage",
+        "tabGroups"
+    ],
+    "background": {
+        "service_worker": "scripts/background.js"
+    },
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_title": "NetSuite Full Tools Config",
+        "default_icon": "assets/icons/icon48.png"
+    },
+    "host_permissions": [
+        "https://*.netsuite.com/*",
+        "https://*.app.netsuite.com/*"
+    ],
+    "optional_host_permissions": [
+        "https://api.github.com/*",
+        "https://api.anthropic.com/*",
+        "https://api.openai.com/*",
+        "https://api.groq.com/*",
+        "https://generativelanguage.googleapis.com/*",
+        "https://openrouter.ai/*",
+        "https://opencode.ai/*",
+        "https://api.together.xyz/*",
+        "https://api.mistral.ai/*",
+        "https://api.deepseek.com/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/_shared/nsft_dom.js",
+                "scripts/modules/_shared/nsft_observer.js",
+                "scripts/modules/_shared/nsft_clipboard.js",
+                "scripts/modules/_shared/nsft_record_buttons.js",
+                "scripts/modules/_shared/nsft_modal_stack.js",
+                "scripts/modules/_shared/nsft_shortcuts.js",
+                "scripts/modules/_shared/nsft_log_format.js",
+                "scripts/modules/_shared/nsft_env.js",
+                "scripts/modules/_shared/nsft_theme.js",
+                "scripts/modules/_shared/nsft_shortcut_coach.js",
+                "scripts/modules/_shared/nsft_suiteql_rest.js"
+            ],
+            "css": [
+                "scripts/modules/_shared/design_tokens.css",
+                "scripts/modules/_shared/nsft_clipboard.css",
+                "scripts/modules/_shared/nsft_record_buttons.css",
+                "scripts/modules/_shared/nsft_log_format.css",
+                "scripts/modules/_shared/nsft_shortcut_coach.css"
+            ],
+            "run_at": "document_start",
+            "all_frames": true
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/libs/sql-formatter/sql-formatter.min.js",
+                "scripts/libs/highlight/highlight.min.js",
+                "scripts/libs/highlight/languages/json.min.js",
+                "scripts/libs/highlight/languages/sql.min.js"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/copy_field_sublist_id/copy_field_sublist_id.js"
+            ],
+            "css": [
+                "scripts/modules/copy_field_sublist_id/copy_field_sublist_id.css"
+            ],
+            "run_at": "document_end",
+            "all_frames": true
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/code_fields_prettier/code_fields_prettier.js"
+            ],
+            "css": [
+                "scripts/modules/code_fields_prettier/code_fields_prettier.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/format_code_fields/format_code_fields.js"
+            ],
+            "css": [
+                "scripts/modules/format_code_fields/format_code_fields.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/scripting/*"
+            ],
+            "js": [
+                "scripts/modules/log_prettier/log_prettier.js",
+                "scripts/modules/log_live_mode/log_live_mode.js",
+                "scripts/modules/log_viewer/log_viewer.js",
+                "scripts/modules/full_logs_button/full_logs_button.js",
+                "scripts/modules/script_auto_name/script_auto_name.js",
+                "scripts/modules/editor_theme/open_file_new_tab.js"
+            ],
+            "css": [
+                "scripts/modules/log_prettier/log_prettier.css",
+                "scripts/modules/log_live_mode/log_live_mode.css",
+                "scripts/modules/log_viewer/log_viewer.css",
+                "scripts/modules/full_logs_button/full_logs_button.css",
+                "scripts/modules/script_auto_name/script_auto_name.css",
+                "scripts/modules/editor_theme/open_file_new_tab.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/record/edittextmediaitem*"
+            ],
+            "js": [
+                "scripts/modules/editor_theme/theme_transform.js",
+                "scripts/modules/editor_theme/editor_theme.js"
+            ],
+            "css": [
+                "scripts/modules/editor_theme/editor_theme.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/view_record_object/view_record_object.js"
+            ],
+            "css": [
+                "scripts/modules/view_record_object/view_record_object.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/update_notice/update_notice.js"
+            ],
+            "css": [
+                "scripts/modules/update_notice/update_notice.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/rate_prompt/rate_prompt.js"
+            ],
+            "css": [
+                "scripts/modules/rate_prompt/rate_prompt.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/view_scripted_record/view_scripted_record.js"
+            ],
+            "css": [
+                "scripts/modules/view_scripted_record/view_scripted_record.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/accounting/transactions/*"
+            ],
+            "js": [
+                "scripts/modules/record_trail/record_trail.js"
+            ],
+            "css": [
+                "scripts/modules/record_trail/record_trail.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/libs/codemirror/codemirror.min.js",
+                "scripts/libs/codemirror/mode/sql/sql.min.js",
+                "scripts/libs/codemirror/addon/hint/show-hint.min.js",
+                "scripts/libs/codemirror/addon/hint/sql-hint.min.js",
+                "scripts/libs/tabulator/tabulator.min.js",
+                "scripts/libs/chartjs/chart.umd.min.js",
+                "scripts/modules/suiteql_runner/chart/nsft_chart_core.js",
+                "scripts/modules/suiteql_runner/suiteql_runner.js",
+                "scripts/modules/suiteql_runner/ai/nsft_ai_agent.js"
+            ],
+            "css": [
+                "scripts/libs/codemirror/codemirror.min.css",
+                "scripts/libs/codemirror/theme/material-darker.min.css",
+                "scripts/libs/codemirror/addon/hint/show-hint.min.css",
+                "scripts/libs/tabulator/tabulator.min.css",
+                "scripts/modules/suiteql_runner/suiteql_runner.css",
+                "scripts/modules/suiteql_runner/ai/nsft_ai.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/search/search.nl*"
+            ],
+            "js": [
+                "scripts/modules/export_search/export_search.js"
+            ],
+            "css": [
+                "scripts/modules/export_search/export_search.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/set_field_values/set_field_values.js"
+            ],
+            "css": [
+                "scripts/modules/set_field_values/set_field_values.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/copy_account_id/copy_account_id.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/open_in_other_env/open_in_other_env.js"
+            ],
+            "css": [
+                "scripts/modules/open_in_other_env/open_in_other_env.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/view_record_object/add_right_menu_tools.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl?*",
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl?*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl?*"
+            ],
+            "css": [
+                "scripts/modules/file_cabinet_utils/file_cabinet_utils.css"
+            ],
+            "js": [
+                "scripts/modules/file_cabinet_utils/file_cabinet_utils.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/find_field_by_id/find_field_by_id.js"
+            ],
+            "css": [
+                "scripts/modules/find_field_by_id/find_field_by_id.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/field_inline_preview/field_inline_preview.js"
+            ],
+            "css": [
+                "scripts/modules/field_inline_preview/field_inline_preview.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/site/hosting/scriptlet.nl*",
+                "https://*.extforms.netsuite.com/app/site/hosting/scriptlet.nl*"
+            ],
+            "js": [
+                "scripts/modules/suitelet_tools/suitelet_tools.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/related_native_links/related_native_links.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/save_and_edit_button/save_and_edit_button.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/edit_and_save_button/edit_and_save_button.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/delete_record_button/delete_record_button.js"
+            ],
+            "css": [
+                "scripts/modules/delete_record_button/delete_record_button.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/cancel_button_override/cancel_button_override.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/record_options_menu/record_options_menu.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/refresh_sublist/refresh_sublist.js"
+            ],
+            "css": [
+                "scripts/modules/refresh_sublist/refresh_sublist.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/autogenerate_ids/autogenerate_ids.js"
+            ],
+            "css": [
+                "scripts/modules/autogenerate_ids/autogenerate_ids.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/load_record_console/load_record_console.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/fix_improve_ui_ux/early_mainmenu.js"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/fix_improve_ui_ux/fix_improve_ui_ux.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/bundler/bundlelist.nl?*"
+            ],
+            "js": [
+                "scripts/modules/auto_refresh/auto_refresh.js"
+            ],
+            "css": [
+                "scripts/modules/auto_refresh/auto_refresh.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/*"
+            ],
+            "js": [
+                "scripts/modules/color_themes/color_themes.js"
+            ],
+            "css": [
+                "scripts/modules/color_themes/color_themes.css"
+            ],
+            "run_at": "document_start",
+            "all_frames": true
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/search/*",
+                "https://*.app.netsuite.com/app/common/workflow/setup/*",
+                "https://*.app.netsuite.com/app/common/custom/bodycustfield.nl*",
+                "https://*.app.netsuite.com/app/common/bulk/bulkop.nl*"
+            ],
+            "js": [
+                "scripts/modules/search_fields_finder/search_fields_finder.js"
+            ],
+            "css": [
+                "scripts/modules/search_fields_finder/search_fields_finder.css"
+            ],
+            "run_at": "document_end",
+            "all_frames": true
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/command_palette/command_palette.js"
+            ],
+            "css": [
+                "scripts/modules/command_palette/command_palette.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/shortcuts_cheatsheet/shortcuts_cheatsheet.js"
+            ],
+            "css": [
+                "scripts/modules/shortcuts_cheatsheet/shortcuts_cheatsheet.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/goto_record/goto_record.js"
+            ],
+            "css": [
+                "scripts/modules/goto_record/goto_record.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/recent_records/recent_records.js"
+            ],
+            "css": [
+                "scripts/modules/recent_records/recent_records.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/sandbox_number_badge/sandbox_number_badge.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/production_banner/production_banner.js"
+            ],
+            "css": [
+                "scripts/modules/production_banner/production_banner.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/discreet_mode/discreet_mode.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/logout_blocker/logout_blocker.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/hide_guided_learning/hide_guided_learning.js"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.netsuite.com/*",
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/json_formatter/json_formatter.js"
+            ],
+            "css": [
+                "scripts/modules/json_formatter/json_formatter.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/role_finder/role_finder.js"
+            ],
+            "css": [
+                "scripts/modules/role_finder/role_finder.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/github_backup/github_backup.js"
+            ],
+            "css": [
+                "scripts/modules/github_backup/github_backup.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/load_n_module/load_n_module.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/center/card.nl*"
+            ],
+            "js": [
+                "scripts/modules/portlet_refresher/portlet_refresher.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/custom/advancedprint/pdftemplate.nl*"
+            ],
+            "js": [
+                "scripts/modules/advanced_pdf_autocomplete/advanced_pdf_autocomplete.js",
+                "scripts/modules/advanced_pdf_preview/advanced_pdf_preview.js",
+                "scripts/modules/advanced_pdf_versions/advanced_pdf_versions.js"
+            ],
+            "css": [
+                "scripts/modules/advanced_pdf_autocomplete/advanced_pdf_autocomplete.css",
+                "scripts/modules/advanced_pdf_preview/advanced_pdf_preview.css",
+                "scripts/modules/advanced_pdf_versions/advanced_pdf_versions.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/setup/upload/csv/*"
+            ],
+            "js": [
+                "scripts/libs/papaparse/papaparse.min.js",
+                "scripts/modules/csv_response_viewer/csv_response_viewer.js"
+            ],
+            "css": [
+                "scripts/modules/csv_response_viewer/csv_response_viewer.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/search/search*"
+            ],
+            "js": [
+                "scripts/modules/in_search_preview/in_search_preview.js",
+                "scripts/modules/search_formula_autocomplete/search_formula_autocomplete.js"
+            ],
+            "css": [
+                "scripts/modules/in_search_preview/in_search_preview.css",
+                "scripts/modules/search_formula_autocomplete/search_formula_autocomplete.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/search/*"
+            ],
+            "js": [
+                "scripts/modules/quick_search_creation/quick_search_creation.js"
+            ],
+            "css": [
+                "scripts/modules/quick_search_creation/quick_search_creation.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/scripting/script.nl*"
+            ],
+            "js": [
+                "scripts/modules/script_upload/script_upload.js"
+            ],
+            "css": [
+                "scripts/modules/script_upload/script_upload.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/workflow/*"
+            ],
+            "js": [
+                "scripts/modules/wf_colored_transitions/wf_colored_transitions.js",
+                "scripts/modules/workflow_searcher/workflow_searcher.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/textarea_min_height/textarea_min_height.js"
+            ],
+            "css": [
+                "scripts/modules/textarea_min_height/textarea_min_height.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/multiselect_counter/multiselect_counter.js"
+            ],
+            "css": [
+                "scripts/modules/multiselect_counter/multiselect_counter.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/floating_field_groups/floating_field_groups.js"
+            ],
+            "css": [
+                "scripts/modules/floating_field_groups/floating_field_groups.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/sublist_line_numbers/sublist_line_numbers.js"
+            ],
+            "css": [
+                "scripts/modules/sublist_line_numbers/sublist_line_numbers.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/dark_mode/dark_mode.js"
+            ],
+            "css": [
+                "scripts/modules/dark_mode/dark_mode.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/turbo_mode/turbo_mode.js"
+            ],
+            "css": [
+                "scripts/modules/turbo_mode/turbo_mode.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/maxlength_counter/maxlength_counter.js"
+            ],
+            "css": [
+                "scripts/modules/maxlength_counter/maxlength_counter.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/sublist_filter/sublist_filter.js"
+            ],
+            "css": [
+                "scripts/modules/sublist_filter/sublist_filter.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/sublist_line_ids/sublist_line_ids.js"
+            ],
+            "css": [
+                "scripts/modules/sublist_line_ids/sublist_line_ids.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/page_performance/page_performance.js"
+            ],
+            "css": [
+                "scripts/modules/page_performance/page_performance.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/saved_search_split/saved_search_split.js"
+            ],
+            "css": [
+                "scripts/modules/saved_search_split/saved_search_split.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/multiselect_hierarchy/multiselect_hierarchy.js"
+            ],
+            "css": [
+                "scripts/modules/multiselect_hierarchy/multiselect_hierarchy.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/sublist_paging/sublist_paging.js"
+            ],
+            "css": [
+                "scripts/modules/sublist_paging/sublist_paging.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/dropdown_size/dropdown_size.js"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/bundle_filter_labels/bundle_filter_labels.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.netsuite.com/app/login/*",
+                "https://*.netsuite.com/pages/customerlogin.jsp*",
+                "https://system.netsuite.com/*",
+                "https://*.app.netsuite.com/app/login/*"
+            ],
+            "js": [
+                "scripts/modules/login_sandbox_indicator/login_sandbox_indicator.js",
+                "scripts/modules/login_company_branding/login_company_branding.js"
+            ],
+            "css": [
+                "scripts/modules/login_sandbox_indicator/login_sandbox_indicator.css",
+                "scripts/modules/login_company_branding/login_company_branding.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
+            ],
+            "js": [
+                "scripts/modules/bundle_folder_names/bundle_folder_names.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
+            ],
+            "js": [
+                "scripts/modules/file_cabinet_copy_path/file_cabinet_copy_path.js"
+            ],
+            "css": [
+                "scripts/modules/file_cabinet_copy_path/file_cabinet_copy_path.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "exclude_matches": [
+                "https://*.app.netsuite.com/app/login/*"
+            ],
+            "js": [
+                "scripts/modules/account_info_cache/account_info_cache.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/error_page_polish/error_page_polish.js"
+            ],
+            "css": [
+                "scripts/modules/error_page_polish/error_page_polish.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://www.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/loggedout_redirect/loggedout_redirect.js"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl*",
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
+            ],
+            "js": [
+                "scripts/modules/file_cabinet_drag_drop/file_cabinet_drag_drop.js"
+            ],
+            "css": [
+                "scripts/modules/file_cabinet_drag_drop/file_cabinet_drag_drop.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl*",
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
+            ],
+            "js": [
+                "scripts/modules/file_cabinet_edit_file/file_cabinet_edit_file.js"
+            ],
+            "css": [
+                "scripts/modules/file_cabinet_edit_file/file_cabinet_edit_file.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
+            ],
+            "js": [
+                "scripts/modules/file_cabinet_rename/file_cabinet_rename.js"
+            ],
+            "css": [
+                "scripts/modules/file_cabinet_rename/file_cabinet_rename.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
+            ],
+            "js": [
+                "scripts/modules/file_cabinet_delete/file_cabinet_delete.js"
+            ],
+            "css": [
+                "scripts/modules/file_cabinet_delete/file_cabinet_delete.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
+            ],
+            "js": [
+                "scripts/modules/file_cabinet_folder_link/file_cabinet_folder_link.js"
+            ],
+            "css": [
+                "scripts/modules/file_cabinet_folder_link/file_cabinet_folder_link.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
+                "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
+            ],
+            "js": [
+                "scripts/modules/file_cabinet_download/file_cabinet_download.js"
+            ],
+            "css": [
+                "scripts/modules/file_cabinet_download/file_cabinet_download.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitem.nl*"
+            ],
+            "js": [
+                "scripts/modules/file_record_preview/file_record_preview.js"
+            ],
+            "css": [
+                "scripts/modules/file_record_preview/file_record_preview.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl*"
+            ],
+            "js": [
+                "scripts/modules/system_folder_safety/system_folder_safety.js"
+            ],
+            "css": [
+                "scripts/modules/system_folder_safety/system_folder_safety.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "exclude_matches": [
+                "https://*.app.netsuite.com/app/login/*"
+            ],
+            "js": [
+                "scripts/modules/netsuite_version_badge/netsuite_version_badge.js"
+            ],
+            "css": [
+                "scripts/modules/netsuite_version_badge/netsuite_version_badge.css"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "styles/themes/*.css",
+                "assets/img/*.png",
+                "assets/icons/*.png",
+                "scripts/libs/**/*.js",
+                "scripts/libs/**/*.css",
+                "scripts/libs/**/*.woff2",
+                "scripts/modules/view_scripted_record/scripted_record_fetcher.js",
+                "scripts/modules/suiteql_runner/suiteql_fetcher.js",
+                "scripts/modules/view_scripted_record/scripted_record_fetcher.js",
+                "scripts/modules/suiteql_runner/suiteql_fetcher.js",
+                "popup/ai_faq.html",
+                "popup/changelog.html",
+                "scripts/modules/suiteql_runner/chart/chart_view.html",
+                "scripts/modules/export_search/export_search_fetcher.js",
+                "scripts/modules/set_field_values/set_field_values_fetcher.js",
+                "scripts/modules/sublist_line_ids/sublist_line_ids_fetcher.js",
+                "scripts/modules/find_field_by_id/find_field_by_id_fetcher.js",
+                "scripts/modules/suitelet_tools/suitelet_tools_fetcher.js",
+                "scripts/modules/suitelet_tools/suitelet_tools.css",
+                "scripts/modules/related_native_links/related_native_links_fetcher.js",
+                "scripts/modules/save_and_edit_button/save_and_edit_button_fetcher.js",
+                "scripts/modules/save_and_edit_button/save_and_edit_button.css",
+                "scripts/modules/edit_and_save_button/edit_and_save_button_fetcher.js",
+                "scripts/modules/edit_and_save_button/edit_and_save_button.css",
+                "scripts/modules/delete_record_button/delete_record_button_fetcher.js",
+                "scripts/modules/refresh_sublist/refresh_sublist_fetcher.js",
+                "scripts/modules/copy_account_id/copy_account_id.css",
+                "scripts/modules/copy_field_sublist_id/copy_field_sublist_id_fetcher.js",
+                "scripts/modules/fix_improve_ui_ux/get_user_id.js",
+                "scripts/modules/load_record_console/load_record_console_fetcher.js",
+                "scripts/modules/load_record_console/load_record_console.css",
+                "scripts/modules/search_fields_finder/search_fields_finder_fetcher.js",
+                "scripts/modules/advanced_pdf_autocomplete/advanced_pdf_autocomplete_fetcher.js",
+                "scripts/modules/in_search_preview/in_search_preview_fetcher.js",
+                "scripts/modules/load_n_module/load_n_module_fetcher.js",
+                "scripts/modules/script_upload/script_upload_fetcher.js",
+                "scripts/modules/script_auto_name/script_auto_name_fetcher.js",
+                "scripts/modules/wf_colored_transitions/wf_colored_transitions_fetcher.js",
+                "scripts/modules/workflow_searcher/workflow_searcher_fetcher.js",
+                "scripts/modules/dropdown_size/dropdown_size_fetcher.js",
+                "scripts/modules/bundle_filter_labels/bundle_filter_labels_fetcher.js",
+                "scripts/modules/netsuite_version_badge/netsuite_version_badge_fetcher.js",
+                "scripts/modules/goto_record/goto_record_fetcher.js",
+                "scripts/modules/field_inline_preview/field_inline_preview_fetcher.js",
+                "scripts/modules/sublist_paging/sublist_paging_fetcher.js",
+                "scripts/modules/record_trail/record_trail_fetcher.js"
+            ],
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ]
+        },
+        {
+            "resources": [
+                "assets/img/*.png",
+                "assets/icons/*.png",
+                "scripts/modules/suitelet_tools/suitelet_tools_fetcher.js",
+                "scripts/modules/suitelet_tools/suitelet_tools.css"
+            ],
+            "matches": [
+                "https://*.extforms.netsuite.com/*"
+            ]
+        }
+    ]
+}

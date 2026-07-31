@@ -1,0 +1,87 @@
+
+.nsft-prod-banner {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #dc2626;
+    color: #fff;
+    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    line-height: 26px;
+    z-index: 2147483000;
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.14);
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: auto;
+}
+
+.nsft-prod-banner-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.nsft-prod-banner-close {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.nsft-prod-banner-close:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+.nsft-prod-banner.nsft-prod-banner-top {
+    top: 0;
+    bottom: auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.14);
+}
+
+.nsft-prod-chip {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    height: 24px;
+    margin-left: 10px;
+    padding: 0 12px;
+    border-radius: 4px;
+    background: #dc2626;
+    color: #fff;
+    font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 24px;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+}
+
+html.nsft-prod-banner-top body {
+    padding-top: 26px !important;
+}

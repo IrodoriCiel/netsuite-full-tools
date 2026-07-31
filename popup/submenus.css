@@ -1,0 +1,798 @@
+
+.nsft-detail-body .nsft-panel {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.nsft-detail-body .nsft-panel-title {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 8px;
+  padding: 7px 2px;
+  background: var(--surface-0);
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  color: var(--text-3);
+}
+.nsft-detail-body .nsft-panel-title-icon { color: var(--text-3); }
+
+.nsft-detail-body .option-row {
+  position: relative;
+  margin-bottom: 8px;
+  padding: 12px 12px 13px;
+  gap: 12px;
+  row-gap: 0;
+  background: var(--surface-1);
+  border: 1px solid var(--hairline) !important;
+  border-radius: var(--r-md);
+  box-shadow: var(--elev-1);
+  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+}
+.nsft-detail-body .option-row:last-child { margin-bottom: 0; }
+.nsft-detail-body .nsft-panel .option-row:hover {
+  background: var(--surface-1);
+  border-color: var(--hairline-strong) !important;
+  box-shadow: var(--elev-2);
+}
+
+.nsft-detail-body .option-row > div:first-child > span,
+.nsft-detail-body .option-row > div:first-child > label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--text-1);
+}
+
+.nsft-detail-body .option-row .description {
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-3);
+  text-wrap: pretty;
+}
+
+.nsft-detail-body .option-row:has(> label.switch > input:not(:checked)) {
+  background: var(--surface-soft);
+  box-shadow: none;
+}
+.nsft-detail-body .option-row:has(> label.switch > input:not(:checked)) > div:first-child {
+  opacity: 0.55;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child):not([style*="display: none"]) {
+  width: 100% !important;
+  box-sizing: border-box;
+  display: flex !important;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 10px !important;
+  padding: 10px 11px !important;
+  background: var(--surface-soft);
+  border: 1px solid var(--hairline);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div:not([style*="display: none"]) {
+  display: grid !important;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 10px;
+  margin: 0 !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div:has(> *:nth-child(3)) {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div > div {
+  display: flex !important;
+  align-items: baseline;
+  justify-content: flex-start !important;
+  gap: 6px;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > span,
+.nsft-detail-body .option-row > div:not(:first-child) > label,
+.nsft-detail-body .option-row > div:not(:first-child) > p,
+.nsft-detail-body .option-row > div:not(:first-child) > a,
+.nsft-detail-body .option-row > div:not(:first-child) > button {
+  align-self: flex-start;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div[style*="text-align: right"] {
+  display: flex !important;
+  justify-content: flex-start !important;
+  gap: 6px;
+}
+
+.nsft-detail-body .option-row select,
+.nsft-detail-body .option-row input[type="text"],
+.nsft-detail-body .option-row input[type="number"],
+.nsft-detail-body .option-row input[type="search"] {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 28px !important;
+  margin: 0 !important;
+  padding: 0 9px !important;
+  font-size: 11.5px !important;
+  border: 1px solid var(--hairline-strong) !important;
+  border-radius: var(--r-sm) !important;
+  background: var(--surface-1) !important;
+  color: var(--text-1) !important;
+  box-sizing: border-box;
+}
+
+.nsft-detail-body .option-row select { padding-right: 24px !important; cursor: pointer; }
+
+.nsft-detail-body .option-row input[id$="Hex"],
+.nsft-detail-body .option-row input[type="number"] { font-family: var(--font-mono) !important; }
+
+.nsft-detail-body .option-row select:focus,
+.nsft-detail-body .option-row input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.nsft-detail-body .option-row input[type="range"] {
+  width: 100% !important;
+  height: 4px !important;
+  margin: 0 !important;
+  border-radius: 2px !important;
+  cursor: pointer;
+}
+
+.nsft-detail-body .option-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(12, 20, 16, 0.28);
+  cursor: pointer;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) label,
+.nsft-detail-body .option-row > div:not(:first-child) > span {
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--text-2) !important;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > span:first-child {
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: var(--text-3) !important;
+}
+
+.nsft-detail-body .option-row [id$="Val"] {
+  font-family: var(--font-mono) !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  color: var(--text-3) !important;
+  white-space: nowrap;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) label:has(> input[type="checkbox"]),
+.nsft-detail-body .option-row > div:not(:first-child) label:has(> input[type="radio"]),
+.nsft-detail-body .option-row > div:not(:first-child) > div:has(> input[type="checkbox"]),
+.nsft-detail-body .option-row > div:not(:first-child) > div:has(> input[type="radio"]) {
+  display: flex !important;
+  align-items: center;
+  gap: 8px !important;
+  min-height: 24px;
+  white-space: normal;
+  cursor: pointer;
+}
+
+.nsft-detail-body .option-row input[type="checkbox"]:not(.switch input),
+.nsft-detail-body .option-row input[type="radio"] {
+  width: 15px !important;
+  height: 15px !important;
+  min-width: 15px !important;
+  margin: 0 !important;
+  flex: 0 0 auto;
+}
+
+.nsft-detail-body .option-row input[type="radio"] { border-radius: 50% !important; }
+
+.nsft-detail-body .option-row .nsft-util-btn {
+  min-height: 26px;
+  padding: 5px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.nsft-detail-body .option-row a {
+  font-size: 11.5px !important;
+  font-weight: 500;
+  color: var(--accent) !important;
+}
+.nsft-detail-body .option-row a:hover { color: var(--accent-hover) !important; }
+
+.nsft-detail-body .option-row small,
+.nsft-detail-body .option-row .nsft-note,
+.nsft-detail-body .option-row [class*="hint"] {
+  display: block;
+  margin-top: 8px;
+  padding: 6px 9px;
+  background: var(--info-soft);
+  border-radius: var(--r-sm);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--info-strong);
+}
+
+.nsft-detail-body { gap: 10px; }
+
+.nsft-detail-body .nsft-panel {
+  border-radius: var(--r-md);
+  box-shadow: var(--elev-1);
+}
+
+.nsft-detail-body .nsft-panel-title {
+  padding: 9px 12px;
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.nsft-detail-body .option-row select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E7B73' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 12px 12px !important;
+}
+:root[data-theme="dark"] .nsft-detail-body .option-row select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238FA098' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div > label:first-child,
+.nsft-detail-body .option-row > div:not(:first-child) > div > div:first-child {
+  justify-content: flex-end !important;
+  text-align: right;
+}
+
+.nsft-detail-body .option-row input[type="range"]:not([id$="Hue"]) {
+  background: var(--track) !important;
+}
+
+.nsft-detail-body .option-row .switch input:focus-visible + .slider {
+  box-shadow: var(--focus-ring);
+}
+
+.nsft-detail-body .option-row > div:first-child > div:not(.description):not([style*="display: none"]) {
+  display: flex !important;
+  flex-direction: column;
+  gap: 9px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 10px !important;
+  padding: 10px 11px !important;
+  background: var(--surface-soft);
+  border: 1px solid var(--hairline);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+}
+
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div:not([style*="display: none"]) {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 0 !important;
+}
+
+.nsft-detail-body .option-row input[type="checkbox"]:not(.switch input),
+.nsft-detail-body .option-row input[type="radio"] {
+  margin: 0 !important;
+}
+.nsft-detail-body .option-row input[type="checkbox"]:not(.switch input) + label,
+.nsft-detail-body .option-row input[type="radio"] + label,
+.nsft-detail-body .option-row input[type="checkbox"]:not(.switch input) + span,
+.nsft-detail-body .option-row input[type="radio"] + span {
+  margin-left: 9px !important;
+  line-height: 1.35;
+}
+.nsft-detail-body .option-row label:has(> input[type="checkbox"]),
+.nsft-detail-body .option-row label:has(> input[type="radio"]),
+.nsft-detail-body .option-row div:has(> input[type="checkbox"]),
+.nsft-detail-body .option-row div:has(> input[type="radio"]) {
+  gap: 9px !important;
+}
+
+.nsft-detail-body .option-row select {
+  max-width: 220px;
+  justify-self: start;
+}
+.nsft-detail-body .option-row input[id$="Hex"] { max-width: 120px; }
+.nsft-detail-body .option-row input[type="number"] { max-width: 96px; }
+
+.nsft-detail-body .option-row > div:not(:first-child):not([style*="display: none"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description):not([style*="display: none"]) {
+  margin-left: 0 !important;
+  padding: 10px 0 10px 10px !important;
+  background: transparent;
+  border: 0 !important;
+  border-left: 2px solid var(--accent) !important;
+  border-radius: 0;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div > label:first-child,
+.nsft-detail-body .option-row > div:not(:first-child) > div > div:first-child {
+  justify-content: flex-start !important;
+  text-align: left;
+}
+.nsft-detail-body .option-row > div:not(:first-child) > div:not([style*="display: none"]) {
+  grid-template-columns: 88px minmax(0, 1fr);
+}
+
+.nsft-detail-body .option-row input[type="color"] {
+  width: 34px !important;
+  height: 28px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  flex: 0 0 auto;
+  margin: 0 !important;
+  padding: 2px !important;
+  background: var(--surface-1) !important;
+  border: 1px solid var(--hairline-strong) !important;
+  border-radius: var(--r-sm) !important;
+  cursor: pointer;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.nsft-detail-body .option-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.nsft-detail-body .option-row input[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: 3px;
+}
+.nsft-detail-body .option-row input[type="color"]:focus {
+  border-color: var(--accent) !important;
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.nsft-detail-body .option-row div:has(> input[type="color"]) {
+  display: flex !important;
+  align-items: center;
+  gap: 8px !important;
+  flex-wrap: wrap;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child):not([style*="display: none"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description):not([style*="display: none"]),
+.nsft-detail-body .option-row > div:not(:first-child) > div:not([style*="display: none"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div:not([style*="display: none"]) {
+  justify-content: flex-start !important;
+  justify-items: start !important;
+  text-align: left !important;
+  align-items: center;
+}
+
+.nsft-detail-body .option-row label:has(> input[type="radio"]),
+.nsft-detail-body .option-row label:has(> input[type="checkbox"]),
+.nsft-detail-body .option-row div:has(> input[type="radio"]),
+.nsft-detail-body .option-row div:has(> input[type="checkbox"]) {
+  justify-content: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: auto;
+  text-align: left !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div:has(input[type="radio"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div:has(input[type="radio"]) {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child):not([style*="display: none"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description):not([style*="display: none"]) {
+  align-items: flex-start !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > *,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > * {
+  width: 100%;
+  box-sizing: border-box;
+  align-self: stretch;
+}
+.nsft-detail-body .option-row > div:not(:first-child) > div:not([style*="display: none"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div:not([style*="display: none"]) {
+  align-items: center !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > button,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) button,
+.nsft-detail-body .option-row > div:not(:first-child) button {
+  width: auto !important;
+  align-self: flex-start !important;
+  justify-content: center;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > span,
+.nsft-detail-body .option-row > div:not(:first-child) > label,
+.nsft-detail-body .option-row > div:not(:first-child) > a,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > span,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > label,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > a {
+  width: auto;
+  align-self: flex-start !important;
+}
+
+.nsft-detail-body .option-row label.switch {
+  display: inline-block !important;
+  position: relative !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  height: 18px !important;
+  flex: 0 0 auto !important;
+  gap: 0 !important;
+  margin: 2px 0 0 !important;
+  padding: 0 !important;
+  align-self: flex-start !important;
+  overflow: visible;
+}
+
+.nsft-detail-body .option-row label.switch > input {
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  border: 0 !important;
+}
+
+.nsft-detail-body .option-row label.switch > .slider {
+  position: absolute !important;
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child):not([style*="display: none"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description):not([style*="display: none"]) {
+  border-left: 2px solid var(--accent) !important;
+}
+
+.nsft-detail-body .option-row:has(> label.switch > input:not(:checked)) > div:not(:first-child),
+.nsft-detail-body .option-row:has(> label.switch > input:not(:checked)) > div:first-child > div:not(.description) {
+  opacity: 0.5;
+  filter: saturate(0.35);
+  pointer-events: none;
+  border-left-color: var(--hairline-strong) !important;
+}
+
+.nsft-detail-body .option-row:has(> label.switch > input:not(:checked)) > div:first-child > div:not(.description) {
+  opacity: 1;
+}
+
+.nsft-detail-body.nsft-detail-body .option-row [style*="display: none"],
+.nsft-detail-body.nsft-detail-body .option-row [style*="display:none"],
+.nsft-detail-body.nsft-detail-body .option-row .nsft-hidden,
+.nsft-detail-body.nsft-detail-body .option-row [hidden],
+.nsft-detail-body.nsft-detail-body .option-row.nsft-hidden {
+  display: none !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child):not([style*="display: none"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description):not([style*="display: none"]) {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px 12px !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div:not([style*="display: none"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div:not([style*="display: none"]) {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: center !important;
+  gap: 8px !important;
+  width: auto !important;
+  max-width: 100%;
+  flex: 0 1 auto !important;
+  grid-template-columns: none !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > *,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > * {
+  width: auto !important;
+  align-self: center !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) label,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) label {
+  display: inline-flex !important;
+  align-items: center;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.nsft-detail-body .option-row select { width: auto !important; max-width: 100%; flex: 0 1 auto !important; }
+.nsft-detail-body .option-row input[type="text"] { width: 150px !important; flex: 0 1 auto !important; }
+.nsft-detail-body .option-row input[id$="Hex"] { width: 110px !important; }
+.nsft-detail-body .option-row input[type="number"] { width: 78px !important; }
+
+.nsft-detail-body .option-row input[type="range"] {
+  flex: 1 1 150px !important;
+  width: auto !important;
+  min-width: 120px;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) label:has(> input[type="checkbox"]),
+.nsft-detail-body .option-row > div:not(:first-child) label:has(> input[type="radio"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description) label:has(> input[type="checkbox"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description) label:has(> input[type="radio"]) {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: normal;
+}
+
+.nsft-detail-body .option-row pre,
+.nsft-detail-body .option-row .nsft-editor-theme-preview {
+  flex: 1 1 100% !important;
+  width: 100% !important;
+  max-width: 100%;
+}
+.nsft-detail-body .option-row > div:not(:first-child) > span:first-child {
+  flex: 1 1 100% !important;
+}
+
+.nsft-detail-body .option-row input[type="checkbox"]:not(.switch input) + label,
+.nsft-detail-body .option-row input[type="radio"] + label {
+  flex: 1 1 160px !important;
+  min-width: 0;
+  margin-left: 0 !important;
+  white-space: normal !important;
+  line-height: 1.35;
+}
+
+.nsft-detail-body .option-row input[type="range"] + span,
+.nsft-detail-body .option-row [id$="Val"],
+.nsft-detail-body .option-row [id$="Value"] {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+.nsft-detail-body .option-row input[type="range"] { min-width: 96px !important; }
+
+.nsft-detail-body .option-row > div:not(:first-child) label { max-width: 100%; }
+
+.nsft-detail-body .option-row > div:not(:first-child) > div:has(> input[type="range"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div:has(> input[type="range"]),
+.nsft-detail-body .option-row > div:not(:first-child):has(> input[type="range"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description):has(> input[type="range"]) {
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  flex: 1 1 100% !important;
+}
+.nsft-detail-body .option-row > div:not(:first-child):has(> input[type="range"]) > span,
+.nsft-detail-body .option-row > div:first-child > div:not(.description):has(> input[type="range"]) > span {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child),
+.nsft-detail-body .option-row > div:first-child > div:not(.description),
+.nsft-detail-body .option-row > div:not(:first-child) > div,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div {
+  align-items: center !important;
+  align-content: center;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) label,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) label,
+.nsft-detail-body .option-row > div:not(:first-child) input,
+.nsft-detail-body .option-row > div:not(:first-child) select,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) input,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) select {
+  align-self: center !important;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div > label:first-child,
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div > label:first-child {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
+.nsft-detail-body .option-row div:has(> input[type="checkbox"]:not(.switch input)),
+.nsft-detail-body .option-row div:has(> input[type="radio"]) {
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: auto !important;
+  flex: 0 0 auto !important;
+}
+.nsft-detail-body .option-row div:has(> input[type="checkbox"]:not(.switch input)) > label,
+.nsft-detail-body .option-row div:has(> input[type="radio"]) > label {
+  flex: 0 1 auto !important;
+  margin-left: 0 !important;
+  white-space: normal !important;
+}
+
+.nsft-detail-body .option-row div:has(> input[type="color"]) {
+  display: flex !important;
+  flex: 1 1 150px !important;
+  min-width: 0;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.nsft-detail-body .option-row input[type="color"] {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 44px !important;
+  max-width: none !important;
+  height: 28px !important;
+}
+
+.nsft-detail-body .option-row input[type="range"] {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  height: 6px !important;
+  border-radius: 3px !important;
+  border: 0 !important;
+  padding: 0 !important;
+  background: var(--track) !important;
+  background-image: none;
+}
+
+.nsft-detail-body .option-row input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: transparent;
+}
+
+.nsft-detail-body .option-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 2px solid var(--accent);
+  box-shadow: 0 1px 3px rgba(12, 20, 16, 0.28);
+  cursor: pointer;
+}
+
+.nsft-detail-body .option-row input[type="range"][id$="Hue"],
+.nsft-detail-body .option-row input[type="range"][id*="hue" i] {
+  background: linear-gradient(90deg,
+    hsl(0 100% 50%), hsl(60 100% 50%), hsl(120 100% 50%), hsl(180 100% 50%),
+    hsl(240 100% 50%), hsl(300 100% 50%), hsl(360 100% 50%)) !important;
+}
+
+.nsft-detail-body .option-row input[type="range"][id$="Sat"],
+.nsft-detail-body .option-row input[type="range"][id*="sat" i] {
+  background: linear-gradient(90deg,
+    hsl(var(--nsft-h, 216) 0% var(--nsft-l, 49%)),
+    hsl(var(--nsft-h, 216) 100% var(--nsft-l, 49%))) !important;
+}
+
+.nsft-detail-body .option-row input[type="range"][id$="Lig"],
+.nsft-detail-body .option-row input[type="range"][id*="lig" i],
+.nsft-detail-body .option-row input[type="range"][id*="light" i] {
+  background: linear-gradient(90deg,
+    hsl(var(--nsft-h, 216) var(--nsft-s, 23%) 4%),
+    hsl(var(--nsft-h, 216) var(--nsft-s, 23%) 50%),
+    hsl(var(--nsft-h, 216) var(--nsft-s, 23%) 96%)) !important;
+}
+
+.nsft-detail-body .nsft-panel-title {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 5 !important;
+  margin: 0 0 8px !important;
+  padding: 9px 12px 8px !important;
+  background: var(--surface-0) !important;
+  box-shadow: 0 0 0 12px var(--surface-0);
+  clip-path: inset(0 -14px 0 -14px);
+}
+
+.nsft-detail-body > .nsft-panel:first-child { margin-top: 0 !important; }
+.nsft-detail-body { padding-top: 0 !important; }
+
+.nsft-detail-body .option-row > div:not(:first-child):has(> input[type="range"]),
+.nsft-detail-body .option-row > div:not(:first-child) > div:has(> input[type="range"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description):has(> input[type="range"]),
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div:has(> input[type="range"]) {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  flex: 1 1 100% !important;
+}
+
+.nsft-detail-body .option-row div:has(> input[type="range"]) > label,
+.nsft-detail-body .option-row div:has(> input[type="range"]) > span:first-child,
+.nsft-detail-body .option-row div:has(> input[type="range"]) > div:first-child {
+  flex: 0 0 86px !important;
+  width: 86px !important;
+  min-width: 86px !important;
+  max-width: 86px !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nsft-detail-body .option-row div:has(> input[type="range"]) > span:last-child,
+.nsft-detail-body .option-row div:has(> input[type="range"]) > output {
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.nsft-detail-body .option-row input[type="range"] {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+.nsft-detail-body .nsft-panel-title {
+  top: -12px !important;
+  margin-top: -12px !important;
+  padding-top: 21px !important;
+  clip-path: none !important;
+  box-shadow: -14px 0 0 var(--surface-0), 14px 0 0 var(--surface-0) !important;
+}
+
+.nsft-detail-body .option-row div:has(> input[type="range"]) > label,
+.nsft-detail-body .option-row div:has(> input[type="range"]) > span:first-child,
+.nsft-detail-body .option-row div:has(> input[type="range"]) > div:first-child {
+  flex: 0 0 118px !important;
+  width: 118px !important;
+  min-width: 118px !important;
+  max-width: 118px !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+.nsft-detail-body .option-row div:has(> input[type="range"]) > div:first-child > * {
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+

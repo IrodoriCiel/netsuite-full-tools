@@ -1,0 +1,31 @@
+.nsft-refresh-sublist-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+}
+
+.nsft-refresh-sublist-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(0, 0, 0, 0.15);
+    border-top-color: #607799;
+    border-radius: 50%;
+    animation: nsft-refresh-sublist-spin 0.7s linear infinite;
+}
+
+@keyframes nsft-refresh-sublist-spin {
+    to { transform: rotate(360deg); }
+}
+
+html[data-nsft-theme="dark"] .nsft-refresh-sublist-overlay {
+    background: rgba(20, 20, 20, 0.6);
+}
+html[data-nsft-theme="dark"] .nsft-refresh-sublist-spinner {
+    border-color: rgba(255, 255, 255, 0.2);
+    border-top-color: #8fb3ff;
+}

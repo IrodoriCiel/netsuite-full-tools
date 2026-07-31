@@ -1,0 +1,106 @@
+
+[data-nsft-ui].nsft-pdf-preview-toggle-option {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 6px 0 10px;
+    padding: 0 4px;
+    height: 34px;
+    float: right;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+    line-height: 1;
+}
+
+[data-nsft-ui].nsft-pdf-preview-toggle-option:active {
+    opacity: 0.8;
+}
+
+[data-nsft-ui].nsft-pdf-preview-toggle-option[data-toggle="true"] {
+    color: #ffffff;
+}
+
+.nsft-pdf-preview-toggle {
+    position: relative;
+    width: 30px;
+    height: 15px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    transition: background 0.2s ease;
+    user-select: none;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.nsft-pdf-preview-toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+}
+
+[data-nsft-ui].nsft-pdf-preview-toggle-option[data-toggle="true"] .nsft-pdf-preview-toggle {
+    background: rgba(255, 255, 255, 0.65);
+}
+
+[data-nsft-ui].nsft-pdf-preview-toggle-option[data-toggle="true"] .nsft-pdf-preview-toggle::after {
+    transform: translateX(15px);
+    background: #1e3a5f;
+}
+
+.nsft-pdf-hidden { display: none !important; }
+
+#nsft-pdf-side-preview-container {
+    display: none;
+    position: relative;
+    clear: both;
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
+                0 8px 24px rgba(15, 23, 42, 0.05);
+    box-sizing: border-box;
+}
+
+body.nsft-pdf-side-preview-on #nsft-pdf-side-preview-container:not(.nsft-pdf-hidden) {
+    display: block;
+}
+
+#nsft-pdf-side-preview-iframe {
+    width: 100%;
+    min-height: 720px;
+    border: none;
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+html[data-nsft-theme="dark"] #nsft-pdf-side-preview-container {
+    background: var(--nsft-dk-surface);
+    border-color: var(--nsft-dk-border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+                0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+html[data-nsft-theme="dark"] #nsft-pdf-side-preview-iframe {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}

@@ -1,0 +1,74 @@
+
+html.nsft-lsi-on.nsft-lsi-sandbox.nsft-lsi-has-env #environment::before {
+    content: "sandbox " var(--nsft-lsi-num, "");
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--nsft-lsi-accent, #b45309);
+    margin-right: 4px;
+}
+
+html.nsft-lsi-on.nsft-lsi-rp.nsft-lsi-has-env #environment::before {
+    content: "release preview ";
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--nsft-lsi-accent, #2563eb);
+    margin-right: 4px;
+}
+
+html.nsft-lsi-on:is(.nsft-lsi-sandbox, .nsft-lsi-rp) .login-page-box #nsft-lsi-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 4px 0 18px 0;
+    padding: 8px 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7c2d12;
+    background: #fed7aa;
+    border: 1px solid #fdba74;
+    border-left: 3px solid #c2410c;
+    border-radius: 6px;
+    user-select: none;
+    text-align: center;
+    white-space: nowrap;
+}
+
+html.nsft-lsi-on.nsft-lsi-rp .login-page-box #nsft-lsi-badge {
+    color: #1e3a8a;
+    background: #dbeafe;
+    border-color: #93c5fd;
+    border-left: 3px solid #2563eb;
+}
+
+html.nsft-lsi-on:is(.nsft-lsi-sandbox, .nsft-lsi-rp) body > #nsft-lsi-badge {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 2147483647;
+    display: block;
+    padding: 4px 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #7c2d12;
+    background: #fed7aa;
+    border: 1px solid #d97706;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(217, 119, 6, 0.25);
+    user-select: none;
+    pointer-events: none;
+}
+
+html.nsft-lsi-on.nsft-lsi-rp body > #nsft-lsi-badge {
+    color: #1e3a8a;
+    background: #dbeafe;
+    border-color: #2563eb;
+}

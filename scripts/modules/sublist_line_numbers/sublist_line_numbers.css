@@ -1,0 +1,89 @@
+
+html.nsft-sln-on {
+    --nsft-sln-inline-pad: 8px;
+    --nsft-sln-char-width: 10px;
+    --nsft-sln-width: calc(var(--nsft-sln-char-width) + (var(--nsft-sln-inline-pad) * 2));
+    --nsft-sln-col-bg: #fafafa;
+    --nsft-sln-header-bg: #e5e5e5;
+    --nsft-sln-header-color: #666;
+    --nsft-sln-header-font-size: 11px;
+    --nsft-sln-cell-font-size: 11px;
+    --nsft-sln-cell-color: #9ca3af;
+    --nsft-sln-cell-font-weight: 500;
+    --nsft-sln-border-color: rgba(0, 0, 0, 0.06);
+    --nsft-sln-divider-color: rgba(0, 0, 0, 0.08);
+}
+
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):not(:has(> .uir-list-machine-ordered)):not(:has(.uir-nodata-row)) {
+    counter-reset: sublist-line var(--nsft-sln-start, 0);
+    contain: layout;
+}
+
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):has(tr:is([id$="_row_9"], [id$="row9"])) {
+    --nsft-sln-char-width: 17px;
+}
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):has(tr:is([id$="_row_99"], [id$="row99"])) {
+    --nsft-sln-char-width: 24px;
+}
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):has(tr:is([id$="_row_999"], [id$="row999"])) {
+    --nsft-sln-char-width: 32px;
+}
+
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):not(:has(> .uir-list-machine-ordered)):not(:has(.uir-nodata-row)) :is(.uir-machine-table, .listtable) > :is(tbody, tfoot) > tr::before {
+    content: "";
+    display: table-cell;
+    box-sizing: content-box;
+    width: var(--nsft-sln-width);
+    max-width: var(--nsft-sln-width);
+    text-align: center;
+    padding-inline: var(--nsft-sln-inline-pad);
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    background-color: var(--nsft-sln-col-bg);
+    border-right: 1px solid var(--nsft-sln-divider-color);
+    user-select: none;
+}
+
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):not(:has(> .uir-list-machine-ordered)):not(:has(.uir-nodata-row)) :is(.uir-machine-table, .listtable) > :is(tbody, tfoot) > tr.uir-machine-headerrow::before {
+    content: "#" !important;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: var(--nsft-sln-header-bg);
+    color: var(--nsft-sln-header-color);
+    font-size: var(--nsft-sln-header-font-size);
+    font-weight: normal;
+    padding-block: 6px;
+    vertical-align: bottom;
+    border-right: 1px solid var(--nsft-sln-divider-color);
+}
+
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):not(:has(> .uir-list-machine-ordered)):not(:has(.uir-nodata-row)) :is(.uir-machine-row, .uir-list-row-tr):not(:has(.uir-new-row))::before {
+    counter-increment: sublist-line;
+    content: counter(sublist-line) !important;
+    font-size: var(--nsft-sln-cell-font-size);
+    font-weight: var(--nsft-sln-cell-font-weight);
+    color: var(--nsft-sln-cell-color);
+    padding-block: 5px;
+    vertical-align: middle;
+    transition: color 0.15s ease;
+}
+
+html.nsft-sln-on .uir-machine-table-container :is(.uir-machine-row, .uir-list-row-tr):hover::before {
+    color: #374151;
+}
+
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):not(:has(> .uir-list-machine-ordered)):not(:has(.uir-nodata-row)) :is(.uir-machine-row, .uir-machine-button-row, .uir-list-row-tr):not(:last-child)::before {
+    border-bottom: solid var(--nsft-sln-border-color) 1px;
+}
+
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):not(:has(> .uir-list-machine-ordered)):not(:has(.uir-nodata-row)) .uir-machine-headerrow::before {
+    left: 0;
+}
+html.nsft-sln-on .uir-machine-table-container:has(.uir-machine-headerrow:not(.uir-loading-row)):not(:has(> .uir-list-machine-ordered)):not(:has(.uir-nodata-row)) :is(.uir-list-row-tr, .uir-machine-row)::before {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--nsft-sln-col-bg);
+}

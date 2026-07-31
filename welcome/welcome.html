@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title data-i18n="welcomeTitle">Welcome to NetSuite Full Tools</title>
+    <script src="../scripts/modules/_shared/nsft_page_theme.js"></script>
+    <link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
+    <link rel="stylesheet" href="welcome.css">
+</head>
+<body>
+
+    <div class="grain" aria-hidden="true"></div>
+
+    <div class="progress" aria-hidden="true">
+        <span id="progressBar" class="progress-bar"></span>
+    </div>
+
+    <section class="hero" id="hero">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
+        <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+        <div class="hero-orb hero-orb-3" aria-hidden="true"></div>
+
+        <div class="hero-content">
+            <div class="hero-logo-wrap" role="img" aria-label="NetSuite Full Tools">
+                <span class="hero-logo-halo" aria-hidden="true"></span>
+                <span class="hero-logo-ring hero-logo-ring-a" aria-hidden="true"></span>
+                <span class="hero-logo-ring hero-logo-ring-b" aria-hidden="true"></span>
+                <img class="hero-logo" src="img/logo.webp" alt="" />
+            </div>
+            <h1 class="hero-title">
+                <span class="hero-title-line line-1">NETSUITE</span>
+                <span class="hero-title-line line-2">FULL<span class="hero-title-amp"> </span>TOOLS</span>
+            </h1>
+            <p class="hero-tagline" data-i18n="welcomeTagline">A simpler way to work in NetSuite.</p>
+
+            <div class="early-notice hero-notice" id="earlyNotice">
+                <span class="early-notice-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </span>
+                <div class="early-notice-text">
+                    <strong data-i18n="welcomeEarlyNoticeTitle">Before you start</strong>
+                    <span>
+                        <span data-i18n="welcomeEarlyNoticeBodyPre">To avoid conflicts and get the most out of NSFT,</span>
+                        <strong class="early-notice-emphasis" data-i18n="welcomeEarlyNoticeBodyBold">we recommend disabling any other NetSuite extension you have installed.</strong>
+                        <span data-i18n="welcomeEarlyNoticeBodyPost">See the three quick steps below.</span>
+                    </span>
+                    <button type="button" id="nsftNoticeJumpToSteps" class="early-notice-cta" data-i18n="welcomeEarlyNoticeCta">Jump to the steps</button>
+                </div>
+            </div>
+
+            <div class="redwood-notice hero-notice" id="redwoodNotice" role="note">
+                <span class="redwood-notice-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                <p class="redwood-notice-text">
+                    <strong data-i18n="welcomeRedwoodNoticeTag">Heads up:</strong>
+                    <span data-i18n="welcomeRedwoodNoticeBodyPre">NSFT is now compatible with Redwood, NetSuite's new interface.</span>
+                    <strong class="redwood-notice-emphasis" data-i18n="welcomeRedwoodNoticeBodyBold">Occasional issues may still appear</strong>
+                    <span data-i18n="welcomeRedwoodNoticeBodyPost">— if you spot one, please help us by reporting it through the "Report a bug" button so we can fix it as soon as possible.</span>
+                </p>
+            </div>
+
+            <span class="hero-scroll-hint mono" data-i18n="heroScrollHint">SCROLL ↓</span>
+        </div>
+    </section>
+
+    <section class="pitch" id="pitch">
+        <div class="parallax-layer parallax-bg" data-speed="0.3" aria-hidden="true">
+            <svg viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(48,115,77,0.09)" stroke-width="1"/>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)"/>
+            </svg>
+        </div>
+
+        <div class="parallax-layer parallax-mid" data-speed="0.6" aria-hidden="true">
+            <span class="parallax-shape shape-square"></span>
+            <span class="parallax-shape shape-circle"></span>
+            <span class="parallax-shape shape-triangle"></span>
+        </div>
+
+        <div class="parallax-layer parallax-fg">
+            <p class="pitch-lead" data-i18n="welcomePitchLine1">We know how it feels</p>
+            <p class="pitch-body" data-i18n="welcomePitchLine2">Working in NetSuite usually means stacking several extensions: one to run SuiteQL, another to inspect the record object, another to audit scripts, another to copy field IDs… and so on.</p>
+            <p class="pitch-body" data-i18n="welcomePitchLine3">Over time, they pile up. They overlap, clash with each other, and end up affecting performance.</p>
+            <p class="pitch-close" data-i18n="welcomePitchLine4">NSFT brings those tools together into a single extension — a more consistent, lightweight experience. The idea is simple: fewer pieces, better workflow.</p>
+        </div>
+    </section>
+
+    <section class="categories" id="categories">
+        <header class="categories-header">
+            <span class="categories-eyebrow mono" data-i18n="categoriesEyebrow">02 — WHAT'S INSIDE</span>
+            <h2 class="categories-heading" data-i18n="welcomeFeaturesTitle">Eight areas, one extension.</h2>
+            <p class="categories-sub" data-i18n="welcomeFeaturesSub">All 100+ modules, grouped by the part of NetSuite they fix.</p>
+        </header>
+
+        <div class="cat-grid">
+            <article class="cat" data-cat="blue">
+                <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg></div>
+                <h3 data-i18n="welcomeCatSqlTitle">SuiteQL &amp; Search</h3>
+                <p data-i18n="welcomeCatSqlDesc">A full SQL editor with schema explorer, autocomplete and JOIN wizard.</p>
+                <ul>
+                    <li class="is-featured" data-i18n="welcomeCatSqlItem1">SuiteQL Runner (editor + tabs + favourites)</li>
+                    <li data-i18n="welcomeCatSqlItem2">Search Fields Finder &amp; formula autocomplete</li>
+                    <li data-i18n="welcomeCatSqlItem3">Export Search (JSON / XML)</li>
+                    <li data-i18n="welcomeCatSqlItem4">Quick Search creation + in-search preview</li>
+                    <li data-i18n="welcomeCatSqlItem5">CSV response viewer</li>
+                    <li data-i18n="welcomeCatSqlItem6">Saved search split view</li>
+                    <li class="is-featured" data-i18n="welcomeCatSqlItem7">AI Assistant for SuiteQL &amp; search</li>
+                    <li data-i18n="welcomeCatSqlItem8">Records catalog + relationship diagram (ERD)</li>
+                    <li data-i18n="welcomeCatSqlItem9">Reusable variables &amp; snippet library</li>
+                </ul>
+            </article>
+
+            <article class="cat" data-cat="green">
+                <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                <h3 data-i18n="welcomeCatRecordTitle">Records &amp; Fields</h3>
+                <p data-i18n="welcomeCatRecordDesc">Inspect, copy and edit records faster.</p>
+                <ul>
+                    <li class="is-featured" data-i18n="welcomeCatRecordItem1">View Record Object (raw JSON inspector)</li>
+                    <li class="is-featured" data-i18n="welcomeCatRecordItem2">Copy Field / Sublist IDs with one click</li>
+                    <li data-i18n="welcomeCatRecordItem3">Find Field by ID (Ctrl+Shift+F)</li>
+                    <li data-i18n="welcomeCatRecordItem4">Set Field Values templates &amp; record options menu</li>
+                    <li data-i18n="welcomeCatRecordItem5">View Record Scripts</li>
+                    <li data-i18n="welcomeCatRecordItem6">Record Trail (related records)</li>
+                    <li data-i18n="welcomeCatRecordItem7">Load Record to Console</li>
+                    <li data-i18n="welcomeCatRecordItem8">Go to record (Alt+Shift+G)</li>
+                    <li data-i18n="welcomeCatRecordItem9">Expanded recent records</li>
+                    <li data-i18n="welcomeCatRecordItem10">Open in another environment</li>
+                    <li data-i18n="welcomeCatRecordItem11">Sandbox number on header logo</li>
+                    <li data-i18n="welcomeCatRecordItem12">Field history in the &#9432; popup</li>
+                    <li data-i18n="welcomeCatRecordItem13">Open custom record from sublist</li>
+                    <li data-i18n="welcomeCatRecordItem14">Hover preview for custom fields</li>
+                    <li data-i18n="welcomeCatRecordItem15">Related native links</li>
+                    <li data-i18n="welcomeCatRecordItem16">Save and Edit button</li>
+                    <li data-i18n="welcomeCatRecordItem17">Edit and Save button</li>
+                    <li data-i18n="welcomeCatRecordItem18">Delete Record button</li>
+                    <li data-i18n="welcomeCatRecordItem19">Cancel without History.Back</li>
+                    <li data-i18n="welcomeCatRecordItem20">Refresh sublist button</li>
+                </ul>
+            </article>
+
+            <article class="cat" data-cat="orange">
+                <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+                <h3 data-i18n="welcomeCatScriptTitle">Scripts &amp; Logs</h3>
+                <p data-i18n="welcomeCatScriptDesc">Readable code fields, syntax-highlighted logs and editor shortcuts.</p>
+                <ul>
+                    <li data-i18n="welcomeCatScriptItem1">Prettify logs with syntax highlighting</li>
+                    <li data-i18n="welcomeCatScriptItem2">Live mode + Full logs button</li>
+                    <li class="is-featured" data-i18n="welcomeCatScriptItem3">Suitelet Tools &amp; Load N Module</li>
+                    <li data-i18n="welcomeCatScriptItem4">Script auto-name &amp; upload helpers</li>
+                    <li data-i18n="welcomeCatScriptItem5">Code editor theme</li>
+                    <li data-i18n="welcomeCatScriptItem6">Close editor on save</li>
+                    <li data-i18n="welcomeCatScriptItem7">Open file in new tab</li>
+                    <li data-i18n="welcomeCatScriptItem8">Searchable execution log</li>
+                    <li data-i18n="welcomeCatScriptItem9">Beautify JSON from Suitelets &amp; RESTlets</li>
+                    <li data-i18n="welcomeCatScriptItem10">Page performance panel</li>
+                    <li data-i18n="welcomeCatScriptItem11">Backup SuiteScripts to GitHub</li>
+                </ul>
+            </article>
+
+            <article class="cat" data-cat="blue-light">
+                <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+                <h3 data-i18n="welcomeCatUiTitle">UI &amp; Workspace</h3>
+                <p data-i18n="welcomeCatUiDesc">Make the UI respect your monitor and your sanity.</p>
+                <ul>
+                    <li data-i18n="welcomeCatUiItem1">Colour themes (HSL) &amp; dark mode</li>
+                    <li data-i18n="welcomeCatUiItem2">Fixed sublist headers / columns / tabs</li>
+                    <li class="is-featured" data-i18n="welcomeCatUiItem3">Grouped tabs by account subdomain</li>
+                    <li data-i18n="welcomeCatUiItem4">Better page titles, tighter dropdowns &amp; navigation</li>
+                    <li data-i18n="welcomeCatUiItem5">Remove NetSuite animations</li>
+                    <li data-i18n="welcomeCatUiItem6">Profile button in header</li>
+                    <li data-i18n="welcomeCatUiItem7">Smaller main menu</li>
+                    <li data-i18n="welcomeCatUiItem8">Floating field groups</li>
+                    <li data-i18n="welcomeCatUiItem9">Compact sublist headers</li>
+                    <li data-i18n="welcomeCatUiItem10">Sublist line numbers</li>
+                    <li data-i18n="welcomeCatUiItem11">Filter sublist rows</li>
+                    <li data-i18n="welcomeCatUiItem12">Sublist line IDs</li>
+                    <li data-i18n="welcomeCatUiItem13">Quick sublist paging</li>
+                    <li data-i18n="welcomeCatUiItem14">Hierarchical multi-select</li>
+                    <li data-i18n="welcomeCatUiItem15">Multi-select counter</li>
+                    <li data-i18n="welcomeCatUiItem16">Character counter</li>
+                    <li data-i18n="welcomeCatUiItem17">Taller textareas</li>
+                    <li data-i18n="welcomeCatUiItem18">Names on «From Bundle» filter</li>
+                    <li data-i18n="welcomeCatUiItem19">Hide Guided Learning</li>
+                </ul>
+            </article>
+
+            <article class="cat" data-cat="green-light">
+                <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+                <h3 data-i18n="welcomeCatFcTitle">File Cabinet</h3>
+                <p data-i18n="welcomeCatFcDesc">The shortcuts NetSuite never shipped.</p>
+                <ul>
+                    <li class="is-featured" data-i18n="welcomeCatFcItem1">Drag &amp; drop, rename, delete in place</li>
+                    <li data-i18n="welcomeCatFcItem2">Edit files in place (no download dance)</li>
+                    <li data-i18n="welcomeCatFcItem3">Copy path &amp; direct folder links</li>
+                    <li data-i18n="welcomeCatFcItem4">System-folder safety guard &amp; file preview in records</li>
+                    <li data-i18n="welcomeCatFcItem5">File Cabinet utilities</li>
+                    <li data-i18n="welcomeCatFcItem6">Download folder as ZIP</li>
+                    <li data-i18n="welcomeCatFcItem7">Bundle names on folders</li>
+                </ul>
+            </article>
+
+            <article class="cat" data-cat="orange-light">
+                <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M9 6h6"/><path d="M18 9v6"/></svg></div>
+                <h3 data-i18n="welcomeCatWfTitle">Workflows &amp; PDFs</h3>
+                <p data-i18n="welcomeCatWfDesc">Visual transitions and real autocomplete in Advanced PDF.</p>
+                <ul>
+                    <li class="is-featured" data-i18n="welcomeCatWfItem1">Coloured workflow transitions + searcher</li>
+                    <li data-i18n="welcomeCatWfItem2">Advanced PDF autocomplete</li>
+                    <li data-i18n="welcomeCatWfItem3">PDF live preview side-by-side</li>
+                    <li data-i18n="welcomeCatWfItem4">PDF version history</li>
+                </ul>
+            </article>
+
+            <article class="cat" data-cat="blue-dark">
+                <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <h3 data-i18n="welcomeCatLoginTitle">Login &amp; Environment</h3>
+                <p data-i18n="welcomeCatLoginDesc">Never commit to prod thinking it was sandbox.</p>
+                <ul>
+                    <li class="is-featured" data-i18n="welcomeCatLoginItem1">Environment badge (PRD / SB / RP)</li>
+                    <li data-i18n="welcomeCatLoginItem2">Login sandbox indicator &amp; branding</li>
+                    <li data-i18n="welcomeCatLoginItem3">Session-timeout blocker</li>
+                    <li data-i18n="welcomeCatLoginItem4">Logged-out redirect &amp; polished error pages</li>
+                    <li data-i18n="welcomeCatLoginItem5">Production warning banner</li>
+                    <li data-i18n="welcomeCatLoginItem6">NetSuite version in header</li>
+                </ul>
+            </article>
+
+            <article class="cat" data-cat="orange-dark">
+                <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+                <h3 data-i18n="welcomeCatPowerTitle">Power tools</h3>
+                <p data-i18n="welcomeCatPowerDesc">The shortcuts that turn a power user into a faster one.</p>
+                <ul>
+                    <li class="is-featured" data-i18n="welcomeCatPowerItem1">Command Palette (Ctrl+Shift+Space)</li>
+                    <li data-i18n="welcomeCatPowerItem2">Keyboard shortcuts cheat sheet (Ctrl+Shift+?)</li>
+                    <li data-i18n="welcomeCatPowerItem3">JSON formatter, role finder, auto-refresh</li>
+                    <li data-i18n="welcomeCatPowerItem4">Auto-generate field &amp; record IDs</li>
+                    <li data-i18n="welcomeCatPowerItem5">New version notice</li>
+                    <li data-i18n="welcomeCatPowerItem6">Discreet mode</li>
+                    <li data-i18n="welcomeCatPowerItem7">Selector diagnostics (developer)</li>
+                    <li data-i18n="welcomeCatPowerItem8">Copy Account ID in Roles</li>
+                    <li data-i18n="welcomeCatPowerItem9">Portlet auto-refresh</li>
+                    <li data-i18n="welcomeCatPowerItem10">Prettify code fields</li>
+                    <li data-i18n="welcomeCatPowerItem11">Guided shortcut suggestions</li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <section class="challenge-sec" id="challenge">
+        <div class="challenge-card">
+            <span class="challenge-badge mono" data-i18n="welcomeChallengeBadge">A SMALL TIP</span>
+            <h2 class="challenge-title" data-i18n="welcomeChallengeTitle">See NSFT at its best</h2>
+            <p class="challenge-body" data-i18n="welcomeChallengeBody">If you'd like to see NSFT at its best, give it a few days without other extensions active. It helps avoid conflicts and gives you a clearer picture of the full workflow.</p>
+            <p class="challenge-promise" data-i18n="welcomeChallengePromise">100+ improvements, one extension. Less noise, more control.</p>
+
+            <button type="button" id="nsftWelcomeOpenExtensions" class="btn-primary" data-i18n="welcomeOpenExtensions">Open Extensions page</button>
+
+            <div class="howto">
+                <h3 class="howto-title mono" data-i18n="welcomeHowtoTitle">OR DO IT MANUALLY</h3>
+                <ol class="steps">
+                    <li class="step">
+                        <span class="step-num">1</span>
+                        <div>
+                            <p data-i18n="welcomeHowtoStep1">Click the Chrome menu (top-right of the browser).</p>
+                            <div class="step-viz dots"><span></span><span></span><span></span></div>
+                        </div>
+                    </li>
+                    <li class="step">
+                        <span class="step-num">2</span>
+                        <div>
+                            <p data-i18n="welcomeHowtoStep2">Go to Extensions → Manage Extensions.</p>
+                            <div class="step-viz path"><span data-i18n="welcomeHowtoPath">Extensions › Manage Extensions</span></div>
+                        </div>
+                    </li>
+                    <li class="step">
+                        <span class="step-num">3</span>
+                        <div>
+                            <p data-i18n="welcomeHowtoStep3">Disable any other NetSuite extensions, if you think it's worth a try.</p>
+                            <div class="step-viz toggle">
+                                <span class="t t-on"><i></i></span>
+                                <span class="t-arrow">→</span>
+                                <span class="t t-off"><i></i></span>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-sec" id="cta">
+        <div class="cta-inner">
+            <button type="button" id="nsftWelcomeOpenSettings" class="btn-primary btn-large" data-i18n="welcomeCtaSettings">Open Settings</button>
+            <button type="button" id="nsftWelcomeOpenChangelog" class="btn-secondary" data-i18n="welcomeCtaChangelog">See what's new</button>
+        </div>
+    </section>
+
+    <script src="libs/gsap.min.js"></script>
+    <script src="libs/ScrollTrigger.min.js"></script>
+    <script src="libs/lenis.min.js"></script>
+    <script src="welcome.js"></script>
+</body>
+</html>

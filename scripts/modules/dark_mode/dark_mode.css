@@ -1,0 +1,76 @@
+
+html.nsft-dark-on {
+    --nsft-di: 0.94;  
+    --nsft-ds: 0.6;   
+    --nsft-inv: invert(var(--nsft-di)) hue-rotate(180deg) saturate(var(--nsft-ds));
+    --nsft-reinv: invert(var(--nsft-di)) hue-rotate(180deg) saturate(calc(1 / var(--nsft-ds)));
+    background-color: var(--nsft-dk-panel) !important;
+}
+
+
+html.nsft-dark-on body {
+    background-color: var(--nsft-dk-panel) !important;
+}
+
+html.nsft-dark-on.nsft-dark-black {
+    --nsft-di: 1;
+    --nsft-ds: 0.55;
+}
+html.nsft-dark-on.nsft-dark-black,
+html.nsft-dark-on.nsft-dark-black body {
+    background-color: var(--nsft-dk-deepest) !important;
+}
+
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) {
+    filter: var(--nsft-inv) !important;
+}
+
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([class*="record-icon"]):not([src*="chrome-extension:"]),
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) video,
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) canvas {
+    filter: var(--nsft-reinv) !important;
+}
+
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) input[type="checkbox"],
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) input[type="radio"] {
+    filter: var(--nsft-reinv) !important;
+}
+
+html.nsft-dark-anim,
+html.nsft-dark-anim body,
+html.nsft-dark-anim:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]),
+html.nsft-dark-anim:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([class*="record-icon"]):not([src*="chrome-extension:"]),
+html.nsft-dark-anim:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) video,
+html.nsft-dark-anim:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) canvas,
+html.nsft-dark-anim:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) input[type="checkbox"],
+html.nsft-dark-anim:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) input[type="radio"] {
+    transition: filter 320ms ease, background-color 320ms ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.nsft-dark-anim,
+    html.nsft-dark-anim body,
+    html.nsft-dark-anim:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) {
+        transition: none !important;
+    }
+}
+
+html.nsft-dark-on:not(.nsft-editor-themed) [popover]:popover-open:not([class*="nsft-"]):not([id*="nsft-"]),
+html.nsft-dark-on:not(.nsft-editor-themed) dialog:modal:not([class*="nsft-"]):not([id*="nsft-"]),
+html.nsft-dark-on:not(.nsft-editor-themed) > :not(head):not(body):not(script):not(style):not([class*="nsft-"]):not([id*="nsft-"]) {
+    filter: var(--nsft-inv) !important;
+}
+
+html.nsft-dark-on:not(.nsft-editor-themed) [popover]:popover-open:not([class*="nsft-"]):not([id*="nsft-"]) img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([class*="record-icon"]):not([src*="chrome-extension:"]),
+html.nsft-dark-on:not(.nsft-editor-themed) dialog:modal:not([class*="nsft-"]):not([id*="nsft-"]) img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([class*="record-icon"]):not([src*="chrome-extension:"]),
+html.nsft-dark-on:not(.nsft-editor-themed) > :not(head):not(body):not(script):not(style):not([class*="nsft-"]):not([id*="nsft-"]) img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([class*="record-icon"]):not([src*="chrome-extension:"]),
+html.nsft-dark-on:not(.nsft-editor-themed) [popover]:popover-open:not([class*="nsft-"]):not([id*="nsft-"]) :is(video, canvas, input[type="checkbox"], input[type="radio"]),
+html.nsft-dark-on:not(.nsft-editor-themed) dialog:modal:not([class*="nsft-"]):not([id*="nsft-"]) :is(video, canvas, input[type="checkbox"], input[type="radio"]),
+html.nsft-dark-on:not(.nsft-editor-themed) > :not(head):not(body):not(script):not(style):not([class*="nsft-"]):not([id*="nsft-"]) :is(video, canvas, input[type="checkbox"], input[type="radio"]) {
+    filter: var(--nsft-reinv) !important;
+}
+
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) [data-header-section="logos"] img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([class*="record-icon"]):not([src*="chrome-extension:"]),
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) [data-automation-id="Logos"] img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([class*="record-icon"]):not([src*="chrome-extension:"]) {
+    filter: none !important;
+}

@@ -1,0 +1,71 @@
+/* Fuentes de programacion empaquetadas para el modulo "Tema del Editor de
+   codigo". Antes FONT_STACKS referenciaba JetBrains Mono / Fira Code / Cascadia
+   Code / Source Code Pro pero la extension no las traia, asi que en Windows
+   todas caian a Consolas y se veian iguales (y el preview "se quedaba en
+   monospace"). Aqui las declaramos via @font-face con woff2 subset latino.
+
+   Las url() son relativas al propio archivo, asi funciona tanto cuando el popup
+   lo carga con <link> como cuando editor_theme.js inyecta el <link> (con URL
+   chrome-extension://) en la pagina de NetSuite. Los .woff2 y este .css estan
+   en web_accessible_resources del manifest. Solo se incluyen pesos 400/700;
+   los nombres de familia coinciden EXACTO con las keys de FONT_STACKS. */
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('jetbrains-mono-400.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('jetbrains-mono-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Fira Code';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('fira-code-400.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Fira Code';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('fira-code-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Cascadia Code';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('cascadia-code-400.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Cascadia Code';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('cascadia-code-700.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('source-code-pro-400.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('source-code-pro-700.woff2') format('woff2');
+}

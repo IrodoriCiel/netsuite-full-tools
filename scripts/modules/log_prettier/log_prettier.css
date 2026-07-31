@@ -1,0 +1,11 @@
+
+td.listtext.uir-list-row-cell {
+    max-width: 85vw !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+}
+
+html.nsft-log-prettier-active div#scriptnote__div {
+    max-height: 800px !important;
+    overflow-y: auto !important;
+}

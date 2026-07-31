@@ -1,0 +1,32 @@
+.nsft-fcp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    vertical-align: middle;
+    cursor: pointer;
+    color: #6b7280;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    user-select: none;
+}
+
+.nsft-fcp-btn:hover {
+    color: #111827;
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+}
+
+.nsft-fcp-btn svg {
+    width: 12px;
+    height: 12px;
+    display: block;
+}
+
+.nsft-fcp-btn.nsft-fcp-copied {
+    color: #15803d;
+}

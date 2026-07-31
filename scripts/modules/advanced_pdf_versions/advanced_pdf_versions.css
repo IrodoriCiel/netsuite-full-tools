@@ -1,0 +1,51 @@
+
+#nsft-pdf-versions-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    float: right;
+    margin: 0 6px 0 10px;
+    padding: 0 4px;
+    height: 34px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 15px;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    box-sizing: border-box;
+    line-height: 1;
+}
+
+#nsft-pdf-versions-container label {
+    font-size: 15px;
+    font-weight: 500;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+#nsft-pdf-versions-select {
+    padding: 4px 22px 4px 6px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    color: #ffffff;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    line-height: 1;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+}
+
+#nsft-pdf-versions-select option {
+    color: #1e293b;
+    background: #ffffff;
+}

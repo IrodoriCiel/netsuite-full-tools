@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" data-nsft-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <title>NSFT — Gráfica</title>
+    <link rel="stylesheet" href="../../_shared/design_tokens.css">
+    <link rel="stylesheet" href="chart_view.css">
+</head>
+
+<body data-nsft-ui>
+    <header class="cv-bar">
+        <div class="cv-title">
+            <span class="cv-dot" aria-hidden="true"></span>
+            <strong id="cv-title" data-i18n="sql_chart_view_title">Gráfica</strong>
+            <span class="cv-sub" id="cv-rows"></span>
+        </div>
+
+        <div class="cv-controls">
+            <label class="cv-field">
+                <span data-i18n="sql_chart_type">Tipo</span>
+                <select id="cv-type">
+                    <option value="bar">Bar</option>
+                    <option value="line">Line</option>
+                    <option value="pie">Pie</option>
+                </select>
+            </label>
+            <label class="cv-field">
+                <span data-i18n="sql_chart_x">Eje X</span>
+                <select id="cv-x"></select>
+            </label>
+            <label class="cv-field">
+                <span data-i18n="sql_chart_y">Eje Y</span>
+                <select id="cv-y" multiple size="1"></select>
+            </label>
+            <label class="cv-field">
+                <span data-i18n="sql_chart_agg">Agrupar</span>
+                <select id="cv-agg">
+                    <option value="none">—</option>
+                    <option value="sum">Sum</option>
+                    <option value="avg">Avg</option>
+                    <option value="count">Count</option>
+                </select>
+            </label>
+            <button type="button" id="cv-png" class="cv-btn"
+                data-i18n-title="sql_chart_export_title" title="Descargar la gráfica como imagen">
+                <span aria-hidden="true">⇩</span>
+                <span data-i18n="sql_chart_export_btn">PNG</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="cv-stage">
+        <div class="cv-msg" id="cv-msg" hidden></div>
+        <div class="cv-canvas-wrap" id="cv-canvas-wrap">
+            <canvas id="cv-canvas"></canvas>
+        </div>
+    </main>
+
+    <script src="../../../libs/chartjs/chart.umd.min.js"></script>
+    <script src="nsft_chart_core.js"></script>
+    <script src="chart_view.js"></script>
+</body>
+
+</html>

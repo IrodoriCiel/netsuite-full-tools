@@ -1,0 +1,12 @@
+html.nsft-turbo *,
+html.nsft-turbo *::before,
+html.nsft-turbo *::after {
+    animation-duration: 0.001s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001s !important;
+    transition-delay: 0s !important;
+}
+
+html.nsft-turbo {
+    scroll-behavior: auto !important;
+}

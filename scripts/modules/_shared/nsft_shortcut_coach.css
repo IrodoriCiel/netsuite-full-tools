@@ -1,0 +1,161 @@
+
+.nsft-coach {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--nsft-z-above-all, 2147483647);
+
+    display: flex;
+    align-items: flex-start;
+    gap: var(--nsft-space-3, 12px);
+    max-width: min(420px, calc(100vw - 32px));
+    box-sizing: border-box;
+    padding: 14px 14px 12px 14px;
+
+    font-family: var(--nsft-font, 'Segoe UI', system-ui, sans-serif);
+    background: var(--nsft-surface-0, #fff);
+    color: var(--nsft-text-1, #0f172a);
+    border: 1px solid var(--nsft-border, #e2e8f0);
+    border-radius: var(--nsft-radius-lg, 14px);
+    box-shadow: var(--nsft-shadow-lg, 0 18px 40px rgba(15, 23, 42, 0.18));
+
+    animation: nsft-coach-in 240ms var(--nsft-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+}
+
+.nsft-coach.nsft-coach-out {
+    animation: nsft-coach-out 200ms var(--nsft-ease, cubic-bezier(0.4, 0, 0.2, 1)) forwards;
+}
+
+@keyframes nsft-coach-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes nsft-coach-out {
+    from { opacity: 1; transform: translateX(-50%) translateY(0); }
+    to   { opacity: 0; transform: translateX(-50%) translateY(8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nsft-coach,
+    .nsft-coach.nsft-coach-out { animation: none; }
+}
+
+.nsft-coach-icon {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--nsft-radius-md, 10px);
+    background: var(--nsft-accent-soft, rgba(79, 70, 229, 0.10));
+    color: var(--nsft-accent, #4f46e5);
+}
+
+.nsft-coach-icon svg { width: 19px; height: 19px; }
+
+.nsft-coach-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.nsft-coach-title {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--nsft-text-1, #0f172a);
+}
+
+.nsft-coach-text {
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--nsft-text-3, #64748b);
+}
+
+.nsft-coach-keys {
+    margin-top: 9px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.nsft-coach-keys kbd {
+    font-family: var(--nsft-font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 5px 8px;
+    color: var(--nsft-text-1, #0f172a);
+    background: var(--nsft-surface-1, #f8fafc);
+    border: 1px solid var(--nsft-border-strong, #cbd5e1);
+    border-bottom-width: 2px;
+    border-radius: var(--nsft-radius-sm, 6px);
+}
+
+.nsft-coach-plus {
+    font-size: 11px;
+    color: var(--nsft-text-muted, #94a3b8);
+}
+
+.nsft-coach-actions {
+    margin-top: 10px;
+}
+
+.nsft-coach-never {
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--nsft-text-muted, #94a3b8);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--nsft-dur-fast, 140ms) var(--nsft-ease, ease);
+}
+
+.nsft-coach-never:hover { color: var(--nsft-text-2, #334155); }
+.nsft-coach-never:focus-visible {
+    outline: 2px solid var(--nsft-accent, #4f46e5);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+
+.nsft-coach-close {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--nsft-radius-sm, 6px);
+    color: var(--nsft-text-muted, #94a3b8);
+    transition: background-color var(--nsft-dur-fast, 140ms) var(--nsft-ease, ease),
+                color var(--nsft-dur-fast, 140ms) var(--nsft-ease, ease);
+}
+
+.nsft-coach-close svg { width: 14px; height: 14px; }
+
+.nsft-coach-close:hover {
+    background: var(--nsft-surface-2, #eef1f6);
+    color: var(--nsft-text-1, #0f172a);
+}
+
+.nsft-coach-close:focus-visible {
+    outline: 2px solid var(--nsft-accent, #4f46e5);
+    outline-offset: 1px;
+}
+
+.nsft-coach.nsft-coach-note {
+    max-width: 380px;
+}

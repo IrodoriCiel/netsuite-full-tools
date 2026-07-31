@@ -1,0 +1,17 @@
+
+.nsft-sli-badge {
+    display: inline-block;
+    margin-right: 5px;
+    padding: 0 5px;
+    background: #eef2f7 !important;
+    color: #5b6b7f !important;
+    border: 1px solid #d3dae3 !important;
+    border-radius: 3px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace !important;
+    font-size: 10px !important;
+    line-height: 15px;
+    font-weight: 600;
+    vertical-align: middle;
+    user-select: all;
+    white-space: nowrap;
+}

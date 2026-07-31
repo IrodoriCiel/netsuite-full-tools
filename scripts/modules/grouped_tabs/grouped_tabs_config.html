@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netsuite Full Tools</title>
+    <link rel="stylesheet" href="../_shared/design_tokens.css">
+    <link rel="stylesheet" href="grouped_tabs_config.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-decor"></div>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <img src="../../../assets/icons/icon128.png" alt="Logo" class="logo">
+                <div>
+                    <h1 data-i18n="gt_config_title">Grouped Tabs Configuration</h1>
+                    <p data-i18n="gt_config_desc">Manage your NetSuite tab groups effectively.</p>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="add-group-card">
+                <h2 data-i18n="gt_add_new_title">Add New Group</h2>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="subdomain" data-i18n="gt_subdomain_label">Subdomain (ID)</label>
+                        <input type="text" id="subdomain" data-i18n-placeholder="gt_subdomain_placeholder"
+                            placeholder="e.g. system" autocomplete="off">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="visibleLabel" data-i18n="gt_visible_label_label">Label</label>
+                        <input type="text" id="visibleLabel" data-i18n-placeholder="gt_visible_label_placeholder"
+                            placeholder="e.g. Production" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="color-selection">
+                    <label data-i18n="gt_color_label">Color Code</label>
+                    <div class="color-options" id="colorOptions">
+                    </div>
+                    <input type="hidden" id="selectedColor" value="grey">
+                </div>
+
+                <button id="addBtn" class="btn-primary">
+                    <span class="icon">+</span>
+                    <span data-i18n="gt_add_btn">Add Group</span>
+                </button>
+            </section>
+
+            <section class="list-section">
+                <h2 data-i18n="gt_current_groups_title">Current Groups</h2>
+                <div id="groupsList" class="groups-list">
+                </div>
+            </section>
+
+            <section class="tools-section">
+                <h2 data-i18n="gt_tools_title">Tools</h2>
+                <div class="tools-grid">
+                    <button id="presetsBtn" class="btn-secondary tools-btn" type="button">
+                        <svg class="tools-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.41 0 .64.19.42.66C12.97 17.55 11 21 11 21z"/>
+                        </svg>
+                        <span data-i18n="gt_tools_presets_btn">Apply preset</span>
+                    </button>
+                    <button id="bulkAddBtn" class="btn-secondary tools-btn" type="button">
+                        <svg class="tools-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-1 14H7v-2h4v2zm0-4H7v-2h4v2zm0-4H7V7h4v2zm4 8h-2v-2h2v2zm4-2h-2v-2h2v2zm0-4h-6v-2h6v2zm0-4h-6V7h6v2z"/>
+                        </svg>
+                        <span data-i18n="gt_tools_bulk_btn">Bulk add</span>
+                    </button>
+                    <button id="exportBtn" class="btn-secondary tools-btn" type="button">
+                        <svg class="tools-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                        </svg>
+                        <span data-i18n="gt_tools_export_btn">Export JSON</span>
+                    </button>
+                    <button id="importBtn" class="btn-secondary tools-btn" type="button">
+                        <svg class="tools-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+                        </svg>
+                        <span data-i18n="gt_tools_import_btn">Import JSON</span>
+                    </button>
+                    <input type="file" id="importFileInput" accept=".json,application/json" hidden>
+                </div>
+            </section>
+        </main>
+
+        <div id="toast" class="toast">Settings saved automatically</div>
+
+        <div id="confirmModal" class="modal-overlay" hidden>
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+                <h3 id="confirmModalTitle" data-i18n="gt_modal_confirm_title">Confirm</h3>
+                <p id="confirmModalMessage"></p>
+                <div class="modal-actions">
+                    <button id="confirmModalCancel" class="btn-secondary" data-i18n="gt_modal_cancel">Cancel</button>
+                    <button id="confirmModalOk" class="btn-danger" data-i18n="gt_modal_delete">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="bulkAddModal" class="modal-overlay" hidden>
+            <div class="modal-card modal-card--wide" role="dialog" aria-modal="true" aria-labelledby="bulkAddModalTitle">
+                <h3 id="bulkAddModalTitle" data-i18n="gt_bulk_modal_title">Bulk add groups</h3>
+                <p class="modal-help" data-i18n="gt_bulk_modal_help">One entry per line. Format: <code>subdomain | label | color</code>. Label and color are optional. Color must be one of: grey, blue, red, yellow, green, pink, purple, cyan, orange.</p>
+                <textarea id="bulkAddTextarea" rows="8" data-i18n-placeholder="gt_bulk_modal_placeholder"
+                    placeholder="1234567 | Production | red&#10;1234567-sb1 | Sandbox 1 | green&#10;1234567-sb2 | Sandbox 2 | yellow"></textarea>
+                <div class="modal-actions">
+                    <button id="bulkAddCancel" class="btn-secondary" data-i18n="gt_modal_cancel">Cancel</button>
+                    <button id="bulkAddApply" class="btn-primary btn-primary--compact" data-i18n="gt_bulk_modal_apply">Add all</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="presetsModal" class="modal-overlay" hidden>
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="presetsModalTitle">
+                <h3 id="presetsModalTitle" data-i18n="gt_presets_modal_title">Apply preset</h3>
+                <p class="modal-help" data-i18n="gt_presets_modal_help">Generates entries for production and sandboxes from your base account ID. Existing entries with the same subdomain are skipped.</p>
+                <label for="presetAccountId" data-i18n="gt_presets_account_label">Base account ID</label>
+                <input type="text" id="presetAccountId" autocomplete="off"
+                    data-i18n-placeholder="gt_presets_account_placeholder" placeholder="e.g. 1234567">
+                <label for="presetType" data-i18n="gt_presets_type_label">Preset</label>
+                <select id="presetType">
+                    <option value="full" data-i18n="gt_presets_type_full">Production + Sandbox 1 + Sandbox 2</option>
+                    <option value="prd_sb1" data-i18n="gt_presets_type_prd_sb1">Production + Sandbox 1</option>
+                    <option value="sandboxes" data-i18n="gt_presets_type_sandboxes">Sandbox 1 + Sandbox 2</option>
+                    <option value="rp" data-i18n="gt_presets_type_rp">Production + Release Preview</option>
+                </select>
+                <div class="modal-actions">
+                    <button id="presetsCancel" class="btn-secondary" data-i18n="gt_modal_cancel">Cancel</button>
+                    <button id="presetsApply" class="btn-primary btn-primary--compact" data-i18n="gt_presets_apply">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template id="editRowTemplate">
+        <div class="group-edit-form">
+            <div class="edit-inputs">
+                <input type="text" class="edit-id" placeholder="ID">
+                <input type="text" class="edit-label" placeholder="Label">
+            </div>
+            <div class="edit-colors">
+            </div>
+            <div class="edit-actions">
+                <button class="btn-save" title="Save">✓</button>
+                <button class="btn-cancel" title="Cancel">✕</button>
+            </div>
+        </div>
+    </template>
+
+    <script src="../_shared/nsft_grouped_tabs_colors.js"></script>
+    <script src="grouped_tabs_config.js"></script>
+</body>
+
+</html>

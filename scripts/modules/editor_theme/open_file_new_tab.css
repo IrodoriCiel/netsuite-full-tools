@@ -1,0 +1,12 @@
+
+.nsft-new-tab-btn {
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 11px;
+    color: #1a0dab;
+    text-decoration: underline;
+}
+
+.nsft-new-tab-btn:hover {
+    color: #f58220;
+}

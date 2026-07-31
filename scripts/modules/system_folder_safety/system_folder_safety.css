@@ -1,0 +1,43 @@
+html.nsft-sfs-on #nsft-sfs-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 14px 16px 14px;
+    padding: 12px 16px;
+    background: #fff7ed;
+    border: 1px solid #fdba74;
+    border-left: 4px solid #c2410c;
+    border-radius: 6px;
+    color: #7c2d12;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+    box-shadow: 0 1px 3px rgba(194, 65, 12, 0.1);
+}
+
+html.nsft-sfs-on #nsft-sfs-banner .nsft-sfs-icon {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    background: #c2410c;
+    border-radius: 50%;
+}
+
+html.nsft-sfs-on #nsft-sfs-banner .nsft-sfs-text {
+    flex: 1 1 auto;
+}
+
+html.nsft-sfs-on #nsft-sfs-banner strong {
+    color: #431407;
+}
+
+html.nsft-sfs-on .nsft-sfs-disabled {
+    filter: grayscale(0.4);
+    cursor: not-allowed !important;
+}

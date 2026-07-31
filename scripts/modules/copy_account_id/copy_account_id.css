@@ -1,0 +1,104 @@
+
+.sb-option,
+.rp-option,
+.pd-option {
+    margin-left: 5px !important;
+    border-radius: 10px;
+}
+
+body[data-page-theme="redwood"] .pd-option {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 8px !important;
+    min-width: 22px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.sb-option {
+    background: linear-gradient(to bottom, #f6ffed 0%, #eaffdb 100%) !important;
+    color: #135200 !important;
+}
+
+.rp-option {
+    background: linear-gradient(to bottom, #e6f7ff 0%, #cbebff 100%) !important;
+    color: #002766 !important;
+}
+
+.rp-option::after {
+    color: inherit !important;
+}
+
+.pd-option {
+    background: linear-gradient(to bottom, #e6fffb 0%, #b7e8de 100%) !important;
+    color: #00474f !important;
+}
+
+.pd-option::after {
+    content: attr(data-content) !important;
+    color: inherit !important;
+}
+
+
+
+.nsft-account-id-wrapper {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center;
+    gap: 0px;
+    z-index: 1000;
+}
+
+.nsft-account-id-text {
+    color: #555 !important;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.nsft-copy-btn {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    gap: 5px;
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e6e6e6;
+    z-index: 1000000;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.nsft-copy-btn:hover {
+    background-color: #f7f9fa;
+    border-color: #d1d1d1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: #333;
+}
+
+.nsft-copy-btn.success {
+    background-color: #f6ffed !important;
+    border-color: #b7eb8f !important;
+    box-shadow: none;
+}
+
+.nsft-copy-btn-text {
+    font-size: 11px;
+    font-weight: 500;
+    color: #777;
+    transition: color 0.2s ease;
+}
+
+.nsft-copy-btn:hover .nsft-copy-btn-text {
+    color: #444;
+}
+
+.nsft-copy-btn.success .nsft-copy-btn-text {
+    color: #389e0d;
+    font-weight: 600;
+}

@@ -1,0 +1,13 @@
+html.nsft-tamh-on textarea.input,
+html.nsft-tamh-on textarea.longtextinputtype,
+html.nsft-tamh-on textarea[name]:not([rows="1"]):not([rows="2"]) {
+    min-height: 72px !important;
+    line-height: 1.4;
+}
+
+@supports (field-sizing: content) {
+    html.nsft-tamh-on textarea.input {
+        field-sizing: content;
+        max-height: min(calc(100vh - 250px), 600px);
+    }
+}

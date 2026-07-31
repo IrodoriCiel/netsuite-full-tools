@@ -1,0 +1,68 @@
+
+.nsft-format-code-fields-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.nsft-format-code-fields-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: #ffffff;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+
+.nsft-format-code-fields-btn:hover {
+    background: #f9fafb;
+    color: #111827;
+    border-color: #d1d5db;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.nsft-format-code-fields-btn:active {
+    background: #f3f4f6;
+    transform: translateY(1px);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.nsft-format-code-fields-btn:focus-visible {
+    outline: none;
+    border-color: #9ca3af;
+    box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.25);
+}
+
+.nsft-format-code-fields-icon {
+    width: 12px;
+    height: 12px;
+    flex: 0 0 auto;
+    color: #6b7280;
+    transition: color 0.15s ease;
+}
+
+.nsft-format-code-fields-btn:hover .nsft-format-code-fields-icon {
+    color: #111827;
+}
+
+.nsft-format-code-fields-label {
+    display: inline-block;
+}
+
+.nsft-format-code-fields-status {
+    font-size: 11px;
+    color: #6b7280;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-weight: 500;
+}

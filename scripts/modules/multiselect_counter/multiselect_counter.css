@@ -1,0 +1,46 @@
+.nsft-msc-counter {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    padding: 1px 7px;
+    min-height: 17px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    color: #374151;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    vertical-align: baseline;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    white-space: nowrap;
+    transition: color 0.15s ease, border-color 0.15s ease,
+                background-color 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+}
+
+.nsft-msc-counter.has-selection {
+    color: #111827;
+    border-color: #9ca3af;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+
+html[data-theme="dark"] .nsft-msc-counter,
+html.nsft-dark .nsft-msc-counter,
+body.nsft-dark .nsft-msc-counter {
+    color: #C6CEDB;
+    background: var(--nsft-dk-surface);
+    border-color: var(--nsft-dk-border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .nsft-msc-counter.has-selection,
+html.nsft-dark .nsft-msc-counter.has-selection,
+body.nsft-dark .nsft-msc-counter.has-selection {
+    color: #E6EBF2;
+    border-color: #5A6475;
+}

@@ -1,0 +1,213 @@
+:root {
+    --h: 216;
+    --s-val: 23;
+    --l-val: 49;
+    --s: calc(var(--s-val) * 1%);
+    --l: calc(var(--l-val) * 1%);
+
+    --s-group: calc(var(--s-val) * 1.3%);
+    --s-vibrant: calc(var(--s-val) * 2.5%);
+
+    --base-color: hsl(var(--h), var(--s), var(--l));
+
+    --hover-l: calc(var(--l) - 10%);
+    --hover-color: hsl(var(--h), var(--s), var(--hover-l));
+
+    --active-l: calc(var(--l) - 20%);
+    --active-color: hsl(var(--h), var(--s), var(--active-l));
+
+    --click-l: calc(var(--l) - 30%);
+    --click-color: hsl(var(--h), var(--s), var(--click-l));
+
+    --group-l: 90%;
+    --group-color: hsl(var(--h), var(--s-group), var(--group-l));
+
+    --on-base: hsl(0 0% calc((55 - var(--l-val)) * 100%));
+
+    --btn-bg: hsl(var(--h), var(--s-vibrant), 42%);
+    --btn-border: hsl(var(--h), var(--s-vibrant), 40%);
+
+    --on-vibrant: oklch(from var(--btn-bg) calc((0.65 - l) * 1000) 0 0);
+    --btn-text-shadow-color: oklch(from var(--btn-bg) calc((l - 0.65) * 1000) 0 0 / 0.25);
+}
+
+html.nsft-ct-enabled {
+    --nsn-uif-refreshed-color-primary-default: var(--base-color) !important;
+    --uif-refreshed-color-primary-default: var(--base-color) !important;
+
+    --nsn-uif-refreshed-color-state-dark-primary-selected: var(--active-color) !important;
+    --uif-refreshed-color-state-dark-primary-selected: var(--active-color) !important;
+
+    --nsn-uif-refreshed-color-state-dark-primary-selected-hover: var(--hover-color) !important;
+    --uif-refreshed-color-state-dark-primary-selected-hover: var(--hover-color) !important;
+
+    --nsn-uif-refreshed-color-state-dark-primary-selected-active: var(--click-color) !important;
+    --uif-refreshed-color-state-dark-primary-selected-active: var(--click-color) !important;
+
+    --nsn-uif-refreshed-color-primary-default-70: hsla(var(--h), var(--s), var(--l), 0.7) !important;
+    --nsn-uif-refreshed-color-primary-default-95: hsla(var(--h), var(--s), var(--l), 0.95) !important;
+}
+
+
+html.nsft-ct-enabled [data-header-section="navigation"],
+html.nsft-ct-enabled [data-widget="MenuBar"],
+html.nsft-ct-enabled [data-widget="MenuBar"] [role="menubar"] {
+    background-color: var(--base-color) !important;
+}
+
+html.nsft-ct-enabled [data-header-section="search"][data-widget="TextBox"],
+html.nsft-ct-enabled [data-automation-id="GlobalSearchTextBox"] {
+    background-color: #fff !important;
+}
+
+
+html.nsft-ct-enabled [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"] {
+    background-color: var(--base-color) !important;
+}
+
+
+html.nsft-ct-enabled [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"][data-highlighted="true"],
+html.nsft-ct-enabled [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"][aria-expanded="true"] {
+    background-color: var(--active-color) !important;
+}
+
+html.nsft-ct-enabled [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"]:hover {
+    background-color: var(--hover-color) !important;
+}
+
+html.nsft-ct-enabled [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"]:active {
+    background-color: var(--click-color) !important;
+}
+
+
+html.nsft-ct-enabled [data-widget="Popover"][data-role="popover"] [role="menuitem"][data-highlighted="true"],
+html.nsft-ct-enabled [data-widget="Popover"][data-role="popover"] [role="menuitem"]:hover {
+    background-color: hsla(var(--h), var(--s), var(--l), 0.14) !important;
+    color: inherit !important;
+}
+
+html.nsft-ct-enabled [data-widget="Popover"][data-role="popover"] [role="menuitem"][aria-expanded="true"] {
+    background-color: hsla(var(--h), var(--s), var(--l), 0.22) !important;
+    color: inherit !important;
+}
+
+html.nsft-ct-enabled .uir-tab-list {
+    background-color: var(--base-color);
+}
+
+
+
+html.nsft-ct-enabled .bgtabbar,
+html.nsft-ct-enabled .bgon,
+html.nsft-ct-enabled .tabur,
+html.nsft-ct-enabled div.unrollformtabheaderexpand:not(.uir-page-search__highlight--primary),
+html.nsft-ct-enabled div.unrollformtabheadercollapse,
+html.nsft-ct-enabled div.unrollformtabheaderesep {
+    background: var(--base-color) !important;
+}
+
+
+html.nsft-ct-enabled div.unrollformtabheadercollapse svg,
+html.nsft-ct-enabled div.unrollformtabheaderexpand:not(.uir-page-search__highlight--primary) svg {
+    fill: var(--on-base) !important;
+}
+
+html.nsft-ct-enabled .uir-unroll-tabs-button {
+    background-color: var(--base-color);
+}
+
+html.nsft-ct-enabled div.fgroup_title {
+    background: var(--group-color);
+}
+
+html.nsft-ct-enabled table.totallingtable caption {
+    background: var(--base-color) !important;
+}
+
+html.nsft-ct-enabled .uir-list-top-button-bar,
+html.nsft-ct-enabled .uir-list-control-bar[data-above="true"] {
+    background-color: var(--group-color) !important;
+}
+
+html.nsft-ct-enabled .bgsubtabbar {
+    background-color: var(--group-color);
+}
+
+html.nsft-ct-enabled div.bgsubtabbar,
+html.nsft-ct-enabled div.unrollformsubtabheaderexpand:not(.uir-page-search__highlight--secondary),
+html.nsft-ct-enabled div.unrollformsubtabheadercollapse {
+    background: var(--group-color) !important;
+}
+
+html.nsft-ct-enabled .formsubtabtexton,
+html.nsft-ct-enabled .formsubtabtextoff {
+    color: hsl(var(--h), var(--s), 30%) !important;
+}
+
+html.nsft-ct-enabled .uir-page-title-record .uir-record-status {
+    background-color: var(--group-color);
+}
+
+html.nsft-ct-enabled .uir-page-title-record .uir-record-type {
+    color: hsl(var(--h), var(--s), 39%);
+}
+
+html.nsft-ct-enabled .uir-hoverable-anchor,
+html.nsft-ct-enabled .dottedlink,
+html.nsft-ct-enabled .ns-portlet-wrapper .ns-portlet-content> :not(.ns-dashboard-form) a,
+html.nsft-ct-enabled .ns-link-button,
+html.nsft-ct-enabled .ns-portlet-wrapper .ns-portlet-content .ns-dashboard-action,
+html.nsft-ct-enabled .ns-portlet-wrapper .ns-portlet-content .ns-portlet-action {
+    color: hsl(var(--h), var(--s-vibrant), 35%) !important;
+    text-decoration: none;
+    border-bottom: 0;
+    cursor: pointer;
+}
+
+html.nsft-ct-enabled .uir-button .pgBntB .bntBgB,
+html.nsft-ct-enabled .uir-multibutton .pgBntB .bntBgB {
+    background: var(--btn-bg) !important;
+    border-color: var(--btn-border) !important;
+    color: var(--on-vibrant) !important;
+    text-shadow: 0 1px 0 var(--btn-text-shadow-color);
+}
+
+html.nsft-ct-enabled button.uir-button[data-button-type="primary"] {
+    background: hsl(var(--h), var(--s), calc((var(--l-val) - 12) * 1%)) !important;
+    background-image: none !important;
+    border-color: hsl(var(--h), var(--s), calc((var(--l-val) - 18) * 1%)) !important;
+    color: var(--on-base) !important;
+    box-shadow: none !important;
+}
+
+html.nsft-ct-enabled button.uir-button[data-button-type="primary"] .uir-button-label,
+html.nsft-ct-enabled button.uir-button[data-button-type="primary"] span {
+    color: var(--on-base) !important;
+}
+
+html.nsft-ct-enabled button.uir-button[data-button-type="primary"]:hover {
+    background: hsl(var(--h), var(--s), calc((var(--l-val) - 22) * 1%)) !important;
+    background-image: none !important;
+    border-color: hsl(var(--h), var(--s), calc((var(--l-val) - 28) * 1%)) !important;
+}
+
+html.nsft-ct-enabled button.uir-button[data-button-type="primary"]:active {
+    background: hsl(var(--h), var(--s), calc((var(--l-val) - 32) * 1%)) !important;
+    background-image: none !important;
+    border-color: hsl(var(--h), var(--s), calc((var(--l-val) - 38) * 1%)) !important;
+}
+
+html.nsft-ct-enabled .machineButtonRow td:first-child+td .machBnt .bntBg {
+    background: hsl(var(--h), var(--s-vibrant), 44%) !important;
+    border: 1px solid hsl(var(--h), var(--s-vibrant), 32%) !important;
+}
+
+html.nsft-ct-enabled .dropdownDiv .dropdownSelected {
+    background: hsla(var(--h), var(--s), var(--l), 0.18) !important;
+    color: inherit !important;
+}
+
+html.nsft-ct-enabled .dropdownDiv .dropdownNotSelected:hover {
+    background: hsla(var(--h), var(--s), var(--l), 0.10) !important;
+    color: inherit !important;
+}

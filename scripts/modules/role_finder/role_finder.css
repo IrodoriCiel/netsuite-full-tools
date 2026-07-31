@@ -1,0 +1,56 @@
+
+.nsft-role-search-container {
+    padding: 10px 14px 6px !important;
+    font-family: var(--nsft-font, 'Inter', 'Segoe UI', system-ui, sans-serif);
+    background: #ffffff !important;
+}
+
+.nsft-role-search-container::before {
+    content: 'BUSCAR ROL';
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b !important;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+}
+
+#nsft-role-search {
+    width: 100% !important;
+    min-width: 280px;
+    height: 36px !important;
+    padding: 0 14px !important;
+    font-family: var(--nsft-font, 'Inter', 'Segoe UI', system-ui, sans-serif);
+    font-size: 13px !important;
+    color: #0f172a !important;
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    outline: none !important;
+    transition: border-color 140ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 140ms cubic-bezier(0.4, 0, 0.2, 1);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+#nsft-role-search::placeholder { color: #94a3b8 !important; }
+
+#nsft-role-search:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25) !important;
+}
+
+.nsft-rf-hl {
+    background: #fde68a !important;
+    color: #0f172a !important;
+    border-radius: 2px;
+    font-weight: 700;
+}
+
+.nsft-rf-sel {
+    background: rgba(79, 70, 229, 0.10) !important;
+    outline: 2px solid rgba(79, 70, 229, 0.35) !important;
+    outline-offset: -2px;
+    border-radius: 6px;
+}

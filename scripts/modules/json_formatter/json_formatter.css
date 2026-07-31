@@ -1,0 +1,617 @@
+
+html.nsft-jf-html { background: var(--nsft-jf-bg, #f8fafc); }
+
+body.nsft-jf-body {
+    margin: 0;
+    padding: 0;
+    background: var(--nsft-jf-bg, #f8fafc);
+    color: var(--nsft-jf-fg, #0f172a);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    -moz-tab-size: 4;
+    tab-size: 4;
+}
+
+#nsft-jf-root { display: block; min-height: 100vh; }
+
+
+body.nsft-jf-theme-light {
+    --nsft-jf-bg: #f8fafc;
+    --nsft-jf-fg: #0f172a;
+    --nsft-jf-header-bg: #ffffff;
+    --nsft-jf-header-border: #e2e8f0;
+    --nsft-jf-title: #475569;
+    --nsft-jf-meta: #94a3b8;
+    --nsft-jf-btn-bg: #ffffff;
+    --nsft-jf-btn-border: #cbd5e1;
+    --nsft-jf-btn-fg: #475569;
+    --nsft-jf-btn-hover-bg: #f0f5fa;
+    --nsft-jf-btn-hover-fg: #1e3a5f;
+    --nsft-jf-btn-hover-border: #4c87b3;
+    --nsft-jf-key: #1e40af;
+    --nsft-jf-key-index: #94a3b8;
+    --nsft-jf-string: #15803d;
+    --nsft-jf-number: #c2410c;
+    --nsft-jf-boolean: #b91c1c;
+    --nsft-jf-null: #94a3b8;
+    --nsft-jf-bracket: #475569;
+    --nsft-jf-tree-line: #cbd5e1;
+    --nsft-jf-toggle: #94a3b8;
+    --nsft-jf-summary: #94a3b8;
+    --nsft-jf-match-bg: #fef08a;
+    --nsft-jf-match-fg: #422006;
+    --nsft-jf-match-active-bg: #f97316;
+    --nsft-jf-match-active-fg: #ffffff;
+    --nsft-jf-input-bg: #ffffff;
+    --nsft-jf-input-border: #cbd5e1;
+    --nsft-jf-input-focus: #4c87b3;
+}
+
+body.nsft-jf-theme-dark {
+    --nsft-jf-bg: var(--nsft-dk-panel);
+    --nsft-jf-fg: #E6EBF2;
+    --nsft-jf-header-bg: var(--nsft-dk-surface);
+    --nsft-jf-header-border: var(--nsft-dk-border);
+    --nsft-jf-title: #C6CEDB;
+    --nsft-jf-meta: #8A93A3;
+    --nsft-jf-btn-bg: var(--nsft-dk-surface);
+    --nsft-jf-btn-border: var(--nsft-dk-border);
+    --nsft-jf-btn-fg: #C6CEDB;
+    --nsft-jf-btn-hover-bg: var(--nsft-dk-hover);
+    --nsft-jf-btn-hover-fg: #E6EBF2;
+    --nsft-jf-btn-hover-border: var(--nsft-dk-border2);
+    --nsft-jf-key: #8FA3FF;
+    --nsft-jf-key-index: #64748b;
+    --nsft-jf-string: #86efac;
+    --nsft-jf-number: #fdba74;
+    --nsft-jf-boolean: #fca5a5;
+    --nsft-jf-null: #64748b;
+    --nsft-jf-bracket: #cbd5e1;
+    --nsft-jf-tree-line: var(--nsft-dk-border);
+    --nsft-jf-toggle: #9AA4B5;
+    --nsft-jf-summary: #9AA4B5;
+    --nsft-jf-match-bg: #facc15;
+    --nsft-jf-match-fg: #1c1917;
+    --nsft-jf-match-active-bg: #f97316;
+    --nsft-jf-match-active-fg: #ffffff;
+    --nsft-jf-input-bg: var(--nsft-dk-panel);
+    --nsft-jf-input-border: var(--nsft-dk-border);
+    --nsft-jf-input-focus: #6E7CF5;
+}
+
+body.nsft-jf-theme-auto {
+    --nsft-jf-bg: #f8fafc;
+    --nsft-jf-fg: #0f172a;
+    --nsft-jf-header-bg: #ffffff;
+    --nsft-jf-header-border: #e2e8f0;
+    --nsft-jf-title: #475569;
+    --nsft-jf-meta: #94a3b8;
+    --nsft-jf-btn-bg: #ffffff;
+    --nsft-jf-btn-border: #cbd5e1;
+    --nsft-jf-btn-fg: #475569;
+    --nsft-jf-btn-hover-bg: #f0f5fa;
+    --nsft-jf-btn-hover-fg: #1e3a5f;
+    --nsft-jf-btn-hover-border: #4c87b3;
+    --nsft-jf-key: #1e40af;
+    --nsft-jf-key-index: #94a3b8;
+    --nsft-jf-string: #15803d;
+    --nsft-jf-number: #c2410c;
+    --nsft-jf-boolean: #b91c1c;
+    --nsft-jf-null: #94a3b8;
+    --nsft-jf-bracket: #475569;
+    --nsft-jf-tree-line: #cbd5e1;
+    --nsft-jf-toggle: #94a3b8;
+    --nsft-jf-summary: #94a3b8;
+    --nsft-jf-match-bg: #fef08a;
+    --nsft-jf-match-fg: #422006;
+    --nsft-jf-match-active-bg: #f97316;
+    --nsft-jf-match-active-fg: #ffffff;
+    --nsft-jf-input-bg: #ffffff;
+    --nsft-jf-input-border: #cbd5e1;
+    --nsft-jf-input-focus: #4c87b3;
+}
+
+html[data-nsft-theme="dark"] body.nsft-jf-theme-auto {
+    --nsft-jf-bg: var(--nsft-dk-panel);
+    --nsft-jf-fg: #E6EBF2;
+    --nsft-jf-header-bg: var(--nsft-dk-surface);
+    --nsft-jf-header-border: var(--nsft-dk-border);
+    --nsft-jf-title: #C6CEDB;
+    --nsft-jf-meta: #8A93A3;
+    --nsft-jf-btn-bg: var(--nsft-dk-surface);
+    --nsft-jf-btn-border: var(--nsft-dk-border);
+    --nsft-jf-btn-fg: #C6CEDB;
+    --nsft-jf-btn-hover-bg: var(--nsft-dk-hover);
+    --nsft-jf-btn-hover-fg: #E6EBF2;
+    --nsft-jf-btn-hover-border: var(--nsft-dk-border2);
+    --nsft-jf-key: #8FA3FF;
+    --nsft-jf-key-index: #64748b;
+    --nsft-jf-string: #86efac;
+    --nsft-jf-number: #fdba74;
+    --nsft-jf-boolean: #fca5a5;
+    --nsft-jf-null: #64748b;
+    --nsft-jf-bracket: #cbd5e1;
+    --nsft-jf-tree-line: var(--nsft-dk-border);
+    --nsft-jf-toggle: #9AA4B5;
+    --nsft-jf-summary: #9AA4B5;
+    --nsft-jf-input-bg: var(--nsft-dk-panel);
+    --nsft-jf-input-border: var(--nsft-dk-border);
+    --nsft-jf-input-focus: #6E7CF5;
+}
+
+body.nsft-jf-theme-monokai {
+    --nsft-jf-bg: #272822;
+    --nsft-jf-fg: #f8f8f2;
+    --nsft-jf-header-bg: #1e1f1c;
+    --nsft-jf-header-border: #3e3d32;
+    --nsft-jf-title: #fd971f;
+    --nsft-jf-meta: #75715e;
+    --nsft-jf-btn-bg: #272822;
+    --nsft-jf-btn-border: #49483e;
+    --nsft-jf-btn-fg: #f8f8f2;
+    --nsft-jf-btn-hover-bg: #3e3d32;
+    --nsft-jf-btn-hover-fg: #fd971f;
+    --nsft-jf-btn-hover-border: #fd971f;
+    --nsft-jf-key: #66d9ef;
+    --nsft-jf-key-index: #75715e;
+    --nsft-jf-string: #e6db74;
+    --nsft-jf-number: #ae81ff;
+    --nsft-jf-boolean: #f92672;
+    --nsft-jf-null: #75715e;
+    --nsft-jf-bracket: #f8f8f2;
+    --nsft-jf-tree-line: #49483e;
+    --nsft-jf-toggle: #75715e;
+    --nsft-jf-summary: #75715e;
+    --nsft-jf-match-bg: #a6e22e;
+    --nsft-jf-match-fg: #1e1f1c;
+    --nsft-jf-match-active-bg: #fd971f;
+    --nsft-jf-match-active-fg: #1e1f1c;
+    --nsft-jf-input-bg: #1e1f1c;
+    --nsft-jf-input-border: #49483e;
+    --nsft-jf-input-focus: #66d9ef;
+}
+
+body.nsft-jf-theme-dracula {
+    --nsft-jf-bg: #282a36;
+    --nsft-jf-fg: #f8f8f2;
+    --nsft-jf-header-bg: #21222c;
+    --nsft-jf-header-border: #44475a;
+    --nsft-jf-title: #bd93f9;
+    --nsft-jf-meta: #6272a4;
+    --nsft-jf-btn-bg: #282a36;
+    --nsft-jf-btn-border: #44475a;
+    --nsft-jf-btn-fg: #f8f8f2;
+    --nsft-jf-btn-hover-bg: #44475a;
+    --nsft-jf-btn-hover-fg: #ff79c6;
+    --nsft-jf-btn-hover-border: #ff79c6;
+    --nsft-jf-key: #8be9fd;
+    --nsft-jf-key-index: #6272a4;
+    --nsft-jf-string: #f1fa8c;
+    --nsft-jf-number: #bd93f9;
+    --nsft-jf-boolean: #ff79c6;
+    --nsft-jf-null: #6272a4;
+    --nsft-jf-bracket: #f8f8f2;
+    --nsft-jf-tree-line: #44475a;
+    --nsft-jf-toggle: #6272a4;
+    --nsft-jf-summary: #6272a4;
+    --nsft-jf-match-bg: #50fa7b;
+    --nsft-jf-match-fg: #21222c;
+    --nsft-jf-match-active-bg: #ff79c6;
+    --nsft-jf-match-active-fg: #21222c;
+    --nsft-jf-input-bg: #21222c;
+    --nsft-jf-input-border: #44475a;
+    --nsft-jf-input-focus: #bd93f9;
+}
+
+body.nsft-jf-theme-solarized-light {
+    --nsft-jf-bg: #fdf6e3;
+    --nsft-jf-fg: #586e75;
+    --nsft-jf-header-bg: #eee8d5;
+    --nsft-jf-header-border: #93a1a1;
+    --nsft-jf-title: #586e75;
+    --nsft-jf-meta: #93a1a1;
+    --nsft-jf-btn-bg: #fdf6e3;
+    --nsft-jf-btn-border: #93a1a1;
+    --nsft-jf-btn-fg: #586e75;
+    --nsft-jf-btn-hover-bg: #eee8d5;
+    --nsft-jf-btn-hover-fg: #073642;
+    --nsft-jf-btn-hover-border: #268bd2;
+    --nsft-jf-key: #268bd2;
+    --nsft-jf-key-index: #93a1a1;
+    --nsft-jf-string: #2aa198;
+    --nsft-jf-number: #d33682;
+    --nsft-jf-boolean: #cb4b16;
+    --nsft-jf-null: #93a1a1;
+    --nsft-jf-bracket: #586e75;
+    --nsft-jf-tree-line: #93a1a1;
+    --nsft-jf-toggle: #93a1a1;
+    --nsft-jf-summary: #93a1a1;
+    --nsft-jf-match-bg: #b58900;
+    --nsft-jf-match-fg: #fdf6e3;
+    --nsft-jf-match-active-bg: #cb4b16;
+    --nsft-jf-match-active-fg: #fdf6e3;
+    --nsft-jf-input-bg: #fdf6e3;
+    --nsft-jf-input-border: #93a1a1;
+    --nsft-jf-input-focus: #268bd2;
+}
+
+body.nsft-jf-theme-solarized-dark {
+    --nsft-jf-bg: #002b36;
+    --nsft-jf-fg: #93a1a1;
+    --nsft-jf-header-bg: #073642;
+    --nsft-jf-header-border: #586e75;
+    --nsft-jf-title: #93a1a1;
+    --nsft-jf-meta: #586e75;
+    --nsft-jf-btn-bg: #002b36;
+    --nsft-jf-btn-border: #586e75;
+    --nsft-jf-btn-fg: #93a1a1;
+    --nsft-jf-btn-hover-bg: #073642;
+    --nsft-jf-btn-hover-fg: #fdf6e3;
+    --nsft-jf-btn-hover-border: #268bd2;
+    --nsft-jf-key: #268bd2;
+    --nsft-jf-key-index: #586e75;
+    --nsft-jf-string: #2aa198;
+    --nsft-jf-number: #d33682;
+    --nsft-jf-boolean: #cb4b16;
+    --nsft-jf-null: #586e75;
+    --nsft-jf-bracket: #93a1a1;
+    --nsft-jf-tree-line: #586e75;
+    --nsft-jf-toggle: #586e75;
+    --nsft-jf-summary: #586e75;
+    --nsft-jf-match-bg: #b58900;
+    --nsft-jf-match-fg: #002b36;
+    --nsft-jf-match-active-bg: #cb4b16;
+    --nsft-jf-match-active-fg: #fdf6e3;
+    --nsft-jf-input-bg: #073642;
+    --nsft-jf-input-border: #586e75;
+    --nsft-jf-input-focus: #268bd2;
+}
+
+body.nsft-jf-theme-nord {
+    --nsft-jf-bg: #2e3440;
+    --nsft-jf-fg: #d8dee9;
+    --nsft-jf-header-bg: #3b4252;
+    --nsft-jf-header-border: #4c566a;
+    --nsft-jf-title: #88c0d0;
+    --nsft-jf-meta: #4c566a;
+    --nsft-jf-btn-bg: #2e3440;
+    --nsft-jf-btn-border: #4c566a;
+    --nsft-jf-btn-fg: #d8dee9;
+    --nsft-jf-btn-hover-bg: #4c566a;
+    --nsft-jf-btn-hover-fg: #eceff4;
+    --nsft-jf-btn-hover-border: #88c0d0;
+    --nsft-jf-key: #88c0d0;
+    --nsft-jf-key-index: #4c566a;
+    --nsft-jf-string: #a3be8c;
+    --nsft-jf-number: #b48ead;
+    --nsft-jf-boolean: #bf616a;
+    --nsft-jf-null: #4c566a;
+    --nsft-jf-bracket: #eceff4;
+    --nsft-jf-tree-line: #4c566a;
+    --nsft-jf-toggle: #4c566a;
+    --nsft-jf-summary: #4c566a;
+    --nsft-jf-match-bg: #ebcb8b;
+    --nsft-jf-match-fg: #2e3440;
+    --nsft-jf-match-active-bg: #d08770;
+    --nsft-jf-match-active-fg: #2e3440;
+    --nsft-jf-input-bg: #3b4252;
+    --nsft-jf-input-border: #4c566a;
+    --nsft-jf-input-focus: #88c0d0;
+}
+
+body.nsft-jf-theme-github {
+    --nsft-jf-bg: #ffffff;
+    --nsft-jf-fg: #24292f;
+    --nsft-jf-header-bg: #f6f8fa;
+    --nsft-jf-header-border: #d0d7de;
+    --nsft-jf-title: #57606a;
+    --nsft-jf-meta: #6e7781;
+    --nsft-jf-btn-bg: #f6f8fa;
+    --nsft-jf-btn-border: #d0d7de;
+    --nsft-jf-btn-fg: #24292f;
+    --nsft-jf-btn-hover-bg: #ddf4ff;
+    --nsft-jf-btn-hover-fg: #0969da;
+    --nsft-jf-btn-hover-border: #0969da;
+    --nsft-jf-key: #0550ae;
+    --nsft-jf-key-index: #6e7781;
+    --nsft-jf-string: #0a3069;
+    --nsft-jf-number: #953800;
+    --nsft-jf-boolean: #cf222e;
+    --nsft-jf-null: #6e7781;
+    --nsft-jf-bracket: #24292f;
+    --nsft-jf-tree-line: #d0d7de;
+    --nsft-jf-toggle: #6e7781;
+    --nsft-jf-summary: #6e7781;
+    --nsft-jf-match-bg: #fff8c5;
+    --nsft-jf-match-fg: #24292f;
+    --nsft-jf-match-active-bg: #ffd33d;
+    --nsft-jf-match-active-fg: #24292f;
+    --nsft-jf-input-bg: #ffffff;
+    --nsft-jf-input-border: #d0d7de;
+    --nsft-jf-input-focus: #0969da;
+}
+
+
+.nsft-jf-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    background: var(--nsft-jf-header-bg);
+    border-bottom: 1px solid var(--nsft-jf-header-border);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    flex-wrap: wrap;
+}
+
+.nsft-jf-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding-right: 4px;
+}
+
+.nsft-jf-logo {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.18);
+}
+
+.nsft-jf-brand-text {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.1;
+    gap: 2px;
+}
+
+.nsft-jf-brand-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--nsft-jf-fg);
+    letter-spacing: 0.01em;
+}
+
+.nsft-jf-brand-sub {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--nsft-jf-meta);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+.nsft-jf-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1 1 280px;
+    min-width: 240px;
+    max-width: 480px;
+    position: relative;
+    background: var(--nsft-jf-input-bg);
+    border: 1px solid var(--nsft-jf-input-border);
+    border-radius: 6px;
+    padding: 0 4px 0 8px;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.nsft-jf-search:focus-within {
+    border-color: var(--nsft-jf-input-focus);
+    box-shadow: 0 0 0 2px rgba(76, 135, 179, 0.18);
+}
+
+.nsft-jf-search-icon { color: var(--nsft-jf-meta); flex-shrink: 0; }
+
+.nsft-jf-search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--nsft-jf-fg);
+    padding: 6px 4px;
+    min-width: 0;
+}
+
+.nsft-jf-search-input::-webkit-search-cancel-button { display: none; }
+
+.nsft-jf-search-input::placeholder { color: var(--nsft-jf-meta); }
+
+.nsft-jf-search-count {
+    font-size: 11px;
+    color: var(--nsft-jf-meta);
+    padding: 0 4px;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+.nsft-jf-search-nav {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--nsft-jf-meta);
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.nsft-jf-search-nav:hover {
+    color: var(--nsft-jf-input-focus);
+    background: var(--nsft-jf-btn-hover-bg);
+}
+
+.nsft-jf-actions { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+
+.nsft-jf-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 110px;
+    height: 30px;
+    padding: 0 12px;
+    background: var(--nsft-jf-btn-bg);
+    border: 1px solid var(--nsft-jf-btn-border);
+    color: var(--nsft-jf-btn-fg);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1;
+    transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+    box-sizing: border-box;
+}
+
+.nsft-jf-actions button svg {
+    flex-shrink: 0;
+    color: currentColor;
+}
+
+.nsft-jf-actions button span {
+    white-space: nowrap;
+}
+
+.nsft-jf-actions button:hover {
+    background: var(--nsft-jf-btn-hover-bg);
+    color: var(--nsft-jf-btn-hover-fg);
+    border-color: var(--nsft-jf-btn-hover-border);
+}
+
+.nsft-jf-actions button:active { transform: translateY(1px); }
+
+.nsft-jf-tree { padding: 18px 18px 40px; }
+
+.nsft-jf-raw {
+    margin: 0;
+    padding: 18px;
+    background: var(--nsft-jf-bg);
+    color: var(--nsft-jf-fg);
+    font-family: inherit;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.nsft-jf-node { padding-left: 4px; position: relative; }
+
+.nsft-jf-key { color: var(--nsft-jf-key); }
+.nsft-jf-key.is-index { color: var(--nsft-jf-key-index); font-style: italic; }
+.nsft-jf-string { color: var(--nsft-jf-string); word-break: break-word; }
+.nsft-jf-number { color: var(--nsft-jf-number); }
+.nsft-jf-boolean { color: var(--nsft-jf-boolean); font-weight: 600; }
+.nsft-jf-null { color: var(--nsft-jf-null); font-style: italic; }
+.nsft-jf-bracket { color: var(--nsft-jf-bracket); font-weight: 600; cursor: pointer; }
+
+.nsft-jf-collapsible { display: inline; }
+
+.nsft-jf-toggle {
+    display: inline-block;
+    width: 14px;
+    text-align: center;
+    color: var(--nsft-jf-toggle);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.15s ease;
+    font-size: 9px;
+    line-height: 1;
+    transform: rotate(90deg);
+    margin-right: 2px;
+}
+
+.nsft-jf-toggle::before { content: '▸'; }
+
+.nsft-jf-collapsible.is-collapsed .nsft-jf-toggle { transform: rotate(0deg); }
+
+.nsft-jf-children {
+    display: block;
+    margin-left: 14px;
+    padding-left: 8px;
+    border-left: 1px dashed var(--nsft-jf-tree-line);
+}
+
+.nsft-jf-summary {
+    color: var(--nsft-jf-summary);
+    font-style: italic;
+    font-size: 11.5px;
+    cursor: pointer;
+    display: none;
+    padding-left: 4px;
+}
+
+.nsft-jf-summary .nsft-jf-bracket {
+    font-style: normal;
+    font-size: 13px;
+}
+
+.nsft-jf-collapsible.is-collapsed > .nsft-jf-children,
+.nsft-jf-collapsible.is-collapsed > .nsft-jf-close { display: none; }
+.nsft-jf-collapsible.is-collapsed > .nsft-jf-summary { display: inline; }
+
+.nsft-jf-sentinel {
+    color: var(--nsft-jf-summary);
+    font-style: italic;
+    font-size: 11.5px;
+    padding: 4px 0 4px 4px;
+    opacity: 0.8;
+}
+
+.nsft-jf-b64-wrap { display: inline; }
+
+.nsft-jf-b64-btn {
+    margin-left: 6px;
+    padding: 0 6px;
+    height: 16px;
+    font-size: 10px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-weight: 600;
+    line-height: 14px;
+    color: var(--nsft-jf-btn-fg);
+    background: var(--nsft-jf-btn-bg);
+    border: 1px solid var(--nsft-jf-btn-border);
+    border-radius: 4px;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+
+.nsft-jf-b64-btn:hover {
+    color: var(--nsft-jf-btn-hover-fg);
+    background: var(--nsft-jf-btn-hover-bg);
+    border-color: var(--nsft-jf-btn-hover-border);
+}
+
+.nsft-jf-b64-decoded {
+    display: block;
+    margin: 2px 0 2px 14px;
+    padding: 4px 8px;
+    background: var(--nsft-jf-header-bg);
+    border-left: 2px solid var(--nsft-jf-input-focus);
+    color: var(--nsft-jf-fg);
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.nsft-jf-match {
+    background: var(--nsft-jf-match-bg);
+    color: var(--nsft-jf-match-fg) !important;
+    border-radius: 3px;
+    padding: 0 2px;
+}
+
+.nsft-jf-match-active {
+    background: var(--nsft-jf-match-active-bg) !important;
+    color: var(--nsft-jf-match-active-fg) !important;
+    box-shadow: 0 0 0 2px var(--nsft-jf-match-active-bg);
+}

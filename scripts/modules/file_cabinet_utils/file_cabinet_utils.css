@@ -1,0 +1,22 @@
+
+.nsft-copy-link {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 2px 5px;
+    border-radius: 4px;
+    color: #555 !important;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.nsft-copy-link:hover {
+    background-color: #f0f0f0;
+    color: #333 !important;
+    text-decoration: none !important;
+}
+
+.nsft-copy-link svg {
+    width: 14px;
+    height: 14px;
+}
