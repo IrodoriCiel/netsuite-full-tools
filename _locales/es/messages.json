@@ -3624,6 +3624,12 @@
   "openWelcomeLink": {
     "message": "Abrir página de bienvenida"
   },
+  "githubRepoLink": {
+    "message": "Código fuente en GitHub"
+  },
+  "githubRepoDesc": {
+    "message": "Revisa el código tal como se publica en la Store: sin código remoto ni envío de datos."
+  },
   "officialSiteLink": {
     "message": "Página oficial"
   },
@@ -8447,6 +8453,18 @@
   },
   "cl_date_6_2_1": {
     "message": "2026-07-31"
+  },
+  "cl_6_2_1_public_title": {
+    "message": "El código de la extensión ahora es público"
+  },
+  "cl_6_2_1_public_desc": {
+    "message": "Puedes revisar el código tal como se publica en la Store, legible y verificado en cada versión, en github.com/IrodoriCiel/netsuite-full-tools. Tienes el enlace en Ajustes → Acerca de y en la web oficial: nada de código remoto ni envío de datos, y ya no hace falta creerlo — se puede comprobar."
+  },
+  "cl_6_2_1_fieldhist_title": {
+    "message": "El historial del campo ya no congela la página"
+  },
+  "cl_6_2_1_fieldhist_desc": {
+    "message": "Al pulsar «Ver historial» en la información de un campo, la página se quedaba clavada —sin scroll y sin poder ni cerrar la pestaña— hasta que llegaba el historial, sobre todo en registros con muchos cambios. Ahora la consulta va en segundo plano y pide solo los cambios de ese campo, así que llega en un momento aunque el registro acumule miles de cambios."
   },
   "cl_6_2_1_sql_cols_title": {
     "message": "Ya no se pierden columnas en los resultados"

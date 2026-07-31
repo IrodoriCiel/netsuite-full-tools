@@ -1685,6 +1685,7 @@ input:checked + .slider::before { transform: translateX(16px); }
 .nsft-settings-row-icon.is-update     { background: var(--cat-workflow-bg);    color: var(--cat-workflow-fg); }
 .nsft-settings-row-icon.is-hints      { background: var(--cat-search-bg);      color: var(--cat-search-fg); }
 .nsft-settings-row-icon.is-site       { background: var(--cat-essentials-bg);  color: var(--cat-essentials-fg); }
+.nsft-settings-row-icon.is-github     { background: var(--cat-dev-bg);         color: var(--cat-dev-fg); }
 
 .nsft-settings-row-text {
     flex: 1;

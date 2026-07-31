@@ -1153,6 +1153,25 @@
             } catch (_) { }
 
             require(['N/query'], function (query) {
+                const fidUpper = String(fieldName || '').toUpperCase();
+                const isCustom = /^cust/i.test(fieldName || '');
+                const params = [Number(recordId)];
+                let fieldCond;
+                if (isCustom) {
+                    fieldCond = 'UPPER(field) = ?';
+                    params.push(fidUpper);
+                } else {
+                    fieldCond = '(LOWER(BUILTIN.DF(field)) = ? OR UPPER(field) LIKE ? OR UPPER(field) LIKE ?)';
+                    params.push(String(fieldLabel || '').toLowerCase(), '%.S' + fidUpper, '%.' + fidUpper);
+                }
+                let typeCond = '';
+                try {
+                    const rectype = new URLSearchParams(window.location.search).get('rectype');
+                    if (rectype && /^\d+$/.test(rectype)) {
+                        typeCond = ' AND recordtypeid = ?';
+                        params.push(Number(rectype));
+                    }
+                } catch (_) { }
                 const sql = `
                     SELECT
                         BUILTIN.DF(name)  AS changedby,
@@ -1160,18 +1179,19 @@
                         oldvalue,
                         newvalue,
                         type,
-                        field             AS fieldid,
-                        BUILTIN.DF(field) AS fieldname
+                        field               AS fieldid,
+                        BUILTIN.DF(field)   AS fieldname,
+                        BUILTIN.DF(context) AS changecontext
                     FROM systemnote
-                    WHERE recordid = ?
+                    WHERE recordid = ? AND ${fieldCond}${typeCond}
                     ORDER BY date DESC
                 `;
-                try {
-                    const rs = query.runSuiteQL({ query: sql, params: [Number(recordId)] }).asMappedResults() || [];
-                    const filtered = filterRowsByField(rs, fieldName, fieldLabel);
+                const onRows = function (rs) {
+                    const filtered = filterRowsByField(rs || [], fieldName, fieldLabel);
                     _auditCache.set(cacheKey, filtered);
                     renderFieldHistory(filtered);
-                } catch (e) {
+                };
+                const onFail = function (e) {
                     console.warn('NSFT field audit SuiteQL error', e);
                     const msg = (e && e.message) ? e.message : String(e);
                     const isPerm = /permission|insufficient/i.test(msg);
@@ -1179,6 +1199,19 @@
                         ? (translations.fav_error_permission || 'Tu rol no tiene acceso al historial de cambios')
                         : (translations.fav_error || 'No se pudo cargar el historial');
                     list.innerHTML = `<div class="nsft-fav-error">${escapeHtml(base)}${isPerm ? '' : '<br><small>' + escapeHtml(msg) + '</small>'}</div>`;
+                };
+
+                if (query.runSuiteQL.promise) {
+                    query.runSuiteQL.promise({ query: sql, params: params })
+                        .then(function (rs) {
+                            return rs.asMappedResults.promise ? rs.asMappedResults.promise() : rs.asMappedResults();
+                        })
+                        .then(onRows)
+                        .catch(onFail);
+                } else {
+                    try {
+                        onRows(query.runSuiteQL({ query: sql, params: params }).asMappedResults());
+                    } catch (e) { onFail(e); }
                 }
             }, function (err) {
                 console.warn('NSFT field audit require failed', err);
@@ -1295,12 +1328,13 @@
                 const oldRaw = (r.oldvalue == null || r.oldvalue === '') ? '' : String(r.oldvalue);
                 const newRaw = (r.newvalue == null || r.newvalue === '') ? '' : String(r.newvalue);
                 const diff = diffHighlight(oldRaw, newRaw);
-                const copyText = `${r.changedate || ''} · ${r.changedby || ''}\n${oldRaw || '—'} → ${newRaw || '—'}`;
+                const ctx = (r.changecontext == null || r.changecontext === '') ? '' : String(r.changecontext);
+                const copyText = `${r.changedate || ''} · ${r.changedby || ''}${ctx ? ' · ' + ctx : ''}\n${oldRaw || '—'} → ${newRaw || '—'}`;
                 return `
                 <div class="nsft-fav-row">
                     <div class="nsft-fav-meta">
                         <span class="nsft-fav-when">${escapeHtml(r.changedate || '')}</span>
-                        <span class="nsft-fav-who">${escapeHtml(r.changedby || '')}</span>
+                        <span class="nsft-fav-who" ${ctx ? `title="${escapeHtml(ctx)}"` : ''}>${escapeHtml(r.changedby || '')}${ctx ? ` <span class="nsft-fav-ctx">· ${escapeHtml(ctx)}</span>` : ''}</span>
                         <span class="nsft-fav-copy" role="button" tabindex="0" title="${escapeHtml(copyTip)}" data-copy="${escapeHtml(copyText)}">${FAV_COPY_ICON}</span>
                     </div>
                     <div class="nsft-fav-line nsft-fav-line-old">

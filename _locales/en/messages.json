@@ -3624,6 +3624,12 @@
   "openWelcomeLink": {
     "message": "Open welcome page"
   },
+  "githubRepoLink": {
+    "message": "Source code on GitHub"
+  },
+  "githubRepoDesc": {
+    "message": "Review the code exactly as published on the Store: no remote code, no data collection."
+  },
   "officialSiteLink": {
     "message": "Official website"
   },
@@ -8447,6 +8453,18 @@
   },
   "cl_date_6_2_1": {
     "message": "2026-07-31"
+  },
+  "cl_6_2_1_public_title": {
+    "message": "The extension's code is now public"
+  },
+  "cl_6_2_1_public_desc": {
+    "message": "You can review the code exactly as published on the Store, readable and verified on every release, at github.com/IrodoriCiel/netsuite-full-tools. The link lives in Settings → About and on the official site: no remote code, no data collection — and you no longer have to take that on faith, you can check."
+  },
+  "cl_6_2_1_fieldhist_title": {
+    "message": "Field history no longer freezes the page"
+  },
+  "cl_6_2_1_fieldhist_desc": {
+    "message": "Clicking \"View history\" on a field's info used to lock the whole page —no scrolling, couldn't even close the tab— until the history arrived, especially on records with many changes. The query now runs in the background and asks only for that field's changes, so it arrives in moments even on records with thousands of changes."
   },
   "cl_6_2_1_sql_cols_title": {
     "message": "Columns no longer go missing from the results"

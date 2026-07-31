@@ -544,6 +544,12 @@ input:checked+.nsft-slider:before {
     white-space: nowrap;
 }
 
+.nsft-fav-ctx {
+    color: #9ca3af;
+    font-weight: 400;
+    font-size: 11px;
+}
+
 .nsft-fav-line {
     display: flex;
     align-items: flex-start;
@@ -649,6 +655,7 @@ input:checked+.nsft-slider:before {
 }
 #nsft-sfv-modal[data-theme="dark"] .nsft-fav-when,
 #nsft-sfv-modal[data-theme="dark"] .nsft-fav-who { color: #C6CEDB; }
+#nsft-sfv-modal[data-theme="dark"] .nsft-fav-ctx { color: #767e8e; }
 #nsft-sfv-modal[data-theme="dark"] .nsft-fav-line-old .nsft-fav-tag {
     background: rgba(240, 112, 138, 0.16);
     box-shadow: inset 0 0 0 1px rgba(240, 112, 138, 0.45);
