@@ -194,13 +194,18 @@
             html.${FSC_CLASS} { --nsft-sublist-col-border: #e3e3e2; }
             /* La 1ª celda de la 1ª fila es la ESQUINA donde se cruzan la columna sticky
                (left, z2) y la cabecera sticky (top, z1); necesita z-index mayor (3) para
-               quedar por encima de ambos ejes en la intersección. */
-            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:first-child:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child,
-            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr:first-child>td:first-child {
+               quedar por encima de ambos ejes en la intersección.
+
+               Las listas que se reordenan arrastrando quedan FUERA en las tres reglas
+               (:not de .uir-grippy en filas y .uir-column-grippy en cabecera): su
+               primera celda es el agarre, no hay nada útil que fijar, y el carril de
+               abajo la desplazaba sobre la columna vecina. */
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:first-child:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy),
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr:first-child>td:first-child:not(.uir-grippy):not(.uir-column-grippy) {
                 z-index: 3;
             }
-            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child,
-            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr>td:first-child {
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy),
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr>td:first-child:not(.uir-grippy):not(.uir-column-grippy) {
                 position: sticky;
                 left: 0;
                 z-index: 2;
@@ -220,8 +225,8 @@
                sitio y no hay número mágico que se descuadre. El selector lleva las
                dos clases, o sea más especificidad que la regla de arriba, y sólo
                actúa cuando ambas features están encendidas. */
-            html.nsft-sln-on.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child,
-            html.nsft-sln-on.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr>td:first-child {
+            html.nsft-sln-on.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy):not(.uir-machine-focused-cell),
+            html.nsft-sln-on.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr:not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy):not(.uir-machine-focused-cell) {
                 left: var(--nsft-sln-width, 26px);
             }
         `;

@@ -15,13 +15,28 @@
         return true;
     }
 
+    let envLetters = '3';
+
     chrome.storage.local.get({
-        [STORAGE_KEY]: true
+        [STORAGE_KEY]: true,
+        envBadgeLetters: '3'
     }, (items) => {
         if (!items[STORAGE_KEY] || !isApplicablePage()) return;
-
+        envLetters = items.envBadgeLetters || '3';
         init(items);
     });
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes.envBadgeLetters) return;
+        envLetters = changes.envBadgeLetters.newValue || '3';
+        try { addAccountColours(); } catch (e) { }
+    });
+
+    function envText(env) {
+        if (!env) return '';
+        const fn = window.NSFT_ENV && window.NSFT_ENV.envLabel;
+        return fn ? fn(env.code, envLetters) : env.code;
+    }
 
     const NAVBAR_ACCOUNT_SELECTOR = 'button[data-header-section="quick-link-menu"][data-automation-id="RoleMenuItem"]';
     let pollInterval = null;
@@ -100,47 +115,181 @@
         }
     }
 
+    function envOfAccountLink(anchor) {
+        let company = '';
+        try {
+            company = new URL(anchor.href).searchParams.get('company') || '';
+        } catch (e) {
+            company = (anchor.getAttribute('href') || '').split('company=')[1] || '';
+            company = company.split('&')[0];
+        }
+        if (!company) return null;
+
+        const E = window.NSFT_ENV;
+        if (!E || typeof E.detectEnv !== 'function') return null;
+        return E.detectEnv(company.replace(/_/g, '-').toLowerCase());
+    }
+
+    const ENV_CLASS = { PRD: 'pd-option', SB: 'sb-option', RP: 'rp-option', TD: 'td-option' };
+
+    function findNativeBadge(root) {
+        if (!root) return null;
+        const propio = (el) => el.closest('.nsft-account-id-wrapper, .nsft-env-badge');
+        const lee = (el) => {
+            const nuestro = el.dataset.nsftEnvNum !== undefined;
+            const orig = el.dataset.nsftEnvOrig;
+            const attr = nuestro ? (orig !== undefined ? orig : null) : el.getAttribute('data-content');
+            return ((attr != null ? attr : el.textContent) || '')
+                .replace(/[^a-z0-9]/gi, '').toUpperCase();
+        };
+
+        const leeConPseudo = (el) => lee(el)
+            || pseudoTexto(el, '::after')
+            || pseudoTexto(el, '::before');
+        const porTexto = Array.from(root.querySelectorAll('*'))
+            .filter(el => !propio(el) && !el.children.length && /^(SB|RP)\d*$/.test(leeConPseudo(el)));
+        if (porTexto.length) return porTexto[porTexto.length - 1];
+
+        const marcados = Array.from(root.querySelectorAll('[data-widget="Badge"], .uif39, [class*="badge" i]'))
+            .filter(el => !propio(el));
+        return marcados.length ? marcados[marcados.length - 1] : null;
+    }
+
+    function findBadgeInPanel(panel) {
+        const children = Array.from(panel.children)
+            .filter(c => !c.classList.contains('nsft-account-id-wrapper'));
+        if (children.length < 2) return null;
+        return children[children.length - 1];
+    }
+
+    function pseudoTexto(el, pseudo) {
+        try {
+            const c = window.getComputedStyle(el, pseudo).content;
+            if (!c || c === 'none' || c === 'normal') return '';
+            return c.replace(/^["']|["']$/g, '').replace(/[^a-z0-9]/gi, '').toUpperCase();
+        } catch (e) { return ''; }
+    }
+
+    function removeEnvNumber(badgeEl) {
+        if (badgeEl.dataset.nsftEnvNum === undefined) return;
+        delete badgeEl.dataset.nsftEnvNum;
+        badgeEl.classList.remove('nsft-env-suffix', 'nsft-env-code');
+        if (badgeEl.dataset.nsftEnvOrig !== undefined) {
+            badgeEl.setAttribute('data-content', badgeEl.dataset.nsftEnvOrig);
+            delete badgeEl.dataset.nsftEnvOrig;
+        } else {
+            badgeEl.removeAttribute('data-content');
+        }
+    }
+
+    function numeroYaVisible(badgeEl, num) {
+        let nodo = badgeEl;
+        for (let salto = 0; salto < 3 && nodo && nodo.parentElement; salto++) {
+            const padre = nodo.parentElement;
+            for (const hermano of padre.children) {
+                if (hermano === nodo || hermano.closest('.nsft-account-id-wrapper')) continue;
+                if ((hermano.textContent || '').trim() === num) return true;
+            }
+            if (padre.tagName === 'A') break;
+            nodo = padre;
+        }
+        return false;
+    }
+
+    function addEnvNumber(badgeEl, env) {
+        const code = String(env.code);
+        const num = (code.match(/^(?:SB|RP)(\d+)$/) || [])[1];
+        if (!num || badgeEl.dataset.nsftEnvNum === num) return;
+        if (numeroYaVisible(badgeEl, num)) return;
+
+        const attr = badgeEl.getAttribute('data-content');
+        const crudo = (attr != null ? attr : (badgeEl.textContent || ''));
+        const label = crudo.replace(/[^a-z0-9]/gi, '').toUpperCase();
+        if (/\d/.test(label)) return;
+
+        if (label === 'SB' || label === 'RP') {
+            badgeEl.dataset.nsftEnvNum = num;
+            if (attr != null) {
+                if (badgeEl.dataset.nsftEnvOrig === undefined) badgeEl.dataset.nsftEnvOrig = attr;
+                badgeEl.setAttribute('data-content', label + num);
+            } else {
+                badgeEl.setAttribute('data-content', num);
+                badgeEl.classList.add('nsft-env-suffix');
+            }
+            return;
+        }
+
+        if (!crudo.trim()) {
+            const enAfter = pseudoTexto(badgeEl, '::after');
+            const enBefore = pseudoTexto(badgeEl, '::before');
+
+            if (/\d/.test(enAfter) || /\d/.test(enBefore)) return;
+
+            badgeEl.dataset.nsftEnvNum = num;
+            if (!/^(SB|RP)$/.test(enAfter) && /^(SB|RP)$/.test(enBefore)) {
+                badgeEl.setAttribute('data-content', num);
+                badgeEl.classList.add('nsft-env-suffix');
+            } else {
+                if (!/^(SB|RP)$/.test(enAfter)) {
+                    console.debug('[NSFT] copy_account_id: chapa sin texto reconocible', badgeEl.className);
+                }
+                badgeEl.setAttribute('data-content', code);
+                badgeEl.classList.add('nsft-env-code');
+            }
+            return;
+        }
+
+        console.debug('[NSFT] copy_account_id: chapa no reconocida', JSON.stringify(crudo));
+    }
+
     function addAccountColours() {
         const links = document.querySelectorAll('a[href*="company="]');
-        const pdText = chrome.i18n.getMessage("cai_pd_badge_content");
 
         for (const anchor of links) {
-            const isSB = anchor.href.includes('_SB');
-            const isRP = anchor.href.includes('_RP');
-            const isProd = !isSB && !isRP;
+            const env = envOfAccountLink(anchor);
+            const family = (window.NSFT_ENV && env) ? window.NSFT_ENV.envFamily(env.code) : null;
+            const cls = (family && ENV_CLASS[family]) || null;
+            const badgeText = envText(env);
+            const isProd = family === 'PRD';
+
+            if (!cls) continue;
+
+            if (!isProd) {
+                const nativa = findNativeBadge(anchor);
+                if (nativa) {
+                    const restos = '.nsft-env-suffix, .nsft-env-code, .sb-option, .rp-option, .pd-option, .td-option';
+                    for (const otra of anchor.querySelectorAll(restos)) {
+                        if (otra === nativa || otra.closest('.nsft-account-id-wrapper, .nsft-env-badge')) continue;
+                        removeEnvNumber(otra);
+                        otra.classList.remove('sb-option', 'rp-option', 'pd-option', 'td-option');
+                    }
+                    nativa.classList.add(cls);
+                    if (envLetters === '2') removeEnvNumber(nativa);
+                    else addEnvNumber(nativa, env);
+                }
+                continue;
+            }
 
             const panel = anchor.querySelector('div[data-widget="StackPanel"]');
 
             if (panel) {
-                const children = Array.from(panel.children).filter(c => !c.classList.contains('nsft-account-id-wrapper'));
-                let badgeEl = children.length > 1 ? children[children.length - 1] : null;
+                if (panel.querySelector(`.${cls}`)) continue;
 
-                if (isSB && badgeEl) {
-                    badgeEl.classList.add('sb-option');
-                } else if (isRP && badgeEl) {
-                    badgeEl.classList.add('rp-option');
-                } else if (isProd) {
-                    const cls = 'pd-option';
-
-                    if (panel.querySelector(`.${cls}`)) continue;
-
-                    if (badgeEl) {
-                        badgeEl.classList.add(cls);
-                        badgeEl.setAttribute('data-content', pdText);
-                    } else {
-                        const newBadge = createBadge(cls, pdText);
-                        panel.appendChild(newBadge);
-                    }
+                const badgeEl = findBadgeInPanel(panel);
+                if (badgeEl) {
+                    badgeEl.classList.add(cls);
+                    badgeEl.setAttribute('data-content', badgeText);
+                } else {
+                    panel.appendChild(createBadge(cls, badgeText));
                 }
-            } else if (isProd) {
-                const cls = 'pd-option';
+            } else {
 
                 const menuItemContent = anchor.querySelector('div[data-widget="MenuItemContent"]');
                 const target = menuItemContent || anchor;
 
                 if (target.querySelector(`.${cls}`)) continue;
 
-                const newBadge = createBadge(cls, pdText);
+                const newBadge = createBadge(cls, badgeText);
                 target.appendChild(newBadge);
 
                 if (menuItemContent) {
@@ -164,9 +313,49 @@
         }
     }
 
+    const MARCAS_NUESTRAS = ['sb-option', 'rp-option', 'pd-option', 'td-option',
+        'nsft-env-suffix', 'nsft-env-code', 'nsft-env-badge'];
+
+    function plantillaChapaNativa() {
+        for (const nativa of document.querySelectorAll('a[href*="company="] [data-widget="Badge"]')) {
+            if (!nativa.classList.contains('nsft-env-badge')) return nativa;
+        }
+        for (const nativa of document.querySelectorAll('a[href*="company="] .sb-option, a[href*="company="] .rp-option')) {
+            if (!nativa.classList.contains('nsft-env-badge')) return nativa;
+        }
+        return null;
+    }
+
+    function limpiarMarcas(el) {
+        el.removeAttribute('id');
+        el.removeAttribute('data-content');
+        delete el.dataset.nsftEnvNum;
+        delete el.dataset.nsftEnvOrig;
+        el.classList.remove(...MARCAS_NUESTRAS);
+    }
+
     function createBadge(cls, text) {
+        const plantilla = plantillaChapaNativa();
+
+        if (plantilla) {
+            const badge = plantilla.cloneNode(true);
+            limpiarMarcas(badge);
+            badge.querySelectorAll('*').forEach(limpiarMarcas);
+            const interior = badge.firstElementChild;
+            if (interior) {
+                interior.textContent = text;
+            } else {
+                badge.textContent = '';
+                badge.setAttribute('data-content', text);
+                badge.classList.add('nsft-env-code');
+            }
+            badge.classList.add('nsft-env-badge', cls);
+            badge.style.flexShrink = '0';
+            return badge;
+        }
+
         const newBadge = document.createElement('div');
-        newBadge.className = `uif39 ${cls}`;
+        newBadge.className = `uif39 nsft-env-badge nsft-env-badge--propia ${cls}`;
         newBadge.style.flexShrink = '0';
         newBadge.setAttribute('data-content', text);
         return newBadge;

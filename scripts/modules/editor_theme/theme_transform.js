@@ -1,8 +1,10 @@
 (function (root, factory) {
+    const api = factory();
     if (typeof module === 'object' && module.exports) {
-        module.exports = factory();
-    } else {
-        root.NSFT_EditorThemeTransform = factory();
+        module.exports = api;
+    }
+    if (root) {
+        root.NSFT_EditorThemeTransform = api;
     }
 }(typeof self !== 'undefined' ? self : this, function () {
     'use strict';

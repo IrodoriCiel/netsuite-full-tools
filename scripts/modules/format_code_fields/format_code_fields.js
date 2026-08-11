@@ -276,11 +276,9 @@
 
         const checkVisibility = () => {
             const val = textarea.value || '';
-            if (isJSON(val) || looksLikeSQL(val) || looksLikeXml(val) || looksLikeHtml(val)) {
-                btn.style.display = 'inline-flex';
-            } else {
-                btn.style.display = 'none';
-            }
+            const esCodigo = isJSON(val) || looksLikeSQL(val) || looksLikeXml(val) || looksLikeHtml(val);
+            btn.style.display = esCodigo ? 'inline-flex' : 'none';
+            wrapper.style.display = esCodigo ? '' : 'none';
         };
 
         textarea.addEventListener('input', checkVisibility, { signal: _ac.signal });

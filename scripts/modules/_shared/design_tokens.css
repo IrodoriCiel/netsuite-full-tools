@@ -39,10 +39,10 @@
     --nsft-text-muted: #94a3b8;
     --nsft-text-on-accent: #ffffff;
 
-    --nsft-accent: #4f46e5;
-    --nsft-accent-hover: #4338ca;
-    --nsft-accent-soft: rgba(79, 70, 229, 0.10);
-    --nsft-accent-ring: rgba(79, 70, 229, 0.25);
+    --nsft-accent: var(--nsft-ns-accent, #3b82f6);
+    --nsft-accent-hover: var(--nsft-ns-accent-hover, #2563eb);
+    --nsft-accent-soft: color-mix(in srgb, var(--nsft-accent) 10%, transparent);
+    --nsft-accent-ring: color-mix(in srgb, var(--nsft-accent) 25%, transparent);
 
     --nsft-success: #10b981;
     --nsft-success-soft: rgba(16, 185, 129, 0.12);
@@ -85,10 +85,10 @@ html[data-nsft-theme="dark"] [data-nsft-ui]:not([data-nsft-force-light]) {
     --nsft-text-3: #9AA4B5;
     --nsft-text-muted: #8A93A3;
 
-    --nsft-accent: #6E7CF5;
-    --nsft-accent-hover: #7E8BF7;
-    --nsft-accent-soft: rgba(110, 124, 245, 0.16);
-    --nsft-accent-ring: rgba(110, 124, 245, 0.3);
+    --nsft-accent: var(--nsft-ns-accent-light, #60A5FA);
+    --nsft-accent-hover: var(--nsft-ns-accent-light-hover, #93C5FD);
+    --nsft-accent-soft: color-mix(in srgb, var(--nsft-accent) 16%, transparent);
+    --nsft-accent-ring: color-mix(in srgb, var(--nsft-accent) 30%, transparent);
 
     --nsft-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
     --nsft-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);

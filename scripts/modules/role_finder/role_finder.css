@@ -37,7 +37,7 @@
 #nsft-role-search::placeholder { color: #94a3b8 !important; }
 
 #nsft-role-search:focus {
-    border-color: #4f46e5 !important;
+    border-color: var(--nsft-ns-accent, #3b82f6) !important;
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25) !important;
 }
 

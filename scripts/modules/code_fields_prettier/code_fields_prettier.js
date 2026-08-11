@@ -2,8 +2,9 @@
     'use strict';
     const STORAGE_KEY = 'enableCodeFieldPrettier';
 
-    const WRAPPER_CLASS = 'nsft-code-fields-prettier-wrapper';
-    const COPY_BTN_CLASS = 'nsft-code-fields-prettier-copy-btn';
+    const WRAPPER_OWN_CLASS = 'nsft-code-fields-prettier-wrapper';
+    const WRAPPER_CLASS = `nsft-codecard ${WRAPPER_OWN_CLASS}`;
+    const COPY_BTN_CLASS = 'nsft-codecard-btn nsft-code-fields-prettier-copy-btn';
     const THEME_LINK_ID = 'nsft-code-fields-prettier-theme-link';
 
     if (window.location.search.match(/[?&]e=[Tt]/)) return;
@@ -15,14 +16,18 @@
     let _diag = false;
     let _unsub = null;
     let _started = false;
+    let _theme = 'auto';
+    let _nsftDark = false;
 
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
-        codeFieldPrettierTheme: 'atom-one-dark',
+        codeFieldPrettierTheme: 'auto',
         enableDiscreetMode: false,
-        nsftSelectorDiagnostics: false
+        nsftSelectorDiagnostics: false,
+        nsftTheme: 'light'
     }, (items) => {
         _diag = !!items.nsftSelectorDiagnostics;
+        _nsftDark = items.nsftTheme === 'dark';
         if (!items[STORAGE_KEY] || items.enableDiscreetMode) return;
         startPrettier(items.codeFieldPrettierTheme);
     });
@@ -31,11 +36,15 @@
         if (area !== 'local') return;
         if (changes.nsftSelectorDiagnostics) _diag = !!changes.nsftSelectorDiagnostics.newValue;
         if (changes.codeFieldPrettierTheme && _started) {
-            updateTheme(changes.codeFieldPrettierTheme.newValue || 'atom-one-dark');
+            updateTheme(changes.codeFieldPrettierTheme.newValue || 'auto');
+        }
+        if (changes.nsftTheme) {
+            _nsftDark = changes.nsftTheme.newValue === 'dark';
+            if (_started && _theme === 'auto') updateTheme('auto');
         }
         if (changes[STORAGE_KEY]) {
             if (changes[STORAGE_KEY].newValue) {
-                chrome.storage.local.get({ codeFieldPrettierTheme: 'atom-one-dark', enableDiscreetMode: false }, (s) => {
+                chrome.storage.local.get({ codeFieldPrettierTheme: 'auto', enableDiscreetMode: false }, (s) => {
                     if (!s.enableDiscreetMode) startPrettier(s.codeFieldPrettierTheme);
                 });
             } else {
@@ -59,15 +68,21 @@
         if (themeStyle) themeStyle.remove();
     }
 
+    function resolveTheme(themeName) {
+        if (themeName !== 'auto') return themeName;
+        return _nsftDark ? 'atom-one-dark' : 'atom-one-light';
+    }
+
     async function updateTheme(themeName) {
-        const themeUrl = chrome.runtime.getURL(`scripts/libs/highlight/themes/${themeName}.css`);
+        _theme = themeName || 'auto';
+        const themeUrl = chrome.runtime.getURL(`scripts/libs/highlight/themes/${resolveTheme(_theme)}.css`);
         try {
             const response = await fetch(themeUrl);
             let cssText = await response.text();
 
             cssText = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
 
-            const scope = `.${WRAPPER_CLASS}`;
+            const scope = `.${WRAPPER_OWN_CLASS}`;
             const scopedCss = cssText.replace(/((?:^|[},])\s*)([.#a-z])/gi, `$1${scope} $2`);
 
             let style = document.getElementById(THEME_LINK_ID);
@@ -188,30 +203,84 @@
     const remapBodySelector = (css) => css.replace(/\bbody\b(?![-_\w])/g, '.nsft-html-body');
 
 
-    function createButtonGroup(content, type) {
-        const group = document.createElement('div');
-        group.className = 'nsft-code-fields-prettier-btn-group';
+    function barButton(label, iconName) {
+        const LF = window.NSFT_LogFormat;
+        if (LF && LF.makeBarButton) {
+            const btn = LF.makeBarButton(label, (LF.ICONS && LF.ICONS[iconName]) || '');
+            btn.className = COPY_BTN_CLASS;
+            return btn;
+        }
+        const btn = document.createElement('button');
+        btn.className = COPY_BTN_CLASS;
+        btn.type = 'button';
+        btn.title = label;
+        const span = document.createElement('span');
+        span.textContent = label;
+        btn.appendChild(span);
+        return btn;
+    }
 
-        const copyBtn = document.createElement('button');
-        copyBtn.className = COPY_BTN_CLASS;
-        copyBtn.type = 'button';
+    function btnLabel(btn) {
+        const LF = window.NSFT_LogFormat;
+        if (LF && LF.btnLabelEl) return LF.btnLabelEl(btn);
+        return btn.querySelector('span') || btn;
+    }
+
+    function fieldNameOf(span) {
+        let el = span;
+        for (let i = 0; i < 4 && el; i++, el = el.parentElement) {
+            const raw = (el.id || (el.dataset && el.dataset.fieldName) || '').trim();
+            if (!raw) continue;
+            const clean = raw.replace(/_fs_(inpt|lbl)$|_val$|_display$|_lbl$/i, '');
+            if (/^[a-z_][\w]*$/i.test(clean)) return clean;
+        }
+        const wrap = span.closest && span.closest('div.uir-field-wrapper, td.uir-field, tr');
+        const lbl = wrap && wrap.querySelector('.uir-label, span.smallgraytextnolink, label');
+        const txt = lbl && (lbl.innerText || lbl.textContent || '').trim();
+        return (txt || '').replace(/[:*]\s*$/, '');
+    }
+
+    function fileNameParts(span) {
+        const LF = window.NSFT_LogFormat;
+        let recType = '';
+        let recId = '';
+        try {
+            const p = new URLSearchParams(location.search);
+            recType = p.get('rectype') || '';
+            recId = p.get('id') || '';
+        } catch (e) { }
+        const form = (location.pathname.split('/').pop() || '').replace(/\.nl$/i, '');
+        return [
+            form,
+            recType ? 'rt' + recType : '',
+            recId ? 'id' + recId : '',
+            fieldNameOf(span),
+            LF && LF.stampPart ? LF.stampPart() : ''
+        ];
+    }
+
+    function createButtonGroup(content, type, nameParts) {
+        const group = document.createElement('div');
+        group.className = 'nsft-codecard-bar nsft-code-fields-prettier-btn-group';
+
+        const copyBtn = barButton(copyLabelFor(type), 'copy');
         copyBtn.dataset.nsFormatType = type;
-        setButtonText(copyBtn, type);
         copyBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             const textToCopy = type === 'JSON' ? JSON.stringify(content, null, 2) : content;
             if (!navigator.clipboard) return;
             navigator.clipboard.writeText(textToCopy).then(() => {
-                copyBtn.textContent = chrome.i18n.getMessage('copied') + '!';
-                setTimeout(() => setButtonText(copyBtn, type), 1500);
+                btnLabel(copyBtn).textContent = chrome.i18n.getMessage('copied') + '!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                    setButtonText(copyBtn, type);
+                    copyBtn.classList.remove('copied');
+                }, 1500);
             });
         });
 
-        const downloadBtn = document.createElement('button');
-        downloadBtn.className = COPY_BTN_CLASS;
-        downloadBtn.type = 'button';
-        downloadBtn.textContent = chrome.i18n.getMessage('download') || 'Descargar';
+        const downloadBtn = barButton(chrome.i18n.getMessage('download') || 'Descargar', 'download');
         downloadBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -229,7 +298,10 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `file.${ext}`;
+            const LF = window.NSFT_LogFormat;
+            a.download = (LF && LF.buildFileName && nameParts && nameParts.length)
+                ? LF.buildFileName(nameParts, ext)
+                : `file.${ext}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -245,7 +317,7 @@
         const wrapper = document.createElement('div');
         wrapper.className = WRAPPER_CLASS;
 
-        wrapper.appendChild(createButtonGroup(content, type));
+        wrapper.appendChild(createButtonGroup(content, type, fileNameParts(span)));
 
         const pre = document.createElement('pre');
         const code = document.createElement('code');
@@ -302,15 +374,11 @@
         const wrapper = document.createElement('div');
         wrapper.className = `${WRAPPER_CLASS} nsft-code-fields-prettier-html`;
 
-        const btnGroup = createButtonGroup(content, 'HTML');
+        const btnGroup = createButtonGroup(content, 'HTML', fileNameParts(span));
 
         const previewLabel = chrome.i18n.getMessage('log_html_preview') || 'Vista';
         const codeLabel = chrome.i18n.getMessage('log_html_code') || 'Código';
-        const toggleBtn = document.createElement('button');
-        toggleBtn.className = COPY_BTN_CLASS;
-        toggleBtn.type = 'button';
-        toggleBtn.textContent = codeLabel;
-        toggleBtn.title = codeLabel;
+        const toggleBtn = barButton(codeLabel, '');
         btnGroup.appendChild(toggleBtn);
 
         wrapper.appendChild(btnGroup);
@@ -324,7 +392,7 @@
             : '';
         const hostStyle = `<style>
             :host { display: block; }
-            .nsft-html-body { padding: 50px 15px 15px 15px; min-height: 20px; }
+            .nsft-html-body { padding: 14px 16px; min-height: 20px; }
         </style>`;
         shadow.innerHTML = hostStyle + styleBlock + `<div class="nsft-html-body">${body}</div>`;
         wrapper.appendChild(host);
@@ -345,8 +413,9 @@
             showingCode = !showingCode;
             host.style.display = showingCode ? 'none' : '';
             codePre.style.display = showingCode ? '' : 'none';
-            toggleBtn.textContent = showingCode ? previewLabel : codeLabel;
-            toggleBtn.title = toggleBtn.textContent;
+            const next = showingCode ? previewLabel : codeLabel;
+            btnLabel(toggleBtn).textContent = next;
+            toggleBtn.title = next;
             if (showingCode && !highlighted && window.hljs) {
                 try { window.hljs.highlightElement(codeEl); highlighted = true; } catch (err) { }
             }
@@ -355,19 +424,23 @@
         span.replaceWith(wrapper);
     }
 
+    function copyLabelFor(type) {
+        if (type === 'JSON') return chrome.i18n.getMessage('copyJson');
+        if (type === 'SQL') return chrome.i18n.getMessage('copySql');
+        if (type === 'XML') return chrome.i18n.getMessage('copyXml') || chrome.i18n.getMessage('copy') + ' XML';
+        if (type === 'HTML') return chrome.i18n.getMessage('copyHtml') || chrome.i18n.getMessage('copy') + ' HTML';
+        return chrome.i18n.getMessage('copy');
+    }
+
     function setButtonText(btn, type) {
-        if (type === 'JSON') btn.textContent = chrome.i18n.getMessage("copyJson");
-        else if (type === 'SQL') btn.textContent = chrome.i18n.getMessage("copySql");
-        else if (type === 'XML') btn.textContent = chrome.i18n.getMessage("copyXml") || chrome.i18n.getMessage("copy") + ' XML';
-        else if (type === 'HTML') btn.textContent = chrome.i18n.getMessage("copyHtml") || chrome.i18n.getMessage("copy") + ' HTML';
-        else btn.textContent = chrome.i18n.getMessage("copy");
+        btnLabel(btn).textContent = copyLabelFor(type);
     }
 
     function updateAllButtonsText() {
-        document.querySelectorAll(`.${COPY_BTN_CLASS}`).forEach(btn => {
-            if (btn.textContent.includes('!')) return;
-            const type = btn.dataset.nsFormatType;
-            setButtonText(btn, type);
+        document.querySelectorAll('.nsft-code-fields-prettier-copy-btn').forEach(btn => {
+            if (!btn.dataset.nsFormatType) return;
+            if (btnLabel(btn).textContent.includes('!')) return;
+            setButtonText(btn, btn.dataset.nsFormatType);
         });
     }
 

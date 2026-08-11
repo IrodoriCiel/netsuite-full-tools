@@ -1,9 +1,9 @@
 {
     "manifest_version": 3,
     "name": "NetSuite Full Tools",
-    "version": "6.2.1",
+    "version": "6.4.0",
     "description": "__MSG_extDescription__",
-    "default_locale": "es",
+    "default_locale": "en",
     "icons": {
         "16": "assets/icons/icon16.png",
         "48": "assets/icons/icon48.png",
@@ -13,7 +13,8 @@
         "clipboardWrite",
         "storage",
         "unlimitedStorage",
-        "tabGroups"
+        "tabGroups",
+        "sidePanel"
     ],
     "background": {
         "service_worker": "scripts/background.js"
@@ -50,6 +51,7 @@
                 "https://*.app.netsuite.com/*"
             ],
             "js": [
+                "scripts/modules/_shared/nsft_mac_keys.js",
                 "scripts/modules/_shared/nsft_dom.js",
                 "scripts/modules/_shared/nsft_observer.js",
                 "scripts/modules/_shared/nsft_clipboard.js",
@@ -60,12 +62,15 @@
                 "scripts/modules/_shared/nsft_env.js",
                 "scripts/modules/_shared/nsft_theme.js",
                 "scripts/modules/_shared/nsft_shortcut_coach.js",
-                "scripts/modules/_shared/nsft_suiteql_rest.js"
+                "scripts/modules/_shared/nsft_suiteql_rest.js",
+                "scripts/modules/_shared/nsft_field_nav.js"
             ],
             "css": [
                 "scripts/modules/_shared/design_tokens.css",
                 "scripts/modules/_shared/nsft_clipboard.css",
                 "scripts/modules/_shared/nsft_record_buttons.css",
+                "scripts/modules/_shared/nsft_code_card.css",
+                "scripts/modules/_shared/nsft_list_toolbar.css",
                 "scripts/modules/_shared/nsft_log_format.css",
                 "scripts/modules/_shared/nsft_shortcut_coach.css"
             ],
@@ -126,6 +131,7 @@
                 "https://*.app.netsuite.com/app/common/scripting/*"
             ],
             "js": [
+                "scripts/modules/_shared/nsft_script_page.js",
                 "scripts/modules/log_prettier/log_prettier.js",
                 "scripts/modules/log_live_mode/log_live_mode.js",
                 "scripts/modules/log_viewer/log_viewer.js",
@@ -161,6 +167,7 @@
                 "https://*.app.netsuite.com/*"
             ],
             "js": [
+                "scripts/modules/_shared/nsft_panel_bridge.js",
                 "scripts/modules/view_record_object/view_record_object.js"
             ],
             "css": [
@@ -206,6 +213,20 @@
         },
         {
             "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/_shared/nsft_script_page.js",
+                "scripts/modules/record_logs_viewer/record_logs_viewer.js"
+            ],
+            "css": [
+                "scripts/modules/_shared/nsft_modal.css",
+                "scripts/modules/record_logs_viewer/record_logs_viewer.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
                 "https://*.app.netsuite.com/app/accounting/transactions/*"
             ],
             "js": [
@@ -228,6 +249,7 @@
                 "scripts/libs/tabulator/tabulator.min.js",
                 "scripts/libs/chartjs/chart.umd.min.js",
                 "scripts/modules/suiteql_runner/chart/nsft_chart_core.js",
+                "scripts/modules/_shared/nsft_panel_bridge.js",
                 "scripts/modules/suiteql_runner/suiteql_runner.js",
                 "scripts/modules/suiteql_runner/ai/nsft_ai_agent.js"
             ],
@@ -1111,6 +1133,10 @@
                 "scripts/modules/set_field_values/set_field_values_fetcher.js",
                 "scripts/modules/sublist_line_ids/sublist_line_ids_fetcher.js",
                 "scripts/modules/find_field_by_id/find_field_by_id_fetcher.js",
+                "scripts/modules/_shared/nsft_field_nav.js",
+                "scripts/modules/recent_records/recent_records_fetcher.js",
+                "scripts/modules/record_logs_viewer/record_logs_viewer_fetcher.js",
+                "scripts/modules/view_record_object/view_record_object_fetcher.js",
                 "scripts/modules/suitelet_tools/suitelet_tools_fetcher.js",
                 "scripts/modules/suitelet_tools/suitelet_tools.css",
                 "scripts/modules/related_native_links/related_native_links_fetcher.js",
@@ -1125,6 +1151,7 @@
                 "scripts/modules/fix_improve_ui_ux/get_user_id.js",
                 "scripts/modules/load_record_console/load_record_console_fetcher.js",
                 "scripts/modules/load_record_console/load_record_console.css",
+                "scripts/modules/load_n_module/load_n_module.css",
                 "scripts/modules/search_fields_finder/search_fields_finder_fetcher.js",
                 "scripts/modules/advanced_pdf_autocomplete/advanced_pdf_autocomplete_fetcher.js",
                 "scripts/modules/in_search_preview/in_search_preview_fetcher.js",

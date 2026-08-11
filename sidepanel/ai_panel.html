@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NSFT — AI</title>
+    <link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
+    <link rel="stylesheet" href="../scripts/modules/suiteql_runner/ai/nsft_ai.css">
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        html[data-nsft-theme="dark"],
+        html[data-nsft-theme="dark"] body {
+            background: var(--nsft-dk-deepest, #0D0E10);
+        }
+
+        /* El chat ES el panel: el flotante llena la ventana. */
+        .nsft-ai-floatwrap {
+            width: 100% !important;
+            max-width: none !important;
+            left: 0 !important;
+            right: 0 !important;
+            border-left: none !important;
+            box-shadow: none !important;
+        }
+
+        /* La cabecera del chat no lleva botones: cerrar es cosa del propio
+           panel de Chrome, con su ✕ nativo. */
+    </style>
+</head>
+
+<body>
+    <script src="../scripts/libs/sql-formatter/sql-formatter.min.js"></script>
+    <script src="nsft_panel_client.js"></script>
+    <script src="../scripts/modules/suiteql_runner/ai/nsft_ai_agent.js"></script>
+</body>
+
+</html>

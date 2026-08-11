@@ -4,18 +4,18 @@
     const PAGE_SIZE_KEY = 'sublistPagingPageSize';
     const CONTAINER_CLASS = 'nsft-sp-bar';
     const APPLIED_ATTR = 'data-nsft-sp-applied';
-    const SVG_FIRST = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>';
-    const SVG_PREV  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>';
-    const SVG_NEXT  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>';
-    const SVG_LAST  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>';
+    const GLYPH_FIRST = '«';
+    const GLYPH_PREV = '‹';
+    const GLYPH_NEXT = '›';
+    const GLYPH_LAST = '»';
 
     const LEFT_BUTTONS = [
-        { label: 'first', icon: SVG_FIRST, key: 'Home', action: 'first' },
-        { label: 'prev', icon: SVG_PREV, key: 'ArrowLeft', action: 'prev' }
+        { label: 'first', icon: GLYPH_FIRST, key: 'Home', action: 'first' },
+        { label: 'prev', icon: GLYPH_PREV, key: 'ArrowLeft', action: 'prev' }
     ];
     const RIGHT_BUTTONS = [
-        { label: 'next', icon: SVG_NEXT, key: 'ArrowRight', action: 'next' },
-        { label: 'last', icon: SVG_LAST, key: 'End', action: 'last' }
+        { label: 'next', icon: GLYPH_NEXT, key: 'ArrowRight', action: 'next' },
+        { label: 'last', icon: GLYPH_LAST, key: 'End', action: 'last' }
     ];
     const KEY_TO_ACTION = { Home: 'first', ArrowLeft: 'prev', ArrowRight: 'next', End: 'last' };
 
@@ -58,6 +58,7 @@
         if (!bar) return;
         const count = Number(m.count) || 0;
         const index = Number(m.index) || 0;
+        if (count > 1) bar.dataset.spSettled = '1';
 
         bar.style.display = count <= 1 ? 'none' : '';
 
@@ -106,8 +107,34 @@
         _bridgeInjected = true;
         const s = document.createElement('script');
         s.src = chrome.runtime.getURL('scripts/modules/sublist_paging/sublist_paging_fetcher.js');
-        s.onload = function () { this.remove(); };
+        s.onload = function () {
+            this.remove();
+            nudgeUnsettled();
+        };
         (document.head || document.documentElement).appendChild(s);
+    }
+
+    const QUERY_RETRY_MS = [250, 600, 1200, 2500, 5000];
+    const MAX_NUDGES = 8;
+
+    function askState(bar) {
+        if (!bar.isConnected || bar.dataset.spSettled) return false;
+        postToBridge({ type: 'query', id: bar.dataset.spId });
+        return true;
+    }
+
+    function queryBar(bar, attempt) {
+        if (!askState(bar)) return;
+        const delay = QUERY_RETRY_MS[attempt];
+        if (delay != null) setTimeout(() => queryBar(bar, attempt + 1), delay);
+    }
+
+    function nudgeUnsettled() {
+        document.querySelectorAll('.' + CONTAINER_CLASS).forEach((bar) => {
+            const done = Number(bar.dataset.spNudges || 0);
+            if (done >= MAX_NUDGES) return;
+            if (askState(bar)) bar.dataset.spNudges = String(done + 1);
+        });
     }
 
     function postToBridge(msg) {
@@ -122,6 +149,7 @@
     function runOnce() {
         if (!enabled) return;
         document.querySelectorAll('.uir-list-control-bar .nldropdown[data-fieldtype="select"]').forEach(injectBar);
+        nudgeUnsettled();
     }
 
     function injectBar(dropdown) {
@@ -131,7 +159,7 @@
 
         const id = String(++_barSeq);
         const bar = document.createElement('div');
-        bar.className = CONTAINER_CLASS;
+        bar.className = 'nsft-tb-group nsft-tb-pager ' + CONTAINER_CLASS;
         bar.dataset.spId = id;
         bar.dataset.spStep = String(_pageStep);
 
@@ -145,16 +173,16 @@
         dropdown.prepend(bar);
         dropdown.setAttribute(APPLIED_ATTR, 'true');
 
-        postToBridge({ type: 'query', id });
+        queryBar(bar, 0);
     }
 
     function makeButton(def) {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'nsft-sp-btn';
+        btn.className = 'nsft-tb-icon nsft-sp-btn';
         btn.dataset.key = def.key;
         btn.dataset.spAction = def.action;
-        btn.innerHTML = def.icon;
+        btn.textContent = def.icon;
         const title = chrome.i18n.getMessage('sp_title_' + def.label) || labelFallback(def.label);
         btn.title = title;
         btn.setAttribute('aria-label', title);
@@ -169,7 +197,7 @@
         goto.type = 'number';
         goto.min = '1';
         goto.value = '1';
-        goto.className = 'nsft-sp-goto';
+        goto.className = 'nsft-tb-num nsft-sp-goto';
         const gotoTitle = chrome.i18n.getMessage('sp_goto_title') || 'Go to page';
         goto.title = gotoTitle;
         goto.setAttribute('aria-label', gotoTitle);
@@ -177,7 +205,7 @@
         goto.addEventListener('change', () => commitGoto(goto));
 
         const status = document.createElement('span');
-        status.className = 'nsft-sp-status';
+        status.className = 'nsft-tb-count nsft-sp-status';
         status.textContent = '/ –';
 
         wrap.appendChild(goto);

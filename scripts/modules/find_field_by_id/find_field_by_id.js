@@ -36,6 +36,8 @@
     function registerShortcut() {
         document.addEventListener('keydown', (e) => {
             if (!_moduleEnabled) return;
+            if (window.NSFT_Shortcuts && window.NSFT_Shortcuts.pageShortcutBlocked
+                && window.NSFT_Shortcuts.pageShortcutBlocked(e)) return;
             if (window.NSFT_Shortcuts && window.NSFT_Shortcuts.matches(e, _shortcut)) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -97,7 +99,17 @@
         });
     }
 
+    function injectFieldNav() {
+        if (document.getElementById('nsft-field-nav-mw')) return;
+        const s = document.createElement('script');
+        s.id = 'nsft-field-nav-mw';
+        s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_field_nav.js');
+        s.onload = function () { this.remove(); };
+        (document.head || document.documentElement).appendChild(s);
+    }
+
     function injectScript() {
+        injectFieldNav();
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL('scripts/modules/find_field_by_id/find_field_by_id_fetcher.js');
         script.onload = function () {
@@ -108,6 +120,7 @@
                 ffi_field_not_found: chrome.i18n.getMessage("ffi_field_not_found"),
                 ffi_copy_manual: chrome.i18n.getMessage("ffi_copy_manual"),
                 ffi_placeholder: chrome.i18n.getMessage("ffi_placeholder"),
+                ffi_clear: chrome.i18n.getMessage("ffi_clear"),
                 ffi_btn_cancel: chrome.i18n.getMessage("ffi_btn_cancel"),
                 ffi_btn_search: chrome.i18n.getMessage("ffi_btn_search"),
                 ffi_id_copied: chrome.i18n.getMessage("ffi_id_copied"),

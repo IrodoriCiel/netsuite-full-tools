@@ -137,6 +137,86 @@
   "sql_confirm_cancel": {
     "message": "Cancel"
   },
+  "sql_rows_confirm_title": {
+    "message": "Keep fetching rows?"
+  },
+  "sql_rows_confirm_body": {
+    "message": "$FETCHED$ rows of $TOTAL$ so far. Fetching the rest may take a while.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_rows_confirm_body_unknown": {
+    "message": "$FETCHED$ rows so far and NetSuite says there are more. Fetching the rest may take a while.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      }
+    }
+  },
+  "sql_rows_confirm_go": {
+    "message": "Keep fetching"
+  },
+  "sql_rows_confirm_stop": {
+    "message": "Stop here"
+  },
+  "sql_rows_capped_max": {
+    "message": "Fetched $FETCHED$ of $TOTAL$ rows: that is the maximum set in preferences.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_rows_capped_guard": {
+    "message": "Fetched $FETCHED$ of $TOTAL$ rows: the download stopped as a safeguard.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_rows_capped_limit": {
+    "message": "Fetched $FETCHED$ of $TOTAL$ rows: NetSuite stopped the download at its execution limit.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_rows_capped_user": {
+    "message": "Fetched $FETCHED$ of $TOTAL$ rows: the execution was stopped before finishing, so the results are incomplete.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_rows_capped_user_unknown": {
+    "message": "Fetched $FETCHED$ rows and the results are incomplete: the execution was stopped before finishing.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      }
+    }
+  },
   "cl_6_2_0_prodpos_title": {
     "message": "Choose where the production warning shows"
   },
@@ -187,6 +267,33 @@
   },
   "sql_status_rendering": {
     "message": "Preparing $1 rows…"
+  },
+  "cl_6_3_0_sql_busy_title": {
+    "message": "The Runner stays usable while the query runs"
+  },
+  "cl_6_3_0_sql_busy_desc": {
+    "message": "Fixed the SuiteQL Runner running notice covering the whole panel and leaving the log and the previous results unreadable."
+  },
+  "cl_6_3_0_sql_stop_title": {
+    "message": "You can stop a running query"
+  },
+  "cl_6_3_0_sql_stop_desc": {
+    "message": "Added a button to stop the SuiteQL Runner query while it runs, keeping the rows fetched up to that point."
+  },
+  "sql_stop_btn": {
+    "message": "Stop"
+  },
+  "sql_stopping_btn": {
+    "message": "Stopping…"
+  },
+  "sql_stop_title": {
+    "message": "Stop the query and keep the rows fetched so far"
+  },
+  "sql_status_stopping": {
+    "message": "Stopping…"
+  },
+  "sql_status_stopping_page": {
+    "message": "Stopping… finishing the page in progress"
   },
   "sql_logs_mark_unexpected": {
     "message": "Line $1, column $2 — parsing stopped here, at \"$3\""
@@ -389,6 +496,9 @@
   "sql_tab_results": {
     "message": "Results"
   },
+  "sql_edge_ai": {
+    "message": "AI"
+  },
   "sql_tab_logs": {
     "message": "Logs"
   },
@@ -571,9 +681,6 @@
   },
   "cai_feature_enabled_log": {
     "message": "Copy Account ID feature enabled. Showing ID: $1"
-  },
-  "cai_pd_badge_content": {
-    "message": "SB"
   },
   "cfsi_hint_click": {
     "message": "Click: copy ID"
@@ -2111,7 +2218,7 @@
     "message": "Sandbox number on header logo"
   },
   "welcomeCatRecordItem12": {
-    "message": "Field history in the ⓘ popup"
+    "message": "Field history in the popup"
   },
   "welcomeCatRecordItem13": {
     "message": "Open custom record from sublist"
@@ -2136,6 +2243,9 @@
   },
   "welcomeCatRecordItem20": {
     "message": "Refresh sublist button"
+  },
+  "welcomeCatRecordItem21": {
+    "message": "View Record Logs (filtered execution logs)"
   },
   "welcomeCatScriptItem5": {
     "message": "Code editor theme"
@@ -2258,13 +2368,13 @@
     "message": "Copy ID"
   },
   "copyJson": {
-    "message": "COPY JSON"
+    "message": "Copy JSON"
   },
   "copyRecordType": {
     "message": "Copy Record Type"
   },
   "copySql": {
-    "message": "COPY SQL"
+    "message": "Copy SQL"
   },
   "copySublistId": {
     "message": "COPY SUBLIST ID"
@@ -2350,6 +2460,15 @@
   "enableTurboModeDesc": {
     "message": "Disables NetSuite animations and transitions so the interface responds instantly. Can also be toggled from the Command Palette."
   },
+  "darkModeScopeLabel": {
+    "message": "Apply to:"
+  },
+  "darkModeScopeAll": {
+    "message": "Everything: NetSuite and the tools"
+  },
+  "darkModeScopeNsft": {
+    "message": "Only the NSFT tools"
+  },
   "darkModeStyleLabel": {
     "message": "Shade:"
   },
@@ -2423,7 +2542,7 @@
     "message": "Go to record"
   },
   "enableFieldAuditQuickViewLabel": {
-    "message": "Field history inside the ⓘ popup"
+    "message": "Field history inside the popup"
   },
   "enableFieldAuditQuickViewDesc": {
     "message": "Adds a \"Field history\" section to the field info popup that lazy-loads (via SuiteQL on systemnote) who changed the field, when, the previous value and the new one."
@@ -2856,6 +2975,15 @@
   "envBadgeColorsGroupLabel": {
     "message": "Badge colors"
   },
+  "envBadgeLettersLabel": {
+    "message": "Badge detail:"
+  },
+  "envBadgeLetters3": {
+    "message": "PRD · SB1 · SB2 — with the sandbox number"
+  },
+  "envBadgeLetters2": {
+    "message": "PD · SB · RP — environment type only"
+  },
   "envBadgeColorPrdLabel": {
     "message": "Production"
   },
@@ -3177,45 +3305,8 @@
   "lv_search_ph": {
     "message": "Search logs…"
   },
-  "lv_all_btn": {
-    "message": "All"
-  },
-  "lv_all_title": {
-    "message": "Search across all script logs (loads the full history)"
-  },
-  "lv_cancel_title": {
-    "message": "Cancel loading"
-  },
-  "lv_all_error": {
-    "message": "Could not load the logs."
-  },
-  "lv_panel_title": {
-    "message": "All logs"
-  },
-  "lv_panel_refresh": {
-    "message": "Reload logs"
-  },
-  "lv_panel_close": {
-    "message": "Close and go back to the on-page rows"
-  },
-  "lv_showing": {
-    "message": "Showing $1 of $2",
-    "placeholders": {
-      "1": {
-        "content": "$1"
-      },
-      "2": {
-        "content": "$2"
-      }
-    }
-  },
-  "lv_loaded_cap": {
-    "message": "Loaded the first $1 entries.",
-    "placeholders": {
-      "1": {
-        "content": "$1"
-      }
-    }
+  "lv_clear_search": {
+    "message": "Clear search"
   },
   "lv_export_csv_title": {
     "message": "Export the filtered rows to CSV"
@@ -3300,6 +3391,288 @@
   "enableScriptedRecordsLabel": {
     "message": "View Record Scripts"
   },
+  "enableRecordLogsViewerLabel": {
+    "message": "View Record Logs"
+  },
+  "enableRecordLogsViewerDesc": {
+    "message": "Browse execution logs without leaving the page, with the current record's scripts preselected and filters by level, type, text and dates. You can switch to another record type from the header."
+  },
+  "rlv_search": {
+    "message": "Search title and detail…"
+  },
+  "rlv_auto": {
+    "message": "Auto"
+  },
+  "rlv_stypes": {
+    "message": "Script type"
+  },
+  "rlv_scripts": {
+    "message": "Scripts"
+  },
+  "rlv_scripts_record": {
+    "message": "On this record"
+  },
+  "rlv_scripts_script": {
+    "message": "From this script"
+  },
+  "rlv_scripts_rest": {
+    "message": "All others"
+  },
+  "rlv_scripts_of": {
+    "message": "On $TYPE$",
+    "placeholders": {
+      "type": { "content": "$1", "example": "salesorder" }
+    }
+  },
+  "rlv_search_script": {
+    "message": "Search script…"
+  },
+  "rlv_scope_pick": {
+    "message": "Change the scope"
+  },
+  "rlv_scope_search": {
+    "message": "Search record type…"
+  },
+  "rlv_scope_current": {
+    "message": "current"
+  },
+  "rlv_scope_loading": {
+    "message": "Loading record types…"
+  },
+  "rlv_scope_empty": {
+    "message": "No record type matches."
+  },
+  "rlv_range": {
+    "message": "Range"
+  },
+  "rlv_range_1h": {
+    "message": "1 h"
+  },
+  "rlv_range_24h": {
+    "message": "24 h"
+  },
+  "rlv_range_7d": {
+    "message": "7 days"
+  },
+  "rlv_range_all": {
+    "message": "All"
+  },
+  "rlv_from": {
+    "message": "From"
+  },
+  "rlv_to": {
+    "message": "To"
+  },
+  "rlv_apply": {
+    "message": "Apply"
+  },
+  "rlv_clear": {
+    "message": "Clear"
+  },
+  "rlv_auto_every": {
+    "message": "Refresh every N seconds"
+  },
+  "rlv_auto_unit": {
+    "message": "secs"
+  },
+  "rlv_dock_btn": {
+    "message": "Dock to the browser side panel"
+  },
+  "rlv_undock_btn": {
+    "message": "Undock: back to the page"
+  },
+  "rlv_panel_no_tab": {
+    "message": "Open a NetSuite tab to query its logs."
+  },
+  "rlv_export_csv": {
+    "message": "CSV"
+  },
+  "rlv_export_json": {
+    "message": "JSON"
+  },
+  "rlv_export_csv_title": {
+    "message": "Download every result of the query as CSV, not just the rows on screen"
+  },
+  "rlv_export_json_title": {
+    "message": "Download every result of the query as JSON, not just the rows on screen"
+  },
+  "rlv_export_capped": {
+    "message": "The file holds the first $ROWS$ rows; the query has more.",
+    "placeholders": {
+      "rows": { "content": "$1", "example": "10,000" }
+    }
+  },
+  "rlv_export_failed": {
+    "message": "The full result could not be downloaded."
+  },
+  "rlv_refresh": {
+    "message": "Refresh"
+  },
+  "rlv_types_more": {
+    "message": "Show more ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "8" }
+    }
+  },
+  "rlv_types_less": {
+    "message": "Show less"
+  },
+  "rlv_group": {
+    "message": "Group by execution"
+  },
+  "rlv_group_entries": {
+    "message": "$COUNT$ entries",
+    "placeholders": {
+      "count": { "content": "$1", "example": "14" }
+    }
+  },
+  "rlv_of_events": {
+    "message": "of $TOTAL$ events",
+    "placeholders": {
+      "total": { "content": "$1", "example": "37500" }
+    }
+  },
+  "rlv_loading_more": {
+    "message": "Loading more…"
+  },
+  "rlv_loading": {
+    "message": "Loading…"
+  },
+  "rlv_empty": {
+    "message": "No logs match the filters."
+  },
+  "rlv_err_generic": {
+    "message": "The logs could not be loaded."
+  },
+  "rlv_err_no_suitescript": {
+    "message": "SuiteScript is not available on this page."
+  },
+  "rlv_all_scripts": {
+    "message": "All scripts"
+  },
+  "rlv_col_date": {
+    "message": "Time"
+  },
+  "rlv_col_level": {
+    "message": "Level"
+  },
+  "rlv_col_script": {
+    "message": "Script"
+  },
+  "rlv_col_title": {
+    "message": "Title"
+  },
+  "rlv_col_detail": {
+    "message": "Detail"
+  },
+  "rlv_copy": {
+    "message": "Copy"
+  },
+  "rlv_close": {
+    "message": "Close"
+  },
+  "rlv_clear_search": {
+    "message": "Clear search"
+  },
+  "rlv_message": {
+    "message": "Message"
+  },
+  "rlv_open_note": {
+    "message": "Script note"
+  },
+  "rlv_ctx_script_id": {
+    "message": "Script ID"
+  },
+  "rlv_ctx_note_id": {
+    "message": "Note ID"
+  },
+  "rlv_stype_userevent": {
+    "message": "User Event"
+  },
+  "rlv_stype_client": {
+    "message": "Client"
+  },
+  "rlv_stype_suitelet": {
+    "message": "Suitelet"
+  },
+  "rlv_stype_restlet": {
+    "message": "RESTlet"
+  },
+  "rlv_stype_scheduled": {
+    "message": "Scheduled"
+  },
+  "rlv_stype_mapreduce": {
+    "message": "Map/Reduce"
+  },
+  "rlv_stype_portlet": {
+    "message": "Portlet"
+  },
+  "rlv_stype_massupdate": {
+    "message": "Mass Update"
+  },
+  "rlv_stype_bundleinstallation": {
+    "message": "Bundle Installation"
+  },
+  "rlv_stype_action": {
+    "message": "Workflow Action"
+  },
+  "rlv_stype_bankconnectivity": {
+    "message": "Bank Connectivity"
+  },
+  "rlv_stype_customgllines": {
+    "message": "Custom GL Lines"
+  },
+  "rlv_stype_customtool": {
+    "message": "Custom Tool"
+  },
+  "rlv_stype_emailcapture": {
+    "message": "Email Capture"
+  },
+  "rlv_stype_plugintype": {
+    "message": "Plug-in Type"
+  },
+  "rlv_stype_plugintypeimpl": {
+    "message": "Plug-in Implementation"
+  },
+  "rlv_stype_sdfinstallation": {
+    "message": "SDF Installation"
+  },
+  "rlv_stype_spaserverscript": {
+    "message": "SPA Server Script"
+  },
+  "rlv_context": {
+    "message": "Context"
+  },
+  "rlv_filters": {
+    "message": "Filters"
+  },
+  "rlv_filters_n": {
+    "message": "Filters · $COUNT$",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "rlv_copied": {
+    "message": "Copied"
+  },
+  "rlv_open_script": {
+    "message": "Open script"
+  },
+  "rlv_open_ns": {
+    "message": "View full logs"
+  },
+  "rlv_hint_nav": {
+    "message": "↑ ↓ navigate"
+  },
+  "rlv_hint_open": {
+    "message": "Enter opens the detail"
+  },
+  "rlv_hint_search": {
+    "message": "Ctrl+K search"
+  },
+  "rlv_title_min": {
+    "message": "Logs"
+  },
   "enableSearchFieldsFinderDesc": {
     "message": "Enhances search field selectors with filters and quick search."
   },
@@ -3357,6 +3730,54 @@
   "es_btn_run": {
     "message": "Send to Console"
   },
+  "es_varname_title": {
+    "message": "Name of the search variable — edit it and the code follows"
+  },
+  "es_with_labels": {
+    "message": "With labels"
+  },
+  "es_with_labels_title": {
+    "message": "Include the column labels in the generated code"
+  },
+  "es_with_loop": {
+    "message": "With result loop"
+  },
+  "es_meta_lines_one": {
+    "message": "1 line"
+  },
+  "es_meta_lines": {
+    "message": "$COUNT$ lines",
+    "placeholders": {
+      "count": { "content": "$1", "example": "26" }
+    }
+  },
+  "es_info_type": {
+    "message": "Type: $TYPE$",
+    "placeholders": {
+      "type": { "content": "$1", "example": "employee" }
+    }
+  },
+  "es_info_columns_one": {
+    "message": "1 column"
+  },
+  "es_info_columns": {
+    "message": "$COUNT$ columns",
+    "placeholders": {
+      "count": { "content": "$1", "example": "8" }
+    }
+  },
+  "es_info_filters_one": {
+    "message": "1 filter"
+  },
+  "es_info_filters": {
+    "message": "$COUNT$ filters",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "es_with_loop_title": {
+    "message": "Add the loop that walks the results, with one variable per column"
+  },
   "es_console_exec_error": {
     "message": "NSFT Execution Error:"
   },
@@ -3382,7 +3803,7 @@
     "message": "SuiteScript 1.0"
   },
   "es_label_ss2": {
-    "message": "SuiteScript 2.x"
+    "message": "SuiteScript 2.1"
   },
   "es_label_ss2_console": {
     "message": "SuiteScript 2.x Run in Console"
@@ -3549,6 +3970,9 @@
   "ffi_placeholder": {
     "message": "Enter ID or Label..."
   },
+  "ffi_clear": {
+    "message": "Clear search"
+  },
   "ffi_prompt_generic": {
     "message": "Find Field by ID or Label:"
   },
@@ -3593,15 +4017,6 @@
   },
   "rateCloseTitle": {
     "message": "Not now"
-  },
-  "footerRefreshBtn": {
-    "message": "Refresh tab"
-  },
-  "footerRefreshTitle": {
-    "message": "Reload the NetSuite tab to apply your changes"
-  },
-  "toastNoNsTab": {
-    "message": "No active NetSuite tab"
   },
   "popupStatsRest": {
     "message": "of $1 features active",
@@ -4185,12 +4600,6 @@
   "ro_export_no_data": {
     "message": "No record loaded yet."
   },
-  "ro_split_title": {
-    "message": "Split-screen mode (dock right)"
-  },
-  "ro_split_resize_title": {
-    "message": "Drag to resize"
-  },
   "ro_staleness_fresh": {
     "message": "Loaded just now"
   },
@@ -4247,6 +4656,18 @@
   },
   "ro_inspect_field_tooltip_on": {
     "message": "Ctrl + Click to find in form"
+  },
+  "ro_dock_btn": {
+    "message": "Dock to the browser side panel"
+  },
+  "ro_undock_btn": {
+    "message": "Undock: back to the page"
+  },
+  "ro_panel_no_tab": {
+    "message": "Open a NetSuite tab to view its record object."
+  },
+  "ro_panel_not_record": {
+    "message": "This page has no record to show. Navigate to a NetSuite record and the viewer will load it automatically."
   },
   "ro_legend": {
     "message": "Use <strong>Ctrl + Click</strong> on a property to find it in the form"
@@ -4389,6 +4810,15 @@
   "sfv_go_to_source_list": {
     "message": "Go to Source List"
   },
+  "sfv_help_label": {
+    "message": "Field help"
+  },
+  "sfv_help_open_tooltip": {
+    "message": "Open NetSuite's help for this field"
+  },
+  "sfv_help_toggle": {
+    "message": "Show or hide the field help"
+  },
   "sfv_internal_id": {
     "message": "Internal Id"
   },
@@ -4431,6 +4861,9 @@
   "sfv_set_non_mandatory": {
     "message": "Set Non Mandatory"
   },
+  "sfv_standard_field": {
+    "message": "Standard Field"
+  },
   "sfv_std_desc": {
     "message": "Standard Field or Unknown Type"
   },
@@ -4459,7 +4892,62 @@
     "message": "Error: $1"
   },
   "sql_truncated_banner": {
-    "message": "Showing $1 of $2 rows. Raise the limit (max records) or refine the query to see the rest."
+    "message": "Showing $SHOWN$ of $TOTAL$ rows: that is the maximum you set. You can raise it or tick \"fetch every row\", up to a ceiling of $CEILING$ rows.",
+    "placeholders": {
+      "shown": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      },
+      "ceiling": {
+        "content": "$3"
+      }
+    }
+  },
+  "sql_truncated_ceiling": {
+    "message": "Showing $SHOWN$ of $TOTAL$ rows: that is the most that can be fetched, by REST or by N/query. Narrow the query to reach the rest.",
+    "placeholders": {
+      "shown": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_truncated_gov": {
+    "message": "Showing $SHOWN$ of $TOTAL$ rows. The run used up the NetSuite execution budget, which is not a setting: raising the maximum will not bring more. Narrow the query, or use the REST method, which does not spend that budget.",
+    "placeholders": {
+      "shown": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_truncated_limit": {
+    "message": "Showing $SHOWN$ of $TOTAL$ rows. NetSuite stopped the download at its execution limit, which is not a setting: narrow the query, or use the REST method, which does not spend that budget.",
+    "placeholders": {
+      "shown": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_truncated_guard": {
+    "message": "Showing $SHOWN$ of $TOTAL$ rows. The download stopped as a safeguard before finishing.",
+    "placeholders": {
+      "shown": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
   },
   "sql_chart_btn": {
     "message": "Chart"
@@ -4508,6 +4996,193 @@
   },
   "suiteqlMaxRecordsLabel": {
     "message": "Max records to fetch"
+  },
+  "suiteqlFetchAllRowsLabel": {
+    "message": "Fetch every row the query returns"
+  },
+  "suiteqlFetchAllRowsDesc": {
+    "message": "Ignores the maximum above and brings back everything the query returns. Past 20,000 rows the Runner asks whether to keep going."
+  },
+  "suiteqlFetchMethodLabel": {
+    "message": "How to fetch rows"
+  },
+  "suiteqlFetchMethodDesc": {
+    "message": "Both fetch rows 1,000 at a time —NetSuite’s maximum— and both can be paused. They differ in speed, in how far they get, and in what the account needs to have enabled."
+  },
+  "suiteqlFetchMethodAuto": {
+    "message": "Automatic"
+  },
+  "suiteqlFetchMethodRest": {
+    "message": "REST"
+  },
+  "suiteqlFetchMethodNquery": {
+    "message": "N/query"
+  },
+  "suiteqlFetchMethodHint_auto": {
+    "message": "Uses REST when the account has it; otherwise N/query.\nThe sensible choice unless you want to force one."
+  },
+  "suiteqlFetchMethodHint_rest": {
+    "message": "Reaches 100,000 rows: it does not burn NetSuite execution units.\nThe fastest: it asks for several 1,000-row batches at once, and how many is set right below.\nKnows the total row count from the start.\nDoes not freeze the tab —the requests do not block the page— and stopping the query takes effect instantly.\nIt does not return columns that are empty in every row: it leaves them out. If you name them in the SELECT they come back on their own; with an asterisk you need the box below and the table schema.\nNeeds REST Web Services enabled and permission on the role."
+  },
+  "suiteqlFetchMethodHint_nquery": {
+    "message": "Only gets as far as NetSuite governance allows: it depends on how many rows and columns the query brings back and on the budget left on the page.\nFetches 1,000 at a time —the maximum—, one batch after another.\nCounts the table before starting, so the first wait is longer on big tables.\nIt brings back EVERY column of the query, including the ones that are empty in every row.\nThe tab freezes and stutters while it runs, because the query executes in the page itself; stopping is not immediate either: it takes effect once the batch in progress ends.\nIf NetSuite cuts it off, it hands over the rows it reached and says so.\nWorks on any account, no extra permissions."
+  },
+  "sql_rest_unavailable": {
+    "message": "This account cannot use the REST endpoint. Change «How to fetch rows» in preferences."
+  },
+  "sql_schema_auto_on": {
+    "message": "Automatic fetch on: typing a table in the FROM downloads its schema. Click to turn it off."
+  },
+  "sql_schema_auto_off": {
+    "message": "Automatic fetch off: schemas only load when you ask for them. Click to turn it on."
+  },
+  "sql_schema_bulk_btn": {
+    "message": "⬇ Download the schema of every table"
+  },
+  "sql_schema_bulk_btn_n": {
+    "message": "⬇ Download the schema of the $COUNT$ tables still missing",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,872"
+      }
+    }
+  },
+  "sql_schema_refreshall_title": {
+    "message": "Refresh the schema"
+  },
+  "sql_schema_refreshall_body": {
+    "message": "This asks the account again for the schema of the $COUNT$ tables in the panel and replaces what is stored. You can cancel midway.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,872"
+      }
+    }
+  },
+  "sql_schema_refreshall_confirm": {
+    "message": "Refresh"
+  },
+  "sql_schema_bulk_wait": {
+    "message": "Loading the catalog…"
+  },
+  "sql_schema_bulk_title": {
+    "message": "Download the full schema"
+  },
+  "sql_schema_bulk_body": {
+    "message": "This downloads the schema of $COUNT$ tables and takes about $MB$ MB. It runs for a few minutes and you can cancel midway: whatever was downloaded stays.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,872"
+      },
+      "mb": {
+        "content": "$2",
+        "example": "18"
+      }
+    }
+  },
+  "sql_schema_bulk_confirm": {
+    "message": "Download"
+  },
+  "sql_schema_bulk_progress": {
+    "message": "Downloading schemas… $DONE$ of $TOTAL$",
+    "placeholders": {
+      "done": {
+        "content": "$1",
+        "example": "340"
+      },
+      "total": {
+        "content": "$2",
+        "example": "1,872"
+      }
+    }
+  },
+  "sql_schema_bulk_stop": {
+    "message": "Cancel"
+  },
+  "sql_schema_bulk_done": {
+    "message": "Schema downloaded: $OK$ table(s) cached, $FAIL$ with no data.",
+    "placeholders": {
+      "ok": {
+        "content": "$1",
+        "example": "1,850"
+      },
+      "fail": {
+        "content": "$2",
+        "example": "22"
+      }
+    }
+  },
+  "sql_schema_bulk_stopped": {
+    "message": "Download cancelled: $OK$ table(s) cached, $FAIL$ with no data.",
+    "placeholders": {
+      "ok": {
+        "content": "$1",
+        "example": "340"
+      },
+      "fail": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "sql_schema_bulk_none": {
+    "message": "Every table's schema is already cached."
+  },
+  "sql_schema_wipe_title": {
+    "message": "Clear the schema cache"
+  },
+  "sql_schema_wipe_body": {
+    "message": "This deletes the stored schemas of $COUNT$ table(s) for this account. You can download them again whenever you want.",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,872"
+      }
+    }
+  },
+  "sql_schema_wipe_confirm": {
+    "message": "Clear"
+  },
+  "sql_schema_wipe_done": {
+    "message": "Cache cleared: $COUNT$ table(s).",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,872"
+      }
+    }
+  },
+  "sql_schema_wipe_empty": {
+    "message": "The schema cache is already empty."
+  },
+  "suiteqlRestConcurrencyLabel": {
+    "message": "Requests at once"
+  },
+  "suiteqlRestConcurrencyDesc": {
+    "message": "How many 1,000-row batches REST asks for at the same time. More means less waiting, but also more load on the account; if NetSuite complains, the download lowers it on its own. Between 1 and 8."
+  },
+  "suiteqlManyRowsLabel": {
+    "message": "Past"
+  },
+  "suiteqlManyRowsUnit": {
+    "message": "rows:"
+  },
+  "suiteqlManyRowsDesc": {
+    "message": "What to do when a query returns a lot of rows: ask, keep fetching, or stop with the rows already fetched."
+  },
+  "suiteqlManyRowsAsk": {
+    "message": "ask"
+  },
+  "suiteqlManyRowsGo": {
+    "message": "keep going"
+  },
+  "suiteqlManyRowsStop": {
+    "message": "stop"
+  },
+  "sql_rows_confirm_remember": {
+    "message": "Remember my answer"
   },
   "sql_executing_query": {
     "message": "Executing query..."
@@ -4783,31 +5458,28 @@
     "message": "Saved Queries"
   },
   "sql_refresh_no_tables": {
-    "message": "No tables detected in FROM"
-  },
-  "sql_refresh_schema_btn": {
-    "message": "Refresh schema"
+    "message": "There are no tables in the panel to refresh"
   },
   "sql_refresh_schema_title": {
-    "message": "Refresh schema cache"
-  },
-  "sql_refresh_started": {
-    "message": "Refreshing $1 table(s)…"
+    "message": "Refresh the schema of the $COUNT$ tables in the panel",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "1,872"
+      }
+    }
   },
   "sql_results_log": {
     "message": "Results: $1 rows (Total: $2) - $3ms"
   },
-  "sql_sample_btn": {
-    "message": "Sample"
-  },
   "sql_sample_inserted": {
-    "message": "Sample query for $1 inserted"
+    "message": "Template for $1 created in a new tab"
   },
   "sql_sample_no_tables": {
-    "message": "Type a table in FROM first so its schema loads"
+    "message": "Load the table schema first to build its template"
   },
-  "sql_sample_title": {
-    "message": "Insert a sample query from a loaded table"
+  "sql_schema_ctx_sample": {
+    "message": "Create a template from this table"
   },
   "sql_save_placeholder": {
     "message": "My Query..."
@@ -4820,9 +5492,6 @@
   },
   "sql_cache_save_failed": {
     "message": "Storage full: could not cache the schema for $1. Free space by removing tables from the cache."
-  },
-  "sql_schema_cache_loaded": {
-    "message": "Loaded $1 table(s) from cache"
   },
   "sql_boot_title": {
     "message": "SuiteQL Runner"
@@ -4846,13 +5515,10 @@
     "message": "Loading cached tables ($1/$2)…"
   },
   "sql_schema_empty": {
-    "message": "Type a table name in FROM to load its schema"
+    "message": "Type a table in the FROM and its schema loads on its own. You can also add them one by one with + or download the account's full schema."
   },
-  "sql_schema_catalog_btn": {
-    "message": "Add"
-  },
-  "sql_erd_btn": {
-    "message": "ERD"
+  "sql_schema_empty_manual": {
+    "message": "Automatic fetch is off: add the tables you want with +, or download the account's full schema."
   },
   "sql_schema_catalog_ph": {
     "message": "Search account tables…"
@@ -4865,6 +5531,9 @@
   },
   "sql_schema_ctx_open_catalog": {
     "message": "Open in Records Catalog"
+  },
+  "sql_schema_ctx_open_definition": {
+    "message": "Open the full definition (JSON)"
   },
   "sql_rcadd_label": {
     "message": "Add to SuiteQL Runner cache"
@@ -4937,6 +5606,20 @@
   },
   "sql_erd_empty": {
     "message": "Add at least one table to the cache to see the diagram."
+  },
+  "sql_erd_empty_sql": {
+    "message": "The diagram shows the tables in FROM and JOIN. Tick the ones you want to add in the legend."
+  },
+  "sql_erd_leg_filter": {
+    "message": "Search table…"
+  },
+  "sql_erd_leg_more": {
+    "message": "… and $COUNT$ more — narrow the search",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
   },
   "cl_6_0_0_sql_erd_title": {
     "message": "Relationship diagram in the SuiteQL Runner"
@@ -5087,6 +5770,196 @@
   },
   "sql_tab_close": {
     "message": "Close"
+  },
+  "sql_tab_rename": {
+    "message": "Rename"
+  },
+  "sql_tabs_scroll_prev": {
+    "message": "Previous tabs"
+  },
+  "sql_tabs_scroll_next": {
+    "message": "Next tabs"
+  },
+  "sql_tab_close_right": {
+    "message": "Close tabs to the right"
+  },
+  "sql_tab_close_left": {
+    "message": "Close tabs to the left"
+  },
+  "sql_tab_close_others": {
+    "message": "Close other tabs"
+  },
+  "sql_tab_close_bulk_title": {
+    "message": "Close those tabs?"
+  },
+  "sql_tab_close_bulk_body": {
+    "message": "This closes $COUNT$ tabs. Their queries are not saved when they close.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "sql_tab_close_bulk_ok": {
+    "message": "Close them"
+  },
+  "sql_tab_rename_taken": {
+    "message": "There is already a saved query named \"$NAME$\"; the tab keeps its own.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "cl_6_3_0_sql_rowcount_title": {
+    "message": "The summary says how many rows were fetched"
+  },
+  "cl_6_3_0_sql_rowcount_desc": {
+    "message": "Fixed the SuiteQL Runner reporting the table total instead of the rows fetched when the download did not reach the end."
+  },
+  "cl_6_3_0_sql_trunc_title": {
+    "message": "The missing-rows notice says why they are missing"
+  },
+  "cl_6_3_0_sql_trunc_desc": {
+    "message": "Fixed the SuiteQL Runner incomplete-results notice advising to raise the max records even when that was not what stopped the download."
+  },
+  "cl_6_3_0_sql_nullcol_title": {
+    "message": "Recover the empty columns REST leaves out"
+  },
+  "cl_6_3_0_sql_nullcol_desc": {
+    "message": "Added an option in the SuiteQL Runner settings to rebuild the columns the REST endpoint omits because they have no value in any row."
+  },
+  "cl_6_3_0_ai_menuoff_title": {
+    "message": "Turning the assistant off turns all of it off"
+  },
+  "cl_6_3_0_ai_menuoff_desc": {
+    "message": "Fixed the AI assistant top-menu button staying visible until the page reloaded after disabling the assistant."
+  },
+  "cl_6_3_0_sln_reorder_title": {
+    "message": "Drag-to-reorder sublists no longer misalign"
+  },
+  "cl_6_3_0_sln_reorder_desc": {
+    "message": "Fixed the first column of drag-to-reorder sublists painting over the next column and hiding its text."
+  },
+  "cl_6_3_0_popup_accents_title": {
+    "message": "Popup search ignores accents"
+  },
+  "cl_6_3_0_popup_accents_desc": {
+    "message": "Fixed the feature search requiring exact accents; it now matches the same with or without them."
+  },
+  "cl_6_3_0_sf_hl_title": {
+    "message": "Sublist filter highlights what it finds"
+  },
+  "cl_6_3_0_sf_hl_desc": {
+    "message": "Added yellow highlighting of the matches when filtering sublist rows, which now also match with or without accents."
+  },
+  "cl_6_3_0_sf_count_title": {
+    "message": "Sublist filter count gets its own pill"
+  },
+  "cl_6_3_0_sf_count_desc": {
+    "message": "Changed the sublist filter count to its own pill and removed the shortcut badge, which looked like an empty box."
+  },
+  "cl_6_3_0_ai_sqlblock_title": {
+    "message": "The assistant no longer keeps the query to itself"
+  },
+  "cl_6_3_0_ai_sqlblock_desc": {
+    "message": "Fixed the SuiteQL Runner assistant sometimes finishing with the results summary without handing over the query, which had to be requested separately."
+  },
+  "cl_6_3_0_hljs_auto_title": {
+    "message": "Highlighted code follows the theme"
+  },
+  "cl_6_3_0_hljs_auto_desc": {
+    "message": "Changed the code highlighting in the log, script, file and export viewers to follow the extension theme: light on light and dark on dark."
+  },
+  "cl_6_3_0_sql_accent_title": {
+    "message": "The tools wear your theme color"
+  },
+  "cl_6_3_0_sql_accent_desc": {
+    "message": "Changed the tools accent color —SuiteQL Runner, search preview, shortcuts and more—, which was fixed and now takes the account NetSuite theme one."
+  },
+  "cl_6_3_0_sql_edgetabs_title": {
+    "message": "Collapsed panels leave a tab to reopen them"
+  },
+  "cl_6_3_0_sql_edgetabs_desc": {
+    "message": "Added an edge tab in the SuiteQL Runner for each hidden panel —schema, assistant and results— that reopens it right where it was."
+  },
+  "cl_6_3_0_sql_erdpick_title": {
+    "message": "The diagram starts from your query"
+  },
+  "cl_6_3_0_sql_erdpick_desc": {
+    "message": "Changed the SuiteQL Runner diagram, which now draws only the tables in FROM and JOIN and lets you add any other from its legend, with a search box."
+  },
+  "cl_6_3_0_sql_schemarank_title": {
+    "message": "The table you search for comes first"
+  },
+  "cl_6_3_0_sql_schemarank_desc": {
+    "message": "Changed the order when filtering the SuiteQL Runner schema, which now puts tables whose name matches on top instead of sorting everything alphabetically."
+  },
+  "cl_6_3_0_sql_tabscroll_title": {
+    "message": "Tabs are browsed with arrows"
+  },
+  "cl_6_3_0_sql_tabscroll_desc": {
+    "message": "Removed the scrollbar from the SuiteQL Runner tabs, replaced by arrows at each end that show up when the tabs do not fit."
+  },
+  "cl_6_3_0_sql_tpl_title": {
+    "message": "Create a table's template from its menu"
+  },
+  "cl_6_3_0_sql_tpl_desc": {
+    "message": "Changed the SuiteQL Runner table template to the table menu in the schema, and it is created in a new tab instead of replacing the query."
+  },
+  "cl_6_3_0_sql_schemadef_title": {
+    "message": "Open a table's full definition"
+  },
+  "cl_6_3_0_sql_schemadef_desc": {
+    "message": "Added opening the full JSON NetSuite returns, untrimmed, to the table menu in the SuiteQL Runner schema."
+  },
+  "cl_6_3_0_sql_findclear_title": {
+    "message": "Search boxes clear with one click"
+  },
+  "cl_6_3_0_sql_findclear_desc": {
+    "message": "Added a cross to empty the schema, results and log search boxes in the SuiteQL Runner, and a magnifier to the schema one, which had none."
+  },
+  "cl_6_3_0_sql_schemafind_title": {
+    "message": "Searching the schema shows what it finds"
+  },
+  "cl_6_3_0_sql_schemafind_desc": {
+    "message": "Fixed matches staying hidden inside collapsed tables when filtering the SuiteQL Runner schema, and they are now highlighted."
+  },
+  "cl_6_3_0_sql_via_title": {
+    "message": "You know which method ran each query"
+  },
+  "cl_6_3_0_sql_via_desc": {
+    "message": "Added a REST or N/query badge to the run summary and to the log detail in the SuiteQL Runner."
+  },
+  "cl_6_3_0_sql_clear_title": {
+    "message": "Empty the results table whenever you want"
+  },
+  "cl_6_3_0_sql_clear_desc": {
+    "message": "Added a button next to the SuiteQL Runner search box that empties the results table and its filter."
+  },
+  "cl_6_3_0_sql_gov_title": {
+    "message": "You can see how much governance the tab has left"
+  },
+  "cl_6_3_0_sql_gov_desc": {
+    "message": "Added a meter in the SuiteQL Runner footer with the governance units left, which drops live while the query runs."
+  },
+  "cl_6_3_0_sql_tabclose_title": {
+    "message": "Close tabs in bulk from their menu"
+  },
+  "cl_6_3_0_sql_tabclose_desc": {
+    "message": "Added closing the tabs to the right, to the left or all the others to the SuiteQL Runner tab menu."
+  },
+  "cl_6_3_0_sql_taborder_title": {
+    "message": "Order your query tabs the way you like"
+  },
+  "cl_6_3_0_sql_taborder_desc": {
+    "message": "Added dragging SuiteQL Runner tabs to reorder them, with the order kept between sessions."
+  },
+  "cl_6_3_0_sql_tabname_title": {
+    "message": "Name your query tabs"
+  },
+  "cl_6_3_0_sql_tabname_desc": {
+    "message": "Added renaming SuiteQL Runner tabs by double-clicking their name; if the tab came from a saved query, that query is renamed too."
   },
   "sql_tab_default_title": {
     "message": "Query"
@@ -5488,6 +6361,15 @@
   "themeLabel": {
     "message": "Theme:"
   },
+  "openModeLabel": {
+    "message": "Open in:"
+  },
+  "openModeOptionModal": {
+    "message": "Floating window"
+  },
+  "openModeOptionPanel": {
+    "message": "Side panel"
+  },
   "themeToggleToDark": {
     "message": "Switch to dark mode"
   },
@@ -5533,11 +6415,20 @@
   "sublistFilterPlaceholder": {
     "message": "Filter rows…"
   },
+  "sublistFilterRowLabel": {
+    "message": "row"
+  },
+  "sublistFilterRowsLabel": {
+    "message": "rows"
+  },
   "sublistFilterClearTitle": {
     "message": "Clear filter"
   },
   "sublistFilterSlashTitle": {
     "message": "Press / to filter"
+  },
+  "sublistFilterCountTitle": {
+    "message": "Visible / total rows"
   },
   "enableSublistLineIdsLabel": {
     "message": "Sublist line IDs"
@@ -6101,6 +6992,85 @@
   "lnm_btn_ok": {
     "message": "OK"
   },
+  "lnm_pick_intro": {
+    "message": "N is always available. Pick the modules you also want loaded without the \"N.\" prefix, ready to use straight from the console."
+  },
+  "lnm_pick_all": {
+    "message": "All"
+  },
+  "lnm_pick_none": {
+    "message": "None"
+  },
+  "lnm_pick_recommended": {
+    "message": "Recommended"
+  },
+  "lnm_pick_taken": {
+    "message": "Already exists on this page: ticking it overwrites it"
+  },
+  "lnm_pick_badge": {
+    "message": "Already loaded"
+  },
+  "lnm_pick_search": {
+    "message": "Search module… e.g. record, https"
+  },
+  "lnm_pick_foot": {
+    "message": "The chosen modules become available in the console without the \"N.\" prefix."
+  },
+  "lnm_pick_count": {
+    "message": "$SEL$ of $TOTAL$ selected",
+    "placeholders": {
+      "sel": { "content": "$1", "example": "11" },
+      "total": { "content": "$2", "example": "27" }
+    }
+  },
+  "lnm_mod_action": { "message": "Execute record actions" },
+  "lnm_mod_auth": { "message": "Change your NetSuite login credentials" },
+  "lnm_mod_bignumber": { "message": "High-precision arithmetic" },
+  "lnm_mod_cache": { "message": "Cache data to improve performance" },
+  "lnm_mod_config": { "message": "Access NetSuite configuration settings" },
+  "lnm_mod_crypto": { "message": "Hashing, hmac and symmetrical encryption" },
+  "lnm_mod_currency": { "message": "Exchange rate between two currencies, by date" },
+  "lnm_mod_currentrecord": { "message": "The record you are working on, client-side" },
+  "lnm_mod_dataset": { "message": "Analytics datasets" },
+  "lnm_mod_datasetlink": { "message": "Joins several datasets" },
+  "lnm_mod_email": { "message": "Send regular, bulk and campaign email" },
+  "lnm_mod_encode": { "message": "Convert a string to another encoding" },
+  "lnm_mod_error": { "message": "Create custom errors to abort the script" },
+  "lnm_mod_file": { "message": "Work with files in NetSuite" },
+  "lnm_mod_format": { "message": "Convert strings to a format, and back" },
+  "lnm_mod_http": { "message": "HTTP calls, with any content type" },
+  "lnm_mod_https": { "message": "HTTPS calls, and secure access to credentials" },
+  "lnm_mod_log": { "message": "Log script execution details" },
+  "lnm_mod_plugin": { "message": "Load custom plug-in implementations" },
+  "lnm_mod_portlet": { "message": "Resize or refresh a form portlet" },
+  "lnm_mod_query": { "message": "SuiteQL queries" },
+  "lnm_mod_record": { "message": "Work with NetSuite records" },
+  "lnm_mod_recordcontext": { "message": "Context of a record" },
+  "lnm_mod_redirect": { "message": "Redirect to a URL, Suitelet, record or search" },
+  "lnm_mod_render": { "message": "Forms and email from templates; print to PDF" },
+  "lnm_mod_runtime": { "message": "Runtime settings: company, script, session and user" },
+  "lnm_mod_search": { "message": "Create and run searches, and walk their results" },
+  "lnm_mod_sftp": { "message": "Connect over SFTP and transfer files" },
+  "lnm_mod_sso": { "message": "Generate SuiteSignOn tokens" },
+  "lnm_mod_suiteappinfo": { "message": "SuiteApp information" },
+  "lnm_mod_task": { "message": "Queue tasks: scripts, Map/Reduce, CSV and workflows" },
+  "lnm_mod_transaction": { "message": "Void transactions" },
+  "lnm_mod_translation": { "message": "Translated string collections" },
+  "lnm_mod_ui": { "message": "Dialogs, messages and interface widgets" },
+  "lnm_mod_url": { "message": "NetSuite navigation paths and URLs" },
+  "lnm_mod_util": { "message": "Utility methods, as on the global util object" },
+  "lnm_mod_workbook": { "message": "Analytics workbooks" },
+  "lnm_mod_workflow": { "message": "Initiate or trigger workflow instances" },
+  "lnm_mod_xml": { "message": "Validate, parse, read and modify XML" },
+  "lnm_btn_load": {
+    "message": "Load ($COUNT$)",
+    "placeholders": {
+      "count": { "content": "$1", "example": "8" }
+    }
+  },
+  "lnm_btn_cancel": {
+    "message": "Cancel"
+  },
   "lnm_auto_close": {
     "message": "Auto-close in {1}s…"
   },
@@ -6157,6 +7127,12 @@
   },
   "ispCollapse": {
     "message": "Collapse"
+  },
+  "ispRefresh": {
+    "message": "Refresh"
+  },
+  "ispResize": {
+    "message": "Drag to resize the preview"
   },
   "ispPreview": {
     "message": "Preview"
@@ -6279,7 +7255,7 @@
     "message": "Developer tool to diagnose breakages after NetSuite upgrades."
   },
   "jfThemeAuto": {
-    "message": "Auto (system)"
+    "message": "Auto (follows the extension theme)"
   },
   "jfThemeLight": {
     "message": "Light"
@@ -6554,6 +7530,18 @@
   "devResetNoticeDone": {
     "message": "Notice reset. Refresh a NetSuite tab to see it."
   },
+  "devResetRateLabel": {
+    "message": "Reset the rate-us prompt"
+  },
+  "devResetRateDesc": {
+    "message": "Makes it show up again on NetSuite tabs after a refresh."
+  },
+  "devResetRateTitle": {
+    "message": "Show the rate-us prompt again"
+  },
+  "devResetRateDone": {
+    "message": "Rate prompt reset. Refresh a NetSuite tab to see it."
+  },
   "devDisableLabel": {
     "message": "Leave developer mode"
   },
@@ -6562,6 +7550,279 @@
   },
   "devDisableTitle": {
     "message": "Leave developer mode"
+  },
+  "shortcutKeyStyleLabel": {
+    "message": "Shortcut key style"
+  },
+  "shortcutKeyStyleDesc": {
+    "message": "How modifiers are spelled. The keys are unchanged: Ctrl and ⌘ both work. Reload the tab to see it."
+  },
+  "shortcutKeyStyleAuto": {
+    "message": "Match the system"
+  },
+  "shortcutKeyStyleMac": {
+    "message": "⌘ ⌥ ⇧ (Mac)"
+  },
+  "shortcutKeyStyleWin": {
+    "message": "Ctrl, Alt and Shift"
+  },
+  "shortcutKeyStyleDone": {
+    "message": "Reload the NetSuite tab and reopen this panel to see it."
+  },
+  "cl_6_4_0_lnm_pick_title": {
+    "message": "Choose which N modules load in the console"
+  },
+  "cl_6_4_0_lnm_pick_desc": {
+    "message": "Added a picker with every module the page supports, instead of always loading the same thirteen."
+  },
+  "cl_6_4_0_es_rename_title": {
+    "message": "Name the search variable yourself"
+  },
+  "cl_6_4_0_es_rename_desc": {
+    "message": "Added the option to change the variable name from the export title, with the code updating as you type."
+  },
+  "cl_6_4_0_es_toggles_title": {
+    "message": "Choose what the exported code carries"
+  },
+  "cl_6_4_0_es_toggles_desc": {
+    "message": "Added two checkboxes to add the column labels and the result loop to the exported code."
+  },
+  "cl_6_4_0_es_layout_title": {
+    "message": "A better laid-out export"
+  },
+  "cl_6_4_0_es_layout_desc": {
+    "message": "Changed the export: the version is picked at the top, the actions sit at the bottom and only the code scrolls, now numbered."
+  },
+  "cl_6_4_0_es_info_title": {
+    "message": "The export says which search it is"
+  },
+  "cl_6_4_0_es_info_desc": {
+    "message": "Added the search name, its type and how many columns and filters it has at the top of the export."
+  },
+  "cl_6_4_0_es_formula_title": {
+    "message": "Formulas no longer break the exported code"
+  },
+  "cl_6_4_0_es_formula_desc": {
+    "message": "Fixed a column with a formula leaving the exported code unable to run."
+  },
+  "cl_6_4_0_es_varname_title": {
+    "message": "The same name in both versions"
+  },
+  "cl_6_4_0_es_varname_desc": {
+    "message": "Changed the exported code, which named the search differently in SuiteScript 1.0 and 2.x."
+  },
+  "cl_6_4_0_lv_toolbar_title": {
+    "message": "Execution Log controls now share one bar"
+  },
+  "cl_6_4_0_lv_toolbar_desc": {
+    "message": "Changed the look of the controls the extension adds to the Execution Log, which now read as a single bar."
+  },
+  "cl_6_4_0_lv_search_title": {
+    "message": "The Execution Log search highlights what it finds"
+  },
+  "cl_6_4_0_lv_search_desc": {
+    "message": "Added highlighting of matches and a button to clear the search, which now finds words with or without accents."
+  },
+  "cl_6_4_0_lv_all_title": {
+    "message": "The Execution Log search focuses on the page"
+  },
+  "cl_6_4_0_lv_all_desc": {
+    "message": "Removed the button that loaded every script log, replaced by the View Record Logs viewer."
+  },
+  "cl_6_4_0_sf_bar_title": {
+    "message": "The sublist filter rests on the table"
+  },
+  "cl_6_4_0_sf_bar_desc": {
+    "message": "Changed the sublist filter into a strip attached to the table header, showing the rows displayed out of the total."
+  },
+  "cl_6_4_0_sf_view_title": {
+    "message": "The sublist filter reaches every sublist"
+  },
+  "cl_6_4_0_sf_view_desc": {
+    "message": "Added the filter to sublists in view mode and to those with few lines, which used to go without it."
+  },
+  "cl_6_4_0_sf_rows_title": {
+    "message": "Sublist buttons stay put while filtering"
+  },
+  "cl_6_4_0_sf_rows_desc": {
+    "message": "Fixed filtering a sublist hiding its buttons and the total counting rows that are not data."
+  },
+  "cl_6_4_0_rs_veil_title": {
+    "message": "The sublist refresh veil matches the theme"
+  },
+  "cl_6_4_0_rs_veil_desc": {
+    "message": "Fixed the loading veil turning white when refreshing a sublist with dark mode on."
+  },
+  "cl_6_4_0_lv_place_title": {
+    "message": "The log search sits in the page button bar"
+  },
+  "cl_6_4_0_lv_place_desc": {
+    "message": "Changed the search box on the full logs page, which now sits in the button bar instead of loose above the table."
+  },
+  "cl_6_4_0_dm_check_title": {
+    "message": "Checkboxes are visible in dark mode"
+  },
+  "cl_6_4_0_dm_check_desc": {
+    "message": "Fixed record checkboxes showing up white when dark mode is on."
+  },
+  "cl_6_4_0_editorclose_title": {
+    "message": "The “Close editor after saving” switch works again"
+  },
+  "cl_6_4_0_editorclose_desc": {
+    "message": "Fixed that switch in the popup always showing as off, and clicking it saving nothing, even though the feature itself was working."
+  },
+  "cl_6_4_0_editortheme_title": {
+    "message": "The editor theme always applies your colors"
+  },
+  "cl_6_4_0_editortheme_desc": {
+    "message": "Fixed the code editor's Custom theme not applying, theme colors being lost when changing the font or size, and its popup preview showing no colors."
+  },
+  "cl_6_4_0_cai_classic_title": {
+    "message": "The account selector gets its badges back in the classic UI"
+  },
+  "cl_6_4_0_cai_classic_desc": {
+    "message": "Fixed the sandbox badges in the account selector losing their color and number in the classic UI after a NetSuite update."
+  },
+  "cl_6_4_0_ct_redwood_title": {
+    "message": "The color theme respects Redwood's white surfaces"
+  },
+  "cl_6_4_0_ct_redwood_desc": {
+    "message": "Changed the color theme so it no longer tints the bars Redwood shows in white (subtabs, field group titles and list bars); now only the active tab underline follows the theme color, and the classic UI stays colored as always."
+  },
+  "cl_6_4_0_ffi_dark_title": {
+    "message": "The found-field highlight stands out in dark mode"
+  },
+  "cl_6_4_0_ffi_dark_desc": {
+    "message": "Changed the highlight that marks the found field, which sank into the background in dark mode; it now uses lighter, brighter colors."
+  },
+  "cl_6_4_0_scrollbars_title": {
+    "message": "The viewers follow dark mode when you scroll too"
+  },
+  "cl_6_4_0_scrollbars_desc": {
+    "message": "Fixed View Record Object and View Scripted Record keeping light scrollbars with dark mode on."
+  },
+  "cl_6_4_0_rom_icon_title": {
+    "message": "The Record Trail icon follows the menu color"
+  },
+  "cl_6_4_0_rom_icon_desc": {
+    "message": "Fixed the Record Trail icon in the options menu always showing blue, not following the other icons' color or dark mode."
+  },
+  "cl_6_4_0_tb_accent_title": {
+    "message": "The extension bars follow the theme color"
+  },
+  "cl_6_4_0_tb_accent_desc": {
+    "message": "Changed the sublist filter, the pager, the logs bar and the field preview so their backgrounds and accents follow the NetSuite theme color instead of a fixed blue."
+  },
+  "cl_6_4_0_sql_offset_title": {
+    "message": "Large Runner downloads no longer stop with an error"
+  },
+  "cl_6_4_0_sql_offset_desc": {
+    "message": "Fixed some SuiteQL Runner queries failing with a limits error when fetching the last page of results."
+  },
+  "cl_6_4_0_fcf_strip_title": {
+    "message": "The format button only shows where there is code"
+  },
+  "cl_6_4_0_fcf_strip_desc": {
+    "message": "Fixed the empty strip of the SQL/JSON format button lingering under text fields that contain no code."
+  },
+  "trackBoardLink": {
+    "message": "Track report progress"
+  },
+  "cl_6_4_0_board_title": {
+    "message": "A public board to follow your reports"
+  },
+  "cl_6_4_0_board_desc": {
+    "message": "Added a public board to follow bug reports and feature requests from reported to shipped — the link lives in the popup contact menu."
+  },
+  "cl_6_4_0_ffi_ui_title": {
+    "message": "The field finder highlights matches and clears in one click"
+  },
+  "cl_6_4_0_ffi_ui_desc": {
+    "message": "Added match highlighting inside the results and a clear-search button to the find-field-by-ID-or-label finder."
+  },
+  "cl_6_4_0_open_mode_title": {
+    "message": "Choose where the record viewers open"
+  },
+  "cl_6_4_0_open_mode_desc": {
+    "message": "Added the option to choose whether View Record Object and Record Logs open as a floating window or in the browser side panel."
+  },
+  "cl_6_4_0_qsc_dark_title": {
+    "message": "Quick search creation follows dark mode"
+  },
+  "cl_6_4_0_qsc_dark_desc": {
+    "message": "Fixed the quick search creation panel staying light and glaring with dark mode on."
+  },
+  "cl_6_4_0_ct_tokens_title": {
+    "message": "All of Redwood follows the theme sliders"
+  },
+  "cl_6_4_0_ct_tokens_desc": {
+    "message": "Changed the color theme to also recolor Redwood's icons, borders, links and selection states, which kept their factory gray-blue even when moving the sliders."
+  },
+  "cl_6_4_0_dm_logo_title": {
+    "message": "The header logo follows dark mode"
+  },
+  "cl_6_4_0_dm_logo_desc": {
+    "message": "Changed the header logo, which kept its light colours while the rest of the page turned dark."
+  },
+  "cl_6_4_0_rlv_title": {
+    "message": "View Record Logs"
+  },
+  "cl_6_4_0_rlv_desc": {
+    "message": "Added an execution log viewer to the Tools menu, with the current record's scripts preselected and filters by level, script type, detail text and dates. The header lets you switch to another record type — listed by name, not by id — and the script list and the types follow the one you pick."
+  },
+  "cl_6_4_0_st_scriptid_title": {
+    "message": "View script opens the right record"
+  },
+  "cl_6_4_0_st_scriptid_desc": {
+    "message": "Fixed the Suitelet tools' view script option not opening its record depending on how the Suitelet had been invoked."
+  },
+  "cl_6_4_0_rr_order_title": {
+    "message": "Recent records land on their date, in order"
+  },
+  "cl_6_4_0_rr_order_desc": {
+    "message": "Fixed Recent Records placing records from other dates under \"Today\"; each group now runs from newest to oldest."
+  },
+  "cl_6_4_0_ai_panel_title": {
+    "message": "The AI assistant opens in the side panel"
+  },
+  "cl_6_4_0_ai_panel_desc": {
+    "message": "Opening the assistant on a page now shows the chat in the browser side panel instead of docking onto the page itself: it sits to the side, covering nothing, and still sees the tab you are working on."
+  },
+  "cl_6_4_0_ro_panel_title": {
+    "message": "View Record Object, in the side panel"
+  },
+  "cl_6_4_0_ro_panel_desc": {
+    "message": "A new button in its header docks it to the browser side panel, next to the page instead of floating over it. It replaces the old split-screen mode, which goes away."
+  },
+  "cl_6_4_0_ro_sources_title": {
+    "message": "A more complete record object"
+  },
+  "cl_6_4_0_ro_sources_desc": {
+    "message": "View Record Object now combines NetSuite’s different query paths and adds the fields that were missing, without touching the ones it already showed."
+  },
+  "cl_6_4_0_ro_slide_title": {
+    "message": "The panel slides out of the way"
+  },
+  "cl_6_4_0_ro_slide_desc": {
+    "message": "Changed the View Record Object panel, which used to appear on the other side at once when moving aside to reveal a field."
+  },
+  "cl_6_4_0_ffi_scroll_title": {
+    "message": "Find Field by ID takes you to the field"
+  },
+  "cl_6_4_0_ffi_scroll_desc": {
+    "message": "Fixed Find Field by ID not scrolling to the field it found; it now opens its tab and glides there."
+  },
+  "cl_6_4_0_sfv_pdf_title": {
+    "message": "Field info is back on pages showing a PDF"
+  },
+  "cl_6_4_0_sfv_pdf_desc": {
+    "message": "Fixed Show Field Information not working on pages that display a PDF."
+  },
+  "cl_6_4_0_keystyle_title": {
+    "message": "Choose how shortcuts are spelled"
+  },
+  "cl_6_4_0_keystyle_desc": {
+    "message": "Added the option to show shortcuts with ⌘ ⌥ ⇧ or with Ctrl, Alt and Shift, instead of letting the system decide."
   },
   "openWelcomeDesc": {
     "message": "A quick tour of what the extension does."
@@ -8036,7 +9297,7 @@
     "message": "Changing a setting no longer reloads your tab"
   },
   "cl_6_0_0_no_autoreload_desc": {
-    "message": "Certain switches used to reload NetSuite straight away, and you could lose whatever you had half-filled in a form. Nothing reloads on its own now: you decide when, with the “Refresh tab” button at the bottom of the popup."
+    "message": "Certain switches used to reload NetSuite straight away, and you could lose whatever you had half-filled in a form. Nothing reloads on its own now: you decide when to reload the page."
   },
   "cl_6_0_0_popup_home_title": {
     "message": "The popup shows your setup at a glance"
@@ -8099,7 +9360,7 @@
     "message": "What is the AI assistant and why does the extension request these permissions?"
   },
   "aifaq_a1": {
-    "message": "It is an **optional** SuiteQL Runner feature that turns natural-language questions into **read-only** SuiteQL queries. The AI host permissions exist solely so the extension can call **the provider you configure**; if you configure none, the feature **stays inert** and talks to no one."
+    "message": "They are two **optional** features: the **SuiteQL Runner** assistant, which turns natural-language questions into **read-only** SuiteQL queries, and the **page assistant**, which answers in plain text about the record or page you are viewing. The permissions towards AI domains exist only so the extension can call the **provider you configure**; if you configure none, both stay **inert** and talk to no one."
   },
   "aifaq_q2": {
     "message": "What data is sent to the AI provider?"
@@ -8145,6 +9406,9 @@
   },
   "aifaq_a8b": {
     "message": "You are welcome to review and analyze it **with no restrictions**, so you can confirm for your own security that **nothing is sent** beyond what is described here."
+  },
+  "aifaq_a8c": {
+    "message": "You can also browse it comfortably on the extension GitHub, readable and by version:"
   },
   "aifaq_q9": {
     "message": "Can I restrict the extension's external access?"
@@ -8224,8 +9488,46 @@
   "sql_results_meta": {
     "message": "$1 rows · $2 ms"
   },
+  "sql_results_meta_partial": {
+    "message": "$1 of $2 rows · $3 ms"
+  },
   "sql_footer_connected": {
     "message": "Connected"
+  },
+  "sql_clear_results_btn": {
+    "message": "Clear results"
+  },
+  "sql_find_clear": {
+    "message": "Clear search"
+  },
+  "sql_via_rest_title": {
+    "message": "Ran through the REST endpoint: it spends no governance and does not freeze the tab."
+  },
+  "sql_via_nquery_title": {
+    "message": "Ran through N/query: it spends governance and works on any account."
+  },
+  "sql_clear_results_title": {
+    "message": "Empty the results table"
+  },
+  "suiteqlRestFillColumnsLabel": {
+    "message": "Recover the empty columns"
+  },
+  "suiteqlRestFillColumnsDesc": {
+    "message": "REST does not return columns that are empty in every row. You only notice it with SELECT *: if you name them in the SELECT they come back on their own. This option helps infer them from the table schema; it can fail. Leave it off to see only what the response brings."
+  },
+  "sql_gov_label": {
+    "message": "Governance"
+  },
+  "sql_gov_title": {
+    "message": "$LEFT$ of $MAX$ governance units left on this tab. The N/query method spends them; REST does not touch them. They reset when the page reloads.",
+    "placeholders": {
+      "left": {
+        "content": "$1"
+      },
+      "max": {
+        "content": "$2"
+      }
+    }
   },
   "sql_results_toggle_title": {
     "message": "Show/hide results"
@@ -8249,19 +9551,31 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "The SuiteQL Runner no longer drops columns from your results: they all show up, even the ones that come back empty."
+    "message": "New: Record Logs Viewer, with filters, search and downloads."
   },
   "un_hl_2": {
-    "message": "The field finder in saved searches now shows up in the related-fields window too, where before there was only a plain dropdown list."
+    "message": "The viewers and the AI assistant dock to the side panel, follow the active tab, and you choose where they open by default."
   },
   "un_hl_3": {
-    "message": "Copying a field ID now confirms it was copied, just like everywhere else in the extension."
+    "message": "New public board to follow your reports, from received to shipped."
   },
   "un_hl_4": {
-    "message": "Plus other minor fixes and improvements: see the changelog for details."
+    "message": "The code editor theme paints its colors again — including the Custom one."
+  },
+  "un_hl_5": {
+    "message": "All of Redwood follows the color theme sliders."
+  },
+  "un_hl_6": {
+    "message": "The Runner no longer cuts large downloads short, and the field finder highlights and clears in one click."
+  },
+  "un_hl_7": {
+    "message": "Finer dark mode: checkboxes, the header logo, code and highlights."
+  },
+  "un_hl_8": {
+    "message": "Plus dozens more fixes: full details in the changelog."
   },
   "un_thanks": {
-    "message": "Thanks to everyone who reports bugs and suggests improvements. You can write from the envelope ✉ button in the extension popup."
+    "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
   },
   "un_toast_btn": {
     "message": "See changelog"
@@ -8483,5 +9797,240 @@
   },
   "cl_6_2_1_sql_cols_desc": {
     "message": "If a column came back empty in the first rows —which is what normally happens when you sort with ORDER BY … DESC— the whole column vanished from the table even when there was data further down, and the same went for columns with no values at all. Now every column in your query shows up, and they also appear in the chart and in whatever you export or copy."
+  },
+  "cl_ver_6_2_2": {
+    "message": "v6.2.2"
+  },
+  "cl_date_6_2_2": {
+    "message": "2026-08-03"
+  },
+  "cl_6_2_2_sfv_help_title": {
+    "message": "Field help inside the info panel"
+  },
+  "cl_6_2_2_sfv_help_desc": {
+    "message": "Field help was brought back, and now shows inside the info panel and can be collapsed."
+  },
+  "cl_6_2_2_acct_env_title": {
+    "message": "The account switcher tells production and sandboxes apart"
+  },
+  "cl_6_2_2_acct_env_desc": {
+    "message": "Fixed the account switcher badge, which marked production the same as sandboxes; it now reads PRD, and each sandbox carries its number (SB1, SB2)."
+  },
+  "cl_6_2_2_sql_null_col_title": {
+    "message": "Results show every column you asked for"
+  },
+  "cl_6_2_2_sql_null_col_desc": {
+    "message": "Fixed columns with no value in any row disappearing from the SuiteQL Runner results."
+  },
+  "cl_6_2_2_open_tab_title": {
+    "message": "Settings can open in a full browser tab"
+  },
+  "cl_6_2_2_open_tab_desc": {
+    "message": "Added a button to open the settings popup in a new tab, with a better layout."
+  },
+  "cl_6_2_2_ai_chat_mode_title": {
+    "message": "The page assistant only shows the controls it uses"
+  },
+  "cl_6_2_2_ai_chat_mode_desc": {
+    "message": "Removed the interaction mode from the page assistant; it only applies in the SuiteQL Runner assistant."
+  },
+  "cl_6_2_2_prettier_dark_title": {
+    "message": "Highlighted code follows dark mode"
+  },
+  "cl_6_2_2_prettier_dark_desc": {
+    "message": "Fixed the formatting in logs, code fields and the JSON viewers for Suitelets and RESTlets not changing color along with dark mode, and added an “Auto” option."
+  },
+  "cl_6_2_2_env_letters_title": {
+    "message": "Choose how much detail the roles-menu badges show"
+  },
+  "cl_6_2_2_env_letters_desc": {
+    "message": "Added an option to choose whether the roles-menu badges show the sandbox number (PRD, SB1, SB2) or just the environment type (PD, SB, RP)."
+  },
+  "cl_6_2_2_no_refresh_btn_title": {
+    "message": "The refresh-page button was removed"
+  },
+  "cl_6_2_2_no_refresh_btn_desc": {
+    "message": "Removed the refresh-page button from the popup footer, replaced by the open-in-a-new-tab one."
+  },
+  "cl_6_2_2_fallback_en_title": {
+    "message": "The default language was changed to English"
+  },
+  "cl_6_2_2_fallback_en_desc": {
+    "message": "Fixed the extension’s default language being Spanish; it is now English."
+  },
+  "cl_6_2_2_dark_pick_title": {
+    "message": "Choose how far dark mode goes"
+  },
+  "cl_6_2_2_dark_pick_desc": {
+    "message": "Added an option to choose whether dark mode applies to all of NetSuite or just the NSFT tools."
+  },
+  "cl_6_2_2_dark_scope_title": {
+    "message": "Dark mode respects your Suitelets and PDFs"
+  },
+  "cl_6_2_2_dark_scope_desc": {
+    "message": "Fixed dark mode applying over your own Suitelets and PDFs; it now only acts on NetSuite forms."
+  },
+  "cl_6_2_2_mackeys_title": {
+    "message": "Shortcuts show the keys your Mac actually has"
+  },
+  "cl_6_2_2_mackeys_desc": {
+    "message": "Fixed shortcuts on Mac, which showed Ctrl; they now use ⌘, ⌥ and ⇧, and the command palette opens with ⌘ too."
+  },
+  "cl_6_2_2_sfv_lang_title": {
+    "message": "Field info follows your language"
+  },
+  "cl_6_2_2_sfv_lang_desc": {
+    "message": "Fixed the labels in the field info panel always coming out in Spanish."
+  },
+  "cl_ver_6_4_0": {
+    "message": "v6.4.0"
+  },
+  "cl_date_6_4_0": {
+    "message": "2026-08-11"
+  },
+  "cl_ver_6_3_0": {
+    "message": "v6.3.0"
+  },
+  "cl_date_6_3_0": {
+    "message": "2026-08-06"
+  },
+  "cl_6_3_0_isp_refresh_title": {
+    "message": "The preview button is now called Refresh"
+  },
+  "cl_6_3_0_isp_refresh_desc": {
+    "message": "Changed the preview panel's “Preview” button to “Refresh”, and added icons to both of its buttons."
+  },
+  "cl_6_3_0_isp_buttons_title": {
+    "message": "The preview buttons show in full"
+  },
+  "cl_6_3_0_isp_buttons_desc": {
+    "message": "Fixed the bar with Expand and Preview being cut off by the window edge and covered by the resize handle."
+  },
+  "cl_6_3_0_sql_method_title": {
+    "message": "Choose how the SuiteQL Runner fetches rows"
+  },
+  "cl_6_3_0_sql_method_desc": {
+    "message": "Added an option in the Runner preferences to fetch rows over REST —no NetSuite execution limit and no frozen tab— or over N/query —which works on any account and keeps columns with no values at all—, or let it pick based on the account."
+  },
+  "cl_6_3_0_sql_allschema_title": {
+    "message": "Download the account's full schema"
+  },
+  "cl_6_3_0_sql_allschema_desc": {
+    "message": "Added an option in the SuiteQL Runner table search to download or refresh every table's schema in one go, with progress and a cancel button."
+  },
+  "cl_6_3_0_sql_openfast_title": {
+    "message": "The SuiteQL Runner opens faster"
+  },
+  "cl_6_3_0_sql_openfast_desc": {
+    "message": "Fixed the Runner loading every stored table on open; it now loads the ones in the query and leaves the rest one click away in the panel."
+  },
+  "cl_6_3_0_sql_wipe_title": {
+    "message": "Clear the SuiteQL Runner schema cache"
+  },
+  "cl_6_3_0_sql_wipe_desc": {
+    "message": "Added a button in the schema panel to delete every stored schema for the account at once."
+  },
+  "cl_6_3_0_sql_autoschema_title": {
+    "message": "Decide when the schema gets downloaded"
+  },
+  "cl_6_3_0_sql_autoschema_desc": {
+    "message": "Added a button in the SuiteQL Runner schema panel to stop downloading each table's schema as you type it into the query."
+  },
+  "cl_6_3_0_sql_par_title": {
+    "message": "Choose how many requests the Runner makes at once"
+  },
+  "cl_6_3_0_sql_par_desc": {
+    "message": "Added an option in the Runner settings to choose how many simultaneous requests the REST download makes, previously always automatic."
+  },
+  "cl_6_3_0_sql_many_title": {
+    "message": "Decide what happens when a query returns a lot of rows"
+  },
+  "cl_6_3_0_sql_many_desc": {
+    "message": "Added to the SuiteQL Runner preferences how many rows trigger the warning and whether to ask, keep going or stop, with an option to remember the answer from the warning itself."
+  },
+  "cl_6_3_0_sql_all_title": {
+    "message": "Choose whether the Runner fetches every row"
+  },
+  "cl_6_3_0_sql_all_desc": {
+    "message": "Added a checkbox in the SuiteQL Runner preferences to fetch every row the query returns, which disables the maximum records setting."
+  },
+  "cl_6_3_0_sql_rows_title": {
+    "message": "The Runner fetches every row you ask for"
+  },
+  "cl_6_3_0_sql_rows_desc": {
+    "message": "Fixed the SuiteQL Runner stopping at 21,000 rows however high the maximum was set, and it now says when it returns fewer rows than there are."
+  },
+  "cl_6_3_0_sql_fmt_key_title": {
+    "message": "The SuiteQL Runner shortcuts work anywhere in the modal"
+  },
+  "cl_6_3_0_sql_fmt_key_desc": {
+    "message": "Fixed the Runner shortcuts —run, save, format, export…— only responding with the cursor inside the editor, and Ctrl+Shift+F opening the field finder instead of formatting."
+  },
+  "cl_6_3_0_env_shape_title": {
+    "message": "The production badge matches the shape of the others"
+  },
+  "cl_6_3_0_env_shape_desc": {
+    "message": "Fixed the production badge in the account switcher showing with a different shape and size from the sandbox ones on the Redwood interface."
+  },
+  "cl_6_3_0_env_dup_title": {
+    "message": "Account switcher badges no longer repeat the number"
+  },
+  "cl_6_3_0_env_dup_desc": {
+    "message": "Fixed the environment number showing twice in the account switcher badges on the Redwood interface."
+  },
+  "cl_6_3_0_isp_dark_title": {
+    "message": "The inline preview follows dark mode"
+  },
+  "cl_6_3_0_isp_dark_desc": {
+    "message": "Fixed the preview panel results staying light with dark mode on."
+  },
+  "cl_6_3_0_isp_lang_title": {
+    "message": "The inline preview shows up in any language"
+  },
+  "cl_6_3_0_isp_lang_desc": {
+    "message": "Fixed the saved-search preview panel only showing up with NetSuite in English; it now appears whatever language the account runs in."
+  },
+  "cl_6_3_0_isp_resize_title": {
+    "message": "The preview keeps the height you leave it at"
+  },
+  "cl_6_3_0_isp_resize_desc": {
+    "message": "Fixed the preview panel carrying on resizing after releasing the mouse."
+  },
+  "openInTabTitle": {
+    "message": "Open in a tab"
+  },
+  "openInTabShort": {
+    "message": "Tab"
+  },
+  "detailEnableAllLong": {
+    "message": "Enable all"
+  },
+  "detailDisableAllLong": {
+    "message": "Disable all"
+  },
+  "rateShort": {
+    "message": "Rate"
+  },
+  "sql_rows_capped_unknown": {
+    "message": "Fetched $FETCHED$ rows and there are more left.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      }
+    }
+  },
+  "sql_rows_capped_gov": {
+    "message": "Fetched $FETCHED$ of $TOTAL$ rows: the download stopped by itself to stay within NetSuite execution limits.",
+    "placeholders": {
+      "fetched": {
+        "content": "$1"
+      },
+      "total": {
+        "content": "$2"
+      }
+    }
+  },
+  "sql_slow_no_order": {
+    "message": "This query has no ORDER BY and NetSuite is paging it very slowly. Ordering by an indexed column —ORDER BY id, for instance— usually makes it far faster."
   }
 }

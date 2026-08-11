@@ -265,7 +265,7 @@
 }
 
 #nsft-fcdd-progress[data-theme="dark"] .nsft-fcdd-prog-fill {
-    background: linear-gradient(to right, #6E7CF5, #7E8BF7);
+    background: linear-gradient(to right, var(--nsft-ns-accent, #3b82f6), var(--nsft-ns-accent-hover, #2563eb));
 }
 
 .nsft-fcdd-notify[data-theme="dark"] {
@@ -338,14 +338,14 @@
 }
 
 .nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-modal-btn.nsft-fcdd-modal-reload {
-    background: #6E7CF5;
-    border-color: #6E7CF5;
+    background: var(--nsft-ns-accent, #3b82f6);
+    border-color: var(--nsft-ns-accent-light, #7FB0FF);
     color: #ffffff;
 }
 
 .nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-modal-btn.nsft-fcdd-modal-reload:hover {
-    background: #7E8BF7;
-    border-color: #7E8BF7;
+    background: var(--nsft-ns-accent-hover, #2563eb);
+    border-color: var(--nsft-ns-accent-light-hover, #93C5FD);
 }
 
 .nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-modal-btn.nsft-fcdd-modal-dismiss {

@@ -500,7 +500,7 @@
         body.innerHTML = `<div class="nsft-sr-logs-loading">${escapeHtml(chrome.i18n.getMessage('sr_logs_loading') || 'Cargando logs...')}</div>`;
         panel.style.display = 'flex';
         if (window.NSFT_LogFormat) {
-            chrome.storage.local.get({ logPrettierTheme: 'atom-one-dark' }, (it) => {
+            chrome.storage.local.get({ logPrettierTheme: 'auto' }, (it) => {
                 window.NSFT_LogFormat.ensureTheme(it.logPrettierTheme);
             });
         }
@@ -618,9 +618,18 @@
         const LF = window.NSFT_LogFormat;
         if (LF) {
             const detailCells = body.querySelectorAll('td.nsft-sr-log-detail');
+            const ctx = _currentLogsContext || {};
             data.forEach((r, i) => {
                 const cell = detailCells[i];
-                if (cell) LF.renderInto(cell, r.detail);
+                if (!cell) return;
+                LF.renderInto(cell, r.detail, {
+                    nameParts: [
+                        ctx.scriptName || (ctx.scriptId ? 'script-' + ctx.scriptId : ''),
+                        String(r.type || '').toLowerCase(),
+                        r.title || '',
+                        LF.stampPart ? LF.stampPart(r.ts) : ''
+                    ]
+                });
             });
         }
     }

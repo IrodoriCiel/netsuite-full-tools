@@ -89,16 +89,6 @@
 
                         function jumpToField(el) {
                             const $a = jQuery(el);
-                            if (!$a.is(':visible')) {
-                                const tabWrapperId = $a.parents('.nltabcontent[id$="_wrapper"]').last().attr('id');
-                                if (tabWrapperId) {
-                                    const tabId = tabWrapperId.substr(0, tabWrapperId.indexOf('_wrapper'));
-                                    const txtId = `${tabId}txt`;
-                                    const expandedTabsId = `${tabId}_pane_hd`;
-                                    if (document.getElementById(txtId)) document.getElementById(txtId).click();
-                                    else if (document.getElementById(expandedTabsId)) document.getElementById(expandedTabsId).click();
-                                }
-                            }
 
                             let $el = $a.closest('.uir-field-wrapper');
                             if (!$el.length) $el = $a.closest('td');
@@ -107,8 +97,13 @@
                             const colorClass = 'nsft-ffi-hl-' + (HL_COLOR || 'green');
                             $el.addClass('nsft-ffi-highlight ' + colorClass);
 
-                            const pos = $el.offset();
-                            if (pos) window.scrollTo((pos.left - 20 < 0 ? 0 : pos.left - 20), (pos.top - 150 < 0 ? 0 : pos.top - 150));
+                            const nav = window.NSFT_FieldNav;
+                            if (nav && nav.goToField) {
+                                nav.goToField($el[0] || el);
+                            } else {
+                                const pos = $el.offset();
+                                if (pos) window.scrollTo((pos.left - 20 < 0 ? 0 : pos.left - 20), (pos.top - 150 < 0 ? 0 : pos.top - 150));
+                            }
 
                             const clearHl = () => $el.removeClass('nsft-ffi-highlight ' + HL_CLASSES);
                             if (HL_PERSIST) {
@@ -131,7 +126,10 @@
                                             <button id="${modalId}-close" class="nsft-ffi-close-btn" aria-label="${esc(TRANSLATIONS.ffi_btn_cancel)}">✕</button>
                                         </div>
                                         <div class="nsft-ffi-modal-body">
-                                            <input type="text" id="${modalId}-input" class="nsft-ffi-modal-input" placeholder="${esc(TRANSLATIONS.ffi_placeholder)}" role="combobox" aria-controls="${modalId}-list" aria-expanded="true" autocomplete="off" />
+                                            <div class="nsft-ffi-input-wrap">
+                                                <input type="text" id="${modalId}-input" class="nsft-ffi-modal-input" placeholder="${esc(TRANSLATIONS.ffi_placeholder)}" role="combobox" aria-controls="${modalId}-list" aria-expanded="true" autocomplete="off" />
+                                                <button type="button" id="${modalId}-clear" class="nsft-ffi-input-clear" aria-label="${esc(TRANSLATIONS.ffi_clear || 'Clear')}" title="${esc(TRANSLATIONS.ffi_clear || '')}" hidden>✕</button>
+                                            </div>
                                             <ul id="${modalId}-list" class="nsft-ffi-results" role="listbox"></ul>
                                         </div>
                                     </div>
@@ -149,6 +147,32 @@
                                 document.removeEventListener('keydown', onKey, true);
                                 if (prevFocus && typeof prevFocus.focus === 'function') { try { prevFocus.focus(); } catch (_) { } }
                             };
+
+                            function markMatch(text, needle) {
+                                const t = String(text || '');
+                                const n = String(needle || '').trim();
+                                if (!n) return esc(t);
+                                const lower = t.toLowerCase();
+                                const ln = n.toLowerCase();
+                                const at = lower.indexOf(ln);
+                                if (at !== -1) {
+                                    return esc(t.slice(0, at))
+                                        + '<mark class="nsft-ffi-hl-txt">' + esc(t.slice(at, at + n.length)) + '</mark>'
+                                        + esc(t.slice(at + n.length));
+                                }
+                                let out = '';
+                                let j = 0;
+                                for (let i = 0; i < t.length; i++) {
+                                    const c = t.charAt(i);
+                                    if (j < ln.length && c.toLowerCase() === ln.charAt(j)) {
+                                        out += '<mark class="nsft-ffi-hl-txt">' + esc(c) + '</mark>';
+                                        j++;
+                                    } else {
+                                        out += esc(c);
+                                    }
+                                }
+                                return j === ln.length ? out : esc(t);
+                            }
 
                             function render(q) {
                                 const needle = String(q || '').trim();
@@ -170,8 +194,8 @@
                                 active = 0;
                                 $list.html(current.map((it, i) => `
                                     <li class="nsft-ffi-result${i === 0 ? ' is-active' : ''}" role="option" data-i="${i}">
-                                        <span class="nsft-ffi-result-label">${esc(it.label || it.id)}</span>
-                                        ${it.id ? `<span class="nsft-ffi-result-id">${esc(it.id)}</span>` : ''}
+                                        <span class="nsft-ffi-result-label">${markMatch(it.label || it.id, needle)}</span>
+                                        ${it.id ? `<span class="nsft-ffi-result-id">${markMatch(it.id, needle)}</span>` : ''}
                                     </li>`).join(''));
                             }
 
@@ -201,7 +225,15 @@
                             }
 
                             document.addEventListener('keydown', onKey, true);
-                            $input.on('input', function () { render(this.value); });
+                            const $clear = jQuery('#' + modalId + '-clear');
+                            const syncClear = () => { $clear.prop('hidden', !String($input.val() || '').length); };
+                            $clear.on('click', function () {
+                                $input.val('');
+                                syncClear();
+                                render('');
+                                $input.focus();
+                            });
+                            $input.on('input', function () { syncClear(); render(this.value); });
                             $list.on('click', '.nsft-ffi-result', function () { choose(parseInt(jQuery(this).attr('data-i'), 10)); });
                             $list.on('mousemove', '.nsft-ffi-result', function () {
                                 const i = parseInt(jQuery(this).attr('data-i'), 10);

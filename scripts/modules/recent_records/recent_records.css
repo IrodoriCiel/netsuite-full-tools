@@ -444,7 +444,7 @@ html.nsft-rr-arm div[data-widget="Popover"]:has(.nsft-rr-panel) {
 
 .nsft-rr-panel[data-theme="dark"] .nsft-rr-row--active {
     background: rgba(110, 124, 245, 0.18);
-    box-shadow: inset 3px 0 0 #6E7CF5;
+    box-shadow: inset 3px 0 0 var(--nsft-ns-accent-light, #7FB0FF);
 }
 
 .nsft-rr-panel[data-theme="dark"] .nsft-rr-section {

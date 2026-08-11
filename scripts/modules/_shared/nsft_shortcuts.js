@@ -3,7 +3,9 @@
 
     if (window.NSFT_Shortcuts) return;
 
-    const IS_MAC = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
+    const IS_MAC = window.NSFT_MacKeys
+        ? window.NSFT_MacKeys.isMac
+        : /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
 
     const entries = new Map();
     let counter = 0;
@@ -66,21 +68,31 @@
         return Array.from(groups, ([group, items]) => ({ group, items }));
     }
 
+    function keyNames(isMac) {
+        const mk = window.NSFT_MacKeys;
+        if (mk && mk.isMac === isMac) return { mod: mk.mod, alt: mk.alt, shift: mk.shift };
+        return isMac ? { mod: '⌘', alt: '⌥', shift: '⇧' } : { mod: 'Ctrl', alt: 'Alt', shift: 'Shift' };
+    }
+
     function formatCombo(combo, opts) {
         const isMac = (opts && typeof opts.isMac === 'boolean') ? opts.isMac : IS_MAC;
+        const K = keyNames(isMac);
         if (typeof combo === 'string') {
             return combo
-                .replace(/\bMod\b/g, isMac ? 'Cmd' : 'Ctrl')
-                .replace(/\bCmd\/Ctrl\b/gi, isMac ? 'Cmd' : 'Ctrl')
-                .replace(/\bCtrl\/Cmd\b/gi, isMac ? 'Cmd' : 'Ctrl')
-                .replace(/\bOption\/Alt\b/gi, isMac ? 'Option' : 'Alt')
-                .replace(/\bAlt\/Option\b/gi, isMac ? 'Option' : 'Alt');
+                .replace(/\bMod\b/g, K.mod)
+                .replace(/\bCmd\/Ctrl\b/gi, K.mod)
+                .replace(/\bCtrl\/Cmd\b/gi, K.mod)
+                .replace(/\bOption\/Alt\b/gi, K.alt)
+                .replace(/\bAlt\/Option\b/gi, K.alt)
+                .replace(/\bCtrl\b/g, K.mod)
+                .replace(/\bAlt\b/g, K.alt)
+                .replace(/\bShift\b/g, K.shift);
         }
         if (combo && typeof combo === 'object') {
             const parts = [];
-            if (combo.ctrlKey || combo.metaKey) parts.push(isMac ? 'Cmd' : 'Ctrl');
-            if (combo.shiftKey) parts.push('Shift');
-            if (combo.altKey) parts.push(isMac ? 'Option' : 'Alt');
+            if (combo.ctrlKey || combo.metaKey) parts.push(K.mod);
+            if (combo.shiftKey) parts.push(K.shift);
+            if (combo.altKey) parts.push(K.alt);
             const code = String(combo.code || combo.key || '');
             const keyDisplay = code
                 .replace(/^Key([A-Z])$/, '$1')
@@ -154,6 +166,22 @@
             .join(' ');
     }
 
+    function insideModal(eventOrNode) {
+        const MS = window.NSFT_ModalStack;
+        if (!MS || typeof MS.contains !== 'function') return false;
+        const node = (eventOrNode && eventOrNode.target) || eventOrNode || document.activeElement;
+        return MS.contains(node);
+    }
+
+    function modalActive() {
+        const MS = window.NSFT_ModalStack;
+        return !!(MS && typeof MS.anyActive === 'function' && MS.anyActive());
+    }
+
+    function pageShortcutBlocked(event) {
+        return modalActive() || insideModal(event);
+    }
+
     function bind(moduleId, opts) {
         const o = opts || {};
         if (!moduleId || !o.label || !o.defaultCombo) return;
@@ -177,6 +205,7 @@
 
         document.addEventListener('keydown', (e) => {
             if (typeof o.isEnabled === 'function' && !o.isEnabled()) return;
+            if (o.skipWhenModalOpen && pageShortcutBlocked(e)) return;
             if (!matches(e, combo)) return;
             e.preventDefault();
             e.stopPropagation();
@@ -211,6 +240,9 @@
         list,
         formatCombo,
         matches,
+        insideModal,
+        modalActive,
+        pageShortcutBlocked,
         parseStringCombo,
         onChange,
         get isMac() { return IS_MAC; }

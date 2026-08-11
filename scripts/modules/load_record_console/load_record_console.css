@@ -152,11 +152,11 @@
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-btn-primary {
-    background: #6E7CF5;
+    background: var(--nsft-ns-accent, #3b82f6);
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-btn-primary:hover {
-    background: #7E8BF7;
+    background: var(--nsft-ns-accent-hover, #2563eb);
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-timer {

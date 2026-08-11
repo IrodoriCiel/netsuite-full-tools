@@ -2,6 +2,24 @@
 (function () {
     'use strict';
 
+    function sfvDiagOn() {
+        try {
+            return !!(document.documentElement && document.documentElement.dataset.nsftSfvDiag);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function sfvDiag() {
+        if (!sfvDiagOn()) return;
+        try { console.log.apply(console, arguments); } catch (e) { }
+    }
+
+    function sfvDiagWarn() {
+        if (!sfvDiagOn()) return;
+        try { console.warn.apply(console, arguments); } catch (e) { }
+    }
+
     if (window.nsftSetFieldValuesInjected) return;
     window.nsftSetFieldValuesInjected = true;
 
@@ -33,10 +51,17 @@
         CUSTOM_FIELDS_CONTAINER: "nsft-div-custom-fields",
         AUDIT_ROW: "nsft-field-audit-row",
         AUDIT_BTN: "nsft-field-audit-btn",
-        AUDIT_LIST: "nsft-field-audit-list"
+        AUDIT_LIST: "nsft-field-audit-list",
+        HELP_SLOT: "nsft-sfv-help-slot"
     };
 
     let NSFT_THEME = 'light';
+
+    let helpCollapsed = false;
+
+    let bypassLabelClick = false;
+
+    let _lastHelpTrigger = null;
 
     window.addEventListener('message', function (event) {
         if (event.source !== window || !event.data) return;
@@ -45,6 +70,10 @@
             if (event.data.theme) NSFT_THEME = event.data.theme;
             if (typeof event.data.auditEnabled === 'boolean') auditEnabled = event.data.auditEnabled;
             if (typeof event.data.noIcon === 'boolean') noIconMode = event.data.noIcon;
+            if (typeof event.data.helpCollapsed === 'boolean') helpCollapsed = event.data.helpCollapsed;
+            if (event.data.helpTemplates && typeof event.data.helpTemplates === 'object') {
+                Object.assign(helpTemplates, event.data.helpTemplates);
+            }
             applyThemeToOpenModal();
             if (!isInit) init();
         } else if (event.data.type === 'nsft-set-field-values-theme') {
@@ -52,6 +81,10 @@
             applyThemeToOpenModal();
         } else if (event.data.type === 'nsft-set-field-values-noicon') {
             applyNoIconChange(event.data.noIcon !== false);
+        } else if (event.data.type === 'nsft-set-field-values-helpcollapsed') {
+            helpCollapsed = event.data.collapsed === true;
+            const box = document.querySelector('.nsft-sfv-help');
+            if (box) box.dataset.collapsed = helpCollapsed ? '1' : '0';
         } else if (event.data.type === 'nsft-set-field-values-audit') {
             auditEnabled = event.data.auditEnabled !== false;
             if (window.NSFT_SetFieldValues && window.NSFT_SetFieldValues.refreshAfterAuditToggle) {
@@ -76,6 +109,13 @@
         } catch (err) {
             console.error("NSFT SetFieldValues Init Error: ", err);
         }
+
+        try {
+            document.addEventListener('click', function (e) {
+                const el = (e.target && e.target.closest) ? e.target.closest('[onclick*="nlFieldHelp"]') : null;
+                if (el) watchForHelpUrl();
+            }, true);
+        } catch (e) { }
     }
 
     function startButtonInjection() {
@@ -364,13 +404,182 @@
         if (label.dataset.nsftLabelClickBound !== '1') {
             label.dataset.nsftLabelClickBound = '1';
             label.addEventListener('click', function (e) {
-                if (!noIconMode) return;
+                if (!noIconMode || bypassLabelClick) return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.NSFT_SetFieldValues.showInfoPopup(fieldName, label, null);
             }, true);
         }
         label.style.cursor = noIconMode ? 'pointer' : '';
+    }
+
+
+    function helpAnchorArgs(anchor) {
+        const oc = (anchor && anchor.getAttribute('onclick')) || '';
+        return (oc.match(/(['"])(?:\\.|(?!\1)[^\\])*\1/g) || [])
+            .map(s => s.slice(1, -1).replace(/\\(['"])/g, '$1').trim());
+    }
+
+    function findHelpAnchor(fieldName) {
+        if (!fieldName) return null;
+
+        const lbl = document.getElementById(fieldName + '_fs_lbl')
+            || document.getElementById(fieldName + '_lbl')
+            || document.querySelector(`[id^="${fieldName}_fs_lbl"], [id^="${fieldName}_lbl"]`);
+        const direct = lbl && lbl.querySelector('[onclick*="nlFieldHelp"]');
+        if (direct) return direct;
+
+        if (_lastHelpTrigger) {
+            try {
+                if ((_lastHelpTrigger.getAttribute('onclick') || '').indexOf('nlFieldHelp') !== -1) {
+                    return _lastHelpTrigger;
+                }
+                const scope = _lastHelpTrigger.closest('.uir-label, .uir-label-span, td, th')
+                    || _lastHelpTrigger.parentElement;
+                const near = scope && scope.querySelector('[onclick*="nlFieldHelp"]');
+                if (near) return near;
+            } catch (e) { }
+        }
+
+        const target = String(fieldName).toLowerCase();
+        const all = document.querySelectorAll('[onclick*="nlFieldHelp"]');
+        for (let i = 0; i < all.length; i++) {
+            const args = helpAnchorArgs(all[i]);
+            for (let j = 0; j < args.length; j++) {
+                if (args[j].toLowerCase() === target) return all[i];
+            }
+        }
+        return null;
+    }
+
+    function looksLikeHelp(value, minLen, fieldName) {
+        if (typeof value !== 'string') return false;
+        const t = value.trim();
+        if (t.length < (minLen || 15)) return false;
+        if (!/\s/.test(t)) return false;
+        if (fieldName && t === fieldName) return false;
+        if (/^(javascript:|https?:)/i.test(t)) return false;
+        return true;
+    }
+
+    function helpFromFieldObject(fld) {
+        if (!fld) return '';
+        try {
+            if (typeof fld.getHelp === 'function') {
+                const v = fld.getHelp();
+                if (looksLikeHelp(v)) return String(v).trim();
+            }
+        } catch (e) { }
+
+        const keys = ['help', 'helptext', 'helpText', 'fieldhelp', 'fieldHelp', 'description'];
+        for (let i = 0; i < keys.length; i++) {
+            try {
+                if (looksLikeHelp(fld[keys[i]])) return String(fld[keys[i]]).trim();
+            } catch (e) { }
+        }
+        return '';
+    }
+
+    function readFieldHelpText(fieldName, sublistId) {
+        if (!fieldName) return '';
+
+        try {
+            const fld = (sublistId && typeof nlapiGetLineItemField === 'function')
+                ? nlapiGetLineItemField(sublistId, fieldName)
+                : (typeof nlapiGetField === 'function' ? nlapiGetField(fieldName) : null);
+            const fromField = helpFromFieldObject(fld);
+            if (fromField) return fromField;
+        } catch (e) { }
+
+        const anchor = findHelpAnchor(fieldName);
+        if (anchor) {
+            const label = (anchor.innerText || '').trim();
+            const args = helpAnchorArgs(anchor);
+            for (let i = 0; i < args.length; i++) {
+                if (args[i] !== label && looksLikeHelp(args[i], 25, fieldName)) return args[i];
+            }
+        }
+
+        if (anchor) {
+            const label = (anchor.innerText || '').trim();
+            const tips = [anchor.getAttribute('title'), anchor.getAttribute('data-ns-tooltip')];
+            const holder = anchor.closest('.uir-label, .uir-field-wrapper');
+            if (holder) tips.push(holder.getAttribute('title'), holder.getAttribute('data-ns-tooltip'));
+            for (let i = 0; i < tips.length; i++) {
+                const t = (tips[i] || '').trim();
+                if (t !== label && looksLikeHelp(t, 25, fieldName)) return t;
+            }
+        }
+
+        const ids = [`${fieldName}_help`, `fieldhelp_${fieldName}`, `help_${fieldName}`];
+        for (let i = 0; i < ids.length; i++) {
+            const node = document.getElementById(ids[i]);
+            const txt = node && (node.innerText || node.textContent || '').trim();
+            if (looksLikeHelp(txt, 15, fieldName)) return txt;
+        }
+
+        return '';
+    }
+
+
+
+    const helpTemplates = {};
+    const HELP_FIELD_PARAMS = ['f', 'fl', 'flk'];
+
+    function helpTemplateKey() {
+        return (window.location.pathname || '').toLowerCase();
+    }
+
+    function rememberHelpTemplate(url, source) {
+        try {
+            const qs = String(url).split('?')[1];
+            if (!qs) return;
+            const params = {};
+            qs.split('&').forEach(pair => {
+                const i = pair.indexOf('=');
+                if (i < 1) return;
+                const k = decodeURIComponent(pair.slice(0, i));
+                if (HELP_FIELD_PARAMS.indexOf(k) !== -1) return;
+                params[k] = decodeURIComponent(pair.slice(i + 1).replace(/\+/g, ' '));
+            });
+            if (!Object.keys(params).length) return;
+
+            const key = helpTemplateKey();
+            helpTemplates[key] = params;
+            sfvDiag(`[NSFT SFV] plantilla de ayuda aprendida (${source}) para ${key}`, params);
+            window.postMessage({ type: 'nsft-sfv-help-template', key: key, params: params }, '*');
+        } catch (e) { }
+    }
+
+    function watchForHelpUrl() {
+        const started = Date.now();
+        const look = function () {
+            let found = '';
+            try {
+                const frames = document.querySelectorAll('iframe[src*="fieldhelp.nl"], frame[src*="fieldhelp.nl"]');
+                if (frames.length) found = frames[frames.length - 1].getAttribute('src') || '';
+            } catch (e) { }
+
+            if (found) { rememberHelpTemplate(found, 'iframe de NetSuite'); return; }
+            if (Date.now() - started < 4000) setTimeout(look, 200);
+        };
+        setTimeout(look, 100);
+    }
+
+    function openNativeFieldHelp(fieldName) {
+        const anchor = findHelpAnchor(fieldName);
+        if (!anchor) return false;
+        try {
+            bypassLabelClick = true;
+            anchor.click();
+            watchForHelpUrl();
+            return true;
+        } catch (e) {
+            console.warn('[NSFT SFV] no se pudo abrir la ayuda nativa', e);
+            return false;
+        } finally {
+            bypassLabelClick = false;
+        }
     }
 
     function applyNoIconChange(newVal) {
@@ -475,7 +684,7 @@
         if (!cell) return;
         const targets = [
             ...cell.querySelectorAll('.bigouter, .uir-field, .listinlinefocusedrowcellnoedit, .listinlinefocusedrowcell, [id$="_fs"]')
-        ];
+        ].filter((t) => !/^(?:parent_)?actionbuttons_|^hddn_/.test(t.id || ''));
         if (targets.length === 0) targets.push(cell);
         for (const t of targets) {
             if (t.dataset.nsftSfvPadded) continue;
@@ -575,6 +784,7 @@
                 if (m) linenum = parseInt(m[1], 10);
             }
             linenum = linenum || null;
+            _lastHelpTrigger = (triggerEl && triggerEl.nodeType === 1) ? triggerEl : null;
             initModal();
 
             const modal = document.getElementById(NSFT.MODAL);
@@ -635,6 +845,7 @@
             `;
             document.body.insertAdjacentHTML("beforeend", html);
             addModalListeners();
+            watchModalSize(document.getElementById(NSFT.MODAL));
         }
 
         function addModalListeners() {
@@ -695,6 +906,8 @@
                 }
             });
 
+            window.addEventListener("resize", () => fitModalInViewport());
+
             header.addEventListener("dblclick", () => {
                 if (modal.dataset.state === "minimised") document.getElementById(NSFT.MAX_BTN).click();
             });
@@ -715,6 +928,55 @@
 
             el.style.left = `${newLeft}px`;
             el.style.top = `${newTop}px`;
+        }
+
+        function fitModalInViewport() {
+            const modal = document.getElementById(NSFT.MODAL);
+            if (!modal || modal.style.display === 'none') return;
+            if (modal.dataset.state === 'minimised') return;
+            if (modal.classList.contains('nsft-dragging')) return;
+
+            const MARGIN = 10;
+            const rect = modal.getBoundingClientRect();
+            if (!rect.height || !rect.width) return;
+
+            let top = rect.top;
+            let left = rect.left;
+
+            if (rect.height + MARGIN * 2 >= window.innerHeight) {
+                top = MARGIN;
+            } else {
+                if (top + rect.height > window.innerHeight - MARGIN) {
+                    top = window.innerHeight - rect.height - MARGIN;
+                }
+                if (top < MARGIN) top = MARGIN;
+            }
+
+            if (rect.width + MARGIN * 2 >= window.innerWidth) {
+                left = MARGIN;
+            } else {
+                if (left + rect.width > window.innerWidth - MARGIN) {
+                    left = window.innerWidth - rect.width - MARGIN;
+                }
+                if (left < MARGIN) left = MARGIN;
+            }
+
+            if (Math.round(top) === Math.round(rect.top) && Math.round(left) === Math.round(rect.left)) return;
+
+            modal.style.transform = 'none';
+            modal.style.top = `${top}px`;
+            modal.style.left = `${left}px`;
+            lastMaximizedTop = `${top}px`;
+            lastMaximizedLeft = `${left}px`;
+        }
+
+        let _modalResizeObserver = null;
+        function watchModalSize(modal) {
+            if (_modalResizeObserver || typeof ResizeObserver !== 'function') return;
+            try {
+                _modalResizeObserver = new ResizeObserver(() => fitModalInViewport());
+                _modalResizeObserver.observe(modal);
+            } catch (e) { }
         }
 
         function snapToEdge(el) {
@@ -819,15 +1081,38 @@
             html += `<div class="nsft-sfv-container" style="${animStyle}">`;
 
             const isCustomInfo = fieldName.startsWith('cust');
-            const typeText = isCustomInfo ? (translations.sfv_custom_field || "Custom Field") : "Campo Estándar";
+            const typeText = isCustomInfo
+                ? (translations.sfv_custom_field || "Custom Field")
+                : (translations.sfv_standard_field || "Standard Field");
             const typeBg = isCustomInfo ? "#fffbe6" : "var(--nsft-sfv-accent-soft)";
             const typeBorder = isCustomInfo ? "#ffeebb" : "var(--nsft-sfv-accent-border)";
             const typeColor = isCustomInfo ? "#d97706" : "var(--nsft-sfv-accent)";
 
+            const nativeHelpBadge = findHelpAnchor(fieldName)
+                ? `<span class="nsft-badge nsft-sfv-help-badge" role="button"
+                         title="${escapeHtml(translations.sfv_help_open_tooltip || '')}"
+                         aria-label="${escapeHtml(translations.sfv_help_open_tooltip || '')}"
+                         onclick="window.parent.NSFT_SetFieldValues.openNativeHelp('${escapeJsString(fieldName)}')">
+                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+                   </span>`
+                : '';
+
             html += `<div id="${NSFT.CUSTOM_FIELDS_CONTAINER}" style="border:1px solid ${typeBorder}; background:${typeBg}; padding:6px 10px; border-radius:4px; margin-bottom:8px; display:flex; flex-direction:column; justify-content:center;">
-                        <span style="font-weight:bold; color:${typeColor}; font-size:13px;">${typeText}</span>
+                        <div class="nsft-sfv-type-line">
+                            <span class="nsft-sfv-type-text" style="font-weight:bold; color:${typeColor}; font-size:13px;">${typeText}</span>
+                            ${nativeHelpBadge}
+                        </div>
                         <div id="nsft-custom-field-details"></div>
                      </div>`;
+
+            const helpText = readFieldHelpText(fieldName, sublistId);
+            if (helpText) {
+                html += helpBlockHtml(helpText);
+            } else if (findHelpAnchor(fieldName)) {
+                html += helpBlockHtml('', { id: NSFT.HELP_SLOT, loading: true });
+            } else {
+                sfvDiag(`[NSFT SFV] ayuda "${fieldName}": no se encontró la ayuda nativa de la etiqueta`);
+            }
 
             html += `<div class="nsft-sfv-row">
                         <span class="nsft-sfv-label">${translations.sfv_internal_id}:</span>
@@ -1075,7 +1360,449 @@
                 }
 
                 wireFieldAuditButton(fieldName);
+
+                fillHelpSlot(fieldName);
+
+                requestAnimationFrame(fitModalInViewport);
             }
+        }
+
+        function helpBlockHtml(text, opts) {
+            const o = opts || {};
+            const idAttr = o.id ? ` id="${o.id}"` : '';
+            const body = o.loading
+                ? '<span class="nsft-sfv-help-skeleton"></span>'
+                : escapeHtml(text);
+            return `<div${idAttr} class="nsft-sfv-help" data-collapsed="${helpCollapsed ? '1' : '0'}">
+                        <div class="nsft-sfv-help-head" title="${escapeHtml(translations.sfv_help_toggle || '')}"
+                             onclick="window.parent.NSFT_SetFieldValues.toggleHelp(this)">
+                            <span class="nsft-sfv-help-title">${escapeHtml(translations.sfv_help_label || 'Field help')}</span>
+                            <span class="nsft-sfv-help-caret" aria-hidden="true">▾</span>
+                        </div>
+                        <div class="nsft-sfv-help-text">${body}</div>
+                    </div>`;
+        }
+
+        function fillHelpSlot(fieldName) {
+            if (!document.getElementById(NSFT.HELP_SLOT)) return;
+
+            fetchCustomFieldHelp(fieldName, function (fromQuery) {
+                if (fromQuery) { paintHelp(fieldName, fromQuery, 'suiteql'); return; }
+                fetchFieldHelpPage(fieldName, function (fromPage, url, generic) {
+                    let how = 'sin ayuda';
+                    if (fromPage) how = 'fieldhelp.nl';
+                    else if (generic) how = 'sin ayuda (respuesta genérica)';
+                    else if (!url) how = 'sin ayuda (no se pudo armar la URL)';
+                    paintHelp(fieldName, fromPage, how + (url ? ` → ${url}` : ''));
+                });
+            });
+        }
+
+        function paintHelp(fieldName, text, source) {
+            const el = document.getElementById(NSFT.HELP_SLOT);
+            if (!el || !_lastRenderCtx || _lastRenderCtx.fieldName !== fieldName) return;
+
+            if (!text) sfvDiag(`[NSFT SFV] ayuda "${fieldName}": ${source || '?'}`);
+
+            const body = el.querySelector('.nsft-sfv-help-text');
+
+            if (!text) {
+                collapseAndRemoveHelp(el);
+                return;
+            }
+
+            if (!body) { el.outerHTML = helpBlockHtml(text); return; }
+            swapHelpText(body, text);
+        }
+
+        const HELP_ANIM_MS = 220;
+
+        function swapHelpText(body, text) {
+            const from = body.getBoundingClientRect().height;
+
+            body.textContent = text;
+            const to = body.getBoundingClientRect().height;
+
+            if (!from || Math.abs(to - from) < 2) return;
+
+            body.style.height = `${from}px`;
+            body.style.opacity = '0';
+            body.classList.add('nsft-sfv-anim');
+
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    body.style.height = `${to}px`;
+                    body.style.opacity = '1';
+                });
+            });
+
+            const done = function () {
+                body.removeEventListener('transitionend', done);
+                body.classList.remove('nsft-sfv-anim');
+                body.style.height = '';
+                body.style.opacity = '';
+            };
+            body.addEventListener('transitionend', done);
+            setTimeout(done, HELP_ANIM_MS + 180);
+        }
+
+        function collapseAndRemoveHelp(box) {
+            const from = box.getBoundingClientRect().height;
+            const remove = function () {
+                if (box.parentNode) box.parentNode.removeChild(box);
+            };
+            if (!from) { remove(); return; }
+
+            box.style.height = `${from}px`;
+            box.classList.add('nsft-sfv-anim');
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    box.style.height = '0px';
+                    box.style.opacity = '0';
+                    box.style.marginBottom = '0px';
+                    box.style.paddingTop = '0px';
+                    box.style.paddingBottom = '0px';
+                });
+            });
+
+            box.addEventListener('transitionend', remove);
+            setTimeout(remove, HELP_ANIM_MS + 180);
+        }
+
+        const _customHelpCache = {};
+
+        function stripTags(v) {
+            if (typeof v !== 'string') return '';
+            return v.replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<[^>]*>/g, '')
+                .replace(/&nbsp;/gi, ' ')
+                .replace(/&amp;/gi, '&')
+                .replace(/&lt;/gi, '<')
+                .replace(/&gt;/gi, '>')
+                .trim();
+        }
+
+        const _fieldHelpCache = {};
+
+        function helpParam(v) {
+            return encodeURIComponent(v).replace(/%3A/gi, ':');
+        }
+
+        function pageNameCandidates() {
+            const out = [];
+            const add = (v) => {
+                const s = String(v || '').trim().toLowerCase();
+                if (s && out.indexOf(s) === -1) out.push(s);
+            };
+
+            try {
+                if (typeof nlapiGetRecordType === 'function') add(nlapiGetRecordType());
+            } catch (e) { }
+
+            try {
+                const hidden = document.querySelector('input[name="type"], input[name="rectype"], input[id="type"]');
+                if (hidden && hidden.value) add(hidden.value);
+            } catch (e) { }
+
+            const m = (window.location.pathname || '').match(/\/([a-z0-9_]+)\.nl$/i);
+            if (m) add(m[1]);
+
+            return out;
+        }
+
+        function isTransactionParam() {
+            return /\/accounting\/transactions\//i.test(window.location.pathname || '') ? 'T' : 'F';
+        }
+
+        function formIdParam() {
+            if (isTransactionParam() !== 'T') return '-1';
+            try {
+                if (typeof nlapiGetFieldValue === 'function') {
+                    const v = nlapiGetFieldValue('customform');
+                    if (v) return String(v);
+                }
+            } catch (e) { }
+            return '-1';
+        }
+
+        function accountParam() {
+            try {
+                if (typeof nlapiGetContext === 'function') {
+                    const c = nlapiGetContext().getCompany();
+                    if (c) return String(c);
+                }
+            } catch (e) { }
+            const el = document.querySelector('[href*="/core/help/"][href*="c="], [src*="/core/help/"][src*="c="]');
+            const s = el ? (el.getAttribute('href') || el.getAttribute('src') || '') : '';
+            const m = s.match(/[?&]c=([^&"']+)/);
+            return m ? decodeURIComponent(m[1]) : '';
+        }
+
+        function nsVerParam() {
+            const el = document.querySelector('script[src*="NS_VER="], link[href*="NS_VER="]');
+            const s = el ? (el.getAttribute('src') || el.getAttribute('href') || '') : '';
+            const m = s.match(/NS_VER=([0-9.]+)/);
+            return m ? m[1] : '';
+        }
+
+        function recordTitleParam() {
+            const h1 = document.querySelector('h1.uir-record-type, .uir-record-type, .uir-page-title h1, #pagetitle h1');
+            const t = h1 ? (h1.innerText || h1.textContent || '').trim() : '';
+            return t.replace(/\s+/g, ' ').trim();
+        }
+
+        function fieldLabelParam(anchor) {
+            const t = anchor ? (anchor.innerText || anchor.textContent || '') : '';
+            return t.replace(/\s+/g, ' ').replace(/[\s*:]+$/, '').trim();
+        }
+
+        function pageHelpTopic() {
+            const el = document.querySelector('[href*="topic="], [onclick*="topic="]');
+            const s = el ? (el.getAttribute('href') || el.getAttribute('onclick') || '') : '';
+            const m = s.match(/topic=([A-Za-z0-9_]+)/);
+            return m ? m[1] : '';
+        }
+
+        function buildFieldHelpUrls(fieldName) {
+            const anchor = findHelpAnchor(fieldName);
+            if (!anchor) return [];
+
+            const args = helpAnchorArgs(anchor);
+
+            const appKeys = args.filter(a => /^APP:/i.test(a));
+            const flk = appKeys.filter(a => /^APP:FORMLABEL:/i.test(a))[0] || '';
+            const ftk = appKeys.filter(a => /^APP:HEADING:/i.test(a))[0]
+                || appKeys.filter(a => a !== flk)[0] || '';
+            const topicArg = args.filter(a => !/^APP:/i.test(a) && /^[A-Z][A-Z0-9_]{3,}$/.test(a))[0];
+
+            const fl = flk ? '' : fieldLabelParam(anchor);
+            if (!flk && !fl) {
+                sfvDiag(`[NSFT SFV] "${fieldName}": ni clave ni etiqueta para pedir la ayuda`, args);
+                return [];
+            }
+
+            const params = {
+                f: fieldName,
+                p: '',
+                l: 'NA',
+                flhtp: 'UI',
+                topic: topicArg || pageHelpTopic(),
+                c: accountParam(),
+                pt: 'RECORD',
+                v: formIdParam(),
+                tr: isTransactionParam(),
+                ft: ftk ? '' : recordTitleParam(),
+                ftk: ftk,
+                fl: fl,
+                flk: flk,
+                NS_VER: nsVerParam(),
+                ifrmcntnr: 'T'
+            };
+
+            const DEDUCED = ['v', 'tr', 'c', 'NS_VER'];
+            const build = (p, skip) => {
+                const qs = Object.keys(params)
+                    .filter(k => skip.indexOf(k) === -1)
+                    .map(k => [k, k === 'p' ? p : params[k]])
+                    .filter(pair => pair[1] !== '' && pair[1] != null)
+                    .map(pair => `${pair[0]}=${helpParam(pair[1])}`)
+                    .join('&');
+                return `/core/help/fieldhelp.nl?${qs}`;
+            };
+
+            const pages = pageNameCandidates();
+            if (!pages.length) pages.push('');
+
+            const urls = [];
+
+            const learned = helpTemplates[helpTemplateKey()];
+            if (learned) {
+                const t = Object.assign({}, learned);
+                t.f = fieldName;
+                delete t.fl; delete t.flk;
+                if (flk) t.flk = flk; else if (fl) t.fl = fl;
+                const qs = Object.keys(t)
+                    .filter(k => t[k] !== '' && t[k] != null)
+                    .map(k => `${k}=${helpParam(t[k])}`)
+                    .join('&');
+                urls.push(`/core/help/fieldhelp.nl?${qs}`);
+            }
+
+            pages.forEach(p => {
+                urls.push(build(p, []));
+                urls.push(build(p, DEDUCED));
+            });
+            urls.push(build(pages[0], DEDUCED.concat(['topic', 'ft', 'ftk'])));
+
+            return urls.filter((u, i) => urls.indexOf(u) === i);
+        }
+
+        function extractHelpFromHtml(html, fieldName, hints) {
+            if (!html) return '';
+
+            const lower = String(html).toLowerCase();
+            const senas = [String(fieldName)].concat(hints || []).filter(Boolean);
+            const reconocida = senas.some(s => lower.indexOf(String(s).toLowerCase()) !== -1);
+            if (!reconocida) return '';
+
+            let plain = '';
+            try {
+                const doc = new DOMParser().parseFromString(String(html), 'text/html');
+                doc.querySelectorAll('script, style').forEach(n => n.remove());
+                doc.querySelectorAll('[href*="helpcenter.nl"], [onclick*="helpcenter.nl"]').forEach(a => {
+                    const holder = (a.closest && a.closest('p, div, td, li, span')) || a;
+                    if (holder && holder.remove) holder.remove();
+                });
+                doc.querySelectorAll('br').forEach(br => br.replaceWith(doc.createTextNode('\n')));
+                doc.querySelectorAll('p, div, tr, li, h1, h2, h3, h4, h5, h6, table')
+                    .forEach(el => el.appendChild(doc.createTextNode('\n')));
+                plain = doc.body ? (doc.body.textContent || '') : '';
+            } catch (e) {
+                plain = stripTags(String(html)
+                    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+                    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+                    .replace(/<\/(p|div|tr|li|h[1-6])>/gi, '\n')
+                    .replace(/<br\s*\/?>/gi, '\n'));
+            }
+
+            const id = String(fieldName).toLowerCase();
+            const esLineaDelId = function (line) {
+                const at = line.toLowerCase().indexOf(id);
+                if (at === -1) return false;
+                const resto = (line.slice(0, at) + line.slice(at + id.length)).replace(/[\s:·|–—-]+/g, '');
+                return resto.length <= 20;
+            };
+
+            return plain
+                .split('\n')
+                .map(s => s.replace(/[ \t ]+/g, ' ').trim())
+                .filter(Boolean)
+                .filter(l => !esLineaDelId(l))
+                .filter(l => looksLikeHelp(l, 20, fieldName))
+                .join('\n')
+                .trim();
+        }
+
+        function helpHints(fieldName) {
+            const anchor = findHelpAnchor(fieldName);
+            const label = anchor ? (anchor.innerText || anchor.textContent || '').trim() : '';
+            return label ? [label] : [];
+        }
+
+        function fetchFieldHelpPage(fieldName, cb) {
+            if (Object.prototype.hasOwnProperty.call(_fieldHelpCache, fieldName)) {
+                const c = _fieldHelpCache[fieldName];
+                cb(c.text, c.url, c.generic);
+                return;
+            }
+
+            const urls = buildFieldHelpUrls(fieldName);
+            if (!urls.length || typeof fetch !== 'function') { cb('', '', false); return; }
+
+            const done = function (text, url, generic) {
+                _fieldHelpCache[fieldName] = { text: text || '', url: url || '', generic: !!generic };
+                const c = _fieldHelpCache[fieldName];
+                cb(c.text, c.url, c.generic);
+            };
+
+            const attempt = function (i, lastUrl) {
+                if (i >= urls.length) {
+                    sfvDiag(`[NSFT SFV] ayuda "${fieldName}": ninguna de estas urls trajo texto`, urls);
+                    done('', lastUrl, true);
+                    return;
+                }
+                const url = urls[i];
+
+                fetch(url, { credentials: 'same-origin' })
+                    .then(function (r) { return r.ok ? r.text() : ''; })
+                    .then(function (html) {
+                        const text = extractHelpFromHtml(html, fieldName, helpHints(fieldName));
+                        if (text) { done(text, url, false); return; }
+                        attempt(i + 1, url);
+                    })
+                    .catch(function (e) {
+                        sfvDiagWarn('[NSFT SFV] fieldhelp.nl falló', e);
+                        attempt(i + 1, url);
+                    });
+            };
+
+            attempt(0, '');
+        }
+
+        function customFieldTables(fieldName) {
+            const f = String(fieldName).toLowerCase();
+            if (f.indexOf('custbody') === 0) return ['transactionBodyCustomField'];
+            if (f.indexOf('custcol') === 0) return ['transactionColumnCustomField', 'itemOptionCustomField'];
+            if (f.indexOf('custentity') === 0) return ['entityCustomField'];
+            if (f.indexOf('custitem') === 0) return ['itemCustomField'];
+            if (f.indexOf('custevent') === 0) return ['crmCustomField'];
+            if (f.indexOf('custrecord') === 0) return ['customRecordCustomField', 'otherCustomField'];
+            return [];
+        }
+
+        function pickHelpColumn(row) {
+            if (!row) return '';
+            const candidates = [row.h, row.help, row.d, row.description];
+            for (let i = 0; i < candidates.length; i++) {
+                const t = stripTags(candidates[i]);
+                if (t) return t;
+            }
+            return '';
+        }
+
+        function fetchCustomFieldHelp(fieldName, cb) {
+            if (!fieldName || !/^cust/i.test(fieldName) || typeof require !== 'function') { cb('', false); return; }
+            if (Object.prototype.hasOwnProperty.call(_customHelpCache, fieldName)) {
+                const c = _customHelpCache[fieldName];
+                cb(c.text, c.answered);
+                return;
+            }
+
+            const scriptId = String(fieldName).toUpperCase().replace(/'/g, "''");
+
+            const tables = ['CustomField'].concat(customFieldTables(fieldName));
+            const attempts = [];
+            for (let c = 0; c < 2; c++) {
+                const col = c === 0 ? 'cf.description AS d' : 'cf.help AS h';
+                for (let t = 0; t < tables.length; t++) {
+                    attempts.push(`SELECT ${col} FROM ${tables[t]} cf WHERE UPPER(cf.scriptid) = '${scriptId}'`);
+                }
+            }
+
+            const finish = function (text, answered) {
+                _customHelpCache[fieldName] = { text: text || '', answered: !!answered };
+                cb(_customHelpCache[fieldName].text, _customHelpCache[fieldName].answered);
+            };
+
+            let answered = false;
+
+            require(['N/query'], function (query) {
+                const run = function (idx) {
+                    if (idx >= attempts.length) { finish('', answered); return; }
+
+                    const onRows = function (rows) {
+                        answered = true;
+                        const text = pickHelpColumn(rows && rows[0]);
+                        if (text) finish(text, true);
+                        else run(idx + 1);
+                    };
+                    const onFail = function () { run(idx + 1); };
+
+                    try {
+                        if (query.runSuiteQL.promise) {
+                            query.runSuiteQL.promise({ query: attempts[idx] })
+                                .then(function (rs) {
+                                    return rs.asMappedResults.promise ? rs.asMappedResults.promise() : rs.asMappedResults();
+                                })
+                                .then(onRows)
+                                .catch(onFail);
+                        } else {
+                            onRows(query.runSuiteQL({ query: attempts[idx] }).asMappedResults());
+                        }
+                    } catch (e) { onFail(e); }
+                };
+                run(0);
+            }, function () { finish('', false); });
         }
 
         function wireFieldAuditButton(fieldName) {
@@ -1322,14 +2049,14 @@
                 return;
             }
             const oldLbl = translations.fav_old_value || 'Antes';
-            const newLbl = translations.fav_new_value || 'Después';
+            const newLbl = translations.fav_new_value || 'Despu\u00e9s';
             const copyTip = translations.fav_copy_change || 'Copiar cambio';
             box.innerHTML = rows.map((r) => {
                 const oldRaw = (r.oldvalue == null || r.oldvalue === '') ? '' : String(r.oldvalue);
                 const newRaw = (r.newvalue == null || r.newvalue === '') ? '' : String(r.newvalue);
                 const diff = diffHighlight(oldRaw, newRaw);
                 const ctx = (r.changecontext == null || r.changecontext === '') ? '' : String(r.changecontext);
-                const copyText = `${r.changedate || ''} · ${r.changedby || ''}${ctx ? ' · ' + ctx : ''}\n${oldRaw || '—'} → ${newRaw || '—'}`;
+                const copyText = `${r.changedate || ''} \u00b7 ${r.changedby || ''}${ctx ? ' \u00b7 ' + ctx : ''}\n${oldRaw || '\u2014'} \u2192 ${newRaw || '\u2014'}`;
                 return `
                 <div class="nsft-fav-row">
                     <div class="nsft-fav-meta">
@@ -1858,6 +2585,43 @@
                 full.style.display = expanded ? 'none' : 'inline';
                 short.style.display = expanded ? 'inline' : 'none';
                 btn.textContent = expanded ? (btn.dataset.more || '') : (btn.dataset.less || '');
+            },
+            openNativeHelp: function (fieldName) {
+                openNativeFieldHelp(fieldName);
+            },
+            toggleHelp: function (headEl) {
+                const box = headEl && headEl.closest('.nsft-sfv-help');
+                if (!box) return;
+                helpCollapsed = box.dataset.collapsed !== '1';
+                box.dataset.collapsed = helpCollapsed ? '1' : '0';
+                try {
+                    window.postMessage({ type: 'nsft-sfv-help-collapsed', collapsed: helpCollapsed }, '*');
+                } catch (e) { }
+            },
+            diagnoseHelp: function (fieldName) {
+                const anchor = findHelpAnchor(fieldName);
+                console.log('%c[NSFT SFV] diagnóstico de ayuda: ' + fieldName, 'font-weight:bold');
+                console.log('  etiqueta encontrada:', !!anchor);
+                if (anchor) {
+                    console.log('  onclick:', anchor.getAttribute('onclick') || '(sin onclick)');
+                    console.log('  argumentos:', helpAnchorArgs(anchor));
+                }
+                console.log('  lectura directa:', readFieldHelpText(fieldName, null) || '(nada)');
+                console.log('  plantilla aprendida:', helpTemplates[helpTemplateKey()] || '(ninguna)');
+
+                const urls = buildFieldHelpUrls(fieldName);
+                console.log('  urls a probar:', urls);
+                urls.forEach(function (url, i) {
+                    fetch(url, { credentials: 'same-origin' })
+                        .then(function (r) { return r.text().then(function (t) { return { s: r.status, t: t }; }); })
+                        .then(function (res) {
+                            const text = extractHelpFromHtml(res.t, fieldName, helpHints(fieldName));
+                            console.log(`  [${i + 1}/${urls.length}] status=${res.s} bytes=${res.t.length} texto=${text ? '"' + text.slice(0, 200) + '"' : '(vacío)'}`);
+                            if (i === 0) console.log('  html de la 1ª (600 primeros):', res.t.slice(0, 600));
+                        })
+                        .catch(function (e) { console.log(`  [${i + 1}/${urls.length}] ERROR`, e); });
+                });
+                return 'ver consola';
             },
             closeHelpWindow: closeHelpWindow
         };

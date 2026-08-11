@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NSFT — Record Logs</title>
+    <link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
+    <link rel="stylesheet" href="../scripts/modules/_shared/nsft_log_format.css">
+    <link rel="stylesheet" href="../scripts/modules/_shared/nsft_code_card.css">
+    <link rel="stylesheet" href="../scripts/modules/_shared/nsft_modal.css">
+    <link rel="stylesheet" href="../scripts/modules/record_logs_viewer/record_logs_viewer.css">
+    <style>
+        /* Lo único propio del panel: la página en sí no pinta nada — el visor
+           llena todo. El fondo sigue al tema para que no haya destello blanco
+           en oscuro mientras el visor monta. */
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        html[data-nsft-theme="dark"],
+        html[data-nsft-theme="dark"] body {
+            background: var(--nsft-dk-deepest, #0D0E10);
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../scripts/libs/highlight/highlight.min.js"></script>
+    <script src="../scripts/libs/highlight/languages/json.min.js"></script>
+    <script src="../scripts/libs/highlight/languages/sql.min.js"></script>
+    <script src="../scripts/modules/_shared/nsft_log_format.js"></script>
+    <script src="../scripts/modules/_shared/nsft_suiteql_rest.js"></script>
+    <script src="record_logs_panel.js"></script>
+    <script src="../scripts/modules/record_logs_viewer/record_logs_viewer.js"></script>
+</body>
+
+</html>

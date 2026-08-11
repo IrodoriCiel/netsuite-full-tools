@@ -25,10 +25,19 @@ html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([i
     filter: var(--nsft-inv) !important;
 }
 
-html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([class*="record-icon"]):not([src*="chrome-extension:"]),
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) img:not([src$=".svg"]):not([src*="/uirefresh/"]):not([src*="/images/nav/"]):not([class*="record-icon"]):not([class*="checkboximage"]):not([src*="chrome-extension:"]):not([alt="logo"]):not([aria-label="logo"]):not([id*="logo"]),
 html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) video,
 html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) canvas {
     filter: var(--nsft-reinv) !important;
+}
+
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) .nsft-code-fields-prettier-wrapper,
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) .nsft-logfmt-wrapper {
+    filter: var(--nsft-reinv) !important;
+}
+
+html.nsft-dark-on:not(.nsft-editor-themed) #nsft-isp-container iframe[name="nsft-in-search-preview"] {
+    filter: var(--nsft-inv) !important;
 }
 
 html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) input[type="checkbox"],

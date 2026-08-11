@@ -7,7 +7,7 @@
         window.__nsftSuiteletTools = { _ready: true };
     }
 
-    const STATE_CACHE_KEY = 'nsftSuiteletToolsCache:';
+    const STATE_CACHE_KEY = 'nsftSuiteletToolsCache2:';
     const STATE_CACHE_TTL_MS = 60 * 60 * 1000;
 
     const IS_EXTFORMS = /\.extforms\.netsuite\.com$/i.test(location.hostname);
@@ -388,19 +388,29 @@
         const cached = readCache(scriptId);
         const state = cached
             ? { ...cached, resolved: !!(cached.scriptFileId && cached.deployInternalId) }
-            : { scriptFileId: null, deployInternalId: null, deployHref: null, resolved: false };
+            : { scriptFileId: null, deployInternalId: null, deployHref: null, scriptInternalId: null, resolved: false };
+
+        if (!state.scriptInternalId && /^\d+$/.test(scriptId)) state.scriptInternalId = scriptId;
 
         try {
-            if (typeof nlapiSearchRecord !== 'undefined' && scriptId && !state.deployInternalId) {
-                const filters = [['script', 'is', scriptId]];
+            if (typeof nlapiSearchRecord !== 'undefined' && scriptId
+                && !state.scriptInternalId && !/^\d+$/.test(scriptId)) {
+                const found = nlapiSearchRecord('script', null, [['scriptid', 'is', scriptId]]);
+                if (found && found[0]) state.scriptInternalId = found[0].getId();
+            }
+
+            const sid = state.scriptInternalId;
+
+            if (typeof nlapiSearchRecord !== 'undefined' && sid && !state.deployInternalId) {
+                const filters = [['script', 'is', sid]];
                 if (deployParam && !/^\d+$/.test(deployParam)) {
                     filters.push('AND', ['scriptid', 'is', deployParam]);
                 }
                 const result = nlapiSearchRecord('scriptdeployment', null, filters)[0];
                 if (result) state.deployInternalId = result.getId();
             }
-            if (typeof nlapiLookupField !== 'undefined' && scriptId && !state.scriptFileId) {
-                state.scriptFileId = nlapiLookupField('script', scriptId, 'scriptfile');
+            if (typeof nlapiLookupField !== 'undefined' && sid && !state.scriptFileId) {
+                state.scriptFileId = nlapiLookupField('script', sid, 'scriptfile');
             }
         } catch (e) { }
 
@@ -416,8 +426,12 @@
             if (elem) elem.addEventListener('click', handler);
         };
 
-        addClick('nsft-suitelet-tools-open-script-record', () => {
-            window.open(`${APP_BASE}/app/common/scripting/script.nl?id=${encodeURIComponent(scriptId)}`);
+        const scriptRecordUrl = () => `${APP_BASE}/app/common/scripting/script.nl?id=`
+            + encodeURIComponent(state.scriptInternalId || scriptId);
+
+        addClick('nsft-suitelet-tools-open-script-record', async () => {
+            await ensureScriptRecordResolved(scriptId, deployParam, state);
+            window.open(scriptRecordUrl());
         });
 
         addClick('nsft-suitelet-tools-open-deploy-record', async () => {
@@ -429,7 +443,7 @@
             } else if (deployParam) {
                 window.open(`${APP_BASE}/app/common/scripting/scriptrecord.nl?id=${encodeURIComponent(deployParam)}`);
             } else {
-                window.open(`${APP_BASE}/app/common/scripting/script.nl?id=${encodeURIComponent(scriptId)}`);
+                window.open(scriptRecordUrl());
             }
         });
 
@@ -438,7 +452,7 @@
             if (state.scriptFileId) {
                 window.open(`${APP_BASE}/app/common/record/edittextmediaitem.nl?id=${state.scriptFileId}&e=T&l=T&target=filesize&syntaxHighlighting=T`);
             } else {
-                window.open(`${APP_BASE}/app/common/scripting/script.nl?id=${encodeURIComponent(scriptId)}`);
+                window.open(scriptRecordUrl());
             }
         });
 
@@ -450,7 +464,7 @@
             target.searchParams.set('sortcol', 'timestamp');
             target.searchParams.set('sortdir', 'DESC');
             target.searchParams.set('loglevel', '');
-            target.searchParams.set('scriptId', scriptId);
+            target.searchParams.set('scriptId', state.scriptInternalId || scriptId);
             if (state.deployInternalId) target.searchParams.set('scriptRecordId', state.deployInternalId);
             window.open(target.toString());
         });
@@ -458,13 +472,13 @@
 
     async function ensureScriptRecordResolved(scriptId, deployParam, state) {
         if (state.resolved) return;
-        if (state.scriptFileId && state.deployInternalId) {
+        if (state.scriptFileId && state.deployInternalId && state.scriptInternalId) {
             state.resolved = true;
             persistState(scriptId, state);
             return;
         }
         try {
-            const html = await fetchScriptHtml(scriptId);
+            const html = await fetchScriptHtml(scriptId, state);
             if (!html) { state.resolved = true; return; }
             const doc = new DOMParser().parseFromString(html, 'text/html');
 
@@ -512,6 +526,12 @@
                     state.deployHref = IS_EXTFORMS ? null : matched.href;
                 }
             }
+            if (!state.scriptInternalId && state.deployInternalId) {
+                const depHtml = await fetchHtml(
+                    `/app/common/scripting/scriptrecord.nl?id=${encodeURIComponent(state.deployInternalId)}`);
+                const m = depHtml && depHtml.match(/script\.nl\?id=(\d+)/i);
+                if (m) state.scriptInternalId = m[1];
+            }
         } catch (e) {
         } finally {
             state.resolved = true;
@@ -519,8 +539,12 @@
         }
     }
 
-    function fetchScriptHtml(scriptId) {
-        const path = `/app/common/scripting/script.nl?id=${encodeURIComponent(scriptId)}`;
+    function fetchScriptHtml(scriptId, state) {
+        const internal = (state && state.scriptInternalId) || scriptId;
+        return fetchHtml(`/app/common/scripting/script.nl?id=${encodeURIComponent(internal)}`);
+    }
+
+    function fetchHtml(path) {
         if (!IS_EXTFORMS) {
             return fetch(path, { credentials: 'same-origin' })
                 .then((r) => (r.ok ? r.text() : null))

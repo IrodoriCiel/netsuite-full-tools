@@ -16,8 +16,10 @@
         return;
     }
 
-    const IS_MAC = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
-    const MOD = IS_MAC ? 'Cmd' : 'Ctrl';
+    const IS_MAC = window.NSFT_MacKeys
+        ? window.NSFT_MacKeys.isMac
+        : /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
+    const MOD = window.NSFT_MacKeys ? window.NSFT_MacKeys.mod : (IS_MAC ? 'Cmd' : 'Ctrl');
 
     const STATIC_GROUPS = [
         {

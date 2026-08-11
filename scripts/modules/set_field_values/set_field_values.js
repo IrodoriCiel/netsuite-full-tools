@@ -5,9 +5,23 @@
     const AUDIT_KEY = 'enableFieldAuditQuickView';
     const NO_ICON_KEY = 'setFieldValuesNoIcon';
     const NSFT_THEME_KEY = 'nsftTheme';
+    const HELP_COLLAPSED_KEY = 'nsftSfvHelpCollapsed';
+    const HELP_TEMPLATES_KEY = 'nsftSfvHelpTemplates';
+    const HELP_TEMPLATES_MAX = 40;
+    const DIAG_KEY = 'nsftSelectorDiagnostics';
+    const DIAG_FLAG = 'nsftSfvDiag';
+
+    function _stampDiag(on) {
+        try {
+            if (on) document.documentElement.dataset[DIAG_FLAG] = '1';
+            else delete document.documentElement.dataset[DIAG_FLAG];
+        } catch (e) { }
+    }
     let _nsftTheme = 'light';
     let _auditEnabled = true;
     let _noIcon = true;
+    let _helpCollapsed = false;
+    let _helpTemplates = {};
 
     function _resolveTheme() {
         return _nsftTheme === 'dark' ? 'dark' : 'light';
@@ -17,17 +31,49 @@
         [STORAGE_KEY]: true,
         [AUDIT_KEY]: true,
         [NO_ICON_KEY]: true,
-        [NSFT_THEME_KEY]: 'light'
+        [HELP_COLLAPSED_KEY]: false,
+        [HELP_TEMPLATES_KEY]: {},
+        [NSFT_THEME_KEY]: 'light',
+        [DIAG_KEY]: false
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
+        _stampDiag(items[DIAG_KEY] === true);
         _nsftTheme = items[NSFT_THEME_KEY] || 'light';
         _auditEnabled = items[AUDIT_KEY] !== false;
         _noIcon = items[NO_ICON_KEY] !== false;
+        _helpCollapsed = items[HELP_COLLAPSED_KEY] === true;
+        _helpTemplates = (items[HELP_TEMPLATES_KEY] && typeof items[HELP_TEMPLATES_KEY] === 'object')
+            ? items[HELP_TEMPLATES_KEY] : {};
         init(items);
+    });
+
+    window.addEventListener('message', (event) => {
+        if (event.source !== window || !event.data) return;
+
+        if (event.data.type === 'nsft-sfv-help-collapsed') {
+            _helpCollapsed = event.data.collapsed === true;
+            chrome.storage.local.set({ [HELP_COLLAPSED_KEY]: _helpCollapsed });
+            return;
+        }
+
+        if (event.data.type === 'nsft-sfv-help-template') {
+            const key = String(event.data.key || '');
+            const params = event.data.params;
+            if (!key || !params || typeof params !== 'object') return;
+
+            _helpTemplates[key] = params;
+            const keys = Object.keys(_helpTemplates);
+            if (keys.length > HELP_TEMPLATES_MAX) {
+                keys.slice(0, keys.length - HELP_TEMPLATES_MAX)
+                    .forEach(k => { delete _helpTemplates[k]; });
+            }
+            chrome.storage.local.set({ [HELP_TEMPLATES_KEY]: _helpTemplates });
+        }
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
+        if (changes[DIAG_KEY]) _stampDiag(changes[DIAG_KEY].newValue === true);
         if (changes[NSFT_THEME_KEY]) {
             _nsftTheme = changes[NSFT_THEME_KEY].newValue || 'light';
             window.postMessage({ type: 'nsft-set-field-values-theme', theme: _resolveTheme() }, '*');
@@ -39,6 +85,10 @@
         if (changes[AUDIT_KEY]) {
             _auditEnabled = changes[AUDIT_KEY].newValue !== false;
             window.postMessage({ type: 'nsft-set-field-values-audit', auditEnabled: _auditEnabled }, '*');
+        }
+        if (changes[HELP_COLLAPSED_KEY]) {
+            _helpCollapsed = changes[HELP_COLLAPSED_KEY].newValue === true;
+            window.postMessage({ type: 'nsft-set-field-values-helpcollapsed', collapsed: _helpCollapsed }, '*');
         }
     });
 
@@ -65,6 +115,10 @@
                 sfv_copy_field_id: chrome.i18n.getMessage("sfv_copy_field_id"),
                 sfv_copied: chrome.i18n.getMessage("sfv_copied"),
                 sfv_custom_field: chrome.i18n.getMessage("sfv_custom_field"),
+                sfv_standard_field: chrome.i18n.getMessage("sfv_standard_field"),
+                sfv_help_label: chrome.i18n.getMessage("sfv_help_label"),
+                sfv_help_toggle: chrome.i18n.getMessage("sfv_help_toggle"),
+                sfv_help_open_tooltip: chrome.i18n.getMessage("sfv_help_open_tooltip"),
                 sfv_field_type: chrome.i18n.getMessage("sfv_field_type"),
                 sfv_list: chrome.i18n.getMessage("sfv_list"),
                 sfv_go_to_source_list: chrome.i18n.getMessage("sfv_go_to_source_list"),
@@ -114,7 +168,9 @@
                 translations: translations,
                 theme: _resolveTheme(),
                 auditEnabled: _auditEnabled,
-                noIcon: _noIcon
+                noIcon: _noIcon,
+                helpCollapsed: _helpCollapsed,
+                helpTemplates: _helpTemplates
             }, '*');
         };
         (document.head || document.documentElement).appendChild(script);

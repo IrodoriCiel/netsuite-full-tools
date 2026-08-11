@@ -1,12 +1,18 @@
 
 .sb-option,
 .rp-option,
-.pd-option {
+.pd-option,
+.td-option {
     margin-left: 5px !important;
+    font-weight: 600 !important;
+}
+
+.nsft-env-badge--propia {
     border-radius: 10px;
 }
 
-body[data-page-theme="redwood"] .pd-option {
+body[data-page-theme="redwood"] .pd-option.nsft-env-badge--propia,
+body[data-page-theme="redwood"] .td-option.nsft-env-badge--propia {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
@@ -15,6 +21,26 @@ body[data-page-theme="redwood"] .pd-option {
     font-size: 11px;
     font-weight: 600;
     line-height: 1.4;
+}
+
+body:not([data-page-theme="redwood"]) .pd-option.nsft-env-badge--propia,
+body:not([data-page-theme="redwood"]) .td-option.nsft-env-badge--propia {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 8px !important;
+    min-width: 22px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+}
+
+[data-widget="Badge"] .sb-option,
+[data-widget="Badge"] .rp-option,
+[data-widget="Badge"] .pd-option,
+[data-widget="Badge"] .td-option {
+    margin-left: 0 !important;
 }
 
 .sb-option {
@@ -39,6 +65,36 @@ body[data-page-theme="redwood"] .pd-option {
 .pd-option::after {
     content: attr(data-content) !important;
     color: inherit !important;
+}
+
+.td-option {
+    background: linear-gradient(to bottom, #f9f0ff 0%, #efdbff 100%) !important;
+    color: #391085 !important;
+}
+
+.td-option::after {
+    content: attr(data-content) !important;
+    color: inherit !important;
+}
+
+.sb-option.nsft-env-suffix::after,
+.rp-option.nsft-env-suffix::after {
+    content: attr(data-content);
+    color: inherit !important;
+}
+
+.sb-option.nsft-env-code::after,
+.rp-option.nsft-env-code::after,
+.uif39.sb-option.nsft-env-code::after,
+.uif39.rp-option.nsft-env-code::after {
+    content: attr(data-content) !important;
+    color: inherit !important;
+}
+
+body[data-page-theme="redwood"] .sb-option,
+body[data-page-theme="redwood"] .rp-option {
+    min-width: 22px;
+    text-align: center;
 }
 
 

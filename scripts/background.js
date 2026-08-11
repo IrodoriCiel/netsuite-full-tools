@@ -391,6 +391,47 @@ function safeTabsUngroup(tabIds) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!message) return;
 
+    if (message.nsftRlv === 'openPanel') {
+        const tabId = sender && sender.tab ? sender.tab.id : null;
+        if (typeof tabId !== 'number' || !chrome.sidePanel) {
+            sendResponse({ ok: false, reason: 'no_side_panel' });
+            return;
+        }
+        try {
+            chrome.sidePanel.setOptions({ tabId, path: 'sidepanel/record_logs_panel.html', enabled: true });
+            chrome.sidePanel.open({ tabId })
+                .then(() => sendResponse({ ok: true }))
+                .catch((e) => sendResponse({ ok: false, reason: (e && e.message) || 'side_panel_failed' }));
+        } catch (e) {
+            sendResponse({ ok: false, reason: (e && e.message) || 'side_panel_failed' });
+            return;
+        }
+        return true;
+    }
+
+    if (message.nsftPanel === 'open') {
+        const PANEL_PATHS = {
+            ro: 'sidepanel/record_object_panel.html',
+            ai: 'sidepanel/ai_panel.html'
+        };
+        const path = PANEL_PATHS[message.panel];
+        const tabId = sender && sender.tab ? sender.tab.id : null;
+        if (!path || typeof tabId !== 'number' || !chrome.sidePanel) {
+            sendResponse({ ok: false, reason: 'no_side_panel' });
+            return;
+        }
+        try {
+            chrome.sidePanel.setOptions({ tabId, path, enabled: true });
+            chrome.sidePanel.open({ tabId })
+                .then(() => sendResponse({ ok: true }))
+                .catch((e) => sendResponse({ ok: false, reason: (e && e.message) || 'side_panel_failed' }));
+        } catch (e) {
+            sendResponse({ ok: false, reason: (e && e.message) || 'side_panel_failed' });
+            return;
+        }
+        return true;
+    }
+
     if (message.action === 'nsftCloseSenderTab') {
         const senderTabId = sender && sender.tab ? sender.tab.id : null;
         if (typeof senderTabId !== 'number') {

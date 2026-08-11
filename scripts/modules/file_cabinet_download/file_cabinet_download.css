@@ -148,7 +148,7 @@
 }
 
 .nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-check input {
-    accent-color: #6E7CF5;
+    accent-color: var(--nsft-ns-accent-light, #7FB0FF);
 }
 
 .nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-status {
@@ -160,7 +160,7 @@
 }
 
 .nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-bar-fill {
-    background: #6E7CF5;
+    background: var(--nsft-ns-accent, #3b82f6);
 }
 
 .nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-actions button {
@@ -175,12 +175,12 @@
 }
 
 .nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-actions button.nsft-fcdl-go {
-    background: #6E7CF5;
-    border-color: #6E7CF5;
+    background: var(--nsft-ns-accent, #3b82f6);
+    border-color: var(--nsft-ns-accent-light, #7FB0FF);
     color: #ffffff;
 }
 
 .nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-actions button.nsft-fcdl-go:hover:not(:disabled) {
-    background: #7E8BF7;
-    border-color: #7E8BF7;
+    background: var(--nsft-ns-accent-hover, #2563eb);
+    border-color: var(--nsft-ns-accent-light-hover, #93C5FD);
 }

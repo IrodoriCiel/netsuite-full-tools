@@ -3,6 +3,63 @@
     if (window.__nsftAiAgentInit) return;
     window.__nsftAiAgentInit = true;
 
+    const PANEL_MODE = location.protocol === 'chrome-extension:';
+    let _pageOrigin = PANEL_MODE ? null : location.origin;
+    let _pageHrefAi = PANEL_MODE ? null : location.href;
+
+    const AI_FETCHER_PATH = 'scripts/modules/suiteql_runner/suiteql_fetcher.js';
+
+    function pageOrigin() { return _pageOrigin; }
+
+    let _tabWatchAi = false;
+    function seguirPestanaAi(client) {
+        if (_tabWatchAi || !client) return;
+        if (typeof chrome === 'undefined' || !chrome.tabs) return;
+        _tabWatchAi = true;
+        let timer = null;
+        let seq = 0;
+        const resolver = (mySeq, intento) => {
+            if (mySeq !== seq) return;
+            client.pageInfo().then((info) => {
+                if (mySeq !== seq) return;
+                if (info && info.href) {
+                    _pageOrigin = info.origin || null;
+                    _pageHrefAi = info.href;
+                    return;
+                }
+                if (intento < 10) { setTimeout(() => resolver(mySeq, intento + 1), 400); return; }
+                _pageOrigin = null;
+                _pageHrefAi = null;
+            });
+        };
+        const revalidar = () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => { resolver(++seq, 0); }, 250);
+        };
+        try {
+            chrome.tabs.onActivated.addListener(revalidar);
+            chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+                if (changeInfo.url || changeInfo.status === 'complete') revalidar();
+            });
+            if (chrome.windows && chrome.windows.onFocusChanged) {
+                chrome.windows.onFocusChanged.addListener(revalidar);
+            }
+        } catch (e) { }
+    }
+
+    function nsFetch(url, init) {
+        if (!PANEL_MODE) return fetch(url, init);
+        const client = window.NSFT_PanelClient;
+        if (!client) return Promise.reject(new Error('no_netsuite_tab'));
+        return client.fetch(String(url), init);
+    }
+
+    function aiPost(msg) {
+        if (!PANEL_MODE) { window.postMessage(msg, '*'); return; }
+        const client = window.NSFT_PanelClient;
+        if (client) client.post(msg, { inject: AI_FETCHER_PATH, relay: ['extension_sql_ai'] });
+    }
+
     const CFG = {
         providerKey: 'nsft_ai_provider_key',
         apiKey: 'nsft_ai_apikey',
@@ -19,7 +76,8 @@
         allowWrites: 'nsft_ai_allow_writes',
         budget: 'nsft_ai_budget'
     };
-    const SCHEMA_CACHE_KEY = 'nsft_sql_schema_cache';
+    const SCHEMA_INDEX_KEY = 'nsft_sql_schema_index';
+    const SCHEMA_ENTRY_PREFIX = 'nsft_sql_schema__';
     const DOCK_WIDTH_KEY = 'nsft_ai_dock_width';
     const DOCK_OPEN_KEY = 'nsft_ai_dock_open';
 
@@ -297,10 +355,10 @@
     function loadSchemaHint(prompt) {
         return new Promise((resolve) => {
             try {
-                chrome.storage.local.get([SCHEMA_CACHE_KEY], (items) => {
-                    const all = (items && items[SCHEMA_CACHE_KEY]) || {};
-                    const acct = all[getNsAccountId()] || {};
-                    const tables = Object.keys(acct);
+                chrome.storage.local.get([SCHEMA_INDEX_KEY], (items) => {
+                    const accountId = getNsAccountId();
+                    const index = ((items && items[SCHEMA_INDEX_KEY]) || {})[accountId] || {};
+                    const tables = Object.keys(index);
                     if (!tables.length) { resolve(''); return; }
 
                     const lines = ['Tables already seen in this account (names only; verify anything else with tools): ' +
@@ -309,9 +367,8 @@
                     const words = normTxt(prompt).match(/[a-z0-9_]{4,}/g) || [];
                     const scored = [];
                     tables.forEach((t) => {
-                        const raw = (acct[t] && acct[t].rawData) || {};
                         const name = normTxt(t);
-                        const label = normTxt(raw.label);
+                        const label = normTxt(index[t] && index[t].label);
                         let score = 0;
                         words.forEach((w) => {
                             const ws = w.replace(/(es|s)$/, '');
@@ -319,15 +376,18 @@
                             if (name.includes(ws) || ws.includes(name)) score += 2;
                             else if (label && label.includes(ws)) score += 1;
                         });
-                        if (score > 0 && Array.isArray(raw.fields) && raw.fields.length) {
-                            scored.push({ t, raw, score });
-                        }
+                        if (score > 0) scored.push({ t, score });
                     });
                     scored.sort((x, y) => y.score - x.score);
                     const picked = scored.slice(0, SCHEMA_CTX_MAX_TABLES);
-                    if (picked.length) {
-                        lines.push('=== Known schema for tables relevant to this request (from local cache; field format id:type) ===');
-                        picked.forEach(({ t, raw }) => {
+                    if (!picked.length) { resolve(lines.join('\n')); return; }
+
+                    const keys = picked.map((p) => SCHEMA_ENTRY_PREFIX + accountId + '__' + p.t);
+                    chrome.storage.local.get(keys, (entries) => {
+                        const detail = [];
+                        picked.forEach(({ t }, i) => {
+                            const raw = (entries[keys[i]] || {}).rawData;
+                            if (!raw || !Array.isArray(raw.fields) || !raw.fields.length) return;
                             const fields = raw.fields
                                 .filter((f) => f && f.id && f.isColumn !== false && f.removed !== true)
                                 .slice(0, SCHEMA_CTX_MAX_FIELDS)
@@ -341,10 +401,14 @@
                                     .map((j) => (j.fieldId || j.id) + ' -> ' + j.sourceTargetType.id);
                                 if (joins.length) line += ' | joins: ' + joins.join(', ');
                             }
-                            lines.push(line);
+                            detail.push(line);
                         });
-                    }
-                    resolve(lines.join('\n'));
+                        if (detail.length) {
+                            lines.push('=== Known schema for tables relevant to this request (from local cache; field format id:type) ===');
+                            lines.push.apply(lines, detail);
+                        }
+                        resolve(lines.join('\n'));
+                    });
                 });
             } catch (e) { resolve(''); }
         });
@@ -434,12 +498,13 @@
     }
 
     function ensureFetcher() {
+        if (PANEL_MODE) return Promise.resolve();
         return new Promise((resolve) => {
             if (document.getElementById(FETCHER_SCRIPT_ID)) { resolve(); return; }
             try {
                 const s = document.createElement('script');
                 s.id = FETCHER_SCRIPT_ID;
-                s.src = chrome.runtime.getURL('scripts/modules/suiteql_runner/suiteql_fetcher.js');
+                s.src = chrome.runtime.getURL(AI_FETCHER_PATH);
                 s.onload = () => setTimeout(resolve, 150);
                 (document.head || document.documentElement).appendChild(s);
             } catch (e) { resolve(); }
@@ -467,8 +532,10 @@
 
     async function runSuiteQLRest(query, limit) {
         const cap = Math.min(1000, Math.max(1, limit || 1000));
-        const url = new URL('/services/rest/query/v1/suiteql?limit=' + cap, location.origin);
-        const res = await fetch(url.href, {
+        const base = pageOrigin();
+        if (!base) throw new Error('no_netsuite_tab');
+        const url = new URL('/services/rest/query/v1/suiteql?limit=' + cap, base);
+        const res = await nsFetch(url.href, {
             method: 'POST',
             credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json', 'Prefer': 'transient' },
@@ -508,7 +575,7 @@
                 const st = e && e.httpStatus;
                 if (st == null || st === 401 || st === 403 || st === 404) {
                     _restSuiteQLBroken = true;
-                    if (st != null) rememberRestOff();
+                    if (st === 403 || st === 404) rememberRestOff();
                 } else {
                     throw e;
                 }
@@ -531,10 +598,10 @@
             };
             window.addEventListener('message', onMsg);
             ensureFetcher().then(() => {
-                window.postMessage({
+                aiPost({
                     dest: 'fetcher_sql', type: 'execute_SQL', reqId,
                     payload: { query: withRowLimit(query, limit || TOOL_ROW_CAP), maxRecords: limit || TOOL_ROW_CAP }
-                }, '*');
+                });
             });
             setTimeout(() => {
                 if (settled) return;
@@ -558,7 +625,7 @@
             };
             window.addEventListener('message', onMsg);
             ensureFetcher().then(() => {
-                window.postMessage({ dest: 'fetcher_sql', type: 'update_record', reqId, payload: { recordType, recordId, values } }, '*');
+                aiPost({ dest: 'fetcher_sql', type: 'update_record', reqId, payload: { recordType, recordId, values } });
             });
             setTimeout(() => {
                 if (settled) return;
@@ -571,16 +638,18 @@
     const CATALOG_MAX_PARSE = 700000;
 
     function fetchRecordCatalog(action, scriptId) {
+        const base = pageOrigin();
+        if (!base) return Promise.reject(new Error('no_netsuite_tab'));
         let url;
         if (action === 'detail') {
             const data = encodeURIComponent(JSON.stringify({ scriptId: scriptId || '', path: '' }));
-            url = location.origin + '/app/recordscatalog/rcendpoint.nl?action=getRecordTypeDetail&data=' + data;
+            url = base + '/app/recordscatalog/rcendpoint.nl?action=getRecordTypeDetail&data=' + data;
         } else {
-            url = location.origin + '/app/recordscatalog/rcendpoint.nl?action=getRecordTypes';
+            url = base + '/app/recordscatalog/rcendpoint.nl?action=getRecordTypes';
         }
         const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
         const to = ctrl ? setTimeout(() => { try { ctrl.abort(); } catch (e) {} }, 15000) : null;
-        return fetch(url, { credentials: 'include', headers: { 'Accept': 'application/json' }, signal: ctrl ? ctrl.signal : undefined })
+        return nsFetch(url, { credentials: 'include', headers: { 'Accept': 'application/json' }, signal: ctrl ? ctrl.signal : undefined })
             .then((r) => { if (to) clearTimeout(to); if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
             .then((t) => {
                 if (t.length > CATALOG_MAX_PARSE) return { __tooLarge: true, __len: t.length };
@@ -801,15 +870,18 @@
 
     function getOpenPageContext() {
         try {
-            const params = new URLSearchParams(location.search);
+            const base = PANEL_MODE ? _pageHrefAi : location.href;
+            if (!base) return '';
+            const u = new URL(base);
+            const params = u.searchParams;
             const id = params.get('id');
             const rectype = params.get('rectype');
-            const m = location.pathname.match(/\/app\/.*\/([a-z0-9_]+)\.nl$/i);
-            const bits = ['url=' + location.origin + location.pathname + (location.search || '')];
+            const m = u.pathname.match(/\/app\/.*\/([a-z0-9_]+)\.nl$/i);
+            const bits = ['url=' + u.origin + u.pathname + (u.search || '')];
             if (m) bits.push('page=' + m[1]);
             if (id && /^\d+$/.test(id)) bits.push('record internalid=' + id);
             if (rectype && /^\d+$/.test(rectype)) bits.push('custom record rectype=' + rectype);
-            const t = (document.title || '').trim();
+            const t = PANEL_MODE ? '' : (document.title || '').trim();
             if (t) bits.push('title="' + t.slice(0, 120).replace(/"/g, "'") + '"');
             return bits.join(' | ');
         } catch (e) { return ''; }
@@ -998,6 +1070,7 @@
         const agentTools = level >= 4 ? [TOOL, CATALOG_TOOL] : [TOOL_LITE];
         if (cfg.allowWrites) { agentTools.push(WRITE_TOOL); system += '\n' + WRITE_RULES; }
         const maxRows = Math.min(500, Math.max(1, cfg.maxRows || TOOL_ROW_CAP));
+        let lastToolSql = '';
         let messages = Array.isArray(history) ? history.slice() : [];
         if (!resuming) {
             const userText = editorSql
@@ -1061,9 +1134,14 @@
 
             if (resp.stopReason !== 'tool_use' || !(resp.toolCalls || []).length) {
                 if (Array.isArray(history)) { history.length = 0; for (const m of messages) history.push(m); }
-                const emitted = extractSql(resp.text || '');
+                let finalText = resp.text || '';
+                let emitted = extractSql(finalText);
+                if (!emitted && lastToolSql && !_chatMode) {
+                    finalText += '\n<sql>' + lastToolSql + '</sql>';
+                    emitted = lastToolSql;
+                }
                 if (emitted) session.lastSql = emitted;
-                cb.done(resp.text || '(Sin texto de respuesta.)', totals.total ? totals : null);
+                cb.done(finalText || '(Sin texto de respuesta.)', totals.total ? totals : null);
                 return;
             }
 
@@ -1132,6 +1210,7 @@
                     cb.queryResult(true, rows.length < total
                         ? chrome.i18n.getMessage('sqlai_step_rows_capped', [String(total), String(rows.length)])
                         : chrome.i18n.getMessage('sqlai_step_rows', [String(total)]));
+                    lastToolSql = q;
                     toolResults.push({ type: 'tool_result', tool_use_id: tc.id, content: JSON.stringify(compactResult(rows, total, rowCap, cfg.maskPii)) });
                 } catch (e) {
                     cb.queryResult(false, chrome.i18n.getMessage('sqlai_step_discarded'));
@@ -1476,24 +1555,27 @@
         const cfgPick = el('button', NS + '-lvlpick ' + NS + '-cfgpick'); cfgPick.type = 'button';
         const cfgMenu = el('div', NS + '-provmenu ' + NS + '-cfgmenu'); cfgMenu.style.display = 'none';
 
-        cfgMenu.appendChild(el('div', NS + '-menuhead', chrome.i18n.getMessage('sqlai_mode_menu_head')));
+        const showMode = !isPageChat;
         const modeItems = [];
-        [true, false].forEach((ask) => {
-            const item = el('div', NS + '-provitem ' + NS + '-modeitem');
-            item.dataset.ask = ask ? '1' : '0';
-            const txt = el('div', NS + '-modeitemtext');
-            txt.appendChild(el('div', NS + '-provname', modeName(ask)));
-            txt.appendChild(el('div', NS + '-modeitemdesc', modeDesc(ask)));
-            item.appendChild(txt);
-            item.appendChild(el('span', NS + '-menucheck', '✓'));
-            item.addEventListener('click', () => {
-                askFirst = ask;
-                try { chrome.storage.local.set({ [CFG.askFirst]: ask }); } catch (e) { }
-                paintCfg();
+        if (showMode) {
+            cfgMenu.appendChild(el('div', NS + '-menuhead', chrome.i18n.getMessage('sqlai_mode_menu_head')));
+            [true, false].forEach((ask) => {
+                const item = el('div', NS + '-provitem ' + NS + '-modeitem');
+                item.dataset.ask = ask ? '1' : '0';
+                const txt = el('div', NS + '-modeitemtext');
+                txt.appendChild(el('div', NS + '-provname', modeName(ask)));
+                txt.appendChild(el('div', NS + '-modeitemdesc', modeDesc(ask)));
+                item.appendChild(txt);
+                item.appendChild(el('span', NS + '-menucheck', '✓'));
+                item.addEventListener('click', () => {
+                    askFirst = ask;
+                    try { chrome.storage.local.set({ [CFG.askFirst]: ask }); } catch (e) { }
+                    paintCfg();
+                });
+                modeItems.push(item);
+                cfgMenu.appendChild(item);
             });
-            modeItems.push(item);
-            cfgMenu.appendChild(item);
-        });
+        }
 
         const lvlHead = el('div', NS + '-menuhead ' + NS + '-cfghead');
         lvlHead.appendChild(el('span', null, chrome.i18n.getMessage('sqlai_lvl_label') || 'Razonamiento'));
@@ -1526,13 +1608,15 @@
             ic.innerHTML = SLIDERS_SVG;
             cfgPick.appendChild(ic);
             cfgPick.appendChild(el('span', NS + '-lvlname',
-                modeName(askFirst) + ' · ' + lvlName(curLevel)));
+                showMode ? (modeName(askFirst) + ' · ' + lvlName(curLevel)) : lvlName(curLevel)));
             cfgPick.appendChild(el('span', NS + '-caret', '▾'));
-            cfgPick.title = (chrome.i18n.getMessage('sqlai_mode_label') || 'Modo') + ': ' +
-                modeName(askFirst) + ' — ' + modeDesc(askFirst) + '\n' +
+            cfgPick.title = (showMode
+                ? (chrome.i18n.getMessage('sqlai_mode_label') || 'Modo') + ': ' +
+                  modeName(askFirst) + ' — ' + modeDesc(askFirst) + '\n'
+                : '') +
                 (chrome.i18n.getMessage('sqlai_lvl_label') || 'Razonamiento') + ': ' +
                 lvlName(curLevel) + ' — ' + lvlDesc(curLevel);
-            cfgPick.classList.toggle(NS + '-modeauto', !askFirst);
+            cfgPick.classList.toggle(NS + '-modeauto', showMode && !askFirst);
 
             modeItems.forEach((it) => {
                 it.classList.toggle(NS + '-active', (it.dataset.ask === '1') === askFirst);
@@ -2681,64 +2765,30 @@
         const ftitle = document.createElement('span');
         ftitle.textContent = chrome.i18n.getMessage('sqlai_float_title') || 'Asistente de IA';
 
-        const fclose = document.createElement('button');
-        fclose.type = 'button';
-        fclose.className = NS + '-floatbtn ' + NS + '-floatclose';
-        fclose.textContent = '✕';
-        fclose.addEventListener('click', () => closeFloating());
-
         fhead.appendChild(ftitle);
-        fhead.appendChild(fclose);
         floatWrap.appendChild(fhead);
         const d = buildDock('page');
         d.classList.add(NS + '-dock-floating');
         floatWrap.appendChild(d);
         document.body.appendChild(floatWrap);
-        dockFloating();
         return d;
     }
 
-    const FLOAT_W = 420;
-
-    let _floatDocked = false;
-    let _floatBodyContain = null, _floatBodyWidth = null, _floatBodyMaxWidth = null, _floatBodyOverflow = null;
-
-    function dockFloating() {
-        if (!floatWrap) return;
+    function cleanupLegacyFloatDock() {
         const body = document.body;
-        if (_floatBodyContain === null) {
-            _floatBodyContain = body.style.contain;
-            _floatBodyWidth = body.style.width;
-            _floatBodyMaxWidth = body.style.maxWidth;
-            _floatBodyOverflow = body.style.overflow;
+        if (!body) return;
+        const wrapDocked = document.querySelector('.' + NS + '-floatwrap-docked');
+        if (wrapDocked) wrapDocked.classList.remove(NS + '-floatwrap-docked');
+        if (body.style.contain === 'paint' && /calc\(100vw/.test(body.style.width || '')) {
+            body.style.contain = '';
+            body.style.width = '';
+            body.style.maxWidth = '';
+            body.style.overflow = '';
         }
-        document.documentElement.appendChild(floatWrap);
-        body.style.contain = 'paint';
-        body.style.width = 'calc(100vw - ' + FLOAT_W + 'px)';
-        body.style.maxWidth = 'calc(100vw - ' + FLOAT_W + 'px)';
-        body.style.overflow = 'hidden auto';
-        floatWrap.classList.add(NS + '-floatwrap-docked');
-        _floatDocked = true;
-    }
-
-    function undockFloating() {
-        const body = document.body;
-        if (_floatBodyContain !== null) {
-            body.style.contain = _floatBodyContain;
-            body.style.width = _floatBodyWidth;
-            body.style.maxWidth = _floatBodyMaxWidth;
-            body.style.overflow = _floatBodyOverflow;
-            _floatBodyContain = _floatBodyWidth = _floatBodyMaxWidth = _floatBodyOverflow = null;
-        }
-        if (floatWrap) {
-            floatWrap.classList.remove(NS + '-floatwrap-docked');
-            document.body.appendChild(floatWrap);
-        }
-        _floatDocked = false;
     }
 
     function closeFloating() {
-        if (_floatDocked) undockFloating();
+        cleanupLegacyFloatDock();
         if (floatWrap) { floatWrap.remove(); floatWrap = null; }
     }
 
@@ -2777,6 +2827,18 @@
                 _aiPage = it.aiAssistantPage !== false;
                 _aiSuiteql = it.aiAssistantSuiteql !== false;
                 if (aiInSuiteql()) tick(); else unmountSuiteqlAi();
+                if (PANEL_MODE && _aiMaster) {
+                    const abrir = () => { try { mountFloating(); } catch (e) { } };
+                    const client = window.NSFT_PanelClient;
+                    if (client) {
+                        client.pageInfo().then((info) => {
+                            _pageOrigin = info && info.origin ? info.origin : null;
+                            _pageHrefAi = info && info.href ? info.href : null;
+                            abrir();
+                        });
+                        seguirPestanaAi(client);
+                    } else abrir();
+                }
             }
         );
         chrome.storage.onChanged.addListener((ch, area) => {
@@ -2792,14 +2854,17 @@
     } catch (e) { }
 
     function consumeAskRecord() {
-        if (floatWrap && floatWrap.isConnected) {
-            closeFloating();
-            return;
-        }
-        const dockEl = mountFloating();
-        if (!dockEl) return;
-        const ta2 = dockEl.querySelector('.' + NS + '-composer-input');
-        if (ta2) setTimeout(() => ta2.focus(), 80);
+        try {
+            chrome.runtime.sendMessage({ nsftPanel: 'open', panel: 'ai' }, (resp) => {
+                void chrome.runtime.lastError;
+                if (resp && resp.ok) {
+                    closeFloating();
+                    return;
+                }
+                console.warn('NSFT: no se pudo abrir el panel lateral —',
+                    (resp && resp.reason) || 'sin respuesta del service worker');
+            });
+        } catch (e) { }
     }
     window.addEventListener('nsft-ai-fix-sql', (ev) => {
         const reply = (payload) => window.dispatchEvent(

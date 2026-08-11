@@ -91,20 +91,39 @@
         const label = chrome.i18n.getMessage('logFullArchive') || 'Full Logs';
         const title = chrome.i18n.getMessage('logFullArchiveTitle') || 'Abrir archivo completo de logs';
 
+        const link = document.createElement('a');
+        link.className = 'nsft-tb-link ' + BTN_CLASS;
+        link.href = '#';
+        link.textContent = label;
+        link.title = title;
+        link.insertAdjacentHTML('beforeend',
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"'
+            + ' stroke-linecap="round" aria-hidden="true"><path d="M14 4h6v6"></path>'
+            + '<path d="M20 4l-9 9"></path>'
+            + '<path d="M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5"></path></svg>');
+        applyTargetAttrs(link);
+        link.addEventListener('click', onLinkClick);
+
+        const liveGroup = liveModeTd && liveModeTd.querySelector('.nsft-tb-group');
+        if (liveGroup) {
+            const joined = document.createElement('span');
+            joined.className = 'nsft-tb-joined ' + CONTAINER_CLASS;
+            const div = document.createElement('span');
+            div.className = 'nsft-tb-divider';
+            joined.append(div, link);
+            liveGroup.appendChild(joined);
+            injectedTd = joined;
+            return;
+        }
+
         const td = document.createElement('td');
         td.className = CONTAINER_CLASS;
         td.style.paddingLeft = '15px';
         td.style.verticalAlign = 'middle';
-
-        const link = document.createElement('a');
-        link.className = BTN_CLASS;
-        link.href = '#';
-        link.textContent = label;
-        link.title = title;
-        applyTargetAttrs(link);
-
-        link.addEventListener('click', onLinkClick);
-        td.appendChild(link);
+        const group = document.createElement('div');
+        group.className = 'nsft-tb-group';
+        group.appendChild(link);
+        td.appendChild(group);
 
         if (liveModeTd) {
             liveModeTd.insertAdjacentElement('afterend', td);
@@ -156,6 +175,12 @@
     }
 
     function resolveScriptId(current, pageId) {
+        const SP = window.NSFT_ScriptPage;
+        if (SP && typeof SP.scriptId === 'function') {
+            const sid = SP.scriptId();
+            if (sid) return String(sid);
+        }
+
         if (/\/scripting\/script\.nl/i.test(current.pathname)) return pageId;
 
         const hasDeploySublist = document.querySelector('tr.uir-list-row-tr a[href*="scriptdeploy.nl"]');

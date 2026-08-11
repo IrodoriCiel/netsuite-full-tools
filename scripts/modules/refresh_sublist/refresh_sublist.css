@@ -22,10 +22,3 @@
     to { transform: rotate(360deg); }
 }
 
-html[data-nsft-theme="dark"] .nsft-refresh-sublist-overlay {
-    background: rgba(20, 20, 20, 0.6);
-}
-html[data-nsft-theme="dark"] .nsft-refresh-sublist-spinner {
-    border-color: rgba(255, 255, 255, 0.2);
-    border-top-color: #8fb3ff;
-}

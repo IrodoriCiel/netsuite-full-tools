@@ -31,7 +31,21 @@
     --btn-text-shadow-color: oklch(from var(--btn-bg) calc((l - 0.65) * 1000) 0 0 / 0.25);
 }
 
+ border-*/link-* duplican el rgb en LITERAL (no
+   referencian la rampa), por eso se pisan uno a uno. Los neutros (black-*,
+   neutral-*), semánticos y de utilidad error/warning/success/focus-azure NO
+   se tocan. */
 html.nsft-ct-enabled {
+    --nsft-rw-95: hsl(var(--h), var(--s), calc((var(--l-val) + 46) * 1%));
+    --nsft-rw-90: hsl(var(--h), var(--s), calc((var(--l-val) + 41) * 1%));
+    --nsft-rw-79: hsl(var(--h), var(--s), calc((var(--l-val) + 30) * 1%));
+    --nsft-rw-69: hsl(var(--h), var(--s), calc((var(--l-val) + 20) * 1%));
+    --nsft-rw-59: hsl(var(--h), var(--s), calc((var(--l-val) + 10) * 1%));
+    --nsft-rw-39: hsl(var(--h), var(--s), calc((var(--l-val) - 10) * 1%));
+    --nsft-rw-29: hsl(var(--h), var(--s), calc((var(--l-val) - 20) * 1%));
+    --nsft-rw-19: hsl(var(--h), var(--s), calc((var(--l-val) - 30) * 1%));
+    --nsft-rw-10: hsl(var(--h), var(--s), calc((var(--l-val) - 39) * 1%));
+
     --nsn-uif-refreshed-color-primary-default: var(--base-color) !important;
     --uif-refreshed-color-primary-default: var(--base-color) !important;
 
@@ -46,6 +60,72 @@ html.nsft-ct-enabled {
 
     --nsn-uif-refreshed-color-primary-default-70: hsla(var(--h), var(--s), var(--l), 0.7) !important;
     --nsn-uif-refreshed-color-primary-default-95: hsla(var(--h), var(--s), var(--l), 0.95) !important;
+
+    --uif-refreshed-color-primary-lightest: var(--nsft-rw-95) !important;
+    --uif-refreshed-color-primary-lighter: var(--nsft-rw-90) !important;
+    --uif-refreshed-color-primary-light: var(--nsft-rw-79) !important;
+    --uif-refreshed-color-primary-dark: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-primary-darker: var(--nsft-rw-29) !important;
+    --uif-refreshed-color-primary-darkest: var(--nsft-rw-19) !important;
+    --uif-refreshed-color-secondary-lightest: var(--nsft-rw-95) !important;
+    --uif-refreshed-color-secondary-lighter: var(--nsft-rw-90) !important;
+    --uif-refreshed-color-secondary-light: var(--nsft-rw-79) !important;
+    --uif-refreshed-color-secondary-default: var(--base-color) !important;
+    --uif-refreshed-color-secondary-dark: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-secondary-darker: var(--nsft-rw-29) !important;
+    --uif-refreshed-color-secondary-darkest: var(--nsft-rw-19) !important;
+
+    --uif-refreshed-color-primary-100: var(--nsft-rw-90) !important;
+    --uif-refreshed-color-primary-200: var(--nsft-rw-79) !important;
+    --uif-refreshed-color-primary-300: var(--nsft-rw-69) !important;
+    --uif-refreshed-color-primary-400: var(--nsft-rw-59) !important;
+    --uif-refreshed-color-primary-500: var(--base-color) !important;
+    --uif-refreshed-color-primary-600: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-primary-700: var(--nsft-rw-29) !important;
+    --uif-refreshed-color-primary-800: var(--nsft-rw-19) !important;
+    --uif-refreshed-color-primary-900: var(--nsft-rw-10) !important;
+    --uif-refreshed-color-blue-50: var(--nsft-rw-95) !important;
+    --uif-refreshed-color-blue-100: var(--nsft-rw-90) !important;
+    --uif-refreshed-color-blue-200: var(--nsft-rw-79) !important;
+    --uif-refreshed-color-blue-300: var(--nsft-rw-69) !important;
+    --uif-refreshed-color-blue-400: var(--nsft-rw-59) !important;
+    --uif-refreshed-color-blue-500: var(--base-color) !important;
+    --uif-refreshed-color-blue-600: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-blue-700: var(--nsft-rw-29) !important;
+    --uif-refreshed-color-blue-800: var(--nsft-rw-19) !important;
+    --uif-refreshed-color-blue-900: var(--nsft-rw-10) !important;
+
+    --uif-refreshed-color-state-light-primary-selected-disabled: hsla(var(--h), var(--s), var(--l), 0.1) !important;
+    --uif-refreshed-color-state-light-primary-selected: hsla(var(--h), var(--s), var(--l), 0.2) !important;
+    --uif-refreshed-color-state-light-primary-selected-hover: hsla(var(--h), var(--s), var(--l), 0.4) !important;
+    --uif-refreshed-color-state-light-primary-selected-active: hsla(var(--h), var(--s), var(--l), 0.6) !important;
+    --uif-refreshed-color-state-dark-primary-selected-disabled: hsla(var(--h), var(--s), var(--l), 0.3) !important;
+
+    --uif-refreshed-color-icon-default: var(--base-color) !important;
+    --uif-refreshed-color-icon-hover: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-icon-pressed: var(--nsft-rw-19) !important;
+    --uif-refreshed-color-icon-active: var(--nsft-rw-29) !important;
+    --uif-refreshed-color-icon-active-hover: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-border-hover: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-border-info: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-border-dark-hover: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-border-dark-info: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-border-light-info: var(--base-color) !important;
+    --uif-refreshed-color-link-dark: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-link-dark-hover: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-link-dark-active: var(--nsft-rw-19) !important;
+    --uif-refreshed-color-link-light: var(--nsft-rw-95) !important;
+    --uif-refreshed-color-link-light-hover: var(--nsft-rw-95) !important;
+    --uif-refreshed-color-a-link: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-a-active: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-a-hover: var(--nsft-rw-19) !important;
+    --uif-refreshed-color-utility-info: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-utility-info-weak: var(--nsft-rw-95) !important;
+    --uif-refreshed-color-text-dark-utility-info: var(--nsft-rw-39) !important;
+    --uif-refreshed-color-text-light-utility-info: var(--nsft-rw-79) !important;
+    --uif-refreshed-color-text-utility-info: var(--nsft-rw-39) !important;
+
+    --nsn-uif-redwood-color-light-brand-100: var(--base-color) !important;
 }
 
 
@@ -91,32 +171,37 @@ html.nsft-ct-enabled [data-widget="Popover"][data-role="popover"] [role="menuite
     color: inherit !important;
 }
 
-html.nsft-ct-enabled .uir-tab-list {
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) .uir-tab-list {
     background-color: var(--base-color);
 }
 
 
 
-html.nsft-ct-enabled .bgtabbar,
-html.nsft-ct-enabled .bgon,
-html.nsft-ct-enabled .tabur,
-html.nsft-ct-enabled div.unrollformtabheaderexpand:not(.uir-page-search__highlight--primary),
-html.nsft-ct-enabled div.unrollformtabheadercollapse,
-html.nsft-ct-enabled div.unrollformtabheaderesep {
+html.nsft-ct-enabled body[data-page-theme="redwood"] .uir-tabs .formtabon,
+html.nsft-ct-enabled body[data-page-theme="redwood"] .uir-tabs--nested .formsubtabon {
+    border-bottom-color: var(--base-color) !important;
+}
+
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) .bgtabbar,
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) .bgon,
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) .tabur,
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.unrollformtabheaderexpand:not(.uir-page-search__highlight--primary),
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.unrollformtabheadercollapse,
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.unrollformtabheaderesep {
     background: var(--base-color) !important;
 }
 
 
-html.nsft-ct-enabled div.unrollformtabheadercollapse svg,
-html.nsft-ct-enabled div.unrollformtabheaderexpand:not(.uir-page-search__highlight--primary) svg {
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.unrollformtabheadercollapse svg,
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.unrollformtabheaderexpand:not(.uir-page-search__highlight--primary) svg {
     fill: var(--on-base) !important;
 }
 
-html.nsft-ct-enabled .uir-unroll-tabs-button {
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) .uir-unroll-tabs-button {
     background-color: var(--base-color);
 }
 
-html.nsft-ct-enabled div.fgroup_title {
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.fgroup_title {
     background: var(--group-color);
 }
 
@@ -124,18 +209,18 @@ html.nsft-ct-enabled table.totallingtable caption {
     background: var(--base-color) !important;
 }
 
-html.nsft-ct-enabled .uir-list-top-button-bar,
-html.nsft-ct-enabled .uir-list-control-bar[data-above="true"] {
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) .uir-list-top-button-bar,
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) .uir-list-control-bar[data-above="true"] {
     background-color: var(--group-color) !important;
 }
 
-html.nsft-ct-enabled .bgsubtabbar {
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) .bgsubtabbar {
     background-color: var(--group-color);
 }
 
-html.nsft-ct-enabled div.bgsubtabbar,
-html.nsft-ct-enabled div.unrollformsubtabheaderexpand:not(.uir-page-search__highlight--secondary),
-html.nsft-ct-enabled div.unrollformsubtabheadercollapse {
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.bgsubtabbar,
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.unrollformsubtabheaderexpand:not(.uir-page-search__highlight--secondary),
+html.nsft-ct-enabled body:not([data-page-theme="redwood"]) div.unrollformsubtabheadercollapse {
     background: var(--group-color) !important;
 }
 

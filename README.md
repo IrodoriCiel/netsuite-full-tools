@@ -12,7 +12,7 @@
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Valoración" src="https://img.shields.io/chrome-web-store/rating/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&color=F59E0B&label=Rating"></a>
 </p>
 <p align="center">
-  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v6.2.1-555555?style=for-the-badge"></a>
+  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v6.4.0-555555?style=for-the-badge"></a>
   <a href="https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3"><img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-2C6E4E?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
   <a href="#ficha-técnica--technical-details"><img alt="JavaScript sin frameworks" src="https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"></a>
   <a href="#ficha-técnica--technical-details"><img alt="Sin telemetría ni servidores propios" src="https://img.shields.io/badge/Privacidad-100%25%20local-2C6E4E?style=for-the-badge"></a>
@@ -23,7 +23,7 @@
 
 ---
 
-**104 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
+**105 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
 
 ## Qué es este repositorio · About this repository
 
@@ -56,6 +56,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 |---|---|
 | **Ver objeto del registro** | inspecciona el objeto completo del registro actual en un visor limpio. |
 | **Ver scripts del registro** | todos los scripts y workflows asociados, de un vistazo. |
+| **Ver logs del registro** | los logs de ejecución sin salir de la página, con los scripts del registro preseleccionados y filtros por nivel, tipo, texto y fechas; también puedes cambiar a otro tipo de registro desde la cabecera. |
 | **Record Trail** | documentos de origen y destino enlazados de una transacción, con salto rápido y copia de IDs. |
 | **Cargar registro a consola** | carga el registro actual en la consola (SS1.0 y SS2.x). |
 | **Menú Opciones de Registro** | accesos directos según el tipo de registro (agregar campo, ver XML, dependientes…). |
@@ -210,6 +211,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 |---|---|
 | **View Record Object** | inspect the full record object in a clean, searchable viewer. |
 | **View Record Scripts** | every script and workflow tied to the record, at a glance. |
+| **View Record Logs** | execution logs without leaving the page, with the record's scripts preselected and filters by level, type, text and dates; you can also switch to another record type from the header. |
 | **Record Trail** | linked source and target documents of a transaction, with quick open and ID copy. |
 | **Load Record to Console** | load the current record into the console (SS1.0 and SS2.x). |
 | **Record Options Menu** | shortcuts based on record type (add field, view XML, dependencies…). |
@@ -406,6 +408,12 @@ Van minificadas porque así las distribuyen sus autores · Shipped minified as t
 1. Descarga o clona este repositorio · Download or clone this repo.
 2. `chrome://extensions` → activa **Modo de desarrollador** · enable **Developer mode**.
 3. **Cargar descomprimida / Load unpacked** → apunta a esta carpeta · point at this folder.
+
+## Licencia · License
+
+Código **disponible para leer, auditar y compilar en local** — pero NO es open source: queda prohibido redistribuirlo o republicarlo en la Chrome Web Store o cualquier otra tienda. Detalles en [LICENSE](LICENSE).
+
+**Source-available** — you may read, audit and build it locally, but it is NOT open source: redistributing it or republishing it to the Chrome Web Store or any other store is not allowed. See [LICENSE](LICENSE).
 
 ---
 

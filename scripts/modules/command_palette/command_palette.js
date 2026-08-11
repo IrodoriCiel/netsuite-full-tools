@@ -478,7 +478,7 @@
     }
 
     function matchesShortcut(e, s) {
-        return !!e.ctrlKey === !!s.ctrlKey &&
+        return !!(e.ctrlKey || e.metaKey) === !!(s.ctrlKey || s.metaKey) &&
                !!e.shiftKey === !!s.shiftKey &&
                !!e.altKey === !!s.altKey &&
                e.code === s.code;
@@ -569,11 +569,11 @@
         });
     }
 
-    const IS_MAC_CMDP = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
     function renderShortcutBadge(combo) {
+        const macKeys = window.NSFT_MacKeys;
         const parts = String(combo).split('+').map(p => p.trim()).filter(Boolean);
         const kbds = parts.map(p => {
-            const label = IS_MAC_CMDP && /^ctrl$/i.test(p) ? 'Cmd' : p;
+            const label = macKeys ? macKeys.humanize(p) : p;
             return `<kbd>${escapeHtml(label)}</kbd>`;
         }).join('');
         return `<span class="nsft-cmdp-item-kbd">${kbds}</span>`;
@@ -824,9 +824,10 @@
     }
 
     function renderShortcutBadgeInner(combo) {
+        const macKeys = window.NSFT_MacKeys;
         const parts = String(combo).split('+').map(p => p.trim()).filter(Boolean);
         return parts.map(p => {
-            const label = IS_MAC_CMDP && /^ctrl$/i.test(p) ? 'Cmd' : p;
+            const label = macKeys ? macKeys.humanize(p) : p;
             return `<kbd>${escapeHtml(label)}</kbd>`;
         }).join('');
     }

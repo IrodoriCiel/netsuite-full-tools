@@ -2,8 +2,11 @@ globalThis.NSFT_DEFAULTS = {
     enableViewRecordObject: true,
     viewRecordObjectTheme: "github-dark",
     viewRecordObjectThemeOverridden: false,
+    viewRecordObjectOpenMode: "modal",
 
     enableViewScriptedRecord: true,
+    enableRecordLogsViewer: true,
+    recordLogsViewerOpenMode: "modal",
     enableRecordTrail: true,
 
     enableCopyFieldAndSublistIds: true,
@@ -19,7 +22,7 @@ globalThis.NSFT_DEFAULTS = {
     enableSuiteletTools: true,
 
     enableCodeFieldPrettier: true,
-    codeFieldPrettierTheme: "github-dark",
+    codeFieldPrettierTheme: "auto",
 
     enableFormatCodeFields: true,
     formatCodeFieldsOnBlur: false,
@@ -42,7 +45,7 @@ globalThis.NSFT_DEFAULTS = {
     enableLoadRecordConsole: true,
 
     enableLogPrettier: true,
-    logPrettierTheme: "github-dark",
+    logPrettierTheme: "auto",
     enableLiveMode: true,
     liveModeInterval: 3,
     liveModeAutoStart: false,
@@ -50,6 +53,7 @@ globalThis.NSFT_DEFAULTS = {
     fullLogsOpenInNewTab: true,
     enableLogViewer: true,
     enableEditorTheme: true,
+    enableEditorCloseAfterSave: true,
     editorTheme: "github-dark",
     editorThemeAutoSwitch: false,
     editorFontFamily: 'JetBrains Mono',
@@ -71,6 +75,7 @@ globalThis.NSFT_DEFAULTS = {
     enablePagePerformance: true,
     enableShortcutsCheatsheet: true,
     enableShortcutHints: true,
+    shortcutKeyStyle: "auto",
     enableGoToRecord: true,
     gotoRecordOverrideNative: true,
     gotoRecordFuzzy: false,
@@ -84,6 +89,7 @@ globalThis.NSFT_DEFAULTS = {
     envBadgeColorPrd: '#dc2626',
     envBadgeColorSb: '#16a34a',
     envBadgeColorRp: '#2563eb',
+    envBadgeLetters: '3',
     enableProductionBanner: true,
     productionBannerPosition: 'bottom',
     enableUpdateNotice: true,
@@ -94,6 +100,7 @@ globalThis.NSFT_DEFAULTS = {
     enableColorThemes: true,
     enableDarkMode: false,
     darkModeStyle: 'gray',
+    darkModeScope: 'all',
     enableTurboMode: false,
     colorThemeHue: 216,
     colorThemeSat: 23,
@@ -124,12 +131,19 @@ globalThis.NSFT_DEFAULTS = {
     suiteqlThemeOverridden: false,
     suiteqlHistoryMax: 30,
     suiteqlMaxRecords: 5000,
+    suiteqlFetchAllRows: true,
+    suiteqlFetchMethod: 'auto',
+    suiteqlRestConcurrency: 4,
+    suiteqlRestFillColumns: false,
+    suiteqlManyRowsAction: 'ask',
+    suiteqlManyRowsThreshold: 20000,
+    suiteqlAutoSchema: true,
 
     enableSearchFieldsFinder: true,
     enableSavedSearchSplit: true,
 
     enableExportSearch: true,
-    exportSearchTheme: "atom-one-dark",
+    exportSearchTheme: "auto",
 
     enableCopyAccountId: true,
 
@@ -193,7 +207,7 @@ globalThis.NSFT_DEFAULTS = {
     enableFileCabinetDeleteBeta: true,
     enableFileCabinetFolderLinkBeta: true,
     enableFileRecordPreviewBeta: true,
-    fileRecordPreviewTheme: 'atom-one-light',
+    fileRecordPreviewTheme: 'auto',
     enableSystemFolderSafetyBeta: true,
     enableNetSuiteVersionBadgeBeta: true
 };
@@ -205,5 +219,6 @@ globalThis.NSFT_SYNC_MIRRORED_KEYS = [
     'envBadgeColorPrd',
     'envBadgeColorSb',
     'envBadgeColorRp',
+    'envBadgeLetters',
     'quickSearchCreationLinks'
 ];

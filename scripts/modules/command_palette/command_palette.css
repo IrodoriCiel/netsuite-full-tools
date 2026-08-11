@@ -272,7 +272,7 @@
 }
 
 .nsft-cmdp-overlay[data-theme="dark"] .nsft-cmdp-selected {
-    box-shadow: inset 3px 0 0 #6E7CF5;
+    box-shadow: inset 3px 0 0 var(--nsft-ns-accent-light, #7FB0FF);
 }
 
 .nsft-cmdp-selected .nsft-cmdp-item-label {

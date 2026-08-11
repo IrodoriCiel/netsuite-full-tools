@@ -134,7 +134,7 @@
 
 .nsft-sss-panel[data-theme="dark"] .nsft-sss-input:focus {
     outline: none;
-    border-color: #6E7CF5;
+    border-color: var(--nsft-ns-accent-light, #7FB0FF);
     box-shadow: 0 0 0 2px rgba(110, 124, 245, 0.18);
 }
 
@@ -143,12 +143,12 @@
 }
 
 .nsft-sss-panel[data-theme="dark"] .nsft-sss-go {
-    background: #6E7CF5;
+    background: var(--nsft-ns-accent, #3b82f6);
     color: #fff;
 }
 
 .nsft-sss-panel[data-theme="dark"] .nsft-sss-go:hover {
-    background: #7E8BF7;
+    background: var(--nsft-ns-accent-hover, #2563eb);
 }
 
 .nsft-sss-panel[data-theme="dark"] .nsft-sss-close {

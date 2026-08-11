@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NSFT — Record Object</title>
+    <link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
+    <link rel="stylesheet" href="../scripts/modules/view_record_object/view_record_object.css">
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        html[data-nsft-theme="dark"],
+        html[data-nsft-theme="dark"] body {
+            background: var(--nsft-dk-deepest, #0D0E10);
+        }
+
+        /* El visor ES el panel: la «ventana» llena todo y pierde lo que aquí
+           no significa nada (split, minimizar, maximizar, arrastre). */
+        #nsft-rec-obj-modal {
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            max-height: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+
+        /* El cuerpo LLENA el alto del panel. El tope de 525px del CSS del
+           módulo es la medida de la ventana flotante; aquí el contenido toma
+           exactamente el hueco entre cabecera y pie (flex-basis 0%: reparte
+           el HUECO, no el contenido — con basis auto un JSON enorme empujaba
+           el pie fuera y el overflow:hidden del marco se comía el scroll) y
+           scrollea por dentro. */
+        #nsft-rec-obj-modal {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .nsft-rec-obj-content {
+            max-height: none !important;
+            height: auto !important;
+            flex: 1 1 0% !important;
+            min-height: 0 !important;
+            overflow-y: auto !important;
+        }
+
+        .nsft-rec-obj-footer {
+            flex-shrink: 0 !important;
+        }
+
+        /* El ✕ propio también fuera: el panel de Chrome ya trae el suyo.
+           Queda el botón de desacoplar para volver a la página. */
+        #nsft-rec-obj-minimise,
+        #nsft-rec-obj-maximise,
+        #nsft-rec-obj-close {
+            display: none !important;
+        }
+
+        .nsft-rec-obj-header {
+            cursor: default !important;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="../scripts/modules/_shared/nsft_suiteql_rest.js"></script>
+    <script src="nsft_panel_client.js"></script>
+    <script src="../scripts/modules/view_record_object/view_record_object.js"></script>
+</body>
+
+</html>

@@ -15,7 +15,7 @@
 
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
-        logPrettierTheme: 'atom-one-dark'
+        logPrettierTheme: 'auto'
     }, (items) => {
         attachStorageListener();
         if (!items[STORAGE_KEY]) return;
@@ -44,20 +44,136 @@
         storageListener = (changes, area) => {
             if (area !== 'local') return;
             if (changes.logPrettierTheme && window.NSFT_LogFormat) {
-                window.NSFT_LogFormat.ensureTheme(changes.logPrettierTheme.newValue || 'atom-one-dark');
+                window.NSFT_LogFormat.ensureTheme(changes.logPrettierTheme.newValue || 'auto');
             }
             if (changes[STORAGE_KEY]) {
                 const enabled = changes[STORAGE_KEY].newValue !== false;
                 if (!enabled) teardown();
-                else chrome.storage.local.get({ logPrettierTheme: 'atom-one-dark' }, init);
+                else chrome.storage.local.get({ logPrettierTheme: 'auto' }, init);
             }
         };
         chrome.storage.onChanged.addListener(storageListener);
     }
 
+    const norm = (s) => String(s || '')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toUpperCase().replace(/\s+/g, ' ').trim();
+
+    const COL_TITLE = ['TITULO', 'TITLE'];
+    const COL_TYPE = ['TIPO', 'TYPE'];
+    const COL_DATE = ['FECHA', 'DATE'];
+    const COL_TIME = ['HORA', 'TIME'];
+
+    const mapOf = (row) => {
+        const map = {};
+        Array.from(row.children).forEach((c, i) => {
+            const t = norm(c.innerText || c.textContent);
+            if (t && map[t] == null) map[t] = i;
+        });
+        return map;
+    };
+
+    const knowsColumns = (map) => COL_TITLE.concat(COL_TYPE).some((n) => map[n] != null);
+
+    function headerMap(td) {
+        const table = td.closest && td.closest('table');
+        const row = td.closest && td.closest('tr');
+        if (!table || !row) return null;
+
+        const candidates = [];
+        const push = (el) => { if (el && el !== row && candidates.indexOf(el) === -1) candidates.push(el); };
+
+        push(table.querySelector('tr.uir-list-headerrow'));
+        push(table.querySelector('thead tr'));
+        const th = table.querySelector('th');
+        if (th && th.closest) push(th.closest('tr'));
+        const hc = table.querySelector('[class*="listheader"], [class*="uir-list-header"]');
+        if (hc && hc.closest) push(hc.closest('tr'));
+        Array.from(table.querySelectorAll('tr')).forEach((r) => {
+            if (r !== row && r.children.length === row.children.length) push(r);
+        });
+
+        for (const c of candidates) {
+            const map = mapOf(c);
+            if (knowsColumns(map)) return map;
+        }
+        return null;
+    }
+
+    function guessByCellType(cells, td) {
+        const typeOf = (c) => (c.getAttribute && c.getAttribute('data-list-cell-type')) || '';
+        const dateIdx = cells.findIndex((c) => typeOf(c) === 'date');
+        const timeIdx = cells.findIndex((c) => typeOf(c) === 'timeofday');
+        const detailIdx = cells.indexOf(td);
+        const limit = dateIdx >= 0 ? dateIdx : (detailIdx >= 0 ? detailIdx : cells.length);
+        const text = (c) => (c ? (c.innerText || c.textContent || '').trim() : '');
+        const plain = [];
+        for (let i = 0; i < limit; i++) {
+            const c = cells[i];
+            if (!c || typeOf(c) !== 'string') continue;
+            if (c.querySelector && c.querySelector('a')) continue;
+            plain.push(i);
+        }
+        return {
+            type: text(cells[plain[plain.length - 2]]),
+            title: text(cells[plain[plain.length - 1]]),
+            date: text(cells[dateIdx]),
+            time: text(cells[timeIdx])
+        };
+    }
+
+    function scriptIdFromUrl() {
+        try {
+            const p = new URLSearchParams(location.search);
+            return p.get('scriptId') || (/script\.nl$/i.test(location.pathname) ? (p.get('id') || '') : '');
+        } catch (e) { return ''; }
+    }
+
+    function rowNameParts(td) {
+        const LF = window.NSFT_LogFormat;
+        const row = td.closest && td.closest('tr');
+        const cells = row ? Array.from(row.children) : [];
+        const cellText = (i) => {
+            const c = (i != null && i >= 0) ? cells[i] : null;
+            return c ? (c.innerText || c.textContent || '').trim() : '';
+        };
+
+        const map = headerMap(td);
+        let type = '';
+        let title = '';
+        let date = '';
+        let time = '';
+        if (map) {
+            const pick = (names) => {
+                for (const n of names) if (map[n] != null) return cellText(map[n]);
+                return '';
+            };
+            type = pick(COL_TYPE);
+            title = pick(COL_TITLE);
+            date = pick(COL_DATE);
+            time = pick(COL_TIME);
+        }
+        if (!title || !date) {
+            const g = guessByCellType(cells, td);
+            type = type || g.type;
+            title = title || g.title;
+            date = date || g.date;
+            time = time || g.time;
+        }
+        const stamp = (date + ' ' + time).trim();
+
+        const scriptId = scriptIdFromUrl();
+        return [
+            scriptId ? 'script-' + scriptId : '',
+            type.toLowerCase(),
+            title,
+            LF && LF.stampPart ? LF.stampPart(stamp) : ''
+        ];
+    }
+
     const formatTD = (td) => {
         if (!td || td.dataset[FORMATTED_ATTR]) return;
-        const lang = window.NSFT_LogFormat.renderInto(td);
+        const lang = window.NSFT_LogFormat.renderInto(td, null, { nameParts: rowNameParts(td) });
         if (lang) td.dataset[FORMATTED_ATTR] = lang;
     };
 

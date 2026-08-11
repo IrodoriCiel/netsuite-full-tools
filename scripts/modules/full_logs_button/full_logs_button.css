@@ -1,51 +1,5 @@
-.nsft-full-logs-btn {
-    height: 30px;
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 0 10px;
-    background: #f4f6f9;
-    color: #4d5f79 !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    text-decoration: none !important;
-    border: 1px solid #dfe3e9;
-    border-radius: 6px;
-    cursor: pointer;
-    line-height: 1;
-    user-select: none;
-    position: relative;
-    top: -2px;
-    transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
-}
 
-.nsft-full-logs-btn::after {
-    content: "";
-    width: 12px;
-    height: 12px;
-    background-color: currentColor;
-    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='currentColor' d='M6 3v1.5H4.5v7h7V10H13v2.5c0 .28-.22.5-.5.5h-9a.5.5 0 0 1-.5-.5v-9c0-.28.22-.5.5-.5H6Zm7 0v4h-1.5V5.56l-4.47 4.47-1.06-1.06L10.44 4.5H9V3h4Z'/></svg>") center/contain no-repeat;
-            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='currentColor' d='M6 3v1.5H4.5v7h7V10H13v2.5c0 .28-.22.5-.5.5h-9a.5.5 0 0 1-.5-.5v-9c0-.28.22-.5.5-.5H6Zm7 0v4h-1.5V5.56l-4.47 4.47-1.06-1.06L10.44 4.5H9V3h4Z'/></svg>") center/contain no-repeat;
-    opacity: 0.7;
-    transition: opacity 180ms ease, transform 180ms ease;
-}
-
-.nsft-full-logs-btn:hover,
-.nsft-full-logs-btn:focus-visible {
-    background: #e9edf3;
-    border-color: #cbd5e1;
-    color: #334155 !important;
-    text-decoration: none !important;
-}
-
-.nsft-full-logs-btn:hover::after,
-.nsft-full-logs-btn:focus-visible::after {
-    opacity: 1;
-    transform: translate(1px, -1px);
-}
-
-.nsft-full-logs-btn:active {
-    background: #dfe3e9;
+.nsft-full-logs-container {
+    vertical-align: middle !important;
+    white-space: nowrap !important;
 }

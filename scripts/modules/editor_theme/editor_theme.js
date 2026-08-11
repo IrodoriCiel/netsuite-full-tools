@@ -134,12 +134,13 @@
 
         const resolvedTheme = resolveThemeForCurrentScheme(items.editorTheme, items.editorThemeAutoSwitch);
 
+        const fontSizeNum = parseInt(items.editorFontSize, 10) || 14;
         const cache = items[THEME_CACHE_KEY];
         const cacheVersionMatches = cache && cache.version === THEME_CACHE_VERSION;
         if (cacheVersionMatches
             && cache.themeName === resolvedTheme
             && cache.fontFamily === items.editorFontFamily
-            && cache.fontSize === items.editorFontSize
+            && (parseInt(cache.fontSize, 10) || 14) === fontSizeNum
             && cache.css) {
             injectThemeStyle(cache.css);
             markThemeApplied();
@@ -515,7 +516,7 @@
                 editorFontSize: 14
             }, (items) => resolve({
                 fontFamily: items.editorFontFamily,
-                fontSize: items.editorFontSize
+                fontSize: parseInt(items.editorFontSize, 10) || 14
             }));
         });
     }

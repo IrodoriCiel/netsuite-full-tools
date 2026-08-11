@@ -121,6 +121,16 @@
                 </svg>
                 <span data-i18n="featureRequestLink">Sugerir una función</span>
               </a>
+              <a href="https://irodoriciel.github.io/nsft-tablero/" target="_blank" rel="noopener"
+                class="nsft-overflow-item" role="menuitem">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="5" height="12" rx="1"></rect>
+                  <rect x="10" y="3" width="5" height="18" rx="1"></rect>
+                  <rect x="17" y="3" width="5" height="8" rx="1"></rect>
+                </svg>
+                <span data-i18n="trackBoardLink">Seguir el avance de los reportes</span>
+              </a>
             </div>
           </div>
           <button type="button" id="nsftSettingsBtn" class="nsft-topbar-btn"
@@ -205,7 +215,7 @@
             data-i18n="statsDisableAll">Desactivar todo</button>
         </div>
 
-        <div class="nsft-search-results" id="nsftSearchResults" hidden></div>
+        <div class="nsft-search-results nsft-detail-body" id="nsftSearchResults" hidden></div>
         <div class="nsft-empty-state" id="nsftEmptyState" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -348,14 +358,25 @@
               <input type="checkbox" id="enableDarkMode">
               <span class="slider round"></span>
             </label>
-            <div style="width: 100%; margin-top: 8px; display: flex; align-items: center; gap: 8px;">
-              <label for="darkModeStyle" style="font-size: 11px; color: var(--text-muted);"
-                data-i18n="darkModeStyleLabel"></label>
-              <select id="darkModeStyle"
-                style="font-size: 12px; padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-label);">
-                <option value="gray" data-i18n="darkModeStyleGray"></option>
-                <option value="black" data-i18n="darkModeStyleBlack"></option>
-              </select>
+            <div style="width: 100%; margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="darkModeScope" style="font-size: 11px; color: var(--text-muted);"
+                  data-i18n="darkModeScopeLabel"></label>
+                <select id="darkModeScope"
+                  style="font-size: 12px; padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-label);">
+                  <option value="all" data-i18n="darkModeScopeAll"></option>
+                  <option value="nsft" data-i18n="darkModeScopeNsft"></option>
+                </select>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="darkModeStyle" style="font-size: 11px; color: var(--text-muted);"
+                  data-i18n="darkModeStyleLabel"></label>
+                <select id="darkModeStyle"
+                  style="font-size: 12px; padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: var(--text-label);">
+                  <option value="gray" data-i18n="darkModeStyleGray"></option>
+                  <option value="black" data-i18n="darkModeStyleBlack"></option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -536,6 +557,15 @@
                   <option value="stackoverflow-light">StackOverflow Light</option>
                   <option value="stackoverflow-dark">StackOverflow Dark</option>
                 </select>
+                <div style="margin-top: 5px;">
+                  <label for="viewRecordObjectOpenMode" style="font-size: 12px; margin-right: 5px;"
+                    data-i18n="openModeLabel"></label>
+                  <select id="viewRecordObjectOpenMode"
+                    style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                    <option value="modal" data-i18n="openModeOptionModal"></option>
+                    <option value="panel" data-i18n="openModeOptionPanel"></option>
+                  </select>
+                </div>
               </div>
             </div>
             <label class="switch">
@@ -552,6 +582,27 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableViewScriptedRecord">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableRecordLogsViewer" data-i18n="enableRecordLogsViewerLabel"></span>
+              <div id="desc_enableRecordLogsViewer" class="description" data-i18n="enableRecordLogsViewerDesc">
+              </div>
+              <div id="rlv-openmode-container" style="margin-top: 5px; display: none;">
+                <label for="recordLogsViewerOpenMode" style="font-size: 12px; margin-right: 5px;"
+                  data-i18n="openModeLabel"></label>
+                <select id="recordLogsViewerOpenMode"
+                  style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="modal" data-i18n="openModeOptionModal"></option>
+                  <option value="panel" data-i18n="openModeOptionPanel"></option>
+                </select>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableRecordLogsViewer">
               <span class="slider round"></span>
             </label>
           </div>
@@ -979,6 +1030,7 @@
                   data-i18n="themeLabel"></label>
                 <select id="logPrettierTheme"
                   style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="jfThemeAuto"></option>
                   <option value="atom-one-dark">Atom One Dark</option>
                   <option value="atom-one-light">Atom One Light</option>
                   <option value="default">Default</option>
@@ -1170,10 +1222,53 @@
                   <label for="suiteqlHistoryMax" style="font-size: 12px; margin-right: 5px;" data-i18n="suiteqlHistoryMaxLabel"></label>
                   <input type="number" id="suiteqlHistoryMax" min="1" max="1000" step="1" style="width: 64px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
                 </div>
-                <div style="margin-top: 6px;">
-                  <label for="suiteqlMaxRecords" style="font-size: 12px; margin-right: 5px;" data-i18n="suiteqlMaxRecordsLabel"></label>
-                  <input type="number" id="suiteqlMaxRecords" min="1000" max="100000" step="1000" style="width: 80px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
-                </div>
+
+                <section class="nsft-sqlset-group">
+                  <label class="nsft-sqlset-check" data-i18n-title="suiteqlFetchAllRowsDesc">
+                    <input type="checkbox" id="suiteqlFetchAllRows">
+                    <span data-i18n="suiteqlFetchAllRowsLabel"></span>
+                  </label>
+                  <div id="suiteqlMaxRecordsRow" class="nsft-sqlset-field">
+                    <label for="suiteqlMaxRecords" style="font-size: 12px;" data-i18n="suiteqlMaxRecordsLabel"></label>
+                    <input type="number" id="suiteqlMaxRecords" min="1000" max="100000" step="1000" style="width: 92px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  </div>
+                  <div id="suiteqlManyRowsRow" class="nsft-sqlset-field" data-i18n-title="suiteqlManyRowsDesc">
+                    <label for="suiteqlManyRowsThreshold" style="font-size: 12px;" data-i18n="suiteqlManyRowsLabel"></label>
+                    <input type="number" id="suiteqlManyRowsThreshold" min="1000" max="100000" step="1000" style="width: 92px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                    <span style="font-size: 12px;" data-i18n="suiteqlManyRowsUnit"></span>
+                    <select id="suiteqlManyRowsAction" style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                      <option value="ask" data-i18n="suiteqlManyRowsAsk"></option>
+                      <option value="continue" data-i18n="suiteqlManyRowsGo"></option>
+                      <option value="stop" data-i18n="suiteqlManyRowsStop"></option>
+                    </select>
+                  </div>
+                </section>
+
+                <section class="nsft-sqlset-group">
+                  <div data-i18n-title="suiteqlFetchMethodDesc">
+                    <div class="nsft-sqlset-field">
+                      <label for="suiteqlFetchMethod" style="font-size: 12px;" data-i18n="suiteqlFetchMethodLabel"></label>
+                      <select id="suiteqlFetchMethod" style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                        <option value="auto" data-i18n="suiteqlFetchMethodAuto"></option>
+                        <option value="rest" data-i18n="suiteqlFetchMethodRest"></option>
+                        <option value="nquery" data-i18n="suiteqlFetchMethodNquery"></option>
+                      </select>
+                    </div>
+                    <div id="suiteqlFetchMethodHint" class="description nsft-sqlset-desc"></div>
+                  </div>
+                  <div id="suiteqlRestFillColumnsRow" style="margin-top: 8px;">
+                    <label class="nsft-sqlset-check">
+                      <input type="checkbox" id="suiteqlRestFillColumns">
+                      <span data-i18n="suiteqlRestFillColumnsLabel"></span>
+                    </label>
+                    <div class="description nsft-sqlset-desc" data-i18n="suiteqlRestFillColumnsDesc"></div>
+                  </div>
+                  <div id="suiteqlRestConcurrencyRow" class="nsft-sqlset-field" style="margin-top: 8px;"
+                    data-i18n-title="suiteqlRestConcurrencyDesc">
+                    <label for="suiteqlRestConcurrency" style="font-size: 12px;" data-i18n="suiteqlRestConcurrencyLabel"></label>
+                    <input type="number" id="suiteqlRestConcurrency" min="1" max="8" step="1" style="width: 55px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  </div>
+                </section>
               </div>
             </div>
             <label class="switch">
@@ -1192,6 +1287,7 @@
                   data-i18n="themeLabel"></label>
                 <select id="exportSearchTheme"
                   style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="jfThemeAuto"></option>
                   <option value="atom-one-dark">Atom One Dark</option>
                   <option value="atom-one-light">Atom One Light</option>
                   <option value="default">Default</option>
@@ -1680,6 +1776,15 @@
               <input type="checkbox" id="enableCopyAccountId">
               <span class="slider round"></span>
             </label>
+
+            <div id="container_enableCopyAccountId"
+              style="width: 100%; margin-top: 8px; display: none; align-items: center; gap: 8px;">
+              <label for="envBadgeLetters" data-i18n="envBadgeLettersLabel"></label>
+              <select id="envBadgeLetters">
+                <option value="3" data-i18n="envBadgeLetters3"></option>
+                <option value="2" data-i18n="envBadgeLetters2"></option>
+              </select>
+            </div>
           </div>
 
           <div class="option-row">
@@ -1787,6 +1892,7 @@
                   data-i18n="themeLabel"></label>
                 <select id="codeFieldPrettierTheme"
                   style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="jfThemeAuto"></option>
                   <option value="atom-one-dark">Atom One Dark</option>
                   <option value="atom-one-light">Atom One Light</option>
                   <option value="default">Default</option>
@@ -1940,6 +2046,7 @@
                   data-i18n="themeLabel"></label>
                 <select id="fileRecordPreviewTheme"
                   style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="jfThemeAuto"></option>
                   <option value="atom-one-dark">Atom One Dark</option>
                   <option value="atom-one-light">Atom One Light</option>
                   <option value="default">Default</option>
@@ -2137,6 +2244,20 @@
                   </svg>
                 </button>
               </div>
+            </div>
+            <div class="nsft-settings-row">
+              <div class="nsft-settings-row-icon is-site">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h6v6H9z"></path><path d="M6 9a3 3 0 1 1 3-3v12a3 3 0 1 1-3-3h12a3 3 0 1 1-3 3V6a3 3 0 1 1 3 3z"></path></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="shortcutKeyStyleLabel">Estilo de los atajos</strong>
+                <small data-i18n="shortcutKeyStyleDesc">Cómo se escriben los modificadores. Las teclas no cambian: Ctrl y ⌘ funcionan igual. Recarga la pestaña para verlo.</small>
+              </div>
+              <select id="shortcutKeyStyle" class="nsft-settings-row-select">
+                <option value="auto" data-i18n="shortcutKeyStyleAuto">Según el sistema</option>
+                <option value="mac" data-i18n="shortcutKeyStyleMac">⌘ ⌥ ⇧ (Mac)</option>
+                <option value="win" data-i18n="shortcutKeyStyleWin">Ctrl, Alt y Shift</option>
+              </select>
             </div>
           </div>
 
@@ -2353,6 +2474,17 @@
               </div>
               <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
             </button>
+            <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevResetRate"
+              data-i18n-title="devResetRateTitle" title="Volver a mostrar el aviso de califícanos">
+              <div class="nsft-settings-row-icon is-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 14.8 8.6 21 9.5 16.5 13.9 17.6 20 12 17.1 6.4 20 7.5 13.9 3 9.5 9.2 8.6"></polygon></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="devResetRateLabel">Reiniciar el aviso de califícanos</strong>
+                <small data-i18n="devResetRateDesc">Lo vuelve a mostrar en las pestañas de NetSuite al refrescar.</small>
+              </div>
+              <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
+            </button>
             <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevDisable"
               data-i18n-title="devDisableTitle" title="Salir del modo desarrollador">
               <div class="nsft-settings-row-icon is-diagnostic">
@@ -2387,8 +2519,16 @@
         <line x1="12" y1="8" x2="12.01" y2="8"></line>
       </svg>
       <small data-i18n="footerNote">Algunos cambios requieren actualizar la página</small>
-      <button type="button" class="nsft-foot-btn" id="nsftFootRefresh"
-        data-i18n="footerRefreshBtn" data-i18n-title="footerRefreshTitle">Refrescar pestaña</button>
+      <button type="button" id="nsftOpenInTabBtn" class="nsft-foot-icon-btn nsft-open-tab-btn"
+        data-i18n-title="openInTabTitle" title="Abrir en una pestaña">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        <span data-i18n="openInTabShort">Pestaña</span>
+      </button>
     </footer>
 
     <div id="nsftToast" class="nsft-toast" role="status" aria-live="polite" hidden>
@@ -2415,6 +2555,7 @@
 
     <div id="nsftMasterBar" hidden></div>
   </div>
+  <script src="../scripts/modules/_shared/nsft_mac_keys.js"></script>
   <script src="../scripts/modules/_shared/nsft_defaults.js"></script>
   <script src="../scripts/modules/editor_theme/theme_transform.js"></script>
   <script src="popup.js"></script>

@@ -8,68 +8,21 @@
 }
 
 .nsft-lv-bar {
-    height: 30px !important;
-    box-sizing: border-box !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 7px !important;
-    padding: 0 10px !important;
-    background: #f4f6f9 !important;
-    border: 1px solid #dfe3e9 !important;
-    border-radius: 6px !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-    position: relative !important;
-    top: -2px;
-    vertical-align: middle !important;
     width: auto !important;
+    min-width: 340px !important;
     visibility: visible !important;
-    transition: background 180ms ease, border-color 180ms ease;
-}
-
-.nsft-lv-bar:focus-within {
-    background: #ffffff !important;
-    border-color: #cbd5e1 !important;
 }
 
 .nsft-lv-icon {
     display: inline-flex;
     align-items: center;
-    color: #4d5f79;
-    opacity: 0.7;
+    color: #94a3b8;
     flex: 0 0 auto;
 }
 
-.nsft-lv-search {
-    border: none !important;
-    outline: none !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    line-height: 1 !important;
-    color: #4d5f79 !important;
-    width: 165px !important;
-    height: auto !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-.nsft-lv-search::placeholder {
-    color: #8a97ab !important;
-    opacity: 1 !important;
-    font-weight: 400 !important;
-}
-
 .nsft-lv-count {
-    font-size: 12px !important;
-    color: #8a97ab !important;
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
     min-width: 20px;
     text-align: right;
-    user-select: none;
     flex: 0 0 auto;
 }
 
@@ -77,216 +30,11 @@ tr.nsft-lv-hidden {
     display: none !important;
 }
 
-.nsft-lv-btn {
-    height: 20px !important;
-    padding: 0 8px !important;
-    border: 1px solid #dfe3e9 !important;
-    border-radius: 4px !important;
-    background: #ffffff !important;
-    color: #4d5f79 !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-    font-size: 10.5px !important;
-    font-weight: 600 !important;
-    line-height: 1 !important;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    cursor: pointer;
-    user-select: none;
-    flex: 0 0 auto;
-    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-}
-
-.nsft-lv-btn:hover {
-    color: #1e40af !important;
-    border-color: #93c5fd !important;
-    background: #eff6ff !important;
-}
-
-.nsft-lv-btn.nsft-lv-btn-active {
-    color: #1d4ed8 !important;
-    background: #eff6ff !important;
-    border-color: #93c5fd !important;
-}
-
-.nsft-lv-btn.nsft-lv-btn-loading {
-    color: #b45309 !important;
-    border-color: #fcd34d !important;
-    background: #fffbeb !important;
-}
-
-.nsft-lv-panel {
-    margin: 8px 0 10px;
-    border: 1px solid #dfe3e9;
-    border-radius: 8px;
-    background: #ffffff;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-.nsft-lv-panel-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background: #f4f6f9;
-    border-bottom: 1px solid #dfe3e9;
-}
-
-.nsft-lv-panel-title {
-    font-size: 12.5px;
+mark.nsft-lv-hl {
+    background: rgba(234, 179, 8, 0.42);
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 1px;
     font-weight: 700;
-    color: #1f2a3d;
-}
-
-.nsft-lv-panel-note {
-    flex: 1 1 auto;
-    font-size: 11px;
-    color: #8a97ab;
-    text-align: right;
-}
-
-.nsft-lv-panel-body {
-    max-height: 420px;
-    overflow: auto;
-}
-
-.nsft-lv-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11.5px;
-}
-
-.nsft-lv-table th {
-    position: sticky;
-    top: 0;
-    background: #f8fafc;
-    color: #4d5f79;
-    text-align: left;
-    font-weight: 700;
-    padding: 6px 10px;
-    border-bottom: 1px solid #dfe3e9;
-    white-space: nowrap;
-}
-
-.nsft-lv-table td {
-    padding: 5px 10px;
-    border-bottom: 1px solid #eef1f5;
-    color: #1f2a3d;
-    vertical-align: top;
-    word-break: break-word;
-}
-
-.nsft-lv-table tbody tr:hover {
-    background: #f8fafc;
-}
-
-
-.nsft-lv-panel[data-theme="dark"] {
-    background: var(--nsft-dk-panel);
-    border-color: #1C222C;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-panel-head {
-    background: var(--nsft-dk-surface);
-    border-bottom-color: #1C222C;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-panel-title {
-    color: #E6EBF2;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-panel-note {
-    color: #9AA4B5;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-btn {
-    background: var(--nsft-dk-surface) !important;
-    border-color: var(--nsft-dk-border) !important;
-    color: #C6CEDB !important;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-btn:hover {
-    background: var(--nsft-dk-hover) !important;
-    border-color: var(--nsft-dk-border2) !important;
-    color: #E6EBF2 !important;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-table th {
-    background: var(--nsft-dk-surface);
-    color: #C6CEDB;
-    border-bottom-color: #1C222C;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-table td {
-    color: #E6EBF2;
-    border-bottom-color: #1C222C;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-table tbody tr:nth-child(even) {
-    background: #141922;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-table tbody tr:hover {
-    background: var(--nsft-dk-hover);
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-level {
-    display: inline-block;
-    padding: 1px 7px;
-    border-radius: 999px;
-    border: 1px solid transparent;
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-level-debug {
-    background: rgba(110, 124, 245, 0.18);
-    border-color: rgba(110, 124, 245, 0.5);
-    color: #B3C1FF;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-level-audit {
-    background: rgba(127, 217, 180, 0.16);
-    border-color: rgba(127, 217, 180, 0.45);
-    color: #7FD9B4;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-level-error {
-    background: rgba(240, 112, 138, 0.18);
-    border-color: rgba(240, 112, 138, 0.5);
-    color: #F0708A;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-level-emergency {
-    background: rgba(240, 112, 138, 0.24);
-    border-color: rgba(240, 112, 138, 0.6);
-    color: #F0708A;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-level-system {
-    background: rgba(253, 230, 138, 0.16);
-    border-color: rgba(253, 230, 138, 0.45);
-    color: #FDE68A;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-panel-body::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-panel-body::-webkit-scrollbar-track {
-    background: var(--nsft-dk-panel);
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-panel-body::-webkit-scrollbar-thumb {
-    background: #2A3240;
-    border-radius: 5px;
-    border: 2px solid var(--nsft-dk-panel);
-}
-
-.nsft-lv-panel[data-theme="dark"] .nsft-lv-panel-body::-webkit-scrollbar-thumb:hover {
-    background: var(--nsft-dk-border2);
+    box-shadow: 0 0 0 1px rgba(180, 130, 0, 0.25);
 }

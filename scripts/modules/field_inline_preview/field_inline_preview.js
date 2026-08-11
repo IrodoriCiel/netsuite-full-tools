@@ -661,14 +661,15 @@
     }
 
     function renderCopyHint() {
+        const K = window.NSFT_MacKeys || { mod: 'Ctrl', alt: 'Alt', shift: 'Shift' };
         const idLine = _noButton
-            ? `<span><kbd>Shift</kbd>+click: ${escapeHtml(i18n('fip_copy_hint_id', 'copiar ID'))}</span>`
+            ? `<span><kbd>${escapeHtml(K.shift)}</kbd>+click: ${escapeHtml(i18n('fip_copy_hint_id', 'copiar ID'))}</span>`
             : '';
         return `
             <div class="nsft-fip-copyhint">
                 ${idLine}
-                <span><kbd>Ctrl</kbd>+click: ${escapeHtml(i18n('fip_copy_hint_ss2', 'copy SS2 snippet'))}</span>
-                <span><kbd>Alt</kbd>+click: ${escapeHtml(i18n('fip_copy_hint_ss1', 'copy SS1 snippet'))}</span>
+                <span><kbd>${escapeHtml(K.mod)}</kbd>+click: ${escapeHtml(i18n('fip_copy_hint_ss2', 'copy SS2 snippet'))}</span>
+                <span><kbd>${escapeHtml(K.alt)}</kbd>+click: ${escapeHtml(i18n('fip_copy_hint_ss1', 'copy SS1 snippet'))}</span>
             </div>
         `;
     }

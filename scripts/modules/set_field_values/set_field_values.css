@@ -168,6 +168,96 @@
     padding-right: 10px;
 }
 
+.nsft-sfv-help {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    border-left: 3px solid hsl(var(--h, 216), calc(var(--s-val, 23) * 1%), 62%);
+    background: hsl(var(--h, 216), calc(var(--s-val, 23) * 1%), 97%);
+    border-radius: 0 4px 4px 0;
+}
+
+.nsft-sfv-help-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.nsft-sfv-help-title {
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #777;
+}
+
+.nsft-sfv-help-caret {
+    font-size: 10px;
+    line-height: 1;
+    color: #999;
+    transition: transform 0.15s ease;
+}
+
+.nsft-sfv-help[data-collapsed="1"] .nsft-sfv-help-caret {
+    transform: rotate(-90deg);
+}
+
+.nsft-sfv-help[data-collapsed="1"] .nsft-sfv-help-text {
+    display: none;
+}
+
+.nsft-sfv-help-text {
+    color: #333;
+    font-size: 12px;
+    line-height: 1.45;
+    max-height: 30vh;
+    overflow-y: auto;
+    white-space: pre-line;
+    margin-top: 2px;
+}
+
+.nsft-sfv-anim {
+    transition: height 0.22s ease, opacity 0.22s ease, margin 0.22s ease, padding 0.22s ease;
+    overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nsft-sfv-anim {
+        transition: none;
+    }
+}
+
+.nsft-sfv-help-skeleton {
+    display: block;
+    height: 12px;
+    margin: 2px 0 1px;
+    border-radius: 3px;
+    background: linear-gradient(90deg,
+            rgba(0, 0, 0, 0.06) 25%,
+            rgba(0, 0, 0, 0.11) 37%,
+            rgba(0, 0, 0, 0.06) 63%);
+    background-size: 400% 100%;
+    animation: nsft-sfv-help-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes nsft-sfv-help-shimmer {
+    0% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nsft-sfv-help-skeleton {
+        animation: none;
+    }
+}
+
 .nsft-sfv-input-group {
     display: flex;
     gap: 5px;
@@ -213,6 +303,35 @@
 .nsft-badge:hover {
     background: hsl(var(--h, 216), calc(var(--s-val, 23) * 1%), 87%);
     color: hsl(var(--h, 216), calc(var(--s-val, 23) * 1%), 22%);
+}
+
+.nsft-sfv-type-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.nsft-sfv-help-badge {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.06);
+    color: inherit;
+}
+
+.nsft-sfv-help-badge svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+.nsft-sfv-help-badge:hover {
+    background: rgba(0, 0, 0, 0.12);
+    color: inherit;
 }
 
 .nsft-switch {
@@ -390,13 +509,38 @@ input:checked+.nsft-slider:before {
     box-shadow: 0 0 4px hsla(var(--h, 216), calc(var(--s-val, 23) * 1.5%), 60%, 0.3) !important;
 }
 
+#nsft-sfv-modal[data-theme="dark"] .nsft-sfv-help {
+    background: var(--nsft-dk-hover) !important;
+    border-left-color: hsl(var(--h, 216), calc(var(--s-val, 23) * 1.5%), 52%) !important;
+}
+
+#nsft-sfv-modal[data-theme="dark"] .nsft-sfv-help-title {
+    color: #9AA4B5 !important;
+}
+
+#nsft-sfv-modal[data-theme="dark"] .nsft-sfv-help-text {
+    color: #E6EBF2 !important;
+}
+
+#nsft-sfv-modal[data-theme="dark"] .nsft-sfv-help-caret {
+    color: #8A93A3 !important;
+}
+
+#nsft-sfv-modal[data-theme="dark"] .nsft-sfv-help-skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.06) 25%,
+            rgba(255, 255, 255, 0.13) 37%,
+            rgba(255, 255, 255, 0.06) 63%) !important;
+    background-size: 400% 100% !important;
+}
+
 #nsft-sfv-modal[data-theme="dark"] #nsft-div-custom-fields {
     background: var(--nsft-sfv-accent-soft) !important;
     border-color: var(--nsft-sfv-accent-border) !important;
     color: #E6EBF2 !important;
 }
 
-#nsft-sfv-modal[data-theme="dark"] #nsft-div-custom-fields > span {
+#nsft-sfv-modal[data-theme="dark"] #nsft-div-custom-fields .nsft-sfv-type-text {
     color: hsl(var(--h, 216), calc(var(--s-val, 23) * 1.5%), 75%) !important;
 }
 
@@ -646,7 +790,7 @@ input:checked+.nsft-slider:before {
 #nsft-sfv-modal[data-theme="dark"] .nsft-fav-row:hover {
     background: var(--nsft-dk-hover);
     border-color: var(--nsft-dk-border2);
-    border-left-color: #6E7CF5;
+    border-left-color: var(--nsft-ns-accent-light, #7FB0FF);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45);
 }
 #nsft-sfv-modal[data-theme="dark"] .nsft-fav-meta {

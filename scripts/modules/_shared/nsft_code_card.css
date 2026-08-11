@@ -1,0 +1,106 @@
+
+.nsft-codecard {
+    --cc-card-bg: #FBFCFD;
+    --cc-card-bd: #DDE1E8;
+    --cc-bar-bg: #F4F6F9;
+    --cc-bar-bd: #E4E8EE;
+    --cc-btn-fg: #384150;
+    --cc-btn-hover-bg: #E4E8EE;
+    --cc-btn-hover-fg: #14181F;
+    --cc-ok-fg: #0A7B5A;
+    --cc-warn-fg: #9a3412;
+    --cc-warn-bg: #fff7ed;
+}
+
+html[data-nsft-theme="dark"] .nsft-codecard {
+    --cc-card-bg: var(--nsft-dk-surface, #141519);
+    --cc-card-bd: var(--nsft-dk-border, #282A30);
+    --cc-bar-bg: var(--nsft-dk-panel, #111215);
+    --cc-bar-bd: var(--nsft-dk-border, #282A30);
+    --cc-btn-fg: #C6CEDB;
+    --cc-btn-hover-bg: var(--nsft-dk-hover, #1E2025);
+    --cc-btn-hover-fg: #E6EBF2;
+    --cc-ok-fg: #7FD1C7;
+    --cc-warn-fg: #F1998E;
+    --cc-warn-bg: rgba(180, 35, 24, 0.14);
+}
+
+.nsft-codecard {
+    position: relative;
+    background: var(--cc-card-bg);
+    border: 1px solid var(--cc-card-bd);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(20, 24, 31, 0.05);
+    overflow: hidden;
+}
+
+.nsft-codecard-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 3px 5px;
+    background: var(--cc-bar-bg);
+    border-bottom: 1px solid var(--cc-bar-bd);
+    flex-shrink: 0;
+}
+
+.nsft-codecard-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 7px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--cc-btn-fg);
+    cursor: pointer;
+    white-space: nowrap;
+    text-transform: none;
+    box-shadow: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nsft-codecard-btn svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.nsft-codecard-btn:hover svg { opacity: 1; }
+
+.nsft-codecard-btn:hover {
+    background: var(--cc-btn-hover-bg);
+    color: var(--cc-btn-hover-fg);
+    transform: none;
+}
+
+.nsft-codecard-btn.copied { color: var(--cc-ok-fg); font-weight: 600; }
+.nsft-codecard-btn.copied svg { opacity: 1; }
+
+.nsft-codecard pre {
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.nsft-codecard code.hljs {
+    border: none;
+    border-radius: 0;
+}
+
+.nsft-codecard-warning {
+    padding: 6px 16px 7px;
+    background: var(--cc-warn-bg);
+    color: var(--cc-warn-fg);
+    font-size: 11px;
+    font-weight: 600;
+    font-style: italic;
+    flex-shrink: 0;
+}

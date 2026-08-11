@@ -3,18 +3,36 @@
 
     if (window.NSFT_LogFormat) return;
 
-    const WRAPPER_CLASS = 'nsft-logfmt-wrapper';
-    const BTN_GROUP_CLASS = 'nsft-logfmt-btn-group';
-    const COPY_BTN_CLASS = 'nsft-logfmt-copy-btn';
+    const WRAPPER_OWN_CLASS = 'nsft-logfmt-wrapper';
+    const WRAPPER_CLASS = `nsft-codecard ${WRAPPER_OWN_CLASS}`;
+    const BTN_GROUP_CLASS = 'nsft-codecard-bar nsft-logfmt-btn-group';
+    const COPY_BTN_CLASS = 'nsft-codecard-btn nsft-logfmt-copy-btn';
     const HTML_CONTENT_CLASS = 'nsft-logfmt-html-content';
     const THEME_LINK_ID = 'nsft-logfmt-theme-link';
-    const THEME_SCOPE = `.${WRAPPER_CLASS}`;
+    const THEME_SCOPE = `.${WRAPPER_OWN_CLASS}`;
 
     const isDiagEnabled = () => !!(window.NSFT_DOM && window.NSFT_DOM.isDiagEnabled && window.NSFT_DOM.isDiagEnabled());
 
     let _loadedTheme = null;
+    let _requestedTheme = null;
+
+    function resolveTheme(name) {
+        if (name !== 'auto') return name;
+        const dark = document.documentElement.getAttribute('data-nsft-theme') === 'dark';
+        return dark ? 'atom-one-dark' : 'atom-one-light';
+    }
+
+    try {
+        chrome.storage.onChanged.addListener((changes, area) => {
+            if (area !== 'local' || !changes.nsftTheme) return;
+            if (_requestedTheme !== 'auto') return;
+            setTimeout(() => ensureTheme('auto'), 60);
+        });
+    } catch (e) { }
+
     async function ensureTheme(themeName) {
-        const name = themeName || 'atom-one-dark';
+        _requestedTheme = themeName || 'atom-one-dark';
+        const name = resolveTheme(_requestedTheme);
         if (_loadedTheme === name && document.getElementById(THEME_LINK_ID)) return;
         const themeUrl = chrome.runtime.getURL(`scripts/libs/highlight/themes/${name}.css`);
         try {
@@ -282,7 +300,55 @@
 
     const i18n = (key, fallback) => (chrome.i18n.getMessage(key) || fallback);
 
-    const createButtonGroup = (text, lang) => {
+    const ICON_COPY = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.8"/><path d="M10.5 3.2A1.7 1.7 0 0 0 8.8 2H3.7A1.7 1.7 0 0 0 2 3.7v5.1c0 .8.6 1.5 1.4 1.7"/></svg>';
+    const ICON_DOWNLOAD = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v7.5"/><path d="M5 7.4 8 10.4l3-3"/><path d="M2.8 12.2v.4a1.4 1.4 0 0 0 1.4 1.4h7.6a1.4 1.4 0 0 0 1.4-1.4v-.4"/></svg>';
+
+    const makeBarButton = (label, iconSvg) => {
+        const btn = document.createElement('button');
+        btn.className = COPY_BTN_CLASS;
+        btn.type = 'button';
+        btn.title = label;
+        if (iconSvg) btn.innerHTML = iconSvg;
+        const span = document.createElement('span');
+        span.textContent = label;
+        btn.appendChild(span);
+        return btn;
+    };
+
+    const btnLabelEl = (btn) => btn.querySelector('span') || btn;
+
+    const SLUG_MAX = 40;
+
+    function slugPart(v) {
+        return String(v == null ? '' : v)
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^\w.\- ]+/g, ' ')
+            .trim()
+            .replace(/[\s-]+/g, '-')
+            .slice(0, SLUG_MAX)
+            .replace(/^[-.]+|[-.]+$/g, '');
+    }
+
+    function buildFileName(parts, ext) {
+        const slug = (Array.isArray(parts) ? parts : [parts])
+            .map(slugPart)
+            .filter(Boolean)
+            .join('_');
+        return (slug || 'log') + '.' + (ext || 'txt');
+    }
+
+    function stampPart(value) {
+        const s = String(value == null ? '' : value).trim();
+        const m = /(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/.exec(s);
+        if (m) return m[1] + m[2] + m[3] + '-' + m[4] + m[5] + (m[6] || '');
+        if (s) return s;
+        const d = new Date();
+        const p = (n) => String(n).padStart(2, '0');
+        return '' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate())
+            + '-' + p(d.getHours()) + p(d.getMinutes());
+    }
+
+    const createButtonGroup = (text, lang, nameParts) => {
         const group = document.createElement('div');
         group.className = BTN_GROUP_CLASS;
 
@@ -290,30 +356,22 @@
         const copiedLabel = i18n('copied', 'Copied');
         const downloadLabel = i18n('download', 'Descargar');
 
-        const copyBtn = document.createElement('button');
-        copyBtn.className = COPY_BTN_CLASS;
-        copyBtn.type = 'button';
-        copyBtn.textContent = copyLabel;
-        copyBtn.title = copyLabel;
+        const copyBtn = makeBarButton(copyLabel, ICON_COPY);
         copyBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             if (!navigator.clipboard) return;
             navigator.clipboard.writeText(text).then(() => {
-                copyBtn.textContent = copiedLabel + '!';
+                btnLabelEl(copyBtn).textContent = copiedLabel + '!';
                 copyBtn.classList.add('copied');
                 setTimeout(() => {
-                    copyBtn.textContent = copyLabel;
+                    btnLabelEl(copyBtn).textContent = copyLabel;
                     copyBtn.classList.remove('copied');
                 }, 2000);
             });
         });
 
-        const downloadBtn = document.createElement('button');
-        downloadBtn.className = COPY_BTN_CLASS;
-        downloadBtn.type = 'button';
-        downloadBtn.textContent = downloadLabel;
-        downloadBtn.title = downloadLabel;
+        const downloadBtn = makeBarButton(downloadLabel, ICON_DOWNLOAD);
         downloadBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -328,7 +386,9 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `log.${ext}`;
+            a.download = (nameParts && nameParts.length)
+                ? buildFileName(nameParts, ext)
+                : `log.${ext}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -340,22 +400,18 @@
         return group;
     };
 
-    const renderCode = (el, text, lang, isRepaired = false, prefix = '', rawOriginal = '') => {
+    const renderCode = (el, text, lang, isRepaired = false, prefix = '', rawOriginal = '', nameParts = null) => {
         const wrapper = document.createElement('div');
         wrapper.className = WRAPPER_CLASS;
 
-        const btnGroup = createButtonGroup(text, lang);
+        const btnGroup = createButtonGroup(text, lang, nameParts);
 
         let toggleBtn = null;
         let originalPre = null;
         if (isRepaired && rawOriginal && rawOriginal !== text) {
-            toggleBtn = document.createElement('button');
-            toggleBtn.className = COPY_BTN_CLASS;
-            toggleBtn.type = 'button';
             const viewOriginalLabel = i18n('log_view_original', 'View original');
             const viewRepairedLabel = i18n('log_view_repaired', 'View repaired');
-            toggleBtn.textContent = viewOriginalLabel;
-            toggleBtn.title = viewOriginalLabel;
+            toggleBtn = makeBarButton(viewOriginalLabel, '');
             toggleBtn.dataset.viewOriginalLabel = viewOriginalLabel;
             toggleBtn.dataset.viewRepairedLabel = viewRepairedLabel;
             btnGroup.appendChild(toggleBtn);
@@ -386,16 +442,17 @@
                 showingOriginal = !showingOriginal;
                 pre.style.display = showingOriginal ? 'none' : '';
                 originalPre.style.display = showingOriginal ? '' : 'none';
-                toggleBtn.textContent = showingOriginal
+                const next = showingOriginal
                     ? toggleBtn.dataset.viewRepairedLabel
                     : toggleBtn.dataset.viewOriginalLabel;
-                toggleBtn.title = toggleBtn.textContent;
+                btnLabelEl(toggleBtn).textContent = next;
+                toggleBtn.title = next;
             });
         }
 
         if (isRepaired) {
             const warning = document.createElement('div');
-            warning.style.cssText = 'color: #800d0dff; font-weight: 600; font-size: 11px; margin-top: 4px; font-style: italic;';
+            warning.className = 'nsft-codecard-warning nsft-logfmt-warning';
             warning.textContent = '⚠️ ' + i18n('json_incomplete_warning', 'Log truncated. JSON auto-repaired.');
             wrapper.appendChild(warning);
         }
@@ -409,19 +466,15 @@
         }
     };
 
-    const renderHtml = (el, text) => {
+    const renderHtml = (el, text, nameParts = null) => {
         const wrapper = document.createElement('div');
         wrapper.className = `${WRAPPER_CLASS} nsft-logfmt-html`;
 
-        const btnGroup = createButtonGroup(text, 'html');
+        const btnGroup = createButtonGroup(text, 'html', nameParts);
 
         const previewLabel = i18n('log_html_preview', 'Vista');
         const codeLabel = i18n('log_html_code', 'Código');
-        const toggleBtn = document.createElement('button');
-        toggleBtn.className = COPY_BTN_CLASS;
-        toggleBtn.type = 'button';
-        toggleBtn.textContent = codeLabel;
-        toggleBtn.title = codeLabel;
+        const toggleBtn = makeBarButton(codeLabel, '');
         btnGroup.appendChild(toggleBtn);
 
         wrapper.appendChild(btnGroup);
@@ -436,7 +489,7 @@
             : '';
         const hostStyle = `<style>
             :host { display: block; }
-            .nsft-html-body { padding: 45px 10px 10px 10px; min-height: 20px; }
+            .nsft-html-body { padding: 14px 16px; min-height: 20px; }
         </style>`;
         shadow.innerHTML = hostStyle + styleBlock + `<div class="nsft-html-body">${body}</div>`;
         wrapper.appendChild(host);
@@ -457,8 +510,9 @@
             showingCode = !showingCode;
             host.style.display = showingCode ? 'none' : '';
             codePre.style.display = showingCode ? '' : 'none';
-            toggleBtn.textContent = showingCode ? previewLabel : codeLabel;
-            toggleBtn.title = toggleBtn.textContent;
+            const next = showingCode ? previewLabel : codeLabel;
+            btnLabelEl(toggleBtn).textContent = next;
+            toggleBtn.title = next;
             if (showingCode && !highlighted && window.hljs) {
                 try { window.hljs.highlightElement(codeEl); highlighted = true; } catch (err) { }
             }
@@ -468,10 +522,11 @@
         el.appendChild(wrapper);
     };
 
-    const renderInto = (el, rawText) => {
+    const renderInto = (el, rawText, opts) => {
         if (!el) return null;
         const raw = (rawText != null ? String(rawText) : (el.textContent || '')).trim();
         if (!raw) return null;
+        const nameParts = (opts && opts.nameParts) || null;
 
         if (window.sqlFormatter && /^select\b/i.test(raw)) {
             let formatted = raw;
@@ -482,7 +537,7 @@
                     indent: '    '
                 });
             } catch (e) { }
-            renderCode(el, formatted, 'sql');
+            renderCode(el, formatted, 'sql', false, '', '', nameParts);
             return 'sql';
         }
 
@@ -494,18 +549,19 @@
                 'json',
                 parsedResult.isRepaired,
                 parsedResult.prefix,
-                parsedResult.rawOriginal
+                parsedResult.rawOriginal,
+                nameParts
             );
             return 'json';
         }
 
         if (looksLikeXml(raw)) {
-            renderCode(el, formatXml(raw), 'xml');
+            renderCode(el, formatXml(raw), 'xml', false, '', '', nameParts);
             return 'xml';
         }
 
         if (looksLikeHtml(raw)) {
-            renderHtml(el, raw);
+            renderHtml(el, raw, nameParts);
             return 'html';
         }
 
@@ -515,6 +571,11 @@
     window.NSFT_LogFormat = {
         renderInto,
         ensureTheme,
+        makeBarButton,
+        btnLabelEl,
+        ICONS: { copy: ICON_COPY, download: ICON_DOWNLOAD },
+        buildFileName,
+        stampPart,
         looksLikeXml,
         looksLikeHtml,
         tryJSON

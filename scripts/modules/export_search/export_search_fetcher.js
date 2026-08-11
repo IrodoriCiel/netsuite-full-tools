@@ -22,12 +22,10 @@
                 exec(event.data.code);
 
                 let varName = 'search';
-                if (event.data.code.includes('window.mySearchResults')) {
-                    varName = 'mySearchResults';
-                } else {
-                    const match = event.data.code.match(/var\s+(\w+)\s*=/);
-                    if (match) varName = match[1];
-                }
+                const exported = event.data.code.match(/window\.(\w+)\s*=/);
+                const declared = event.data.code.match(/var\s+(\w+)\s*=/);
+                if (exported) varName = exported[1];
+                else if (declared) varName = declared[1];
 
                 console.log(
                     "%c[NSFT]%c " + translations.consoleSuccess + "%c" + varName,
@@ -35,8 +33,17 @@
                     "color: inherit;",
                     "font-weight: bold; color: #2ecc71;"
                 );
+
+                window.postMessage({
+                    type: 'nsft-export-search-executed',
+                    payload: { ok: true, varName }
+                }, '*');
             } catch (e) {
                 console.error(translations.execError, e);
+                window.postMessage({
+                    type: 'nsft-export-search-executed',
+                    payload: { ok: false, details: e && e.message ? e.message : '' }
+                }, '*');
             }
         }
     });
@@ -92,7 +99,7 @@
         }
     }
 
-    function generateAndSendCode(search, hideLabels = false) {
+    function generateAndSendCode(search) {
         try {
             const searchType = search.searchType;
             const filters = search.filterExpression || [];
@@ -107,56 +114,54 @@
 
             const columns = search.columns;
 
-            const ss1Columns = columns.map(c => {
-                const formula = c.formula ? c.formula.replace(/\"/g, '&#92;"') : null;
+            const VAR_TOKEN = '__NSFT_SEARCH_VAR__';
+            const searchVar = VAR_TOKEN;
+            const defaultVarName = `${searchType}Search`;
 
-                let col = `   new nlobjSearchColumn("${c.name}",`;
-                col += c.join ? `"${c.join}",` : "null,";
-                col += c.summary ? `"${c.summary}"` : "null";
+            function buildSS1Columns(noLabels) {
+                return columns.map(c => {
+                    const formula = c.formula ? c.formula.replace(/\"/g, '&#92;"') : null;
+                    const join = c.join ? `"${c.join}"` : 'null';
+                    const summary = c.summary ? `"${c.summary}"` : 'null';
 
-                if (formula) {
-                    col += `).setFormula("${formula}")`;
-                }
+                    let col = (join === 'null' && summary === 'null')
+                        ? `   new nlobjSearchColumn("${c.name}")`
+                        : `   new nlobjSearchColumn("${c.name}",${join},${summary})`;
 
-                if (c.sortdir) {
-                    if (!formula) col += `)`;
-                    col += `.setSort(${c.sortdir === 'DESC'})`;
-                }
-
-                if (!formula && !c.sortdir) {
-                    col += `)`;
-                }
-
-                return col.replace(',null,null)', ')').replace(', null, null)', ')');
-            }).join(', \n');
-
-            let searchCode1 = `var ${searchType}Search = nlapiSearchRecord("${searchType}",null,\n`;
-            searchCode1 += `${filterExpr}\n], \n`;
-            searchCode1 += `[\n${ss1Columns}\n]);`;
+                    if (formula) col += `.setFormula("${formula}")`;
+                    if (c.sortdir) col += `.setSort(${c.sortdir === 'DESC'})`;
+                    if (!noLabels && c.label) col += `.setLabel("${c.label}")`;
+                    return col;
+                }).join(', \n');
+            }
 
 
 
-            const ss2Columns = columns.map(c => {
-                const formula = c.formula ? c.formula.replace(/\"/g, '&#92;"') : null;
+            function buildSS2Columns(noLabels) {
+                const body = columns.map(c => {
+                    const formula = c.formula ? c.formula.replace(/\"/g, '&#92;"') : null;
 
-                if (!formula && !c.join && !c.summary && !c.sortdir) {
-                    return `      "${c.name}"`;
-                }
+                    if (!formula && !c.join && !c.summary && !c.sortdir) {
+                        if (noLabels || !c.label) return `      "${c.name}"`;
+                        return `      search.createColumn({name: "${c.name}", label: "${c.label}"})`;
+                    }
 
-                const props = [];
-                props.push(`         name: "${c.name}"`);
-                if (c.join) props.push(`         join: "${c.join}"`);
-                if (c.summary) props.push(`         summary: "${c.summary}"`);
-                if (formula) props.push(`         formula: "${formula}"`);
-                if (c.sortdir) props.push(`         sort: search.Sort.${c.sortdir}`);
-                if (!hideLabels && c.label) props.push(`         label: "${c.label}"`);
+                    const props = [];
+                    props.push(`         name: "${c.name}"`);
+                    if (c.join) props.push(`         join: "${c.join}"`);
+                    if (c.summary) props.push(`         summary: "${c.summary}"`);
+                    if (formula) props.push(`         formula: "${formula}"`);
+                    if (c.sortdir) props.push(`         sort: search.Sort.${c.sortdir}`);
+                    if (!noLabels && c.label) props.push(`         label: "${c.label}"`);
 
-                return `      search.createColumn({\n${props.join(',\n')}\n      })`;
-            }).join(',\n');
+                    return `      search.createColumn({\n${props.join(',\n')}\n      })`;
+                }).join(',\n');
 
-            let ss2ColumnsStr = `[\n${ss2Columns}`;
-            if (ss2Columns.length > 0) ss2ColumnsStr += '\n   ]';
-            else ss2ColumnsStr += '   ]';
+                let str = `[\n${body}`;
+                if (body.length > 0) str += '\n   ]';
+                else str += '   ]';
+                return str;
+            }
 
 
             let ss2FilterExpr = filterExpr.replace(/   /g, "      ");
@@ -168,55 +173,98 @@
                 settingsStr = `   settings:${JSON.stringify(search.settings)},\n`;
             }
 
-            const resultBody = columns.map(c => {
-                const keySource = (c.name && !c.formula) ? c.name : (c.label || c.name);
-                const key = (keySource || 'column').toLowerCase().replace(/[^a-z0-9_]/g, '_');
+            function columnVars(keyword, objectArgs, indent) {
+                return columns.map(c => {
+                    const keySource = (c.name && !c.formula) ? c.name : (c.label || c.name);
+                    const key = (keySource || 'column').toLowerCase().replace(/[^a-z0-9_]/g, '_');
 
-                let method = "getValue";
-                if (COMMON_LIST_FIELDS.includes(c.name) && !c.summary && !c.formula) {
-                    method = "getText";
-                }
+                    let method = "getValue";
+                    if (COMMON_LIST_FIELDS.includes(c.name) && !c.summary && !c.formula) {
+                        method = "getText";
+                    }
 
-                const formula = c.formula ? c.formula.replace(/\"/g, '&#92;"') : null;
+                    const formula = c.formula ? c.formula.replace(/\"/g, '&#92;"') : null;
 
-                const args = [`name: '${c.name}'`];
-                if (c.join) args.push(`join: '${c.join}'`);
-                if (c.summary) args.push(`summary: '${c.summary}'`);
-                if (formula) args.push(`formula: '${formula}'`);
+                    let arg;
+                    if (objectArgs) {
+                        const args = [`name: "${c.name}"`];
+                        if (c.join) args.push(`join: "${c.join}"`);
+                        if (c.summary) args.push(`summary: "${c.summary}"`);
+                        if (formula) args.push(`formula: "${formula}"`);
+                        arg = `{ ${args.join(', ')} }`;
+                    } else {
+                        const parts = [`"${c.name}"`];
+                        if (c.join || c.summary) parts.push(c.join ? `"${c.join}"` : 'null');
+                        if (c.summary) parts.push(`"${c.summary}"`);
+                        arg = parts.join(', ');
+                    }
 
-                const arg = `{ ${args.join(', ')} }`;
+                    return `${indent}${keyword} ${key} = result.${method}(${arg});`;
+                }).join('\n');
+            }
 
-                return `    const ${key} = result.${method}(${arg});`;
-            }).join('\n');
-
-
-            const searchCode2 = `const ${searchType}SearchObj = search.create({
+            const buildSS2 = (noLabels, includeLoop) => {
+                let code = `const ${searchVar} = search.create({
    type: "${searchType}",
 ${settingsStr}   filters:
    ${ss2FilterExpr}
    columns:
-   ${ss2ColumnsStr}
-});
+   ${buildSS2Columns(noLabels)}
+});`;
+                if (includeLoop) {
+                    code += `
 
-${searchType}SearchObj.run().each(function(result){
-${resultBody}
+${searchVar}.run().each(function(result){
+${columnVars('const', true, '    ')}
     return true;
 });`;
+                }
+                return code;
+            };
 
+            const buildSS1 = (noLabels, includeLoop) => {
+                let code = `var ${searchVar} = nlapiSearchRecord("${searchType}",null,\n`;
+                code += `${filterExpr}\n], \n`;
+                code += `[\n${buildSS1Columns(noLabels)}\n]);`;
+                if (includeLoop) {
+                    code += `
+
+if (${searchVar}) {
+    for (var i = 0; i < ${searchVar}.length; i++) {
+        var result = ${searchVar}[i];
+${columnVars('var', false, '        ')}
+    }
+}`;
+                }
+                return code;
+            };
+
+            const variants = {};
+            [false, true].forEach((noLabels) => {
+                [true, false].forEach((includeLoop) => {
+                    const key = `${noLabels ? 'nolabels' : 'labels'}_${includeLoop ? 'loop' : 'noloop'}`;
+                    variants[key] = {
+                        ss1: buildSS1(noLabels, includeLoop).replace(/&#92;/g, '\\'),
+                        ss2: buildSS2(noLabels, includeLoop).replace(/&#92;/g, '\\')
+                    };
+                });
+            });
+
+            const resultsVar = `${searchVar}Results`;
             const searchCode2Console = `require(['N/search'], function(search) {
     try {
-        var mySearch = search.load({ id: "${search.id}" });
-        var pagedData = mySearch.runPaged({ pageSize: 1000 });
-        var mySearchResults = [];
+        var ${searchVar} = search.load({ id: "${search.id}" });
+        var pagedData = ${searchVar}.runPaged({ pageSize: 1000 });
+        var ${resultsVar} = [];
 
         pagedData.pageRanges.forEach(function(pageRange) {
             var page = pagedData.fetch({ index: pageRange.index });
-            mySearchResults = mySearchResults.concat(page.data);
+            ${resultsVar} = ${resultsVar}.concat(page.data);
         });
-        
-        console.log("${translations.totalResults}", mySearchResults.length);
-        console.log(mySearchResults);
-        window.mySearchResults = mySearchResults;
+
+        console.log("${translations.totalResults}", ${resultsVar}.length);
+        console.log(${resultsVar});
+        window.${resultsVar} = ${resultsVar};
     } catch(e) {
         console.error(e.message);
     }
@@ -225,8 +273,13 @@ ${resultBody}
             window.postMessage({
                 type: 'nsft-export-search-success',
                 payload: {
-                    ss1: searchCode1.replace(/&#92;/g, '\\'),
-                    ss2: searchCode2.replace(/&#92;/g, '\\'),
+                    variants,
+                    info: {
+                        varName: defaultVarName,
+                        searchType: searchType,
+                        columns: columns.length,
+                        filters: filters.filter(Array.isArray).length
+                    },
                     ss2console: searchCode2Console.replace(/&#92;/g, '\\')
                 }
             }, '*');

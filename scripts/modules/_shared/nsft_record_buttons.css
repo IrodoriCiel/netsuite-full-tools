@@ -12,6 +12,7 @@
 
 :root { --nsft-danger: #cc0000; --nsft-danger-hover: #a30000; }
 
+
 .nsft-btn-spinner {
     display: inline-block;
     width: 12px;

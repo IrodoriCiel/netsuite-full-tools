@@ -12,6 +12,10 @@
     let pendingInit = null;
     let _nsftTheme = 'light';
     let _discreet = false;
+    const WITH_LABELS_KEY = 'nsftExportSearchWithLabels';
+    let _withLabels = false;
+    const WITH_LOOP_KEY = 'nsftExportSearchWithLoop';
+    let _withLoop = false;
 
     function _nsftResolveTheme() {
         return _nsftTheme === 'dark' ? 'dark' : 'light';
@@ -28,27 +32,32 @@
         if (area === 'local' && changes[NSFT_THEME_KEY]) {
             _nsftTheme = changes[NSFT_THEME_KEY].newValue || 'light';
             _nsftApplyThemeToModal();
+            if (_requestedTheme === 'auto') updateTheme('auto');
         }
     });
 
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
         exportSearchTheme: "atom-one-dark",
-        enableDiscreetMode: false
+        enableDiscreetMode: false,
+        [WITH_LABELS_KEY]: false,
+        [WITH_LOOP_KEY]: false
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
 
+        _withLabels = items[WITH_LABELS_KEY] === true;
+        _withLoop = items[WITH_LOOP_KEY] === true;
         _discreet = !!items.enableDiscreetMode;
         init(items);
     });
 
     function init(items) {
-        updateTheme(items.exportSearchTheme || 'atom-one-dark');
+        updateTheme(items.exportSearchTheme || 'auto');
 
         chrome.storage.onChanged.addListener((changes, area) => {
             if (area !== 'local') return;
             if (changes.exportSearchTheme) {
-                updateTheme(changes.exportSearchTheme.newValue || 'atom-one-dark');
+                updateTheme(changes.exportSearchTheme.newValue || 'auto');
             }
             if (changes.enableDiscreetMode) {
                 _discreet = !!changes.enableDiscreetMode.newValue;
@@ -106,6 +115,8 @@
                 renderResults(event.data.payload);
             } else if (event.data.type === 'nsft-export-search-error') {
                 renderError(event.data.payload);
+            } else if (event.data.type === 'nsft-export-search-executed') {
+                showExecutionToast(event.data.payload || {});
             }
         });
     }
@@ -115,6 +126,7 @@
         if (contentDiv) {
             contentDiv.innerHTML = getLoadingHtml(chrome.i18n.getMessage('es_loading') || 'Loading...');
         }
+        setFooter('');
 
         const translations = {
             consoleSuccess: chrome.i18n.getMessage('es_console_success_log') || 'Search loaded in console successfully. Available variable: ',
@@ -157,41 +169,95 @@
     function getResultsShell() {
         if (_resultsShell) return _resultsShell;
 
-        const labelSS2 = chrome.i18n.getMessage('es_label_ss2') || 'SuiteScript 2.x';
+        const labelVarName = chrome.i18n.getMessage('es_varname_title')
+            || 'Name of the search variable — edit it and the code follows';
+        const labelSS2 = chrome.i18n.getMessage('es_label_ss2') || 'SuiteScript 2.1';
         const labelSS1 = chrome.i18n.getMessage('es_label_ss1') || 'SuiteScript 1.0';
         const labelCopy = chrome.i18n.getMessage('es_btn_copy') || 'Copy';
         const labelRun = chrome.i18n.getMessage('es_btn_run') || 'Send to Console';
+        const labelWithLabels = chrome.i18n.getMessage('es_with_labels') || 'With labels';
+        const labelWithLabelsTitle = chrome.i18n.getMessage('es_with_labels_title')
+            || 'Include the column labels in the generated code';
+        const labelLoop = chrome.i18n.getMessage('es_with_loop') || 'With result loop';
+        const labelLoopTitle = chrome.i18n.getMessage('es_with_loop_title')
+            || 'Add the loop that walks the results, with one variable per column';
+
+        const help = (t) => `<span class="nsft-export-search-help" title="${t}" aria-hidden="true">?</span>`;
+        const toggles = `
+            <div class="nsft-export-search-toggles">
+                <label class="nsft-export-search-toggle">
+                    <input type="checkbox" data-toggle="labels"><span>${labelWithLabels}</span>${help(labelWithLabelsTitle)}
+                </label>
+                <label class="nsft-export-search-toggle">
+                    <input type="checkbox" data-toggle="loop"><span>${labelLoop}</span>${help(labelLoopTitle)}
+                </label>
+            </div>`;
 
         const iconCopy = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
         const iconRun = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`;
 
         _resultsShell = `
-            <div class="nsft-export-search-tabs-bar">
-                <div class="nsft-export-search-tabs" role="tablist">
+            <div class="nsft-export-search-head">
+                <div class="nsft-export-search-head-id">
+                    <input class="nsft-export-search-info-name" type="text" spellcheck="false"
+                           autocomplete="off" aria-label="${labelVarName}" title="${labelVarName}">
+                    <div class="nsft-export-search-chips"></div>
+                </div>
+                <div class="nsft-export-search-seg" role="tablist">
                     <button class="nsft-export-search-tab active" role="tab" data-tab="ss2" aria-selected="true">${labelSS2}</button>
                     <button class="nsft-export-search-tab" role="tab" data-tab="ss1" aria-selected="false">${labelSS1}</button>
                 </div>
-                <div class="nsft-export-search-actions active" data-actions="ss2">
-                    <button class="nsft-export-search-btn-copy" data-target="nsft-export-search-ss2">${iconCopy} <span>${labelCopy}</span></button>
-                    <button class="nsft-export-search-btn-run" data-target="nsft-export-search-ss2c">${iconRun} <span>${labelRun}</span></button>
+            </div>
+
+            <div class="nsft-export-search-card">
+                <div class="nsft-export-search-cardbar">
+                    ${toggles}
+                    <div class="nsft-export-search-meta">
+                        <span class="nsft-export-search-lines"></span>
+                        <span class="nsft-export-search-enc">UTF-8</span>
+                    </div>
                 </div>
-                <div class="nsft-export-search-actions" data-actions="ss1">
-                    <button class="nsft-export-search-btn-copy" data-target="nsft-export-search-ss1">${iconCopy} <span>${labelCopy}</span></button>
-                    <button class="nsft-export-search-btn-run" data-target="nsft-export-search-ss1">${iconRun} <span>${labelRun}</span></button>
+
+                <div class="nsft-export-search-code">
+                    <div class="nsft-export-search-panel active" data-panel="ss2" role="tabpanel">
+                        <div class="nsft-export-search-gutter" aria-hidden="true"></div>
+                        <pre id="nsft-export-search-ss2" class="prettyprint"><code class="language-javascript"></code></pre>
+                    </div>
+
+                    <div class="nsft-export-search-panel" data-panel="ss1" role="tabpanel">
+                        <div class="nsft-export-search-gutter" aria-hidden="true"></div>
+                        <pre id="nsft-export-search-ss1" class="prettyprint"><code class="language-javascript"></code></pre>
+                    </div>
                 </div>
             </div>
 
-            <div class="nsft-export-search-panel active" data-panel="ss2" role="tabpanel">
-                <pre id="nsft-export-search-ss2" class="prettyprint"><code class="language-javascript"></code></pre>
-            </div>
-
-            <div id="nsft-export-search-ss2c" style="display:none;"></div>
-
-            <div class="nsft-export-search-panel" data-panel="ss1" role="tabpanel">
-                <pre id="nsft-export-search-ss1" class="prettyprint"><code class="language-javascript"></code></pre>
-            </div>
+            <div id="nsft-export-search-ss2c" hidden></div>
         `;
         return _resultsShell;
+    }
+
+    function setFooter(html) {
+        const modal = document.getElementById('nsft-export-search-modal');
+        const foot = modal ? modal.querySelector('.nsft-rec-obj-footer') : null;
+        if (foot) foot.innerHTML = html || '';
+        return foot;
+    }
+
+    let _footerShell = null;
+    function getFooterShell() {
+        if (_footerShell) return _footerShell;
+
+        const labelCopy = chrome.i18n.getMessage('es_btn_copy') || 'Copy';
+        const labelRun = chrome.i18n.getMessage('es_btn_run') || 'Send to Console';
+        const iconCopy = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+        const iconRun = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`;
+
+        _footerShell = `
+            <div class="nsft-export-search-foot-actions">
+                <button class="nsft-export-search-btn-copy" type="button">${iconCopy} <span>${labelCopy}</span></button>
+                <button class="nsft-export-search-btn-run nsft-export-search-primary" type="button">${iconRun} <span>${labelRun}</span></button>
+            </div>`;
+        return _footerShell;
     }
 
     function renderResults(data) {
@@ -201,16 +267,153 @@
         const labelRunning = chrome.i18n.getMessage('es_running') || 'Running...';
 
         contentDiv.innerHTML = getResultsShell();
+        const footEl = setFooter(getFooterShell());
+        const scopes = footEl ? [contentDiv, footEl] : [contentDiv];
+        const findAll = (sel) => scopes.reduce(
+            (acc, root) => acc.concat(Array.from(root.querySelectorAll(sel))), []);
 
         const codeSS2 = contentDiv.querySelector('#nsft-export-search-ss2 code');
         const codeSS1 = contentDiv.querySelector('#nsft-export-search-ss1 code');
         const ss2cDiv = contentDiv.querySelector('#nsft-export-search-ss2c');
-        if (codeSS2) codeSS2.textContent = data.ss2 || '';
-        if (codeSS1) codeSS1.textContent = data.ss1 || '';
-        if (ss2cDiv) ss2cDiv.textContent = data.ss2console || '';
 
-        let ss1Highlighted = false;
-        if (window.hljs && codeSS2) window.hljs.highlightElement(codeSS2);
+        const info = data.info || {};
+        const nameEl = contentDiv.querySelector('.nsft-export-search-info-name');
+        const chipsEl = contentDiv.querySelector('.nsft-export-search-chips');
+
+        const VAR_TOKEN = '__NSFT_SEARCH_VAR__';
+        const defaultVar = info.varName || 'mySearch';
+        let varName = defaultVar;
+        const applyVar = (s) => String(s == null ? '' : s).split(VAR_TOKEN).join(varName);
+
+        function sanitiseVar(raw) {
+            const cleaned = String(raw || '').replace(/[^A-Za-z0-9_$]/g, '');
+            if (!cleaned) return defaultVar;
+            return /^[0-9]/.test(cleaned) ? `_${cleaned}` : cleaned;
+        }
+
+        if (nameEl) nameEl.value = varName;
+        if (chipsEl) {
+            const n = (one, many, count) => (count === 1
+                ? (chrome.i18n.getMessage(one) || `1`)
+                : (chrome.i18n.getMessage(many, [String(count)]) || String(count)));
+
+            const chips = [];
+            if (info.searchType) {
+                chips.push(chrome.i18n.getMessage('es_info_type', [info.searchType])
+                    || `Type: ${info.searchType}`);
+            }
+            chips.push(n('es_info_columns_one', 'es_info_columns', info.columns || 0));
+            chips.push(n('es_info_filters_one', 'es_info_filters', info.filters || 0));
+
+            chipsEl.innerHTML = '';
+            chips.forEach((text) => {
+                const span = document.createElement('span');
+                span.className = 'nsft-export-search-chip';
+                span.textContent = text;
+                chipsEl.appendChild(span);
+            });
+        }
+
+
+        const variants = data.variants || {};
+
+        function currentVariant() {
+            const key = `${_withLabels ? 'labels' : 'nolabels'}_${_withLoop ? 'loop' : 'noloop'}`;
+            return variants[key] || {};
+        }
+
+        const linesEl = contentDiv.querySelector('.nsft-export-search-lines');
+
+        function activeCode() {
+            const panel = contentDiv.querySelector('.nsft-export-search-panel.active');
+            return panel ? panel.querySelector('code') : null;
+        }
+
+        function paintCode() {
+            const v = currentVariant();
+            if (codeSS2) setCode(codeSS2, applyVar(v.ss2));
+            if (codeSS1) setCode(codeSS1, applyVar(v.ss1));
+            if (ss2cDiv) ss2cDiv.textContent = applyVar(data.ss2console);
+            updateMeta();
+        }
+
+        function setGutter(panel, count) {
+            const gutter = panel ? panel.querySelector('.nsft-export-search-gutter') : null;
+            if (!gutter) return;
+            const nums = [];
+            for (let i = 1; i <= count; i++) nums.push(i);
+            gutter.textContent = nums.join('\n');
+        }
+
+        function highlight(el) {
+            if (!window.hljs || !el) return;
+            el.removeAttribute('data-highlighted');
+            el.className = 'language-javascript';
+            window.hljs.highlightElement(el);
+        }
+
+        function setCode(el, text) {
+            el.textContent = text;
+            const panel = el.closest('.nsft-export-search-panel');
+            setGutter(panel, text ? text.split('\n').length : 0);
+
+            el.removeAttribute('data-highlighted');
+            el.className = 'language-javascript';
+            if (panel && panel.classList.contains('active')) highlight(el);
+        }
+
+        function updateMeta() {
+            if (!linesEl) return;
+            const el = activeCode();
+            const count = (el && el.textContent) ? el.textContent.split('\n').length : 0;
+            linesEl.textContent = count === 1
+                ? (chrome.i18n.getMessage('es_meta_lines_one') || '1 line')
+                : (chrome.i18n.getMessage('es_meta_lines', [String(count)]) || `${count} lines`);
+        }
+
+        paintCode();
+
+        if (nameEl) {
+            nameEl.addEventListener('input', () => {
+                const clean = String(nameEl.value || '').replace(/[^A-Za-z0-9_$]/g, '');
+                if (clean !== nameEl.value) {
+                    const at = nameEl.selectionStart;
+                    nameEl.value = clean;
+                    try { nameEl.setSelectionRange(at - 1, at - 1); } catch (e) { }
+                }
+                varName = clean || defaultVar;
+                paintCode();
+            });
+
+            const settle = () => {
+                varName = sanitiseVar(nameEl.value);
+                nameEl.value = varName;
+                paintCode();
+            };
+            nameEl.addEventListener('blur', settle);
+            nameEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); }
+            });
+        }
+
+        contentDiv.querySelectorAll('.nsft-export-search-toggle input').forEach((box) => {
+            const which = box.getAttribute('data-toggle');
+            box.checked = which === 'loop' ? _withLoop : _withLabels;
+
+            box.addEventListener('change', () => {
+                if (which === 'loop') _withLoop = box.checked;
+                else _withLabels = box.checked;
+
+                paintCode();
+
+                try {
+                    chrome.storage.local.set({
+                        [WITH_LABELS_KEY]: _withLabels,
+                        [WITH_LOOP_KEY]: _withLoop
+                    });
+                } catch (e) { }
+            });
+        });
 
         contentDiv.querySelectorAll('.nsft-export-search-tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -226,65 +429,79 @@
                     panel.classList.toggle('active', panel.getAttribute('data-panel') === target);
                 });
 
-                contentDiv.querySelectorAll('.nsft-export-search-actions').forEach(group => {
-                    group.classList.toggle('active', group.getAttribute('data-actions') === target);
+                const shown = activeCode();
+                if (shown && !shown.dataset.highlighted) highlight(shown);
+
+                updateMeta();
+            });
+        });
+
+        function flash(btn, message, ms) {
+            const span = btn.querySelector('span') || btn;
+            const original = span.textContent;
+            span.textContent = message;
+            setTimeout(() => { span.textContent = original; }, ms || 1500);
+        }
+
+        function copyActive(btn) {
+            const el = activeCode();
+            if (!el || !el.textContent) return;
+            const done = () => flash(btn, chrome.i18n.getMessage('es_copied') || 'Copied!');
+            if (window.NSFT_Clipboard && window.NSFT_Clipboard.copy) {
+                window.NSFT_Clipboard.copy(el.textContent, { toast: false, onSuccess: done });
+                return;
+            }
+            navigator.clipboard.writeText(el.textContent).then(done);
+        }
+
+        findAll('.nsft-export-search-btn-copy')
+            .forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    copyActive(btn);
                 });
-
-                if (target === 'ss1' && !ss1Highlighted && window.hljs && codeSS1) {
-                    window.hljs.highlightElement(codeSS1);
-                    ss1Highlighted = true;
-                }
             });
-        });
 
-        contentDiv.querySelectorAll('.nsft-export-search-btn-copy').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        const runBtn = findAll('.nsft-export-search-btn-run')[0];
+        if (runBtn) {
+            runBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const targetId = btn.getAttribute('data-target');
-                const pEl = document.getElementById(targetId);
-                const span = btn.querySelector('span');
-                if (pEl) {
-                    navigator.clipboard.writeText(pEl.textContent).then(() => {
-                        const originalText = span ? span.textContent : btn.textContent;
-                        if (span) span.textContent = chrome.i18n.getMessage('es_copied') || 'Copied!';
-                        setTimeout(() => {
-                            if (span) span.textContent = originalText;
-                        }, 1500);
-                    });
+                const onSS1 = !!contentDiv.querySelector('.nsft-export-search-panel.active[data-panel="ss1"]');
+                const el = onSS1 ? activeCode() : ss2cDiv;
+                if (!el || !el.textContent) return;
+                try {
+                    window.postMessage({
+                        type: 'nsft-export-search-execute',
+                        code: el.textContent
+                    }, '*');
+                    flash(runBtn, labelRunning, 1000);
+                } catch (err) {
+                    console.error("Execution Request Error:", err);
                 }
             });
-        });
+        }
+    }
 
-        contentDiv.querySelectorAll('.nsft-export-search-btn-run').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const targetId = btn.getAttribute('data-target');
-                const contentEl = document.getElementById(targetId);
-                const span = btn.querySelector('span');
+    function showExecutionToast(payload) {
+        const T = window.NSFT_Clipboard;
+        if (!T || typeof T.showToast !== 'function') return;
 
-                if (contentEl && contentEl.textContent) {
-                    try {
-                        window.postMessage({
-                            type: 'nsft-export-search-execute',
-                            code: contentEl.textContent
-                        }, '*');
+        if (payload.ok) {
+            const base = chrome.i18n.getMessage('es_console_success_log')
+                || 'Search loaded in console successfully. Available variable: ';
+            T.showToast(base + (payload.varName || ''), { type: 'success' });
+            return;
+        }
 
-                        const originalText = span ? span.textContent : btn.textContent;
-                        if (span) span.textContent = labelRunning;
-                        setTimeout(() => {
-                            if (span) span.textContent = originalText;
-                        }, 1000);
-                    } catch (err) {
-                        console.error("Execution Request Error:", err);
-                    }
-                }
-            });
-        });
+        const err = chrome.i18n.getMessage('es_console_exec_error') || 'NSFT Execution Error:';
+        T.showToast(payload.details ? `${err} ${payload.details}` : err, { type: 'error' });
     }
 
     function renderError(payload) {
         const contentDiv = document.querySelector('.nsft-export-search-content');
         if (!contentDiv) return;
+
+        setFooter('');
 
         let title = chrome.i18n.getMessage('es_error_title') || 'Error';
         let message = chrome.i18n.getMessage('es_error_unknown') || 'An unknown error occurred.';
@@ -566,7 +783,14 @@
             </div>
         </div>`;
 
-    async function updateTheme(themeName) {
+    let _requestedTheme = null;
+    function resolveHlTheme(name) {
+        if (name !== 'auto') return name;
+        return _nsftTheme === 'dark' ? 'atom-one-dark' : 'atom-one-light';
+    }
+    async function updateTheme(requested) {
+        _requestedTheme = requested;
+        const themeName = resolveHlTheme(requested);
         const themeUrl = chrome.runtime.getURL(`scripts/libs/highlight/themes/${themeName}.css`);
         try {
             const response = await fetch(themeUrl);

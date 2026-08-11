@@ -1,94 +1,12 @@
-.nsft-sp-bar {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    margin-right: 8px;
-    padding: 2px;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    vertical-align: middle;
-}
-
-.nsft-sp-btn {
-    display: grid;
-    place-items: center;
-    width: 26px;
-    height: 26px;
-    padding: 0;
-    margin: 0;
-    font: inherit;
-    line-height: 0;
-    color: #475569;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    transition: color 0.15s ease,
-                border-color 0.15s ease,
-                background-color 0.15s ease,
-                box-shadow 0.15s ease;
-}
-
-.nsft-sp-btn svg {
-    width: 14px;
-    height: 14px;
-    display: block;
-    flex-shrink: 0;
-}
-
-.nsft-sp-btn:hover {
-    color: #0f172a;
-    border-color: #94a3b8;
-    background: #ffffff;
-    box-shadow: 0 2px 4px rgba(16, 24, 40, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-.nsft-sp-btn:active {
-    background: #f1f5f9;
-    border-color: #94a3b8;
-    box-shadow: inset 0 2px 3px rgba(16, 24, 40, 0.1);
-}
-
-.nsft-sp-btn:focus-visible {
-    outline: 2px solid #3b82f6;
-    outline-offset: 2px;
-    border-color: #3b82f6;
-}
-
-.nsft-sp-btn:disabled {
-    color: #cbd5e1;
-    background: #f8fafc;
-    border-color: #e2e8f0;
-    cursor: not-allowed;
-    box-shadow: none;
-}
 
 .nsft-sp-center {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     padding: 0 2px;
 }
 
-.nsft-sp-goto {
-    width: 38px;
-    height: 24px;
-    padding: 0 4px;
-    font: inherit;
-    font-size: 12px;
-    text-align: center;
-    color: #0f172a;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    -moz-appearance: textfield;
-}
+.nsft-sp-goto { -moz-appearance: textfield; }
 
 .nsft-sp-goto::-webkit-outer-spin-button,
 .nsft-sp-goto::-webkit-inner-spin-button {
@@ -96,16 +14,10 @@
     margin: 0;
 }
 
+.nsft-sp-btn:focus-visible,
 .nsft-sp-goto:focus-visible {
-    outline: 2px solid #3b82f6;
+    outline: 2px solid var(--nsft-ns-accent, #3b82f6);
     outline-offset: 1px;
-    border-color: #3b82f6;
 }
 
-.nsft-sp-status {
-    font-size: 12px;
-    color: #64748b;
-    user-select: none;
-    white-space: nowrap;
-    min-width: 26px;
-}
+.nsft-sp-btn:disabled { cursor: not-allowed !important; }

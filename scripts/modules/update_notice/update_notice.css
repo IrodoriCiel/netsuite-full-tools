@@ -64,7 +64,7 @@
     padding: 5px 12px;
     border: none;
     border-radius: 7px;
-    background: #4f46e5;
+    background: var(--nsft-ns-accent, #3b82f6);
     color: #ffffff;
     font-size: 12px;
     font-weight: 600;
@@ -72,7 +72,7 @@
 }
 
 #nsft-update-notice .nsft-un-btn:hover {
-    background: #4338ca;
+    background: var(--nsft-ns-accent-hover, #2563eb);
 }
 
 #nsft-update-notice .nsft-un-close {

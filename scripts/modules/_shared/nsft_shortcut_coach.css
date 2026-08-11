@@ -50,8 +50,8 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--nsft-radius-md, 10px);
-    background: var(--nsft-accent-soft, rgba(79, 70, 229, 0.10));
-    color: var(--nsft-accent, #4f46e5);
+    background: var(--nsft-accent-soft, rgba(59, 130, 246, 0.10));
+    color: var(--nsft-accent, #3b82f6);
 }
 
 .nsft-coach-icon svg { width: 19px; height: 19px; }
@@ -122,7 +122,7 @@
 
 .nsft-coach-never:hover { color: var(--nsft-text-2, #334155); }
 .nsft-coach-never:focus-visible {
-    outline: 2px solid var(--nsft-accent, #4f46e5);
+    outline: 2px solid var(--nsft-accent, #3b82f6);
     outline-offset: 2px;
     border-radius: 3px;
 }
@@ -152,7 +152,7 @@
 }
 
 .nsft-coach-close:focus-visible {
-    outline: 2px solid var(--nsft-accent, #4f46e5);
+    outline: 2px solid var(--nsft-accent, #3b82f6);
     outline-offset: 1px;
 }
 

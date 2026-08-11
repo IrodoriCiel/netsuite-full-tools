@@ -49,18 +49,18 @@ body.nsft-jf-theme-light {
 }
 
 body.nsft-jf-theme-dark {
-    --nsft-jf-bg: var(--nsft-dk-panel);
+    --nsft-jf-bg: var(--nsft-dk-panel, #111215);
     --nsft-jf-fg: #E6EBF2;
-    --nsft-jf-header-bg: var(--nsft-dk-surface);
-    --nsft-jf-header-border: var(--nsft-dk-border);
+    --nsft-jf-header-bg: var(--nsft-dk-surface, #141519);
+    --nsft-jf-header-border: var(--nsft-dk-border, #282A30);
     --nsft-jf-title: #C6CEDB;
     --nsft-jf-meta: #8A93A3;
-    --nsft-jf-btn-bg: var(--nsft-dk-surface);
-    --nsft-jf-btn-border: var(--nsft-dk-border);
+    --nsft-jf-btn-bg: var(--nsft-dk-surface, #141519);
+    --nsft-jf-btn-border: var(--nsft-dk-border, #282A30);
     --nsft-jf-btn-fg: #C6CEDB;
-    --nsft-jf-btn-hover-bg: var(--nsft-dk-hover);
+    --nsft-jf-btn-hover-bg: var(--nsft-dk-hover, #1E2025);
     --nsft-jf-btn-hover-fg: #E6EBF2;
-    --nsft-jf-btn-hover-border: var(--nsft-dk-border2);
+    --nsft-jf-btn-hover-border: var(--nsft-dk-border2, #34373E);
     --nsft-jf-key: #8FA3FF;
     --nsft-jf-key-index: #64748b;
     --nsft-jf-string: #86efac;
@@ -68,16 +68,16 @@ body.nsft-jf-theme-dark {
     --nsft-jf-boolean: #fca5a5;
     --nsft-jf-null: #64748b;
     --nsft-jf-bracket: #cbd5e1;
-    --nsft-jf-tree-line: var(--nsft-dk-border);
+    --nsft-jf-tree-line: var(--nsft-dk-border, #282A30);
     --nsft-jf-toggle: #9AA4B5;
     --nsft-jf-summary: #9AA4B5;
     --nsft-jf-match-bg: #facc15;
     --nsft-jf-match-fg: #1c1917;
     --nsft-jf-match-active-bg: #f97316;
     --nsft-jf-match-active-fg: #ffffff;
-    --nsft-jf-input-bg: var(--nsft-dk-panel);
-    --nsft-jf-input-border: var(--nsft-dk-border);
-    --nsft-jf-input-focus: #6E7CF5;
+    --nsft-jf-input-bg: var(--nsft-dk-panel, #111215);
+    --nsft-jf-input-border: var(--nsft-dk-border, #282A30);
+    --nsft-jf-input-focus: var(--nsft-ns-accent-light, #7FB0FF);
 }
 
 body.nsft-jf-theme-auto {
@@ -113,18 +113,18 @@ body.nsft-jf-theme-auto {
 }
 
 html[data-nsft-theme="dark"] body.nsft-jf-theme-auto {
-    --nsft-jf-bg: var(--nsft-dk-panel);
+    --nsft-jf-bg: var(--nsft-dk-panel, #111215);
     --nsft-jf-fg: #E6EBF2;
-    --nsft-jf-header-bg: var(--nsft-dk-surface);
-    --nsft-jf-header-border: var(--nsft-dk-border);
+    --nsft-jf-header-bg: var(--nsft-dk-surface, #141519);
+    --nsft-jf-header-border: var(--nsft-dk-border, #282A30);
     --nsft-jf-title: #C6CEDB;
     --nsft-jf-meta: #8A93A3;
-    --nsft-jf-btn-bg: var(--nsft-dk-surface);
-    --nsft-jf-btn-border: var(--nsft-dk-border);
+    --nsft-jf-btn-bg: var(--nsft-dk-surface, #141519);
+    --nsft-jf-btn-border: var(--nsft-dk-border, #282A30);
     --nsft-jf-btn-fg: #C6CEDB;
-    --nsft-jf-btn-hover-bg: var(--nsft-dk-hover);
+    --nsft-jf-btn-hover-bg: var(--nsft-dk-hover, #1E2025);
     --nsft-jf-btn-hover-fg: #E6EBF2;
-    --nsft-jf-btn-hover-border: var(--nsft-dk-border2);
+    --nsft-jf-btn-hover-border: var(--nsft-dk-border2, #34373E);
     --nsft-jf-key: #8FA3FF;
     --nsft-jf-key-index: #64748b;
     --nsft-jf-string: #86efac;
@@ -132,12 +132,12 @@ html[data-nsft-theme="dark"] body.nsft-jf-theme-auto {
     --nsft-jf-boolean: #fca5a5;
     --nsft-jf-null: #64748b;
     --nsft-jf-bracket: #cbd5e1;
-    --nsft-jf-tree-line: var(--nsft-dk-border);
+    --nsft-jf-tree-line: var(--nsft-dk-border, #282A30);
     --nsft-jf-toggle: #9AA4B5;
     --nsft-jf-summary: #9AA4B5;
-    --nsft-jf-input-bg: var(--nsft-dk-panel);
-    --nsft-jf-input-border: var(--nsft-dk-border);
-    --nsft-jf-input-focus: #6E7CF5;
+    --nsft-jf-input-bg: var(--nsft-dk-panel, #111215);
+    --nsft-jf-input-border: var(--nsft-dk-border, #282A30);
+    --nsft-jf-input-focus: var(--nsft-ns-accent-light, #7FB0FF);
 }
 
 body.nsft-jf-theme-monokai {

@@ -53,13 +53,21 @@
     let activeTheme = DEFAULT_THEME;
     let formatted = false;
 
+    function stampUnifiedTheme(mode) {
+        try {
+            document.documentElement.setAttribute('data-nsft-theme', mode === 'dark' ? 'dark' : 'light');
+        } catch (e) { }
+    }
+
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
         [THEME_KEY]: DEFAULT_THEME,
+        nsftTheme: 'light',
         jsonFormatterMaxAutoExpandDepth: 2,
         jsonFormatterMaxChildrenPreview: 60
     }, (settings) => {
         if (!settings[STORAGE_KEY]) return;
+        stampUnifiedTheme(settings.nsftTheme);
         activeTheme = settings[THEME_KEY] || DEFAULT_THEME;
         maxAutoExpandDepth = clampInt(settings.jsonFormatterMaxAutoExpandDepth, 0, 20, 2);
         maxChildrenPreview = clampInt(settings.jsonFormatterMaxChildrenPreview, 1, 100000, 60);
@@ -73,9 +81,12 @@
     }
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local' || !changes[THEME_KEY]) return;
-        activeTheme = changes[THEME_KEY].newValue || DEFAULT_THEME;
-        applyTheme();
+        if (area !== 'local') return;
+        if (changes.nsftTheme) stampUnifiedTheme(changes.nsftTheme.newValue);
+        if (changes[THEME_KEY]) {
+            activeTheme = changes[THEME_KEY].newValue || DEFAULT_THEME;
+            applyTheme();
+        }
     });
 
     function applyTheme() {

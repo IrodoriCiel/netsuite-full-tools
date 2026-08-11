@@ -55,11 +55,17 @@
         return 'DEFAULT';
     }
 
+    function envLabel(code, letters) {
+        if (code !== 'PRD') return code;
+        return String(letters) === '2' ? 'PD' : 'PRD';
+    }
+
     globalThis.NSFT_ENV = {
         NS_URL_PATTERN,
         isNetSuiteUrl,
         detectEnv,
         envFromUrl,
-        envFamily
+        envFamily,
+        envLabel
     };
 })();

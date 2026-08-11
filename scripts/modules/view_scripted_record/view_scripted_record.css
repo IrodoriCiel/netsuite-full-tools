@@ -545,7 +545,7 @@
 }
 
 .nsft-sr-filter-group > select:focus {
-    border-color: #4f46e5;
+    border-color: var(--nsft-ns-accent, #3b82f6);
     box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.18);
 }
 
@@ -623,6 +623,32 @@
     border-color: var(--nsft-dk-border);
     color: #E6EBF2;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.45);
+}
+
+.nsft-scripted-rec-modal[data-theme="dark"],
+.nsft-scripted-rec-modal[data-theme="dark"] * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--nsft-dk-border2) var(--nsft-dk-panel);
+}
+
+.nsft-scripted-rec-modal[data-theme="dark"] ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.nsft-scripted-rec-modal[data-theme="dark"] ::-webkit-scrollbar-track,
+.nsft-scripted-rec-modal[data-theme="dark"] ::-webkit-scrollbar-corner {
+    background: var(--nsft-dk-panel);
+}
+
+.nsft-scripted-rec-modal[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: var(--nsft-dk-border2);
+    border-radius: 6px;
+    border: 3px solid var(--nsft-dk-panel);
+}
+
+.nsft-scripted-rec-modal[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #4A4F58;
 }
 
 .nsft-scripted-rec-modal[data-theme="dark"] .nsft-sr-header,
@@ -735,7 +761,7 @@
 }
 
 .nsft-scripted-rec-modal[data-theme="dark"] .nsft-sr-filter-group > select:focus {
-    border-color: #6E7CF5 !important;
+    border-color: var(--nsft-ns-accent-light, #7FB0FF) !important;
     box-shadow: 0 0 0 2px rgba(110, 124, 245, 0.2) !important;
 }
 
@@ -815,7 +841,7 @@
 
 .nsft-scripted-rec-modal[data-theme="dark"] #nsft-scripted-rec-search-input:focus {
     background: var(--nsft-dk-panel) !important;
-    border-color: #6E7CF5 !important;
+    border-color: var(--nsft-ns-accent-light, #7FB0FF) !important;
     box-shadow: 0 0 0 2px rgba(110, 124, 245, 0.2) !important;
 }
 
@@ -843,7 +869,7 @@
 
 .nsft-scripted-rec-modal[data-theme="dark"] .nsft-scripted-rec-tab.active {
     color: #8FA3FF !important;
-    border-bottom-color: #6E7CF5 !important;
+    border-bottom-color: var(--nsft-ns-accent-light, #7FB0FF) !important;
 }
 
 .nsft-scripted-rec-modal[data-theme="dark"] #nsft-scripted-rec-global-loading {
@@ -893,7 +919,7 @@
 
 .nsft-scripted-rec-modal[data-theme="dark"] .nsft-scripted-rec-tab.active {
     color: #8FA3FF;
-    border-bottom-color: #6E7CF5;
+    border-bottom-color: var(--nsft-ns-accent-light, #7FB0FF);
 }
 
 .nsft-scripted-rec-modal[data-theme="dark"] a {

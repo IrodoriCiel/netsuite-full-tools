@@ -97,13 +97,23 @@
   gap: 8px 10px;
 }
 
-.nsft-detail-body .option-row > div:not(:first-child) > div > div {
+
+.nsft-detail-body .option-row > div:not(:first-child) > div > div:not(.description) {
   display: flex !important;
   align-items: baseline;
   justify-content: flex-start !important;
   gap: 6px;
   margin: 0 !important;
   white-space: nowrap;
+}
+
+.nsft-detail-body .option-row > div:not(:first-child) > div > .description {
+  display: block !important;
+  white-space: normal;
+  flex: 1 0 100%;
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: 2px 0 0 !important;
 }
 
 .nsft-detail-body .option-row > div:not(:first-child) > span,
@@ -135,6 +145,16 @@
   background: var(--surface-1) !important;
   color: var(--text-1) !important;
   box-sizing: border-box;
+}
+
+.nsft-detail-body .option-row .nsft-sqlset-field input[type="number"] {
+  width: 92px !important;
+  min-width: 92px !important;
+  flex: 0 0 auto;
+}
+.nsft-detail-body .option-row .nsft-sqlset-field input#suiteqlRestConcurrency {
+  width: 56px !important;
+  min-width: 56px !important;
 }
 
 .nsft-detail-body .option-row select { padding-right: 24px !important; cursor: pointer; }
@@ -246,6 +266,19 @@
   color: var(--info-strong);
 }
 
+.nsft-detail-body .option-row ul.nsft-hint-list {
+  padding: 7px 10px 7px 25px;
+  margin: 6px 0 0;
+}
+
+.nsft-detail-body .option-row ul.nsft-hint-list li {
+  margin: 0 0 3px;
+}
+
+.nsft-detail-body .option-row ul.nsft-hint-list li:last-child {
+  margin-bottom: 0;
+}
+
 .nsft-detail-body { gap: 10px; }
 
 .nsft-detail-body .nsft-panel {
@@ -305,6 +338,12 @@
   align-items: center;
   gap: 8px 10px;
   margin: 0 !important;
+}
+
+.nsft-detail-body .option-row > div:first-child > div:not(.description) > div:not([style*="display: none"]) > .description {
+  flex: 1 0 100%;
+  min-width: 0;
+  white-space: normal;
 }
 
 .nsft-detail-body .option-row input[type="checkbox"]:not(.switch input),
@@ -647,6 +686,17 @@
   white-space: normal !important;
 }
 
+.nsft-detail-body .option-row > div:not(:first-child):has(> input[type="checkbox"]:not(.switch input)),
+.nsft-detail-body .option-row > div:not(:first-child):has(> input[type="radio"]) {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  flex: 1 1 100% !important;
+}
+
 .nsft-detail-body .option-row div:has(> input[type="color"]) {
   display: flex !important;
   flex: 1 1 150px !important;
@@ -727,7 +777,7 @@
 }
 
 .nsft-detail-body > .nsft-panel:first-child { margin-top: 0 !important; }
-.nsft-detail-body { padding-top: 0 !important; }
+.nsft-detail-body:not(.nsft-search-results) { padding-top: 0 !important; }
 
 .nsft-detail-body .option-row > div:not(:first-child):has(> input[type="range"]),
 .nsft-detail-body .option-row > div:not(:first-child) > div:has(> input[type="range"]),
@@ -796,3 +846,874 @@
   text-overflow: clip !important;
 }
 
+
+html[data-view="tab"],
+html[data-view="tab"] body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+html[data-view="tab"] .nsft-app {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 304px 1fr;
+  grid-template-rows: auto 1fr;
+  background: var(--surface-2, var(--surface-1));
+}
+
+html[data-view="tab"] .nsft-tabside {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--tab-panel);
+  border-right: 1px solid var(--hairline);
+}
+
+html[data-view="tab"] .nsft-tabside-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 14px 11px;
+}
+
+html[data-view="tab"] .nsft-tabside-head .nsft-brand { flex: 1 1 auto; min-width: 0; }
+
+html[data-view="tab"] .nsft-tabside-head .nsft-theme-toggle {
+  width: 34px;
+  height: 34px;
+  margin-left: auto;
+  border-radius: 10px;
+}
+
+html[data-view="tab"] .nsft-tabside-head .nsft-theme-toggle svg { width: 17px; height: 17px; }
+
+html[data-view="tab"] .nsft-topbar { display: none; }
+
+html[data-view="tab"] .nsft-tabside .nsft-screen[data-screen-el="home"] {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 12px 10px;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+html[data-view="tab"] .nsft-screen[data-screen-el="home"] .nsft-search-input {
+  height: 38px;
+  border-radius: 10px;
+  background: var(--surface-2, var(--surface-1));
+  font-size: 13.5px;
+}
+
+html[data-view="tab"] .nsft-tile-grid {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  gap: 1px;
+  margin-top: 10px;
+  flex: 0 0 auto;
+  animation: none;
+}
+
+html[data-view="tab"] .nsft-tile {
+  padding: 9px 11px;
+  gap: 12px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+
+html[data-view="tab"] .nsft-tile:hover {
+  transform: none;
+  box-shadow: none;
+  background: var(--surface-2, var(--surface-soft));
+}
+
+html[data-view="tab"] .nsft-tile::before { content: none; }
+html[data-view="tab"] .nsft-tile-meter { display: none; }
+
+html[data-view="tab"] .nsft-tile-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+html[data-view="tab"] .nsft-tile-icon-wrap svg { width: 19px; height: 19px; }
+
+html[data-view="tab"] .nsft-tile-text {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+html[data-view="tab"] .nsft-tile-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[data-view="tab"] .nsft-tile-count {
+  flex: 0 0 auto;
+  margin-left: auto;
+  gap: 1px;
+  padding: 3px 7px;
+  border-radius: 7px;
+  background: var(--tile-bg, var(--surface-2));
+}
+
+html[data-view="tab"] .nsft-tile-on,
+html[data-view="tab"] .nsft-tile-total { font-size: 12px; font-weight: 700; }
+
+html[data-view="tab"] .nsft-tile-on { color: var(--tile-fg, var(--text-2)); }
+
+html[data-view="tab"] .nsft-tile-total { color: var(--tile-fg, var(--text-3)); opacity: 0.55; }
+
+html[data-view="tab"] .nsft-tile.is-current {
+  background: var(--tile-bg, var(--surface-2));
+}
+
+html[data-view="tab"] .nsft-tile.is-current .nsft-tile-icon-wrap {
+  background: var(--tab-panel);
+  box-shadow: var(--elev-1);
+}
+
+html[data-view="tab"] .nsft-tile.is-current .nsft-tile-count { background: var(--tab-panel); }
+html[data-view="tab"] .nsft-tile.is-current .nsft-tile-on { color: var(--tile-fg, var(--accent)); }
+
+html[data-view="tab"] .nsft-tabside-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding: 10px 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+html[data-view="tab"] .nsft-tabside-actions > * {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  width: auto;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+              border-color 0.15s ease, transform 0.12s var(--spring),
+              box-shadow 0.15s ease;
+}
+
+html[data-view="tab"] .nsft-tabside-actions > *:hover { transform: translateY(-1px); }
+html[data-view="tab"] .nsft-tabside-actions > *:active { transform: translateY(0) scale(0.95); }
+
+html[data-view="tab"] .nsft-tabside-actions svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: inherit;
+  transform-origin: center;
+  transition: transform 0.3s var(--spring);
+}
+
+html[data-view="tab"] .nsft-tabside-actions > * > span { display: none; }    
+
+html[data-view="tab"] .nsft-tabside-bug {
+  background: rgba(198, 70, 70, 0.14);
+  border-color: rgba(198, 70, 70, 0.32);
+  color: #C64646;
+}
+
+html[data-view="tab"] .nsft-tabside-bug:hover {
+  background: rgba(198, 70, 70, 0.22);
+  border-color: #C64646;
+  color: #A83636;
+  box-shadow: 0 2px 8px rgba(198, 70, 70, 0.28);
+}
+
+html[data-view="tab"][data-theme="dark"] .nsft-tabside-bug {
+  background: rgba(224, 123, 106, 0.18);
+  border-color: rgba(224, 123, 106, 0.45);
+  color: #E07B6A;
+}
+
+html[data-view="tab"][data-theme="dark"] .nsft-tabside-bug:hover {
+  background: rgba(224, 123, 106, 0.26);
+  border-color: #E07B6A;
+  color: #F0A294;
+  box-shadow: 0 2px 10px rgba(224, 123, 106, 0.36);
+}
+
+html[data-view="tab"] .nsft-tabside-idea {
+  background: rgba(128, 88, 201, 0.14);
+  border-color: rgba(128, 88, 201, 0.32);
+  color: #8058C9;
+}
+
+html[data-view="tab"] .nsft-tabside-idea:hover {
+  background: rgba(128, 88, 201, 0.22);
+  border-color: #8058C9;
+  color: #6A45B0;
+  box-shadow: 0 2px 8px rgba(128, 88, 201, 0.28);
+}
+
+html[data-view="tab"][data-theme="dark"] .nsft-tabside-idea {
+  background: rgba(168, 138, 235, 0.18);
+  border-color: rgba(168, 138, 235, 0.45);
+  color: #A88AEB;
+}
+
+html[data-view="tab"][data-theme="dark"] .nsft-tabside-idea:hover {
+  background: rgba(168, 138, 235, 0.26);
+  border-color: #A88AEB;
+  color: #C4AEF2;
+  box-shadow: 0 2px 10px rgba(168, 138, 235, 0.36);
+}
+
+
+html[data-view="tab"] .nsft-tabside-bug:hover svg {
+  animation: nsft-tabside-bug-wiggle 0.5s var(--spring);
+}
+
+@keyframes nsft-tabside-bug-wiggle {
+  0%, 100% { transform: rotate(0); }
+  30%      { transform: rotate(-12deg); }
+  65%      { transform: rotate(9deg); }
+}
+
+html[data-view="tab"] .nsft-tabside-idea:hover svg {
+  animation: nsft-tabside-idea-glow 1.4s ease-in-out infinite;
+}
+
+@keyframes nsft-tabside-idea-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 currentColor); transform: scale(1); }
+  50%      { filter: drop-shadow(0 0 3.5px currentColor); transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-view="tab"] .nsft-tabside-actions > *:hover { transform: none; }
+  html[data-view="tab"] .nsft-tabside-actions > *:hover svg {
+    animation: none;
+    transform: none;
+  }
+}
+
+html[data-view="tab"] .nsft-tabhead {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 15px 28px 13px;
+  background: var(--tab-panel);
+  border-bottom: 1px solid var(--hairline);
+}
+
+html[data-view="tab"] .nsft-tabhead-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+html[data-view="tab"] .nsft-tb-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  flex: 0 0 auto;
+}
+
+html[data-view="tab"] .nsft-tb-icon svg { width: 23px; height: 23px; }
+
+html[data-view="tab"] .nsft-tb-breadcrumb {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 10px;
+}
+
+html[data-view="tab"] .nsft-tb-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+html[data-view="tab"] .nsft-tb-count { font-size: 13px; }
+
+html[data-view="tab"] .nsft-topbar-actions {
+  flex: 0 0 auto;
+  margin-left: auto;
+  gap: 10px;
+}
+
+html[data-view="tab"] .nsft-topbar-sep { display: none; }
+html[data-view="tab"] #nsftFeedbackBtn { display: none; }    
+html[data-view="tab"] .nsft-topbar-actions #nsftSettingsBtn { display: none; }
+html[data-view="tab"] .nsft-topbar-actions .nsft-theme-toggle { display: none; }
+
+html[data-view="tab"] .nsft-topbar-actions .nsft-topbar-btn {
+  width: auto;
+  height: 38px;
+  padding: 0 13px;
+  gap: 9px;
+  border-radius: 11px;
+}
+
+html[data-view="tab"] .nsft-tab-btn-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+html[data-view="tab"] .nsft-tabhead-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 8px;
+  padding-top: 11px;
+  border-top: 1px solid var(--hairline);
+}
+
+html[data-view="tab"] .nsft-stats {
+  flex: 1 1 200px;
+  min-width: 200px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  gap: 10px;
+}
+
+html[data-view="tab"] .nsft-stats .nsft-stats-btn { display: none; }
+html[data-view="tab"] .nsft-stats-main { display: flex; align-items: center; gap: 10px; }
+html[data-view="tab"] .nsft-stats-line { order: 2; font-size: 12.5px; }
+html[data-view="tab"] .nsft-stats-track {
+  order: 1;
+  margin: 0;
+  flex: 0 1 180px;
+  min-width: 60px;
+  height: 5px;
+  border-radius: 99px;
+}
+
+html[data-view="tab"] .nsft-tb-detail-actions {
+  margin-left: auto;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+html[data-view="tab"] .nsft-tb-detail-actions .nsft-tb-btn {
+  width: auto;
+  height: 38px;
+  padding: 0 14px;
+  gap: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: 9px;
+  background: var(--surface-0);
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+html[data-view="tab"] .nsft-tb-detail-actions .nsft-tb-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+html[data-view="tab"] .nsft-screens {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2, var(--surface-1));
+}
+
+html[data-view="tab"] .nsft-screen {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transition: none !important;
+  will-change: auto;
+  height: 100%;
+  overflow-y: auto;
+}
+
+html[data-view="tab"] .nsft-app[data-screen="settings"] .nsft-screen[data-screen-el="detail"] { display: none; }
+html[data-view="tab"] .nsft-app:not([data-screen="settings"]) .nsft-screen[data-screen-el="settings"] { display: none; }
+
+
+html[data-view="tab"] .nsft-detail-body .nsft-panel .option-row:hover {
+  background: var(--surface-1);
+  border-color: var(--hairline) !important;
+  box-shadow: var(--elev-1);
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row:has(> label.switch > input:not(:checked)):hover {
+  background: var(--surface-soft);
+  box-shadow: none;
+}
+
+html[data-view="tab"] .option-row.nsft-search-miss { display: none !important; }
+html[data-view="tab"] .nsft-panel.nsft-search-empty { display: none !important; }
+html[data-view="tab"] .nsft-search-results { display: none !important; }
+
+html[data-view="tab"] .nsft-screens > .nsft-empty-state:not([hidden]) {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 22px 28px 40px;
+  margin: 0;
+  max-width: none;
+  color: var(--text-3);
+  font-size: 14px;
+  background: var(--surface-2, var(--surface-1));
+}
+
+html[data-view="tab"] .nsft-screens > .nsft-empty-state[hidden] { display: none; }
+
+html[data-view="tab"] .nsft-screens > .nsft-empty-state svg {
+  width: 30px;
+  height: 30px;
+  color: var(--text-4);
+}
+
+html[data-view="tab"] .nsft-screens > .nsft-empty-state p { margin: 0; }
+
+html[data-view="tab"] .nsft-app-foot {
+  grid-column: 2;
+  grid-row: 3;
+  background: transparent;
+  border: 0;
+  padding: 0 28px 14px;
+}
+
+html[data-view="tab"] .nsft-app { grid-template-rows: auto 1fr auto; }
+
+html[data-view="tab"] .nsft-open-tab-btn { display: none; }
+
+.nsft-foot-icon-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 26px;
+  margin-left: auto;
+  padding: 0 9px;
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.nsft-app-foot .nsft-foot-icon-btn svg { width: 14px; height: 14px; }
+
+.nsft-foot-icon-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-primary);
+}
+
+html[data-view="tab"] .nsft-tb-title { font-size: 17px; }
+
+html[data-view="tab"] .nsft-tb-icon {
+  width: 30px;
+  height: 30px;
+}
+
+html[data-view="tab"] .nsft-tb-detail-actions { margin-left: auto; }
+
+html[data-view="tab"] .nsft-brand { flex: 0 0 auto; }
+
+
+html[data-view="tab"] {
+  --tab-panel: var(--surface-0);
+  --tab-bg: var(--surface-2);
+}
+
+html[data-view="tab"][data-theme="dark"] {
+  --tab-panel: var(--surface-1);
+  --tab-bg: var(--surface-0);
+}
+
+html[data-view="tab"] .nsft-screens,
+html[data-view="tab"] .nsft-app { background: var(--tab-bg); }
+
+html[data-view="tab"] .nsft-tabside,
+html[data-view="tab"] .nsft-tabhead { background: var(--tab-panel); }
+
+
+html[data-view="tab"] .nsft-detail-body .option-row label.switch,
+html[data-view="tab"] .nsft-settings .switch {
+  width: 50px !important;
+  min-width: 50px !important;
+  max-width: 50px !important;
+  height: 28px !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row label.switch > .slider::before,
+html[data-view="tab"] .nsft-settings .slider::before {
+  height: 22px !important;
+  width: 22px !important;
+  left: 3px !important;
+  bottom: 3px !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row label.switch > input:checked + .slider::before,
+html[data-view="tab"] .nsft-settings input:checked + .slider::before {
+  transform: translateX(22px) !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row input[type="checkbox"]:not(.switch input),
+html[data-view="tab"] .nsft-detail-body .option-row input[type="radio"] {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row button:not(.nsft-panel-master-btn) {
+  height: 36px !important;
+  padding: 0 16px !important;
+  font-size: 13.5px !important;
+  border-radius: 8px !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row {
+  padding: 18px 20px 19px;
+  margin-bottom: 12px;
+  gap: 18px;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child):not([style*="display: none"]) {
+  margin-top: 14px !important;
+  padding: 16px !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child) > div:not([style*="display: none"]) {
+  gap: 10px 14px;
+}
+
+html[data-view="tab"] .nsft-screen[data-screen-el="detail"] { padding: 0 30px 44px; }
+html[data-view="tab"] .nsft-screen[data-screen-el="detail"] > :first-child { margin-top: 24px; }
+html[data-view="tab"] .nsft-screen[data-screen-el="settings"] { padding: 24px 30px 44px; }
+
+@media (min-width: 1500px) {
+  html[data-view="tab"] .nsft-app[data-detail-mode="all"] .nsft-panel { column-gap: 22px; }
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:first-child > span,
+html[data-view="tab"] .nsft-detail-body .option-row > div:first-child > label {
+  font-size: 16.5px;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row .description {
+  font-size: 13.5px !important;
+  line-height: 1.5;
+  max-width: 76ch;    
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row select,
+html[data-view="tab"] .nsft-detail-body .option-row input[type="text"],
+html[data-view="tab"] .nsft-detail-body .option-row input[type="number"],
+html[data-view="tab"] .nsft-detail-body .option-row input[type="search"] {
+  height: 36px !important;
+  font-size: 13.5px !important;
+  padding: 0 12px !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child) label,
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child) > span,
+html[data-view="tab"] .nsft-detail-body .option-row > div:first-child > div:not(.description) label,
+html[data-view="tab"] .nsft-detail-body .option-row > div:first-child > div:not(.description) span {
+  font-size: 13.5px !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row [style*="font-size"] {
+  font-size: 13.5px !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row label:not(.switch) {
+  font-weight: 500 !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+}
+
+html[data-view="tab"] .nsft-detail-body:not(.nsft-search-results),
+html[data-view="tab"] .nsft-screen[data-screen-el="settings"] .nsft-settings {
+  max-width: 1180px;
+}
+
+@media (min-width: 1500px) {
+  html[data-view="tab"] .nsft-app[data-detail-mode="all"] .nsft-detail-body:not(.nsft-search-results) { max-width: 1560px; }
+
+  html[data-view="tab"] .nsft-app[data-detail-mode="all"] .nsft-panel {
+    column-count: 2;
+    column-gap: 16px;
+  }
+
+  html[data-view="tab"] .nsft-app[data-detail-mode="all"] .nsft-panel .option-row {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+  }
+
+  html[data-view="tab"] .nsft-app[data-detail-mode="all"] .nsft-panel-title {
+    column-span: all;
+  }
+}
+
+
+html[data-view="tab"] .nsft-tb-count { display: none; }
+
+html[data-view="tab"] .nsft-tb-detail-actions .nsft-tb-btn {
+  min-width: 168px;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 16px;
+}
+
+html[data-view="tab"] .nsft-tb-detail-actions .nsft-tb-btn > svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+html[data-view="tab"] .nsft-tb-detail-actions .nsft-tb-btn-label {
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child):not([style*="display: none"]) {
+  gap: 11px;
+  margin-top: 12px !important;
+  padding: 14px !important;
+  background: var(--surface-soft);
+  border: 1px solid var(--hairline);
+  border-left: 1px solid var(--hairline);    
+  border-radius: 10px;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child) > span:first-child {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-3) !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row:has(> label.switch > input:not(:checked)) > div:not(:first-child) {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row input[type="range"] {
+  max-width: 340px;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child):not(:has(> div)):has(> input:not([type="checkbox"]):not([type="radio"])) {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child):not(:has(> div)) > input[type="text"],
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child):not(:has(> div)) > input[type="number"] {
+  width: 180px !important;
+  flex: 0 0 auto;
+}
+
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child):not(:has(> div)) > label,
+html[data-view="tab"] .nsft-detail-body .option-row > div:not(:first-child):not(:has(> div)) > span {
+  align-self: center;
+}
+
+html[data-view="tab"] [data-panel="essentials"]   { --tile-bg: var(--cat-essentials-bg);   --tile-fg: var(--cat-essentials-fg); }
+html[data-view="tab"] [data-panel="records"]      { --tile-bg: var(--cat-records-bg);      --tile-fg: var(--cat-records-fg); }
+html[data-view="tab"] [data-panel="dev"]          { --tile-bg: var(--cat-dev-bg);          --tile-fg: var(--cat-dev-fg); }
+html[data-view="tab"] [data-panel="search"]       { --tile-bg: var(--cat-search-bg);       --tile-fg: var(--cat-search-fg); }
+html[data-view="tab"] [data-panel="layout"]       { --tile-bg: var(--cat-layout-bg);       --tile-fg: var(--cat-layout-fg); }
+html[data-view="tab"] [data-panel="productivity"] { --tile-bg: var(--cat-productivity-bg); --tile-fg: var(--cat-productivity-fg); }
+html[data-view="tab"] [data-panel="fileCabinet"]  { --tile-bg: var(--cat-fileCabinet-bg);  --tile-fg: var(--cat-fileCabinet-fg); }
+html[data-view="tab"] [data-panel="pdf"]          { --tile-bg: var(--cat-pdf-bg);          --tile-fg: var(--cat-pdf-fg); }
+html[data-view="tab"] [data-panel="workflow"]     { --tile-bg: var(--cat-workflow-bg);     --tile-fg: var(--cat-workflow-fg); }
+
+html[data-view="tab"] .nsft-detail-body .nsft-panel-title {
+  position: sticky;
+  top: 0 !important;
+  z-index: 2 !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px !important;
+  padding: 11px 2px 10px !important;
+  background: var(--tab-bg) !important;
+  border-bottom: 2px solid var(--tile-bg, var(--hairline));
+  box-shadow: none !important;    
+  clip-path: none !important;
+  font-size: 13.5px !important;
+  letter-spacing: 0.07em !important;
+  color: var(--tile-fg, var(--text-2)) !important;
+}
+
+html[data-view="tab"] .nsft-detail-body .nsft-panel-title-icon {
+  box-sizing: content-box;
+  width: 15px;
+  height: 15px;
+  padding: 5px;
+  border-radius: 8px;
+  background: var(--tile-bg, var(--surface-2));
+  color: var(--tile-fg, var(--text-3));
+}
+
+html[data-view="tab"] .nsft-panel-count {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tile-bg, var(--surface-2));
+  color: var(--tile-fg, var(--text-3));
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+html[data-view="tab"] .nsft-app[data-detail-mode="all"] .nsft-detail-body .nsft-panel + .nsft-panel {
+  margin-top: 30px;
+}
+
+html[data-view="tab"] .nsft-detail-body .nsft-panel-master { margin-left: auto; }
+
+html[data-view="tab"] .nsft-screen[data-screen-el="detail"] > .nsft-app-foot {
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 24px 0 18px;    
+  padding: 11px 14px;
+  max-width: 1180px;
+  background: var(--accent-soft);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  color: var(--text-2);
+}
+
+html[data-view="tab"] .nsft-screen[data-screen-el="detail"] > .nsft-app-foot small {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+html[data-view="tab"] .nsft-screen[data-screen-el="detail"] > .nsft-app-foot svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+
+@media (min-width: 1500px) {
+  html[data-view="tab"] .nsft-app[data-detail-mode="all"] .nsft-screen[data-screen-el="detail"] > .nsft-app-foot {
+    max-width: 1560px;
+  }
+}
+
+html[data-view="tab"] .nsft-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+html[data-view="tab"] .nsft-settings-group { gap: 8px; }
+
+html[data-view="tab"] .nsft-settings-group-title {
+  margin: 0 0 6px 2px;
+  padding-bottom: 8px;
+  font-size: 11.5px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+html[data-view="tab"] .nsft-settings-row {
+  gap: 14px;
+  padding: 16px 18px;
+  font-size: 14.5px;
+  border-radius: 10px;
+}
+
+html[data-view="tab"] .nsft-settings-row + .nsft-settings-row { margin-top: 10px; }
+
+html[data-view="tab"] .nsft-settings-row-text { gap: 4px; }
+html[data-view="tab"] .nsft-settings-row-text strong { font-size: 16.5px; }
+html[data-view="tab"] .nsft-settings-row-text small { font-size: 13.5px; line-height: 1.5; }
+
+html[data-view="tab"] .nsft-settings-row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+html[data-view="tab"] .nsft-settings-row-icon svg { width: 18px; height: 18px; }
+html[data-view="tab"] .nsft-settings-row-chev { font-size: 16px; }
+
+html[data-view="tab"] .nsft-settings select,
+html[data-view="tab"] .nsft-settings input[type="text"],
+html[data-view="tab"] .nsft-settings input[type="number"],
+html[data-view="tab"] .nsft-settings input[type="search"] {
+  height: 36px;
+  font-size: 13.5px;
+  padding: 0 12px;
+}
+
+html[data-view="tab"] .nsft-settings button:not(.nsft-settings-row-btn):not(.nsft-seg-btn) {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13.5px;
+}
+
+html[data-view="tab"] .nsft-settings .nsft-seg-btn {
+  width: 42px;
+  height: 36px;
+}
+
+html[data-view="tab"] .nsft-settings .nsft-seg-btn svg { width: 18px; height: 18px; }
+
+html[data-view="tab"] .nsft-settings-rows .option-row {
+  padding: 16px 18px;
+  gap: 18px;
+}
+
+html[data-view="tab"] .nsft-settings-rows .option-row > div:first-child > span,
+html[data-view="tab"] .nsft-settings-rows .option-row > div:first-child > label {
+  font-size: 16.5px;
+}
+
+html[data-view="tab"] .nsft-settings-rows .option-row .description {
+  font-size: 13.5px;
+  line-height: 1.5;
+}

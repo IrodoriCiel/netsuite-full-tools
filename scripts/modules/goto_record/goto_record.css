@@ -193,7 +193,7 @@
     border-color: var(--nsft-dk-border);
 }
 .nsft-gtr-overlay[data-theme="dark"] .nsft-gtr-input:focus {
-    border-color: #6E7CF5;
+    border-color: var(--nsft-ns-accent-light, #7FB0FF);
     background: var(--nsft-dk-panel);
     box-shadow: 0 0 0 3px rgba(110, 124, 245, 0.22);
 }
@@ -222,7 +222,7 @@
 }
 .nsft-gtr-overlay[data-theme="dark"] .nsft-gtr-suggest-selected {
     background: rgba(110, 124, 245, 0.18);
-    box-shadow: inset 3px 0 0 #6E7CF5;
+    box-shadow: inset 3px 0 0 var(--nsft-ns-accent-light, #7FB0FF);
 }
 .nsft-gtr-overlay[data-theme="dark"] .nsft-gtr-suggest-defn {
     border-bottom-color: var(--nsft-dk-border);
@@ -256,7 +256,7 @@ html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-sugge
 }
 html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-suggest-selected {
     background: rgba(110, 124, 245, 0.18);
-    box-shadow: inset 3px 0 0 #6E7CF5;
+    box-shadow: inset 3px 0 0 var(--nsft-ns-accent-light, #7FB0FF);
 }
 html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-header h2 {
     color: #C6CEDB;
@@ -272,7 +272,7 @@ html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-close
     color: #E6EBF2;
 }
 html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-input:focus {
-    border-color: #6E7CF5;
+    border-color: var(--nsft-ns-accent-light, #7FB0FF);
     background: var(--nsft-dk-panel);
     box-shadow: 0 0 0 3px rgba(110, 124, 245, 0.22);
 }

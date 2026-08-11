@@ -17,6 +17,17 @@
         return idx;
     }
 
+    function countOf(dd, bar) {
+        var n = 0;
+        try { n = dd.getValues().length || 0; } catch (e) { n = 0; }
+        try {
+            var wrap = bar && bar.parentElement;
+            var filas = wrap ? wrap.querySelectorAll('.dropdownDiv > div[id^="nl"]').length : 0;
+            if (filas > n) n = filas;
+        } catch (e) { }
+        return n;
+    }
+
     function report(bar) {
         var dd = getDD(bar);
         if (!dd) return;
@@ -25,7 +36,7 @@
                 dest: 'extension_sp',
                 id: bar.dataset.spId,
                 index: dd.getIndex(),
-                count: dd.getValues().length
+                count: countOf(dd, bar)
             }, '*');
         } catch (e) { }
     }

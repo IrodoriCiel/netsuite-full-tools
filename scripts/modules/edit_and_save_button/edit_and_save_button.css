@@ -146,9 +146,9 @@ html[data-nsft-theme="dark"] .nsft-eas-modal-footer {
 }
 
 html[data-nsft-theme="dark"] .nsft-eas-btn-primary {
-    background: #6E7CF5;
+    background: var(--nsft-ns-accent, #3b82f6);
 }
 
 html[data-nsft-theme="dark"] .nsft-eas-btn-primary:hover {
-    background: #7E8BF7;
+    background: var(--nsft-ns-accent-hover, #2563eb);
 }

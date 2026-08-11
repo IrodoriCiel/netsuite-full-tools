@@ -75,7 +75,7 @@
 #nsft-pp-panel .nsft-pp-big {
     font-size: 24px;
     font-weight: 700;
-    color: #2563eb;
+    color: var(--nsft-ns-accent, #2563eb);
     line-height: 1.1;
 }
 
@@ -127,7 +127,9 @@
 #nsft-pp-panel .nsft-pp-bar-fill {
     display: block;
     height: 100%;
-    background: linear-gradient(90deg, #60a5fa, #2563eb);
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--nsft-ns-accent, #2563eb) 55%, #fff),
+        var(--nsft-ns-accent, #2563eb));
     border-radius: 4px;
 }
 
@@ -161,7 +163,7 @@
 
 #nsft-pp-panel .nsft-pp-copy {
     padding: 7px 14px;
-    background: #2563eb;
+    background: var(--nsft-ns-accent, #2563eb);
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -171,7 +173,7 @@
 }
 
 #nsft-pp-panel .nsft-pp-copy:hover {
-    background: #1d4ed8;
+    background: var(--nsft-ns-accent-bd, #1d4ed8);
 }
 
 #nsft-pp-panel .nsft-pp-empty {
@@ -205,7 +207,7 @@
     background: var(--nsft-dk-surface);
     border-color: #1C222C;
 }
-#nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-big { color: #B3C1FF; }
+#nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-big { color: var(--nsft-ns-accent-light, #B3C1FF); }
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-big2 { color: #E6EBF2; }
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-loading { color: #5A6475; }
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-cap { color: #9AA4B5; }
@@ -213,7 +215,9 @@
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-plabel { color: #C6CEDB; }
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-bar { background: #1C222C; }
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-bar-fill {
-    background: linear-gradient(90deg, #8FA3FF, #6E7CF5);
+    background: linear-gradient(90deg,
+        var(--nsft-ns-accent-light, #8FA3FF),
+        var(--nsft-ns-accent-light-bd, #7FB0FF));
 }
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-pval { color: #E6EBF2; }
 
@@ -224,9 +228,9 @@
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-res b { color: #E6EBF2; }
 
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-copy {
-    background: #6E7CF5;
+    background: var(--nsft-ns-accent, #3b82f6);
     color: #ffffff;
 }
-#nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-copy:hover { background: #7E8BF7; }
+#nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-copy:hover { background: var(--nsft-ns-accent-hover, #2563eb); }
 
 #nsft-pp-overlay[data-theme="dark"] #nsft-pp-panel .nsft-pp-empty { color: #9AA4B5; }

@@ -6,9 +6,9 @@
     --rt-text: #0f172a;
     --rt-text-dim: #64748b;
     --rt-text-faint: #94a3b8;
-    --rt-accent: #2563eb;
-    --rt-accent-soft: #eff6ff;
-    --rt-accent-border: #93c5fd;
+    --rt-accent: var(--nsft-ns-accent, #2563eb);
+    --rt-accent-soft: var(--nsft-ns-accent-soft, #eff6ff);
+    --rt-accent-border: color-mix(in srgb, var(--rt-accent) 45%, #fff);
     --rt-ok: #16a34a;
     --rt-badge-bg: #f1f5f9;
     --rt-badge-text: #475569;
@@ -31,9 +31,9 @@ html.nsft-dark-on .nsft-rtrail-overlay {
     --rt-text: #E6EBF2;
     --rt-text-dim: #9AA4B5;
     --rt-text-faint: #8A93A3;  
-    --rt-accent: #8FA3FF;
-    --rt-accent-soft: rgba(110, 124, 245, 0.16);
-    --rt-accent-border: #6E7CF5;
+    --rt-accent: var(--nsft-ns-accent-light, #8FA3FF);
+    --rt-accent-soft: color-mix(in srgb, var(--rt-accent) 16%, transparent);
+    --rt-accent-border: var(--nsft-ns-accent-light-bd, #7FB0FF);
     --rt-ok: #7FD9B4;
     --rt-badge-bg: var(--nsft-dk-hover);
     --rt-badge-text: #9AA4B5;

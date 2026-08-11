@@ -4,10 +4,18 @@
     if (window.__nsftLnmFetcher) return;
     window.__nsftLnmFetcher = true;
 
-    const SUBMODULES = [
+    const DEFAULT_ALIASES = [
         'record', 'search', 'currentRecord', 'format', 'runtime', 'log',
-        'https', 'url', 'error', 'util', 'format/i18n', 'ui/dialog', 'ui/message'
+        'https', 'url', 'error', 'util', 'ui'
     ];
+
+    const ICON_TERMINAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+        + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        + '<polyline points="4 17 10 11 4 5"></polyline>'
+        + '<line x1="12" y1="19" x2="20" y2="19"></line></svg>';
+
+    let savedAliases = null;
+    let DESCRIPTIONS = {};
 
     const I18N_FALLBACK = {
         lnm_loaded: 'Módulo N cargado. Variables disponibles en la consola.',
@@ -21,14 +29,25 @@
         lnm_fail_error: 'Error al cargar el módulo N: $1',
         lnm_modal_title: 'Cargar módulo N',
         lnm_btn_ok: 'Aceptar',
-        lnm_auto_close: 'Cierre automático en {1}s…'
+        lnm_auto_close: 'Cierre automático en {1}s…',
+        lnm_pick_intro: 'N está siempre disponible. Elige los módulos que quieres cargar además, sin el prefijo «N.», para usarlos directamente en la consola.',
+        lnm_pick_all: 'Todos',
+        lnm_pick_none: 'Ninguno',
+        lnm_pick_recommended: 'Recomendados',
+        lnm_pick_taken: 'Ya existe en esta página: marcarlo lo sobrescribe',
+        lnm_pick_badge: 'Ya cargado',
+        lnm_pick_count: '$1 de $2 seleccionados',
+        lnm_pick_search: 'Buscar módulo… p. ej. record, https',
+        lnm_pick_foot: 'Los módulos elegidos quedan disponibles en la consola sin el prefijo «N.».',
+        lnm_btn_load: 'Cargar ($1)',
+        lnm_btn_cancel: 'Cancelar'
     };
 
     let MSG = I18N_FALLBACK;
     let currentTheme = 'light';
     let activeModal = null;
     let activeInterval = null;
-    let alreadyLoaded = false;
+    let loadedN = null;
 
     window.addEventListener('message', (event) => {
         if (event.source !== window) return;
@@ -39,6 +58,8 @@
             const payload = data.payload || {};
             if (payload.i18n) MSG = Object.assign({}, I18N_FALLBACK, payload.i18n);
             if (payload.theme) currentTheme = payload.theme;
+            if (Array.isArray(payload.aliases)) savedAliases = payload.aliases;
+            if (payload.descriptions) DESCRIPTIONS = payload.descriptions;
             triggerLoad();
         } else if (data.type === 'theme_changed') {
             const newTheme = data.payload && data.payload.theme;
@@ -52,16 +73,6 @@
     });
 
     function triggerLoad() {
-        if (alreadyLoaded) {
-            const reloaded = ['N'].concat(SUBMODULES.filter((p) => {
-                const v = p.split('/').pop();
-                return typeof window[v] !== 'undefined';
-            }).map((p) => p.split('/').pop()));
-            notifySuccess(buildSuccessText(reloaded));
-            return;
-        }
-        alreadyLoaded = true;
-
         if (typeof require === 'undefined' || !require) {
             notifyError(MSG.lnm_toast_fail_require);
             return;
@@ -70,24 +81,36 @@
     }
 
     async function loadModules() {
-        const N = await requireOne('N');
+        const N = loadedN || await requireOne('N');
         if (!N) {
             notifyError(MSG.lnm_toast_fail_require);
             return;
         }
-        window.N = N;
-        const exposed = ['N'];
+        loadedN = N;
 
-        const results = await Promise.all(SUBMODULES.map((path) => requireOne('N/' + path)));
-        results.forEach((mod, idx) => {
-            if (!mod) return;
-            const varName = SUBMODULES[idx].split('/').pop();
-            window[varName] = mod;
-            exposed.push(varName);
+        window.N = N;
+
+        const available = Object.keys(N).filter((k) => {
+            try { return N[k] != null; } catch (e) { return false; }
+        }).sort();
+
+        showAliasPicker(N, available);
+    }
+
+    function applyAliases(N, chosen) {
+        const exposed = ['N'];
+        chosen.forEach((name) => {
+            try {
+                window[name] = N[name];
+                exposed.push(name);
+            } catch (e) { }
         });
 
         logToConsole(exposed);
         notifySuccess(buildSuccessText(exposed));
+        window.postMessage({
+            dest: 'extension_lnm', type: 'aliases', payload: { aliases: chosen }
+        }, '*');
     }
 
     function buildSuccessText(vars) {
@@ -152,45 +175,154 @@
         activeModal = null;
     }
 
-    function showModal(message) {
+    function showAliasPicker(N, available) {
         closeActiveModal();
-        let countdown = 3;
 
-        const overlay = el('div', {
-            class: 'nsft-lrc-modal-overlay',
-            'data-theme': currentTheme
-        });
-        const content = el('div', { class: 'nsft-lrc-modal-content' });
+        const preset = Array.isArray(savedAliases) ? savedAliases : DEFAULT_ALIASES;
+        const chosen = new Set(preset.filter((name) => available.indexOf(name) !== -1));
+
+        const overlay = el('div', { class: 'nsft-lrc-modal-overlay', 'data-theme': currentTheme });
+        const content = el('div', { class: 'nsft-lrc-modal-content nsft-lnm-picker' });
+
         const header = el('div', { class: 'nsft-lrc-modal-header' });
-        const title = el('span', { class: 'nsft-lrc-modal-title', text: MSG.lnm_modal_title });
-        const closeBtn = el('button', { class: 'nsft-lrc-close-btn', text: '✕', type: 'button' });
-        header.append(title, closeBtn);
+        header.append(
+            el('span', { class: 'nsft-lrc-modal-title', text: MSG.lnm_modal_title }),
+            el('button', { class: 'nsft-lrc-close-btn', text: '✕', type: 'button' })
+        );
+        const closeBtn = header.querySelector('.nsft-lrc-close-btn');
 
-        const body = el('div', { class: 'nsft-lrc-modal-body', text: String(message || '') });
+        const body = el('div', { class: 'nsft-lrc-modal-body' });
+        body.append(el('p', { class: 'nsft-lnm-intro', text: MSG.lnm_pick_intro }));
+
+        const searchRow = el('div', { class: 'nsft-lnm-search' });
+        const searchInput = el('input', {
+            class: 'nsft-lnm-input', type: 'text', spellcheck: 'false',
+            placeholder: MSG.lnm_pick_search
+        });
+        searchRow.append(searchInput);
+        body.append(searchRow);
+
+        const tools = el('div', { class: 'nsft-lnm-tools' });
+        const allBtn = el('button', { class: 'nsft-lnm-link', text: MSG.lnm_pick_all, type: 'button' });
+        const noneBtn = el('button', { class: 'nsft-lnm-link', text: MSG.lnm_pick_none, type: 'button' });
+        const recBtn = el('button', { class: 'nsft-lnm-link', text: MSG.lnm_pick_recommended, type: 'button' });
+        const count = el('span', { class: 'nsft-lnm-count' });
+        tools.append(allBtn, sep(), noneBtn, sep(), recBtn, count);
+        body.append(tools);
+
+        const list = el('div', { class: 'nsft-lnm-list' });
+        const rows = [];
+
+        available.forEach((name) => {
+            const taken = Object.prototype.hasOwnProperty.call(window, name);
+            const desc = (DESCRIPTIONS && DESCRIPTIONS[name]) || '';
+
+            const label = el('label', {
+                class: 'nsft-lnm-item' + (taken ? ' is-taken' : ''),
+                title: taken ? MSG.lnm_pick_taken : ''
+            });
+            const box = el('input', { type: 'checkbox' });
+            box.checked = chosen.has(name);
+            box.value = name;
+
+            const head = el('div', { class: 'nsft-lnm-head' });
+            head.append(
+                el('span', { class: 'nsft-lnm-name', text: name }),
+                el('span', { class: 'nsft-lnm-path', text: 'N/' + name })
+            );
+            if (taken) head.append(el('span', { class: 'nsft-lnm-badge', text: MSG.lnm_pick_badge }));
+
+            const col = el('div', { class: 'nsft-lnm-body' });
+            col.append(head);
+            if (desc) col.append(el('small', { class: 'nsft-lnm-desc', text: desc }));
+
+            label.append(box, col);
+
+            const row = { name: name, box: box, label: label, hay: (name + ' ' + desc).toLowerCase() };
+            rows.push(row);
+
+            box.addEventListener('change', () => {
+                if (box.checked) chosen.add(name); else chosen.delete(name);
+                refresh();
+            });
+
+            list.append(label);
+        });
+
+        body.append(list);
 
         const footer = el('div', { class: 'nsft-lrc-modal-footer' });
-        const timer = el('span', { class: 'nsft-lrc-timer' });
-        const okBtn = el('button', { class: 'nsft-lrc-btn nsft-lrc-btn-primary', text: MSG.lnm_btn_ok, type: 'button' });
-        footer.append(timer, okBtn);
+        const hint = el('small', { class: 'nsft-lnm-foot', text: MSG.lnm_pick_foot });
+        const cancelBtn = el('button', { class: 'nsft-lrc-btn', text: MSG.lnm_btn_cancel, type: 'button' });
+
+        const okBtn = el('button', { class: 'nsft-lrc-btn nsft-lrc-btn-primary', type: 'button' });
+        okBtn.innerHTML = ICON_TERMINAL;
+        const okLabel = el('span', {});
+        okBtn.append(okLabel);
+
+        footer.append(hint, cancelBtn, okBtn);
 
         content.append(header, body, footer);
         overlay.append(content);
         document.body.appendChild(overlay);
         activeModal = overlay;
 
-        const close = () => closeActiveModal();
+        function refresh() {
+            const tpl = MSG.lnm_pick_count || '$1 / $2';
+            count.textContent = tpl
+                .replace('$1', String(chosen.size))
+                .replace('$2', String(available.length));
 
-        const tick = () => {
-            timer.textContent = MSG.lnm_auto_close ? MSG.lnm_auto_close.replace('{1}', String(countdown)) : '';
-            if (countdown <= 0) close();
-            countdown--;
+            const btnTpl = MSG.lnm_btn_load || 'Load ($1)';
+            okLabel.textContent = btnTpl.replace('$1', String(chosen.size));
+
+            rows.forEach((r) => r.label.classList.toggle('is-on', r.box.checked));
+            applyFilter();
+        }
+
+        function applyFilter() {
+            const q = searchInput.value.trim().toLowerCase();
+            let visible = 0;
+            rows.forEach((r) => {
+                const show = !q || r.hay.indexOf(q) !== -1;
+                r.label.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            list.classList.toggle('is-empty', visible === 0);
+        }
+
+        const setMany = (names) => {
+            chosen.clear();
+            names.forEach((n) => chosen.add(n));
+            rows.forEach((r) => { r.box.checked = chosen.has(r.name); });
+            refresh();
         };
-        tick();
-        activeInterval = setInterval(tick, 1000);
 
-        okBtn.addEventListener('click', close);
+        allBtn.addEventListener('click', () => setMany(available));
+        noneBtn.addEventListener('click', () => setMany([]));
+        recBtn.addEventListener('click', () => setMany(
+            DEFAULT_ALIASES.filter((n) => available.indexOf(n) !== -1)
+        ));
+
+        searchInput.addEventListener('input', applyFilter);
+
+        const close = () => closeActiveModal();
+        cancelBtn.addEventListener('click', close);
         closeBtn.addEventListener('click', close);
         overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+        okBtn.addEventListener('click', () => {
+            const picked = available.filter((name) => chosen.has(name));
+            close();
+            applyAliases(N, picked);
+        });
+
+        refresh();
+        searchInput.focus();
+    }
+
+    function sep() {
+        return el('span', { class: 'nsft-lnm-sep', text: '|' });
     }
 
     function el(tag, attrs) {

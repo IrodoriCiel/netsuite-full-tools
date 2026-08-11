@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #4f46e5;
-    --primary-hover: #4338ca;
+    --primary-color: var(--nsft-ns-accent, #3b82f6);
+    --primary-hover: var(--nsft-ns-accent-hover, #2563eb);
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --text-main: #1e293b;
@@ -586,8 +586,8 @@ small {
 
 html[data-nsft-theme="dark"] {
     color-scheme: dark;
-    --primary-color: #6E7CF5;
-    --primary-hover: #7E8BF7;
+    --primary-color: var(--nsft-ns-accent-light, #7FB0FF);
+    --primary-hover: var(--nsft-ns-accent-light-hover, #93C5FD);
     --bg-color: var(--nsft-dk-deepest);
     --card-bg: var(--nsft-dk-panel);
     --text-main: #E6EBF2;

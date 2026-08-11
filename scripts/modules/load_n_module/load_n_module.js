@@ -4,8 +4,10 @@
     const STORAGE_KEY = 'enableLoadNModule';
     const FETCHER_SCRIPT = 'scripts/modules/load_n_module/load_n_module_fetcher.js';
     const CSS_FILE = 'scripts/modules/load_record_console/load_record_console.css';
+    const CSS_FILE_OWN = 'scripts/modules/load_n_module/load_n_module.css';
     const CUSTOM_EVENT = 'nsft-load-n-module';
     const THEME_KEY = 'nsftTheme';
+    const ALIASES_KEY = 'nsftLnmAliases';
 
     if (!/\.app\.netsuite\.com$/.test(location.hostname)) return;
 
@@ -65,6 +67,15 @@
         if (e.source !== window) return;
         const d = e.data;
         if (!d || typeof d !== 'object' || d.dest !== 'extension_lnm') return;
+
+        if (d.type === 'aliases') {
+            const list = d.payload && d.payload.aliases;
+            if (Array.isArray(list)) {
+                try { chrome.storage.local.set({ [ALIASES_KEY]: list }); } catch (e) { }
+            }
+            return;
+        }
+
         if (!window.NSFT_Clipboard || !window.NSFT_Clipboard.showToast) return;
         if (d.type === 'success') {
             window.NSFT_Clipboard.showToast(d.text || '', { type: 'success' });
@@ -107,23 +118,61 @@
     }
 
     function sendInitMessage() {
+        chrome.storage.local.get({ [ALIASES_KEY]: null }, (items) => {
+            const saved = items && items[ALIASES_KEY];
+            postInit(Array.isArray(saved) ? saved : null);
+        });
+    }
+
+    const MODULE_KEYS = [
+        'action', 'auth', 'bignumber', 'cache', 'config', 'crypto', 'currency',
+        'currentRecord', 'dataset', 'datasetLink', 'email', 'encode', 'error', 'file',
+        'format', 'http', 'https', 'log', 'plugin', 'portlet', 'query', 'record',
+        'recordContext', 'redirect', 'render', 'runtime', 'search', 'sftp', 'sso',
+        'suiteAppInfo', 'task', 'transaction', 'translation', 'ui', 'url', 'util',
+        'workbook', 'workflow', 'xml'
+    ];
+
+    function buildDescriptions() {
+        const out = {};
+        MODULE_KEYS.forEach((k) => {
+            const msg = chrome.i18n.getMessage('lnm_mod_' + k.toLowerCase());
+            if (msg) out[k] = msg;
+        });
+        return out;
+    }
+
+    function postInit(aliases) {
         window.postMessage({
             dest: 'fetcher_lnm',
             type: 'init',
             payload: {
+                aliases: aliases,
+                descriptions: buildDescriptions(),
                 i18n: {
                     lnm_loaded: chrome.i18n.getMessage('lnm_loaded'),
-                    lnm_toast_short: chrome.i18n.getMessage('lnm_toast_short'),
+                    lnm_toast_short: chrome.i18n.getMessage('lnm_toast_short', ['$1']),
                     lnm_toast_fail_require: chrome.i18n.getMessage('lnm_toast_fail_require'),
-                    lnm_toast_fail_error: chrome.i18n.getMessage('lnm_toast_fail_error'),
+                    lnm_toast_fail_error: chrome.i18n.getMessage('lnm_toast_fail_error', ['$1']),
                     lnm_console_tag: chrome.i18n.getMessage('lnm_console_tag'),
                     lnm_console_loaded: chrome.i18n.getMessage('lnm_console_loaded'),
                     lnm_vars_label: chrome.i18n.getMessage('lnm_vars_label'),
                     lnm_fail_require: chrome.i18n.getMessage('lnm_fail_require'),
-                    lnm_fail_error: chrome.i18n.getMessage('lnm_fail_error'),
+                    lnm_fail_error: chrome.i18n.getMessage('lnm_fail_error', ['$1']),
                     lnm_modal_title: chrome.i18n.getMessage('lnm_modal_title'),
                     lnm_btn_ok: chrome.i18n.getMessage('lnm_btn_ok'),
-                    lnm_auto_close: chrome.i18n.getMessage('lnm_auto_close')
+                    lnm_auto_close: chrome.i18n.getMessage('lnm_auto_close'),
+                    lnm_pick_intro: chrome.i18n.getMessage('lnm_pick_intro'),
+                    lnm_pick_all: chrome.i18n.getMessage('lnm_pick_all'),
+                    lnm_pick_none: chrome.i18n.getMessage('lnm_pick_none'),
+                    lnm_pick_recommended: chrome.i18n.getMessage('lnm_pick_recommended'),
+                    lnm_pick_taken: chrome.i18n.getMessage('lnm_pick_taken'),
+                    lnm_pick_badge: chrome.i18n.getMessage('lnm_pick_badge'),
+                    lnm_pick_count: chrome.i18n.getMessage('lnm_pick_count', ['$1', '$2']),
+                    lnm_pick_search: chrome.i18n.getMessage('lnm_pick_search'),
+                    lnm_pick_foot: chrome.i18n.getMessage('lnm_pick_foot'),
+                    lnm_btn_load: chrome.i18n.getMessage('lnm_btn_load', ['$1']),
+                    lnm_btn_cancel: chrome.i18n.getMessage('lnm_btn_cancel')
                 },
                 theme: resolveTheme()
             }
@@ -146,17 +195,20 @@
     }
 
     function injectCSS() {
-        if (_cssInjected || document.getElementById('nsft-lrc-css')) {
-            _cssInjected = true;
-            return;
-        }
+        if (_cssInjected) return;
+        linkOnce('nsft-lrc-css', CSS_FILE);
+        linkOnce('nsft-lnm-css', CSS_FILE_OWN);
+        _cssInjected = true;
+    }
+
+    function linkOnce(id, file) {
+        if (document.getElementById(id)) return;
         const link = document.createElement('link');
-        link.id = 'nsft-lrc-css';
+        link.id = id;
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = chrome.runtime.getURL(CSS_FILE);
+        link.href = chrome.runtime.getURL(file);
         appendTo('head').appendChild(link);
-        _cssInjected = true;
     }
 
     function appendTo(preferred) {

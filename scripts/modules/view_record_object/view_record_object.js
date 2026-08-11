@@ -1,5 +1,19 @@
 (function () {
   'use strict';
+  const PANEL_MODE = location.protocol === 'chrome-extension:';
+  let _pageHref = PANEL_MODE ? null : window.location.href;
+
+  function pageHref() { return _pageHref; }
+
+  function nsFetch(url, init) {
+    if (!PANEL_MODE) return fetch(url, init);
+    const client = window.NSFT_PanelClient;
+    if (!client) return Promise.reject(new Error('no_netsuite_tab'));
+    let abs = String(url);
+    if (abs.charAt(0) === '/' && _pageHref) abs = new URL(abs, _pageHref).href;
+    return client.fetch(abs, init);
+  }
+
   const STORAGE_KEY = 'enableViewRecordObject';
   const NSFT_THEME_KEY = 'nsftTheme';
   let lastMaximizedLeft = null;
@@ -73,18 +87,90 @@
   };
 
   const MAX_ANIMATED_TOGGLE_ITEMS = 500;
-  const BODY_PROPERTIES_TO_EXCLUDE = ['wfPI', 'wfSR', 'wfVF', 'wfFC', 'wfPS', 'nsbrowserenv', '_multibtnstate_', 'entryformquerystring', 'wfinstances', 'whence', '_eml_nkey_', '_csrf', 'ntype', 'nluser', 'nlrole', 'nldept', 'nlloc', 'nlsub', 'baserecordtype'];
+  const BODY_PROPERTIES_TO_EXCLUDE = ['_csrf', '_eml_nkey_', '_multibtnstate_', 'nsbrowserenv'];
 
   const _RB = window.NSFT_RecordButtons;
   if (_RB && _RB.isExcludedPage && _RB.isExcludedPage()) return;
   if (window.location.pathname.startsWith('/app/common/search/')) return;
+  let _openMode = 'modal';
+
   chrome.storage.local.get({
     [STORAGE_KEY]: true,
-    viewRecordObjectTheme: 'atom-one-dark'
+    viewRecordObjectTheme: 'atom-one-dark',
+    viewRecordObjectOpenMode: 'modal'
   }, (items) => {
+    _openMode = items.viewRecordObjectOpenMode || 'modal';
     if (!items[STORAGE_KEY]) return;
+    if (PANEL_MODE) {
+      const client = window.NSFT_PanelClient;
+      const arrancar = (info) => {
+        _pageHref = info && info.href ? info.href : null;
+        init(items);
+        window.dispatchEvent(new CustomEvent('nsft-show-record-object'));
+      };
+      if (client) client.pageInfo().then(arrancar);
+      else arrancar(null);
+      seguirPestana(client);
+      return;
+    }
     init(items);
   });
+
+  function seguirPestana(client) {
+    if (!client || typeof chrome === 'undefined' || !chrome.tabs) return;
+    let timer = null;
+    let seq = 0;
+    const esNs = (url) => !!url && /^https:\/\/[^/]*\.app\.netsuite\.com\//.test(url);
+
+    const esperarPuente = (mySeq, intento) => {
+      if (mySeq !== seq) return;
+      client.pageInfo().then((info) => {
+        if (mySeq !== seq) return;
+        const href = info && info.href ? info.href : null;
+        if (href) {
+          if (href === _pageHref) return;
+          _pageHref = href;
+          STATE.nsftRecordObject = null;
+          STATE.loaded = false;
+          loadRecordXml();
+          return;
+        }
+        if (intento < 10) { setTimeout(() => esperarPuente(mySeq, intento + 1), 400); return; }
+        _pageHref = null;
+        STATE.nsftRecordObject = null;
+        updateStatus(chrome.i18n.getMessage('ro_panel_no_tab') || 'Abre una pestaña de NetSuite.', true);
+      });
+    };
+
+    const revalidar = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const mySeq = ++seq;
+        chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+          if (mySeq !== seq) return;
+          const url = tabs && tabs[0] && tabs[0].url ? tabs[0].url : null;
+          if (!esNs(url)) {
+            if (_pageHref === null) return;
+            _pageHref = null;
+            STATE.nsftRecordObject = null;
+            updateStatus(chrome.i18n.getMessage('ro_panel_no_tab') || 'Abre una pestaña de NetSuite.', true);
+            return;
+          }
+          if (url === _pageHref) return;
+          esperarPuente(mySeq, 0);
+        });
+      }, 250);
+    };
+    try {
+      chrome.tabs.onActivated.addListener(revalidar);
+      chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+        if (changeInfo.url || changeInfo.status === 'complete') revalidar();
+      });
+      if (chrome.windows && chrome.windows.onFocusChanged) {
+        chrome.windows.onFocusChanged.addListener(revalidar);
+      }
+    } catch (e) { }
+  }
 
   function init(items) {
     if (items.viewRecordObjectTheme) {
@@ -136,9 +222,7 @@
         });
     }
 
-    window.addEventListener('nsft-show-record-object', function (evt) {
-      if (window.NSFT_ShortcutCoach) window.NSFT_ShortcutCoach.hint('view_record_object');
-
+    function abrirEnPagina() {
       const modal = document.getElementById('nsft-rec-obj-modal');
       if (!modal) {
         initModal(false);
@@ -160,12 +244,30 @@
           loadRecordXml();
         }
       }
+    }
+
+    window.addEventListener('nsft-show-record-object', function (evt) {
+      if (window.NSFT_ShortcutCoach) window.NSFT_ShortcutCoach.hint('view_record_object');
+
+      if (!PANEL_MODE && _openMode === 'panel' && !(evt && evt.detail && evt.detail.fromPanel)) {
+        try {
+          chrome.runtime.sendMessage({ nsftPanel: 'open', panel: 'ro' }, (resp) => {
+            void chrome.runtime.lastError;
+            if (!(resp && resp.ok)) abrirEnPagina();
+          });
+          return;
+        } catch (e) { }
+      }
+      abrirEnPagina();
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === 'local') {
         if (changes.viewRecordObjectTheme) {
           sendThemeUpdate(changes.viewRecordObjectTheme.newValue || 'atom-one-dark');
+        }
+        if (changes.viewRecordObjectOpenMode) {
+          _openMode = changes.viewRecordObjectOpenMode.newValue || 'modal';
         }
       }
     });
@@ -267,19 +369,57 @@
     });
 
     clickHandler('nsft-rec-obj-close', () => {
+      if (PANEL_MODE) { window.close(); return; }
       modal.style.display = 'none';
       _firstSnapshot = null;
       _diffPaths = null;
       stopStalenessTicker();
-      exitSplitMode();
+      cleanupLegacySplit();
       dispatchLayoutUpdate();
     });
 
-    clickHandler('nsft-rec-obj-reload', () => loadRecordXml());
+    clickHandler('nsft-rec-obj-reload', () => {
+      if (PANEL_MODE && window.NSFT_PanelClient) {
+        window.NSFT_PanelClient.pageInfo().then((info) => {
+          _pageHref = info && info.href ? info.href : null;
+          STATE.nsftRecordObject = null;
+          if (!_pageHref) {
+            updateStatus(chrome.i18n.getMessage('ro_panel_no_tab') || 'Abre una pestaña de NetSuite.', true);
+            return;
+          }
+          loadRecordXml();
+        });
+        return;
+      }
+      loadRecordXml();
+    });
+
+    clickHandler('nsft-rec-obj-undock', () => {
+      const client = window.NSFT_PanelClient;
+      if (!client) return;
+      client.dispatch('nsft-show-record-object').then((okd) => {
+        if (okd) { window.close(); return; }
+        console.warn('NSFT: no hay pestaña de NetSuite donde desacoplar el visor');
+      });
+    });
+
+    clickHandler('nsft-rec-obj-dock', () => {
+      try {
+        chrome.runtime.sendMessage({ nsftPanel: 'open', panel: 'ro' }, (resp) => {
+          void chrome.runtime.lastError;
+          if (resp && resp.ok) {
+            const cerrar = document.getElementById('nsft-rec-obj-close');
+            if (cerrar) cerrar.click();
+            return;
+          }
+          console.warn('NSFT: no se pudo abrir el panel lateral —',
+            (resp && resp.reason) || 'sin respuesta del service worker');
+        });
+      } catch (e) { }
+    });
 
     clickHandler('nsft-rec-obj-export', exportRecordAsJson);
 
-    clickHandler('nsft-rec-obj-split', toggleSplitMode);
 
     const header = document.querySelector('.nsft-rec-obj-header');
     if (header) {
@@ -318,6 +458,7 @@
       };
 
       header.addEventListener('mousedown', (event) => {
+        if (PANEL_MODE) return;
         if (document.activeElement) document.activeElement.blur();
         if (event.target.closest('.nsft-header-actions')) return;
 
@@ -459,148 +600,23 @@
     }
   }
 
-  let _splitOriginalBodyContain = null;
-  let _splitOriginalBodyWidth = null;
-  let _splitOriginalBodyMaxWidth = null;
-  let _splitOriginalBodyOverflow = null;
-  let _modalParentBeforeSplit = null;
-  let _splitResizeListener = null;
-
-  function isSplitMode() {
-    const m = document.getElementById('nsft-rec-obj-modal');
-    return m && m.dataset.state === 'split';
-  }
-
-  function toggleSplitMode() {
-    if (isSplitMode()) exitSplitMode();
-    else enterSplitMode();
-  }
-
-  function enterSplitMode() {
-    const modal = document.getElementById('nsft-rec-obj-modal');
-    if (!modal) return;
-    if (modal.dataset.state === 'maximised') {
-      lastMaximizedLeft = modal.style.left || lastMaximizedLeft;
-      lastMaximizedTop = modal.style.top || lastMaximizedTop;
-    }
-    if (modal.parentNode !== document.documentElement) {
-      _modalParentBeforeSplit = modal.parentNode;
-      document.documentElement.appendChild(modal);
-    }
-    modal.dataset.state = 'split';
-    const desired = 500;
-    modal.style.width = desired + 'px';
-    modal.style.left = '';
-    modal.style.right = '0';
-    modal.style.top = '0';
-    modal.style.bottom = '0';
-    modal.style.height = '100vh';
-    applyBodyShiftForSplit(desired);
-    ensureSplitResizeHandle(modal);
-    updateTitleState();
-    dispatchLayoutUpdate();
-  }
-
-  function exitSplitMode() {
-    const modal = document.getElementById('nsft-rec-obj-modal');
-    if (!modal) return;
-    if (modal.dataset.state !== 'split') return;
-    modal.dataset.state = 'maximised';
-    modal.style.width = '';
-    modal.style.height = '';
-    modal.style.right = '';
-    modal.style.bottom = '';
-    if (lastMaximizedTop !== null) modal.style.top = lastMaximizedTop;
-    else modal.style.top = '';
-    if (lastMaximizedLeft !== null) modal.style.left = lastMaximizedLeft;
-    else modal.style.left = '';
-    restoreBodyShift();
-    removeSplitResizeHandle(modal);
-    if (modal.parentNode === document.documentElement) {
-      const dest = _modalParentBeforeSplit || document.body;
-      dest.appendChild(modal);
-      _modalParentBeforeSplit = null;
-    }
-    updateTitleState();
-    dispatchLayoutUpdate();
-  }
-
-  function applyBodyShiftForSplit(width) {
+  function cleanupLegacySplit() {
     const body = document.body;
     if (!body) return;
-    if (_splitOriginalBodyContain === null) {
-      _splitOriginalBodyContain = body.style.contain;
-      _splitOriginalBodyWidth = body.style.width;
-      _splitOriginalBodyMaxWidth = body.style.maxWidth;
-      _splitOriginalBodyOverflow = body.style.overflow;
-    }
-    body.style.contain = 'paint';
-    body.style.width = `calc(100vw - ${width}px)`;
-    body.style.maxWidth = `calc(100vw - ${width}px)`;
-    body.style.overflow = 'hidden auto';
-    body.classList.add('nsft-rec-obj-split-active');
-  }
-
-  function restoreBodyShift() {
-    const body = document.body;
-    if (!body) return;
-    if (_splitOriginalBodyContain !== null) {
-      body.style.contain = _splitOriginalBodyContain;
-      body.style.width = _splitOriginalBodyWidth;
-      body.style.maxWidth = _splitOriginalBodyMaxWidth;
-      body.style.overflow = _splitOriginalBodyOverflow;
-    }
+    if (!body.classList.contains('nsft-rec-obj-split-active')
+      && !document.documentElement.classList.contains('nsft-rec-obj-split-active')) return;
     body.classList.remove('nsft-rec-obj-split-active');
-    _splitOriginalBodyContain = null;
-    _splitOriginalBodyWidth = null;
-    _splitOriginalBodyMaxWidth = null;
-    _splitOriginalBodyOverflow = null;
-    const html = document.documentElement;
-    if (html) {
-      html.style.paddingRight = '';
-      html.style.boxSizing = '';
-      html.style.overflowX = '';
-      html.classList.remove('nsft-rec-obj-split-active');
-    }
+    body.style.contain = '';
+    body.style.width = '';
+    body.style.maxWidth = '';
+    body.style.overflow = '';
     body.style.zoom = '';
     body.style.marginRight = '';
-  }
-
-  function ensureSplitResizeHandle(modal) {
-    if (modal.querySelector('.nsft-rec-obj-split-handle')) return;
-    const handle = document.createElement('div');
-    handle.className = 'nsft-rec-obj-split-handle';
-    handle.title = chrome.i18n.getMessage('ro_split_resize_title') || 'Arrastrar para redimensionar';
-    modal.appendChild(handle);
-
-    let resizing = false;
-    handle.addEventListener('mousedown', (e) => {
-      resizing = true;
-      e.preventDefault();
-      document.body.style.cursor = 'ew-resize';
-    });
-    _splitResizeListener = (e) => {
-      if (!resizing) return;
-      const newWidth = Math.max(320, Math.min(window.innerWidth - 200, window.innerWidth - e.clientX));
-      modal.style.width = newWidth + 'px';
-      applyBodyShiftForSplit(newWidth);
-    };
-    window.addEventListener('mousemove', _splitResizeListener);
-    window.addEventListener('mouseup', () => {
-      if (resizing) {
-        resizing = false;
-        document.body.style.cursor = '';
-      }
-    });
-  }
-
-  function removeSplitResizeHandle(modal) {
-    const h = modal.querySelector('.nsft-rec-obj-split-handle');
-    if (h) h.remove();
-    if (_splitResizeListener) {
-      window.removeEventListener('mousemove', _splitResizeListener);
-      _splitResizeListener = null;
-    }
+    const html = document.documentElement;
+    html.style.paddingRight = '';
+    html.style.boxSizing = '';
+    html.style.overflowX = '';
+    html.classList.remove('nsft-rec-obj-split-active');
   }
 
   function bringToFront() {
@@ -690,11 +706,13 @@
          <div class="nsft-rec-obj-header">
              <span id="nsft-ro-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path></svg>${chrome.i18n.getMessage('ro_title')}</span>
              <span class="nsft-header-actions">
+               ${PANEL_MODE ? `<span id="nsft-rec-obj-undock" title="${chrome.i18n.getMessage('ro_undock_btn') || 'Desacoplar: volver a la página'}">
+                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path><path d="M11 9l-3 3 3 3"></path></svg>
+               </span>` : `<span id="nsft-rec-obj-dock" title="${chrome.i18n.getMessage('ro_dock_btn') || 'Acoplar al panel lateral del navegador'}">
+                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path></svg>
+               </span>`}
                <span id="nsft-rec-obj-export" title="${chrome.i18n.getMessage('ro_export_title') || 'Descargar como JSON'}">
                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-               </span>
-               <span id="nsft-rec-obj-split" title="${chrome.i18n.getMessage('ro_split_title') || 'Modo split-screen (acoplar a la derecha)'}">
-                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="13" y1="4" x2="13" y2="20"></line></svg>
                </span>
                <span id="nsft-rec-obj-reload" title="${chrome.i18n.getMessage('ro_reload')}">
                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
@@ -740,13 +758,19 @@
         STATE.type = nlapiGetRecordType();
       }
 
-      let url = window.location.href;
+      if (!pageHref()) {
+        updateStatus(chrome.i18n.getMessage('ro_panel_no_tab') || 'Abre una pestaña de NetSuite.', true);
+        STATE.loaded = true;
+        return;
+      }
+
+      let url = pageHref();
       const hashIdx = url.indexOf('#');
       if (hashIdx !== -1) url = url.substring(0, hashIdx);
       url += (url.includes('?') ? '&' : '?') + 'xml=T';
       if (!url.includes('e=T') && !noneEdit) url += '&e=T';
 
-      const response = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/xml' } });
+      const response = await nsFetch(url, { method: 'GET', headers: { 'Content-Type': 'application/xml' } });
       if (!response.ok) {
         if (!noneEdit) return loadRecordXml(true);
         throw new Error(chrome.i18n.getMessage('ro_network_error'));
@@ -762,6 +786,12 @@
     }
   };
 
+  function panelSinRegistro() {
+    updateStatus(chrome.i18n.getMessage('ro_panel_not_record')
+      || 'Esta página no tiene un registro que mostrar.', true);
+    STATE.loaded = true;
+  }
+
   const formatRecord = async (xmlString, noneEdit) => {
     if (!xmlString) return;
     updateStatus(chrome.i18n.getMessage('ro_loading_record'));
@@ -774,13 +804,19 @@
       if (!el) el = getXmlValue(xml, 'nlapiResponse', true);
 
       if (!el) {
-        if (noneEdit) throw chrome.i18n.getMessage('ro_root_node_error');
+        if (noneEdit) {
+          if (PANEL_MODE) { panelSinRegistro(); return; }
+          throw chrome.i18n.getMessage('ro_root_node_error');
+        }
         return loadRecordXml(true);
       }
 
       const record = getXmlValue(el, 'record', true);
       if (!record) {
-        if (noneEdit) throw chrome.i18n.getMessage('ro_record_node_error');
+        if (noneEdit) {
+          if (PANEL_MODE) { panelSinRegistro(); return; }
+          throw chrome.i18n.getMessage('ro_record_node_error');
+        }
         return loadRecordXml(true);
       }
 
@@ -790,7 +826,7 @@
 
       const recordAttributes = record.getAttributeNames();
       recordAttributes.forEach(attr => {
-        if (!['fields', 'perm'].includes(attr)) recordObject[attr] = record.getAttribute(attr);
+        if (attr !== 'fields') recordObject[attr] = record.getAttribute(attr);
       });
 
       let fields = record.getAttribute('fields');
@@ -808,8 +844,10 @@
 
       Array.from(record.children).forEach(child => {
         const tagName = child.tagName;
-        if (tagName != 'machine' && !shouldExcludeBodyField(tagName)) {
-          recordObject.bodyFields[tagName] = getXmlValue(record, tagName);
+        if (tagName != 'machine') {
+          if (!shouldExcludeBodyField(tagName)) {
+            recordObject.bodyFields[tagName] = getXmlValue(record, tagName);
+          }
         } else {
           const machine = child;
           const machineId = machine.getAttribute('name');
@@ -839,6 +877,7 @@
       recordObject.lineFields = sublistData;
       updateStatus(chrome.i18n.getMessage('ro_loading_record'));
 
+      await enrichRecordObject(recordObject, noneEdit);
 
       const inventoryDetailIds = xmlInventoryDetailIds;
 
@@ -921,7 +960,7 @@
     const fetchOne = async (id) => {
       const [sublistId, internalId] = id.split('-');
       try {
-        const response = await fetch('/app/accounting/transactions/inventory/numbered/inventorydetail.nl?e=T&xml=T&id=' + internalId, {
+        const response = await nsFetch('/app/accounting/transactions/inventory/numbered/inventorydetail.nl?e=T&xml=T&id=' + internalId, {
           method: 'GET',
           headers: { 'Content-Type': 'application/xml' }
         });
@@ -972,8 +1011,291 @@
   };
 
 
+  const ENRICH_TIMEOUT_MS = 8000;
+
+  const fetchWithTimeout = async (url, init) => {
+    if (PANEL_MODE) return nsFetch(url, init);
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ENRICH_TIMEOUT_MS);
+    try {
+      return await fetch(url, { ...init, signal: ctrl.signal });
+    } finally {
+      clearTimeout(t);
+    }
+  };
+
+  const stripRestLinks = (value) => {
+    if (Array.isArray(value)) return value.map(stripRestLinks);
+    if (value && typeof value === 'object') {
+      const out = {};
+      Object.entries(value).forEach(([k, v]) => {
+        if (k === 'links') return;
+        out[k] = stripRestLinks(v);
+      });
+      return out;
+    }
+    return value;
+  };
+
+  const flattenRestRecord = (json) => {
+    const body = {};
+    const sublists = {};
+    Object.entries(json || {}).forEach(([k, v]) => {
+      if (k === 'links' || k === 'o:errorDetails') return;
+      if (v === null || typeof v !== 'object') { body[k] = v; return; }
+      if (Array.isArray(v)) { body[k] = stripRestLinks(v); return; }
+      if (Array.isArray(v.items)) {
+        sublists[k] = v.items.map((line) => stripRestLinks(line));
+        return;
+      }
+      if ('id' in v && 'links' in v && Object.keys(v).length <= 3) {
+        body[k] = (v.refName != null && v.refName !== '')
+          ? v.id + ' (' + v.refName + ')'
+          : v.id;
+        return;
+      }
+      body[k] = stripRestLinks(v);
+    });
+    return { body, sublists };
+  };
+
+  const mergeMissingBody = (recordObject, extraBody) => {
+    const have = new Set(Object.keys(recordObject.bodyFields).map((k) => k.toLowerCase()));
+    Object.keys(recordObject).forEach((k) => have.add(k.toLowerCase()));
+    let added = 0;
+    Object.entries(extraBody || {}).forEach(([k, v]) => {
+      const lk = k.toLowerCase();
+      if (have.has(lk) || shouldExcludeBodyField(lk)) return;
+      recordObject.bodyFields[k] = v;
+      have.add(lk);
+      added += 1;
+    });
+    return added;
+  };
+
+  const mergeMissingSublists = (recordObject, sublists) => {
+    let added = 0;
+    const haveNames = {};
+    Object.keys(recordObject.lineFields).forEach((k) => { haveNames[k.toLowerCase()] = k; });
+    Object.entries(sublists || {}).forEach(([name, lines]) => {
+      const existingName = haveNames[name.toLowerCase()];
+      if (!existingName) {
+        recordObject.lineFields[name] = lines;
+        added += (lines.length && lines[0] && typeof lines[0] === 'object')
+          ? Object.keys(lines[0]).length
+          : 1;
+        return;
+      }
+      const target = recordObject.lineFields[existingName];
+      if (!Array.isArray(target) || target.length !== lines.length) return;
+      const newCols = new Set();
+      target.forEach((line, i) => {
+        const have = new Set(Object.keys(line).map((k) => k.toLowerCase()));
+        Object.entries(lines[i] || {}).forEach(([k, v]) => {
+          if (have.has(k.toLowerCase())) return;
+          line[k] = v;
+          newCols.add(k.toLowerCase());
+        });
+      });
+      added += newCols.size;
+    });
+    return added;
+  };
+
+  const suiteqlTableFor = (type) => {
+    const t = String(type || '').toLowerCase();
+    return /^[a-z][a-z0-9_]*$/.test(t) ? t : null;
+  };
+
+  const xmlVariantUrl = (wantEdit) => {
+    const u = new URL(pageHref() || window.location.href);
+    u.hash = '';
+    u.searchParams.set('xml', 'T');
+    if (wantEdit) u.searchParams.set('e', 'T');
+    else u.searchParams.delete('e');
+    return u.toString();
+  };
+
+  const xmlRecordParts = (xmlText) => {
+    try {
+      const xml = new DOMParser().parseFromString(xmlText, 'application/xml');
+      const el = getXmlValue(xml, 'nsResponse', true) || getXmlValue(xml, 'nlapiResponse', true);
+      const record = el && getXmlValue(el, 'record', true);
+      if (!record) return null;
+
+      const body = {};
+      const sublists = {};
+      record.getAttributeNames().forEach((attr) => {
+        if (attr !== 'fields') body[attr] = record.getAttribute(attr);
+      });
+      (record.getAttribute('fields') || '').split(',').forEach((f) => {
+        if (f && body[f] === undefined) body[f] = '';
+      });
+      Array.from(record.children).forEach((child) => {
+        if (child.tagName === 'machine') {
+          const name = child.getAttribute('name');
+          if (!name) return;
+          const template = {};
+          (child.getAttribute('fields') || '').split(',').forEach((c) => { if (c) template[c] = ''; });
+          sublists[name] = Array.from(child.children).map((line) => {
+            const obj = { ...template };
+            Array.from(line.children).forEach((col) => {
+              obj[col.tagName] = col.textContent === 'null' ? '' : col.textContent;
+            });
+            return obj;
+          });
+        } else {
+          body[child.tagName] = child.textContent === 'null' ? '' : child.textContent;
+        }
+      });
+      return { body, sublists };
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const fetchXmlVariant = async (wantEdit) => {
+    const resp = await fetchWithTimeout(xmlVariantUrl(wantEdit), {
+      headers: { 'Content-Type': 'application/xml' },
+      credentials: 'same-origin'
+    });
+    if (!resp.ok) return null;
+    const text = await resp.text();
+    const t = text.trim();
+    if (t.startsWith('<!DOCTYPE') || t.startsWith('<html')) return null;
+    return xmlRecordParts(text);
+  };
+
+  const fetchRestRecord = async (type, id) => {
+    const url = '/services/rest/record/v1/' + encodeURIComponent(String(type).toLowerCase())
+      + '/' + encodeURIComponent(String(id)) + '?expandSubResources=true';
+    const resp = await fetchWithTimeout(url, {
+      headers: { 'Accept': 'application/json' },
+      credentials: 'same-origin'
+    });
+    if (!resp.ok) return null;
+    return resp.json();
+  };
+
+  const fetchSuiteQLRowRest = async (table, idNum) => {
+    const resp = await fetchWithTimeout('/services/rest/query/v1/suiteql?limit=1&offset=0', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'transient' },
+      body: JSON.stringify({ q: 'SELECT * FROM ' + table + ' WHERE id = ' + idNum })
+    });
+    const rest = window.NSFT_SuiteQLRest;
+    if (!resp.ok) {
+      if (rest && rest.markOff && (resp.status === 403 || resp.status === 404)) rest.markOff();
+      return null;
+    }
+    if (rest && rest.markOn) rest.markOn();
+    const json = await resp.json();
+    const item = (json && json.items && json.items[0]) || null;
+    if (!item) return null;
+    const row = {};
+    Object.keys(item).forEach((k) => { if (k !== 'links') row[k] = item[k]; });
+    return row;
+  };
+
+  const SQL_FETCHER_TIMEOUT_MS = 6000;
+  let _roFetcherInjected = false;
+  let _sqlReqSeq = PANEL_MODE ? 1000000 : 0;
+
+  const RO_FETCHER_PATH = 'scripts/modules/view_record_object/view_record_object_fetcher.js';
+
+  const injectRoFetcher = () => {
+    if (PANEL_MODE) return;
+    if (_roFetcherInjected) return;
+    _roFetcherInjected = true;
+    const s = document.createElement('script');
+    s.src = chrome.runtime.getURL(RO_FETCHER_PATH);
+    s.onload = function () { this.remove(); };
+    (document.head || document.documentElement).appendChild(s);
+  };
+
+  const roPost = (msg) => {
+    if (!PANEL_MODE) { window.postMessage(msg, '*'); return; }
+    const client = window.NSFT_PanelClient;
+    if (client) client.post(msg, { inject: RO_FETCHER_PATH, relay: ['extension_ro'] });
+  };
+
+  const sqlRowViaFetcher = (table, idNum) => new Promise((resolve) => {
+    try {
+      injectRoFetcher();
+      const reqId = ++_sqlReqSeq;
+      let timer = null;
+      const onMsg = (e) => {
+        if (e.source !== window) return;
+        const d = e.data;
+        if (!d || d.dest !== 'extension_ro' || d.type !== 'sqlrow') return;
+        if (!d.payload || d.payload.reqId !== reqId) return;
+        cleanup();
+        resolve(d.payload.row || null);
+      };
+      const cleanup = () => {
+        window.removeEventListener('message', onMsg);
+        if (timer) clearTimeout(timer);
+      };
+      window.addEventListener('message', onMsg);
+      timer = setTimeout(() => { cleanup(); resolve(null); }, SQL_FETCHER_TIMEOUT_MS);
+      const send = () => roPost({
+        dest: 'fetcher_ro', type: 'sqlrow',
+        payload: { reqId, table, id: idNum }
+      });
+      send();
+      setTimeout(send, 350);
+    } catch (e) { resolve(null); }
+  });
+
+  const fetchSuiteQLRow = async (type, id, restOff) => {
+    const table = suiteqlTableFor(type);
+    const idNum = parseInt(id, 10);
+    if (!table || !idNum || idNum <= 0) return null;
+    if (!restOff) {
+      const row = await fetchSuiteQLRowRest(table, idNum).catch(() => null);
+      if (row) return row;
+    }
+    return sqlRowViaFetcher(table, idNum);
+  };
+
+  const enrichRecordObject = async (recordObject, baseWasView) => {
+    try {
+      const type = recordObject.recordType || STATE.type;
+      const id = recordObject.id || STATE.id;
+      if (!type || !id) return;
+
+      const restHelper = window.NSFT_SuiteQLRest;
+      let off = false;
+      try {
+        off = await Promise.resolve(restHelper && restHelper.isKnownOff ? restHelper.isKnownOff() : false);
+      } catch (e) { off = false; }
+
+      const [xmlAlt, restJson, sqlRow] = await Promise.all([
+        fetchXmlVariant(!!baseWasView).catch(() => null),
+        off ? null : fetchRestRecord(type, id).catch(() => null),
+        fetchSuiteQLRow(type, id, off).catch(() => null)
+      ]);
+
+      if (xmlAlt) {
+        mergeMissingBody(recordObject, xmlAlt.body);
+        mergeMissingSublists(recordObject, xmlAlt.sublists);
+      }
+      if (restJson) {
+        const flat = flattenRestRecord(restJson);
+        mergeMissingBody(recordObject, flat.body);
+        mergeMissingSublists(recordObject, flat.sublists);
+      }
+      if (sqlRow) {
+        mergeMissingBody(recordObject, sqlRow);
+      }
+    } catch (e) {
+    }
+  };
+
   const shouldExcludeBodyField = (fieldId) => {
-    return BODY_PROPERTIES_TO_EXCLUDE.includes(fieldId) || fieldId.startsWith('nsapi') || fieldId.startsWith('nlapi');
+    const f = String(fieldId || '').toLowerCase();
+    return BODY_PROPERTIES_TO_EXCLUDE.includes(f) || f.startsWith('nsapi') || f.startsWith('nlapi');
   };
 
   const getXmlValue = (xml, property, returnNode) => {
@@ -1237,27 +1559,8 @@
     return filteredObject;
   };
 
-  const scrollFieldIntoCenter = (el) => {
-    let node = el.parentElement;
-    while (node && node !== document.documentElement) {
-      const cs = getComputedStyle(node);
-      if (/(auto|scroll|overlay)/.test(cs.overflowY) && node.scrollHeight > node.clientHeight + 1) {
-        const nRect = node.getBoundingClientRect();
-        const eRect = el.getBoundingClientRect();
-        node.scrollTop += (eRect.top - nRect.top) - (node.clientHeight / 2) + (eRect.height / 2);
-      }
-      node = node.parentElement;
-    }
-    const r = el.getBoundingClientRect();
-    const scroller = document.scrollingElement || document.documentElement;
-    scroller.scrollTo({
-      top: scroller.scrollTop + r.top - (window.innerHeight / 2) + (r.height / 2),
-      behavior: 'smooth'
-    });
-  };
-
   const findNetSuiteField = (evt) => {
-    if (!evt.ctrlKey) return;
+    if (!evt.ctrlKey && !evt.metaKey) return;
     const keyEl = evt.target.closest ? evt.target.closest('.nsft-fmt-key') : null;
     if (!keyEl) return;
     if (keyEl.parentElement && keyEl.parentElement.classList.contains('nsft-fmt-toggler-link')) return;
@@ -1285,28 +1588,16 @@
       return;
     }
 
-    const subtabId = fieldLabel.closest('.subtabblock')?.parentElement?.dataset?.nspsLayer;
-    if (subtabId) {
-      const subtab = document.getElementById(`${subtabId}txt`);
-      if (subtab) subtab.click();
-    }
-
-    const tabContentEl = fieldLabel.closest('.nltabcontent');
-    if (tabContentEl) {
-      const tabId = tabContentEl.parentElement.id.replace(/_wrapper$|_div$|_form$/, '');
-      const tab = document.getElementById(`${tabId}txt`);
-      if (tab) tab.click();
-    }
-
-    if (isSplitMode()) {
-      scrollFieldIntoCenter(fieldLabel);
+    const nav = window.NSFT_FieldNav;
+    if (nav && nav.goToField) {
+      nav.goToField(fieldLabel, { native: true });
     } else {
       fieldLabel.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
     }
     const highlightTarget = fieldLabel.closest('.uir-field-wrapper') || fieldLabel.closest('td') || fieldLabel;
     highlightTarget.classList.add('nsft-ffi-highlight', 'nsft-ffi-hl-green');
 
-    if (!isSplitMode()) {
+    {
       setTimeout(() => {
         const modal = document.getElementById('nsft-rec-obj-modal');
         if (!modal || modal.style.display === 'none' || modal.dataset.state === 'minimised') return;
@@ -1322,11 +1613,16 @@
         if (intersect) {
           const viewportWidth = window.innerWidth;
           const fieldCenterX = fieldRect.left + fieldRect.width / 2;
-          if (fieldCenterX < viewportWidth / 2) {
-            modal.style.left = (viewportWidth - modalRect.width - 40) + 'px';
-          } else {
-            modal.style.left = '40px';
-          }
+          const destino = fieldCenterX < viewportWidth / 2
+            ? (viewportWidth - modalRect.width - 40)
+            : 40;
+
+          modal.style.left = modalRect.left + 'px';
+          modal.style.right = 'auto';
+
+          requestAnimationFrame(() => {
+            modal.style.left = destino + 'px';
+          });
         }
       }, 600);
     }

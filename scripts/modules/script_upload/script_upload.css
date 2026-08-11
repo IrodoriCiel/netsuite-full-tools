@@ -680,12 +680,12 @@ tr.nsft-script-upload-row > td {
 }
 
 .nsft-su-diff-overlay[data-theme="dark"] .nsft-su-diff-btn-confirm {
-    background: #6E7CF5;
+    background: var(--nsft-ns-accent, #3b82f6);
     color: #ffffff;
 }
 
 .nsft-su-diff-overlay[data-theme="dark"] .nsft-su-diff-btn-confirm:hover:not(:disabled) {
-    background: #7E8BF7;
+    background: var(--nsft-ns-accent-hover, #2563eb);
 }
 
 .nsft-su-diff-overlay[data-theme="dark"] .nsft-su-diff-btn-confirm:disabled {
@@ -694,5 +694,5 @@ tr.nsft-script-upload-row > td {
 }
 
 .nsft-su-diff-overlay[data-theme="dark"] .nsft-su-diff-btn:focus-visible {
-    outline-color: #6E7CF5;
+    outline-color: var(--nsft-ns-accent-light, #7FB0FF);
 }

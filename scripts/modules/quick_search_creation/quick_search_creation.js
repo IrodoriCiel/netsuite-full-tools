@@ -87,7 +87,7 @@
     }
 
     function resolveTheme() {
-        return _theme === 'dark' ? 'dark' : 'light';
+        return 'light';
     }
 
     function evaluate() {

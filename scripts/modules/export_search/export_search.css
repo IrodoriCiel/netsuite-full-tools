@@ -135,17 +135,27 @@
 
 #nsft-export-search-modal .nsft-rec-obj-content {
     flex: 1;
+    min-height: 0;
     padding: 0;
-    overflow-y: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
 .nsft-export-search-content {
-    padding: 20px;
+    flex: 1;
+    min-height: 0;
+    padding: 12px 16px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
+}
+
+.nsft-export-search-content > .nsft-export-search-message,
+.nsft-export-search-content > .nsft-loading-text {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .nsft-loading-text {
@@ -201,68 +211,232 @@
     width: 4px;
 }
 
-.nsft-export-search-tabs-bar {
+.nsft-export-search-head {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
-    border-bottom: 1px solid #e5e7eb;
-    margin-bottom: -8px;
+    gap: 16px;
+    flex-shrink: 0;
 }
 
-.nsft-export-search-tabs {
+.nsft-export-search-head-id {
     display: flex;
-    gap: 4px;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.nsft-export-search-seg {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 3px;
+    border-radius: 8px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+}
+
+.nsft-export-search-info-name {
+    margin: 0;
+    padding: 2px 6px;
+    width: 100%;
+    max-width: 320px;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #111827;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    outline: none;
+    cursor: text;
+}
+
+.nsft-export-search-info-name:hover {
+    border-color: #e5e7eb;
+}
+
+.nsft-export-search-info-name:focus {
+    border-color: var(--nsft-ns-accent, #3b82f6);
+    background: #fff;
+}
+
+.nsft-export-search-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.nsft-export-search-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    font-size: 11.5px;
+    color: #4b5563;
+    white-space: nowrap;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-info-name {
+    color: #E6EBF2 !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-info-name:hover {
+    border-color: var(--nsft-dk-border) !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-info-name:focus {
+    border-color: var(--nsft-ns-accent-light, #7FB0FF) !important;
+    background: var(--nsft-dk-surface) !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-chip {
+    background: var(--nsft-dk-surface) !important;
+    border-color: var(--nsft-dk-border) !important;
+    color: #9AA4B2 !important;
+}
+
+.nsft-export-search-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+}
+
+.nsft-export-search-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: #4b5563;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.nsft-export-search-toggle input {
+    margin: 0;
+    cursor: pointer;
+}
+
+.nsft-export-search-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid #d1d5db;
+    font-size: 9px;
+    font-weight: 700;
+    color: #9ca3af;
+    cursor: help;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-toggle {
+    color: #9AA4B2 !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-help {
+    border-color: var(--nsft-dk-border2) !important;
+    color: #7A8595 !important;
 }
 
 .nsft-export-search-tab {
     background: transparent;
     border: none;
-    border-bottom: 2px solid transparent;
-    padding: 8px 14px;
-    font-size: 13px;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12.5px;
     font-weight: 500;
     color: #6b7280;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
     font-family: inherit;
-    margin-bottom: -1px;
+    white-space: nowrap;
 }
 
 .nsft-export-search-tab:hover {
     color: #1f2937;
-    background: #f9fafb;
 }
 
 .nsft-export-search-tab.active {
-    color: #2563eb;
-    border-bottom-color: #2563eb;
+    background: #ffffff;
+    color: #111827;
     font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.nsft-export-search-card {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.nsft-export-search-cardbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 9px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fafafa;
+    flex-shrink: 0;
+}
+
+.nsft-export-search-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11.5px;
+    color: #9ca3af;
+    white-space: nowrap;
+}
+
+.nsft-export-search-lines {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.nsft-export-search-code {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
 }
 
 .nsft-export-search-panel {
     display: none;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    flex-direction: column;
 }
 
 .nsft-export-search-panel.active {
     display: flex;
+    align-items: flex-start;
+    min-width: min-content;
 }
 
-.nsft-export-search-actions {
-    display: none;
-    gap: 8px;
-    align-items: center;
-    padding-bottom: 6px;
-}
-
-.nsft-export-search-actions.active {
-    display: flex;
+.nsft-export-search-gutter {
+    flex-shrink: 0;
+    padding: 12px 10px 12px 14px;
+    text-align: right;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre;
+    color: #c3c8d1;
+    background: #fff;
+    user-select: none;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    border-right: 1px solid #f1f2f4;
 }
 
 .nsft-export-search-btn-copy,
@@ -292,17 +466,45 @@
     background-color: #e5e7eb;
 }
 
+.nsft-export-search-code code.hljs {
+    padding: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+    display: block;
+}
+
 pre.prettyprint {
     margin: 0;
-    padding: 12px;
+    padding: 12px 14px;
     font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
     font-size: 12px;
     line-height: 1.5;
     color: #1f2937;
     white-space: pre;
-    overflow-x: auto;
     border: none;
     background: #fff;
+}
+
+.nsft-export-search-foot-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.nsft-export-search-btn-run.nsft-export-search-primary {
+    background: var(--nsft-ns-accent, #3b82f6);
+    border-color: var(--nsft-ns-accent, #3b82f6);
+    color: #fff;
+}
+
+.nsft-export-search-btn-run.nsft-export-search-primary:hover {
+    background: var(--nsft-ns-accent-hover, #2563eb);
+    border-color: var(--nsft-ns-accent-hover, #2563eb);
+}
+
+.nsft-export-search-btn-run.nsft-export-search-primary:active {
+    background: var(--nsft-ns-accent-hover, #2563eb);
 }
 
 .nsft-export-search-message {
@@ -347,7 +549,7 @@ pre.prettyprint {
 }
 
 .nsft-export-search-body a {
-    color: #2563eb;
+    color: var(--nsft-ns-accent, #3b82f6);
     text-decoration: none;
     font-size: 14px;
 }
@@ -422,8 +624,8 @@ pre.prettyprint {
 }
 
 #nsft-export-search-modal[data-theme="dark"] .nsft-export-search-panel {
-    background: var(--nsft-dk-surface) !important;
-    border-color: var(--nsft-dk-border) !important;
+    background: transparent !important;
+    border: none !important;
 }
 
 #nsft-export-search-modal[data-theme="dark"] .nsft-export-search-tabs {
@@ -440,12 +642,45 @@ pre.prettyprint {
 }
 
 #nsft-export-search-modal[data-theme="dark"] .nsft-export-search-tab.active {
-    color: #8FA3FF !important;
-    border-bottom-color: #6E7CF5 !important;
+    background: var(--nsft-dk-surface) !important;
+    color: #E6EBF2 !important;
+    box-shadow: none !important;
 }
 
-#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-tabs-bar {
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-seg {
+    background: var(--nsft-dk-deepest) !important;
+    border-color: var(--nsft-dk-border) !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-card {
+    background: var(--nsft-dk-surface) !important;
+    border-color: var(--nsft-dk-border) !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-cardbar {
+    background: var(--nsft-dk-deepest) !important;
     border-bottom-color: var(--nsft-dk-border) !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-meta {
+    color: #7A8595 !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-gutter {
+    background: var(--nsft-dk-surface) !important;
+    color: #5A6472 !important;
+    border-right-color: var(--nsft-dk-border) !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-btn-run.nsft-export-search-primary {
+    background: var(--nsft-ns-accent, #3b82f6) !important;
+    border-color: var(--nsft-ns-accent-bd, #2563eb) !important;
+    color: #FFFFFF !important;
+}
+
+#nsft-export-search-modal[data-theme="dark"] .nsft-export-search-btn-run.nsft-export-search-primary:hover {
+    background: var(--nsft-ns-accent-hover, #2563eb) !important;
+    border-color: var(--nsft-ns-accent-hover, #2563eb) !important;
 }
 
 #nsft-export-search-modal[data-theme="dark"] .nsft-export-search-btn-copy,
@@ -468,7 +703,7 @@ pre.prettyprint {
 
 #nsft-export-search-modal[data-theme="dark"] .nsft-export-search-panel pre,
 #nsft-export-search-modal[data-theme="dark"] .nsft-export-search-panel code {
-    background: var(--nsft-dk-panel) !important;
+    background: transparent !important;
     color: #E6EBF2 !important;
 }
 
@@ -490,7 +725,7 @@ pre.prettyprint {
 }
 
 #nsft-export-search-modal[data-theme="dark"] .nsft-export-search-body a {
-    color: #8FA3FF !important;
+    color: var(--nsft-ns-accent-light, #7FB0FF) !important;
 }
 
 #nsft-export-search-modal[data-theme="dark"] .nsft-export-search-body a:hover {

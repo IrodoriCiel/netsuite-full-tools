@@ -12,7 +12,15 @@
     const SNIPPETS_STORAGE_KEY = 'nsftSqlSnippets';
     let HISTORY_MAX = 30;
     let MAX_RECORDS_FETCH = 5000;
-    const DEFAULT_QUERY = 'SELECT * FROM transaction t WHERE t.id = 1';
+    const FETCH_ALL_CEILING = 100000;
+    const DEFAULT_QUERY = [
+        'SELECT',
+        '  TOP 100 *',
+        'FROM',
+        '  transaction t',
+        'ORDER BY',
+        '  t.id DESC'
+    ].join('\n');
 
     function _clampInt(v, min, max, fallback) {
         const n = parseInt(v, 10);
@@ -59,7 +67,8 @@
             title: (chrome.i18n.getMessage('sql_tab_default_title') || 'Query') + ' ' + (i || (tabs.length + 1)),
             query: DEFAULT_QUERY,
             fileName: null,
-            dirty: false
+            dirty: false,
+            renamed: false
         };
     }
 
@@ -72,7 +81,8 @@
                     title: t.title || 'Query',
                     query: typeof t.query === 'string' ? t.query : '',
                     fileName: t.fileName || null,
-                    dirty: !!t.dirty
+                    dirty: !!t.dirty,
+                    renamed: !!t.renamed
                 }));
                 activeTabId = stored.activeTabId && tabs.find(t => t.id === stored.activeTabId)
                     ? stored.activeTabId
@@ -91,7 +101,7 @@
             [TABS_STORAGE_KEY]: {
                 tabs: tabs.map(t => ({
                     id: t.id, title: t.title, query: t.query,
-                    fileName: t.fileName, dirty: t.dirty
+                    fileName: t.fileName, dirty: t.dirty, renamed: t.renamed
                 })),
                 activeTabId
             }
@@ -141,7 +151,8 @@
             title: (opts && opts.title) || ((chrome.i18n.getMessage('sql_tab_default_title') || 'Query') + ' ' + (tabs.length + 1)),
             query: (opts && typeof opts.query === 'string') ? opts.query : DEFAULT_QUERY,
             fileName: (opts && opts.fileName) || null,
-            dirty: false
+            dirty: false,
+            renamed: false
         };
         tabs.push(t);
         activateTab(t.id);
@@ -150,6 +161,7 @@
     function closeTab(id) {
         const idx = tabs.findIndex(t => t.id === id);
         if (idx === -1) return;
+        if (_renamingTabId === id) _renamingTabId = null;
         tabs.splice(idx, 1);
         if (tabs.length === 0) {
             tabs = [makeDefaultTab(1)];
@@ -167,7 +179,7 @@
         const t = getActiveTab();
         if (!t) return;
         t.fileName = name;
-        t.title = name || t.title;
+        if (!t.renamed) t.title = name || t.title;
         t.dirty = false;
         currentFileName = name;
         renderTabsBar();
@@ -214,9 +226,317 @@
             + `<span class="nsft-sql-tab-close" data-tab-close="${t.id}" title="${closeTitle}">×</span>`;
     }
 
+    let _renamingTabId = null;
+
+    function renameSavedQuery(previo, nuevo) {
+        let saved = {};
+        try {
+            saved = JSON.parse(localStorage.getItem(SAVED_QUERIES_KEY) || '{}');
+        } catch (e) {
+            saved = {};
+        }
+        if (!saved[previo]) return 'missing';
+        if (Object.prototype.hasOwnProperty.call(saved, nuevo)) return 'taken';
+
+        saved[nuevo] = saved[previo];
+        delete saved[previo];
+        writeSavedQueries(saved);
+
+        tabs.forEach((t) => {
+            if (t.fileName !== previo) return;
+            t.fileName = nuevo;
+            if (!t.renamed) t.title = nuevo;
+        });
+        if (currentFileName === previo) currentFileName = nuevo;
+        return 'ok';
+    }
+
+    function startTabRename(id) {
+        if (_renamingTabId) return;
+        const tab = tabs.find(t => t.id === id);
+        const el = document.querySelector('.nsft-sql-tab[data-tab-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+        if (!tab || !el) return;
+        const labelEl = el.querySelector('.nsft-sql-tab-label');
+        if (!labelEl) return;
+
+        _renamingTabId = id;
+        const previo = tab.title;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'nsft-sql-tab-rename';
+        input.value = previo;
+        input.setAttribute('aria-label', chrome.i18n.getMessage('sql_tab_rename') || 'Rename tab');
+        labelEl.replaceWith(input);
+        input.focus();
+        input.select();
+
+        let cerrado = false;
+        const cerrar = (guardar) => {
+            if (cerrado) return;
+            cerrado = true;
+            _renamingTabId = null;
+
+            const nuevo = guardar ? input.value.trim() : '';
+            if (nuevo && nuevo !== previo) {
+                const res = tab.fileName ? renameSavedQuery(tab.fileName, nuevo) : 'unsaved';
+                if (res === 'taken') {
+                    logToToolbar(chrome.i18n.getMessage('sql_tab_rename_taken', [nuevo])
+                        || ('Ya hay una consulta guardada con el nombre «' + nuevo + '».'), 'warning');
+                } else {
+                    tab.title = nuevo;
+                    tab.renamed = res !== 'ok';
+                    persistTabs();
+                    if (res === 'ok') updateTitleState();
+                }
+            }
+            el.removeAttribute('data-render-key');
+            renderTabsBar();
+        };
+
+        input.addEventListener('keydown', (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') { e.preventDefault(); cerrar(true); }
+            else if (e.key === 'Escape') { e.preventDefault(); cerrar(false); }
+        });
+        input.addEventListener('blur', () => cerrar(true));
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('dblclick', (e) => e.stopPropagation());
+    }
+
+    async function closeTabsBulk(id, modo) {
+        const idx = tabs.findIndex(t => t.id === id);
+        if (idx === -1) return;
+
+        const victimas = tabs.filter((t, i) => {
+            if (t.id === id) return false;
+            if (modo === 'right') return i > idx;
+            if (modo === 'left') return i < idx;
+            return true;
+        });
+        if (!victimas.length) return;
+
+        const res = await showRunnerConfirm({
+            title: chrome.i18n.getMessage('sql_tab_close_bulk_title') || 'Close tabs?',
+            body: chrome.i18n.getMessage('sql_tab_close_bulk_body', [String(victimas.length)])
+                || ('This closes ' + victimas.length + ' tabs. Their queries are not saved.'),
+            confirmLabel: chrome.i18n.getMessage('sql_tab_close_bulk_ok') || 'Close',
+            danger: true
+        });
+        if (!(res && typeof res === 'object' ? res.ok : res)) return;
+
+        const fuera = new Set(victimas.map(t => t.id));
+        if (_renamingTabId && fuera.has(_renamingTabId)) _renamingTabId = null;
+        tabs = tabs.filter(t => !fuera.has(t.id));
+
+        if (fuera.has(activeTabId)) activateTab(id);
+        else { renderTabsBar(); persistTabs(); }
+    }
+
+    function showTabContextMenu(evt, id) {
+        removeTabContextMenu();
+        if (!tabs.find(t => t.id === id)) return;
+
+        const ctx = document.createElement('div');
+        ctx.className = 'nsft-sql-schema-ctx';
+        ctx.id = 'nsft-sql-tab-ctx';
+        ctx.style.left = evt.clientX + 'px';
+        ctx.style.top = evt.clientY + 'px';
+
+        const mkItem = (label, handler, opts) => {
+            const o = opts || {};
+            const item = document.createElement('div');
+            item.className = 'nsft-sql-schema-ctx-item'
+                + (o.danger ? ' is-danger' : '')
+                + (o.disabled ? ' is-disabled' : '');
+            item.textContent = label;
+            if (o.disabled) {
+                item.setAttribute('aria-disabled', 'true');
+                return item;
+            }
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeTabContextMenu();
+                handler();
+            });
+            return item;
+        };
+
+        const idx = tabs.findIndex(t => t.id === id);
+        const sep = () => {
+            const s = document.createElement('div');
+            s.className = 'nsft-sql-schema-ctx-sep';
+            return s;
+        };
+
+        ctx.appendChild(mkItem(
+            chrome.i18n.getMessage('sql_tab_rename') || 'Rename',
+            () => startTabRename(id)
+        ));
+        ctx.appendChild(sep());
+        ctx.appendChild(mkItem(
+            chrome.i18n.getMessage('sql_tab_close') || 'Close',
+            () => closeTab(id),
+            { danger: true }
+        ));
+        ctx.appendChild(mkItem(
+            chrome.i18n.getMessage('sql_tab_close_right') || 'Close tabs to the right',
+            () => closeTabsBulk(id, 'right'),
+            { danger: true, disabled: idx >= tabs.length - 1 }
+        ));
+        ctx.appendChild(mkItem(
+            chrome.i18n.getMessage('sql_tab_close_left') || 'Close tabs to the left',
+            () => closeTabsBulk(id, 'left'),
+            { danger: true, disabled: idx <= 0 }
+        ));
+        ctx.appendChild(mkItem(
+            chrome.i18n.getMessage('sql_tab_close_others') || 'Close other tabs',
+            () => closeTabsBulk(id, 'others'),
+            { danger: true, disabled: tabs.length < 2 }
+        ));
+
+        document.body.appendChild(ctx);
+        clampMenuToViewport(ctx, evt.clientX, evt.clientY);
+        setTimeout(() => {
+            document.addEventListener('click', removeTabContextMenu, { once: true });
+        }, 0);
+    }
+
+    function removeTabContextMenu() {
+        const el = document.getElementById('nsft-sql-tab-ctx');
+        if (el) el.remove();
+    }
+
+    let _dragTabId = null;
+    let _dragMoved = false;
+    let _dragStartX = 0;
+    let _dragGrabOffset = 0;
+
+    const TAB_DRAG_THRESHOLD = 4;
+
+    function syncTabsOrderFromDom(bar) {
+        const pos = new Map();
+        bar.querySelectorAll('.nsft-sql-tab').forEach((el, i) => {
+            pos.set(el.getAttribute('data-tab-id'), i);
+        });
+        tabs.sort((a, b) => (pos.get(a.id) ?? 0) - (pos.get(b.id) ?? 0));
+    }
+
+    function autoScrollTabsBar(bar, clientX) {
+        const r = bar.getBoundingClientRect();
+        const zona = 28;
+        if (clientX < r.left + zona) bar.scrollLeft -= 12;
+        else if (clientX > r.right - zona) bar.scrollLeft += 12;
+    }
+
+    function onTabPointerDown(e) {
+        if (e.button !== 0 || _renamingTabId) return;
+        if (e.target.closest('[data-tab-close]') || e.target.closest('[data-tab-fav]')) return;
+        if (e.target.closest('#nsft-sql-tab-add')) return;
+        const tabEl = e.target.closest('.nsft-sql-tab');
+        if (!tabEl) return;
+
+        _dragTabId = tabEl.getAttribute('data-tab-id');
+        _dragMoved = false;
+        _dragStartX = e.clientX;
+        _dragGrabOffset = e.clientX - tabEl.getBoundingClientRect().left;
+    }
+
+    function onTabPointerMove(e) {
+        if (!_dragTabId) return;
+        const bar = e.currentTarget;
+        const dragEl = bar.querySelector('.nsft-sql-tab[data-tab-id="' + (window.CSS && CSS.escape ? CSS.escape(_dragTabId) : _dragTabId) + '"]');
+        if (!dragEl) return;
+
+        if (!_dragMoved) {
+            if (Math.abs(e.clientX - _dragStartX) < TAB_DRAG_THRESHOLD) return;
+            _dragMoved = true;
+            dragEl.classList.add('is-dragging');
+            bar.classList.add('is-reordering');
+            try { bar.setPointerCapture(e.pointerId); } catch (err) { }
+        }
+        e.preventDefault();
+        autoScrollTabsBar(bar, e.clientX);
+
+        const otras = Array.from(bar.querySelectorAll('.nsft-sql-tab')).filter(el => el !== dragEl);
+        for (const el of otras) {
+            const r = el.getBoundingClientRect();
+            if (e.clientX < r.left || e.clientX > r.right) continue;
+            const medio = r.left + r.width / 2;
+            const antes = el.compareDocumentPosition(dragEl) & Node.DOCUMENT_POSITION_FOLLOWING;
+            if (antes && e.clientX < medio) bar.insertBefore(dragEl, el);
+            else if (!antes && e.clientX > medio) el.after(dragEl);
+            else break;
+            syncTabsOrderFromDom(bar);
+            break;
+        }
+
+        dragEl.style.transform = '';
+        const natural = dragEl.getBoundingClientRect().left;
+        const barRect = bar.getBoundingClientRect();
+        const minX = barRect.left - natural;
+        const maxX = barRect.right - dragEl.offsetWidth - natural;
+        const dx = Math.max(minX, Math.min(maxX, e.clientX - _dragGrabOffset - natural));
+        dragEl.style.transform = 'translateX(' + dx + 'px)';
+    }
+
+    function onTabPointerUp(e) {
+        if (!_dragTabId) return;
+        const bar = e.currentTarget;
+        const dragEl = bar.querySelector('.nsft-sql-tab.is-dragging');
+        if (dragEl) {
+            dragEl.classList.remove('is-dragging');
+            dragEl.style.transform = '';
+        }
+        bar.classList.remove('is-reordering');
+        try { bar.releasePointerCapture(e.pointerId); } catch (err) { }
+
+        if (_dragMoved) {
+            syncTabsOrderFromDom(bar);
+            persistTabs();
+        }
+        _dragTabId = null;
+        _dragMoved = false;
+    }
+
     function _tabRenderKey(t, savedMap) {
         const entry = t.fileName ? savedMap[t.fileName] : null;
         return [t.title, t.dirty ? 1 : 0, entry ? 1 : 0, (entry && entry.favorite === true) ? 1 : 0].join('');
+    }
+
+    function syncTabsNav() {
+        const bar = document.getElementById('nsft-sql-tabs-bar');
+        const prev = document.getElementById('nsft-sql-tabs-prev');
+        const next = document.getElementById('nsft-sql-tabs-next');
+        if (!bar || !prev || !next) return;
+
+        const desborda = bar.scrollWidth > bar.clientWidth + 1;
+        prev.hidden = !desborda;
+        next.hidden = !desborda;
+        if (!desborda) return;
+
+        const max = bar.scrollWidth - bar.clientWidth;
+        prev.disabled = bar.scrollLeft <= 1;
+        next.disabled = bar.scrollLeft >= max - 1;
+    }
+
+    function scrollTabsBy(dir) {
+        const bar = document.getElementById('nsft-sql-tabs-bar');
+        if (!bar) return;
+        const paso = Math.max(120, Math.round(bar.clientWidth * 0.5));
+        bar.scrollBy({ left: dir * paso, behavior: 'smooth' });
+    }
+
+    let _lastScrolledTabId = null;
+    function scrollActiveTabIntoView() {
+        if (activeTabId === _lastScrolledTabId) return;
+        _lastScrolledTabId = activeTabId;
+        const bar = document.getElementById('nsft-sql-tabs-bar');
+        if (!bar || bar.scrollWidth <= bar.clientWidth + 1) return;
+        const el = bar.querySelector('.nsft-sql-tab.active');
+        if (el && el.scrollIntoView) {
+            el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+        }
     }
 
     function renderTabsBar() {
@@ -243,6 +563,35 @@
                     if (id && id !== activeTabId) activateTab(id);
                 }
             });
+
+            bar.addEventListener('dblclick', (e) => {
+                if (e.target.closest('[data-tab-close]') || e.target.closest('[data-tab-fav]')) return;
+                const tabEl = e.target.closest('.nsft-sql-tab');
+                if (!tabEl) return;
+                e.preventDefault();
+                startTabRename(tabEl.getAttribute('data-tab-id'));
+            });
+
+            bar.addEventListener('contextmenu', (e) => {
+                const tabEl = e.target.closest('.nsft-sql-tab');
+                if (!tabEl) return;
+                e.preventDefault();
+                showTabContextMenu(e, tabEl.getAttribute('data-tab-id'));
+            });
+
+            bar.addEventListener('pointerdown', onTabPointerDown);
+            bar.addEventListener('pointermove', onTabPointerMove);
+            bar.addEventListener('pointerup', onTabPointerUp);
+            bar.addEventListener('pointercancel', onTabPointerUp);
+
+            bar.addEventListener('scroll', syncTabsNav, { passive: true });
+            const prevBtn = document.getElementById('nsft-sql-tabs-prev');
+            const nextBtn = document.getElementById('nsft-sql-tabs-next');
+            if (prevBtn) prevBtn.addEventListener('click', (e) => { e.stopPropagation(); scrollTabsBy(-1); });
+            if (nextBtn) nextBtn.addEventListener('click', (e) => { e.stopPropagation(); scrollTabsBy(1); });
+            if (typeof ResizeObserver !== 'undefined') {
+                try { new ResizeObserver(syncTabsNav).observe(bar); } catch (err) { }
+            }
         }
 
         let addBtnEl = bar.querySelector('#nsft-sql-tab-add');
@@ -263,13 +612,14 @@
             present[t.id] = true;
             let el = existing[t.id];
             const key = _tabRenderKey(t, savedMap);
+            const renaming = t.id === _renamingTabId;
             if (!el) {
                 el = document.createElement('div');
                 el.className = 'nsft-sql-tab';
                 el.setAttribute('data-tab-id', t.id);
                 el.innerHTML = _tabInnerHtml(t, savedMap);
                 el.setAttribute('data-render-key', key);
-            } else if (el.getAttribute('data-render-key') !== key) {
+            } else if (!renaming && el.getAttribute('data-render-key') !== key) {
                 el.innerHTML = _tabInnerHtml(t, savedMap);
                 el.setAttribute('data-render-key', key);
             }
@@ -281,26 +631,76 @@
         Object.keys(existing).forEach(id => {
             if (!present[id]) existing[id].remove();
         });
+
+        syncTabsNav();
+        scrollActiveTabIntoView();
     }
 
     let _resultsSearchTerm = '';
 
-    function highlightCellFormatter(cell) {
-        const raw = cell.getValue();
-        const s = (raw === null || raw === undefined) ? '' : String(raw);
-        const term = _resultsSearchTerm;
-        if (!term || !s) return escapeHtml(s);
+    const SEARCH_SVG = '<svg class="nsft-sql-search-ico" viewBox="0 0 24 24" fill="none" '
+        + 'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">'
+        + '<circle cx="10.5" cy="10.5" r="6.8"></circle><path d="m20.5 20.5-5.2-5.2"></path></svg>';
+
+    function wireFindClear(inputId) {
+        const input = document.getElementById(inputId);
+        const wrap = input && input.closest('.nsft-sql-find');
+        if (!input || !wrap || wrap.dataset.nsftFindWired) return;
+        wrap.dataset.nsftFindWired = '1';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'nsft-sql-find-clear';
+        btn.hidden = true;
+        const label = chrome.i18n.getMessage('sql_find_clear') || 'Clear search';
+        btn.title = label;
+        btn.setAttribute('aria-label', label);
+        btn.textContent = '×';
+        wrap.appendChild(btn);
+
+        const sync = () => { btn.hidden = !input.value; };
+
+        const limpiar = () => {
+            if (!input.value) return;
+            input.value = '';
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            sync();
+            input.focus();
+        };
+
+        input.addEventListener('input', sync);
+        btn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+        });
+        btn.addEventListener('click', (e) => { e.stopPropagation(); limpiar(); });
+        input.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape' || !input.value) return;
+            e.preventDefault();
+            e.stopPropagation();
+            limpiar();
+        });
+        sync();
+    }
+
+    function markMatches(text, termLc) {
+        const s = (text === null || text === undefined) ? '' : String(text);
+        if (!termLc || !s) return escapeHtml(s);
 
         const low = s.toLowerCase();
-        let out = '', from = 0, i = low.indexOf(term);
+        let i = low.indexOf(termLc);
         if (i === -1) return escapeHtml(s);
+        let out = '', from = 0;
         while (i !== -1) {
             out += escapeHtml(s.slice(from, i)) +
-                '<mark class="nsft-sql-hl">' + escapeHtml(s.slice(i, i + term.length)) + '</mark>';
-            from = i + term.length;
-            i = low.indexOf(term, from);
+                '<mark class="nsft-sql-hl">' + escapeHtml(s.slice(i, i + termLc.length)) + '</mark>';
+            from = i + termLc.length;
+            i = low.indexOf(termLc, from);
         }
         return out + escapeHtml(s.slice(from));
+    }
+
+    function highlightCellFormatter(cell) {
+        return markMatches(cell.getValue(), _resultsSearchTerm);
     }
 
     function escapeHtml(str) {
@@ -366,6 +766,13 @@
         suiteqlThemeOverridden: false,
         suiteqlHistoryMax: 30,
         suiteqlMaxRecords: 5000,
+        suiteqlFetchAllRows: true,
+        suiteqlFetchMethod: 'auto',
+        suiteqlManyRowsAction: 'ask',
+        suiteqlManyRowsThreshold: 20000,
+        suiteqlRestConcurrency: 4,
+        suiteqlRestFillColumns: false,
+        suiteqlAutoSchema: true,
         nsft_sql_sidebar_side: 'left',
         nsft_sql_sidebar_open: true,
         nsft_sql_sidebar_width: 0,
@@ -417,7 +824,17 @@
 
     function init(items) {
         HISTORY_MAX = _clampInt(items.suiteqlHistoryMax, 1, 1000, 30);
-        MAX_RECORDS_FETCH = _clampInt(items.suiteqlMaxRecords, 1000, 100000, 5000);
+        MAX_RECORDS_FETCH = items.suiteqlFetchAllRows
+            ? FETCH_ALL_CEILING
+            : _clampInt(items.suiteqlMaxRecords, 1000, 100000, 5000);
+        ROWS_CONFIRM_THRESHOLD = _clampInt(items.suiteqlManyRowsThreshold, 1000, 100000, 20000);
+        MANY_ROWS_ACTION = ['ask', 'continue', 'stop'].includes(items.suiteqlManyRowsAction)
+            ? items.suiteqlManyRowsAction : 'ask';
+        FETCH_METHOD = ['auto', 'rest', 'nquery'].includes(items.suiteqlFetchMethod)
+            ? items.suiteqlFetchMethod : 'auto';
+        REST_CONCURRENCY = _clampInt(items.suiteqlRestConcurrency, 1, 8, 4);
+        REST_FILL_COLUMNS = !!items.suiteqlRestFillColumns;
+        AUTO_SCHEMA = items.suiteqlAutoSchema !== false;
         if (items.suiteqlThemeOverridden) {
             currentTheme = items.suiteqlTheme || 'eclipse';
         } else {
@@ -425,6 +842,41 @@
         }
         setupListeners();
     }
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local') return;
+
+        if (changes.suiteqlFetchMethod) {
+            const v = changes.suiteqlFetchMethod.newValue;
+            FETCH_METHOD = ['auto', 'rest', 'nquery'].includes(v) ? v : 'auto';
+            _runnerRestBroken = false;
+        }
+        if (changes.suiteqlManyRowsAction) {
+            const v = changes.suiteqlManyRowsAction.newValue;
+            MANY_ROWS_ACTION = ['ask', 'continue', 'stop'].includes(v) ? v : 'ask';
+        }
+        if (changes.suiteqlManyRowsThreshold) {
+            ROWS_CONFIRM_THRESHOLD = _clampInt(changes.suiteqlManyRowsThreshold.newValue, 1000, 100000, 20000);
+        }
+        if (changes.suiteqlRestFillColumns) {
+            REST_FILL_COLUMNS = !!changes.suiteqlRestFillColumns.newValue;
+        }
+        if (changes.suiteqlRestConcurrency) {
+            REST_CONCURRENCY = _clampInt(changes.suiteqlRestConcurrency.newValue, 1, 8, 4);
+        }
+        if (changes.suiteqlAutoSchema) {
+            AUTO_SCHEMA = changes.suiteqlAutoSchema.newValue !== false;
+            paintAutoSchemaBtn();
+            renderSchemaTree();
+        }
+        if (changes.suiteqlFetchAllRows || changes.suiteqlMaxRecords) {
+            chrome.storage.local.get({ suiteqlFetchAllRows: true, suiteqlMaxRecords: 5000 }, (it) => {
+                MAX_RECORDS_FETCH = it.suiteqlFetchAllRows
+                    ? FETCH_ALL_CEILING
+                    : _clampInt(it.suiteqlMaxRecords, 1000, 100000, 5000);
+            });
+        }
+    });
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local') {
@@ -527,6 +979,40 @@
     let _runPhase = 'idle';
     let _runWatchdog = null;
     const RUN_WATCHDOG_MS = 180000;
+
+    let _stopRequested = false;
+    let _restAbort = null;
+    let _runVia = null;
+
+    let _govLeft = null;
+    let _govMax = 0;
+
+    function reportGovernance(units) {
+        const n = Number(units);
+        if (!Number.isFinite(n) || n < 0) return;
+        _govLeft = n;
+        if (n > _govMax) _govMax = n;
+        paintGovernance();
+    }
+
+    function paintGovernance() {
+        const box = document.getElementById('nsft-sql-gov');
+        if (!box) return;
+        if (_govLeft === null || !_govMax) { box.hidden = true; return; }
+        box.hidden = false;
+
+        const ratio = Math.max(0, Math.min(1, _govLeft / _govMax));
+        const fill = box.querySelector('.nsft-sql-gov-fill');
+        if (fill) fill.style.width = (ratio * 100).toFixed(1) + '%';
+        const num = box.querySelector('.nsft-sql-gov-num');
+        if (num) num.textContent = fmtNum(_govLeft);
+
+        box.classList.toggle('is-low', ratio <= 0.15);
+        box.classList.toggle('is-mid', ratio > 0.15 && ratio <= 0.4);
+
+        box.title = chrome.i18n.getMessage('sql_gov_title', [fmtNum(_govLeft), fmtNum(_govMax)])
+            || (_govLeft + ' / ' + _govMax);
+    }
     let _logsSeeded = false;
     let _logFilter = 'all';
     let _logQuery = '';
@@ -575,18 +1061,11 @@
         const modal = document.getElementById('nsft-sql-modal');
         if (modal) modal.setAttribute('data-run-state', state);
 
-        const overlay = document.getElementById('nsft-sql-run-overlay');
-        if (overlay) overlay.hidden = state !== 'running';
+        const pill = document.getElementById('nsft-sql-run-pill');
+        if (pill) pill.hidden = state !== 'running';
 
-        const runBtn = document.getElementById('nsft-sql-tool-run');
-        if (runBtn) {
-            const busy = state === 'running';
-            runBtn.classList.toggle('is-busy', busy);
-            runBtn.disabled = busy;
-            runBtn.setAttribute('aria-busy', busy ? 'true' : 'false');
-            const glyph = runBtn.querySelector('.nsft-sql-run-glyph');
-            if (glyph) glyph.textContent = busy ? '' : '▶';
-        }
+        paintRunButton(state === 'running');
+        paintClearResultsBtn(state === 'running');
 
         const errBox = document.getElementById('nsft-sql-results-error');
         if (errBox) errBox.hidden = state !== 'error';
@@ -597,14 +1076,7 @@
         _runWatchdog = null;
         if (state !== 'running') _runPhase = 'idle';
 
-        if (state === 'running') {
-            _runWatchdog = setTimeout(() => {
-                if (_runPhase === 'idle') return;
-                logToToolbar(chrome.i18n.getMessage('sql_run_timeout')
-                    || 'La consulta no ha respondido; puedes volver a intentarlo.', 'warning');
-                setRunState('idle');
-            }, RUN_WATCHDOG_MS);
-        }
+        if (state === 'running') armRunWatchdog();
 
         if (!el) return;
 
@@ -613,53 +1085,122 @@
             _runFetched = 0;
             _runTotal = 0;
             _runPhase = 'running';
+            el.textContent = '';
             paintRunStatus();
             _runTimer = setInterval(paintRunStatus, 1000);
         } else if (state === 'ok' && info) {
+            const incompleto = Number(info.total) > Number(info.rows);
             paintStatus('<span class="nsft-sql-status-glyph is-ok" aria-hidden="true">✓</span>',
-                chrome.i18n.getMessage('sql_results_meta', [String(info.rows), String(info.ms)])
-                || `${info.rows} rows · ${info.ms} ms`);
+                (incompleto
+                    ? chrome.i18n.getMessage('sql_results_meta_partial', [fmtNum(info.rows), fmtNum(info.total), String(info.ms)])
+                    : chrome.i18n.getMessage('sql_results_meta', [fmtNum(info.rows), String(info.ms)]))
+                || `${fmtNum(info.rows)} rows · ${info.ms} ms`,
+                viaBadgeHtml(_runVia));
         } else if (state === 'error') {
             paintStatus('<span class="nsft-sql-status-glyph is-error" aria-hidden="true">✕</span>',
-                chrome.i18n.getMessage('sql_status_error') || 'Error');
+                chrome.i18n.getMessage('sql_status_error') || 'Error',
+                viaBadgeHtml(_runVia));
         } else {
             el.textContent = '';
         }
     }
 
-    function paintStatus(glyphHtml, text) {
-        const el = document.getElementById('nsft-sql-status-text');
-        if (el) el.innerHTML = glyphHtml + '<span>' + escapeHtml(text) + '</span>';
+    function paintRunButton(busy) {
+        const btn = document.getElementById('nsft-sql-tool-run');
+        if (!btn) return;
+        if (!btn.dataset.runTitle) btn.dataset.runTitle = btn.title || '';
+
+        const stopping = busy && _stopRequested;
+        btn.classList.toggle('is-stop', busy && !stopping);
+        btn.classList.toggle('is-busy', stopping);
+        btn.disabled = stopping;
+        btn.setAttribute('aria-busy', busy ? 'true' : 'false');
+
+        const glyph = btn.querySelector('.nsft-sql-run-glyph');
+        if (glyph) glyph.textContent = stopping ? '' : (busy ? '■' : '▶');
+
+        const label = btn.querySelector('.nsft-sql-run-label');
+        if (label) {
+            label.textContent = stopping
+                ? (chrome.i18n.getMessage('sql_stopping_btn') || 'Stopping…')
+                : busy
+                    ? (chrome.i18n.getMessage('sql_stop_btn') || 'Stop')
+                    : (chrome.i18n.getMessage('sql_submenu_run') || 'Run');
+        }
+
+        const kbd = btn.querySelector('.nsft-sql-kbd');
+        if (kbd) kbd.hidden = busy;
+
+        btn.title = busy
+            ? (chrome.i18n.getMessage('sql_stop_title') || 'Stop and keep the rows fetched so far')
+            : btn.dataset.runTitle;
     }
 
-    const RUN_SPINNER = '<span class="nsft-ui-spinner nsft-sql-status-spin" aria-hidden="true"></span>';
+    function requestStopRun() {
+        if (_runPhase === 'idle' || _stopRequested) return;
+        _stopRequested = true;
+
+        if (_restAbort) {
+            try { _restAbort.abort(); } catch (e) { }
+        }
+        try { window.postMessage({ type: 'stop_SQL', dest: 'fetcher_sql' }, '*'); } catch (e) { }
+
+        paintRunButton(true);
+        paintRunStatus();
+        armRunWatchdog();
+    }
+
+    function paintStatus(glyphHtml, text, extraHtml) {
+        const el = document.getElementById('nsft-sql-status-text');
+        if (el) el.innerHTML = glyphHtml + '<span>' + escapeHtml(text) + '</span>' + (extraHtml || '');
+    }
+
+    function viaBadgeHtml(via) {
+        if (via !== 'rest' && via !== 'nquery') return '';
+        const label = via === 'rest' ? 'REST' : 'N/query';
+        const title = chrome.i18n.getMessage(via === 'rest' ? 'sql_via_rest_title' : 'sql_via_nquery_title') || label;
+        return '<span class="nsft-sql-via is-' + via + '" title="' + escapeHtml(title) + '">' + label + '</span>';
+    }
 
     function paintRunStatus() {
         const secs = Math.floor((Date.now() - _runStartedAt) / 1000);
         const tail = secs >= 1 ? ' · ' + secs + ' s' : '';
         let text;
 
-        if (_runPhase === 'rendering') {
-            text = chrome.i18n.getMessage('sql_status_rendering', [String(_runFetched)])
-                || `Preparing ${_runFetched} rows…`;
+        if (_stopRequested && _runPhase === 'running') {
+            text = _runVia === 'nquery'
+                ? (chrome.i18n.getMessage('sql_status_stopping_page') || 'Stopping… finishing the page in progress')
+                : (chrome.i18n.getMessage('sql_status_stopping') || 'Stopping…');
+        } else if (_runPhase === 'rendering') {
+            text = chrome.i18n.getMessage('sql_status_rendering', [fmtNum(_runFetched)])
+                || `Preparing ${fmtNum(_runFetched)} rows…`;
         } else if (_runFetched > 0) {
             text = _runTotal > _runFetched
-                ? (chrome.i18n.getMessage('sql_status_fetching_of', [String(_runFetched), String(_runTotal)])
-                    || `Fetching ${_runFetched} of ${_runTotal} rows…`)
-                : (chrome.i18n.getMessage('sql_status_fetching', [String(_runFetched)])
-                    || `Fetching ${_runFetched} rows…`);
+                ? (chrome.i18n.getMessage('sql_status_fetching_of', [fmtNum(_runFetched), fmtNum(_runTotal)])
+                    || `Fetching ${fmtNum(_runFetched)} of ${fmtNum(_runTotal)} rows…`)
+                : (chrome.i18n.getMessage('sql_status_fetching', [fmtNum(_runFetched)])
+                    || `Fetching ${fmtNum(_runFetched)} rows…`);
         } else {
             text = chrome.i18n.getMessage('sql_status_running') || 'Executing…';
         }
-        paintStatus(RUN_SPINNER, text + tail);
-        const big = document.getElementById('nsft-sql-run-overlay-text');
-        if (big) big.textContent = (text + tail).replace('…', '');
+        const chip = document.getElementById('nsft-sql-run-pill-text');
+        if (chip) chip.textContent = (text + tail).replace('…', '');
+    }
+
+    function armRunWatchdog() {
+        clearTimeout(_runWatchdog);
+        _runWatchdog = setTimeout(() => {
+            if (_runPhase === 'idle') return;
+            logToToolbar(chrome.i18n.getMessage('sql_run_timeout')
+                || 'La consulta no ha respondido; puedes volver a intentarlo.', 'warning');
+            setRunState('idle');
+        }, RUN_WATCHDOG_MS);
     }
 
     function reportRunProgress(fetched, total) {
         _runFetched = fetched;
         _runTotal = total || 0;
-        if (_runPhase === 'running') paintRunStatus();
+        if (_runPhase === 'running') { paintRunStatus(); armRunWatchdog(); }
     }
 
     const SQL_ERROR_KINDS = [
@@ -917,7 +1458,8 @@
                     query: e.query || '',
                     rows: e.rows,
                     durationMs: e.durationMs,
-                    errorMsg: e.errorMsg || ''
+                    errorMsg: e.errorMsg || '',
+                    via: e.via || null
                 }));
             if (!seeded.length) return;
             _sqlLogs = _sqlLogs.concat(seeded).slice(0, LOG_MAX);
@@ -1148,7 +1690,10 @@
                     <div class="nsft-sql-logs-dident">
                         <span class="nsft-sql-logs-dicon is-${g.cls}">${g.ch}</span>
                         <div class="nsft-sql-logs-dtitles">
-                            <div class="nsft-sql-logs-dtitle">${escapeHtml(title)}</div>
+                            <!-- La chapa de la vía va con el TÍTULO y no con la
+                                 hora: es de la ejecución, igual que el icono de
+                                 éxito o error, no un dato de cuándo pasó. -->
+                            <div class="nsft-sql-logs-dtitle">${escapeHtml(title)}${viaBadgeHtml(entry.via)}</div>
                             <!-- El mensaje crudo de NetSuite incrusta la consulta
                                  ENTERA, así que con un SQL largo ocupa media ficha
                                  y empuja fuera de vista el bloque de la consulta
@@ -1474,7 +2019,7 @@
             acts.className = 'nsft-sql-confirm-actions';
             const cancel = document.createElement('button');
             cancel.type = 'button';
-            cancel.textContent = chrome.i18n.getMessage('sql_confirm_cancel') || 'Cancelar';
+            cancel.textContent = o.cancelLabel || chrome.i18n.getMessage('sql_confirm_cancel') || 'Cancelar';
             const ok = document.createElement('button');
             ok.type = 'button';
             ok.className = 'is-primary' + (o.danger ? ' is-danger' : '');
@@ -1484,6 +2029,20 @@
             acts.appendChild(ok);
             box.appendChild(h);
             if (o.body) box.appendChild(p);
+
+            let rememberBox = null;
+            if (o.rememberLabel) {
+                const rl = document.createElement('label');
+                rl.className = 'nsft-sql-confirm-remember';
+                rememberBox = document.createElement('input');
+                rememberBox.type = 'checkbox';
+                const rt = document.createElement('span');
+                rt.textContent = o.rememberLabel;
+                rl.appendChild(rememberBox);
+                rl.appendChild(rt);
+                box.appendChild(rl);
+            }
+
             box.appendChild(acts);
             overlay.appendChild(box);
             host.appendChild(overlay);
@@ -1493,8 +2052,9 @@
                 if (done) return;
                 done = true;
                 document.removeEventListener('keydown', onKey, true);
+                const remember = !!(rememberBox && rememberBox.checked);
                 overlay.remove();
-                resolve(val);
+                resolve(o.rememberLabel ? { ok: val, remember } : val);
             };
             const onKey = (ev) => {
                 if (ev.key !== 'Escape') return;
@@ -1780,26 +2340,134 @@
     }
 
 
+    let _rounds = null;
+    let _askedThisRun = false;
+
+    async function handleRoundResults(p) {
+        if (!_rounds) _rounds = { rows: [], asked: false, started: Date.now(), count: 0 };
+        _rounds.rows = _rounds.rows.concat(p.data || []);
+        if (!_rounds.columns && p.columns) _rounds.columns = p.columns;
+        if (Number(p.count) > 0) _rounds.count = Number(p.count);
+
+        const total = Math.min(_rounds.count || 0, MAX_RECORDS_FETCH);
+        reportRunProgress(_rounds.rows.length, total);
+
+        const finish = (stopReason) => {
+            const acc = _rounds;
+            _rounds = null;
+            handleExtensionMessage({
+                type: 'results',
+                payload: {
+                    data: acc.rows, count: acc.count || p.count || acc.rows.length,
+                    executionTime: Date.now() - acc.started,
+                    query: p.query, columns: acc.columns || p.columns || null,
+                    stopReason
+                }
+            });
+        };
+
+        if (_stopRequested) { finish('user'); return; }
+
+        if (!_rounds.asked && _rounds.rows.length >= ROWS_CONFIRM_THRESHOLD) {
+            _rounds.asked = true;
+            const seguir = await askKeepFetching(_rounds.rows.length, total);
+            if (!seguir) { finish('user'); return; }
+        }
+
+        if (_stopRequested) { finish('user'); return; }
+
+        window.postMessage({
+            type: 'execute_SQL', dest: 'fetcher_sql',
+            payload: {
+                query: p.query,
+                maxRecords: MAX_RECORDS_FETCH,
+                fromPage: p.nextPage,
+                pageSize: p.pageSize || undefined,
+                rowsSoFar: _rounds ? _rounds.rows.length : 0
+            }
+        }, '*');
+    }
+
     function handleExtensionMessage(message) {
+        if (message.type === 'notice') {
+            const permitidas = ['sql_slow_no_order'];
+            const key = message.payload && message.payload.key;
+            if (permitidas.indexOf(key) !== -1) {
+                logToToolbar(chrome.i18n.getMessage(key) || key, 'warning');
+            }
+            return;
+        }
+        if (message.type === 'progress') {
+            reportGovernance(message.payload && message.payload.units);
+            const n = Number(message.payload && message.payload.fetched);
+            if (Number.isFinite(n)) {
+                reportRunProgress(n, _runTotal);
+                if (!_askedThisRun && n >= ROWS_CONFIRM_THRESHOLD) {
+                    _askedThisRun = true;
+                    askKeepFetching(n, _runTotal || 0).then((seguir) => {
+                        if (seguir) return;
+                        window.postMessage({ type: 'stop_SQL', dest: 'fetcher_sql' }, '*');
+                    });
+                }
+            }
+            return;
+        }
         if (message.type === 'results') {
-            const { data, count, executionTime, query, columns } = message.payload;
-            const logMsg = chrome.i18n.getMessage('sql_results_log', [String(data.length), String(count), String(executionTime)]) || `Results: ${data.length} rows (Total: ${count}) - ${executionTime}ms`;
+            const p = message.payload;
+            if (p && p.nextPage !== null && p.nextPage !== undefined) { handleRoundResults(p); return; }
+            if (_rounds) {
+                p.data = _rounds.rows.concat(p.data || []);
+                p.columns = p.columns || _rounds.columns || null;
+                p.executionTime = Date.now() - _rounds.started;
+                if (!(Number(p.count) > 0)) p.count = _rounds.count || p.data.length;
+                _rounds = null;
+            }
+        }
+        if (message.type === 'results') {
+            const { data, count, executionTime, query, columns, stopReason } = message.payload;
+            const logMsg = chrome.i18n.getMessage('sql_results_log', [fmtNum(data.length), fmtNum(count), String(executionTime)]) || `Results: ${fmtNum(data.length)} rows (Total: ${fmtNum(count)}) - ${executionTime}ms`;
             logToToolbar(logMsg, 'success');
+
+            if (typeof count === 'number' && count > data.length) {
+                const key = stopReason === 'max' ? 'sql_rows_capped_max'
+                    : stopReason === 'user' ? 'sql_rows_capped_user'
+                        : stopReason === 'governance' ? 'sql_rows_capped_gov'
+                            : stopReason === 'limit' ? 'sql_rows_capped_limit'
+                                : 'sql_rows_capped_guard';
+                const ref = stopReason === 'max' ? count : fetchDenominator(count, data.length);
+                logToToolbar(
+                    chrome.i18n.getMessage(key, [fmtNum(data.length), fmtNum(ref)])
+                    || (data.length + ' / ' + ref),
+                    stopReason === 'user' ? 'info' : 'warning'
+                );
+            } else if (stopReason && stopReason !== 'complete') {
+                const key = stopReason === 'user' ? 'sql_rows_capped_user_unknown' : 'sql_rows_capped_unknown';
+                logToToolbar(
+                    chrome.i18n.getMessage(key, [fmtNum(data.length)])
+                    || (data.length + ' rows, more available'),
+                    stopReason === 'user' ? 'info' : 'warning'
+                );
+            }
 
             _runPhase = 'rendering';
             _runFetched = data.length;
             paintRunStatus();
 
             afterPaint().then(() => {
-                updateResultTable(data, count, executionTime, columns);
+                updateResultTable(data, count, executionTime, columns, query || _lastRunQuery, stopReason);
                 _runPhase = 'idle';
-                updateLastHistoryEntry({ status: 'ok', rows: count, durationMs: executionTime, errorMsg: null });
-                setRunState('ok', { rows: count, ms: executionTime });
+                updateLastHistoryEntry({ status: 'ok', rows: data.length, durationMs: executionTime, errorMsg: null, via: _runVia });
+                setRunState('ok', {
+                    rows: data.length,
+                    total: fetchDenominator(count, data.length),
+                    ms: executionTime
+                });
                 addRunLog({
                     status: 'ok',
                     query: query || _lastRunQuery,
-                    rows: count,
-                    durationMs: executionTime
+                    rows: data.length,
+                    durationMs: executionTime,
+                    via: _runVia
                 });
             });
         } else if (message.type === 'error') {
@@ -1820,7 +2488,8 @@
                 status: 'error',
                 query: _lastRunQuery,
                 errorMsg: rawText,
-                hint: info.hint
+                hint: info.hint,
+                via: _runVia
             }, { reveal: true });
         } else if (message.type === 'resolved_scriptid') {
             const p = message.payload || {};
@@ -2001,8 +2670,24 @@
         };
     }
 
-    const SCHEMA_CACHE_KEY = 'nsft_sql_schema_cache';
+    const SCHEMA_INDEX_KEY = 'nsft_sql_schema_index';
+    const SCHEMA_ENTRY_PREFIX = 'nsft_sql_schema__';
+    const SCHEMA_LEGACY_KEY = 'nsft_sql_schema_cache';
     const SCHEMA_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+    function schemaEntryKey(accountId, tableName) {
+        return SCHEMA_ENTRY_PREFIX + accountId + '__' + tableName;
+    }
+
+    function parseSchemaEntryKey(key) {
+        if (key.indexOf(SCHEMA_ENTRY_PREFIX) !== 0) return null;
+        const rest = key.slice(SCHEMA_ENTRY_PREFIX.length);
+        const sep = rest.indexOf('__');
+        if (sep <= 0) return null;
+        const table = rest.slice(sep + 2);
+        if (!table) return null;
+        return { account: rest.slice(0, sep), table: table };
+    }
 
     function getNsAccountId() {
         const m = location.hostname.match(/^([a-z0-9]+(?:[-_][a-z0-9]+)*)\./i);
@@ -2013,17 +2698,93 @@
 
     let _cacheWriteChain = Promise.resolve();
 
+    let _schemaStoreReady = null;
+    function readySchemaStore() {
+        if (_schemaStoreReady) return _schemaStoreReady;
+        _schemaStoreReady = new Promise((resolve) => {
+            chrome.storage.local.get([SCHEMA_LEGACY_KEY, SCHEMA_INDEX_KEY], (items) => {
+                const legacy = items[SCHEMA_LEGACY_KEY];
+                if (!legacy || typeof legacy !== 'object') { resolve(); return; }
+                const write = {};
+                const index = items[SCHEMA_INDEX_KEY] || {};
+                Object.keys(legacy).forEach((acct) => {
+                    const tables = legacy[acct] || {};
+                    Object.keys(tables).forEach((t) => {
+                        const e = tables[t];
+                        if (!e || !e.rawData || !e.ts) return;
+                        write[schemaEntryKey(acct, t)] = { rawData: e.rawData, ts: e.ts };
+                        if (!index[acct]) index[acct] = {};
+                        if (!index[acct][t]) {
+                            index[acct][t] = { ts: e.ts, label: (e.rawData && e.rawData.label) || '' };
+                        }
+                    });
+                });
+                write[SCHEMA_INDEX_KEY] = index;
+                chrome.storage.local.set(write, () => {
+                    chrome.storage.local.remove([SCHEMA_LEGACY_KEY], resolve);
+                });
+            });
+        });
+        return _schemaStoreReady;
+    }
+
+    function trimSchemaForCache(data) {
+        if (!data || typeof data !== 'object') return data;
+        const arr = (v) => (Array.isArray(v) && v.length ? v : undefined);
+        const tipo = (st) => (st ? { id: st.id, label: st.label } : undefined);
+        return {
+            id: data.id,
+            label: data.label,
+            recordClass: data.recordClass,
+            fields: Array.isArray(data.fields) ? data.fields.map((f) => ({
+                id: f.id,
+                label: f.label,
+                dataType: f.dataType,
+                fieldType: f.fieldType,
+                isAvailable: f.isAvailable === false ? false : undefined,
+                removed: f.removed === true ? true : undefined,
+                isColumn: f.isColumn === false ? false : undefined,
+                availabilityDetails: arr(f.availabilityDetails),
+                features: arr(f.features),
+                permissions: arr(f.permissions),
+                joins: arr((f.joins || []).map((j) => ({
+                    id: j.id,
+                    fieldId: j.fieldId,
+                    cardinality: j.cardinality,
+                    sourceTargetType: tipo(j.sourceTargetType)
+                })))
+            })) : [],
+            joins: arr((data.joins || []).map((j) => ({
+                id: j.id,
+                fieldId: j.fieldId,
+                cardinality: j.cardinality,
+                joinType: j.joinType,
+                isAvailable: j.isAvailable === false ? false : undefined,
+                sourceTargetType: j.sourceTargetType ? {
+                    id: j.sourceTargetType.id,
+                    label: j.sourceTargetType.label,
+                    joinPairs: arr((j.sourceTargetType.joinPairs || []).map((p) => ({ label: p.label })))
+                } : undefined
+            })))
+        };
+    }
+
     function saveSchemaToCache(tableName, rawData) {
         if (_skipCacheSave) return;
         tableName = normalizeTableName(tableName);
         if (!tableName) return;
         const accountId = getNsAccountId();
-        _cacheWriteChain = _cacheWriteChain.then(() => new Promise((resolve) => {
-            chrome.storage.local.get([SCHEMA_CACHE_KEY], (items) => {
-                const cache = items[SCHEMA_CACHE_KEY] || {};
-                if (!cache[accountId]) cache[accountId] = {};
-                cache[accountId][tableName] = { rawData, ts: Date.now() };
-                chrome.storage.local.set({ [SCHEMA_CACHE_KEY]: cache }, () => {
+        const stored = trimSchemaForCache(rawData);
+        const ts = Date.now();
+        _cacheWriteChain = _cacheWriteChain.then(readySchemaStore).then(() => new Promise((resolve) => {
+            chrome.storage.local.get([SCHEMA_INDEX_KEY], (items) => {
+                const index = items[SCHEMA_INDEX_KEY] || {};
+                if (!index[accountId]) index[accountId] = {};
+                index[accountId][tableName] = { ts: ts, label: (stored && stored.label) || '' };
+                chrome.storage.local.set({
+                    [schemaEntryKey(accountId, tableName)]: { rawData: stored, ts: ts },
+                    [SCHEMA_INDEX_KEY]: index
+                }, () => {
                     const err = chrome.runtime.lastError;
                     if (err) {
                         console.warn('NSFT: no se pudo guardar el esquema de ' + tableName, err.message || err);
@@ -2039,38 +2800,112 @@
         }));
     }
 
-    function loadSchemaFromCache(cb) {
+    function saveSchemaBatch(list) {
+        if (!list || !list.length) return Promise.resolve();
         const accountId = getNsAccountId();
-        chrome.storage.local.get([SCHEMA_CACHE_KEY], (items) => {
-            const all = items[SCHEMA_CACHE_KEY] || {};
-            const accountCache = all[accountId] || {};
-            const now = Date.now();
-            const fresh = {};
-            const stale = [];
-            const stamps = {};
-            for (const [tableName, entry] of Object.entries(accountCache)) {
-                if (!entry || !entry.ts || !entry.rawData) continue;
-                fresh[tableName] = entry.rawData;
-                stamps[tableName] = entry.ts;
-                if ((now - entry.ts) >= SCHEMA_CACHE_TTL_MS) stale.push(tableName);
-            }
-            cb(fresh, stale, stamps);
+        const ts = Date.now();
+        const write = {};
+        const meta = [];
+        list.forEach((it) => {
+            const t = normalizeTableName(it.tableName);
+            if (!t || !it.rawData) return;
+            const stored = trimSchemaForCache(it.rawData);
+            write[schemaEntryKey(accountId, t)] = { rawData: stored, ts: ts };
+            meta.push({ t: t, label: (stored && stored.label) || '' });
+        });
+        if (!meta.length) return Promise.resolve();
+        _cacheWriteChain = _cacheWriteChain.then(readySchemaStore).then(() => new Promise((resolve) => {
+            chrome.storage.local.get([SCHEMA_INDEX_KEY], (items) => {
+                const index = items[SCHEMA_INDEX_KEY] || {};
+                if (!index[accountId]) index[accountId] = {};
+                meta.forEach((m) => { index[accountId][m.t] = { ts: ts, label: m.label }; });
+                write[SCHEMA_INDEX_KEY] = index;
+                chrome.storage.local.set(write, () => {
+                    const err = chrome.runtime.lastError;
+                    if (err) console.warn('NSFT: fallo guardando un bloque de esquemas', err.message || err);
+                    resolve();
+                });
+            });
+        }));
+        return _cacheWriteChain;
+    }
+
+    function loadSchemaIndex(cb) {
+        const accountId = getNsAccountId();
+        readySchemaStore().then(() => {
+            chrome.storage.local.get([SCHEMA_INDEX_KEY], (items) => {
+                cb((items[SCHEMA_INDEX_KEY] || {})[accountId] || {}, accountId);
+            });
+        });
+    }
+
+    function loadSchemaFromCache(cb, only) {
+        loadSchemaIndex((index, accountId) => {
+            const names = (only ? only.map(normalizeTableName) : Object.keys(index))
+                .filter((t) => t && index[t]);
+            if (!names.length) { cb({}, [], {}); return; }
+            const keys = names.map((t) => schemaEntryKey(accountId, t));
+            chrome.storage.local.get(keys, (entries) => {
+                const now = Date.now();
+                const fresh = {};
+                const stale = [];
+                const stamps = {};
+                names.forEach((tableName) => {
+                    const entry = entries[schemaEntryKey(accountId, tableName)];
+                    if (!entry || !entry.ts || !entry.rawData) return;
+                    fresh[tableName] = entry.rawData;
+                    stamps[tableName] = entry.ts;
+                    if ((now - entry.ts) >= SCHEMA_CACHE_TTL_MS) stale.push(tableName);
+                });
+                cb(fresh, stale, stamps);
+            });
+        });
+    }
+
+    let _schemaIndexMem = {};
+
+    function refreshSchemaIndexMem(cb) {
+        loadSchemaIndex((index) => {
+            _schemaIndexMem = index || {};
+            if (typeof paintBulkButton === 'function') paintBulkButton();
+            if (cb) cb();
+        });
+    }
+
+    function ensureTableInMemory(tableName) {
+        tableName = normalizeTableName(tableName);
+        if (!tableName || sqlTableMeta[tableName]) return Promise.resolve(false);
+        if (!_schemaIndexMem[tableName]) return Promise.resolve(false);
+        return new Promise((resolve) => {
+            loadSchemaFromCache((cached, stale, stamps) => {
+                const raw = cached[tableName];
+                if (!raw) { resolve(false); return; }
+                _skipCacheSave++;
+                try {
+                    ingestSchemaResponse(tableName, raw, { deferUi: true });
+                    if (stamps[tableName]) _schemaIngestTs[tableName] = stamps[tableName];
+                } finally {
+                    _skipCacheSave--;
+                }
+                resolve(true);
+            }, [tableName]);
         });
     }
 
     function clearSchemaCache(tableName) {
         tableName = tableName ? normalizeTableName(tableName) : null;
         const accountId = getNsAccountId();
-        _cacheWriteChain = _cacheWriteChain.then(() => new Promise((resolve) => {
-            chrome.storage.local.get([SCHEMA_CACHE_KEY], (items) => {
-                const cache = items[SCHEMA_CACHE_KEY] || {};
-                if (!cache[accountId]) { resolve(); return; }
-                if (tableName) {
-                    delete cache[accountId][tableName];
-                } else {
-                    delete cache[accountId];
-                }
-                chrome.storage.local.set({ [SCHEMA_CACHE_KEY]: cache }, resolve);
+        _cacheWriteChain = _cacheWriteChain.then(readySchemaStore).then(() => new Promise((resolve) => {
+            chrome.storage.local.get([SCHEMA_INDEX_KEY], (items) => {
+                const index = items[SCHEMA_INDEX_KEY] || {};
+                const acct = index[accountId];
+                if (!acct) { resolve(); return; }
+                const names = tableName ? [tableName] : Object.keys(acct);
+                names.forEach((t) => { delete acct[t]; });
+                if (!Object.keys(acct).length) delete index[accountId];
+                chrome.storage.local.set({ [SCHEMA_INDEX_KEY]: index }, () => {
+                    chrome.storage.local.remove(names.map((t) => schemaEntryKey(accountId, t)), resolve);
+                });
             });
         }));
     }
@@ -2162,7 +2997,7 @@
             if (!join || !join.targetTable) return null;
             currentTable = join.targetTable;
             if (!sqlTableMeta[currentTable]) {
-                fetchTableSchema(currentTable);
+                if (AUTO_SCHEMA) fetchTableSchema(currentTable, { auto: true });
                 return null;
             }
         }
@@ -2367,29 +3202,56 @@
 
     const _schemaIngestTs = {};
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local' || !changes[SCHEMA_CACHE_KEY]) return;
-        const all = changes[SCHEMA_CACHE_KEY].newValue || {};
-        const acct = all[getNsAccountId()] || {};
+        if (area !== 'local') return;
+        const accountId = getNsAccountId();
         let dirty = false;
-        _skipCacheSave++;
-        try {
-            Object.keys(acct).forEach((t) => {
-                const entry = acct[t];
-                if (!entry || !entry.rawData || !entry.ts) return;
-                if (userRemovedTables.has(t)) return;
-                if (sqlTableMeta[t] && (_schemaIngestTs[t] || 0) >= entry.ts) return;
-                _schemaIngestTs[t] = entry.ts;
-                ingestSchemaResponse(t, entry.rawData, { deferUi: true });
-                dirty = true;
-            });
 
+        const idx = changes[SCHEMA_INDEX_KEY];
+        if (idx) {
+            _schemaIndexMem = (idx.newValue || {})[accountId] || {};
+            paintBulkButton();
+        }
+
+        if (idx && idx.oldValue && idx.oldValue[accountId]
+            && !(idx.newValue && idx.newValue[accountId])) {
             Object.keys(sqlTableMeta).forEach((t) => {
-                if (acct[t]) return;
                 delete sqlTableMeta[t];
                 delete sqlHintTables[t];
                 delete _schemaIngestTs[t];
                 schemaExpanded.delete('T:' + t);
-                userRemovedTables.add(t);
+            });
+            userRemovedTables.clear();
+            failedTables.clear();
+            renderSchemaTree();
+            if (typeof runLint === 'function' && lintEnabled) runLint();
+            return;
+        }
+
+        _skipCacheSave++;
+        try {
+            Object.keys(changes).forEach((key) => {
+                const parsed = parseSchemaEntryKey(key);
+                if (!parsed || parsed.account !== accountId) return;
+                const t = parsed.table;
+                const entry = changes[key].newValue;
+
+                if (!entry || !entry.rawData) {
+                    if (!sqlTableMeta[t] && !sqlHintTables[t]) return;
+                    delete sqlTableMeta[t];
+                    delete sqlHintTables[t];
+                    delete _schemaIngestTs[t];
+                    schemaExpanded.delete('T:' + t);
+                    userRemovedTables.add(t);
+                    dirty = true;
+                    return;
+                }
+
+                if (userRemovedTables.has(t)) return;
+
+                if (!sqlTableMeta[t]) return;
+                if ((_schemaIngestTs[t] || 0) >= (entry.ts || 0)) return;
+                _schemaIngestTs[t] = entry.ts || Date.now();
+                ingestSchemaResponse(t, entry.rawData, { deferUi: true });
                 dirty = true;
             });
         } finally {
@@ -2496,7 +3358,21 @@
             old.remove();
             return;
         }
-        const tables = getLoadedTableNames().filter(t => sqlTableMeta[t]);
+        const enSql = Object.values(parseAliasMap(editor ? editor.getValue() : ''))
+            .filter((t, i, arr) => arr.indexOf(t) === i);
+        const disponibles = Array.from(new Set(
+            getLoadedTableNames().concat(Object.keys(_schemaIndexMem))
+        )).sort();
+        const tables = enSql.filter(t => sqlTableMeta[t]);
+
+        const ctx = {
+            all: disponibles,
+            pos: {},
+            view: { k: 1, tx: 0, ty: 0 },
+            legendOpen: !tables.length,
+            legendFilter: ''
+        };
+
         const overlay = document.createElement('div');
         overlay.id = 'nsft-sql-erd-overlay';
         overlay.className = 'nsft-sql-erd-overlay';
@@ -2514,19 +3390,44 @@
         head.appendChild(close);
         overlay.appendChild(head);
 
-        if (!tables.length) {
-            const empty = document.createElement('div');
-            empty.className = 'nsft-sql-schema-empty';
-            empty.textContent = chrome.i18n.getMessage('sql_erd_empty') || 'Agrega al menos una tabla a la caché para ver el diagrama.';
-            overlay.appendChild(empty);
-        } else {
-            overlay.appendChild(buildErdCanvas(tables));
-        }
+        let visibles = tables.slice();
+        ctx.render = () => {
+            const prev = overlay.querySelector('.nsft-sql-erd-canvas, .nsft-sql-schema-empty');
+            const nuevo = disponibles.length
+                ? buildErdCanvas(visibles, ctx)
+                : (() => {
+                    const empty = document.createElement('div');
+                    empty.className = 'nsft-sql-schema-empty';
+                    empty.textContent = chrome.i18n.getMessage('sql_erd_empty')
+                        || 'Agrega al menos una tabla a la caché para ver el diagrama.';
+                    return empty;
+                })();
+            if (prev) prev.replaceWith(nuevo); else overlay.appendChild(nuevo);
+        };
+
+        ctx.toggle = (name, on) => {
+            if (!on) {
+                visibles = visibles.filter(t => t !== name);
+                ctx.render();
+                return;
+            }
+            if (visibles.indexOf(name) !== -1) return;
+            const añadir = () => {
+                if (!sqlTableMeta[name]) return;
+                visibles = visibles.concat(name);
+                ctx.render();
+            };
+            if (sqlTableMeta[name]) { añadir(); return; }
+            ensureTableInMemory(name).then(añadir);
+        };
+
+        ctx.render();
         const host = document.getElementById('nsft-sql-modal') || document.body;
         host.appendChild(overlay);
     }
 
-    function buildErdCanvas(tables) {
+    function buildErdCanvas(tables, ctx) {
+        ctx = ctx || { all: tables, pos: {}, view: { k: 1, tx: 0, ty: 0 }, legendOpen: false, legendFilter: '' };
         const WW = 4000, WH = 3000, CW = 230;
         const NS = 'http://www.w3.org/2000/svg';
         const wrap = document.createElement('div');
@@ -2538,6 +3439,14 @@
         svg.classList.add('nsft-sql-erd-edges');
         world.appendChild(svg);
         wrap.appendChild(world);
+
+        if (!tables.length) {
+            const hint = document.createElement('div');
+            hint.className = 'nsft-sql-schema-empty nsft-sql-erd-hint';
+            hint.textContent = chrome.i18n.getMessage('sql_erd_empty_sql')
+                || 'El diagrama muestra las tablas del FROM y los JOIN. Marca en la acotación las que quieras añadir.';
+            wrap.appendChild(hint);
+        }
 
         const hiddenT = new Set();
         const hiddenE = new Set();
@@ -2591,10 +3500,19 @@
             tables = placed;
         }
 
-        const pos = {};
+        const pos = ctx.pos;
         const cardEls = {};
-        tables.forEach((t, i) => {
-            pos[t] = { x: 80 + (i % 3) * (CW + 150), y: 80 + Math.floor(i / 3) * 380 };
+        let slot = 0;
+        const ocupado = (x, y) => Object.keys(pos).some(k => pos[k].x === x && pos[k].y === y);
+        tables.forEach((t) => {
+            if (pos[t]) return;
+            let x, y;
+            do {
+                x = 80 + (slot % 3) * (CW + 150);
+                y = 80 + Math.floor(slot / 3) * 380;
+                slot++;
+            } while (ocupado(x, y) && slot < 600);
+            pos[t] = { x: x, y: y };
         });
 
         const loaded = new Set(tables), seen = new Set(), edges = [];
@@ -3169,9 +4087,10 @@
         });
         syncEdges();
 
-        const view = { k: 1, tx: 0, ty: 0 };
+        const view = ctx.view;
         const apply = () => { world.style.transform = 'translate(' + view.tx + 'px,' + view.ty + 'px) scale(' + view.k + ')'; };
         const fit = () => {
+            if (!tables.length) return;
             const xs = tables.map(t => pos[t].x), ys = tables.map(t => pos[t].y);
             const minX = Math.min(...xs) - 40, minY = Math.min(...ys) - 40;
             const maxX = Math.max(...xs) + CW + 40, maxY = Math.max(...ys) + 260;
@@ -3226,28 +4145,35 @@
             escapeHtml(chrome.i18n.getMessage('sql_erd_legend') || 'Acotación') + '</span>';
         const legBody = document.createElement('div');
         legBody.className = 'nsft-sql-erd-legend-body';
-        legBody.style.display = 'none';
+        legBody.style.display = ctx.legendOpen ? '' : 'none';
+        legHead.querySelector('.nsft-sql-erd-legend-caret').textContent = ctx.legendOpen ? '▾' : '▸';
         legHead.addEventListener('click', () => {
             const closed = legBody.style.display === 'none';
             legBody.style.display = closed ? '' : 'none';
+            ctx.legendOpen = closed;
             legHead.querySelector('.nsft-sql-erd-legend-caret').textContent = closed ? '▾' : '▸';
         });
         legend.appendChild(legHead);
         legend.appendChild(legBody);
         wrap.appendChild(legend);
 
-        const legRow = (color, label, kind, ref) => {
+        const legRow = (color, label, kind, ref, enDiagrama, host) => {
             const row = document.createElement('label');
             row.className = 'nsft-sql-erd-legrow';
             const cb = document.createElement('input');
             cb.type = 'checkbox';
-            cb.checked = kind === 't' ? !hiddenT.has(ref) : !hiddenE.has(ref);
+            const externa = kind === 't' && enDiagrama === false;
+            cb.checked = externa ? false
+                : (kind === 't' ? !hiddenT.has(ref) : !hiddenE.has(ref));
             cb.addEventListener('change', () => {
+                if (externa || (kind === 't' && !cb.checked && ctx.toggle)) {
+                    if (ctx.toggle) { ctx.toggle(ref, cb.checked); return; }
+                }
                 const set = kind === 't' ? hiddenT : hiddenE;
                 if (cb.checked) set.delete(ref); else set.add(ref);
                 applyHidden();
             });
-            legendChecks.push({ cb, kind, ref });
+            if (!externa) legendChecks.push({ cb, kind, ref });
             row.appendChild(cb);
             const sw = document.createElement('span');
             sw.className = 'nsft-sql-erd-legsw';
@@ -3257,7 +4183,7 @@
             tx.className = 'nsft-sql-erd-legtx';
             tx.textContent = label;
             row.appendChild(tx);
-            legBody.appendChild(row);
+            (host || legBody).appendChild(row);
         };
         const legGroup = (title) => {
             const h = document.createElement('div');
@@ -3284,16 +4210,75 @@
             applyHidden();
         });
         legBody.appendChild(legActs);
-        tables.forEach((t2, i2) => {
-            legRow(DOTS[i2 % DOTS.length], (sqlTableMeta[t2] && sqlTableMeta[t2].label) || t2, 't', t2);
+
+        const visto = new Set(tables);
+        const findWrap = document.createElement('div');
+        findWrap.className = 'nsft-sql-find nsft-sql-erd-legfind';
+        const find = document.createElement('input');
+        find.type = 'text';
+        find.className = 'nsft-sql-erd-legfilter';
+        find.placeholder = chrome.i18n.getMessage('sql_erd_leg_filter') || 'Buscar tabla…';
+        find.value = ctx.legendFilter || '';
+        findWrap.appendChild(find);
+        legBody.appendChild(findWrap);
+
+        const legList = document.createElement('div');
+        legList.className = 'nsft-sql-erd-leglist';
+        legBody.appendChild(legList);
+
+        const LEG_MAX = 200;
+        const pintarLista = () => {
+            legList.innerHTML = '';
+            const q = (ctx.legendFilter || '').trim().toLowerCase();
+            const rank = (t) => {
+                if (!q || t === q) return 0;
+                if (t.startsWith(q)) return 1;
+                if (t.includes(q)) return 2;
+                return 3;
+            };
+            const candidatas = (ctx.all || tables)
+                .filter(t => !q || t.includes(q)
+                    || String((_schemaIndexMem[t] || {}).label || '').toLowerCase().includes(q))
+                .sort((a, b) => (rank(a) - rank(b)) || a.localeCompare(b));
+
+            const fijas = tables.filter(t => candidatas.indexOf(t) === -1);
+            const lista = fijas.concat(candidatas);
+            const recorte = lista.slice(0, LEG_MAX);
+
+            recorte.forEach((t2, i2) => {
+                const label = (sqlTableMeta[t2] && sqlTableMeta[t2].label)
+                    || String((_schemaIndexMem[t2] || {}).label || '') || t2;
+                legRow(DOTS[i2 % DOTS.length], label === t2 ? t2 : (t2 + ' — ' + label), 't', t2,
+                    visto.has(t2), legList);
+            });
+            if (lista.length > recorte.length) {
+                const mas = document.createElement('div');
+                mas.className = 'nsft-sql-erd-legmore';
+                mas.textContent = chrome.i18n.getMessage('sql_erd_leg_more', [String(lista.length - recorte.length)])
+                    || ('… y ' + (lista.length - recorte.length) + ' más — afina la búsqueda');
+                legList.appendChild(mas);
+            }
+        };
+
+        let findTimer = 0;
+        find.addEventListener('input', () => {
+            ctx.legendFilter = find.value;
+            clearTimeout(findTimer);
+            findTimer = setTimeout(pintarLista, 120);
         });
+        ['click', 'mousedown', 'pointerdown', 'wheel'].forEach(ev =>
+            findWrap.addEventListener(ev, (e) => e.stopPropagation()));
+        pintarLista();
         if (edges.length) {
             legGroup(chrome.i18n.getMessage('sql_erd_leg_links') || 'Uniones');
             edges.forEach(e2 => {
                 legRow(e2.el.style.stroke || '#94a3b8', e2.a + ' ↔ ' + e2.b, 'e', e2);
             });
         }
-        setTimeout(() => { fit(); syncEdges(); }, 0);
+        setTimeout(() => {
+            if (!ctx.fitted) { ctx.fitted = true; fit(); } else { apply(); }
+            syncEdges();
+        }, 0);
         return wrap;
     }
 
@@ -3396,6 +4381,16 @@
         window.open(url, '_blank', 'noopener');
     }
 
+    function schemaDetailUrl(tableName) {
+        const payload = JSON.stringify({ scriptId: String(tableName || ''), path: '' });
+        return '/app/recordscatalog/rcendpoint.nl?action=getRecordTypeDetail&data='
+            + encodeURIComponent(payload);
+    }
+
+    function openSchemaDefinition(tableName) {
+        window.open(location.origin + schemaDetailUrl(tableName), '_blank', 'noopener');
+    }
+
     function rcCurrentTable() {
         const m = (location.hash || '').match(/#\/record(?:_[a-z]+)?\/([A-Za-z0-9_]+)/i);
         return m ? m[1].toLowerCase() : null;
@@ -3410,23 +4405,21 @@
         const rcCached = new Set();
 
         function refreshRcCached(cb) {
-            chrome.storage.local.get([SCHEMA_CACHE_KEY], (items) => {
-                const acct = (items[SCHEMA_CACHE_KEY] || {})[getNsAccountId()] || {};
+            loadSchemaIndex((index) => {
                 rcCached.clear();
-                Object.keys(acct).forEach((t) => { if (acct[t] && acct[t].rawData) rcCached.add(t); });
+                Object.keys(index).forEach((t) => rcCached.add(t));
                 if (cb) cb();
             });
         }
 
         chrome.storage.onChanged.addListener((changes, area) => {
-            if (area !== 'local' || !changes[SCHEMA_CACHE_KEY]) return;
+            if (area !== 'local' || !changes[SCHEMA_INDEX_KEY]) return;
             refreshRcCached(ensureRcAdd);
         });
 
         function rcFetchAndSave(btn, t, doneMsg) {
             btn.disabled = true;
-            const payload = JSON.stringify({ scriptId: t, path: '' });
-            return fetch('/app/recordscatalog/rcendpoint.nl?action=getRecordTypeDetail&data=' + encodeURIComponent(payload))
+            return fetch(schemaDetailUrl(t))
                 .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
                 .then(json => {
                     if (!(json && json.status === 'ok' && json.data && json.data.fields)) throw new Error('not found');
@@ -3573,6 +4566,7 @@
     function renderCatalogResults() {
         const box = document.getElementById('nsft-sql-schema-catalog-results');
         if (!box) return;
+        paintBulkButton();
         const q = catalogNorm(catalogQuery.trim());
         box.innerHTML = '';
 
@@ -3647,17 +4641,23 @@
         paintCatalogSelection(false);
     }
 
-    function fetchTableSchema(tableName, opts) {
+    async function fetchTableSchema(tableName, opts) {
         tableName = normalizeTableName(tableName);
         opts = opts || {};
-        if (!tableName) return Promise.resolve();
+        if (!tableName) return;
         if (!opts.force && (sqlHintTables[tableName] || failedTables.has(tableName))) {
-            return Promise.resolve();
+            return;
         }
 
-        const payload = JSON.stringify({ scriptId: tableName, path: "" });
-        const url = `/app/recordscatalog/rcendpoint.nl?action=getRecordTypeDetail&data=${encodeURIComponent(payload)}`;
+        if (!opts.force && await ensureTableInMemory(tableName)) {
+            renderSchemaTree();
+            if (typeof runLint === 'function' && lintEnabled) runLint();
+            return;
+        }
 
+        const url = schemaDetailUrl(tableName);
+
+        if (opts.auto) setAutoPulse(true);
         logToToolbar(chrome.i18n.getMessage('sql_fetching_details', [tableName]) || `Fetching details for ${tableName}...`);
         return fetch(url)
             .then(res => {
@@ -3676,6 +4676,9 @@
             .catch(() => {
                 failedTables.add(tableName);
                 logToToolbar(chrome.i18n.getMessage('sql_not_found_table', [tableName]) || `Not found ${tableName} table`, 'warning');
+            })
+            .finally(() => {
+                if (opts.auto) setAutoPulse(false);
             });
     }
 
@@ -3857,38 +4860,8 @@
                     autoCloseBrackets: true,
 
                     extraKeys: {
-                        'Ctrl-Enter': () => executeCurrentQuery(),
-                        'Cmd-Enter': () => executeCurrentQuery(),
-                        'Ctrl-S': () => { handleFileSave(); },
-                        'Cmd-S': () => { handleFileSave(); },
-                        'Shift-Ctrl-S': () => { handleFileSaveAs(); },
-                        'Shift-Cmd-S': () => { handleFileSaveAs(); },
-                        'Ctrl-O': () => { handleFileOpen(); },
-                        'Cmd-O': () => { handleFileOpen(); },
-                        'Shift-Ctrl-F': () => { handleEditFormat(); },
-                        'Shift-Cmd-F': () => { handleEditFormat(); },
                         'Ctrl-F': () => { handleEditFind(); },
                         'Cmd-F': () => { handleEditFind(); },
-                        'Shift-Ctrl-D': () => { handleFileExport(); },
-                        'Shift-Cmd-D': () => { handleFileExport(); },
-                        'Shift-Ctrl-E': () => { handleRunExport(); },
-                        'Shift-Cmd-E': () => { handleRunExport(); },
-                        'Shift-Ctrl-C': () => { handleRunCopy(); },
-                        'Shift-Cmd-C': () => { handleRunCopy(); },
-                        'Ctrl-B': () => { toggleSchemaSidebar(); },
-                        'Cmd-B': () => { toggleSchemaSidebar(); },
-                        'Shift-Ctrl-K': () => { handleRefreshSchema(); },
-                        'Shift-Cmd-K': () => { handleRefreshSchema(); },
-                        'Shift-Ctrl-G': () => { importSavedQueriesFromFile(); },
-                        'Shift-Cmd-G': () => { importSavedQueriesFromFile(); },
-                        'Shift-Ctrl-Y': () => { exportSavedQueriesToFile(); },
-                        'Shift-Cmd-Y': () => { exportSavedQueriesToFile(); },
-                        'Shift-Ctrl-X': () => { handleModalExit(); },
-                        'Shift-Cmd-X': () => { handleModalExit(); },
-                        'Shift-Ctrl-1': () => { handleViewEditor(); },
-                        'Shift-Cmd-1': () => { handleViewEditor(); },
-                        'Shift-Ctrl-2': () => { handleViewTable(); },
-                        'Shift-Cmd-2': () => { handleViewTable(); },
                         'Ctrl-Space': 'autocomplete'
                     },
 
@@ -3999,6 +4972,8 @@
                     const token = instance.getTokenAt(cursor);
                     const currentTokenString = token ? token.string : null;
 
+                    if (!AUTO_SCHEMA) return;
+
                     const tables = parseTablesFromQuery(content);
                     const tablesToFetch = tables.filter(tableName =>
                         !sqlHintTables[tableName]
@@ -4010,7 +4985,7 @@
                     if (tablesToFetch.length > 0) {
                         clearTimeout(tableFetchTimeout);
                         tableFetchTimeout = setTimeout(() => {
-                            tablesToFetch.forEach(t => fetchTableSchema(t));
+                            tablesToFetch.forEach(t => fetchTableSchema(t, { auto: true }));
                         }, 1000);
                     }
                 };
@@ -4049,16 +5024,6 @@
             initVariablesUI();
             initToolbarMenuExclusivity();
 
-            const sampleBtn = document.getElementById('nsft-sql-tool-sample');
-            const sampleMenu = document.getElementById('nsft-sql-sample-menu');
-            if (sampleBtn && sampleMenu) {
-                document.addEventListener('click', (e) => {
-                    if (!sampleMenu.contains(e.target) && e.target !== sampleBtn && !sampleBtn.contains(e.target)) {
-                        sampleMenu.classList.remove('open');
-                    }
-                });
-            }
-
             const joinBtn = document.getElementById('nsft-sql-tool-join');
             const joinMenu = document.getElementById('nsft-sql-join-menu');
             if (joinBtn && joinMenu) {
@@ -4076,6 +5041,25 @@
             if (schemaAddBtn) schemaAddBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleCatalogPop(); });
             const schemaErdBtn = document.getElementById('nsft-sql-schema-erd');
             if (schemaErdBtn) schemaErdBtn.addEventListener('click', (e) => { e.stopPropagation(); openErdView(); });
+            const schemaWipeBtn = document.getElementById('nsft-sql-schema-wipe');
+            if (schemaWipeBtn) schemaWipeBtn.addEventListener('click', (e) => { e.stopPropagation(); handleWipeSchemaCache(); });
+            const schemaAutoBtn = document.getElementById('nsft-sql-schema-auto');
+            if (schemaAutoBtn) {
+                paintAutoSchemaBtn();
+                schemaAutoBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    chrome.storage.local.set({ suiteqlAutoSchema: !AUTO_SCHEMA });
+                });
+            }
+            const schemaAllBtn = document.getElementById('nsft-sql-schema-all');
+            if (schemaAllBtn) {
+                schemaAllBtn.addEventListener('click', (e) => { e.stopPropagation(); handleBulkSchemaDownload(); });
+            }
+            const schemaRefreshBtn = document.getElementById('nsft-sql-schema-refresh');
+            if (schemaRefreshBtn) {
+                schemaRefreshBtn.addEventListener('click', (e) => { e.stopPropagation(); handleRefreshSchema(); });
+            }
+            paintBulkButton();
             const catalogInputEl = document.getElementById('nsft-sql-schema-catalog-input');
             if (catalogInputEl) {
                 catalogInputEl.addEventListener('input', (e) => { catalogQuery = e.target.value || ''; renderCatalogResults(); });
@@ -4100,43 +5084,20 @@
             if (schemaFilterEl) {
                 schemaFilterEl.addEventListener('input', (e) => {
                     schemaFilter = e.target.value || '';
+                    _schemaFilterCollapsed.clear();
                     renderSchemaTree();
                 });
             }
+            wireFindClear('nsft-sql-schema-filter');
+            wireFindClear('nsft-sql-results-search');
+            wireFindClear('nsft-sql-logs-filter');
+            const treeEl = document.getElementById('nsft-sql-schema-tree');
+            if (treeEl) treeEl.addEventListener('scroll', () => renderSchemaTree(), { passive: true });
 
             await afterPaint();
             setBootStep('sql_boot_step_schema', 'Cargando tablas en caché…', 5);
 
-            await new Promise((resolve) => {
-                loadSchemaFromCache(async (cached, stale, stamps) => {
-                    const cachedTables = Object.keys(cached);
-                    if (cachedTables.length) {
-                        _skipCacheSave++;
-                        try {
-                            const CHUNK = 8;
-                            for (let i = 0; i < cachedTables.length; i += CHUNK) {
-                                cachedTables.slice(i, i + CHUNK).forEach(t => {
-                                    ingestSchemaResponse(t, cached[t], { deferUi: true });
-                                    if (stamps && stamps[t]) _schemaIngestTs[t] = stamps[t];
-                                });
-                                const done = Math.min(i + CHUNK, cachedTables.length);
-                                setBootStep(
-                                    'sql_boot_step_tables',
-                                    `Cargando tablas en caché (${done}/${cachedTables.length})…`,
-                                    5,
-                                    [String(done), String(cachedTables.length)]
-                                );
-                                if (done < cachedTables.length) await afterPaint();
-                            }
-                        } finally {
-                            _skipCacheSave--;
-                        }
-                        logToToolbar(chrome.i18n.getMessage('sql_schema_cache_loaded', [String(cachedTables.length)]) || `Loaded ${cachedTables.length} cached table(s)`, 'success');
-                        _staleOnBoot = (stale || []).slice();
-                    }
-                    resolve();
-                });
-            });
+            await new Promise((resolve) => refreshSchemaIndexMem(resolve));
 
             await new Promise((resolve) => {
                 loadTabsFromStorage(() => {
@@ -4153,6 +5114,19 @@
                     resolve();
                 });
             });
+
+            const enUso = editor ? parseTablesFromQuery(editor.getValue()) : [];
+            const porCargar = enUso.filter((t) => _schemaIndexMem[t]);
+            if (porCargar.length) {
+                setBootStep('sql_boot_step_tables', 'Cargando tablas en caché…', 5,
+                    [String(porCargar.length), String(porCargar.length)]);
+                await Promise.all(porCargar.map(ensureTableInMemory));
+                const ahora = Date.now();
+                _staleOnBoot = porCargar.filter((t) => {
+                    const e = _schemaIndexMem[t];
+                    return e && e.ts && (ahora - e.ts) >= SCHEMA_CACHE_TTL_MS;
+                });
+            }
 
             flushSchemaTreeRender();
             if (typeof runLint === 'function' && lintEnabled) runLint();
@@ -4451,9 +5425,102 @@
         return order;
     }
 
-    function deriveColumnKeys(data, metaColumns) {
+    function selectListColumns(sql) {
+        const text = String(sql || '');
+        if (!text) return null;
+
+        const m = /\bselect\b/i.exec(text);
+        if (!m) return null;
+
+        let depth = 0, quote = null, from = -1;
+        const start = m.index + m[0].length;
+        for (let i = start; i < text.length; i++) {
+            const c = text[i];
+            if (quote) { if (c === quote) quote = null; continue; }
+            if (c === "'" || c === '"') { quote = c; continue; }
+            if (c === '(') { depth++; continue; }
+            if (c === ')') { depth--; continue; }
+            if (depth === 0 && /\s/.test(c) && /^from\s/i.test(text.slice(i + 1, i + 6))) { from = i + 1; break; }
+        }
+        if (from === -1) return null;
+
+        const list = text.slice(start, from);
+
+        const parts = [];
+        let buf = '';
+        depth = 0; quote = null;
+        for (const c of list) {
+            if (quote) { buf += c; if (c === quote) quote = null; continue; }
+            if (c === "'" || c === '"') { quote = c; buf += c; continue; }
+            if (c === '*' && depth === 0) return null;
+            if (c === '(') depth++;
+            if (c === ')') depth--;
+            if (c === ',' && depth === 0) { parts.push(buf); buf = ''; continue; }
+            buf += c;
+        }
+        parts.push(buf);
+
+        const out = [];
+        for (let raw of parts) {
+            let item = raw.replace(/\s+/g, ' ').trim();
+            if (!item) return null;
+            item = item.replace(/^distinct\s+/i, '').trim();
+            item = item.replace(/^top\s+\d+\s+/i, '').trim();
+            item = item.replace(/^distinct\s+/i, '').trim();
+            if (!item) return null;
+
+            let name = null;
+            const simple = /^(?:[A-Za-z_][A-Za-z0-9_]*\.)?([A-Za-z_][A-Za-z0-9_]*)$/.exec(item);
+            const asAlias = /\sas\s+(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))$/i.exec(item);
+            const dosToken = /^(?:[A-Za-z_][A-Za-z0-9_]*\.)?[A-Za-z_][A-Za-z0-9_]*\s+(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))$/.exec(item);
+            if (simple) name = simple[1];
+            else if (asAlias) name = asAlias[1] || asAlias[2];
+            else if (dosToken) name = dosToken[1] || dosToken[2];
+            if (!name) return null;
+            if (/^(?:from|where|as|end|null|else|then|when|case|desc|asc|and|or|not|is|in|like|between|distinct)$/i.test(name)) return null;
+            out.push(name);
+        }
+        return out.length ? out : null;
+    }
+
+    function starColumnsFromSchema(sql) {
+        if (!REST_FILL_COLUMNS) return null;
+        if (_runVia !== 'rest') return null;
+
+        const texto = String(sql || '');
+        const m = /\bselect\b/i.exec(texto);
+        if (!m) return null;
+        let d = 0, q = null, hayStar = false;
+        for (let i = m.index + m[0].length; i < texto.length; i++) {
+            const c = texto[i];
+            if (q) { if (c === q) q = null; continue; }
+            if (c === "'" || c === '"') { q = c; continue; }
+            if (c === '(') { d++; continue; }
+            if (c === ')') { d--; continue; }
+            if (d === 0 && c === '*') { hayStar = true; continue; }
+            if (d === 0 && /\s/.test(c) && /^from\s/i.test(texto.slice(i + 1, i + 6))) break;
+        }
+        if (!hayStar) return null;
+
+        const mapa = parseAliasMap(texto);
+        const tablas = Array.from(new Set(Object.values(mapa)));
+        if (tablas.length !== 1) return null;
+        const meta = sqlTableMeta[tablas[0]];
+        if (!meta || !meta.fields) return null;
+        const campos = Object.values(meta.fields)
+            .filter(f => f && f.isAvailable && !f.removed && f.isColumn)
+            .map(f => f.id)
+            .sort((a, b) => a.localeCompare(b));
+        return campos.length ? campos : null;
+    }
+
+    function deriveColumnKeys(data, metaColumns, sql) {
         const fromData = unionColumnKeys(data);
-        if (!Array.isArray(metaColumns) || !metaColumns.length) return fromData;
+        if (!Array.isArray(metaColumns) || !metaColumns.length) {
+            const fromSql = selectListColumns(sql) || starColumnsFromSchema(sql);
+            if (!fromSql) return fromData;
+            metaColumns = fromSql;
+        }
 
         const byLower = new Map();
         fromData.forEach(k => {
@@ -4474,25 +5541,99 @@
         return out;
     }
 
-    function updateResultTable(data, count, time, metaColumns) {
+    function fetchDenominator(count, fetched) {
+        const objetivo = Math.min(Number(count) || 0, MAX_RECORDS_FETCH);
+        return objetivo > fetched ? objetivo : count;
+    }
+
+    function clearResults() {
+        if (resultTable) {
+            try { resultTable.clearFilter(true); } catch (e) { }
+            try { resultTable.clearData(); } catch (e) { }
+            try { resultTable.setColumns([]); } catch (e) { }
+        }
+
+        _resultsSearchTerm = '';
+        const buscador = document.getElementById('nsft-sql-results-search');
+        if (buscador) buscador.value = '';
+
+        const chartToggle = document.getElementById('nsft-sql-chart-toggle');
+        if (chartToggle && chartToggle.dataset.mode === 'chart') toggleChartView(false);
+
+        const banner = document.getElementById('nsft-sql-trunc-banner');
+        if (banner) { banner.hidden = true; banner.textContent = ''; }
+
+        setRunState('idle');
+        paintClearResultsBtn();
+    }
+
+    function paintClearResultsBtn(running) {
+        const btn = document.getElementById('nsft-sql-clear-btn');
+        if (!btn) return;
+        const corriendo = (running === undefined) ? (_runPhase === 'running') : !!running;
+        let hay = false;
+        try { hay = !!(resultTable && resultTable.getDataCount() > 0); } catch (e) { hay = false; }
+        btn.disabled = !hay || corriendo;
+    }
+
+    function normalizeRows(data, columnas) {
+        if (!Array.isArray(data) || !data.length) return data;
+        return data.map((row) => {
+            const out = {};
+            columnas.forEach((k) => {
+                const v = row[k];
+                out[k] = Array.isArray(v) ? v.join(', ') : (v === undefined ? null : v);
+            });
+            Object.keys(row).forEach((k) => {
+                if (Object.prototype.hasOwnProperty.call(out, k)) return;
+                const v = row[k];
+                out[k] = Array.isArray(v) ? v.join(', ') : v;
+            });
+            return out;
+        });
+    }
+
+    function updateResultTable(data, count, time, metaColumns, sql, stopReason) {
         if (!resultTable) return;
 
 
         const banner = document.getElementById('nsft-sql-trunc-banner');
         if (banner) {
-            if (data.length < count) {
-                banner.textContent = chrome.i18n.getMessage(
-                    'sql_truncated_banner', [String(data.length), String(count)]
-                ) || `Showing ${data.length} of ${count} rows. Raise the limit (max records) or refine the query to see the rest.`;
-                banner.hidden = false;
-            } else {
-                banner.hidden = true;
-                banner.textContent = '';
+            let texto = '';
+            const ref = fetchDenominator(count, data.length);
+            if (stopReason === 'user') {
+                texto = count > data.length
+                    ? (chrome.i18n.getMessage('sql_rows_capped_user', [fmtNum(data.length), fmtNum(ref)])
+                        || `Fetched ${fmtNum(data.length)} of ${fmtNum(ref)} rows: the execution was stopped before finishing, so the results are incomplete.`)
+                    : (chrome.i18n.getMessage('sql_rows_capped_user_unknown', [fmtNum(data.length)])
+                        || `Fetched ${fmtNum(data.length)} rows and the results are incomplete: the execution was stopped before finishing.`);
+            } else if (data.length < count) {
+                const args = [fmtNum(data.length), fmtNum(ref)];
+                if (stopReason === 'governance') {
+                    texto = chrome.i18n.getMessage('sql_truncated_gov', args)
+                        || `Showing ${args[0]} of ${args[1]} rows. The run used up the NetSuite execution budget, which is not a setting.`;
+                } else if (stopReason === 'limit') {
+                    texto = chrome.i18n.getMessage('sql_truncated_limit', args)
+                        || `Showing ${args[0]} of ${args[1]} rows. NetSuite stopped the download at its execution limit.`;
+                } else if (stopReason === 'guard') {
+                    texto = chrome.i18n.getMessage('sql_truncated_guard', args)
+                        || `Showing ${args[0]} of ${args[1]} rows. The download stopped as a safeguard before finishing.`;
+                } else if (data.length >= FETCH_ALL_CEILING) {
+                    texto = chrome.i18n.getMessage('sql_truncated_ceiling', [fmtNum(data.length), fmtNum(count)])
+                        || `Showing ${fmtNum(data.length)} of ${fmtNum(count)} rows: that is the most that can be fetched, by any method.`;
+                } else {
+                    texto = chrome.i18n.getMessage('sql_truncated_banner', [fmtNum(data.length), fmtNum(count), fmtNum(FETCH_ALL_CEILING)])
+                        || `Showing ${fmtNum(data.length)} of ${fmtNum(count)} rows: that is the maximum you set, up to a ceiling of ${fmtNum(FETCH_ALL_CEILING)} rows.`;
+                }
             }
+            banner.textContent = texto;
+            banner.hidden = !texto;
         }
 
         if (data.length > 0) {
-            const columns = deriveColumnKeys(data, metaColumns).map(key => {
+            const claves = deriveColumnKeys(data, metaColumns, sql);
+            data = normalizeRows(data, claves);
+            const columns = claves.map(key => {
                 let maxLen = key.length;
                 const rowCap = Math.min(data.length, 500);
                 let seen = 0;
@@ -4527,6 +5668,8 @@
             resultTable.setData([]);
             try { resultTable.setColumns([]); } catch (e) { }
         }
+
+        paintClearResultsBtn();
 
         const chartToggle = document.getElementById('nsft-sql-chart-toggle');
         if (chartToggle && chartToggle.dataset.mode === 'chart') {
@@ -4599,8 +5742,49 @@
         }
     }
 
+    let _modalKeysBound = false;
+
+    const MODAL_COMMANDS = [
+        ['Mod+Enter', () => executeCurrentQuery()],
+        ['Mod+S', () => handleFileSave()],
+        ['Mod+Shift+S', () => handleFileSaveAs()],
+        ['Mod+O', () => handleFileOpen()],
+        ['Mod+Shift+F', () => handleEditFormat()],
+        ['Mod+Shift+D', () => handleFileExport()],
+        ['Mod+Shift+E', () => handleRunExport()],
+        ['Mod+Shift+C', () => handleRunCopy()],
+        ['Mod+B', () => toggleSchemaSidebar()],
+        ['Mod+Shift+K', () => handleRefreshSchema()],
+        ['Mod+Shift+G', () => importSavedQueriesFromFile()],
+        ['Mod+Shift+Y', () => exportSavedQueriesToFile()],
+        ['Mod+Shift+X', () => handleModalExit()],
+        ['Mod+Shift+1', () => handleViewEditor()],
+        ['Mod+Shift+2', () => handleViewTable()]
+    ];
+
+    function onModalKeydown(e) {
+        const S = window.NSFT_Shortcuts;
+        if (!S || typeof S.matches !== 'function') return;
+        const modal = document.getElementById('nsft-sql-modal');
+        const MS = window.NSFT_ModalStack;
+        if (!modal || !MS || typeof MS.isActive !== 'function' || !MS.isActive(modal)) return;
+        if (e.target && e.target.closest
+            && e.target.closest('.nsft-sql-dialog, .nsft-sql-erd-overlay')) return;
+        for (const [combo, run] of MODAL_COMMANDS) {
+            if (!S.matches(e, combo)) continue;
+            e.preventDefault();
+            e.stopPropagation();
+            run();
+            return;
+        }
+    }
+
     function addModalListeners() {
         const modal = document.getElementById('nsft-sql-modal');
+        if (!_modalKeysBound) {
+            document.addEventListener('keydown', onModalKeydown, true);
+            _modalKeysBound = true;
+        }
 
         const resizer = document.getElementById('nsft-sql-resizer');
         const mainPanel = document.querySelector('.nsft-sql-main-panel');
@@ -4847,6 +6031,7 @@
         registerAction('nsft-sql-action-export', handleFileExport);
         registerAction('nsft-sql-export-btn', handleRunExport);
         registerAction('nsft-sql-copy-btn', handleRunCopy);
+        registerAction('nsft-sql-clear-btn', clearResults);
         registerAction('nsft-sql-action-import-json', () => importSavedQueriesFromFile());
         registerAction('nsft-sql-action-export-json', exportSavedQueriesToFile);
         registerAction('nsft-sql-action-exit', handleModalExit);
@@ -4876,11 +6061,15 @@
         registerAction('nsft-sql-tool-save-as', handleFileSaveAs);
         registerAction('nsft-sql-tool-format', handleToolbarFormat);
         registerAction('nsft-sql-tool-run', handleToolbarRun);
-        registerAction('nsft-sql-tool-refresh-schema', handleRefreshSchema);
-        registerAction('nsft-sql-tool-sample', handleSampleQuery);
         registerAction('nsft-sql-tool-join', handleInsertJoin);
         registerAction('nsft-sql-tool-schema-toggle', toggleSchemaSidebar);
         registerAction('nsft-sql-tool-results-toggle', handleViewTable);
+        registerAction('nsft-sql-edge-schema', toggleSchemaSidebar);
+        registerAction('nsft-sql-edge-results', handleViewTable);
+        registerAction('nsft-sql-edge-ai', () => {
+            const btn = document.getElementById('nsft-sql-tool-ai');
+            if (btn) btn.click();
+        });
         registerAction('nsft-sql-tool-lint', handleToggleLint);
         registerAction('nsft-sql-schema-close', toggleSchemaSidebar);
         registerAction('nsft-sql-results-close', handleViewTable);
@@ -6686,61 +7875,20 @@
     }
 
     function handleRefreshSchema() {
-        if (!editor) return;
-        const tables = parseTablesFromQuery(editor.getValue());
-        if (!tables.length) {
-            logToToolbar(chrome.i18n.getMessage('sql_refresh_no_tables') || 'No tables detected in FROM', 'warning');
+        const listadas = Array.from(new Set(
+            getLoadedTableNames().concat(Object.keys(_schemaIndexMem))
+        )).sort();
+        if (!listadas.length) {
+            logToToolbar(chrome.i18n.getMessage('sql_refresh_no_tables')
+                || 'No hay tablas en el panel que actualizar.', 'warning');
             return;
         }
-
-        tables.forEach(t => {
-            delete sqlHintTables[t];
-            delete sqlTableMeta[t];
-            failedTables.delete(t);
-            clearSchemaCache(t);
-        });
-
-        logToToolbar(chrome.i18n.getMessage('sql_refresh_started', [String(tables.length)]) || `Refreshing ${tables.length} table(s)…`, 'info');
-        tables.forEach(t => fetchTableSchema(t, { force: true }));
+        return runBulkSchema(listadas, true);
     }
 
-    function handleSampleQuery() {
-        const menu = document.getElementById('nsft-sql-sample-menu');
-        if (!menu) return;
-
-        if (menu.classList.contains('open')) {
-            menu.classList.remove('open');
-            return;
-        }
-
-        const loaded = Object.keys(sqlTableMeta);
-        if (!loaded.length) {
-            logToToolbar(chrome.i18n.getMessage('sql_sample_no_tables') || 'Type a table in FROM first so its schema loads', 'warning');
-            return;
-        }
-
-        menu.innerHTML = '';
-        loaded.sort().forEach(tableName => {
-            const meta = sqlTableMeta[tableName];
-            const item = document.createElement('div');
-            item.className = 'nsft-sql-fav-item';
-            item.textContent = meta && meta.label && meta.label !== tableName
-                ? `${tableName} — ${meta.label}`
-                : tableName;
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                insertSampleQueryFor(tableName);
-                menu.classList.remove('open');
-            });
-            menu.appendChild(item);
-        });
-        menu.classList.add('open');
-    }
-
-    function insertSampleQueryFor(tableName) {
-        if (!editor) return;
+    function buildSampleQuery(tableName) {
         const meta = sqlTableMeta[tableName];
-        if (!meta) return;
+        if (!meta) return null;
 
         const preferred = new Set(['STRING', 'TEXT', 'DATE', 'DATETIME', 'INTEGER', 'FLOAT', 'NUMBER', 'CURRENCY']);
         const fields = Object.values(meta.fields)
@@ -6756,12 +7904,19 @@
             : fields.slice(0, 5).map(f => f.id);
 
         const selectList = (picked.length ? picked : ['id']).map(id => `  ${id}`).join(',\n');
-        const sql = `SELECT\n${selectList}\nFROM ${tableName}\nFETCH FIRST 100 ROWS ONLY`;
+        return `SELECT\n${selectList}\nFROM ${tableName}\nFETCH FIRST 100 ROWS ONLY`;
+    }
 
-        editor.setValue(sql);
-        editor.refresh();
-        editor.focus();
-        logToToolbar(chrome.i18n.getMessage('sql_sample_inserted', [tableName]) || `Sample query for ${tableName} inserted`, 'success');
+    function openSampleQueryTab(tableName) {
+        const sql = buildSampleQuery(tableName);
+        if (!sql) {
+            logToToolbar(chrome.i18n.getMessage('sql_sample_no_tables')
+                || 'Load the table schema first', 'warning');
+            return;
+        }
+        createTab({ title: tableName, query: sql });
+        logToToolbar(chrome.i18n.getMessage('sql_sample_inserted', [tableName])
+            || `Sample query for ${tableName} inserted`, 'success');
     }
 
     const SIDEBAR_OPEN_KEY = 'nsft_sql_sidebar_open';
@@ -6772,6 +7927,37 @@
     const SIDEBAR_DEFAULT_WIDTH = 260;
     const schemaExpanded = new Set();
     let schemaFilter = '';
+
+    const _schemaFilterCollapsed = new Set();
+
+    function schemaIsOpen(key, autoOpen) {
+        if (_schemaFilterCollapsed.has(key)) return false;
+        return autoOpen || schemaExpanded.has(key);
+    }
+
+    function schemaToggle(key, autoOpen) {
+        if (schemaIsOpen(key, autoOpen)) {
+            if (autoOpen) _schemaFilterCollapsed.add(key);
+            schemaExpanded.delete(key);
+        } else {
+            _schemaFilterCollapsed.delete(key);
+            schemaExpanded.add(key);
+        }
+        renderSchemaTree();
+    }
+
+    function schemaMatchesIn(meta, filterLc) {
+        if (!filterLc || !meta) return { fields: false, joins: false };
+        const fields = Object.values(meta.fields || {}).some((f) =>
+            f && f.isAvailable && !f.removed && (
+                String(f.id || '').toLowerCase().includes(filterLc) ||
+                String(f.label || '').toLowerCase().includes(filterLc)));
+        const joins = Object.values(meta.joins || {}).some((j) =>
+            j && j.isAvailable &&
+            (String(j.id || '') + ' ' + String(j.targetTable || '') + ' ' + String(j.targetLabel || ''))
+                .toLowerCase().includes(filterLc));
+        return { fields: fields, joins: joins };
+    }
 
     function getLoadedTableNames() {
         return Object.keys(sqlTableMeta).sort();
@@ -6883,42 +8069,194 @@
         scheduleSchemaTreeRender();
     }
 
+    const SCHEMA_OVERSCAN = 6;
+    const _schemaRowH = Object.create(null);
+    let _schemaMeasuring = false;
+    let _schemaRowEst = 34;
+
+    function schemaRowHeight(name) {
+        return _schemaRowH[name] || _schemaRowEst;
+    }
+
+    function schemaSpacer(h) {
+        const d = document.createElement('div');
+        d.className = 'nsft-sql-schema-spacer';
+        d.style.height = h + 'px';
+        return d;
+    }
+
     function renderSchemaTreeNow() {
         const tree = document.getElementById('nsft-sql-schema-tree');
         if (!tree) return;
 
-        const tables = getLoadedTableNames();
         const filterLc = schemaFilter.trim().toLowerCase();
-        const frag = document.createDocumentFragment();
 
-        tables.forEach(tableName => {
-            const meta = sqlTableMeta[tableName];
-            if (!meta) return;
-            const tableEl = renderSchemaTable(tableName, meta, filterLc);
-            if (tableEl) frag.appendChild(tableEl);
-        });
+        const cargadas = getLoadedTableNames();
+        const coincide = (t) => !filterLc || t.includes(filterLc)
+            || String((_schemaIndexMem[t] || {}).label || '').toLowerCase().includes(filterLc);
 
-        if (!frag.childNodes.length) {
-            tree.innerHTML = `<div class="nsft-sql-schema-empty">${escapeHtml(chrome.i18n.getMessage('sql_schema_empty') || 'Write a table name in FROM to load its schema')}</div>`;
+        const rank = (t) => {
+            if (!filterLc || t === filterLc) return 0;
+            if (t.startsWith(filterLc)) return 1;
+            if (t.includes(filterLc)) return 2;
+            return 3;
+        };
+        const todas = Array.from(new Set(
+            cargadas.concat(Object.keys(_schemaIndexMem).filter(coincide))
+        )).sort((a, b) => (rank(a) - rank(b)) || a.localeCompare(b));
+
+        if (!todas.length) {
+            const vacio = AUTO_SCHEMA
+                ? (chrome.i18n.getMessage('sql_schema_empty')
+                    || 'Escribe una tabla en el FROM y su esquema se carga solo. También puedes agregarlas una a una con + o descargar el esquema completo de la cuenta.')
+                : (chrome.i18n.getMessage('sql_schema_empty_manual')
+                    || 'La descarga automática está apagada: agrega con + las tablas que quieras, o descarga el esquema completo de la cuenta.');
+            tree.innerHTML = `<div class="nsft-sql-schema-empty">${escapeHtml(vacio)}</div>`;
             return;
         }
 
+        const scroll = tree.scrollTop;
+        const alto = tree.clientHeight || 400;
+        let acc = 0;
+        let primera = 0;
+        while (primera < todas.length && acc + schemaRowHeight(todas[primera]) <= scroll) {
+            acc += schemaRowHeight(todas[primera]);
+            primera++;
+        }
+        for (let n = 0; n < SCHEMA_OVERSCAN && primera > 0; n++) {
+            primera--;
+            acc -= schemaRowHeight(todas[primera]);
+        }
+        const arriba = acc;
+
+        let usado = arriba;
+        let ultima = primera;
+        const limite = scroll + alto;
+        while (ultima < todas.length && usado < limite) {
+            usado += schemaRowHeight(todas[ultima]);
+            ultima++;
+        }
+        ultima = Math.min(todas.length, ultima + SCHEMA_OVERSCAN);
+
+        let abajo = 0;
+        for (let k = ultima; k < todas.length; k++) abajo += schemaRowHeight(todas[k]);
+
+        const frag = document.createDocumentFragment();
+        if (arriba > 0) frag.appendChild(schemaSpacer(arriba));
+        for (let k = primera; k < ultima; k++) {
+            const tableName = todas[k];
+            const meta = sqlTableMeta[tableName];
+            const el = meta ? renderSchemaTable(tableName, meta, filterLc) : renderSchemaStub(tableName, filterLc);
+            if (!el) continue;
+            el.dataset.nsftTable = tableName;
+            frag.appendChild(el);
+        }
+        frag.appendChild(schemaSpacer(abajo));
+
         tree.innerHTML = '';
         tree.appendChild(frag);
+        tree.scrollTop = scroll;
+
+        medirFilasEsquema(tree);
+    }
+
+    function medirFilasEsquema(tree) {
+        if (_schemaMeasuring) return;
+        const filas = Array.from(tree.children);
+        let cambio = false;
+        for (let i = 0; i < filas.length; i++) {
+            const el = filas[i];
+            const name = el.dataset && el.dataset.nsftTable;
+            if (!name) continue;
+            const sig = filas[i + 1];
+            const h = sig ? (sig.offsetTop - el.offsetTop) : el.offsetHeight;
+            if (h <= 0) continue;
+            if (Math.abs(h - schemaRowHeight(name)) > 1) {
+                _schemaRowH[name] = h;
+                cambio = true;
+            }
+            if (el.dataset.nsftOpen !== '1' && Math.abs(h - _schemaRowEst) > 1) {
+                _schemaRowEst = h;
+                cambio = true;
+            }
+        }
+        if (!cambio) return;
+        _schemaMeasuring = true;
+        try {
+            renderSchemaTreeNow();
+        } finally {
+            _schemaMeasuring = false;
+        }
+    }
+
+    function renderSchemaStub(tableName, filterLc) {
+        const wrap = document.createElement('div');
+        wrap.className = 'nsft-sql-schema-table';
+        wrap.dataset.nsftOpen = '0';
+        const header = document.createElement('div');
+        header.className = 'nsft-sql-schema-node nsft-sql-schema-node-table';
+        const label = String((_schemaIndexMem[tableName] || {}).label || '');
+        const actionsTitle = chrome.i18n.getMessage('sql_schema_actions_title') || 'Acciones de la tabla';
+        header.innerHTML = `
+            <span class="nsft-sql-schema-caret">▸</span>
+            <span class="nsft-sql-schema-label">${markMatches(tableName, filterLc)}</span>
+            <span class="nsft-sql-schema-sub">${markMatches(label && label !== tableName ? label : '', filterLc)}</span>
+            <button class="nsft-sql-schema-actions-btn" type="button" title="${escapeHtml(actionsTitle)}" aria-label="${escapeHtml(actionsTitle)}" aria-haspopup="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"/>
+                    <line x1="12" y1="11" x2="12" y2="16"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </button>`;
+
+        const cargar = () => ensureTableInMemory(tableName).then(() => {
+            renderSchemaTree();
+            if (typeof runLint === 'function' && lintEnabled) runLint();
+        });
+
+        header.addEventListener('click', (e) => {
+            if (e.target.closest('.nsft-sql-schema-actions-btn')) return;
+            schemaExpanded.add('T:' + tableName);
+            cargar();
+        });
+        const actionsBtn = header.querySelector('.nsft-sql-schema-actions-btn');
+        if (actionsBtn) {
+            actionsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const r = actionsBtn.getBoundingClientRect();
+                cargar().then(() => {
+                    const meta = sqlTableMeta[tableName];
+                    if (meta) showSchemaTableContextMenu({ clientX: r.left, clientY: r.bottom + 4 }, tableName, meta);
+                });
+            });
+        }
+        header.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            cargar().then(() => {
+                const meta = sqlTableMeta[tableName];
+                if (meta) showSchemaTableContextMenu(e, tableName, meta);
+            });
+        });
+        wrap.appendChild(header);
+        return wrap;
     }
 
     function renderSchemaTable(tableName, meta, filterLc) {
         const wrap = document.createElement('div');
         wrap.className = 'nsft-sql-schema-table';
 
-        const expanded = schemaExpanded.has('T:' + tableName);
+        const hits = schemaMatchesIn(meta, filterLc);
+        const autoTable = !!(hits.fields || hits.joins);
+        const expanded = schemaIsOpen('T:' + tableName, autoTable);
+        wrap.dataset.nsftOpen = expanded ? '1' : '0';
         const header = document.createElement('div');
         header.className = 'nsft-sql-schema-node nsft-sql-schema-node-table';
         const actionsTitle = chrome.i18n.getMessage('sql_schema_actions_title') || 'Acciones de la tabla';
         header.innerHTML = `
             <span class="nsft-sql-schema-caret">${expanded ? '▾' : '▸'}</span>
-            <span class="nsft-sql-schema-label">${escapeHtml(tableName)}</span>
-            <span class="nsft-sql-schema-sub">${escapeHtml(meta.label && meta.label !== tableName ? meta.label : '')}</span>
+            <span class="nsft-sql-schema-label">${markMatches(tableName, filterLc)}</span>
+            <span class="nsft-sql-schema-sub">${markMatches(meta.label && meta.label !== tableName ? meta.label : '', filterLc)}</span>
             <button class="nsft-sql-schema-actions-btn" type="button" title="${escapeHtml(actionsTitle)}" aria-label="${escapeHtml(actionsTitle)}" aria-haspopup="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="12" r="9"/>
@@ -6928,9 +8266,7 @@
             </button>`;
         header.addEventListener('click', (e) => {
             if (e.target.closest('.nsft-sql-schema-actions-btn')) return;
-            if (schemaExpanded.has('T:' + tableName)) schemaExpanded.delete('T:' + tableName);
-            else schemaExpanded.add('T:' + tableName);
-            renderSchemaTree();
+            schemaToggle('T:' + tableName, autoTable);
         });
         header.addEventListener('contextmenu', (e) => {
             e.preventDefault();
@@ -6952,16 +8288,12 @@
         const fieldsSection = document.createElement('div');
         fieldsSection.className = 'nsft-sql-schema-section';
         const fieldsKey = 'F:' + tableName;
-        const fieldsOpen = schemaExpanded.has(fieldsKey);
+        const fieldsOpen = schemaIsOpen(fieldsKey, hits.fields);
         const fieldsCount = Object.values(meta.fields).filter(f => f.isAvailable && !f.removed).length;
         const fieldsHead = document.createElement('div');
         fieldsHead.className = 'nsft-sql-schema-node nsft-sql-schema-node-section';
         fieldsHead.innerHTML = `<span class="nsft-sql-schema-caret">${fieldsOpen ? '▾' : '▸'}</span><span class="nsft-sql-schema-label">Fields</span><span class="nsft-sql-schema-count">${fieldsCount}</span>`;
-        fieldsHead.addEventListener('click', () => {
-            if (schemaExpanded.has(fieldsKey)) schemaExpanded.delete(fieldsKey);
-            else schemaExpanded.add(fieldsKey);
-            renderSchemaTree();
-        });
+        fieldsHead.addEventListener('click', () => schemaToggle(fieldsKey, hits.fields));
         fieldsSection.appendChild(fieldsHead);
 
         if (fieldsOpen) {
@@ -6969,25 +8301,23 @@
             const dataTypes = Object.keys(groups).sort();
             dataTypes.forEach(dt => {
                 const groupKey = 'G:' + tableName + ':' + dt;
-                const groupOpen = schemaExpanded.has(groupKey);
                 const groupFiltered = filterLc
                     ? groups[dt].filter(f => f.id.toLowerCase().includes(filterLc) || (f.label || '').toLowerCase().includes(filterLc))
                     : groups[dt];
                 if (filterLc && !groupFiltered.length) return;
+                const groupOpen = schemaIsOpen(groupKey, !!filterLc && !!groupFiltered.length);
 
                 const groupHead = document.createElement('div');
                 groupHead.className = 'nsft-sql-schema-node nsft-sql-schema-node-group';
-                groupHead.innerHTML = `<span class="nsft-sql-schema-caret">${groupOpen || filterLc ? '▾' : '▸'}</span><span class="nsft-sql-schema-icon nsft-sql-hint-icon nsft-sql-hint-icon-${dt}">${getDataTypeIcon(dt)}</span><span class="nsft-sql-schema-label">${escapeHtml(dt)}</span><span class="nsft-sql-schema-count">${groupFiltered.length}</span>`;
+                groupHead.innerHTML = `<span class="nsft-sql-schema-caret">${groupOpen ? '▾' : '▸'}</span><span class="nsft-sql-schema-icon nsft-sql-hint-icon nsft-sql-hint-icon-${dt}">${getDataTypeIcon(dt)}</span><span class="nsft-sql-schema-label">${escapeHtml(dt)}</span><span class="nsft-sql-schema-count">${groupFiltered.length}</span>`;
                 groupHead.addEventListener('click', () => {
-                    if (schemaExpanded.has(groupKey)) schemaExpanded.delete(groupKey);
-                    else schemaExpanded.add(groupKey);
-                    renderSchemaTree();
+                    schemaToggle(groupKey, !!filterLc && !!groupFiltered.length);
                 });
                 fieldsSection.appendChild(groupHead);
 
-                if (groupOpen || filterLc) {
+                if (groupOpen) {
                     groupFiltered.forEach(f => {
-                        fieldsSection.appendChild(renderSchemaField(tableName, f));
+                        fieldsSection.appendChild(renderSchemaField(tableName, f, filterLc));
                     });
                 }
             });
@@ -6999,22 +8329,18 @@
             const joinsSection = document.createElement('div');
             joinsSection.className = 'nsft-sql-schema-section';
             const joinsKey = 'J:' + tableName;
-            const joinsOpen = schemaExpanded.has(joinsKey);
+            const joinsOpen = schemaIsOpen(joinsKey, hits.joins);
+            const joinsFiltered = joinsAvailable
+                .filter(j => !filterLc || (j.id + ' ' + (j.targetTable || '') + ' ' + (j.targetLabel || '')).toLowerCase().includes(filterLc))
+                .sort((a, b) => a.id.localeCompare(b.id));
             const joinsHead = document.createElement('div');
             joinsHead.className = 'nsft-sql-schema-node nsft-sql-schema-node-section';
-            joinsHead.innerHTML = `<span class="nsft-sql-schema-caret">${joinsOpen ? '▾' : '▸'}</span><span class="nsft-sql-schema-label">Joins</span><span class="nsft-sql-schema-count">${joinsAvailable.length}</span>`;
-            joinsHead.addEventListener('click', () => {
-                if (schemaExpanded.has(joinsKey)) schemaExpanded.delete(joinsKey);
-                else schemaExpanded.add(joinsKey);
-                renderSchemaTree();
-            });
+            joinsHead.innerHTML = `<span class="nsft-sql-schema-caret">${joinsOpen ? '▾' : '▸'}</span><span class="nsft-sql-schema-label">Joins</span><span class="nsft-sql-schema-count">${filterLc ? joinsFiltered.length : joinsAvailable.length}</span>`;
+            joinsHead.addEventListener('click', () => schemaToggle(joinsKey, hits.joins));
             joinsSection.appendChild(joinsHead);
 
             if (joinsOpen) {
-                const sortedJoins = joinsAvailable
-                    .filter(j => !filterLc || (j.id + ' ' + (j.targetTable || '') + ' ' + (j.targetLabel || '')).toLowerCase().includes(filterLc))
-                    .sort((a, b) => a.id.localeCompare(b.id));
-                sortedJoins.forEach(j => joinsSection.appendChild(renderSchemaJoin(tableName, j)));
+                joinsFiltered.forEach(j => joinsSection.appendChild(renderSchemaJoin(tableName, j, filterLc)));
             }
             wrap.appendChild(joinsSection);
         }
@@ -7022,13 +8348,13 @@
         return wrap;
     }
 
-    function renderSchemaField(tableName, field) {
+    function renderSchemaField(tableName, field, filterLc) {
         const row = document.createElement('div');
         row.className = 'nsft-sql-schema-leaf nsft-sql-schema-leaf-field';
         row.innerHTML = `
             <span class="nsft-sql-schema-icon nsft-sql-hint-icon nsft-sql-hint-icon-${field.dataType || 'UNKNOWN'}">${getDataTypeIcon(field.dataType)}</span>
-            <span class="nsft-sql-schema-id">${escapeHtml(field.id)}</span>
-            <span class="nsft-sql-schema-lbl">${escapeHtml(field.label && field.label !== field.id && !/^\[Missing Label:/i.test(field.label) ? field.label : '')}</span>`;
+            <span class="nsft-sql-schema-id">${markMatches(field.id, filterLc)}</span>
+            <span class="nsft-sql-schema-lbl">${markMatches(field.label && field.label !== field.id && !/^\[Missing Label:/i.test(field.label) ? field.label : '', filterLc)}</span>`;
         row.addEventListener('click', () => insertAliasedAtCursor(tableName, field.id));
         row.addEventListener('contextmenu', (e) => {
             e.preventDefault();
@@ -7037,13 +8363,13 @@
         return row;
     }
 
-    function renderSchemaJoin(tableName, join) {
+    function renderSchemaJoin(tableName, join, filterLc) {
         const row = document.createElement('div');
         row.className = 'nsft-sql-schema-leaf nsft-sql-schema-leaf-join';
         row.innerHTML = `
             <span class="nsft-sql-schema-icon nsft-sql-hint-icon nsft-sql-hint-icon-JOIN">→</span>
-            <span class="nsft-sql-schema-id">${escapeHtml(join.targetTable || join.id)}</span>
-            <span class="nsft-sql-schema-lbl">${escapeHtml(join.targetLabel && join.targetLabel !== join.targetTable ? join.targetLabel : '')}</span>
+            <span class="nsft-sql-schema-id">${markMatches(join.targetTable || join.id, filterLc)}</span>
+            <span class="nsft-sql-schema-lbl">${markMatches(join.targetLabel && join.targetLabel !== join.targetTable ? join.targetLabel : '', filterLc)}</span>
             <span class="nsft-sql-schema-card">${escapeHtml(join.cardinality || '')}</span>`;
         row.title = chrome.i18n.getMessage('sql_schema_join_tooltip') || 'Click to open JOIN wizard with this join preselected';
         row.addEventListener('click', (e) => {
@@ -7064,8 +8390,6 @@
     function openJoinWizardForJoin(tableName, join) {
         const menu = document.getElementById('nsft-sql-join-menu');
         if (!menu) return;
-        const sampleMenu = document.getElementById('nsft-sql-sample-menu');
-        if (sampleMenu) sampleMenu.classList.remove('open');
         renderJoinWizard(menu, [{ rootTable: tableName, join }]);
         menu.classList.add('open');
     }
@@ -7132,7 +8456,8 @@
             refresh: '<path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>',
             trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>',
             external: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
-            download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>'
+            download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+            newDoc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h9"/><polyline points="14 2 14 8 20 8"/><path d="M19 14v6"/><path d="M16 17h6"/>'
         };
 
         const mkItem = (label, handler, icon, danger) => {
@@ -7159,6 +8484,12 @@
         ctx.appendChild(head);
 
         ctx.appendChild(mkItem(
+            chrome.i18n.getMessage('sql_schema_ctx_sample') || 'Crear plantilla de esta tabla',
+            () => openSampleQueryTab(tableName), I.newDoc
+        ));
+        ctx.appendChild(mkSep());
+
+        ctx.appendChild(mkItem(
             chrome.i18n.getMessage('sql_schema_ctx_refresh_table') || 'Actualizar tabla',
             () => refreshSingleTable(tableName), I.refresh
         ));
@@ -7171,6 +8502,10 @@
         ctx.appendChild(mkItem(
             chrome.i18n.getMessage('sql_schema_ctx_open_catalog') || 'Abrir en el Catálogo de Registros',
             () => openInRecordsCatalog(tableName), I.external
+        ));
+        ctx.appendChild(mkItem(
+            chrome.i18n.getMessage('sql_schema_ctx_open_definition') || 'Abrir la definición completa (JSON)',
+            () => openSchemaDefinition(tableName), I.external
         ));
 
         ctx.appendChild(mkSep());
@@ -7197,13 +8532,236 @@
     function refreshSingleTable(tableName) {
         tableName = normalizeTableName(tableName);
         if (!tableName) return;
-        delete sqlHintTables[tableName];
-        delete sqlTableMeta[tableName];
         failedTables.delete(tableName);
         userRemovedTables.delete(tableName);
-        clearSchemaCache(tableName);
-        renderSchemaTree();
         fetchTableSchema(tableName, { force: true }).then(renderSchemaTree);
+    }
+
+    const BULK_CONCURRENCY = 6;
+    const BULK_FLUSH = 60;
+    const BULK_AVG_KB = 10;
+    let _bulkCancel = false;
+    let _bulkRunning = false;
+
+    function paintBulkBar(done, total) {
+        const bar = document.getElementById('nsft-sql-schema-bulk');
+        if (!bar) return;
+        const txt = bar.querySelector('.nsft-sql-schema-bulk-text');
+        const fill = bar.querySelector('.nsft-sql-schema-bulk-fill');
+        if (txt) {
+            txt.textContent = chrome.i18n.getMessage('sql_schema_bulk_progress',
+                [fmtNum(done), fmtNum(total)]) || `Descargando esquemas… ${fmtNum(done)}/${fmtNum(total)}`;
+        }
+        if (fill) fill.style.width = total ? Math.round((done / total) * 100) + '%' : '0%';
+    }
+
+    function showBulkBar(total) {
+        const host = document.getElementById('nsft-sql-schema-sidebar');
+        if (!host || document.getElementById('nsft-sql-schema-bulk')) return;
+        const bar = document.createElement('div');
+        bar.id = 'nsft-sql-schema-bulk';
+        bar.className = 'nsft-sql-schema-bulk';
+        const txt = document.createElement('div');
+        txt.className = 'nsft-sql-schema-bulk-text';
+        const track = document.createElement('div');
+        track.className = 'nsft-sql-schema-bulk-track';
+        const fill = document.createElement('div');
+        fill.className = 'nsft-sql-schema-bulk-fill';
+        track.appendChild(fill);
+        const stop = document.createElement('button');
+        stop.type = 'button';
+        stop.className = 'nsft-sql-schema-bulk-stop';
+        stop.textContent = chrome.i18n.getMessage('sql_schema_bulk_stop') || 'Cancelar';
+        stop.addEventListener('click', () => { _bulkCancel = true; });
+        bar.appendChild(txt);
+        bar.appendChild(track);
+        bar.appendChild(stop);
+        const header = host.querySelector('.nsft-sql-schema-header');
+        if (header && header.nextSibling) host.insertBefore(bar, header.nextSibling);
+        else host.appendChild(bar);
+        paintBulkBar(0, total);
+    }
+
+    function hideBulkBar() {
+        const bar = document.getElementById('nsft-sql-schema-bulk');
+        if (bar) bar.remove();
+    }
+
+    function bulkFetchOne(tableName) {
+        return fetch(schemaDetailUrl(tableName))
+            .then((r) => (r.ok ? r.json() : null))
+            .then((json) => {
+                if (!(json && json.status === 'ok' && json.data && json.data.fields)) return null;
+                return { tableName: tableName, rawData: json.data };
+            })
+            .catch(() => null);
+    }
+
+    async function handleBulkSchemaDownload() {
+        if (_bulkRunning) return;
+        const btn = document.getElementById('nsft-sql-schema-all');
+
+        if (!catalogTables) {
+            ensureCatalogLoaded();
+            if (btn) btn.textContent = chrome.i18n.getMessage('sql_schema_bulk_wait') || 'Cargando el catálogo…';
+            let esperas = 0;
+            while (!catalogTables && esperas++ < 60) {
+                await new Promise((r) => setTimeout(r, 250));
+            }
+            paintBulkButton();
+        }
+        const pendientes = (catalogTables || [])
+            .map((t) => t.id)
+            .filter((t) => t && !_schemaIndexMem[t]);
+        if (!pendientes.length) {
+            logToToolbar(chrome.i18n.getMessage('sql_schema_bulk_none')
+                || 'Ya está en caché el esquema de todas las tablas.', 'info');
+            return;
+        }
+        return runBulkSchema(pendientes, false);
+    }
+
+    async function runBulkSchema(pendientes, refrescar) {
+        if (_bulkRunning || !pendientes || !pendientes.length) return;
+
+        const mb = Math.max(1, Math.round((pendientes.length * BULK_AVG_KB) / 1024));
+        const ok = await showRunnerConfirm({
+            title: refrescar
+                ? (chrome.i18n.getMessage('sql_schema_refreshall_title') || 'Actualizar el esquema')
+                : (chrome.i18n.getMessage('sql_schema_bulk_title') || 'Descargar el esquema completo'),
+            body: refrescar
+                ? (chrome.i18n.getMessage('sql_schema_refreshall_body', [fmtNum(pendientes.length)])
+                    || `Se volverá a pedir a la cuenta el esquema de las ${fmtNum(pendientes.length)} tablas del panel.`)
+                : (chrome.i18n.getMessage('sql_schema_bulk_body', [fmtNum(pendientes.length), String(mb)])
+                    || `Se descargará el esquema de ${fmtNum(pendientes.length)} tablas (unos ${mb} MB). Puedes cancelar a medias y se queda lo bajado.`),
+            confirmLabel: refrescar
+                ? (chrome.i18n.getMessage('sql_schema_refreshall_confirm') || 'Actualizar')
+                : (chrome.i18n.getMessage('sql_schema_bulk_confirm') || 'Descargar')
+        });
+        if (!ok) return;
+
+        _bulkRunning = true;
+        _bulkCancel = false;
+        toggleCatalogPop(false);
+        showBulkBar(pendientes.length);
+        let hechas = 0;
+        let fallos = 0;
+        let porGuardar = [];
+        try {
+            for (let i = 0; i < pendientes.length && !_bulkCancel; i += BULK_CONCURRENCY) {
+                const tanda = pendientes.slice(i, i + BULK_CONCURRENCY);
+                const res = await Promise.all(tanda.map(bulkFetchOne));
+                res.forEach((r) => {
+                    if (r) { hechas++; porGuardar.push(r); } else { fallos++; }
+                });
+                if (porGuardar.length >= BULK_FLUSH) {
+                    saveSchemaBatch(porGuardar);
+                    porGuardar = [];
+                }
+                paintBulkBar(hechas + fallos, pendientes.length);
+                await new Promise((r) => setTimeout(r, 0));
+            }
+            if (porGuardar.length) saveSchemaBatch(porGuardar);
+            await _cacheWriteChain;
+            await new Promise((resolve) => refreshSchemaIndexMem(resolve));
+            renderSchemaTree();
+            const key = _bulkCancel ? 'sql_schema_bulk_stopped' : 'sql_schema_bulk_done';
+            logToToolbar(chrome.i18n.getMessage(key, [fmtNum(hechas), fmtNum(fallos)])
+                || `${fmtNum(hechas)} tablas en caché (${fmtNum(fallos)} sin datos).`,
+                _bulkCancel ? 'info' : 'success');
+        } finally {
+            _bulkRunning = false;
+            _bulkCancel = false;
+            hideBulkBar();
+            paintBulkButton();
+        }
+    }
+
+    function paintBulkButton() {
+        const total = (catalogTables || []).length;
+        const faltan = total
+            ? (catalogTables || []).filter((t) => t.id && !_schemaIndexMem[t.id]).length
+            : 0;
+
+        const btn = document.getElementById('nsft-sql-schema-all');
+        if (btn) {
+            btn.textContent = total
+                ? (chrome.i18n.getMessage('sql_schema_bulk_btn_n', [fmtNum(faltan)])
+                    || `⬇ Descargar el esquema de las ${fmtNum(faltan)} tablas que faltan`)
+                : (chrome.i18n.getMessage('sql_schema_bulk_btn') || '⬇ Descargar el esquema de todas las tablas');
+            btn.disabled = _bulkRunning || (!!total && !faltan);
+        }
+
+        const ref = document.getElementById('nsft-sql-schema-refresh');
+        if (ref) {
+            const listadas = new Set(getLoadedTableNames().concat(Object.keys(_schemaIndexMem)));
+            const t = chrome.i18n.getMessage('sql_refresh_schema_title', [fmtNum(listadas.size)])
+                || `Actualizar el esquema de las ${fmtNum(listadas.size)} tablas del panel`;
+            ref.title = t + ' (' + KBD_MOD + KBD_SHIFT + 'K)';
+            ref.setAttribute('aria-label', t);
+            ref.disabled = _bulkRunning || !listadas.size;
+            ref.classList.toggle('is-spinning', _bulkRunning);
+        }
+    }
+
+    const AUTO_ICO = '<g transform="translate(0.9 0.6)"><path d="M9.5 3.5v7.5"/><path d="M5.8 7.8l3.7 3.9 3.7-3.9"/><path d="M3 15.5v3a1.6 1.6 0 0 0 1.6 1.6h9.8a1.6 1.6 0 0 0 1.6-1.6v-3"/><path d="M19.2 2.6 15.4 8.4h3.2l-3.6 5.4" fill="currentColor" stroke-width="1.2" stroke-linejoin="miter"/></g>';
+    const AUTO_SVG_OPEN = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+    const AUTO_ON_SVG = AUTO_SVG_OPEN + AUTO_ICO + '</svg>';
+    const AUTO_OFF_SVG = AUTO_SVG_OPEN + AUTO_ICO + '<path d="M3 3l18 18"/></svg>';
+
+    function paintAutoSchemaBtn() {
+        const btn = document.getElementById('nsft-sql-schema-auto');
+        if (!btn) return;
+        const title = AUTO_SCHEMA
+            ? (chrome.i18n.getMessage('sql_schema_auto_on') || 'Descarga automática del esquema activada · Clic para desactivarla')
+            : (chrome.i18n.getMessage('sql_schema_auto_off') || 'Descarga automática del esquema desactivada · Clic para activarla');
+        btn.innerHTML = AUTO_SCHEMA ? AUTO_ON_SVG : AUTO_OFF_SVG;
+        btn.classList.toggle('is-off', !AUTO_SCHEMA);
+        btn.classList.toggle('is-fetching', AUTO_SCHEMA && _autoFetchInFlight > 0);
+        btn.setAttribute('aria-pressed', AUTO_SCHEMA ? 'true' : 'false');
+        btn.title = title;
+        btn.setAttribute('aria-label', title);
+    }
+
+    let _autoFetchInFlight = 0;
+
+    function setAutoPulse(activa) {
+        _autoFetchInFlight = Math.max(0, _autoFetchInFlight + (activa ? 1 : -1));
+        const btn = document.getElementById('nsft-sql-schema-auto');
+        if (btn) btn.classList.toggle('is-fetching', AUTO_SCHEMA && _autoFetchInFlight > 0);
+    }
+
+    function handleWipeSchemaCache() {
+        loadSchemaIndex(async (index) => {
+            const total = Object.keys(index).length;
+            if (!total) {
+                logToToolbar(chrome.i18n.getMessage('sql_schema_wipe_empty')
+                    || 'La caché de esquemas ya está vacía.', 'info');
+                return;
+            }
+            const ok = await showRunnerConfirm({
+                title: chrome.i18n.getMessage('sql_schema_wipe_title') || 'Vaciar la caché de esquemas',
+                body: chrome.i18n.getMessage('sql_schema_wipe_body', [fmtNum(total)])
+                    || `Se borrarán los esquemas de ${fmtNum(total)} tabla(s) de esta cuenta.`,
+                confirmLabel: chrome.i18n.getMessage('sql_schema_wipe_confirm') || 'Vaciar',
+                danger: true
+            });
+            if (!ok) return;
+
+            Object.keys(sqlTableMeta).forEach((t) => {
+                delete sqlTableMeta[t];
+                delete sqlHintTables[t];
+                delete _schemaIngestTs[t];
+                schemaExpanded.delete('T:' + t);
+            });
+            failedTables.clear();
+            userRemovedTables.clear();
+            clearSchemaCache();
+            renderSchemaTree();
+            if (typeof runLint === 'function' && lintEnabled) runLint();
+            logToToolbar(chrome.i18n.getMessage('sql_schema_wipe_done', [fmtNum(total)])
+                || `Caché vaciada (${fmtNum(total)} tablas).`, 'success');
+        });
     }
 
     function removeSingleTable(tableName) {
@@ -7938,10 +9496,62 @@
 
     const runQuery = (ctx) => {
         if (!ctx.query_data) throw "Query data not found";
+        if (FETCH_METHOD === 'nquery') { _runVia = 'nquery'; injectFetcher(ctx.query_data); return; }
+        _runVia = 'rest';
         runQueryRest(ctx.query_data).then((ok) => {
-            if (!ok) injectFetcher(ctx.query_data);
+            if (ok) return;
+            if (_stopRequested) { setRunState('idle'); return; }
+            if (FETCH_METHOD === 'rest') {
+                setRunState('idle');
+                logToToolbar(chrome.i18n.getMessage('sql_rest_unavailable')
+                    || 'This account cannot use the REST endpoint; pick another method in preferences.', 'warning');
+                return;
+            }
+            _runVia = 'nquery';
+            injectFetcher(ctx.query_data);
         });
     };
+
+    let ROWS_CONFIRM_THRESHOLD = 20000;
+    let MANY_ROWS_ACTION = 'ask';
+    let FETCH_METHOD = 'auto';
+    let REST_CONCURRENCY = 4;
+    let REST_FILL_COLUMNS = false;
+    let AUTO_SCHEMA = true;
+
+    async function askKeepFetching(fetched, total) {
+        if (MANY_ROWS_ACTION === 'continue') return true;
+        if (MANY_ROWS_ACTION === 'stop') return false;
+
+        const conocido = total > fetched;
+        const res = await showRunnerConfirm({
+            title: chrome.i18n.getMessage('sql_rows_confirm_title') || 'Keep fetching rows?',
+            body: (conocido
+                ? chrome.i18n.getMessage('sql_rows_confirm_body', [fmtNum(fetched), fmtNum(total)])
+                : chrome.i18n.getMessage('sql_rows_confirm_body_unknown', [fmtNum(fetched)])) || '',
+            confirmLabel: chrome.i18n.getMessage('sql_rows_confirm_go') || 'Keep fetching',
+            cancelLabel: chrome.i18n.getMessage('sql_rows_confirm_stop') || 'Stop here',
+            rememberLabel: chrome.i18n.getMessage('sql_rows_confirm_remember') || 'Remember my answer'
+        });
+        const ok = !!(res && typeof res === 'object' ? res.ok : res);
+        if (res && res.remember) {
+            MANY_ROWS_ACTION = ok ? 'continue' : 'stop';
+            chrome.storage.local.set({ suiteqlManyRowsAction: MANY_ROWS_ACTION });
+        }
+        return ok;
+    }
+
+    function fmtNum(n) {
+        try { return Number(n).toLocaleString(); } catch (e) { return String(n); }
+    }
+
+    function offsetDeLinks(links, rel) {
+        if (!Array.isArray(links)) return null;
+        const l = links.find((x) => x && x.rel === rel);
+        if (!l || !l.href) return null;
+        const m = /[?&]offset=(\d+)/.exec(l.href);
+        return m ? parseInt(m[1], 10) : null;
+    }
 
     let _runnerRestBroken = false;
     async function runQueryRest(queryData) {
@@ -7949,55 +9559,198 @@
         const query = queryData && queryData.query;
         if (!query) return false;
         if (window.NSFT_SuiteQLRest && await window.NSFT_SuiteQLRest.isKnownOff()) {
-            _runnerRestBroken = true;
-            return false;
+            const vivo = window.NSFT_SuiteQLRest.probe
+                ? await window.NSFT_SuiteQLRest.probe()
+                : false;
+            if (!vivo) {
+                _runnerRestBroken = true;
+                return false;
+            }
         }
         const startTime = Date.now();
         const maxRecords = (queryData && queryData.maxRecords) || 5000;
-        try {
-            let rows = [], offset = 0, total = 0, guard = 0;
-            for (;;) {
-                const limit = Math.min(1000, maxRecords - rows.length);
-                if (limit <= 0) break;
+        const MIN_LIMIT = 50;
+
+        const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        _restAbort = ctrl;
+
+        const pedirPagina = async (offset, limit) => {
+            try {
                 const url = new URL('/services/rest/query/v1/suiteql?limit=' + limit + '&offset=' + offset, location.origin);
                 const res = await fetch(url.href, {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json', 'Prefer': 'transient' },
-                    body: JSON.stringify({ q: query })
+                    body: JSON.stringify({ q: query }),
+                    signal: ctrl ? ctrl.signal : undefined
                 });
                 if (!res.ok) {
-                    const st = res.status;
-                    if (st === 401 || st === 403 || st === 404) {
-                        _runnerRestBroken = true;
-                        if (window.NSFT_SuiteQLRest) window.NSFT_SuiteQLRest.markOff();
-                        return false;
-                    }
                     let detail = '';
-                    try { const j = await res.json(); detail = (j['o:errorDetails'] && j['o:errorDetails'][0] && j['o:errorDetails'][0].detail) || j.title || ''; } catch (e) { }
-                    handleExtensionMessage({ type: 'error', text: detail || ('HTTP ' + st) });
-                    return true;
+                    try {
+                        const j = await res.json();
+                        detail = (j['o:errorDetails'] && j['o:errorDetails'][0] && j['o:errorDetails'][0].detail) || j.title || '';
+                    } catch (e) { }
+                    return { offset: offset, ok: false, status: res.status, detail: detail };
                 }
                 const j = await res.json();
                 const items = Array.isArray(j.items) ? j.items : [];
-                items.forEach((it) => {
+                const filas = items.map((it) => {
                     const row = {};
                     Object.keys(it).forEach((k) => { if (k !== 'links') row[k] = it[k]; });
-                    rows.push(row);
+                    return row;
                 });
-                total = (typeof j.totalResults === 'number') ? j.totalResults : rows.length;
-                reportRunProgress(rows.length, Math.min(total, maxRecords));
-                if (!j.hasMore || rows.length >= maxRecords || items.length === 0) break;
-                offset += items.length;
-                if (++guard > 20) break;
+                return {
+                    offset: offset, ok: true, rows: filas,
+                    total: (typeof j.totalResults === 'number') ? j.totalResults : 0,
+                    hasMore: !!j.hasMore,
+                    lastOffset: offsetDeLinks(j.links, 'last'),
+                    nextOffset: offsetDeLinks(j.links, 'next')
+                };
+            } catch (e) {
+                if (e && e.name === 'AbortError') {
+                    return { offset: offset, ok: false, status: -1, aborted: true, detail: '' };
+                }
+                return { offset: offset, ok: false, status: 0, detail: (e && e.message) || '' };
             }
+        };
+
+        try {
+            let limit = 1000;
+            let stopReason = 'complete';
+            let asked = false;
+
+            let primera = await pedirPagina(0, Math.min(limit, maxRecords));
+            if (!primera.ok) {
+                const st = primera.status;
+                if (primera.aborted) {
+                    handleExtensionMessage({
+                        type: 'results',
+                        payload: { data: [], count: 0, executionTime: Date.now() - startTime, query, stopReason: 'user' }
+                    });
+                    return true;
+                }
+                if (st === 401 || st === 403 || st === 404) {
+                    _runnerRestBroken = true;
+                    if (window.NSFT_SuiteQLRest && (st === 403 || st === 404)) {
+                        window.NSFT_SuiteQLRest.markOff();
+                    }
+                    return false;
+                }
+                const porTamano = st === 0 || st === 408 || st === 429 || st >= 500;
+                if (!porTamano) {
+                    handleExtensionMessage({ type: 'error', text: primera.detail || ('HTTP ' + st) });
+                    return true;
+                }
+                while (!primera.ok && !primera.aborted && limit > MIN_LIMIT) {
+                    limit = Math.max(MIN_LIMIT, Math.floor(limit / 5));
+                    primera = await pedirPagina(0, Math.min(limit, maxRecords));
+                }
+                if (primera.aborted || _stopRequested) {
+                    handleExtensionMessage({
+                        type: 'results',
+                        payload: { data: [], count: 0, executionTime: Date.now() - startTime, query, stopReason: 'user' }
+                    });
+                    return true;
+                }
+                if (!primera.ok) return false;
+            }
+
+            let rows = primera.rows;
+            let total = primera.total || rows.length;
+            reportRunProgress(rows.length, Math.min(total, maxRecords));
+
+            const finPorEnlace = primera.lastOffset ? primera.lastOffset + limit : 0;
+            const techo = total
+                ? Math.min(maxRecords, total)
+                : (finPorEnlace ? Math.min(maxRecords, finPorEnlace) : maxRecords);
+
+            const offsetEsperado = rows.length;
+            const desacuerdo = primera.nextOffset != null && primera.nextOffset !== offsetEsperado;
+            const aCiegas = !total && !finPorEnlace;
+            const guiadoPorNext = desacuerdo || aCiegas;
+
+            let siguiente = guiadoPorNext && primera.nextOffset != null
+                ? primera.nextOffset
+                : offsetEsperado;
+            let hayMas = primera.hasMore && rows.length > 0;
+            let concurrencia = guiadoPorNext ? 1 : Math.max(1, Math.min(8, REST_CONCURRENCY));
+            let guard = 0;
+
+            while (hayMas && siguiente < techo) {
+                if (_stopRequested) { stopReason = 'user'; break; }
+
+                if (++guard > Math.ceil(techo / MIN_LIMIT) + 8) { stopReason = 'guard'; break; }
+
+                if (!asked && rows.length >= ROWS_CONFIRM_THRESHOLD) {
+                    asked = true;
+                    const seguir = await askKeepFetching(rows.length, Math.min(total || techo, techo));
+                    if (!seguir) { stopReason = 'user'; break; }
+                }
+
+                const tanda = [];
+                let cursor = siguiente;
+                for (let i = 0; i < concurrencia && cursor < techo; i++) {
+                    tanda.push({ offset: cursor, limit: limit });
+                    cursor += limit;
+                }
+                if (!tanda.length) break;
+
+                const respuestas = await Promise.all(tanda.map((p) => pedirPagina(p.offset, p.limit)));
+
+                let fallo = null;
+                for (let i = 0; i < respuestas.length; i++) {
+                    const r = respuestas[i];
+                    if (!r.ok) { fallo = r; break; }
+                    if (r.total) total = r.total;
+                    if (r.rows.length) rows = rows.concat(r.rows);
+                    siguiente = (guiadoPorNext && r.nextOffset != null)
+                        ? r.nextOffset
+                        : r.offset + r.rows.length;
+                    if (!r.hasMore || r.rows.length < tanda[i].limit) { hayMas = false; break; }
+                }
+
+                if (fallo) {
+                    const st = fallo.status;
+                    if (fallo.aborted) { stopReason = 'user'; break; }
+                    if (st === 401 || st === 403 || st === 404) {
+                        stopReason = 'limit';
+                        break;
+                    }
+                    const porTamano = st === 0 || st === 408 || st === 429 || st >= 500;
+                    if (!porTamano) {
+                        handleExtensionMessage({ type: 'error', text: fallo.detail || ('HTTP ' + st) });
+                        return true;
+                    }
+                    if (concurrencia > 1) {
+                        concurrencia = Math.max(1, Math.floor(concurrencia / 2));
+                    } else if (limit > MIN_LIMIT) {
+                        limit = Math.max(MIN_LIMIT, Math.floor(limit / 5));
+                    } else {
+                        stopReason = 'limit';
+                        break;
+                    }
+                }
+
+                reportRunProgress(rows.length, Math.min(total || techo, techo));
+
+                await new Promise((r) => setTimeout(r, 0));
+            }
+
+            if (rows.length > techo) rows = rows.slice(0, techo);
+
+            if (stopReason === 'complete' && rows.length >= maxRecords && (hayMas || total > maxRecords)) {
+                stopReason = 'max';
+            }
+
             handleExtensionMessage({
                 type: 'results',
-                payload: { data: rows, count: total, executionTime: Date.now() - startTime, query }
+                payload: { data: rows, count: total, executionTime: Date.now() - startTime, query, stopReason }
             });
             return true;
         } catch (e) {
             return false;
+        } finally {
+            if (_restAbort === ctrl) _restAbort = null;
         }
     }
 
@@ -8221,6 +9974,12 @@
 
         _lastRunQuery = query;
 
+        _rounds = null;
+        _askedThisRun = false;
+        _stopRequested = false;
+        _restAbort = null;
+        _runVia = null;
+
         switchPanelTab('results');
         setRunState('running');
 
@@ -8237,6 +9996,7 @@
 
 
     function handleToolbarRun() {
+        if (_runPhase !== 'idle') { requestStopRun(); return; }
         executeCurrentQuery();
     }
 
@@ -8346,9 +10106,11 @@
         constrainModalToWindow(el);
     }
 
-    const IS_MAC = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || '');
-    const KBD_MOD = IS_MAC ? 'Cmd+' : 'Ctrl+';
-    const KBD_SHIFT = 'Shift+';
+    const NSFT_KEYS = window.NSFT_MacKeys
+        || { isMac: /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent || ''), mod: 'Ctrl', shift: 'Shift' };
+    const IS_MAC = NSFT_KEYS.isMac;
+    const KBD_MOD = NSFT_KEYS.mod + '+';
+    const KBD_SHIFT = NSFT_KEYS.shift + '+';
     const KBD_ENTER = 'Enter';
     const kbd = (combo) => `<span class="nsft-sql-kbd">${combo}</span>`;
 
@@ -8433,8 +10195,8 @@
                     </div>
                     <div class="nsft-sql-toolbar-sep"></div>
 
-                    <button class="nsft-sql-toolbar-button" id="nsft-sql-tool-run" title="${chrome.i18n.getMessage('sql_submenu_run') || 'Run'} (${KBD_MOD}${KBD_ENTER})" style="background-color: #3b82f6; color: white; border-color: #2563eb;">
-                        <span class="nsft-sql-btn-glyph nsft-sql-run-glyph">▶</span>${chrome.i18n.getMessage('sql_submenu_run') || 'Run'}<span class="nsft-sql-kbd">${IS_MAC ? '⌘↵' : 'Ctrl+↵'}</span>
+                    <button class="nsft-sql-toolbar-button" id="nsft-sql-tool-run" title="${chrome.i18n.getMessage('sql_submenu_run') || 'Run'} (${KBD_MOD}${KBD_ENTER})" style="background-color: var(--nsft-ns-accent, #3b82f6); color: white; border-color: var(--nsft-ns-accent-bd, #2563eb);">
+                        <span class="nsft-sql-btn-glyph nsft-sql-run-glyph">▶</span><span class="nsft-sql-run-label">${chrome.i18n.getMessage('sql_submenu_run') || 'Run'}</span><span class="nsft-sql-kbd">${IS_MAC ? '⌘↵' : 'Ctrl+↵'}</span>
                     </button>
                     <div class="nsft-sql-toolbar-sep"></div>
 
@@ -8447,12 +10209,6 @@
                                 <span class="nsft-sql-btn-glyph">⋈</span>${chrome.i18n.getMessage('sql_join_btn') || 'JOIN'}
                             </button>
                             <div class="nsft-sql-favorites-menu nsft-sql-join-menu" id="nsft-sql-join-menu"></div>
-                        </div>
-                        <div class="nsft-sql-favorites-wrap">
-                            <button class="nsft-sql-toolbar-button" id="nsft-sql-tool-sample" title="${chrome.i18n.getMessage('sql_sample_title') || 'Insert sample query from loaded table'}">
-                                <span class="nsft-sql-btn-glyph">▤</span>${chrome.i18n.getMessage('sql_sample_btn') || 'Sample'}
-                            </button>
-                            <div class="nsft-sql-favorites-menu" id="nsft-sql-sample-menu"></div>
                         </div>
                         <div class="nsft-sql-favorites-wrap">
                             <button class="nsft-sql-toolbar-button" id="nsft-sql-tool-variables" title="${chrome.i18n.getMessage('sql_vars_title') || 'Variables'}">
@@ -8484,18 +10240,34 @@
                     <button class="nsft-sql-toolbar-button nsft-sql-iconbtn" id="nsft-sql-tool-lint" title="${chrome.i18n.getMessage('sql_lint_toggle_title') || 'Toggle field availability lint'}">
                         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5l3.5 3.5 7.5-8"></path></svg>
                     </button>
-                    <button class="nsft-sql-toolbar-button" id="nsft-sql-tool-refresh-schema" style="background-color: #10b981; color: white; border-color: #059669;" title="${chrome.i18n.getMessage('sql_refresh_schema_title') || 'Refresh schema cache'} (${KBD_MOD}${KBD_SHIFT}K)">
-                        <span class="nsft-sql-btn-glyph">⟳</span>${chrome.i18n.getMessage('sql_refresh_schema_btn') || 'Refresh'}
-                    </button>
                 </div>
-                <div class="nsft-sql-tabs-bar" id="nsft-sql-tabs-bar"></div>
+                <!-- Las flechas van FUERA de la barra que se desplaza: dentro se
+                     irían con ella y dejarían de estar donde se las busca.
+                     Aparecen sólo cuando las pestañas no caben. -->
+                <div class="nsft-sql-tabs-row">
+                    <button type="button" class="nsft-sql-tabs-nav" id="nsft-sql-tabs-prev" hidden
+                        title="${escapeHtml(chrome.i18n.getMessage('sql_tabs_scroll_prev') || 'Pestañas anteriores')}"
+                        aria-label="${escapeHtml(chrome.i18n.getMessage('sql_tabs_scroll_prev') || 'Pestañas anteriores')}">‹</button>
+                    <div class="nsft-sql-tabs-bar" id="nsft-sql-tabs-bar"></div>
+                    <button type="button" class="nsft-sql-tabs-nav" id="nsft-sql-tabs-next" hidden
+                        title="${escapeHtml(chrome.i18n.getMessage('sql_tabs_scroll_next') || 'Pestañas siguientes')}"
+                        aria-label="${escapeHtml(chrome.i18n.getMessage('sql_tabs_scroll_next') || 'Pestañas siguientes')}">›</button>
+                </div>
                 <div class="nsft-sql-workzone${cachedSidebarSide === 'right' ? ' sidebar-right' : ''}">
+                    <!-- Pestañas de borde: una por panel plegado, pegada al lado
+                         por donde reaparece (esquema al costado, IA a la derecha,
+                         resultados abajo). Quién se ve lo decide el CSS mirando
+                         las clases de plegado de cada panel: aquí no hay estado
+                         que sincronizar. Reabren con el MISMO camino que los
+                         botones de la barra. -->
+                    <button type="button" class="nsft-sql-edge-tab nsft-sql-edge-tab-schema" id="nsft-sql-edge-schema"
+                        title="${chrome.i18n.getMessage('sql_schema_toggle_title') || 'Toggle Schema explorer'} (${KBD_MOD}B)">${chrome.i18n.getMessage('sql_schema_title') || 'Esquema'}</button>
+                    <button type="button" class="nsft-sql-edge-tab nsft-sql-edge-tab-ai" id="nsft-sql-edge-ai"
+                        title="${escapeHtml(chrome.i18n.getMessage('sqlai_toggle_title') || 'AI')}">${chrome.i18n.getMessage('sql_edge_ai') || 'IA'}</button>
                 <aside class="nsft-sql-schema-sidebar" id="nsft-sql-schema-sidebar">
                     <div class="nsft-sql-schema-header">
                         <div class="nsft-sql-schema-header-row">
                             <span class="nsft-sql-schema-title" data-i18n="sql_schema_title">${chrome.i18n.getMessage('sql_schema_title') || 'Schema'}</span>
-                            <button type="button" class="nsft-sql-schema-add" id="nsft-sql-schema-erd" title="${chrome.i18n.getMessage('sql_erd_title') || 'Diagrama de relaciones (tablas en caché)'}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M9 6h6"/><path d="M18 9v6"/><path d="M6 9v7a2 2 0 0 0 2 2h7"/></svg> ${chrome.i18n.getMessage('sql_erd_btn') || 'ERD'}</button>
-                            <button type="button" class="nsft-sql-schema-add" id="nsft-sql-schema-add" title="${chrome.i18n.getMessage('sql_schema_catalog_ph') || 'Buscar tabla en la cuenta…'}">+ ${chrome.i18n.getMessage('sql_schema_catalog_btn') || 'Agregar'}</button>
                             <!-- Cerrar el panel desde el propio panel. Hace lo mismo
                                  que el interruptor de la barra de herramientas: se
                                  registra contra la MISMA función, para que no haya
@@ -8504,19 +10276,79 @@
                                 title="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}"
                                 aria-label="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}">${CLOSE_SVG}</button>
                         </div>
-                        <input type="text" class="nsft-sql-schema-filter" id="nsft-sql-schema-filter" placeholder="${chrome.i18n.getMessage('sql_schema_filter_placeholder') || 'Filter fields…'}">
+                        <!-- LOS BOTONES VAN EN SU PROPIA FILA, no a la derecha del
+                             título. Apretados junto a "Esquema" competían con él
+                             por un ancho que el usuario puede estrechar a mano, y
+                             al hacerlo eran los primeros en desbordarse. Abajo
+                             tienen el ancho entero y quedan alineados con el
+                             filtro, que es el otro control de la lista.
+
+                             Separados en tres grupos: traer esquema (agregar,
+                             actualizar, automático) · destructivo (vaciar) · otra
+                             vista (diagrama). Vaciar aislado a propósito, y el
+                             diagrama aparte porque no toca la caché: abre otra
+                             pantalla. -->
+                        <div class="nsft-sql-schema-actions">
+                            <!-- Tabla + lupa: buscar una tabla de la cuenta. El
+                                 «+» a secas decía «añadir algo», no «buscar una
+                                 tabla», que es lo que abre. -->
+                            <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn" id="nsft-sql-schema-add" title="${escapeHtml(chrome.i18n.getMessage('sql_schema_catalog_ph') || 'Buscar tabla en la cuenta…')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sql_schema_catalog_ph') || 'Buscar tabla en la cuenta…')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.5h13v9.5"/><path d="M3.5 5.5v10.5h7"/><path d="M3.5 9.2h13M8.6 5.5V16"/><circle cx="16.6" cy="16.6" r="4.1"/><path d="M19.6 19.6 22 22"/></svg></button>
+                            <!-- Actualizar. Estaba en la barra de herramientas,
+                                 pero es una acción SOBRE la lista de al lado: su
+                                 sitio es la cabecera de esa lista. Dos arcos con
+                                 punta: es sincronizar con la cuenta, no rehacer
+                                 una sola cosa. Gira mientras dura. -->
+                            <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn" id="nsft-sql-schema-refresh" title="${escapeHtml(chrome.i18n.getMessage('sql_menu_refresh_schema') || 'Actualizar esquema')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 0 1-14.6 5.9"/><path d="M3.5 12a8.5 8.5 0 0 1 14.6-5.9"/><path d="M18.1 2.6v3.8h-3.8M5.9 21.4v-3.8h3.8"/></svg></button>
+                            <!-- Descarga automática del esquema al escribir la
+                                 tabla en el FROM. Vive AQUÍ y no en el popup: se
+                                 decide mientras se trabaja en el editor, mirando
+                                 el propio panel, no antes de abrirlo. -->
+                            <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn nsft-sql-schema-auto" id="nsft-sql-schema-auto" aria-pressed="true"></button>
+                            <span class="nsft-sql-schema-actions-sep" aria-hidden="true"></span>
+                            <!-- Vaciar la caché de esquemas de ESTA cuenta. La
+                                 mecánica ya existía (clearSchemaCache sin tabla),
+                                 pero no había forma de llamarla: sólo se podía ir
+                                 quitando tabla por tabla desde su menú. -->
+                            <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn is-danger" id="nsft-sql-schema-wipe" title="${escapeHtml(chrome.i18n.getMessage('sql_schema_wipe_title') || 'Vaciar la caché de esquemas de esta cuenta')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sql_schema_wipe_title') || 'Vaciar la caché de esquemas de esta cuenta')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.6h16"/><path d="M9.4 6.6V4.5h5.2v2.1"/><path d="M6.2 6.6l.9 12.2a1.6 1.6 0 0 0 1.6 1.5h6.6a1.6 1.6 0 0 0 1.6-1.5l.9-12.2"/><path d="M10 10.6v6M14 10.6v6" opacity=".6"/></svg></button>
+                            <span class="nsft-sql-schema-actions-sep" aria-hidden="true"></span>
+                            <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn" id="nsft-sql-schema-erd" title="${escapeHtml(chrome.i18n.getMessage('sql_erd_title') || 'Diagrama de relaciones (tablas en caché)')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sql_erd_title') || 'Diagrama de relaciones (tablas en caché)')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.6" y="2.8" width="6.8" height="5" rx="1.4"/><rect x="2.4" y="16.2" width="6.8" height="5" rx="1.4"/><rect x="14.8" y="16.2" width="6.8" height="5" rx="1.4"/><path d="M12 7.8v3.6M12 11.4H5.8v4.8M12 11.4h6.2v4.8"/></svg></button>
+                        </div>
+                        <!-- Envuelto sólo para colgarle el aspa de limpiar. Sin
+                             span de lupa, a diferencia de los otros dos: éste ya
+                             la trae como imagen de fondo del propio campo, y
+                             añadir otra la duplicaba.
+                             (Cuidado al editar aquí: esto va dentro de un
+                             template literal, así que un acento grave cierra la
+                             cadena y lo de detrás se lee como código.) -->
+                        <div class="nsft-sql-find nsft-sql-find-schema">
+                            <input type="text" class="nsft-sql-schema-filter" id="nsft-sql-schema-filter" placeholder="${chrome.i18n.getMessage('sql_schema_filter_placeholder') || 'Filter fields…'}">
+                        </div>
                         <div class="nsft-sql-schema-catalog-pop" id="nsft-sql-schema-catalog-pop" hidden>
                             <input type="text" class="nsft-sql-schema-catalog-input" id="nsft-sql-schema-catalog-input" autocomplete="off" spellcheck="false" placeholder="${chrome.i18n.getMessage('sql_schema_catalog_ph') || 'Buscar tabla en la cuenta…'}">
                             <div class="nsft-sql-schema-catalog-results" id="nsft-sql-schema-catalog-results"></div>
+                            <!-- Bajar el esquema de TODA la cuenta. Va aquí, al
+                                 pie del buscador del catálogo, porque es el sitio
+                                 donde ya está la lista completa de tablas: la
+                                 cabecera del panel tiene sus cuatro botones y un
+                                 quinto ya no se lee. -->
+                            <button type="button" class="nsft-sql-schema-catalog-all" id="nsft-sql-schema-all"></button>
                         </div>
                     </div>
                     <div class="nsft-sql-schema-tree" id="nsft-sql-schema-tree"></div>
                 </aside>
                 <div class="nsft-sql-schema-resizer" id="nsft-sql-schema-resizer" title="${chrome.i18n.getMessage('sql_schema_resizer_title') || 'Drag to resize'}"></div>
                 <div class="nsft-sql-center">
+                    <!-- Anclada a la COLUMNA CENTRAL, no a la workzone: la
+                         workzone incluye el chat de IA, y con él abierto la
+                         pestaña caía encima de su cajón de escribir. -->
+                    <button type="button" class="nsft-sql-edge-tab nsft-sql-edge-tab-results" id="nsft-sql-edge-results"
+                        title="${chrome.i18n.getMessage('sql_results_toggle_title') || 'Show/hide results'}">${chrome.i18n.getMessage('sql_tab_results') || 'Resultados'}</button>
                 <div class="nsft-sql-main-panel">
                     <div class="nsft-sql-editor-container">
-                        <textarea id="nsft-sql-query-input" class="nsft-sql-textarea" spellcheck="false">SELECT * FROM transaction t WHERE t.id = 1</textarea>
+                        <!-- Sale de DEFAULT_QUERY para que no haya dos ejemplos
+                             que mantener: el textarea es lo que CodeMirror lee al
+                             montarse, así que si divergen, el que se ve es éste. -->
+                        <textarea id="nsft-sql-query-input" class="nsft-sql-textarea" spellcheck="false">${escapeHtml(DEFAULT_QUERY)}</textarea>
                     </div>
                 </div>
                 <div class="nsft-sql-resizer" id="nsft-sql-resizer" title="Drag to resize">
@@ -8546,10 +10378,19 @@
                             aria-label="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}">${CLOSE_SVG}</button>
                     </div>
                     <div class="nsft-sql-results-toolbar">
-                        <div class="nsft-sql-results-search-wrap">
-                            <span class="nsft-sql-search-glyph">⌕</span>
+                        <div class="nsft-sql-results-search-wrap nsft-sql-find">
+                            <span class="nsft-sql-search-glyph" aria-hidden="true">${SEARCH_SVG}</span>
                             <input id="nsft-sql-results-search" placeholder="${chrome.i18n.getMessage('sql_search_placeholder') || 'Search results...'}">
                         </div>
+                        <!-- Vaciar la tabla. Va pegado al buscador y no con los de
+                             la derecha porque actúa sobre lo MISMO que él: las
+                             filas que hay delante. Los otros tres se las llevan a
+                             otro sitio (gráfica, portapapeles, fichero). -->
+                        <button type="button" id="nsft-sql-clear-btn" class="nsft-sql-chart-toggle nsft-sql-clear-btn" disabled
+                            title="${escapeHtml(chrome.i18n.getMessage('sql_clear_results_title') || 'Clear the results table')}"
+                            aria-label="${escapeHtml(chrome.i18n.getMessage('sql_clear_results_title') || 'Clear the results table')}">
+                            <svg class="nsft-sql-btn-ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg><span>${chrome.i18n.getMessage('sql_clear_results_btn') || 'Clear results'}</span>
+                        </button>
                         <div class="nsft-sql-toolbar-spacer"></div>
                         <span id="nsft-sql-status-text"></span>
                         <button type="button" id="nsft-sql-chart-toggle" class="nsft-sql-chart-toggle" data-mode="table" title="${chrome.i18n.getMessage('sql_chart_btn') || 'Chart'}">
@@ -8571,6 +10412,15 @@
                             <span class="nsft-sql-btn-glyph">⧉</span><span>${escapeHtml(chrome.i18n.getMessage('sql_chart_popout') || 'Abrir en pestaña')}</span>
                         </button>
                     </div>
+                    <!-- Aviso COMPACTO de ejecución. Sustituye al velo grande
+                         siempre que haya algo debajo que merezca seguir
+                         leyéndose: la tabla de la consulta anterior, o la lista
+                         del Registro. Va en el flujo, no flotando, para no tapar
+                         la primera fila de lo que hay debajo. -->
+                    <div id="nsft-sql-run-pill" class="nsft-sql-run-pill" hidden>
+                        <span class="nsft-ui-spinner nsft-sql-run-pill-spin" aria-hidden="true"></span>
+                        <span id="nsft-sql-run-pill-text"></span>
+                    </div>
                     <div id="nsft-sql-trunc-banner" class="nsft-sql-trunc-banner" hidden></div>
                     <!-- Aviso en la pestaña de RESULTADOS cuando la última ejecución
                          falló: la tabla se vacía, así que sin esto sólo se vería un
@@ -8582,14 +10432,6 @@
                             >${chrome.i18n.getMessage('sql_results_failed_cta') || 'See the error'}</button>
                     </div>
                     <div id="nsft-sql-results-table"></div>
-                    <!-- Aviso grande de ejecución sobre la zona de resultados: el
-                         texto de la barra es pequeño y está arriba a la derecha,
-                         fácil de no ver. Aquí cae donde ya estás mirando. -->
-                    <div id="nsft-sql-run-overlay" class="nsft-sql-run-overlay" hidden>
-                        <span class="nsft-ui-spinner nsft-sql-run-overlay-spin" aria-hidden="true"></span>
-                        <span id="nsft-sql-run-overlay-text"></span>
-                        <span class="nsft-sql-run-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-                    </div>
                     <div id="nsft-sql-chart-view" class="nsft-sql-chart-view" hidden>
                         <div class="nsft-sql-chart-config">
                             <label>${chrome.i18n.getMessage('sql_chart_type') || 'Type'}
@@ -8636,8 +10478,8 @@
                                     </div>
                                     <span class="nsft-sql-logs-count" id="nsft-sql-logs-count"></span>
                                 </div>
-                                <div class="nsft-sql-logs-filter-wrap">
-                                    <span class="nsft-sql-search-glyph">⌕</span>
+                                <div class="nsft-sql-logs-filter-wrap nsft-sql-find">
+                                    <span class="nsft-sql-search-glyph" aria-hidden="true">${SEARCH_SVG}</span>
                                     <input id="nsft-sql-logs-filter" class="nsft-sql-logs-filter"
                                         placeholder="${chrome.i18n.getMessage('sql_logs_filter_ph') || 'Filter by table, text or error code'}">
                                 </div>
@@ -8653,7 +10495,19 @@
                 </div>
                 </div>
             <div class="suiteql-runner-footer">
-                <span id="nsft-sql-conn-status" class="nsft-sql-footer-status">● ${chrome.i18n.getMessage('sql_footer_connected') || 'Connected'}</span>
+                <span class="nsft-sql-footer-left">
+                    <span id="nsft-sql-conn-status" class="nsft-sql-footer-status">● ${chrome.i18n.getMessage('sql_footer_connected') || 'Connected'}</span>
+                    <!-- Medidor de gobernanza. Vive en el pie y no en el panel de
+                         resultados a propósito: el pie se ve desde las dos
+                         pestañas y con el modal en cualquier tamaño, y esto hay
+                         que poder mirarlo justo mientras la descarga corre.
+                         Oculto hasta que llega la primera lectura. -->
+                    <span id="nsft-sql-gov" class="nsft-sql-gov" hidden>
+                        <span class="nsft-sql-gov-label">${chrome.i18n.getMessage('sql_gov_label') || 'Governance'}</span>
+                        <span class="nsft-sql-gov-bar"><span class="nsft-sql-gov-fill"></span></span>
+                        <span class="nsft-sql-gov-num"></span>
+                    </span>
+                </span>
                 <div id="nsft-sql-editor-stats" class="nsft-sql-footer-stats">
                     <span class="nsft-sql-stat-item">Ln 1, Col 1</span>
                     <span class="nsft-sql-stat-item">Ch 0</span>

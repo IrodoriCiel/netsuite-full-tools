@@ -47,3 +47,15 @@ textarea:focus + .nsft-mlc:not(:empty) {
     border-color: #dc2626;
     background: #dc2626;
 }
+
+body:not([data-page-theme="redwood"]) td.uir-machine-focused-cell span.uir-field-input:has(> .nsft-mlc):has(.uir-helper-button) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px;
+}
+
+body:not([data-page-theme="redwood"]) td.uir-machine-focused-cell span.uir-field-input:has(> .nsft-mlc):has(.uir-helper-button) > input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+}

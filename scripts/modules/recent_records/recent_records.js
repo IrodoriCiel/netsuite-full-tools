@@ -72,6 +72,7 @@
         if (_inited) return;
         _inited = true;
         document.documentElement.classList.add('nsft-rr-arm');
+        injectFetcher();
         document.addEventListener('mouseover', onMouseOver, true);
         document.addEventListener('focusin', onMouseOver, true);
         document.addEventListener('visibilitychange', onVisibilityChange);
@@ -420,10 +421,25 @@
 
     function groupByDate(items) {
         const g = { today: [], yesterday: [], week: [], older: [] };
+
+        const fromPref = dayFirstFromPreference();
+        const dayFirst = (fromPref === null) ? inferDayFirst(items) : fromPref;
+
         items.forEach((it) => {
-            const bucket = it.ts ? bucketForDate(new Date(it.ts)) : dateBucket(it.date);
-            g[bucket].push(it);
+            const when = it.ts ? new Date(it.ts) : parseNsDate(it.date, dayFirst);
+            it.when = (when && !isNaN(when.getTime())) ? when.getTime() : null;
+            g[bucketForDate(when)].push(it);
         });
+
+        Object.keys(g).forEach((k) => {
+            g[k].sort((a, b) => {
+                if (a.when === b.when) return 0;
+                if (a.when === null) return 1;
+                if (b.when === null) return -1;
+                return b.when - a.when;
+            });
+        });
+
         return g;
     }
 
@@ -553,7 +569,52 @@
         return 'older';
     }
 
-    function parseNsDate(dateStr) {
+    let _dateFormat = null;
+
+    function dayFirstFromPreference() {
+        if (!_dateFormat) return null;
+        const f = String(_dateFormat).toUpperCase();
+        const d = f.indexOf('D');
+        const m = f.indexOf('M');
+        if (d === -1 || m === -1) return null;
+        return d < m;
+    }
+
+    function injectFetcher() {
+        if (document.getElementById('nsft-rr-fetcher')) return;
+        try {
+            const s = document.createElement('script');
+            s.id = 'nsft-rr-fetcher';
+            s.src = chrome.runtime.getURL('scripts/modules/recent_records/recent_records_fetcher.js');
+            s.onload = function () { this.remove(); };
+            (document.head || document.documentElement).appendChild(s);
+        } catch (e) { }
+    }
+
+    window.addEventListener('message', (e) => {
+        if (e.source !== window) return;
+        const d = e.data;
+        if (!d || typeof d !== 'object' || d.dest !== 'extension_rr') return;
+        if (d.type === 'dateformat' && d.payload && d.payload.format) {
+            _dateFormat = d.payload.format;
+        }
+    });
+
+    function inferDayFirst(items) {
+        for (const it of items || []) {
+            const s = String((it && it.date) || '').trim();
+            const md = s.match(/(\d{1,4})[\/.\-](\d{1,4})[\/.\-](\d{1,4})/);
+            if (!md) continue;
+            const a = parseInt(md[1], 10);
+            const b = parseInt(md[2], 10);
+            if (a > 31 || b > 31) continue;
+            if (a > 12 && b <= 12) return true;
+            if (b > 12 && a <= 12) return false;
+        }
+        return null;
+    }
+
+    function parseNsDate(dateStr, dayFirst) {
         if (!dateStr) return null;
         const s = String(dateStr).trim();
 
@@ -579,13 +640,10 @@
             const a = rest[0], b = rest[1];
             if (a > 12 && b <= 12) return new Date(year, b - 1, a);
             if (b > 12 && a <= 12) return new Date(year, a - 1, b);
-            const now = Date.now();
-            const c1 = new Date(year, a - 1, b);
-            const c2 = new Date(year, b - 1, a);
-            const ok1 = c1.getTime() <= now + DAY_MS;
-            const ok2 = c2.getTime() <= now + DAY_MS;
-            if (ok1 && ok2) return c1.getTime() >= c2.getTime() ? c1 : c2;
-            return ok1 ? c1 : c2;
+
+            return dayFirst === false
+                ? new Date(year, a - 1, b)
+                : new Date(year, b - 1, a);
         }
 
         const t = Date.parse(s.replace(/\b(am|pm)\b/i, (m) => m.toUpperCase()));

@@ -2,7 +2,7 @@
     'use strict';
     const STORAGE_KEY = 'enableFileRecordPreviewBeta';
     const THEME_KEY = 'fileRecordPreviewTheme';
-    const DEFAULT_THEME = 'atom-one-light';
+    const DEFAULT_THEME = 'auto';
     const APPLIED_ATTR = 'data-nsft-frp-applied';
     const PREVIEW_ID = 'nsft-frp-preview';
     const THEME_STYLE_ID = 'nsft-frp-theme';
@@ -72,16 +72,25 @@
         if (changes[THEME_KEY]) {
             loadTheme(changes[THEME_KEY].newValue || DEFAULT_THEME);
         }
+        if (changes.nsftTheme && _requestedTheme === 'auto') {
+            setTimeout(() => loadTheme('auto'), 60);
+        }
     });
 
+    let _requestedTheme = null;
     async function loadTheme(themeName) {
+        _requestedTheme = themeName;
+        if (themeName === 'auto') {
+            themeName = document.documentElement.getAttribute('data-nsft-theme') === 'dark'
+                ? 'atom-one-dark' : 'atom-one-light';
+        }
         let safeName = String(themeName || '').replace(/[^a-z0-9-]/gi, '');
-        if (!safeName) safeName = DEFAULT_THEME;
+        if (!safeName) safeName = 'atom-one-light';
         try {
             const url = chrome.runtime.getURL('scripts/libs/highlight/themes/' + safeName + '.css');
             let res = await fetch(url);
-            if (!res.ok && safeName !== DEFAULT_THEME) {
-                res = await fetch(chrome.runtime.getURL('scripts/libs/highlight/themes/' + DEFAULT_THEME + '.css'));
+            if (!res.ok && safeName !== 'atom-one-light') {
+                res = await fetch(chrome.runtime.getURL('scripts/libs/highlight/themes/atom-one-light.css'));
             }
             if (!res.ok) return;
             let cssText = await res.text();

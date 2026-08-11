@@ -1,0 +1,84 @@
+NetSuite Full Tools (NSFT)
+Licencia de código disponible / Source-Available License
+
+Copyright © 2026 Miguel Ángel García Figueroa.
+Todos los derechos reservados. / All rights reserved.
+
+────────────────────────────────── ESPAÑOL ──────────────────────────────────
+
+Este código fuente se publica únicamente con fines de TRANSPARENCIA y
+AUDITORÍA de la extensión "NetSuite Full Tools", cuya distribución oficial es
+exclusivamente a través de la Chrome Web Store:
+https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc
+
+SE PERMITE, sin coste y sin permiso previo:
+
+  1. Ver, clonar y auditar este repositorio.
+  2. Compilar y ejecutar la extensión para uso personal o interno de tu
+     organización, sin redistribuirla.
+  3. Citar fragmentos breves del código con atribución (documentación,
+     artículos, informes de seguridad).
+  4. Proponer cambios mediante issues y pull requests.
+
+NO SE PERMITE sin permiso previo y por escrito del autor:
+
+  1. Redistribuir este software ni obras derivadas de él, con o sin cambios,
+     por ningún medio.
+  2. Publicarlo —total o parcialmente, con o sin cambios— en la Chrome Web
+     Store ni en ninguna otra tienda o catálogo de extensiones.
+  3. Venderlo, relicenciarlo o incorporarlo a otro producto.
+  4. Usar el nombre "NetSuite Full Tools", "NSFT" o sus logotipos en
+     productos derivados.
+
+CONTRIBUCIONES: al enviar un pull request aceptas conceder al autor una
+licencia perpetua, mundial, gratuita e irrevocable para usar, modificar,
+relicenciar y distribuir tu contribución como parte del proyecto.
+
+SIN GARANTÍA: el software se ofrece "TAL CUAL", sin garantía de ningún tipo,
+expresa o implícita. El autor no responde por daños derivados de su uso.
+
+MARCAS: NetSuite es una marca de Oracle y/o sus filiales. Este proyecto es
+independiente y no está afiliado a Oracle ni respaldado por ella.
+
+────────────────────────────────── ENGLISH ──────────────────────────────────
+
+This source code is published solely for TRANSPARENCY and AUDITING of the
+"NetSuite Full Tools" extension, whose official distribution happens
+exclusively through the Chrome Web Store:
+https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc
+
+YOU MAY, free of charge and without prior permission:
+
+  1. View, clone and audit this repository.
+  2. Build and run the extension for personal use or internal use within
+     your organization, without redistributing it.
+  3. Quote brief code excerpts with attribution (documentation, articles,
+     security reports).
+  4. Propose changes through issues and pull requests.
+
+YOU MAY NOT, without the author's prior written permission:
+
+  1. Redistribute this software or works derived from it, with or without
+     changes, by any means.
+  2. Publish it — in whole or in part, with or without changes — to the
+     Chrome Web Store or any other extension store or catalog.
+  3. Sell it, relicense it, or incorporate it into another product.
+  4. Use the "NetSuite Full Tools" or "NSFT" names or logos in derivative
+     products.
+
+CONTRIBUTIONS: by submitting a pull request you agree to grant the author a
+perpetual, worldwide, royalty-free, irrevocable license to use, modify,
+relicense and distribute your contribution as part of the project.
+
+NO WARRANTY: the software is provided "AS IS", without warranty of any kind,
+express or implied. The author is not liable for damages arising from its
+use.
+
+TRADEMARKS: NetSuite is a trademark of Oracle and/or its affiliates. This
+project is independent and is neither affiliated with nor endorsed by
+Oracle.
+
+─────────────────────────────────────────────────────────────────────────────
+
+La versión en español prevalece en caso de discrepancia.
+The Spanish version prevails in case of discrepancy.

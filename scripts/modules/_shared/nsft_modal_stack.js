@@ -38,5 +38,35 @@
     function register(modalEl) { if (modalEl) explicit.add(modalEl); }
     function unregister(modalEl) { explicit.delete(modalEl); }
 
-    window.NSFT_ModalStack = { bringToFront, register, unregister, Z_BASE };
+    function isVisible(el) {
+        if (!el || !el.isConnected) return false;
+        const cs = window.getComputedStyle(el);
+        return cs.display !== 'none' && cs.visibility !== 'hidden';
+    }
+
+    function contains(node) {
+        if (!node || !node.nodeType) return false;
+        for (const el of getAllCandidates()) {
+            if (isVisible(el) && el.contains(node)) return true;
+        }
+        return false;
+    }
+
+    function isActive(el) {
+        if (!isVisible(el)) return false;
+        const st = (el.dataset && el.dataset.state) || el.getAttribute('data-state') || '';
+        return st !== 'minimised';
+    }
+
+    function anyActive() {
+        for (const el of getAllCandidates()) {
+            if (isActive(el)) return true;
+        }
+        return false;
+    }
+
+    window.NSFT_ModalStack = {
+        bringToFront, register, unregister,
+        contains, isVisible, isActive, anyActive, Z_BASE
+    };
 })();

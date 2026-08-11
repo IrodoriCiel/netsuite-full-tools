@@ -2,9 +2,10 @@
     'use strict';
 
     const KEY = 'nsftSuiteQLRestOff';
-    const TTL = 7 * 24 * 60 * 60 * 1000;
+    const TTL = 24 * 60 * 60 * 1000;
 
     let cached = null;
+    let probing = null;
 
     function readMap() {
         return new Promise((resolve) => {
@@ -31,6 +32,32 @@
                 const payload = {}; payload[KEY] = map;
                 try { chrome.storage.local.set(payload); } catch (e) { }
             });
+        },
+
+        markOn: function () {
+            cached = Promise.resolve(false);
+            readMap().then((map) => {
+                if (!(location.hostname in map)) return;
+                delete map[location.hostname];
+                const payload = {}; payload[KEY] = map;
+                try { chrome.storage.local.set(payload); } catch (e) { }
+            });
+        },
+
+        probe: function () {
+            if (probing) return probing;
+            const self = this;
+            probing = fetch('/services/rest/query/v1/suiteql?limit=1', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'Prefer': 'transient' },
+                body: JSON.stringify({ q: 'SELECT 1 AS uno FROM dual' })
+            }).then((r) => {
+                if (r.ok) { self.markOn(); return true; }
+                if (r.status === 403 || r.status === 404) { self.markOff(); return false; }
+                return false;
+            }).catch(() => false);
+            return probing;
         }
     };
 })();

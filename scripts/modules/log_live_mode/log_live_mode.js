@@ -15,22 +15,34 @@
     const LABEL_CLASS = 'nsft-log-live-mode-label';
     const INPUT_CLASS = 'nsft-log-live-mode-input';
     const UNIT_CLASS = 'nsft-log-live-mode-unit';
-    const INDICATOR_CLASS = 'nsft-log-live-mode-indicator';
-    const COUNTDOWN_CLASS = 'nsft-log-live-mode-countdown';
 
     const I18N = {
         live: chrome.i18n.getMessage('liveMode'),
         secs: chrome.i18n.getMessage('secondsAbbr')
     };
 
+    const SPINNER_SVG = '<svg class="nsft-tb-spinner" width="14" height="14" viewBox="0 0 16 16"'
+        + ' fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">'
+        + '<circle cx="8" cy="8" r="6" stroke-dasharray="28 12"></circle></svg>';
+    const PAUSE_SVG = '<svg class="nsft-tb-pause" width="14" height="14" viewBox="0 0 16 16"'
+        + ' fill="currentColor" aria-hidden="true">'
+        + '<rect x="4.6" y="3.8" width="2.4" height="8.4" rx="1.1"></rect>'
+        + '<rect x="9" y="3.8" width="2.4" height="8.4" rx="1.1"></rect></svg>';
+
+    const divider = () => {
+        const d = document.createElement('span');
+        d.className = 'nsft-tb-divider';
+        return d;
+    };
+
+    let refreshTimeout = null;
+    let isRefreshing = false;
     let refreshLoop = null;
     let currentInterval = 3;
     let countdownRemaining = 0;
     let injectedTd = null;
     let chkEl = null;
     let intervalInputEl = null;
-    let dotEl = null;
-    let countdownEl = null;
     let unsubscribeObserver = null;
     let storageListener = null;
     let visibilityListener = null;
@@ -133,68 +145,70 @@
         td.style.verticalAlign = 'middle';
 
         const container = document.createElement('div');
-        container.className = CONTAINER_CLASS;
+        container.className = 'nsft-tb-group ' + CONTAINER_CLASS;
 
         const toggleLabel = document.createElement('label');
-        toggleLabel.className = TOGGLE_CLASS;
+        toggleLabel.className = 'nsft-tb-switch ' + TOGGLE_CLASS;
         const chk = document.createElement('input');
         chk.type = 'checkbox';
         chk.id = 'nsft-live-mode-chk';
         chk.checked = !!shouldAutoStart;
         const sliderSpan = document.createElement('span');
-        sliderSpan.className = SLIDER_CLASS;
+        sliderSpan.className = 'nsft-tb-slider ' + SLIDER_CLASS;
         toggleLabel.append(chk, sliderSpan);
 
         const labelSpan = document.createElement('span');
-        labelSpan.className = LABEL_CLASS;
+        labelSpan.className = 'nsft-tb-label ' + LABEL_CLASS;
         labelSpan.textContent = I18N.live;
 
-        const intervalWrap = document.createElement('div');
-        intervalWrap.style.display = 'flex';
-        intervalWrap.style.alignItems = 'baseline';
+        const intervalWrap = document.createElement('span');
+        intervalWrap.style.display = 'inline-flex';
+        intervalWrap.style.alignItems = 'center';
+        intervalWrap.style.gap = '5px';
         const intervalInput = document.createElement('input');
         intervalInput.type = 'number';
         intervalInput.id = 'nsft-live-interval';
-        intervalInput.className = INPUT_CLASS;
+        intervalInput.className = 'nsft-tb-num ' + INPUT_CLASS;
         intervalInput.min = String(INTERVAL_MIN);
         intervalInput.max = String(INTERVAL_MAX);
         intervalInput.step = '1';
         intervalInput.value = String(initialInterval);
         const unit = document.createElement('span');
-        unit.className = UNIT_CLASS;
+        unit.className = 'nsft-tb-unit ' + UNIT_CLASS;
         unit.textContent = I18N.secs;
         intervalWrap.append(intervalInput, unit);
 
-        const dot = document.createElement('div');
-        dot.id = 'nsft-live-dot';
-        dot.className = INDICATOR_CLASS + (shouldAutoStart ? ' active' : '');
+        const stateIcon = document.createElement('span');
+        stateIcon.id = 'nsft-live-state';
+        stateIcon.className = 'nsft-tb-spinslot';
+        stateIcon.innerHTML = SPINNER_SVG + PAUSE_SVG;
 
-        const countdown = document.createElement('span');
-        countdown.id = 'nsft-live-countdown';
-        countdown.className = COUNTDOWN_CLASS;
-        countdown.textContent = '';
-
-        container.append(toggleLabel, labelSpan, intervalWrap, dot, countdown);
+        container.append(toggleLabel, labelSpan, divider(), intervalWrap, stateIcon);
         td.appendChild(container);
         tr.appendChild(td);
 
         injectedTd = td;
         chkEl = chk;
         intervalInputEl = intervalInput;
-        dotEl = dot;
-        countdownEl = countdown;
 
         chk.addEventListener('change', onToggleChange);
         intervalInput.addEventListener('change', onIntervalChange);
+        intervalInput.addEventListener('focus', () => {
+            if (chkEl && chkEl.checked) intervalInput.value = String(currentInterval);
+        });
+        intervalInput.addEventListener('blur', updateIntervalField);
+        updateStateIcon();
+        updateIntervalField();
     }
 
     function onToggleChange() {
         if (chkEl.checked) {
-            if (dotEl) dotEl.classList.add('active');
             startLoop(currentInterval);
         } else {
             stopLoop();
         }
+        updateStateIcon();
+        updateIntervalField();
     }
 
     function onIntervalChange() {
@@ -217,43 +231,62 @@
         currentInterval = total;
         countdownRemaining = total;
         refreshLoop = setInterval(loopTick, 1000);
-        showCountdown(true);
-        updateCountdownDisplay();
+        updateIntervalField();
         if (!opts || opts.immediate !== false) {
             triggerRefresh();
         }
     }
 
     function loopTick() {
+        if (isRefreshing) return;
         countdownRemaining -= 1;
         if (countdownRemaining <= 0) {
+            countdownRemaining = 0;
+            updateIntervalField();
             triggerRefresh();
-            countdownRemaining = currentInterval;
+            return;
         }
-        updateCountdownDisplay();
+        updateIntervalField();
     }
 
-    function stopLoop(opts) {
+    function stopLoop() {
         if (refreshLoop) {
             clearInterval(refreshLoop);
             refreshLoop = null;
         }
-        if (!opts || !opts.keepUi) {
-            if (dotEl) dotEl.classList.remove('active');
-            showCountdown(false);
+        if (refreshTimeout) {
+            clearTimeout(refreshTimeout);
+            refreshTimeout = null;
         }
+        setRefreshing(false);
+        countdownRemaining = currentInterval;
+        updateIntervalField();
     }
 
-    function showCountdown(visible) {
-        if (!countdownEl) return;
-        countdownEl.classList.toggle('active', !!visible);
-        if (!visible) countdownEl.textContent = '';
+    function updateStateIcon() {
+        if (!injectedTd) return;
+        const slot = injectedTd.querySelector('.nsft-tb-spinslot');
+        if (slot) slot.classList.toggle('is-live', !!(chkEl && chkEl.checked));
     }
 
-    function updateCountdownDisplay() {
-        if (!countdownEl) return;
-        const remaining = Math.max(0, countdownRemaining);
-        countdownEl.textContent = remaining + I18N.secs;
+    function updateIntervalField() {
+        if (!intervalInputEl) return;
+        if (document.activeElement === intervalInputEl) return;
+        const live = !!(chkEl && chkEl.checked);
+        intervalInputEl.value = String(live ? Math.max(0, countdownRemaining) : currentInterval);
+        intervalInputEl.classList.toggle('is-counting', live);
+    }
+
+    function setRefreshing(on) {
+        isRefreshing = !!on;
+        if (injectedTd) {
+            const group = injectedTd.querySelector('.nsft-tb-group');
+            if (group) group.classList.toggle('is-refreshing', isRefreshing);
+        }
+        if (!isRefreshing) {
+            countdownRemaining = currentInterval;
+            updateIntervalField();
+        }
     }
 
     function triggerRefresh() {
@@ -262,17 +295,12 @@
             : document.querySelector('#refreshscriptnote');
         if (!btn) return;
 
-        if (dotEl) {
-            dotEl.classList.add('active');
-            dotEl.style.animation = 'none';
-            if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(() => {
-                    if (dotEl) dotEl.style.animation = '';
-                });
-            } else {
-                dotEl.style.animation = '';
-            }
-        }
+        setRefreshing(true);
+        if (refreshTimeout) clearTimeout(refreshTimeout);
+        refreshTimeout = setTimeout(() => {
+            refreshTimeout = null;
+            setRefreshing(false);
+        }, 1200);
 
         btn.click();
     }
@@ -297,8 +325,6 @@
         injectedTd = null;
         chkEl = null;
         intervalInputEl = null;
-        dotEl = null;
-        countdownEl = null;
         countdownRemaining = 0;
     }
 })();
