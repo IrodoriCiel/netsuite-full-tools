@@ -17,9 +17,10 @@
   <a href="#ficha-técnica--technical-details"><img alt="JavaScript sin frameworks" src="https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"></a>
   <a href="#ficha-técnica--technical-details"><img alt="Sin telemetría ni servidores propios" src="https://img.shields.io/badge/Privacidad-100%25%20local-2C6E4E?style=for-the-badge"></a>
   <a href="#ficha-técnica--technical-details"><img alt="Español e inglés" src="https://img.shields.io/badge/ES%20·%20EN-i18n-6E7CF5?style=for-the-badge"></a>
+  <a href="https://irodoriciel.github.io/nsft-tablero/"><img alt="Tablero público: estado de los errores reportados y las mejoras pedidas" src="https://img.shields.io/badge/Tablero%20·%20Board-bugs%20y%20mejoras-1A73E8?style=for-the-badge"></a>
 </p>
 
-<p align="center"><a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc">Chrome Web Store</a> · <a href="https://netsuitefulltools.com/">netsuitefulltools.com</a> · <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc/support">Soporte / Support</a></p>
+<p align="center"><a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc">Chrome Web Store</a> · <a href="https://netsuitefulltools.com/">netsuitefulltools.com</a> · <a href="https://irodoriciel.github.io/nsft-tablero/">Tablero de avance / Progress board</a> · <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc/support">Soporte / Support</a></p>
 
 ---
 
@@ -419,3 +420,4 @@ Código **disponible para leer, auditar y compilar en local** — pero NO es ope
 
 Espejo generado automáticamente en cada versión · Mirror auto-generated on every release.
 Errores y sugerencias · Bugs & suggestions → [soporte de la Store](https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc/support).
+Estado de lo reportado · Track what you reported → [Tablero · Board](https://irodoriciel.github.io/nsft-tablero/).
