@@ -78,10 +78,28 @@
 
     }
 
+
+    const I18N_KEYS = [
+        'wfs_stage_workflow', 'wfs_states', 'wfs_actions', 'wfs_transitions', 'wfs_progress_title', 'wfs_loading', 'wfs_title', 'wfs_search_ph', 'wfs_all_types', 'wfs_all_triggers', 'wfs_all_states', 'wfs_only_active', 'wfs_result_one', 'wfs_result_many', 'wfs_empty', 'wfs_no_type', 'wfs_inactive', 'wfs_lbl_state', 'wfs_lbl_trigger', 'wfs_lbl_field', 'wfs_lbl_value', 'wfs_lbl_button', 'wfs_lbl_formula', 'wfs_lbl_condition', 'wfs_lbl_contexts', 'wfs_lbl_actions', 'wfs_lbl_key', 'wfs_lbl_flow', 'wfs_minimize', 'wfs_maximize', 'wfs_close'
+    ];
+
+    let _i18nCache = null;
+
+    function getMessages() {
+        if (_i18nCache) return _i18nCache;
+        _i18nCache = {};
+        for (const k of I18N_KEYS) {
+            const v = chrome.i18n.getMessage(k);
+            if (v) _i18nCache[k] = v;
+        }
+        return _i18nCache;
+    }
+
     function injectFetcher(workflowId) {
         const s = document.createElement('script');
         s.src = chrome.runtime.getURL(FETCHER_PATH);
         s.dataset.nsftWorkflowId = workflowId;
+        s.dataset.nsftI18n = JSON.stringify(getMessages());
         s.onload = function () { this.remove(); };
         (document.head || document.documentElement).appendChild(s);
     }

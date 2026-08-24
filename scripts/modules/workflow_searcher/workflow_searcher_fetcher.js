@@ -1,11 +1,17 @@
 (function () {
     'use strict';
 
+    const I18N = (() => {
+        try { return JSON.parse(document.currentScript?.dataset?.nsftI18n || '{}'); }
+        catch (e) { return {}; }
+    })();
+    const t = (clave, reserva) => I18N[clave] || reserva;
+
     const PANEL_ID = 'nsft-wf-progress-panel';
     const STAGE_LABELS = {
-        workflow: 'Estructura del workflow',
-        state: 'Estados',
-        actions: 'Acciones'
+        workflow: t('wfs_stage_workflow', 'Estructura del workflow'),
+        state: t('wfs_states', 'Estados'),
+        actions: t('wfs_actions', 'Acciones')
     };
 
     const STYLES = `
@@ -576,7 +582,7 @@
         wrap.innerHTML = `
             <div class="wfp-head">
                 <span class="wfp-head-dot"></span>
-                <span class="wfp-head-title">Indexador de Workflow</span>
+                <span class="wfp-head-title">${t('wfs_progress_title', 'Indexador de Workflow')}</span>
             </div>
             <div class="wfp-body"></div>
         `;
@@ -668,7 +674,7 @@
                 PANEL.actionsChildren.set(id, childMax);
                 if (childMax === 0) PANEL.actionsChildren.delete(id);
             } else {
-                const label = STAGE_LABELS[id] || title || 'Cargando...';
+                const label = STAGE_LABELS[id] || title || t('wfs_loading', 'Cargando…');
                 PANEL.stages.set(id, { label, current: current || 0, max: Number(total) || 0 });
             }
             renderPanel();
@@ -788,27 +794,27 @@
         panel.innerHTML = `
             <div class="wfi-head">
                 <svg class="wfi-head-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-                <span class="wfi-title">Indexador</span>
+                <span class="wfi-title">${t('wfs_title', 'Indexador')}</span>
                 <span class="wfi-capsule-count">${actionsTotal}</span>
-                <button class="wfi-min" type="button" aria-label="Minimizar" title="Minimizar">&mdash;</button>
-                <button class="wfi-max" type="button" aria-label="Maximizar" title="Maximizar">&#x25A2;</button>
-                <button class="wfi-close" type="button" aria-label="Cerrar" title="Cerrar">&#x2715;</button>
+                <button class="wfi-min" type="button" aria-label="${t('wfs_minimize', 'Minimizar')}" title="${t('wfs_minimize', 'Minimizar')}">&mdash;</button>
+                <button class="wfi-max" type="button" aria-label="${t('wfs_maximize', 'Maximizar')}" title="${t('wfs_maximize', 'Maximizar')}">&#x25A2;</button>
+                <button class="wfi-close" type="button" aria-label="${t('wfs_close', 'Cerrar')}" title="${t('wfs_close', 'Cerrar')}">&#x2715;</button>
             </div>
             <div class="wfi-tabs">
-                <button class="wfi-tab is-active" data-tab="actions" type="button">Acciones</button>
-                <button class="wfi-tab" data-tab="states" type="button">Estados</button>
-                <button class="wfi-tab" data-tab="transitions" type="button">Transiciones</button>
+                <button class="wfi-tab is-active" data-tab="actions" type="button">${t('wfs_actions', 'Acciones')}</button>
+                <button class="wfi-tab" data-tab="states" type="button">${t('wfs_states', 'Estados')}</button>
+                <button class="wfi-tab" data-tab="transitions" type="button">${t('wfs_transitions', 'Transiciones')}</button>
             </div>
             <div class="wfi-filters">
-                <input class="wfi-search" type="search" placeholder="Buscar nombre, campo, valor, formula..." />
+                <input class="wfi-search" type="search" placeholder="${t('wfs_search_ph', 'Buscar nombre, campo, valor, fórmula…')}" />
                 <div class="wfi-filter-row" data-row="actions">
-                    <select class="wfi-filter" data-filter="actionType"><option value="all">Todos los tipos</option></select>
-                    <select class="wfi-filter" data-filter="triggerType"><option value="all">Todos los triggers</option></select>
+                    <select class="wfi-filter" data-filter="actionType"><option value="all">${t('wfs_all_types', 'Todos los tipos')}</option></select>
+                    <select class="wfi-filter" data-filter="triggerType"><option value="all">${t('wfs_all_triggers', 'Todos los triggers')}</option></select>
                 </div>
                 <div class="wfi-filter-row" data-row="states-actions">
-                    <select class="wfi-filter" data-filter="stateKey"><option value="all">Todos los estados</option></select>
+                    <select class="wfi-filter" data-filter="stateKey"><option value="all">${t('wfs_all_states', 'Todos los estados')}</option></select>
                 </div>
-                <label class="wfi-checkbox"><input type="checkbox" data-filter="onlyActive" checked /> Solo activas</label>
+                <label class="wfi-checkbox"><input type="checkbox" data-filter="onlyActive" checked /> ${t('wfs_only_active', 'Solo activas')}</label>
             </div>
             <div class="wfi-count"></div>
             <div class="wfi-results"></div>
@@ -914,9 +920,9 @@
         }
         states.sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
-        fillSelect('actionType', [...actionTypes].sort(), 'Todos los tipos');
-        fillSelect('triggerType', [...triggerTypes].sort(), 'Todos los triggers');
-        fillSelect('stateKey', states.map(s => ({ value: s.key, label: s.name })), 'Todos los estados');
+        fillSelect('actionType', [...actionTypes].sort(), t('wfs_all_types', 'Todos los tipos'));
+        fillSelect('triggerType', [...triggerTypes].sort(), t('wfs_all_triggers', 'Todos los triggers'));
+        fillSelect('stateKey', states.map(s => ({ value: s.key, label: s.name })), t('wfs_all_states', 'Todos los estados'));
     }
 
     function fillSelect(filterName, values, allLabel) {
@@ -1060,10 +1066,10 @@
         else if (f.tab === 'states') items = collectStates(wf, f);
         else if (f.tab === 'transitions') items = collectTransitions(wf, f);
 
-        counter.textContent = `${items.length} ${items.length === 1 ? 'resultado' : 'resultados'}`;
+        counter.textContent = `${items.length} ${items.length === 1 ? t('wfs_result_one', 'resultado') : t('wfs_result_many', 'resultados')}`;
 
         if (items.length === 0) {
-            list.innerHTML = `<div class="wfi-empty">Sin resultados con los filtros actuales.</div>`;
+            list.innerHTML = `<div class="wfi-empty">${t('wfs_empty', 'Sin resultados con los filtros actuales.')}</div>`;
             return;
         }
 
@@ -1133,18 +1139,18 @@
         const dataUrl = url ? `data-url="${url}"` : '';
 
         if (tab === 'actions') {
-            const title = item.actionType || '(sin tipo)';
-            const inactive = item.inactive ? `<span class="wfi-pill is-inactive">Inactiva</span>` : '';
+            const title = item.actionType || t('wfs_no_type', '(sin tipo)');
+            const inactive = item.inactive ? `<span class="wfi-pill is-inactive">${t('wfs_inactive', 'Inactiva')}</span>` : '';
             const stringId = item.stringId ? `<code>${escapeHtml(item.stringId)}</code>` : '';
             const metaLines = [];
-            metaLines.push(`<b>Estado:</b> ${escapeHtml(item.stateName)}`);
-            if (item.triggerType) metaLines.push(`<b>Trigger:</b> <code>${escapeHtml(item.triggerType)}</code>`);
-            if (item.field) metaLines.push(`<b>Campo:</b> <code>${escapeHtml(item.field)}</code>`);
-            if (item.value !== undefined && item.value !== null && item.value !== '') metaLines.push(`<b>Valor:</b> ${escapeHtml(item.value)}`);
-            if (item.buttonLabel) metaLines.push(`<b>Botón:</b> ${escapeHtml(item.buttonLabel)}`);
-            if (item.conditionFormula) metaLines.push(`<b>Fórmula:</b> <code>${escapeHtml(truncate(item.conditionFormula, 120))}</code>`);
-            else if (item.conditionText) metaLines.push(`<b>Condición:</b> ${escapeHtml(truncate(item.conditionText, 120))}`);
-            if (item.executionContexts) metaLines.push(`<b>Contextos:</b> ${escapeHtml(item.executionContexts.replace(/,\s*$/, ''))}`);
+            metaLines.push(`<b>${t('wfs_lbl_state', 'Estado')}:</b> ${escapeHtml(item.stateName)}`);
+            if (item.triggerType) metaLines.push(`<b>${t('wfs_lbl_trigger', 'Trigger')}:</b> <code>${escapeHtml(item.triggerType)}</code>`);
+            if (item.field) metaLines.push(`<b>${t('wfs_lbl_field', 'Campo')}:</b> <code>${escapeHtml(item.field)}</code>`);
+            if (item.value !== undefined && item.value !== null && item.value !== '') metaLines.push(`<b>${t('wfs_lbl_value', 'Valor')}:</b> ${escapeHtml(item.value)}`);
+            if (item.buttonLabel) metaLines.push(`<b>${t('wfs_lbl_button', 'Botón')}:</b> ${escapeHtml(item.buttonLabel)}`);
+            if (item.conditionFormula) metaLines.push(`<b>${t('wfs_lbl_formula', 'Fórmula')}:</b> <code>${escapeHtml(truncate(item.conditionFormula, 120))}</code>`);
+            else if (item.conditionText) metaLines.push(`<b>${t('wfs_lbl_condition', 'Condición')}:</b> ${escapeHtml(truncate(item.conditionText, 120))}`);
+            if (item.executionContexts) metaLines.push(`<b>${t('wfs_lbl_contexts', 'Contextos')}:</b> ${escapeHtml(item.executionContexts.replace(/,\s*$/, ''))}`);
 
             return `
                 <div class="wfi-item" ${dataUrl}>
@@ -1166,7 +1172,7 @@
                         <span class="wfi-title-text">${escapeHtml(item.name)}</span>
                         ${startPill}
                     </div>
-                    <div class="wfi-item-meta"><b>Acciones:</b> ${item.actionsCount} &middot; <b>Key:</b> <code>${escapeHtml(item.key)}</code></div>
+                    <div class="wfi-item-meta"><b>${t('wfs_lbl_actions', 'Acciones')}:</b> ${item.actionsCount} &middot; <b>${t('wfs_lbl_key', 'Clave')}:</b> <code>${escapeHtml(item.key)}</code></div>
                 </div>
             `;
         }
@@ -1178,7 +1184,7 @@
                 <div class="wfi-item-head">
                     <span class="wfi-title-text">${escapeHtml(tName)}</span>
                 </div>
-                <div class="wfi-item-meta">${fromTo ? `<b>Flujo:</b> ${escapeHtml(fromTo)} &middot; ` : ''}<b>Key:</b> <code>${escapeHtml(item.key)}</code></div>
+                <div class="wfi-item-meta">${fromTo ? `<b>${t('wfs_lbl_flow', 'Flujo')}:</b> ${escapeHtml(fromTo)} &middot; ` : ''}<b>${t('wfs_lbl_key', 'Clave')}:</b> <code>${escapeHtml(item.key)}</code></div>
             </div>
         `;
     }

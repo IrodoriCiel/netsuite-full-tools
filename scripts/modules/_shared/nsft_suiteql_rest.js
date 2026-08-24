@@ -6,6 +6,7 @@
 
     let cached = null;
     let probing = null;
+    let transportInjected = false;
 
     function readMap() {
         return new Promise((resolve) => {
@@ -58,6 +59,36 @@
                 return false;
             }).catch(() => false);
             return probing;
+        },
+
+        ensureTransport: function () {
+            if (transportInjected) return;
+            transportInjected = true;
+            try {
+                const s = document.createElement('script');
+                s.async = false;
+                s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_suiteql_transport.js');
+                s.onload = function () { this.remove(); };
+                (document.head || document.documentElement).appendChild(s);
+            } catch (e) { }
         }
     };
+
+    window.addEventListener('message', function (event) {
+        if (event.source !== window) return;
+        const data = event.data;
+        if (!data) return;
+        if (data.dest === 'nsft_sql_ready') {
+            let known;
+            try { known = window.NSFT_SuiteQLRest.isKnownOff(); } catch (e) { known = false; }
+            Promise.resolve(known).catch(() => false).then((off) => {
+                window.postMessage({ dest: 'nsft_sql_restoff', off: !!off }, '*');
+            });
+            return;
+        }
+        if (data.dest !== 'nsft_sql_state') return;
+        const p = data.payload || {};
+        if (p.on) window.NSFT_SuiteQLRest.markOn();
+        else if (p.status === 403 || p.status === 404) window.NSFT_SuiteQLRest.markOff();
+    });
 })();

@@ -104,5 +104,23 @@
 
     function value(v) { return v === null || v === undefined ? '' : String(v); }
 
-    window.NSFT_DOM = { q, qAll, observe, isDiagEnabled, escapeHtml, textNode };
+    function isTransparentColor(color) {
+        if (!color) return true;
+        const c = String(color).replace(/\s+/g, '');
+        if (c === 'transparent') return true;
+        return /^rgba\(\d+,\d+,\d+,(?:0|0?\.0+)\)$/.test(c);
+    }
+
+    function firstOpaqueBackground(el) {
+        for (let node = el; node; node = node.parentElement) {
+            const bg = getComputedStyle(node).backgroundColor;
+            if (!isTransparentColor(bg)) return bg;
+        }
+        return '';
+    }
+
+    window.NSFT_DOM = {
+        q, qAll, observe, isDiagEnabled, escapeHtml, textNode,
+        isTransparentColor, firstOpaqueBackground
+    };
 })();

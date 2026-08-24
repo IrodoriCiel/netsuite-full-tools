@@ -1,6 +1,12 @@
 (function () {
     'use strict';
 
+    function ensureSqlTransport() {
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+            window.NSFT_SuiteQLRest.ensureTransport();
+        }
+    }
+
     const STORAGE_KEY = 'enableScriptAutoName';
 
     if (!/\/scripting\/script\.nl/i.test(location.pathname)) return;
@@ -113,7 +119,9 @@
 
     function injectFetcher() {
         if (fetcherInjected) return;
+        ensureSqlTransport();
         const s = document.createElement('script');
+        s.async = false;
         s.src = chrome.runtime.getURL('scripts/modules/script_auto_name/script_auto_name_fetcher.js');
         s.onload = function () { this.remove(); };
         (document.head || document.documentElement).appendChild(s);

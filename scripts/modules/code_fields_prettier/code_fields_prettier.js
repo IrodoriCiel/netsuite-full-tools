@@ -293,6 +293,7 @@
                 : type === 'HTML' ? 'html'
                 : type === 'XML' ? 'xml'
                 : type === 'SQL' ? 'sql'
+                : type === 'FTL' ? 'ftl'
                 : 'txt';
             const blob = new Blob([textToDownload], { type: mime });
             const url = URL.createObjectURL(blob);
@@ -324,6 +325,7 @@
         const langClass = type === 'JSON' ? 'language-json'
             : type === 'SQL' ? 'language-sql'
             : type === 'XML' ? 'language-xml'
+            : type === 'FTL' ? 'language-freemarker'
             : 'hljs';
         code.className = `${langClass} hljs`;
 
@@ -429,6 +431,7 @@
         if (type === 'SQL') return chrome.i18n.getMessage('copySql');
         if (type === 'XML') return chrome.i18n.getMessage('copyXml') || chrome.i18n.getMessage('copy') + ' XML';
         if (type === 'HTML') return chrome.i18n.getMessage('copyHtml') || chrome.i18n.getMessage('copy') + ' HTML';
+        if (type === 'FTL') return chrome.i18n.getMessage('copyFreeMarker') || chrome.i18n.getMessage('copy') + ' FreeMarker';
         return chrome.i18n.getMessage('copy');
     }
 
@@ -444,9 +447,29 @@
         });
     }
 
+    function looksLikeFreeMarker(text) {
+        const t = (text || '').replace(/^[\uFEFF\u200B]+/, '');
+        if (t.length < 8) return false;
+        return /<#[a-zA-Z-]/.test(t)
+            || /<\/#[a-zA-Z]/.test(t)
+            || /<@[a-zA-Z]/.test(t)
+            || /\[#ftl\b/i.test(t);
+    }
+
+    const SQL_FORMAS = [
+        [/^select\b/i,              /\bfrom\b/i],
+        [/^delete\b/i,              /\bfrom\b/i],
+        [/^update\b/i,              /\bset\b/i],
+        [/^insert\b/i,              /\binto\b/i],
+        [/^merge\b/i,               /\b(into|using)\b/i],
+        [/^with\b/i,                /\bas\s*\(/i],
+        [/^(create|alter|drop)\b/i, /\b(table|view|index|sequence|synonym|procedure|function|trigger|database|schema|materialized)\b/i]
+    ];
+
     function looksLikeSQL(text) {
         if (!text || text.length < 10) return false;
-        return /^\s*(select|with|insert|update|delete|create|alter|drop|merge)\b/i.test(text.trim());
+        const t = text.trim();
+        return SQL_FORMAS.some(([verbo, companera]) => verbo.test(t) && companera.test(t));
     }
 
     function decodeHtmlEntities(input) {
@@ -464,6 +487,9 @@
         );
     }
 
+    const VALOR_SEL = 'span.input, span.uir-field-input, span[data-nsps-type="field_input"]';
+    const ETIQUETA_SEL = '.uir-label, .smallgraytextnolink, label, [id$="_lbl"]';
+
     function scanSpans(root = document) {
         const selector = 'span.input, span.uir-field-input, div.uir-field-wrapper, td.uir-field, span[data-nsps-type="field_input"]';
         const candidates = Array.from(root.querySelectorAll(selector));
@@ -471,7 +497,11 @@
         candidates.forEach(span => {
             if (span.dataset && span.dataset.nsftPrettierDone) return;
 
-            if (span.querySelector('input, textarea, select, button, iframe')) return;
+            if (span.querySelector(VALOR_SEL)) return;
+            if (span.querySelector(ETIQUETA_SEL)) return;
+            if (span.matches && span.matches(ETIQUETA_SEL)) return;
+
+            if (span.querySelector('input, textarea, select, button, iframe, img')) return;
 
             let text = span.innerText;
             if (!text) text = span.textContent;
@@ -502,6 +532,12 @@
                         }
                     } catch (err2) { }
                 }
+            }
+
+            if (looksLikeFreeMarker(text)) {
+                formatElement(span, 'FTL', text);
+                span.dataset.nsftPrettierDone = '1';
+                return;
             }
 
             if (looksLikeSQL(text)) {

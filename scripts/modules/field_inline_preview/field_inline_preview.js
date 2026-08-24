@@ -1,6 +1,12 @@
 (function () {
     'use strict';
 
+    function ensureSqlTransport() {
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+            window.NSFT_SuiteQLRest.ensureTransport();
+        }
+    }
+
     const STORAGE_KEY = 'enableFieldInlinePreview';
     const NSFT_THEME_KEY = 'nsftTheme';
     const NO_BUTTON_KEY = 'copyIdsNoButton';
@@ -141,7 +147,9 @@
     function ensureFetcher() {
         if (_fetcherInjected) return;
         _fetcherInjected = true;
+        ensureSqlTransport();
         const s = document.createElement('script');
+        s.async = false;
         s.src = chrome.runtime.getURL('scripts/modules/field_inline_preview/field_inline_preview_fetcher.js');
         s.onload = function () { this.remove(); };
         (document.head || document.documentElement).appendChild(s);

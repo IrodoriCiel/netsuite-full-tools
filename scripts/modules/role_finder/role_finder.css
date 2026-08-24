@@ -5,8 +5,7 @@
     background: #ffffff !important;
 }
 
-.nsft-role-search-container::before {
-    content: 'BUSCAR ROL';
+.nsft-role-search-title {
     display: block;
     font-size: 10px;
     font-weight: 700;

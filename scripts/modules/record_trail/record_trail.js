@@ -1,6 +1,12 @@
 (function () {
     'use strict';
 
+    function ensureSqlTransport() {
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+            window.NSFT_SuiteQLRest.ensureTransport();
+        }
+    }
+
     const STORAGE_KEY = 'enableRecordTrail';
     const OVERLAY_CLASS = 'nsft-rtrail-overlay';
     const FETCHER_DEST = 'fetcher_rtrail';
@@ -289,7 +295,9 @@
         return new Promise((resolve) => {
             if (_fetcherInjected) return resolve();
             _fetcherInjected = true;
+            ensureSqlTransport();
             const s = document.createElement('script');
+            s.async = false;
             s.src = chrome.runtime.getURL('scripts/modules/record_trail/record_trail_fetcher.js');
             s.onload = function () { this.remove(); resolve(); };
             (document.head || document.documentElement).appendChild(s);

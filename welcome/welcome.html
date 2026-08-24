@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <title data-i18n="welcomeTitle">Welcome to NetSuite Full Tools</title>
     <script src="../scripts/modules/_shared/nsft_page_theme.js"></script>
+    <script src="../scripts/modules/_shared/nsft_defaults.js"></script>
+    <script src="welcome_boot.js"></script>
     <link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
     <link rel="stylesheet" href="welcome.css">
+    <link rel="stylesheet" href="welcome_previews.css">
 </head>
 <body>
 
@@ -21,6 +24,7 @@
         <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
         <div class="hero-orb hero-orb-3" aria-hidden="true"></div>
 
+        <div class="hero-shell">
         <div class="hero-content">
             <div class="hero-logo-wrap" role="img" aria-label="NetSuite Full Tools">
                 <span class="hero-logo-halo" aria-hidden="true"></span>
@@ -33,6 +37,8 @@
                 <span class="hero-title-line line-2">FULL<span class="hero-title-amp"> </span>TOOLS</span>
             </h1>
             <p class="hero-tagline" data-i18n="welcomeTagline">A simpler way to work in NetSuite.</p>
+
+            <div class="hero-preview" id="wizPreview" hidden></div>
 
             <div class="early-notice hero-notice" id="earlyNotice">
                 <span class="early-notice-icon" aria-hidden="true">
@@ -58,11 +64,42 @@
                     <span data-i18n="welcomeRedwoodNoticeBodyPre">NSFT is now compatible with Redwood, NetSuite's new interface.</span>
                     <strong class="redwood-notice-emphasis" data-i18n="welcomeRedwoodNoticeBodyBold">Occasional issues may still appear</strong>
                     <span data-i18n="welcomeRedwoodNoticeBodyPost">— if you spot one, please help us by reporting it through the "Report a bug" button so we can fix it as soon as possible.</span>
+                    <a class="redwood-notice-cta" href="https://forms.gle/6FPaQNjs6pUJu9WV8" target="_blank" rel="noopener" data-i18n="reportBugLink">Report a bug</a>
                 </p>
             </div>
 
-            <span class="hero-scroll-hint mono" data-i18n="heroScrollHint">SCROLL ↓</span>
         </div>
+
+        <aside class="hero-wizard" id="setupWizard" hidden aria-labelledby="wizTitle">
+            <div class="wizard-card">
+                <div class="wizard-head">
+                    <div class="wizard-eyebrow-row">
+                        <span class="wizard-eyebrow" data-i18n="welcomeWizEyebrow">Initial setup</span>
+                        <span class="wizard-rule" aria-hidden="true"></span>
+                        <span class="wizard-count" id="wizCount"></span>
+                    </div>
+                    <h2 class="wizard-title" id="wizTitle"></h2>
+                    <p class="wizard-sub" id="wizSub"></p>
+                    <div class="wizard-gauge" id="wizGauge" aria-hidden="true">
+                        <div class="wizard-bar" id="wizBarTrack"><span id="wizBar"></span></div>
+                        <span class="wizard-gauge-count" id="wizBarCount"></span>
+                    </div>
+                </div>
+
+                <div class="wizard-body" id="wizBody"></div>
+
+                <div class="wizard-foot">
+                    <div class="wizard-nav">
+                        <button type="button" class="btn-secondary" id="wizBack" data-i18n="welcomeWizBack">Back</button>
+                        <button type="button" class="btn-primary" id="wizNext" data-i18n="welcomeWizNext">Next</button>
+                    </div>
+                    <button type="button" class="wizard-skip" id="wizSkip" data-i18n="welcomeWizSkip">Skip</button>
+                </div>
+            </div>
+        </aside>
+        </div>
+
+        <span class="hero-scroll-hint mono" data-i18n="heroScrollHint">SCROLL ↓</span>
     </section>
 
     <section class="pitch" id="pitch">
@@ -171,7 +208,7 @@
                 <ul>
                     <li data-i18n="welcomeCatUiItem1">Colour themes (HSL) &amp; dark mode</li>
                     <li data-i18n="welcomeCatUiItem2">Fixed sublist headers / columns / tabs</li>
-                    <li class="is-featured" data-i18n="welcomeCatUiItem3">Grouped tabs by account subdomain</li>
+                    <li class="is-featured" data-i18n="welcomeCatUiItem3">Grouped tabs by account</li>
                     <li data-i18n="welcomeCatUiItem4">Better page titles, tighter dropdowns &amp; navigation</li>
                     <li data-i18n="welcomeCatUiItem5">Remove NetSuite animations</li>
                     <li data-i18n="welcomeCatUiItem6">Profile button in header</li>
@@ -307,5 +344,7 @@
     <script src="libs/lenis.min.js"></script>
     <script src="../scripts/modules/_shared/nsft_mac_keys.js"></script>
     <script src="welcome.js"></script>
+    <script src="welcome_previews.js"></script>
+    <script src="welcome_wizard.js"></script>
 </body>
 </html>

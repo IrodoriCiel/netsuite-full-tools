@@ -14,21 +14,19 @@
     function checkUnique(payload) {
         const scriptid = (payload && payload.scriptid) || '';
         if (!scriptid) { sendResult(scriptid, false); return; }
-        if (typeof require === 'undefined') { sendResult(scriptid, null, 'require undefined'); return; }
-        require(['N/query'], function (query) {
-            try {
-                const variants = buildVariants(scriptid);
-                if (variants.length === 0) { sendResult(scriptid, false); return; }
-                const placeholders = variants.map(() => '?').join(',');
-                const rs = query.runSuiteQL({
-                    query: 'SELECT id, scriptid FROM script WHERE LOWER(scriptid) IN (' + placeholders + ')',
-                    params: variants
-                });
-                const rows = rs && rs.asMappedResults ? rs.asMappedResults() : [];
-                sendResult(scriptid, rows && rows.length > 0, null, rows);
-            } catch (e) {
-                sendResult(scriptid, null, String(e && e.message || e));
-            }
+        const T = window.NSFT_SQL;
+        if (!T) { sendResult(scriptid, null, 'SuiteQL transport unavailable'); return; }
+        const variants = buildVariants(scriptid);
+        if (variants.length === 0) { sendResult(scriptid, false); return; }
+        const head = 'SELECT id, scriptid FROM script WHERE LOWER(scriptid) IN (';
+        T.run({
+            rest: head + variants.map((v) => T.lit(v)).join(',') + ')',
+            sql: head + variants.map(() => '?').join(',') + ')',
+            params: variants,
+            limit: 20
+        }, function (err, rows) {
+            if (err) { sendResult(scriptid, null, err.message || err.code || 'query'); return; }
+            sendResult(scriptid, !!(rows && rows.length), null, rows || []);
         });
     }
 

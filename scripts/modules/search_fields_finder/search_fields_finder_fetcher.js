@@ -28,28 +28,24 @@
         ));
     }
 
-    function ffFuzzyPositions(text, query) {
-        const t = String(text == null ? '' : text).toLowerCase();
-        const q = String(query == null ? '' : query).toLowerCase();
-        if (!q) return [];
+    function ffWords(query) {
+        return String(query == null ? '' : query).toLowerCase().split(/\s+/).filter(Boolean);
+    }
 
-        const idx = t.indexOf(q);
-        if (idx !== -1) {
-            const pos = [];
-            for (let i = 0; i < q.length; i++) pos.push(idx + i);
-            return pos;
-        }
+    function ffWordPositions(text, word) {
+        const t = String(text == null ? '' : text).toLowerCase();
+        const w = String(word || '');
+        if (!w) return [];
+
         const pos = [];
-        let ti = 0;
-        for (let qi = 0; qi < q.length; qi++) {
-            let found = -1;
-            for (; ti < t.length; ti++) {
-                if (t[ti] === q[qi]) { found = ti; ti++; break; }
-            }
-            if (found === -1) return null;
-            pos.push(found);
+        let from = 0;
+        let idx = t.indexOf(w, from);
+        while (idx !== -1) {
+            for (let i = 0; i < w.length; i++) pos.push(idx + i);
+            from = idx + w.length;
+            idx = t.indexOf(w, from);
         }
-        return pos;
+        return pos.length ? pos : null;
     }
 
     function ffHighlight(text, positions) {
@@ -1154,14 +1150,24 @@
                 return;
             }
 
-            const namePos = ffFuzzyPositions(this.fieldName || "", val);
+            const name = this.fieldName || "";
             const showId = this.dropdown.settings.attributes.fieldId && this.fieldType != FieldType.RELATED;
             const prettyId = showId ? (this.prettyFieldId() || "") : "";
-            const idPos = showId ? ffFuzzyPositions(prettyId, val) : null;
 
-            if (namePos || idPos) {
+            const namePos = [];
+            const idPos = [];
+            let todas = true;
+            for (const word of ffWords(val)) {
+                const enNombre = ffWordPositions(name, word);
+                const enId = showId ? ffWordPositions(prettyId, word) : null;
+                if (!enNombre && !enId) { todas = false; break; }
+                if (enNombre) namePos.push(...enNombre);
+                if (enId) idPos.push(...enId);
+            }
+
+            if (todas) {
                 this.show();
-                this.fieldNameElement.innerHTML = ffHighlight(this.fieldName || "", namePos);
+                this.fieldNameElement.innerHTML = ffHighlight(name, namePos);
                 if (showId) this.fieldIdTextElement.innerHTML = ffHighlight(prettyId, idPos);
             } else {
                 this.hide();

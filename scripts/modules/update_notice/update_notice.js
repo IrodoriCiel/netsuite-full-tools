@@ -3,6 +3,7 @@
 
     const STORAGE_KEY = 'enableUpdateNotice';
     const SEEN_KEY = 'nsftUpdateSeenVersion';
+    const UN_MAX_HIGHLIGHTS = 8;
 
     const RB = window.NSFT_RecordButtons;
     if (RB && RB.isHeaderlessPage && RB.isHeaderlessPage()) return;
@@ -29,7 +30,10 @@
         const t = document.getElementById('nsft-update-notice');
         if (!t) return;
         t.classList.remove('nsft-un-visible');
-        setTimeout(() => t.remove(), 250);
+        setTimeout(() => {
+            if (window.NSFT_Notices) window.NSFT_Notices.unmount(t);
+            else t.remove();
+        }, 250);
     }
 
     function show() {
@@ -53,14 +57,13 @@
         body.textContent = chrome.i18n.getMessage('un_toast_body');
         const list = document.createElement('ul');
         list.className = 'nsft-un-list';
-        ['un_hl_1', 'un_hl_2', 'un_hl_3', 'un_hl_4', 'un_hl_5', 'un_hl_6',
-         'un_hl_7', 'un_hl_8'].forEach((k) => {
-            const msg = chrome.i18n.getMessage(k);
-            if (!msg) return;
+        for (let i = 1; i <= UN_MAX_HIGHLIGHTS; i++) {
+            const msg = chrome.i18n.getMessage('un_hl_' + i);
+            if (!msg) continue;
             const li = document.createElement('li');
             li.textContent = msg;
             list.appendChild(li);
-        });
+        }
         const thanksMsg = chrome.i18n.getMessage('un_thanks');
         let thanks = null;
         if (thanksMsg) {
@@ -94,7 +97,9 @@
         toast.appendChild(logo);
         toast.appendChild(text);
         toast.appendChild(close);
-        document.body.appendChild(toast);
+        if (!(window.NSFT_Notices && window.NSFT_Notices.mount(toast))) {
+            document.body.appendChild(toast);
+        }
         requestAnimationFrame(() => toast.classList.add('nsft-un-visible'));
     }
 })();

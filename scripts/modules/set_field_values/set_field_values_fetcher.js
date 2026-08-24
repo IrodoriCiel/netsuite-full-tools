@@ -1776,33 +1776,20 @@
 
             let answered = false;
 
-            require(['N/query'], function (query) {
-                const run = function (idx) {
-                    if (idx >= attempts.length) { finish('', answered); return; }
+            const T = window.NSFT_SQL;
+            if (!T) { finish('', false); return; }
 
-                    const onRows = function (rows) {
-                        answered = true;
-                        const text = pickHelpColumn(rows && rows[0]);
-                        if (text) finish(text, true);
-                        else run(idx + 1);
-                    };
-                    const onFail = function () { run(idx + 1); };
-
-                    try {
-                        if (query.runSuiteQL.promise) {
-                            query.runSuiteQL.promise({ query: attempts[idx] })
-                                .then(function (rs) {
-                                    return rs.asMappedResults.promise ? rs.asMappedResults.promise() : rs.asMappedResults();
-                                })
-                                .then(onRows)
-                                .catch(onFail);
-                        } else {
-                            onRows(query.runSuiteQL({ query: attempts[idx] }).asMappedResults());
-                        }
-                    } catch (e) { onFail(e); }
-                };
-                run(0);
-            }, function () { finish('', false); });
+            const run = function (idx) {
+                if (idx >= attempts.length) { finish('', answered); return; }
+                T.run({ rest: attempts[idx], sql: attempts[idx], limit: 1 }, function (err, rows) {
+                    if (err) { run(idx + 1); return; }
+                    answered = true;
+                    const text = pickHelpColumn(rows && rows[0]);
+                    if (text) finish(text, true);
+                    else run(idx + 1);
+                });
+            };
+            run(0);
         }
 
         function wireFieldAuditButton(fieldName) {
@@ -1879,26 +1866,37 @@
                 }
             } catch (_) { }
 
-            require(['N/query'], function (query) {
-                const fidUpper = String(fieldName || '').toUpperCase();
-                const isCustom = /^cust/i.test(fieldName || '');
-                const params = [Number(recordId)];
+            const T = window.NSFT_SQL;
+            if (!T) {
+                list.innerHTML = `<div class="nsft-fav-error">${escapeHtml(translations.fav_error || 'No se pudo cargar el historial')}</div>`;
+                return;
+            }
+
+            const fidUpper = String(fieldName || '').toUpperCase();
+            const isCustom = /^cust/i.test(fieldName || '');
+            let rectypeParam = null;
+            try {
+                const rt = new URLSearchParams(window.location.search).get('rectype');
+                if (rt && /^\d+$/.test(rt)) rectypeParam = Number(rt);
+            } catch (_) { }
+
+            const build = function (inline) {
+                const params = [];
+                const P = function (v) {
+                    if (inline) return (typeof v === 'number') ? String(v) : T.lit(v);
+                    params.push(v);
+                    return '?';
+                };
+                const recCond = 'recordid = ' + P(Number(recordId));
                 let fieldCond;
                 if (isCustom) {
-                    fieldCond = 'UPPER(field) = ?';
-                    params.push(fidUpper);
+                    fieldCond = 'UPPER(field) = ' + P(fidUpper);
                 } else {
-                    fieldCond = '(LOWER(BUILTIN.DF(field)) = ? OR UPPER(field) LIKE ? OR UPPER(field) LIKE ?)';
-                    params.push(String(fieldLabel || '').toLowerCase(), '%.S' + fidUpper, '%.' + fidUpper);
+                    fieldCond = '(LOWER(BUILTIN.DF(field)) = ' + P(String(fieldLabel || '').toLowerCase()) +
+                        ' OR UPPER(field) LIKE ' + P('%.S' + fidUpper) +
+                        ' OR UPPER(field) LIKE ' + P('%.' + fidUpper) + ')';
                 }
-                let typeCond = '';
-                try {
-                    const rectype = new URLSearchParams(window.location.search).get('rectype');
-                    if (rectype && /^\d+$/.test(rectype)) {
-                        typeCond = ' AND recordtypeid = ?';
-                        params.push(Number(rectype));
-                    }
-                } catch (_) { }
+                const typeCond = (rectypeParam !== null) ? (' AND recordtypeid = ' + P(rectypeParam)) : '';
                 const sql = `
                     SELECT
                         BUILTIN.DF(name)  AS changedby,
@@ -1910,39 +1908,35 @@
                         BUILTIN.DF(field)   AS fieldname,
                         BUILTIN.DF(context) AS changecontext
                     FROM systemnote
-                    WHERE recordid = ? AND ${fieldCond}${typeCond}
+                    WHERE ${recCond} AND ${fieldCond}${typeCond}
                     ORDER BY date DESC
                 `;
-                const onRows = function (rs) {
-                    const filtered = filterRowsByField(rs || [], fieldName, fieldLabel);
-                    _auditCache.set(cacheKey, filtered);
-                    renderFieldHistory(filtered);
-                };
-                const onFail = function (e) {
-                    console.warn('NSFT field audit SuiteQL error', e);
-                    const msg = (e && e.message) ? e.message : String(e);
-                    const isPerm = /permission|insufficient/i.test(msg);
-                    const base = isPerm
-                        ? (translations.fav_error_permission || 'Tu rol no tiene acceso al historial de cambios')
-                        : (translations.fav_error || 'No se pudo cargar el historial');
-                    list.innerHTML = `<div class="nsft-fav-error">${escapeHtml(base)}${isPerm ? '' : '<br><small>' + escapeHtml(msg) + '</small>'}</div>`;
-                };
+                return { sql: sql, params: params };
+            };
 
-                if (query.runSuiteQL.promise) {
-                    query.runSuiteQL.promise({ query: sql, params: params })
-                        .then(function (rs) {
-                            return rs.asMappedResults.promise ? rs.asMappedResults.promise() : rs.asMappedResults();
-                        })
-                        .then(onRows)
-                        .catch(onFail);
-                } else {
-                    try {
-                        onRows(query.runSuiteQL({ query: sql, params: params }).asMappedResults());
-                    } catch (e) { onFail(e); }
-                }
-            }, function (err) {
-                console.warn('NSFT field audit require failed', err);
-                list.innerHTML = `<div class="nsft-fav-error">${escapeHtml(translations.fav_error || 'No se pudo cargar el historial')}</div>`;
+            const bound = build(false);
+            const inlined = build(true);
+
+            const onFail = function (e) {
+                console.warn('NSFT field audit SuiteQL error', e);
+                const msg = (e && e.message) ? e.message : String(e);
+                const isPerm = /permission|insufficient/i.test(msg);
+                const base = isPerm
+                    ? (translations.fav_error_permission || 'Tu rol no tiene acceso al historial de cambios')
+                    : (translations.fav_error || 'No se pudo cargar el historial');
+                list.innerHTML = `<div class="nsft-fav-error">${escapeHtml(base)}${isPerm ? '' : '<br><small>' + escapeHtml(msg) + '</small>'}</div>`;
+            };
+
+            T.run({
+                rest: inlined.sql,
+                sql: bound.sql,
+                params: bound.params,
+                limit: 1000
+            }, function (err, rows) {
+                if (err) { onFail(err); return; }
+                const filtered = filterRowsByField(rows || [], fieldName, fieldLabel);
+                _auditCache.set(cacheKey, filtered);
+                renderFieldHistory(filtered);
             });
         }
 
@@ -2232,29 +2226,25 @@
                 btn.style.opacity = "0.5";
             }
 
-            if (typeof require !== 'function') {
+            const T = window.NSFT_SQL;
+            if (!T) {
                 cacheAndShow(fieldName, "none", translations.sfv_not_found);
                 return;
             }
             try {
-                require(['N/query'], function (query) {
-                    const escapedScriptId = fieldName.toUpperCase().replace(/'/g, "''");
-                    const sql = `SELECT id AS fieldid, recordType AS rectype FROM CustomField WHERE scriptid = '${escapedScriptId}'`;
-                    try {
-                        const res = query.runSuiteQL({ query: sql }).asMappedResults();
-                        if (res && res.length > 0 && res[0].fieldid && res[0].rectype) {
-                            const editUrl = `/app/common/custom/custreccustfield.nl?rectype=${res[0].rectype}&e=T&id=${res[0].fieldid}`;
-                            cacheAndShow(fieldName, "flex", translations.sfv_edit_field_btn, translations.sfv_edit_tooltip, editUrl);
-                        } else {
-                            cacheAndShow(fieldName, "none", translations.sfv_not_found);
-                        }
-                    } catch (e) {
-                        console.warn("NSFT SuiteQL Error (custrecord no rectype)", e);
+                const sql = `SELECT id AS fieldid, recordType AS rectype FROM CustomField WHERE scriptid = ${T.lit(fieldName.toUpperCase())}`;
+                T.run({ rest: sql, sql: sql, limit: 5 }, function (err, res) {
+                    if (err) {
+                        console.warn("NSFT SuiteQL Error (custrecord no rectype)", err);
+                        cacheAndShow(fieldName, "none", translations.sfv_not_found);
+                        return;
+                    }
+                    if (res && res.length > 0 && res[0].fieldid && res[0].rectype) {
+                        const editUrl = `/app/common/custom/custreccustfield.nl?rectype=${res[0].rectype}&e=T&id=${res[0].fieldid}`;
+                        cacheAndShow(fieldName, "flex", translations.sfv_edit_field_btn, translations.sfv_edit_tooltip, editUrl);
+                    } else {
                         cacheAndShow(fieldName, "none", translations.sfv_not_found);
                     }
-                }, function (err) {
-                    console.warn("NSFT Loading N/query failed", err);
-                    cacheAndShow(fieldName, "none", translations.sfv_not_found);
                 });
             } catch (e) {
                 cacheAndShow(fieldName, "none", translations.sfv_not_found);
@@ -2274,29 +2264,25 @@
                 btn.style.opacity = "0.5";
             }
 
-            if (typeof require !== 'function') {
+            const T = window.NSFT_SQL;
+            if (!T) {
                 cacheAndShow(fieldName, "none", translations.sfv_not_found);
                 return;
             }
             try {
-                require(['N/query'], function (query) {
-                    const escapedScriptId = fieldName.toUpperCase().replace(/'/g, "''");
-                    const sql = `SELECT id AS fieldid FROM CustomField WHERE scriptid = '${escapedScriptId}'`;
-                    try {
-                        const res = query.runSuiteQL({ query: sql }).asMappedResults();
-                        if (res && res.length > 0 && res[0].fieldid) {
-                            const editUrl = `/app/common/custom/columncustfield.nl?id=${res[0].fieldid}&e=T`;
-                            cacheAndShow(fieldName, "flex", translations.sfv_edit_field_btn, translations.sfv_edit_tooltip, editUrl);
-                        } else {
-                            cacheAndShow(fieldName, "none", translations.sfv_not_found);
-                        }
-                    } catch (e) {
-                        console.warn("NSFT SuiteQL Error (custcol)", e);
+                const sql = `SELECT id AS fieldid FROM CustomField WHERE scriptid = ${T.lit(fieldName.toUpperCase())}`;
+                T.run({ rest: sql, sql: sql, limit: 5 }, function (err, res) {
+                    if (err) {
+                        console.warn("NSFT SuiteQL Error (custcol)", err);
+                        cacheAndShow(fieldName, "none", translations.sfv_not_found);
+                        return;
+                    }
+                    if (res && res.length > 0 && res[0].fieldid) {
+                        const editUrl = `/app/common/custom/columncustfield.nl?id=${res[0].fieldid}&e=T`;
+                        cacheAndShow(fieldName, "flex", translations.sfv_edit_field_btn, translations.sfv_edit_tooltip, editUrl);
+                    } else {
                         cacheAndShow(fieldName, "none", translations.sfv_not_found);
                     }
-                }, function (err) {
-                    console.warn("NSFT Loading N/query failed", err);
-                    cacheAndShow(fieldName, "none", translations.sfv_not_found);
                 });
             } catch (e) {
                 cacheAndShow(fieldName, "none", translations.sfv_not_found);
@@ -2318,28 +2304,24 @@
                 btn.style.opacity = "0.5";
             }
 
-            if (typeof require === 'function') {
+            const T = window.NSFT_SQL;
+            if (T) {
                 try {
-                    require(['N/query'], function (query) {
-                        const escapedScriptId = fieldName.toUpperCase().replace(/'/g, "''");
-                        const sql = `SELECT id AS fieldid, recordType AS rectype FROM CustomField WHERE scriptid = '${escapedScriptId}'`;
-                        try {
-                            const res = query.runSuiteQL({ query: sql }).asMappedResults();
-                            if (res && res.length > 0 && res[0].fieldid) {
-                                const fieldId = res[0].fieldid;
-                                const resolvedRectype = res[0].rectype || rectypeId;
-                                const editUrl = `/app/common/custom/custreccustfield.nl?rectype=${resolvedRectype}&e=T&id=${fieldId}`;
-                                cacheAndShow(fieldName, "flex", translations.sfv_edit_field_btn, translations.sfv_edit_tooltip, editUrl);
-                            } else {
-                                scrapeCustomRecordFieldInfo(fieldName, rectypeId);
-                            }
-                        } catch (e) {
-                            console.warn("NSFT SuiteQL Error", e);
+                    const sql = `SELECT id AS fieldid, recordType AS rectype FROM CustomField WHERE scriptid = ${T.lit(fieldName.toUpperCase())}`;
+                    T.run({ rest: sql, sql: sql, limit: 5 }, function (err, res) {
+                        if (err) {
+                            console.warn("NSFT SuiteQL Error", err);
+                            scrapeCustomRecordFieldInfo(fieldName, rectypeId);
+                            return;
+                        }
+                        if (res && res.length > 0 && res[0].fieldid) {
+                            const fieldId = res[0].fieldid;
+                            const resolvedRectype = res[0].rectype || rectypeId;
+                            const editUrl = `/app/common/custom/custreccustfield.nl?rectype=${resolvedRectype}&e=T&id=${fieldId}`;
+                            cacheAndShow(fieldName, "flex", translations.sfv_edit_field_btn, translations.sfv_edit_tooltip, editUrl);
+                        } else {
                             scrapeCustomRecordFieldInfo(fieldName, rectypeId);
                         }
-                    }, function (err) {
-                        console.warn("NSFT Loading N/query failed", err);
-                        scrapeCustomRecordFieldInfo(fieldName, rectypeId);
                     });
                     return;
                 } catch (e) { }
@@ -2401,26 +2383,22 @@
                 btn.style.opacity = "0.5";
             }
 
-            if (typeof require === 'function') {
+            const T = window.NSFT_SQL;
+            if (T) {
                 try {
-                    require(['N/query'], function (query) {
-                        const escapedScriptId = fieldName.toUpperCase().replace(/'/g, "''");
-                        const sql = `SELECT cf.id AS fieldid FROM CustomField cf WHERE cf.fieldType = '${fieldType}' AND cf.scriptid = '${escapedScriptId}'`;
-                        try {
-                            const res = query.runSuiteQL({ query: sql }).asMappedResults();
-                            if (res && res.length > 0 && res[0].fieldid) {
-                                const editUrl = `${editPath}?id=${res[0].fieldid}&e=T`;
-                                cacheAndShow(fieldName, "flex", translations.sfv_edit_field_btn, translations.sfv_edit_tooltip, editUrl);
-                            } else {
-                                fetchCustomFieldInfo(fieldName, recType, editPath);
-                            }
-                        } catch (e) {
-                            console.warn("NSFT SuiteQL Error", e);
+                    const sql = `SELECT cf.id AS fieldid FROM CustomField cf WHERE cf.fieldType = ${T.lit(fieldType)} AND cf.scriptid = ${T.lit(fieldName.toUpperCase())}`;
+                    T.run({ rest: sql, sql: sql, limit: 5 }, function (err, res) {
+                        if (err) {
+                            console.warn("NSFT SuiteQL Error", err);
+                            fetchCustomFieldInfo(fieldName, recType, editPath);
+                            return;
+                        }
+                        if (res && res.length > 0 && res[0].fieldid) {
+                            const editUrl = `${editPath}?id=${res[0].fieldid}&e=T`;
+                            cacheAndShow(fieldName, "flex", translations.sfv_edit_field_btn, translations.sfv_edit_tooltip, editUrl);
+                        } else {
                             fetchCustomFieldInfo(fieldName, recType, editPath);
                         }
-                    }, function (err) {
-                        console.warn("NSFT Loading N/query failed", err);
-                        fetchCustomFieldInfo(fieldName, recType, editPath);
                     });
                     return;
                 } catch (e) { }

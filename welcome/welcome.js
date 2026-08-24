@@ -99,7 +99,7 @@
 
         gsap.set('.hero-logo-wrap', { autoAlpha: 0, scale: 0.35, rotation: -220 });
         gsap.set('.hero-logo-ring', { autoAlpha: 0, scale: 0.6 });
-        gsap.set('.hero-tagline, .hero-notice, .hero-scroll-hint', { autoAlpha: 0, y: 24 });
+        gsap.set('.hero-tagline, .hero-notice, .hero-scroll-hint, .hero-wizard', { autoAlpha: 0, y: 24 });
         gsap.set('.hero-title-line', { yPercent: 110 });
         gsap.set('.hero-orb', { scale: 0.6, autoAlpha: 0 });
 
@@ -109,6 +109,7 @@
           .to('.hero-logo-ring', { autoAlpha: 1, scale: 1, duration: 1.1, stagger: 0.12, ease: 'power3.out' }, 0.45)
           .to('.hero-title-line', { yPercent: 0, duration: 1.4, stagger: 0.12 }, 0.85)
           .to('.hero-tagline', { autoAlpha: 1, y: 0, duration: 0.9 }, 1.7)
+          .to('.hero-wizard', { autoAlpha: 1, y: 0, duration: 0.9 }, 1.75)
           .to('.hero-notice', { autoAlpha: 1, y: 0, duration: 0.9 }, 1.9)
           .to('.hero-scroll-hint', { autoAlpha: 1, y: 0, duration: 0.6 }, 2.2)
           .add(startHeroLogoIdle, '>-0.2');

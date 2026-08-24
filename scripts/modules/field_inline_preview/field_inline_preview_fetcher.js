@@ -66,51 +66,38 @@
             reply('', [], 'Empty scriptid');
             return;
         }
-        if (typeof require === 'undefined') {
-            reply(scriptid, [], "'require' is not defined — open NSFT on a NetSuite page.");
+        const T = window.NSFT_SQL;
+        if (!T) {
+            reply(scriptid, [], 'SuiteQL transport unavailable');
             return;
         }
-        try {
-            require(['N/query'], function (q) {
-                try {
-                    const safe = scriptid.replace(/'/g, "''");
-                    const where = `WHERE UPPER(scriptid) = UPPER('${safe}')`;
-                    const baseCols = 'scriptid, name, fieldvaluetype, fieldvaluetyperecord, recordType';
-                    const richQuery = `SELECT ${baseCols}, BUILTIN.DF(fieldvaluetyperecord) AS fieldvaluetyperecordname FROM customfield ${where}`;
-                    const baseQuery = `SELECT ${baseCols} FROM customfield ${where}`;
 
-                    const toRows = (mapped) => mapped.map(r => ({
-                        scriptid: r.scriptid,
-                        name: r.name,
-                        fieldvaluetype: r.fieldvaluetype,
-                        fieldvaluetyperecord: r.fieldvaluetyperecord,
-                        fieldvaluetyperecordname: r.fieldvaluetyperecordname || null,
-                        recordtype: r.recordtype
-                    }));
+        const where = `WHERE UPPER(scriptid) = UPPER(${T.lit(scriptid)})`;
+        const baseCols = 'scriptid, name, fieldvaluetype, fieldvaluetyperecord, recordType';
+        const richQuery = `SELECT ${baseCols}, BUILTIN.DF(fieldvaluetyperecord) AS fieldvaluetyperecordname FROM customfield ${where}`;
+        const baseQuery = `SELECT ${baseCols} FROM customfield ${where}`;
 
-                    if (q.runSuiteQL && typeof q.runSuiteQL.promise === 'function') {
-                        q.runSuiteQL.promise({ query: richQuery })
-                            .then((res) => reply(scriptid, toRows(res.asMappedResults()), null))
-                            .catch(() => q.runSuiteQL.promise({ query: baseQuery })
-                                .then((res) => reply(scriptid, toRows(res.asMappedResults()), null))
-                                .catch((err) => reply(scriptid, [], (err && err.message) || String(err))));
-                        return;
-                    }
-
-                    let mapped;
-                    try {
-                        mapped = q.runSuiteQL({ query: richQuery }).asMappedResults();
-                    } catch (_) {
-                        mapped = q.runSuiteQL({ query: baseQuery }).asMappedResults();
-                    }
-                    reply(scriptid, toRows(mapped), null);
-                } catch (err) {
-                    reply(scriptid, [], (err && err.message) || String(err));
-                }
-            });
-        } catch (err) {
-            reply(scriptid, [], (err && err.message) || String(err));
-        }
+        T.run({
+            rest: richQuery,
+            sql: richQuery,
+            limit: 5,
+            fallback: { rest: baseQuery, sql: baseQuery, limit: 5 }
+        }, function (err, rows) {
+            if (err) {
+                reply(scriptid, [], err.message || err.code || 'query');
+                return;
+            }
+            reply(scriptid, (rows || []).map(function (r) {
+                return {
+                    scriptid: r.scriptid,
+                    name: r.name,
+                    fieldvaluetype: r.fieldvaluetype,
+                    fieldvaluetyperecord: r.fieldvaluetyperecord,
+                    fieldvaluetyperecordname: r.fieldvaluetyperecordname || null,
+                    recordtype: r.recordtype
+                };
+            }), null);
+        });
     }
 
     function reply(scriptid, rows, error) {

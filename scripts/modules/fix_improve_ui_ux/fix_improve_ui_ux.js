@@ -199,13 +199,23 @@
                Las listas que se reordenan arrastrando quedan FUERA en las tres reglas
                (:not de .uir-grippy en filas y .uir-column-grippy en cabecera): su
                primera celda es el agarre, no hay nada útil que fijar, y el carril de
-               abajo la desplazaba sobre la columna vecina. */
+               abajo la desplazaba sobre la columna vecina.
+
+               EL '> tbody' VA COMO HIJO DIRECTO, Y NO ES CAPRICHO. Con el 'tbody'
+               como descendiente, la rama genérica se metía DENTRO de las tablas
+               anidadas que NetSuite usa para dibujar los botones de la línea
+               —Agregar, Cancelar…, cada uno con su tablita de imágenes de
+               esquina— y pegaba la primera celda de cada una. Con el repintado
+               de fondo encima, esas celdas salían grises: de ahí el canto que
+               aparecía encima de Agregar en la clásica. La sublista de verdad es
+               hija directa del contenedor, así que la cadena de hijos la coge
+               igual y las anidadas no. */
             html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:first-child:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy),
-            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr:first-child>td:first-child:not(.uir-grippy):not(.uir-column-grippy) {
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) > tbody>tr:first-child>td:first-child:not(.uir-grippy):not(.uir-column-grippy) {
                 z-index: 3;
             }
             html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy),
-            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr>td:first-child:not(.uir-grippy):not(.uir-column-grippy) {
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) > tbody>tr>td:first-child:not(.uir-grippy):not(.uir-column-grippy) {
                 position: sticky;
                 left: 0;
                 z-index: 2;
@@ -226,8 +236,67 @@
                dos clases, o sea más especificidad que la regla de arriba, y sólo
                actúa cuando ambas features están encendidas. */
             html.nsft-sln-on.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy):not(.uir-machine-focused-cell),
-            html.nsft-sln-on.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tbody>tr:not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy):not(.uir-machine-focused-cell) {
+            html.nsft-sln-on.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) > tbody>tr:not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy):not(.uir-machine-focused-cell) {
                 left: var(--nsft-sln-width, 26px);
+            }
+
+            /* LA LÍNEA EN EDICIÓN TAMBIÉN SE QUEDA.
+               La fila enfocada estaba excluida de las reglas de arriba —herencia
+               de la extensión de referencia, que además sólo fija la columna
+               fuera de Redwood—, así que al ir a la derecha se iba entera
+               mientras el resto de la tabla se quedaba. Va aparte y no dentro de
+               aquellas por dos motivos:
+
+               · '!important' en el 'position': NetSuite le pone a esa celda un
+                 'style="position: relative"' EN LÍNEA, y un estilo en línea gana
+                 a cualquier regla nuestra. Sin esto no se pega, se quede o no en
+                 el selector.
+               · el 'left' se declara aquí mismo. Y eso, de paso, quita la causa
+                 del punto 85 (la línea nueva corrida a la derecha): aquel fallo
+                 salía de que la celda seguía en 'relative' mientras la regla del
+                 carril de números le metía un 'left', que sobre un elemento
+                 relativo DESPLAZA. En 'sticky', 'left' sólo dice dónde se pega. */
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tr.uir-machine-row-focused>td:first-child:not(.uir-grippy):not(.uir-column-grippy) {
+                position: sticky !important;
+                left: 0;
+                z-index: 2;
+                border-right: 1px solid var(--nsft-sublist-col-border, #e3e3e2) !important;
+            }
+            html.nsft-sln-on.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tr.uir-machine-row-focused>td:first-child:not(.uir-grippy):not(.uir-column-grippy) {
+                left: var(--nsft-sln-width, 26px);
+            }
+
+            /* Y LOS BOTONES DE LA LÍNEA (Agregar / Cancelar / Copiar anterior…).
+               Aquí no vale fijar la celda: la fila de botones es UN solo
+               <td colspan="16"> que ocupa la tabla entera, y pegar algo tan ancho
+               como lo que se desplaza no pega nada.
+
+               SE PEGA EL <div>, Y EL 'width' NO ES OPCIONAL. Una caja 'sticky'
+               sólo puede deslizarse DENTRO de su bloque contenedor: el del <div>
+               es el <td> ancho —hay holgura de sobra—, mientras que el de la
+               tabla de dentro es el propio <div>, que se va con el contenido.
+               Medido en vivo: pegando la tabla, 'position' decía 'sticky' y aun
+               así se quedaba en x = -34 con el contenedor en x = 25. Por eso el
+               <div> encogido a 'max-content' es el único punto de agarre: a lo
+               ancho del <td> no sobresale de ningún sitio y no se pega nunca.
+
+               Hubo una ronda en la que esto pareció romper la clásica —botones
+               movidos y un canto encima de Agregar—, pero aquello no salía de
+               aquí: era el fondo que se le pintaba por detrás y la rama genérica
+               de más arriba, que con el 'tbody' como descendiente se metía en las
+               tablitas de los botones. Arregladas las dos, el <div> vuelve a ser
+               el sitio correcto, y el árbol es el MISMO en las dos UIs
+               (TR > TD > DIV > TABLE), así que no hay un apaño por interfaz.
+
+               Las dos ramas son el mismo sitio con la clase en el <td> o en el
+               <div>: NetSuite la pone en los dos y no en todas las páginas
+               igual. */
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tr.uir-machine-button-row>td>div.machineButtonRow,
+            html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tr.uir-machine-button-row>td.machineButtonRow>div {
+                position: sticky;
+                left: 0;
+                z-index: 2;
+                width: max-content;
             }
         `;
         (document.head || document.documentElement).appendChild(style);
@@ -248,6 +317,65 @@
         (document.head || document.documentElement).appendChild(style);
     }
 
+    const FSC_BG_MARK = 'nsftFscBg';
+    let _fscUnsub = null;
+
+    const FSC_STICKY_CELLS =
+        `html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) .listtable>tbody>tr:not(.uir-machine-row-last):not(.uir-machine-row-focused)>td:first-child:not(.uir-grippy):not(.uir-column-grippy):not([data-nsft-fsc-bg]),` +
+        `html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) > tbody>tr>td:first-child:not(.uir-grippy):not(.uir-column-grippy):not([data-nsft-fsc-bg]),` +
+        `html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tr.uir-machine-row-focused>td:first-child:not(.uir-grippy):not(.uir-column-grippy):not([data-nsft-fsc-bg])`;
+
+    function paintFixedColumnBackground() {
+        document.querySelectorAll(FSC_STICKY_CELLS).forEach((td) => {
+            td.dataset[FSC_BG_MARK] = '1';
+
+            if (!isTransparentColor(getComputedStyle(td).backgroundColor)) return;
+
+            const row = td.parentElement;
+            if (row && !isTransparentColor(getComputedStyle(row).backgroundColor)) {
+                td.style.backgroundColor = 'inherit';
+                return;
+            }
+            const bg = firstOpaqueBackground(row);
+            if (bg) td.style.backgroundColor = bg;
+        });
+    }
+
+    function clearFixedColumnBackground() {
+        document.querySelectorAll('[data-nsft-fsc-bg]').forEach((td) => {
+            delete td.dataset[FSC_BG_MARK];
+            td.style.removeProperty('background-color');
+        });
+    }
+
+    const FSC_BTN_MARK = 'nsftFscBtn';
+    const FSC_BUTTON_BARS =
+        `html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tr.uir-machine-button-row>td>div.machineButtonRow:not([data-nsft-fsc-btn]),` +
+        `html.${FSC_CLASS} .uir-machine-table-container > table:not(.openList) tr.uir-machine-button-row>td.machineButtonRow>div:not([data-nsft-fsc-btn])`;
+
+    function offsetAbsLeft(el) {
+        let x = 0;
+        for (let n = el; n; n = n.offsetParent) x += n.offsetLeft;
+        return x;
+    }
+
+    function alignFixedColumnButtons() {
+        document.querySelectorAll(FSC_BUTTON_BARS).forEach((bar) => {
+            const cont = bar.closest('.uir-machine-table-container');
+            if (!cont || cont.scrollLeft !== 0) return;
+            bar.dataset[FSC_BTN_MARK] = '1';
+            const inset = Math.round(offsetAbsLeft(bar) - offsetAbsLeft(cont));
+            if (inset > 0) bar.style.left = inset + 'px';
+        });
+    }
+
+    function clearFixedColumnButtons() {
+        document.querySelectorAll('[data-nsft-fsc-btn]').forEach((bar) => {
+            delete bar.dataset[FSC_BTN_MARK];
+            bar.style.removeProperty('left');
+        });
+    }
+
     function runFixedSublistColumn() {
         try {
             if (window.NSFT_RecordButtons && NSFT_RecordButtons.isHeaderlessPage && NSFT_RecordButtons.isHeaderlessPage()) return;
@@ -255,9 +383,67 @@
         ensureSublistSharedStyle();
         ensureFscStyle();
         document.documentElement.classList.add(FSC_CLASS);
+        paintFixedColumnBackground();
+        alignFixedColumnButtons();
+        if (window.NSFT_Observer && !_fscUnsub) {
+            _fscUnsub = NSFT_Observer.subscribe(() => {
+                paintFixedColumnBackground();
+                alignFixedColumnButtons();
+            }, { throttle: 400 });
+        }
     }
     function stopFixedSublistColumn() {
         document.documentElement.classList.remove(FSC_CLASS);
+        if (_fscUnsub) { _fscUnsub(); _fscUnsub = null; }
+        clearFixedColumnBackground();
+        clearFixedColumnButtons();
+    }
+
+    const FSH_BG_MARK = 'nsftFshBg';
+    let _fshUnsub = null;
+
+    function isTransparentColor(color) {
+        if (window.NSFT_DOM && NSFT_DOM.isTransparentColor) return NSFT_DOM.isTransparentColor(color);
+        if (!color) return true;
+        const c = String(color).replace(/\s+/g, '');
+        if (c === 'transparent') return true;
+        return /^rgba\(\d+,\d+,\d+,(?:0|0?\.0+)\)$/.test(c);
+    }
+
+    function firstOpaqueBackground(el) {
+        if (window.NSFT_DOM && NSFT_DOM.firstOpaqueBackground) return NSFT_DOM.firstOpaqueBackground(el);
+        for (let node = el; node; node = node.parentElement) {
+            const bg = getComputedStyle(node).backgroundColor;
+            if (!isTransparentColor(bg)) return bg;
+        }
+        return '';
+    }
+
+    function paintFixedHeaderBackground() {
+        const rows = document.querySelectorAll(
+            `html.${FSH_CLASS} .uir-machine-table-container > table tr.uir-list-headerrow,` +
+            `html.${FSH_CLASS} .uir-machine-table-container > table tr.uir-machine-headerrow`
+        );
+        rows.forEach((row) => {
+            if (row.dataset[FSH_BG_MARK]) return;
+            row.dataset[FSH_BG_MARK] = '1';
+
+            const bg = firstOpaqueBackground(row);
+            if (!bg) return;
+            row.querySelectorAll(':scope > td').forEach((td) => {
+                if (!isTransparentColor(getComputedStyle(td).backgroundColor)) return;
+                td.style.backgroundColor = bg;
+            });
+        });
+    }
+
+    function clearFixedHeaderBackground() {
+        document.querySelectorAll('[data-nsft-fsh-bg]').forEach((row) => {
+            delete row.dataset[FSH_BG_MARK];
+            row.querySelectorAll(':scope > td').forEach((td) => {
+                td.style.removeProperty('background-color');
+            });
+        });
     }
 
     function runFixedSublistHeaders() {
@@ -267,9 +453,15 @@
         ensureSublistSharedStyle();
         ensureFshStyle();
         document.documentElement.classList.add(FSH_CLASS);
+        paintFixedHeaderBackground();
+        if (window.NSFT_Observer && !_fshUnsub) {
+            _fshUnsub = NSFT_Observer.subscribe(paintFixedHeaderBackground, { throttle: 400 });
+        }
     }
     function stopFixedSublistHeaders() {
         document.documentElement.classList.remove(FSH_CLASS);
+        if (_fshUnsub) { _fshUnsub(); _fshUnsub = null; }
+        clearFixedHeaderBackground();
     }
 
     const FIXED_TABS_STYLE_ID = 'nsft-fixed-tabs-style';

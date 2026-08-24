@@ -1,0 +1,25 @@
+
+#nsft-notice-stack {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 10050;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    pointer-events: none;
+    max-width: min(340px, calc(100vw - 36px));
+    max-height: calc(100vh - 36px);
+}
+
+#nsft-notice-stack > *,
+#nsft-notice-stack > [id] {
+    pointer-events: auto;
+    position: relative;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    top: auto;
+    margin: 0;
+}

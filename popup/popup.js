@@ -220,6 +220,15 @@ const NSFT_DEV_TAP_WINDOW_MS = 3000;
         });
     }
 
+    const freshInstall = document.getElementById('nsftDevFreshInstall');
+    if (freshInstall) {
+        freshInstall.addEventListener('click', () => {
+            chrome.storage.local.remove('nsftOnboardingDone', () => {
+                chrome.tabs.create({ url: chrome.runtime.getURL('welcome/welcome.html') });
+            });
+        });
+    }
+
     const resetRate = document.getElementById('nsftDevResetRate');
     if (resetRate) {
         resetRate.addEventListener('click', () => {
@@ -1520,6 +1529,7 @@ function applyTabLayout() {
         const key = label && label.getAttribute('data-i18n');
         if (key === 'reportBugLink') item.classList.add('nsft-tabside-bug');
         else if (key === 'featureRequestLink') item.classList.add('nsft-tabside-idea');
+        else if (key === 'trackBoardLink') item.classList.add('nsft-tabside-board');
         acts.appendChild(item);
     });
     const gear = document.getElementById('nsftSettingsBtn');
@@ -1553,6 +1563,38 @@ function applyTabLayout() {
 
     const screens = document.querySelector('.nsft-screens');
     if (screens) app.insertBefore(header, screens);
+
+    const pv = document.createElement('aside');
+    pv.className = 'nsft-tabpreview';
+    pv.id = 'nsftTabPreview';
+
+    const pvHead = document.createElement('header');
+    pvHead.className = 'nsft-tabpreview-head';
+    const pvKicker = document.createElement('span');
+    pvKicker.className = 'nsft-tabpreview-kicker';
+    pvKicker.textContent = chrome.i18n.getMessage('previewPanelTitle') || 'Preview';
+    const pvName = document.createElement('strong');
+    pvName.className = 'nsft-tabpreview-name';
+
+    const pvTexts = document.createElement('div');
+    pvTexts.className = 'nsft-tabpreview-titles';
+    pvTexts.append(pvKicker, pvName);
+
+    const pvReplay = document.createElement('button');
+    pvReplay.type = 'button';
+    pvReplay.className = 'nsft-tabpreview-replay';
+    pvReplay.title = chrome.i18n.getMessage('previewReplay') || 'Replay';
+    pvReplay.setAttribute('aria-label', pvReplay.title);
+    pvReplay.textContent = '\u21BB';
+
+    pvHead.append(pvTexts, pvReplay);
+
+    const pvBody = document.createElement('div');
+    pvBody.className = 'nsft-tabpreview-body';
+
+    pv.append(pvHead, pvBody);
+    if (screens) screens.appendChild(pv);
+    wireTabPreview(pv, pvBody, pvName, pvReplay);
 
     if (screens) {
         const results = document.getElementById('nsftSearchResults');
@@ -1868,6 +1910,13 @@ function initializeSettingsScreen() {
     const disableAll = document.getElementById('nsftSettingsDisableAll');
     if (disableAll) disableAll.addEventListener('click', () => applySmartDisableAll());
     if (enableAll) enableAll.addEventListener('click', () => applySmartEnableAll({ mode: 'restore' }));
+
+    const wizard = document.getElementById('nsftSettingsWizard');
+    if (wizard) {
+        wizard.addEventListener('click', () => {
+            chrome.tabs.create({ url: chrome.runtime.getURL('welcome/welcome.html#wizard') });
+        });
+    }
 }
 
 const NSFT_DISABLE_SNAPSHOT_KEY = 'nsftDisableSnapshot';
@@ -2710,3 +2759,133 @@ chrome.storage.local.get(null, (rawLocalItems) => {
         });
     });
 });
+
+function wireTabPreview(panel, caja, tituloEl, replayEl) {
+    const pv = window.NSFT_PV;
+    if (!pv || !pv.pintar || !caja) return;
+
+    const rotulos = {};
+    document.querySelectorAll('[id^="label_enable"]').forEach((el) => {
+        rotulos[el.id.slice(6)] = (el.textContent || '').trim();
+    });
+
+    const datosDeFila = (row) => {
+        const sw = row.querySelector('label.switch input[type="checkbox"][id^="enable"]')
+            || row.querySelector('input[type="checkbox"][id^="enable"]');
+        if (!sw) return null;
+        const rot = row.querySelector('[id^="label_"]');
+        const des = row.querySelector('.description');
+        return {
+            key: sw.id,
+            label: (rot && rot.textContent.trim()) || sw.id,
+            desc: (des && des.textContent.trim()) || ''
+        };
+    };
+
+    const controlDe = (destino, row, moduloKey) => {
+        let el = destino.closest('select, input');
+        if (!el) {
+            const lab = destino.closest('label');
+            if (lab && !lab.classList.contains('switch')) {
+                const id = lab.getAttribute('for');
+                el = (id && row.querySelector('[id="' + id + '"]')) || lab.querySelector('select, input');
+            }
+        }
+        if (!el || !el.id || el.id === moduloKey) return null;
+        return el;
+    };
+
+    const datosDeSub = (el, row) => {
+        if (!el.id || !pv.html[el.id]) return null;
+        const rot = row.querySelector('label[for="' + el.id + '"]') || el.closest('label');
+        return {
+            key: el.id,
+            label: (rot && rot.textContent.trim()) || el.id,
+            desc: ''
+        };
+    };
+
+    const dondeDe = (row, moduloKey) => {
+        const cajas = Array.from(row.querySelectorAll('input[type="checkbox"]'))
+            .filter((el) => el.id && el.id !== moduloKey);
+        if (cajas.length < 2) return null;
+        const cont = cajas[0].closest('div');
+        const head = cont && cont.querySelector(':scope > span[data-i18n]');
+        return {
+            titulo: head ? (head.textContent || '').trim() : '',
+            items: cajas.map((el) => {
+                const lab = el.closest('label');
+                return { texto: ((lab && lab.textContent) || el.id).trim(), on: el.checked };
+            })
+        };
+    };
+
+    const pintarDonde = (row, moduloKey) => {
+        const datos = dondeDe(row, moduloKey);
+        if (!datos) return;
+        const bloque = document.createElement('div');
+        bloque.className = 'nsft-tabpreview-where';
+        if (datos.titulo) {
+            const tit = document.createElement('span');
+            tit.className = 'nsft-tabpreview-where-title';
+            tit.textContent = datos.titulo;
+            bloque.appendChild(tit);
+        }
+        const tira = document.createElement('div');
+        tira.className = 'nsft-tabpreview-chips';
+        datos.items.forEach((it) => {
+            const chip = document.createElement('span');
+            chip.className = 'nsft-tabpreview-chip' + (it.on ? ' is-on' : '');
+            chip.textContent = it.texto;
+            tira.appendChild(chip);
+        });
+        bloque.appendChild(tira);
+        caja.appendChild(bloque);
+    };
+
+    let ultima = null;
+    const pintarFila = (row) => {
+        if (!row) return false;
+        const modulo = datosDeFila(row);
+        if (!modulo) return false;
+        ultima = modulo.key;
+        panel.classList.add('is-on');
+        pv.pintar(caja, modulo, {
+            respaldo: modulo.key, rotulos: rotulos, titulo: tituloEl, descAbajo: true
+        });
+        pintarDonde(row, modulo.key);
+        return true;
+    };
+
+    const mirar = (destino) => {
+        const row = destino && destino.closest && destino.closest('.option-row');
+        if (!row) return;
+        const modulo = datosDeFila(row);
+        if (!modulo) return;
+        const control = controlDe(destino, row, modulo.key);
+        const sub = control ? datosDeSub(control, row) : null;
+        const item = sub || modulo;
+        if (ultima === item.key) return;
+        ultima = item.key;
+        panel.classList.add('is-on');
+        pv.pintar(caja, item, {
+            respaldo: modulo.key, rotulos: rotulos, titulo: tituloEl, descAbajo: true
+        });
+        pintarDonde(row, modulo.key);
+    };
+
+    if (replayEl) {
+        replayEl.addEventListener('click', () => {
+            const key = ultima;
+            ultima = null;
+            const row = document.querySelector('[id="label_' + key + '"]');
+            const fila = row && row.closest('.option-row');
+            if (fila) pintarFila(fila);
+        });
+    }
+
+    document.addEventListener('mouseover', (e) => mirar(e.target));
+    document.addEventListener('focusin', (e) => mirar(e.target));
+
+    pintarFila(document.querySelector('.nsft-screens .option-row'));
+}

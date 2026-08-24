@@ -1,6 +1,12 @@
 (function () {
     'use strict';
 
+    function ensureSqlTransport() {
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+            window.NSFT_SuiteQLRest.ensureTransport();
+        }
+    }
+
     const STORAGE_KEY = 'enableSetFieldValues';
     const AUDIT_KEY = 'enableFieldAuditQuickView';
     const NO_ICON_KEY = 'setFieldValuesNoIcon';
@@ -98,7 +104,9 @@
     }
 
     function injectScript() {
+        ensureSqlTransport();
         const script = document.createElement('script');
+        script.async = false;
         script.src = chrome.runtime.getURL('scripts/modules/set_field_values/set_field_values_fetcher.js');
         script.onload = function () {
             this.remove();

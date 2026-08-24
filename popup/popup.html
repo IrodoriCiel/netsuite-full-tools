@@ -25,6 +25,7 @@
   </style>
   <script src="early-theme.js"></script>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="../welcome/welcome_previews.css">
   <link rel="stylesheet" href="submenus.css">
   <link rel="stylesheet" href="../scripts/libs/fonts/editor_fonts.css">
 </head>
@@ -694,8 +695,8 @@
               <div id="desc_enableCopyFieldAndSublistIds" class="description" data-i18n="enableFieldAndSublistIdsDesc">
               </div>
               <div id="copy-ids-controls" class="nsft-radio-group" style="margin-top: 5px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" name="copyIdsNoButton" value="false"><span data-i18n="copyIdsWithButtonLabel"></span></label>
-                <label><input type="radio" name="copyIdsNoButton" value="true"><span data-i18n="copyIdsNoButtonLabel"></span></label>
+                <label><input type="radio" id="copyIdsModeIcons" name="copyIdsNoButton" value="false"><span data-i18n="copyIdsWithButtonLabel"></span></label>
+                <label><input type="radio" id="copyIdsModeShift" name="copyIdsNoButton" value="true"><span data-i18n="copyIdsNoButtonLabel"></span></label>
               </div>
             </div>
             <label class="switch">
@@ -709,8 +710,8 @@
               <span id="label_enableSetFieldValues" data-i18n="enableSetFieldValuesLabel"></span>
               <div id="desc_enableSetFieldValues" class="description" data-i18n="enableSetFieldValuesDesc"></div>
               <div id="set-field-values-controls" class="nsft-radio-group" style="margin-top: 5px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" name="setFieldValuesNoIcon" value="false"><span data-i18n="setFieldValuesWithIconLabel"></span></label>
-                <label><input type="radio" name="setFieldValuesNoIcon" value="true"><span data-i18n="setFieldValuesNoIconLabel"></span></label>
+                <label><input type="radio" id="setFieldValuesModeIcon" name="setFieldValuesNoIcon" value="false"><span data-i18n="setFieldValuesWithIconLabel"></span></label>
+                <label><input type="radio" id="setFieldValuesModeLabel" name="setFieldValuesNoIcon" value="true"><span data-i18n="setFieldValuesNoIconLabel"></span></label>
               </div>
             </div>
             <label class="switch">
@@ -804,8 +805,8 @@
               <span id="label_enableSaveAndEditButton" data-i18n="enableSaveAndEditButtonLabel"></span>
               <div id="desc_enableSaveAndEditButton" class="description" data-i18n="enableSaveAndEditButtonDesc"></div>
               <div id="save-and-edit-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" name="saveAndEditButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
-                <label><input type="radio" name="saveAndEditButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
+                <label><input type="radio" id="saveAndEditModeButton" name="saveAndEditButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
+                <label><input type="radio" id="saveAndEditModeMenu" name="saveAndEditButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
                 <div class="description" style="flex-basis: 100%; font-size: 10px;" data-i18n="recordActionModeNote"></div>
               </div>
             </div>
@@ -820,8 +821,8 @@
               <span id="label_enableEditAndSaveButton" data-i18n="enableEditAndSaveButtonLabel"></span>
               <div id="desc_enableEditAndSaveButton" class="description" data-i18n="enableEditAndSaveButtonDesc"></div>
               <div id="edit-and-save-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" name="editAndSaveButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
-                <label><input type="radio" name="editAndSaveButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
+                 <label><input type="radio" id="editAndSaveModeButton" name="editAndSaveButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
+                <label><input type="radio" id="editAndSaveModeMenu" name="editAndSaveButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
                 <label class="nsft-subpref" style="flex-basis: 100%; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" id="editAndSaveConfirmInPrd"><span data-i18n="editAndSaveConfirmInPrdLabel"></span></label>
                 <div class="description" style="flex-basis: 100%; font-size: 10px;" data-i18n="recordActionModeNote"></div>
               </div>
@@ -837,8 +838,8 @@
               <span id="label_enableDeleteRecordButton" data-i18n="enableDeleteRecordButtonLabel"></span>
               <div id="desc_enableDeleteRecordButton" class="description" data-i18n="enableDeleteRecordButtonDesc"></div>
               <div id="delete-record-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" name="deleteRecordButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
-                <label><input type="radio" name="deleteRecordButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
+                <label><input type="radio" id="deleteRecordModeButton" name="deleteRecordButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
+                <label><input type="radio" id="deleteRecordModeMenu" name="deleteRecordButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
                 <label class="nsft-subpref" style="flex-basis: 100%; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" id="deleteRecordRequireTypeConfirm"><span data-i18n="deleteRecordRequireTypeConfirmLabel"></span></label>
                 <div class="description" style="flex-basis: 100%; font-size: 10px;" data-i18n="recordActionModeNote"></div>
               </div>
@@ -2263,6 +2264,16 @@
 
           <div class="nsft-settings-group">
             <h3 class="nsft-settings-group-title" data-i18n="settingsGroupPreferences">Preferencias</h3>
+            <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftSettingsWizard">
+              <div class="nsft-settings-row-icon nsft-settings-row-icon-accent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"></path><path d="M4 12h10"></path><path d="M4 18h7"></path><circle cx="18" cy="16" r="3"></circle></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="settingsWizardLabel">Asistente de arranque</strong>
+                <small data-i18n="settingsWizardDesc">Repasa qué funciones tienes encendidas, categoría por categoría.</small>
+              </div>
+              <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
+            </button>
             <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftSettingsEnableAll">
               <div class="nsft-settings-row-icon nsft-settings-row-icon-accent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -2474,6 +2485,17 @@
               </div>
               <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
             </button>
+            <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevFreshInstall"
+              data-i18n-title="devFreshInstallTitle" title="Abrir la bienvenida como en una instalación nueva">
+              <div class="nsft-settings-row-icon nsft-settings-row-icon-accent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><polyline points="7 10 12 15 17 10"></polyline><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="devFreshInstallLabel">Simular instalación nueva</strong>
+                <small data-i18n="devFreshInstallDesc">Abre la bienvenida con el asistente, como al instalar por primera vez. No toca tus preferencias.</small>
+              </div>
+              <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
+            </button>
             <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevResetRate"
               data-i18n-title="devResetRateTitle" title="Volver a mostrar el aviso de califícanos">
               <div class="nsft-settings-row-icon is-feature">
@@ -2558,6 +2580,7 @@
   <script src="../scripts/modules/_shared/nsft_mac_keys.js"></script>
   <script src="../scripts/modules/_shared/nsft_defaults.js"></script>
   <script src="../scripts/modules/editor_theme/theme_transform.js"></script>
+  <script src="../welcome/welcome_previews.js"></script>
   <script src="popup.js"></script>
   <script src="submenus.js"></script>
 </body>

@@ -155,6 +155,11 @@
         const container = document.createElement('div');
         container.className = 'nsft-role-search-container';
 
+        const title = document.createElement('div');
+        title.className = 'nsft-role-search-title';
+        title.textContent = chrome.i18n.getMessage('rolefTitle') || 'SEARCH ROLE';
+        container.appendChild(title);
+
         const input = document.createElement('input');
         input.type = 'text';
         input.name = IDS.SEARCH;

@@ -1911,6 +1911,102 @@
   "nsft_clipboard_fail": {
     "message": "Error al copiar"
   },
+  "welcomeWizProfileTitle": {
+    "message": "¿Con qué quieres empezar?"
+  },
+  "welcomeWizProfileSub": {
+    "message": "Elige un punto de partida. Con «Personalizado» lo eliges categoría por categoría, y puedes cambiarlo cuando quieras desde los ajustes."
+  },
+  "welcomeWizProfileNone": {
+    "message": "Nada activado"
+  },
+  "welcomeWizProfileNoneDesc": {
+    "message": "NetSuite se queda tal cual y vas encendiendo lo que necesites."
+  },
+  "welcomeWizProfileSuggested": {
+    "message": "Lo sugerido"
+  },
+  "welcomeWizProfileSuggestedDesc": {
+    "message": "Lo útil encendido, sin nada que impacte en el rendimiento."
+  },
+  "welcomeWizProfileAll": {
+    "message": "Todo"
+  },
+  "welcomeWizProfileAllDesc": {
+    "message": "Todas las funciones de NSFT activadas, la extensión completa."
+  },
+  "colorThemesScopeNote": {
+    "message": "Se aplica en todas tus cuentas de NetSuite y con cualquier rol, y siempre por encima de los temas nativos."
+  },
+  "previewPanelTitle": {
+    "message": "Vista previa"
+  },
+  "previewReplay": {
+    "message": "Repetir"
+  },
+  "welcomeWizRequires": {
+    "message": "Requiere $1"
+  },
+  "welcomeWizProfileCustom": {
+    "message": "Personalizado"
+  },
+  "welcomeWizProfileCustomDesc": {
+    "message": "Eliges tú, categoría por categoría, qué se enciende y qué no."
+  },
+  "welcomeWizEyebrow": {
+    "message": "Configuración inicial"
+  },
+  "welcomeWizRecommended": {
+    "message": "Recomendado"
+  },
+  "welcomeWizConfirm": {
+    "message": "Confirmar"
+  },
+  "welcomeWizContinue": {
+    "message": "Continuar"
+  },
+  "welcomeWizStepSub": {
+    "message": "$1 de $2 activadas en esta categoría."
+  },
+  "welcomeWizNext": {
+    "message": "Siguiente"
+  },
+  "welcomeWizBack": {
+    "message": "Atrás"
+  },
+  "welcomeWizSkip": {
+    "message": "Saltar y quedarme con lo elegido"
+  },
+  "welcomeWizFinish": {
+    "message": "Terminar"
+  },
+  "welcomeWizAll": {
+    "message": "Activar todas"
+  },
+  "welcomeWizNone": {
+    "message": "Desactivar todas"
+  },
+  "welcomeWizToolsLabel": {
+    "message": "Herramientas"
+  },
+  "welcomeWizDoneTitle": {
+    "message": "Todo listo"
+  },
+  "welcomeWizDoneSub": {
+    "message": "Quedaron $1 de $2 funciones activadas. Puedes cambiarlas cuando quieras desde los ajustes."
+  },
+  "welcomeWizDoneMore": {
+    "message": "Muchas funciones traen además sus propios ajustes —el tema, el intervalo, los colores— que puedes afinar cuando quieras desde el popup, debajo de su interruptor."
+  },
+  "welcomeWizOpenSettings": {
+    "message": "Abrir ajustes"
+  },
+  "settingsWizardLabel": {
+    "message": "Asistente de arranque"
+  },
+  "settingsWizardDesc": {
+    "message": "Repasa qué funciones tienes encendidas, categoría por categoría."
+  },
   "welcomeTitle": {
     "message": "Bienvenido a NetSuite Full Tools"
   },
@@ -2104,7 +2200,7 @@
     "message": "Cabeceras de sublist, columnas y pestañas fijas"
   },
   "welcomeCatUiItem3": {
-    "message": "Pestañas agrupadas por subdominio de cuenta"
+    "message": "Pestañas agrupadas por cuenta"
   },
   "welcomeCatUiItem4": {
     "message": "Mejores títulos de página, dropdowns y navegación más compactos"
@@ -2378,6 +2474,9 @@
   },
   "copySublistId": {
     "message": "COPIAR ID SUBLISTA"
+  },
+  "copyFreeMarker": {
+    "message": "Copiar FreeMarker"
   },
   "copyXml": {
     "message": "Copiar XML"
@@ -2695,13 +2794,22 @@
     "message": "ej. INV-00123  ·  customer 942  ·  invoice 12847"
   },
   "gtr_hint": {
-    "message": "Busca por tranid, «tipo id» o nombre de custom record (el id es opcional). Enter para ir · Esc para cerrar."
+    "message": "Busca por número de documento o de transacción, «tipo id» o nombre de custom record (el id es opcional). Enter para ir · Esc para cerrar."
   },
   "gtr_searching": {
     "message": "Buscando…"
   },
   "gtr_not_found": {
-    "message": "No se encontró ningún registro con ese tranid."
+    "message": "No se encontró ningún registro con ese número."
+  },
+  "gtr_err_stale": {
+    "message": "La extensión se actualizó. Recarga la página para volver a buscar desde aquí."
+  },
+  "gtr_err_unavailable": {
+    "message": "No se pudo buscar desde esta página. Para buscar desde cualquier sitio, la cuenta necesita los servicios web REST activados; sin ellos sólo funciona en las páginas que cargan SuiteScript, como una transacción o un registro personalizado."
+  },
+  "gtr_err_query": {
+    "message": "La búsqueda falló. Inténtalo de nuevo."
   },
   "gtr_multiple": {
     "message": "Varios resultados — elige uno."
@@ -3186,7 +3294,7 @@
     "message": "Agrupar Pestañas"
   },
   "enableJsonPrettyDesc": {
-    "message": "Formatear y resaltar JSON/SQL en registros al verlos."
+    "message": "Formatear y resaltar JSON, SQL, XML, HTML y FreeMarker en registros al verlos."
   },
   "enableJsonPrettyLabel": {
     "message": "Embellecer Campos de Código"
@@ -4153,8 +4261,8 @@
   "gt_error_required": {
     "message": "Cuenta y Etiqueta son obligatorios."
   },
-  "gt_invalid_subdomain": {
-    "message": "El subdominio sólo puede contener letras minúsculas, números y guiones."
+  "gt_invalid_account": {
+    "message": "El ID de cuenta sólo puede llevar letras, números, guiones o guiones bajos (ej. 7643216_SB1 o 7643216-sb1)."
   },
   "gt_modal_confirm_title": {
     "message": "Eliminar grupo"
@@ -4187,7 +4295,7 @@
     "message": "Agregar grupos en lote"
   },
   "gt_bulk_modal_help": {
-    "message": "Una entrada por línea. Formato: subdominio | etiqueta | color. Etiqueta y color son opcionales. El color debe ser uno de: grey, blue, red, yellow, green, pink, purple, cyan, orange."
+    "message": "Una entrada por línea. Formato: ID de cuenta | etiqueta | color. Etiqueta y color son opcionales. El color debe ser uno de: grey, blue, red, yellow, green, pink, purple, cyan, orange."
   },
   "gt_bulk_modal_placeholder": {
     "message": "1234567 | Producción | red\n1234567-sb1 | Sandbox 1 | green\n1234567-sb2 | Sandbox 2 | yellow"
@@ -4248,7 +4356,7 @@
     "message": "Aplicar preset"
   },
   "gt_presets_modal_help": {
-    "message": "Genera entradas para producción y sandboxes a partir del ID base de cuenta. Las entradas existentes con el mismo subdominio se saltan."
+    "message": "Genera entradas para producción y sandboxes a partir del ID base de cuenta. Las entradas existentes con el mismo ID de cuenta se saltan."
   },
   "gt_presets_account_label": {
     "message": "ID base de cuenta"
@@ -4300,14 +4408,14 @@
   "gt_saved_msg": {
     "message": "¡Guardado!"
   },
-  "gt_subdomain_help": {
-    "message": "El ID de la cuenta"
+  "gt_account_help": {
+    "message": "El ID de cuenta o el subdominio de la URL: valen los dos."
   },
-  "gt_subdomain_label": {
-    "message": "ID de Cuenta"
+  "gt_account_label": {
+    "message": "ID de Cuenta o subdominio"
   },
-  "gt_subdomain_placeholder": {
-    "message": "ej. 7643216_SB1"
+  "gt_account_placeholder": {
+    "message": "ej. 1234567_SB1 o 1234567-sb1"
   },
   "gt_visible_label_label": {
     "message": "Nombre de grupo de pestañas"
@@ -6650,13 +6758,13 @@
     "message": "Eliminar"
   },
   "fcd_confirm": {
-    "message": "¿Seguro que quieres eliminar este {type}?"
+    "message": "¿Seguro que quieres eliminar {type}?"
   },
   "fcd_type_file": {
-    "message": "archivo"
+    "message": "este archivo"
   },
   "fcd_type_folder": {
-    "message": "carpeta"
+    "message": "esta carpeta"
   },
   "fcd_contents_header": {
     "message": "Contenido"
@@ -7221,6 +7329,9 @@
   "enableRoleFinderDesc": {
     "message": "Agrega un input en el menú de cuenta para filtrar roles y cuentas al escribir."
   },
+  "rolefTitle": {
+    "message": "BUSCAR ROL"
+  },
   "rolefPlaceholder": {
     "message": "Buscar rol..."
   },
@@ -7228,7 +7339,7 @@
     "message": "Bloqueador de cierre de sesión"
   },
   "enableLogoutBlockerDesc": {
-    "message": "Neutraliza el popup de expiración de sesión para seguir trabajando sin interrupciones."
+    "message": "Quita la cortina que tapa la página cuando caduca la sesión, para seguir viendo y copiando lo que tenías. La sesión sigue caducada: para guardar hay que volver a entrar."
   },
   "enableHideGuidedLearningLabel": {
     "message": "Ocultar aprendizaje guiado"
@@ -7410,6 +7521,99 @@
   "wfctLineDotted": {
     "message": "Punteada"
   },
+  "wfs_stage_workflow": {
+    "message": "Estructura del workflow"
+  },
+  "wfs_states": {
+    "message": "Estados"
+  },
+  "wfs_actions": {
+    "message": "Acciones"
+  },
+  "wfs_transitions": {
+    "message": "Transiciones"
+  },
+  "wfs_progress_title": {
+    "message": "Indexador de Workflow"
+  },
+  "wfs_loading": {
+    "message": "Cargando…"
+  },
+  "wfs_title": {
+    "message": "Indexador"
+  },
+  "wfs_search_ph": {
+    "message": "Buscar nombre, campo, valor, fórmula…"
+  },
+  "wfs_all_types": {
+    "message": "Todos los tipos"
+  },
+  "wfs_all_triggers": {
+    "message": "Todos los triggers"
+  },
+  "wfs_all_states": {
+    "message": "Todos los estados"
+  },
+  "wfs_only_active": {
+    "message": "Solo activas"
+  },
+  "wfs_result_one": {
+    "message": "resultado"
+  },
+  "wfs_result_many": {
+    "message": "resultados"
+  },
+  "wfs_empty": {
+    "message": "Sin resultados con los filtros actuales."
+  },
+  "wfs_no_type": {
+    "message": "(sin tipo)"
+  },
+  "wfs_inactive": {
+    "message": "Inactiva"
+  },
+  "wfs_lbl_state": {
+    "message": "Estado"
+  },
+  "wfs_lbl_trigger": {
+    "message": "Trigger"
+  },
+  "wfs_lbl_field": {
+    "message": "Campo"
+  },
+  "wfs_lbl_value": {
+    "message": "Valor"
+  },
+  "wfs_lbl_button": {
+    "message": "Botón"
+  },
+  "wfs_lbl_formula": {
+    "message": "Fórmula"
+  },
+  "wfs_lbl_condition": {
+    "message": "Condición"
+  },
+  "wfs_lbl_contexts": {
+    "message": "Contextos"
+  },
+  "wfs_lbl_actions": {
+    "message": "Acciones"
+  },
+  "wfs_lbl_key": {
+    "message": "Clave"
+  },
+  "wfs_lbl_flow": {
+    "message": "Flujo"
+  },
+  "wfs_minimize": {
+    "message": "Minimizar"
+  },
+  "wfs_maximize": {
+    "message": "Maximizar"
+  },
+  "wfs_close": {
+    "message": "Cerrar"
+  },
   "wfctLineWidthLabel": {
     "message": "Grosor de línea"
   },
@@ -7529,6 +7733,15 @@
   },
   "devResetNoticeDone": {
     "message": "Aviso reiniciado. Refresca una pestaña de NetSuite para verlo."
+  },
+  "devFreshInstallLabel": {
+    "message": "Simular instalación nueva"
+  },
+  "devFreshInstallDesc": {
+    "message": "Abre la bienvenida con el asistente, como al instalar por primera vez. No toca tus preferencias."
+  },
+  "devFreshInstallTitle": {
+    "message": "Abrir la bienvenida como en una instalación nueva"
   },
   "devResetRateLabel": {
     "message": "Reiniciar el aviso de califícanos"
@@ -9551,28 +9764,25 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "Nuevo: Ver Logs del Registro, con filtros, buscador y descargas."
+    "message": "Al instalar, un asistente te deja elegir con qué funciones empiezas."
   },
   "un_hl_2": {
-    "message": "Los visores y el asistente de IA se acoplan al panel lateral, siguen a la pestaña activa y puedes elegir dónde abren por defecto."
+    "message": "Cada función se ve en un dibujo animado antes de encenderla."
   },
   "un_hl_3": {
-    "message": "Nuevo tablero público para seguir tus reportes, de recibido a publicado."
+    "message": "El Asistente de IA tarda menos en responder a cada pregunta."
   },
   "un_hl_4": {
-    "message": "El tema del editor de código vuelve a pintar sus colores — incluido el Personalizado."
+    "message": "En las sublistas, lo que queda fijo ya no deja ver el texto que pasa por debajo."
   },
   "un_hl_5": {
-    "message": "Redwood entero acompaña a los deslizadores del tema de color."
+    "message": "La línea que estás editando y sus botones se quedan a la vista al desplazarte a la derecha."
   },
   "un_hl_6": {
-    "message": "El Runner ya no corta las descargas grandes, y el buscador de campos resalta y se limpia de un clic."
+    "message": "El buscador de campos de las búsquedas encuentra por palabras completas, y admite varias en cualquier orden."
   },
   "un_hl_7": {
-    "message": "Modo oscuro más fino: casillas, logo de la cabecera, código y resaltados."
-  },
-  "un_hl_8": {
-    "message": "Y decenas de arreglos más: los detalles, en el changelog."
+    "message": "Y se arreglaron otros fallos: textos corrientes formateados como código, paneles que salían siempre en español y el ID de cuenta con guion bajo. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -9878,6 +10088,132 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
+  },
+  "cl_ver_6_5_1": {
+    "message": "v6.5.1"
+  },
+  "cl_date_6_5_1": {
+    "message": "2026-08-24"
+  },
+  "cl_6_5_1_fsc_bg_title": {
+    "message": "La columna fija tapa lo que pasa por debajo"
+  },
+  "cl_6_5_1_fsc_bg_desc": {
+    "message": "Se arregló que en Redwood se leyeran las demás columnas a través de la primera columna fija de las sublistas."
+  },
+  "cl_6_5_1_fsc_rows_title": {
+    "message": "La línea en edición se queda con su columna"
+  },
+  "cl_6_5_1_fsc_rows_desc": {
+    "message": "Se arregló que la línea en edición y sus botones se fueran al desplazar la sublista a la derecha con la columna fija."
+  },
+  "cl_6_5_1_ff_words_title": {
+    "message": "El buscador de campos busca por palabras"
+  },
+  "cl_6_5_1_ff_words_desc": {
+    "message": "Se arregló que el buscador de campos trajera campos sin relación, y ahora acepta varias palabras en cualquier orden."
+  },
+  "cl_ver_6_5_0": {
+    "message": "v6.5.0"
+  },
+  "cl_date_6_5_0": {
+    "message": "2026-08-23"
+  },
+  "cl_6_5_0_previews_title": {
+    "message": "Cada función se ve antes de encenderla"
+  },
+  "cl_6_5_0_previews_desc": {
+    "message": "Se agregó un dibujo animado de cada función, en el asistente de arranque y en el popup a pantalla completa, para no tener que adivinar qué hace cada opción."
+  },
+  "cl_6_5_0_wfsearch_i18n_title": {
+    "message": "El Indexador de Workflow habla tu idioma"
+  },
+  "cl_6_5_0_wfsearch_i18n_desc": {
+    "message": "Se arregló que el panel del Indexador de Workflow saliera siempre en español, sin seguir el idioma de la extensión."
+  },
+  "cl_6_5_0_ai_nquery_title": {
+    "message": "El Asistente de IA responde antes"
+  },
+  "cl_6_5_0_ai_nquery_desc": {
+    "message": "Se cambió la vía por la que el Asistente consulta los datos, que ahora tarda menos en cada intento de una misma pregunta."
+  },
+  "cl_6_5_0_wizard_title": {
+    "message": "Eliges qué se enciende al instalar"
+  },
+  "cl_6_5_0_wizard_desc": {
+    "message": "Se agregó un asistente de arranque con cuatro puntos de partida, uno para elegir función por función, también disponible en los ajustes."
+  },
+  "cl_6_5_0_prettier_sqlguess_title": {
+    "message": "Sólo se formatea el valor de los campos de código"
+  },
+  "cl_6_5_0_prettier_sqlguess_desc": {
+    "message": "Se arregló que se formatearan como código las etiquetas de los campos y los textos que sólo empiezan por una palabra de SQL."
+  },
+  "cl_6_5_0_rolef_i18n_title": {
+    "message": "El buscador de roles habla tu idioma"
+  },
+  "cl_6_5_0_rolef_i18n_desc": {
+    "message": "Se arregló que el rótulo del buscador de roles saliera siempre en español, sin seguir el idioma de la extensión."
+  },
+  "cl_6_5_0_fcpath_toast_title": {
+    "message": "La ruta copiada se confirma"
+  },
+  "cl_6_5_0_fcpath_toast_desc": {
+    "message": "Se agregó el aviso con la ruta copiada al usar el icono de copiar ruta en el Archivador, que antes copiaba sin señal alguna."
+  },
+  "cl_6_5_0_fcdel_wording_title": {
+    "message": "El aviso de eliminar concuerda"
+  },
+  "cl_6_5_0_fcdel_wording_desc": {
+    "message": "Se arregló la concordancia del mensaje de confirmación al eliminar una carpeta desde el Archivador."
+  },
+  "cl_ver_6_4_2": {
+    "message": "v6.4.2"
+  },
+  "cl_date_6_4_2": {
+    "message": "2026-08-20"
+  },
+  "cl_6_4_2_gt_accountid_title": {
+    "message": "El ID de cuenta se acepta como lo escribe NetSuite"
+  },
+  "cl_6_4_2_gt_accountid_desc": {
+    "message": "Se arregló que la configuración de Pestañas Agrupadas rechazara el ID de cuenta con guion bajo; ahora acepta las dos formas."
+  },
+  "cl_6_4_2_fsh_bg_title": {
+    "message": "Los títulos fijos tapan lo que pasa por debajo"
+  },
+  "cl_6_4_2_fsh_bg_desc": {
+    "message": "Se arregló que en Redwood se leyera el contenido a través de la cabecera fija de las sublistas y del título fijo de los grupos de campos."
+  },
+  "cl_ver_6_4_1": {
+    "message": "v6.4.1"
+  },
+  "cl_date_6_4_1": {
+    "message": "2026-08-20"
+  },
+  "cl_6_4_1_gtr_anypage_title": {
+    "message": "Ir al record funciona fuera de las páginas de registro"
+  },
+  "cl_6_4_1_gtr_anypage_desc": {
+    "message": "Se arregló que Ir al record no encontrara nada fuera de una página de registro; ahora funciona en cualquiera con los servicios web REST activados."
+  },
+  "cl_6_4_1_prettier_ftl_title": {
+    "message": "Los campos con FreeMarker se ven como código"
+  },
+  "cl_6_4_1_prettier_ftl_desc": {
+    "message": "Se agregó el reconocimiento de FreeMarker en los campos de registro, que ahora salen resaltados y con sus botones de copiar y descargar."
+  },
+  "cl_6_4_1_gtr_txnnum_title": {
+    "message": "Ir al record encuentra por número de transacción"
+  },
+  "cl_6_4_1_gtr_txnnum_desc": {
+    "message": "Se agregó la búsqueda por número de transacción en Ir al record, además del número de documento."
+  },
+  "cl_6_4_1_sql_transport_title": {
+    "message": "Las consultas de las herramientas ya no bloquean la página"
+  },
+  "cl_6_4_1_sql_transport_desc": {
+    "message": "Se cambió cómo consultan datos las herramientas: ya no congelan la página y funcionan donde antes fallaban."
   },
   "cl_ver_6_4_0": {
     "message": "v6.4.0"

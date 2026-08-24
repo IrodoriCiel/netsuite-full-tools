@@ -12,7 +12,7 @@
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Valoración" src="https://img.shields.io/chrome-web-store/rating/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&color=F59E0B&label=Rating"></a>
 </p>
 <p align="center">
-  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v6.4.0-555555?style=for-the-badge"></a>
+  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v6.5.1-555555?style=for-the-badge"></a>
   <a href="https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3"><img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-2C6E4E?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
   <a href="#ficha-técnica--technical-details"><img alt="JavaScript sin frameworks" src="https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"></a>
   <a href="#ficha-técnica--technical-details"><img alt="Sin telemetría ni servidores propios" src="https://img.shields.io/badge/Privacidad-100%25%20local-2C6E4E?style=for-the-badge"></a>
@@ -149,7 +149,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Buscador de roles** | filtra roles y cuentas al escribir. |
 | **Logo de compañía en login** | muestra logo y nombre de la compañía en la página de login. |
 | **Indicador de sandbox en login** | banner que marca las cuentas sandbox. |
-| **Bloqueador de cierre de sesión** | neutraliza el popup de expiración para no perder tu trabajo. |
+| **Bloqueador de cierre de sesión** | quita la cortina que tapa la página al caducar la sesión, para seguir viendo y copiando lo que tenías (para guardar, hay que volver a entrar). |
 | **Regresar al account desde netsuite.com** | te devuelve a tu cuenta si caes en la landing pública. |
 | **Auto refresco en bundles** | interruptor de auto refresco en la lista de bundles. |
 | **Auto-refresh de portlets** | refresca los portlets del dashboard automáticamente. |
@@ -304,7 +304,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Role Finder** | filter roles and accounts as you type. |
 | **Company Logo on Login** | shows the company logo and name on the login page. |
 | **Sandbox Indicator on Login** | a banner marking sandbox accounts. |
-| **Logout Blocker** | neutralizes the session-timeout popup so you don't lose work. |
+| **Logout Blocker** | removes the curtain that covers the page when the session expires, so you can still read and copy what you had (saving means logging back in). |
 | **Return to Account from netsuite.com** | sends you back to your account if you hit the public page. |
 | **Auto Refresh on Bundles** | an auto-refresh toggle on the Bundle List. |
 | **Portlet Auto-refresh** | auto-refreshes dashboard portlets. |

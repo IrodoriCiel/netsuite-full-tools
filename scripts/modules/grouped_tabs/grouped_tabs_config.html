@@ -28,9 +28,9 @@
                 <h2 data-i18n="gt_add_new_title">Add New Group</h2>
                 <div class="form-grid">
                     <div class="input-group">
-                        <label for="subdomain" data-i18n="gt_subdomain_label">Subdomain (ID)</label>
-                        <input type="text" id="subdomain" data-i18n-placeholder="gt_subdomain_placeholder"
-                            placeholder="e.g. system" autocomplete="off">
+                        <label for="accountId" data-i18n="gt_account_label">Account ID or subdomain</label>
+                        <input type="text" id="accountId" data-i18n-placeholder="gt_account_placeholder"
+                            placeholder="e.g. 1234567_SB1 or 1234567-sb1" autocomplete="off">
                     </div>
 
                     <div class="input-group">
@@ -107,7 +107,7 @@
         <div id="bulkAddModal" class="modal-overlay" hidden>
             <div class="modal-card modal-card--wide" role="dialog" aria-modal="true" aria-labelledby="bulkAddModalTitle">
                 <h3 id="bulkAddModalTitle" data-i18n="gt_bulk_modal_title">Bulk add groups</h3>
-                <p class="modal-help" data-i18n="gt_bulk_modal_help">One entry per line. Format: <code>subdomain | label | color</code>. Label and color are optional. Color must be one of: grey, blue, red, yellow, green, pink, purple, cyan, orange.</p>
+                <p class="modal-help" data-i18n="gt_bulk_modal_help">One entry per line. Format: <code>account ID | label | color</code>. Label and color are optional. Color must be one of: grey, blue, red, yellow, green, pink, purple, cyan, orange.</p>
                 <textarea id="bulkAddTextarea" rows="8" data-i18n-placeholder="gt_bulk_modal_placeholder"
                     placeholder="1234567 | Production | red&#10;1234567-sb1 | Sandbox 1 | green&#10;1234567-sb2 | Sandbox 2 | yellow"></textarea>
                 <div class="modal-actions">
@@ -120,7 +120,7 @@
         <div id="presetsModal" class="modal-overlay" hidden>
             <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="presetsModalTitle">
                 <h3 id="presetsModalTitle" data-i18n="gt_presets_modal_title">Apply preset</h3>
-                <p class="modal-help" data-i18n="gt_presets_modal_help">Generates entries for production and sandboxes from your base account ID. Existing entries with the same subdomain are skipped.</p>
+                <p class="modal-help" data-i18n="gt_presets_modal_help">Generates entries for production and sandboxes from your base account ID. Existing entries with the same account ID are skipped.</p>
                 <label for="presetAccountId" data-i18n="gt_presets_account_label">Base account ID</label>
                 <input type="text" id="presetAccountId" autocomplete="off"
                     data-i18n-placeholder="gt_presets_account_placeholder" placeholder="e.g. 1234567">

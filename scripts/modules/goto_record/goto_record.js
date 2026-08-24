@@ -24,7 +24,11 @@
     let _onKeydown = null;
     let _onMessage = null;
     let _onShowGoto = null;
+    let _lastLookup = '';
+    let _searchTimer = null;
+    const SEARCH_TIMEOUT_MS = 20000;
     let _suggestToken = 0;
+    let _suggBuckets = { token: -1, tx: [], types: [] };
     let _suggestTimer = null;
     let _suggestRows = [];
     let _suggestSelectedIdx = -1;
@@ -225,10 +229,29 @@
     function ensureFetcher() {
         if (_fetcherInjected) return;
         _fetcherInjected = true;
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+            window.NSFT_SuiteQLRest.ensureTransport();
+        }
         const s = document.createElement('script');
+        s.async = false;
         s.src = chrome.runtime.getURL('scripts/modules/goto_record/goto_record_fetcher.js');
         s.onload = function () { this.remove(); };
         (document.head || document.documentElement).appendChild(s);
+    }
+
+    function postToFetcher(type, payload) {
+        window.postMessage({ dest: 'fetcher_gtr', type, payload }, '*');
+    }
+
+    function fetcherErrorText(payload) {
+        const code = (payload && payload.code) || 'query';
+        if (code === 'stale') {
+            return i18n('gtr_err_stale', 'The extension was updated. Reload the page to search from here again.');
+        }
+        if (code === 'unavailable') {
+            return i18n('gtr_err_unavailable', "Couldn't search from this page. To search from anywhere, the account needs REST web services enabled; without them it only works on pages that load SuiteScript, such as a transaction or a custom record.");
+        }
+        return i18n('gtr_err_query', 'The search failed. Try again.');
     }
 
     function handleFetcherMessage(event) {
@@ -239,11 +262,13 @@
         if (data.type === 'tranidResult') {
             handleTranidResult(data.payload);
         } else if (data.type === 'tranidError') {
-            showError(data.payload.message);
+            showError(fetcherErrorText(data.payload));
         } else if (data.type === 'customRecordResult') {
             handleCustomRecordResult(data.payload);
         } else if (data.type === 'customRecordError') {
-            showError(data.payload.message);
+            showError(fetcherErrorText(data.payload));
+        } else if (data.type === 'transactionSuggestions') {
+            handleTransactionSuggestions(data.payload);
         } else if (data.type === 'customRecordSuggestions') {
             handleCustomRecordSuggestions(data.payload);
         } else if (data.type === 'customRecordInstanceSuggestions') {
@@ -256,6 +281,7 @@
     }
 
     function handleTranidResult(payload) {
+        clearSearchTimer();
         const { found, rows } = payload || {};
         if (!found || !rows || !rows.length) {
             showError(i18n('gtr_not_found', 'No matching tranid found.'));
@@ -282,6 +308,7 @@
     }
 
     function handleCustomRecordResult(payload) {
+        clearSearchTimer();
         const { found, rows, recordId } = payload || {};
         if (!found || !rows || !rows.length) {
             showError(i18n('gtr_custom_not_found', 'Custom record type not found.'));
@@ -399,6 +426,7 @@
     }
 
     function closeModal() {
+        clearSearchTimer();
         const el = document.getElementById(MODAL_ID);
         if (el) el.remove();
         _selectedType = null;
@@ -426,7 +454,7 @@
                            role="combobox" aria-autocomplete="list" aria-expanded="false"
                            aria-controls="nsft-gtr-suggestions" />
                     <ul id="nsft-gtr-suggestions" class="nsft-gtr-suggestions" role="listbox" hidden></ul>
-                    <p class="nsft-gtr-hint">${escapeHtml(i18n('gtr_hint', 'Search by tranid, "type id", or a custom record name (id is optional). Enter to go · Esc to close.'))}</p>
+                    <p class="nsft-gtr-hint">${escapeHtml(i18n('gtr_hint', 'Search by document or transaction number, "type id", or a custom record name (id is optional). Enter to go · Esc to close.'))}</p>
                     <p class="nsft-gtr-status" aria-live="polite"></p>
                 </div>
             </div>
@@ -515,12 +543,13 @@
             return;
         }
         const token = ++_suggestToken;
+        _suggBuckets = { token, tx: [], types: [] };
         _suggestTimer = setTimeout(() => {
-            window.postMessage({
-                dest: 'fetcher_gtr',
-                type: 'suggestCustomRecords',
-                payload: { query: queryAlias, token, fuzzy: _fuzzy }
-            }, '*');
+            postToFetcher('suggestCustomRecords', { query: queryAlias, token, fuzzy: _fuzzy });
+            if (looksLikeDocNumber(queryAlias)) {
+                _lastLookup = queryAlias.toUpperCase();
+                postToFetcher('suggestTransactions', { prefix: queryAlias, token });
+            }
         }, SUGGEST_DEBOUNCE_MS);
     }
 
@@ -529,17 +558,13 @@
         if (_suggestTimer) clearTimeout(_suggestTimer);
         const token = ++_suggestToken;
         _suggestTimer = setTimeout(() => {
-            window.postMessage({
-                dest: 'fetcher_gtr',
-                type: 'suggestCustomRecordInstances',
-                payload: {
-                    scriptid: _selectedType.scriptid,
-                    rectypeId: _selectedType.rectypeId,
-                    typeName: _selectedType.name,
-                    filter,
-                    token
-                }
-            }, '*');
+            postToFetcher('suggestCustomRecordInstances', {
+                scriptid: _selectedType.scriptid,
+                rectypeId: _selectedType.rectypeId,
+                typeName: _selectedType.name,
+                filter,
+                token
+            });
         }, SUGGEST_DEBOUNCE_MS);
     }
 
@@ -552,21 +577,57 @@
         return trimmed;
     }
 
+    function looksLikeDocNumber(v) {
+        v = String(v || '').trim();
+        if (v.length < 4 || /\s/.test(v)) return false;
+        if (/^customrecord/i.test(v)) return false;
+        return /\d/.test(v);
+    }
+
+    function mergeSuggestions(token, key, rows) {
+        if (token !== _suggestToken) return;
+        if (_suggBuckets.token !== token) _suggBuckets = { token, tx: [], types: [] };
+        _suggBuckets[key] = rows || [];
+        const prev = _suggestSelectedIdx;
+        const prevRow = (prev >= 0) ? _suggestRows[prev] : null;
+        renderSuggestions(_suggBuckets.tx.concat(_suggBuckets.types));
+        if (prevRow) {
+            const idx = _suggestRows.findIndex((r) => r.kind === prevRow.kind
+                && String(r.id || r.rectypeId || '') === String(prevRow.id || prevRow.rectypeId || ''));
+            if (idx >= 0) setSuggestSelection(idx);
+        }
+    }
+
+    function handleTransactionSuggestions(payload) {
+        if (!payload) return;
+        if (payload.token !== _suggestToken) return;
+        noteSuggestError(payload);
+        mergeSuggestions(payload.token, 'tx', (payload.rows || []).map((r) => ({
+            kind: 'tranid',
+            id: r.id,
+            type: r.type,
+            tranid: r.tranid,
+            transactionnumber: r.transactionnumber,
+            trandate: r.trandate
+        })));
+    }
+
     function handleCustomRecordSuggestions(payload) {
         if (!payload) return;
         if (payload.token !== _suggestToken) return;
-        const rows = (payload.rows || []).map((r) => ({
+        noteSuggestError(payload);
+        mergeSuggestions(payload.token, 'types', (payload.rows || []).map((r) => ({
             kind: 'type',
             rectypeId: r.rectypeId,
             scriptid: r.scriptid,
             name: r.name
-        }));
-        renderSuggestions(rows);
+        })));
     }
 
     function handleCustomRecordInstanceSuggestions(payload) {
         if (!payload) return;
         if (payload.token !== _suggestToken) return;
+        noteSuggestError(payload);
         const rows = [];
         if (payload.rectypeId) {
             rows.push({
@@ -644,7 +705,15 @@
         }
         if (r.kind === 'tranid') {
             const dateStr = r.trandate ? String(r.trandate) : `#${r.id}`;
-            return makeSuggestItem(i, `${r.tranid || ('#' + r.id)} · ${r.type}`, dateStr);
+            const tn = String(r.transactionnumber || '').toUpperCase();
+            const ti = String(r.tranid || '').toUpperCase();
+            const byTxnNumber = tn && _lastLookup
+                && tn.indexOf(_lastLookup) === 0
+                && ti.indexOf(_lastLookup) !== 0;
+            const title = byTxnNumber
+                ? `${r.transactionnumber} · ${r.tranid || ('#' + r.id)} · ${r.type}`
+                : `${r.tranid || ('#' + r.id)} · ${r.type}`;
+            return makeSuggestItem(i, title, dateStr);
         }
         if (r.kind === 'recent') {
             return makeSuggestItem(i, r.title || r.url, i18n('gtr_recent_tag', 'Recent'), 'nsft-gtr-suggest-recent');
@@ -702,6 +771,11 @@
     }
 
     function showError(msg) {
+        clearSearchTimer();
+        showStatusError(msg);
+    }
+
+    function showStatusError(msg) {
         const status = document.querySelector(`#${MODAL_ID} .nsft-gtr-status`);
         if (status) {
             status.textContent = msg;
@@ -709,7 +783,29 @@
         }
     }
 
+    function noteSuggestError(payload) {
+        if (_searchTimer) return;
+        if (payload && payload.error) {
+            showStatusError(fetcherErrorText({ code: payload.code }));
+            return;
+        }
+        const status = document.querySelector(`#${MODAL_ID} .nsft-gtr-status`);
+        if (status && status.classList.contains('nsft-gtr-status-error')) {
+            status.textContent = '';
+            status.classList.remove('nsft-gtr-status-error');
+        }
+    }
+
+    function clearSearchTimer() {
+        if (_searchTimer) { clearTimeout(_searchTimer); _searchTimer = null; }
+    }
+
     function showSearching() {
+        clearSearchTimer();
+        _searchTimer = setTimeout(() => {
+            _searchTimer = null;
+            showError(i18n('gtr_err_query', 'The search failed. Try again.'));
+        }, SEARCH_TIMEOUT_MS);
         showStatus(i18n('gtr_searching', 'Looking up…'));
     }
 
@@ -776,41 +872,26 @@
             }
 
             showSearching();
-            window.postMessage({
-                dest: 'fetcher_gtr',
-                type: 'lookupCustomRecord',
-                payload: { alias: aliasTokens.join(' '), id: idToken }
-            }, '*');
+            postToFetcher('lookupCustomRecord', { alias: aliasTokens.join(' '), id: idToken });
             return;
         }
 
         if (tokens.length >= 2) {
             showSearching();
-            window.postMessage({
-                dest: 'fetcher_gtr',
-                type: 'lookupCustomRecord',
-                payload: { alias: value, id: '' }
-            }, '*');
+            postToFetcher('lookupCustomRecord', { alias: value, id: '' });
             return;
         }
 
         if (/^customrecord[a-z0-9_]*$/i.test(value)) {
             showSearching();
-            window.postMessage({
-                dest: 'fetcher_gtr',
-                type: 'lookupCustomRecord',
-                payload: { alias: value, id: '' }
-            }, '*');
+            postToFetcher('lookupCustomRecord', { alias: value, id: '' });
             return;
         }
 
         if (/^[A-Za-z]/.test(value) || value.includes('-')) {
             showSearching();
-            window.postMessage({
-                dest: 'fetcher_gtr',
-                type: 'lookupTranid',
-                payload: { tranid: value }
-            }, '*');
+            _lastLookup = value.toUpperCase();
+            postToFetcher('lookupTranid', { tranid: value });
             return;
         }
 

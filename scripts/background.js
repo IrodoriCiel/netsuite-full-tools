@@ -19,6 +19,13 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
         } catch (e) { }
     }
 
+    if (reason === 'update') {
+        chrome.storage.local.get({ nsftOnboardingDone: false }, (it) => {
+            if (chrome.runtime.lastError) return;
+            if (!it.nsftOnboardingDone) chrome.storage.local.set({ nsftOnboardingDone: true });
+        });
+    }
+
     chrome.storage.local.get({ nsftInstalledAt: 0 }, (it) => {
         if (chrome.runtime.lastError) return;
         if (!it.nsftInstalledAt) chrome.storage.local.set({ nsftInstalledAt: Date.now() });

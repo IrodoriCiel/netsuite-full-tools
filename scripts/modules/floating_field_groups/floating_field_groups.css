@@ -12,6 +12,7 @@ html.nsft-ffg-on tr:is(
     position: sticky;
     top: var(--nsft-ffg-top, 7px);
     z-index: 3;
+    background-color: var(--nsft-ffg-bg, transparent);
 }
 
 html.nsft-ffg-on .nltabcontent tr:has(> .fgroup_title),

@@ -1911,6 +1911,102 @@
   "nsft_clipboard_fail": {
     "message": "Copy failed"
   },
+  "welcomeWizProfileTitle": {
+    "message": "Where do you want to start?"
+  },
+  "welcomeWizProfileSub": {
+    "message": "Pick a starting point. With Custom you choose category by category, and you can change it any time from the settings."
+  },
+  "welcomeWizProfileNone": {
+    "message": "Nothing enabled"
+  },
+  "welcomeWizProfileNoneDesc": {
+    "message": "NetSuite stays as it is and you turn on what you need."
+  },
+  "welcomeWizProfileSuggested": {
+    "message": "Suggested"
+  },
+  "welcomeWizProfileSuggestedDesc": {
+    "message": "The useful ones on, with nothing that affects performance."
+  },
+  "welcomeWizProfileAll": {
+    "message": "Everything"
+  },
+  "welcomeWizProfileAllDesc": {
+    "message": "Every NSFT feature enabled, the whole extension."
+  },
+  "colorThemesScopeNote": {
+    "message": "Applies to every NetSuite account and any role, and always on top of the native themes."
+  },
+  "previewPanelTitle": {
+    "message": "Preview"
+  },
+  "previewReplay": {
+    "message": "Replay"
+  },
+  "welcomeWizRequires": {
+    "message": "Requires $1"
+  },
+  "welcomeWizProfileCustom": {
+    "message": "Custom"
+  },
+  "welcomeWizProfileCustomDesc": {
+    "message": "You pick, category by category, what gets turned on and what does not."
+  },
+  "welcomeWizEyebrow": {
+    "message": "Initial setup"
+  },
+  "welcomeWizRecommended": {
+    "message": "Recommended"
+  },
+  "welcomeWizConfirm": {
+    "message": "Confirm"
+  },
+  "welcomeWizContinue": {
+    "message": "Continue"
+  },
+  "welcomeWizStepSub": {
+    "message": "$1 of $2 enabled in this category."
+  },
+  "welcomeWizNext": {
+    "message": "Next"
+  },
+  "welcomeWizBack": {
+    "message": "Back"
+  },
+  "welcomeWizSkip": {
+    "message": "Skip and keep what I picked"
+  },
+  "welcomeWizFinish": {
+    "message": "Finish"
+  },
+  "welcomeWizAll": {
+    "message": "Enable all"
+  },
+  "welcomeWizNone": {
+    "message": "Disable all"
+  },
+  "welcomeWizToolsLabel": {
+    "message": "Tools"
+  },
+  "welcomeWizDoneTitle": {
+    "message": "All set"
+  },
+  "welcomeWizDoneSub": {
+    "message": "$1 of $2 features are enabled. You can change them any time from the settings."
+  },
+  "welcomeWizDoneMore": {
+    "message": "Many features also have their own settings — theme, interval, colors — that you can fine-tune any time from the popup, right under its switch."
+  },
+  "welcomeWizOpenSettings": {
+    "message": "Open settings"
+  },
+  "settingsWizardLabel": {
+    "message": "Setup wizard"
+  },
+  "settingsWizardDesc": {
+    "message": "Review which features you have on, category by category."
+  },
   "welcomeTitle": {
     "message": "Welcome to NetSuite Full Tools"
   },
@@ -2104,7 +2200,7 @@
     "message": "Fixed sublist headers / columns / tabs"
   },
   "welcomeCatUiItem3": {
-    "message": "Grouped tabs by account subdomain"
+    "message": "Grouped tabs by account"
   },
   "welcomeCatUiItem4": {
     "message": "Better page titles, tighter dropdowns & navigation"
@@ -2378,6 +2474,9 @@
   },
   "copySublistId": {
     "message": "COPY SUBLIST ID"
+  },
+  "copyFreeMarker": {
+    "message": "Copy FreeMarker"
   },
   "copyXml": {
     "message": "Copy XML"
@@ -2695,13 +2794,22 @@
     "message": "e.g. INV-00123  ·  customer 942  ·  invoice 12847"
   },
   "gtr_hint": {
-    "message": "Search by tranid, \"type id\", or a custom record name (id is optional). Enter to go · Esc to close."
+    "message": "Search by document or transaction number, \"type id\", or a custom record name (id is optional). Enter to go · Esc to close."
   },
   "gtr_searching": {
     "message": "Looking up…"
   },
   "gtr_not_found": {
-    "message": "No matching tranid found."
+    "message": "No record found with that number."
+  },
+  "gtr_err_stale": {
+    "message": "The extension was updated. Reload the page to search from here again."
+  },
+  "gtr_err_unavailable": {
+    "message": "Couldn't search from this page. To search from anywhere, the account needs REST web services enabled; without them it only works on pages that load SuiteScript, such as a transaction or a custom record."
+  },
+  "gtr_err_query": {
+    "message": "The search failed. Try again."
   },
   "gtr_multiple": {
     "message": "Multiple matches — pick one."
@@ -3186,7 +3294,7 @@
     "message": "Grouped Tabs"
   },
   "enableJsonPrettyDesc": {
-    "message": "Format and highlight JSON/SQL in records when viewing."
+    "message": "Format and highlight JSON, SQL, XML, HTML and FreeMarker in records when viewing."
   },
   "enableJsonPrettyLabel": {
     "message": "Prettify Code Fields"
@@ -4133,7 +4241,7 @@
     "message": "Yellow"
   },
   "gt_config_desc": {
-    "message": "Define which NetSuite subdomains should be grouped together."
+    "message": "Define which NetSuite accounts should be grouped together."
   },
   "gt_config_title": {
     "message": "Grouped Tabs Configuration"
@@ -4148,13 +4256,13 @@
     "message": "Delete"
   },
   "gt_error_duplicate": {
-    "message": "This subdomain is already configured."
+    "message": "This account is already configured."
   },
   "gt_error_required": {
-    "message": "Subdomain and Label are required."
+    "message": "Account ID and Label are required."
   },
-  "gt_invalid_subdomain": {
-    "message": "Subdomain must contain only lowercase letters, numbers and dashes."
+  "gt_invalid_account": {
+    "message": "The account ID can only contain letters, numbers, dashes or underscores (e.g. 5644658_SB1 or 5644658-sb1)."
   },
   "gt_modal_confirm_title": {
     "message": "Delete group"
@@ -4187,7 +4295,7 @@
     "message": "Bulk add groups"
   },
   "gt_bulk_modal_help": {
-    "message": "One entry per line. Format: subdomain | label | color. Label and color are optional. Color must be one of: grey, blue, red, yellow, green, pink, purple, cyan, orange."
+    "message": "One entry per line. Format: account ID | label | color. Label and color are optional. Color must be one of: grey, blue, red, yellow, green, pink, purple, cyan, orange."
   },
   "gt_bulk_modal_placeholder": {
     "message": "1234567 | Production | red\n1234567-sb1 | Sandbox 1 | green\n1234567-sb2 | Sandbox 2 | yellow"
@@ -4248,7 +4356,7 @@
     "message": "Apply preset"
   },
   "gt_presets_modal_help": {
-    "message": "Generates entries for production and sandboxes from your base account ID. Existing entries with the same subdomain are skipped."
+    "message": "Generates entries for production and sandboxes from your base account ID. Existing entries with the same account ID are skipped."
   },
   "gt_presets_account_label": {
     "message": "Base account ID"
@@ -4300,14 +4408,14 @@
   "gt_saved_msg": {
     "message": "Saved!"
   },
-  "gt_subdomain_help": {
-    "message": "The account ID part of the URL."
+  "gt_account_help": {
+    "message": "The account ID or the URL subdomain: either one works."
   },
-  "gt_subdomain_label": {
-    "message": "Account ID"
+  "gt_account_label": {
+    "message": "Account ID or subdomain"
   },
-  "gt_subdomain_placeholder": {
-    "message": "e.g. 5644658_sb1"
+  "gt_account_placeholder": {
+    "message": "e.g. 1234567_SB1 or 1234567-sb1"
   },
   "gt_visible_label_label": {
     "message": "Tab Group Name"
@@ -7221,6 +7329,9 @@
   "enableRoleFinderDesc": {
     "message": "Adds a filter input on the account menu to search roles and accounts on the fly."
   },
+  "rolefTitle": {
+    "message": "SEARCH ROLE"
+  },
   "rolefPlaceholder": {
     "message": "Search role..."
   },
@@ -7228,7 +7339,7 @@
     "message": "Logout blocker"
   },
   "enableLogoutBlockerDesc": {
-    "message": "Neutralizes the session timeout popup so you can keep working uninterrupted."
+    "message": "Removes the curtain that covers the page when the session expires, so you can still read and copy what you had. The session is still expired: saving means logging back in."
   },
   "enableHideGuidedLearningLabel": {
     "message": "Hide Guided Learning"
@@ -7410,6 +7521,99 @@
   "wfctLineDotted": {
     "message": "Dotted"
   },
+  "wfs_stage_workflow": {
+    "message": "Workflow structure"
+  },
+  "wfs_states": {
+    "message": "States"
+  },
+  "wfs_actions": {
+    "message": "Actions"
+  },
+  "wfs_transitions": {
+    "message": "Transitions"
+  },
+  "wfs_progress_title": {
+    "message": "Workflow Indexer"
+  },
+  "wfs_loading": {
+    "message": "Loading…"
+  },
+  "wfs_title": {
+    "message": "Indexer"
+  },
+  "wfs_search_ph": {
+    "message": "Search name, field, value, formula…"
+  },
+  "wfs_all_types": {
+    "message": "All types"
+  },
+  "wfs_all_triggers": {
+    "message": "All triggers"
+  },
+  "wfs_all_states": {
+    "message": "All states"
+  },
+  "wfs_only_active": {
+    "message": "Active only"
+  },
+  "wfs_result_one": {
+    "message": "result"
+  },
+  "wfs_result_many": {
+    "message": "results"
+  },
+  "wfs_empty": {
+    "message": "No results with the current filters."
+  },
+  "wfs_no_type": {
+    "message": "(no type)"
+  },
+  "wfs_inactive": {
+    "message": "Inactive"
+  },
+  "wfs_lbl_state": {
+    "message": "State"
+  },
+  "wfs_lbl_trigger": {
+    "message": "Trigger"
+  },
+  "wfs_lbl_field": {
+    "message": "Field"
+  },
+  "wfs_lbl_value": {
+    "message": "Value"
+  },
+  "wfs_lbl_button": {
+    "message": "Button"
+  },
+  "wfs_lbl_formula": {
+    "message": "Formula"
+  },
+  "wfs_lbl_condition": {
+    "message": "Condition"
+  },
+  "wfs_lbl_contexts": {
+    "message": "Contexts"
+  },
+  "wfs_lbl_actions": {
+    "message": "Actions"
+  },
+  "wfs_lbl_key": {
+    "message": "Key"
+  },
+  "wfs_lbl_flow": {
+    "message": "Flow"
+  },
+  "wfs_minimize": {
+    "message": "Minimize"
+  },
+  "wfs_maximize": {
+    "message": "Maximize"
+  },
+  "wfs_close": {
+    "message": "Close"
+  },
   "wfctLineWidthLabel": {
     "message": "Line width"
   },
@@ -7529,6 +7733,15 @@
   },
   "devResetNoticeDone": {
     "message": "Notice reset. Refresh a NetSuite tab to see it."
+  },
+  "devFreshInstallLabel": {
+    "message": "Simulate a fresh install"
+  },
+  "devFreshInstallDesc": {
+    "message": "Opens the welcome page with the setup wizard, as on a first install. It does not touch your preferences."
+  },
+  "devFreshInstallTitle": {
+    "message": "Open the welcome page as on a fresh install"
   },
   "devResetRateLabel": {
     "message": "Reset the rate-us prompt"
@@ -9551,28 +9764,25 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "New: Record Logs Viewer, with filters, search and downloads."
+    "message": "On install, a wizard lets you pick which features you start with."
   },
   "un_hl_2": {
-    "message": "The viewers and the AI assistant dock to the side panel, follow the active tab, and you choose where they open by default."
+    "message": "Every feature shows an animated preview before you turn it on."
   },
   "un_hl_3": {
-    "message": "New public board to follow your reports, from received to shipped."
+    "message": "The AI Assistant takes less time to answer each question."
   },
   "un_hl_4": {
-    "message": "The code editor theme paints its colors again — including the Custom one."
+    "message": "In sublists, whatever stays fixed no longer lets the text underneath show through."
   },
   "un_hl_5": {
-    "message": "All of Redwood follows the color theme sliders."
+    "message": "The line you are editing and its buttons stay in view when you scroll right."
   },
   "un_hl_6": {
-    "message": "The Runner no longer cuts large downloads short, and the field finder highlights and clears in one click."
+    "message": "The field finder in searches matches whole words, and takes several of them in any order."
   },
   "un_hl_7": {
-    "message": "Finer dark mode: checkboxes, the header logo, code and highlights."
-  },
-  "un_hl_8": {
-    "message": "Plus dozens more fixes: full details in the changelog."
+    "message": "Other bugs fixed too: plain text formatted as code, panels stuck in one language and the account ID with an underscore. See the changelog for details."
   },
   "un_thanks": {
     "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
@@ -9881,6 +10091,132 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Fixed the labels in the field info panel always coming out in Spanish."
+  },
+  "cl_ver_6_5_1": {
+    "message": "v6.5.1"
+  },
+  "cl_date_6_5_1": {
+    "message": "2026-08-24"
+  },
+  "cl_6_5_1_fsc_bg_title": {
+    "message": "The fixed column covers what scrolls under it"
+  },
+  "cl_6_5_1_fsc_bg_desc": {
+    "message": "Fixed the other columns showing through the fixed first column of sublists on Redwood."
+  },
+  "cl_6_5_1_fsc_rows_title": {
+    "message": "The line being edited keeps its column"
+  },
+  "cl_6_5_1_fsc_rows_desc": {
+    "message": "Fixed the line being edited and its buttons scrolling away when moving a sublist right with the fixed column."
+  },
+  "cl_6_5_1_ff_words_title": {
+    "message": "The field finder matches whole words"
+  },
+  "cl_6_5_1_ff_words_desc": {
+    "message": "Fixed the field finder returning unrelated fields, and it now accepts several words in any order."
+  },
+  "cl_ver_6_5_0": {
+    "message": "v6.5.0"
+  },
+  "cl_date_6_5_0": {
+    "message": "2026-08-23"
+  },
+  "cl_6_5_0_previews_title": {
+    "message": "See each feature before turning it on"
+  },
+  "cl_6_5_0_previews_desc": {
+    "message": "Added an animated drawing of every feature, in the setup wizard and in the full-screen popup, so there is no need to guess what each option does."
+  },
+  "cl_6_5_0_wfsearch_i18n_title": {
+    "message": "The Workflow Indexer speaks your language"
+  },
+  "cl_6_5_0_wfsearch_i18n_desc": {
+    "message": "Fixed the Workflow Indexer panel always showing in Spanish instead of following the extension language."
+  },
+  "cl_6_5_0_ai_nquery_title": {
+    "message": "The AI Assistant answers sooner"
+  },
+  "cl_6_5_0_ai_nquery_desc": {
+    "message": "Changed the path the Assistant uses to query data, which now takes less time on each attempt at the same question."
+  },
+  "cl_6_5_0_wizard_title": {
+    "message": "Choose what gets enabled on install"
+  },
+  "cl_6_5_0_wizard_desc": {
+    "message": "Added a setup wizard with four starting points, one to pick feature by feature, also available from the settings."
+  },
+  "cl_6_5_0_prettier_sqlguess_title": {
+    "message": "Only real code fields get formatted"
+  },
+  "cl_6_5_0_prettier_sqlguess_desc": {
+    "message": "Fixed field labels and ordinary text being formatted as code just for starting with a SQL word."
+  },
+  "cl_6_5_0_rolef_i18n_title": {
+    "message": "The role finder speaks your language"
+  },
+  "cl_6_5_0_rolef_i18n_desc": {
+    "message": "Fixed the role finder's caption always showing in Spanish instead of following the extension's language."
+  },
+  "cl_6_5_0_fcpath_toast_title": {
+    "message": "Copied path is confirmed"
+  },
+  "cl_6_5_0_fcpath_toast_desc": {
+    "message": "Added a notice showing the copied path when using the copy-path icon in the File Cabinet, which previously copied with no feedback."
+  },
+  "cl_6_5_0_fcdel_wording_title": {
+    "message": "Delete prompt reads correctly"
+  },
+  "cl_6_5_0_fcdel_wording_desc": {
+    "message": "Fixed the wording of the confirmation message when deleting a folder from the File Cabinet."
+  },
+  "cl_ver_6_4_2": {
+    "message": "v6.4.2"
+  },
+  "cl_date_6_4_2": {
+    "message": "2026-08-20"
+  },
+  "cl_6_4_2_gt_accountid_title": {
+    "message": "The account ID is accepted the way NetSuite writes it"
+  },
+  "cl_6_4_2_gt_accountid_desc": {
+    "message": "Fixed the Grouped Tabs settings rejecting an account ID written with an underscore; both forms are now accepted."
+  },
+  "cl_6_4_2_fsh_bg_title": {
+    "message": "Sticky headings cover what scrolls under them"
+  },
+  "cl_6_4_2_fsh_bg_desc": {
+    "message": "Fixed content showing through the sticky sublist header and the sticky field group title on Redwood."
+  },
+  "cl_ver_6_4_1": {
+    "message": "v6.4.1"
+  },
+  "cl_date_6_4_1": {
+    "message": "2026-08-20"
+  },
+  "cl_6_4_1_gtr_anypage_title": {
+    "message": "Go to record works outside record pages"
+  },
+  "cl_6_4_1_gtr_anypage_desc": {
+    "message": "Fixed Go to record finding nothing outside a record page; it now works anywhere when REST web services are enabled."
+  },
+  "cl_6_4_1_prettier_ftl_title": {
+    "message": "FreeMarker fields show as code"
+  },
+  "cl_6_4_1_prettier_ftl_desc": {
+    "message": "Added FreeMarker recognition to record fields, which now appear highlighted and with their copy and download buttons."
+  },
+  "cl_6_4_1_gtr_txnnum_title": {
+    "message": "Go to record finds transaction numbers"
+  },
+  "cl_6_4_1_gtr_txnnum_desc": {
+    "message": "Added search by transaction number in Go to record, on top of the document number."
+  },
+  "cl_6_4_1_sql_transport_title": {
+    "message": "Tool lookups no longer freeze the page"
+  },
+  "cl_6_4_1_sql_transport_desc": {
+    "message": "Changed how tools look up data: they no longer freeze the page and now work on screens where they used to fail."
   },
   "cl_ver_6_4_0": {
     "message": "v6.4.0"

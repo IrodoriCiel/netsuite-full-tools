@@ -565,23 +565,33 @@
         };
     }
 
+    let _fetcherSuiteQLBroken = false;
+
     async function runSuiteQL(query, limit) {
         const cap = Math.max(1, (limit || TOOL_ROW_CAP)) + 1;
-        if (!_restSuiteQLBroken && await restKnownOff()) _restSuiteQLBroken = true;
-        if (!_restSuiteQLBroken) {
+
+        if (!_fetcherSuiteQLBroken) {
             try {
-                return await runSuiteQLRest(query, cap);
+                return await runSuiteQLFetcher(query, cap);
             } catch (e) {
-                const st = e && e.httpStatus;
-                if (st == null || st === 401 || st === 403 || st === 404) {
-                    _restSuiteQLBroken = true;
-                    if (st === 403 || st === 404) rememberRestOff();
+                const msg = String((e && e.message) || '');
+                if (/require.{0,3} is not defined|Tiempo de espera|Timed out/i.test(msg)) {
+                    _fetcherSuiteQLBroken = true;
                 } else {
                     throw e;
                 }
             }
         }
-        return runSuiteQLFetcher(query, cap);
+
+        if (!_restSuiteQLBroken && await restKnownOff()) _restSuiteQLBroken = true;
+        if (_restSuiteQLBroken) throw new Error('suiteql_sin_via');
+        try {
+            return await runSuiteQLRest(query, cap);
+        } catch (e) {
+            const st = e && e.httpStatus;
+            if (st === 403 || st === 404) { _restSuiteQLBroken = true; rememberRestOff(); }
+            throw e;
+        }
     }
 
     function runSuiteQLFetcher(query, limit) {

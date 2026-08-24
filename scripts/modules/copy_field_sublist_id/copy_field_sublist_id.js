@@ -1,5 +1,11 @@
 (function () {
     'use strict';
+
+    function ensureSqlTransport() {
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+            window.NSFT_SuiteQLRest.ensureTransport();
+        }
+    }
     const STORAGE_KEY = 'enableCopyFieldAndSublistIds';
     const OPEN_REC_KEY = 'enableOpenCustomRecordBtn';
     const NO_BUTTON_KEY = 'copyIdsNoButton';
@@ -88,7 +94,9 @@
 
         if (!window.nsftRecordType && !_fetcherInjected) {
             _fetcherInjected = true;
+            ensureSqlTransport();
             const script = document.createElement('script');
+            script.async = false;
             script.src = chrome.runtime.getURL('scripts/modules/copy_field_sublist_id/copy_field_sublist_id_fetcher.js');
             script.onload = function () { this.remove(); };
             (document.head || document.documentElement).appendChild(script);

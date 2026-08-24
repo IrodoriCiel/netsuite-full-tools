@@ -66,9 +66,26 @@
         return false;
     };
 
+    const SQL_FORMAS = [
+        [/^select\b/i,              /\bfrom\b/i],
+        [/^delete\b/i,              /\bfrom\b/i],
+        [/^update\b/i,              /\bset\b/i],
+        [/^insert\b/i,              /\binto\b/i],
+        [/^merge\b/i,               /\b(into|using)\b/i],
+        [/^with\b/i,                /\bas\s*\(/i],
+        [/^(create|alter|drop)\b/i, /\b(table|view|index|sequence|synonym|procedure|function|trigger|database|schema|materialized)\b/i],
+        [/^truncate\b/i,            /\btable\b/i],
+        [/^explain\b/i,             /^explain\s+plan\b/i],
+        [/^(grant|revoke)\b/i,      /\b(select|insert|update|delete|execute|references|privileges)\b[\s\S]*\bon\b/i],
+        [/^call\b/i,                /^call\s+[\w.$]+\s*\(/i],
+        [/^declare\b/i,             /\bbegin\b/i],
+        [/^begin\b/i,               /\bend\s*;/i]
+    ];
+
     const looksLikeSQL = (text) => {
         if (!text || text.length < 10) return false;
-        return /^\s*(select|with|insert|update|delete|create|alter|drop|merge|explain|call|truncate|grant|revoke|begin|declare)\b/i.test(text.trim());
+        const t = text.trim();
+        return SQL_FORMAS.some(([verbo, companera]) => verbo.test(t) && companera.test(t));
     };
 
     const HTML_ROOTS = new Set([

@@ -150,8 +150,23 @@
         });
     }
 
-    async function suiteqlAll(query, cap) {
+    async function suiteqlAll(query, cap, which) {
+        const rest = window.NSFT_SuiteQLRest;
+        let known = false;
+        try { known = (rest && rest.isKnownOff) ? await rest.isKnownOff() : false; } catch (e) { known = false; }
+        if (!known) {
+            try {
+                return await suiteqlViaRest(query, cap);
+            } catch (e) {
+                if (!e || !e.restUnavailable) throw e;
+            }
+        }
+        return await suiteqlViaFetcher(which);
+    }
+
+    async function suiteqlViaRest(query, cap) {
         cap = cap || 5000;
+        const rest = window.NSFT_SuiteQLRest;
         let rows = [], offset = 0;
         for (;;) {
             const limit = Math.min(1000, cap - rows.length);
@@ -163,10 +178,17 @@
                 body: JSON.stringify({ q: query })
             });
             if (!res.ok) {
+                if (res.status === 401 || res.status === 403 || res.status === 404) {
+                    if (rest && rest.markOff && (res.status === 403 || res.status === 404)) rest.markOff();
+                    const off = new Error('REST unavailable');
+                    off.restUnavailable = true;
+                    throw off;
+                }
                 let detail = '';
                 try { const j = await res.json(); detail = (j['o:errorDetails'] && j['o:errorDetails'][0] && j['o:errorDetails'][0].detail) || j.title || ''; } catch (e) { }
                 throw new Error(msg('ghb_err_suiteql', [detail || ('HTTP ' + res.status)], 'SuiteQL: ' + (detail || res.status)));
             }
+            if (rest && rest.markOn) rest.markOn();
             const j = await res.json();
             const items = Array.isArray(j.items) ? j.items : [];
             items.forEach((it) => { const r = {}; Object.keys(it).forEach((k) => { if (k !== 'links') r[k] = it[k]; }); rows.push(r); });
@@ -176,15 +198,60 @@
         return rows;
     }
 
+    let _ghbFetcherReady = null;
+    let _ghbReq = 0;
+
+    function ensureGhbFetcher() {
+        if (_ghbFetcherReady) return _ghbFetcherReady;
+        _ghbFetcherReady = new Promise((resolve) => {
+            if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+                window.NSFT_SuiteQLRest.ensureTransport();
+            }
+            const s = document.createElement('script');
+            s.async = false;
+            s.src = chrome.runtime.getURL('scripts/modules/github_backup/github_backup_fetcher.js');
+            s.onload = function () { this.remove(); resolve(); };
+            s.onerror = function () { this.remove(); resolve(); };
+            (document.head || document.documentElement).appendChild(s);
+        });
+        return _ghbFetcherReady;
+    }
+
+    function suiteqlViaFetcher(which) {
+        if (!which) return Promise.reject(new Error(msg('ghb_err_suiteql', ['—'], 'SuiteQL: —')));
+        const reqId = ++_ghbReq;
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                window.removeEventListener('message', onMsg);
+                reject(new Error(msg('ghb_err_suiteql', ['timeout'], 'SuiteQL: timeout')));
+            }, 120000);
+            function onMsg(ev) {
+                if (ev.source !== window) return;
+                const d = ev.data;
+                if (!d || d.dest !== 'extension_ghb') return;
+                const pl = d.payload || {};
+                if (pl.reqId !== reqId) return;
+                clearTimeout(timer);
+                window.removeEventListener('message', onMsg);
+                if (d.type === 'rows') resolve(pl.rows || []);
+                else reject(new Error(msg('ghb_err_suiteql', [pl.message || '—'], 'SuiteQL: ' + (pl.message || ''))));
+            }
+            window.addEventListener('message', onMsg);
+            ensureGhbFetcher().then(() => {
+                window.postMessage({ dest: 'fetcher_ghb', type: 'query', payload: { which: which, reqId: reqId } }, '*');
+            });
+        });
+    }
+
     async function listScriptFiles() {
         const q = "SELECT f.id AS fileid, f.name AS filename, f.url AS fileurl, f.folder AS folderid, " +
             "BUILTIN.DF(s.scripttype) AS scripttype " +
             "FROM file f LEFT JOIN script s ON s.scriptfile = f.id " +
             "WHERE f.url IS NOT NULL AND LOWER(f.name) LIKE '%.js' ORDER BY f.name";
-        const raw = await suiteqlAll(q, 20000);
+        const raw = await suiteqlAll(q, 20000, 'files');
         const rows = []; const seenF = new Set();
         raw.forEach((r) => { const k = String(r.fileid); if (!seenF.has(k)) { seenF.add(k); rows.push(r); } });
-        const folders = await suiteqlAll('SELECT id, name, parent FROM mediaitemfolder', 20000);
+        const folders = await suiteqlAll('SELECT id, name, parent FROM mediaitemfolder', 20000, 'folders');
         const byId = {};
         folders.forEach((f) => { byId[String(f.id)] = { name: f.name || String(f.id), parent: f.parent != null ? String(f.parent) : null }; });
         const pathCache = {};

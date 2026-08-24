@@ -142,7 +142,11 @@ function showConfirmModal(messageKey, onConfirm, opts) {
     okBtn.focus();
 }
 
-function isValidSubdomain(id) {
+function normalizeAccountId(id) {
+    return String(id == null ? '' : id).trim().toLowerCase().replace(/_/g, '-');
+}
+
+function isValidAccountId(id) {
     return /^[a-z0-9-]+$/.test(id);
 }
 
@@ -310,7 +314,7 @@ function renderEditRow(group, index) {
 
     const btnSave = clone.querySelector('.btn-save');
     btnSave.onclick = () => {
-        const newId = inputs.id.value.trim().toLowerCase();
+        const newId = normalizeAccountId(inputs.id.value);
         const newLabel = inputs.label.value.trim();
 
         if (!newId || !newLabel) {
@@ -318,8 +322,8 @@ function renderEditRow(group, index) {
             return;
         }
 
-        if (!isValidSubdomain(newId)) {
-            showToast('gt_invalid_subdomain', 'error');
+        if (!isValidAccountId(newId)) {
+            showToast('gt_invalid_account', 'error');
             return;
         }
 
@@ -353,11 +357,11 @@ function renderEditRow(group, index) {
 }
 
 function addGroup() {
-    const idInput = document.getElementById('subdomain');
+    const idInput = document.getElementById('accountId');
     const labelInput = document.getElementById('visibleLabel');
     const colorInput = document.getElementById('selectedColor');
 
-    const id = idInput.value.trim().toLowerCase();
+    const id = normalizeAccountId(idInput.value);
     const label = labelInput.value.trim();
     const color = colorInput.value;
 
@@ -366,8 +370,8 @@ function addGroup() {
         return;
     }
 
-    if (!isValidSubdomain(id)) {
-        showToast('gt_invalid_subdomain', 'error');
+    if (!isValidAccountId(id)) {
+        showToast('gt_invalid_account', 'error');
         return;
     }
 
@@ -440,8 +444,8 @@ function applyBulkAdd(text) {
     let skippedDup = 0;
     for (const line of lines) {
         const parts = line.split('|').map(p => p.trim());
-        const id = (parts[0] || '').toLowerCase();
-        if (!isValidSubdomain(id)) { skippedInvalid++; continue; }
+        const id = normalizeAccountId(parts[0]);
+        if (!isValidAccountId(id)) { skippedInvalid++; continue; }
         if (currentConfig.some(g => g.id === id)) { skippedDup++; continue; }
         const label = parts[1] || id;
         let color = (parts[2] || 'grey').toLowerCase();
@@ -504,8 +508,8 @@ function importConfigFromFile(file) {
         const cleaned = [];
         for (const entry of parsed) {
             if (!entry || typeof entry !== 'object') continue;
-            const id = String(entry.id || '').trim().toLowerCase();
-            if (!isValidSubdomain(id)) continue;
+            const id = normalizeAccountId(entry.id);
+            if (!isValidAccountId(id)) continue;
             const label = String(entry.label || id).trim();
             let color = String(entry.color || 'grey').toLowerCase();
             if (!validColors.has(color)) color = 'grey';
@@ -552,9 +556,9 @@ function importConfigFromFile(file) {
 }
 
 function applyPreset(baseAccountId, presetType) {
-    const base = String(baseAccountId || '').trim().toLowerCase();
-    if (!isValidSubdomain(base)) {
-        showToast('gt_invalid_subdomain', 'error');
+    const base = normalizeAccountId(baseAccountId);
+    if (!isValidAccountId(base)) {
+        showToast('gt_invalid_account', 'error');
         return;
     }
     const templates = {

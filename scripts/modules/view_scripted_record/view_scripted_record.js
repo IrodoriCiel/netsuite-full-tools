@@ -1,5 +1,11 @@
 (function () {
     'use strict';
+
+    function ensureSqlTransport() {
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+            window.NSFT_SuiteQLRest.ensureTransport();
+        }
+    }
     const STORAGE_KEY = 'enableViewScriptedRecord';
     const NSFT_THEME_KEY = 'nsftTheme';
     let lastMaximizedLeft = null;
@@ -1050,8 +1056,10 @@
             return;
         }
 
+        ensureSqlTransport();
         const script = document.createElement('script');
         script.id = scriptId;
+        script.async = false;
         script.src = chrome.runtime.getURL('scripts/modules/view_scripted_record/scripted_record_fetcher.js');
         script.onload = function () {
             window.postMessage(payload, '*');

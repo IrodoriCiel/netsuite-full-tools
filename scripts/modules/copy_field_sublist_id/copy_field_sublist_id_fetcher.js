@@ -54,62 +54,53 @@
             return;
         }
 
-        if (typeof require !== 'function') {
+        const T = window.NSFT_SQL;
+        if (!T) {
             window.postMessage({
                 type: 'nsft-custom-record-id-result',
-                error: 'NO_REQUIRE',
+                error: 'NO_TRANSPORT',
                 requestId: requestId
             }, '*');
             return;
         }
 
-        try {
-            require(['N/query'], function (query) {
-                try {
-                    const sql =
-                        "SELECT customfield.recordType AS recordtype, " +
-                        "BUILTIN.DF(customfield.recordType) AS recordname " +
-                        "FROM customfield " +
-                        "WHERE UPPER(customfield.scriptid) = ?";
-                    const res = query.runSuiteQL({ query: sql, params: [cacheKey] }).asMappedResults();
-                    if (res && res.length > 0 && res[0].recordtype) {
-                        const recordName = res[0].recordname || '';
-                        _recordTypeCache.set(cacheKey, { recordType: res[0].recordtype, recordName: recordName });
-                        window.postMessage({
-                            type: 'nsft-custom-record-id-result',
-                            recordType: res[0].recordtype,
-                            recordName: recordName,
-                            requestId: requestId
-                        }, '*');
-                    } else {
-                        window.postMessage({
-                            type: 'nsft-custom-record-id-result',
-                            error: 'NOT_FOUND',
-                            requestId: requestId
-                        }, '*');
-                    }
-                } catch (e) {
-                    const m = (e && e.message) ? e.message : '';
-                    const isPerm = /permission|insufficient|not\s+authorized|SSS_/i.test(m);
-                    window.postMessage({
-                        type: 'nsft-custom-record-id-result',
-                        error: isPerm ? 'PERMISSION' : (m || 'SUITEQL_ERROR'),
-                        requestId: requestId
-                    }, '*');
-                }
-            }, function (err) {
+        const head =
+            "SELECT customfield.recordType AS recordtype, " +
+            "BUILTIN.DF(customfield.recordType) AS recordname " +
+            "FROM customfield " +
+            "WHERE UPPER(customfield.scriptid) = ";
+        T.run({
+            rest: head + T.lit(cacheKey),
+            sql: head + '?',
+            params: [cacheKey],
+            limit: 1
+        }, function (err, res) {
+            if (err) {
+                const m = err.message || '';
+                const isPerm = /permission|insufficient|not\s+authorized|SSS_/i.test(m);
                 window.postMessage({
                     type: 'nsft-custom-record-id-result',
-                    error: (err && err.message) || 'REQUIRE_FAILED',
+                    error: isPerm ? 'PERMISSION' : (m || 'SUITEQL_ERROR'),
                     requestId: requestId
                 }, '*');
-            });
-        } catch (e) {
-            window.postMessage({
-                type: 'nsft-custom-record-id-result',
-                error: (e && e.message) || 'UNEXPECTED',
-                requestId: requestId
-            }, '*');
-        }
+                return;
+            }
+            if (res && res.length > 0 && res[0].recordtype) {
+                const recordName = res[0].recordname || '';
+                _recordTypeCache.set(cacheKey, { recordType: res[0].recordtype, recordName: recordName });
+                window.postMessage({
+                    type: 'nsft-custom-record-id-result',
+                    recordType: res[0].recordtype,
+                    recordName: recordName,
+                    requestId: requestId
+                }, '*');
+            } else {
+                window.postMessage({
+                    type: 'nsft-custom-record-id-result',
+                    error: 'NOT_FOUND',
+                    requestId: requestId
+                }, '*');
+            }
+        });
     });
 })();

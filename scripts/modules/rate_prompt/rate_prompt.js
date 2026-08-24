@@ -67,7 +67,11 @@
         const t = document.getElementById(TOAST_ID);
         if (!t) return;
         t.classList.remove('nsft-rp-visible');
-        setTimeout(() => { if (t.isConnected) t.remove(); }, 250);
+        setTimeout(() => {
+            if (!t.isConnected) return;
+            if (window.NSFT_Notices) window.NSFT_Notices.unmount(t);
+            else t.remove();
+        }, 250);
     }
 
     function t(key, fallback) {
@@ -145,7 +149,9 @@
         toast.appendChild(logo);
         toast.appendChild(text);
         toast.appendChild(close);
-        document.body.appendChild(toast);
+        if (!(window.NSFT_Notices && window.NSFT_Notices.mount(toast))) {
+            document.body.appendChild(toast);
+        }
         requestAnimationFrame(() => toast.classList.add('nsft-rp-visible'));
     }
 })();

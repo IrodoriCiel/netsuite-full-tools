@@ -158,7 +158,13 @@
             e.preventDefault();
             e.stopPropagation();
             const fullPath = joinPath(folderPath, name);
-            if (navigator.clipboard && navigator.clipboard.writeText) {
+            if (window.NSFT_Clipboard) {
+                window.NSFT_Clipboard.copy(fullPath, {
+                    toast: { preview: fullPath },
+                    onSuccess: () => flash(btn, true),
+                    onError: () => flash(btn, false)
+                });
+            } else if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(fullPath).then(() => flash(btn, true));
             } else {
                 const ta = document.createElement('textarea');

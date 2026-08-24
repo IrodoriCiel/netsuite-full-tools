@@ -14,40 +14,40 @@
             send(reqId, null, 'Invalid transaction id');
             return;
         }
-        try {
-            if (typeof require === 'undefined') {
-                send(reqId, null, "'require' is not defined. Ensure you are on a NetSuite page.");
-                return;
-            }
-            require(['N/query'], function (query) {
-                try {
-                    const run = (sql) => query.runSuiteQL({ query: sql }).asMappedResults();
+        const T = window.NSFT_SQL;
+        if (!T) { send(reqId, null, 'SuiteQL transport unavailable'); return; }
 
-                    const currentRows = run(
-                        'SELECT id, type, BUILTIN.DF(type) AS typename, tranid, trandate, BUILTIN.DF(status) AS status ' +
-                        'FROM transaction WHERE id = ' + id
-                    );
-                    const current = currentRows[0] ? node(currentRows[0]) : null;
-
-                    const sources = groupLinks(run(
-                        'SELECT pl.previousdoc AS id, pl.linktype, t.type, BUILTIN.DF(t.type) AS typename, t.tranid, t.trandate, BUILTIN.DF(t.status) AS status ' +
-                        'FROM PreviousTransactionLink pl JOIN transaction t ON t.id = pl.previousdoc ' +
-                        'WHERE pl.nextdoc = ' + id
-                    ));
-                    const targets = groupLinks(run(
-                        'SELECT nl.nextdoc AS id, nl.linktype, t.type, BUILTIN.DF(t.type) AS typename, t.tranid, t.trandate, BUILTIN.DF(t.status) AS status ' +
-                        'FROM NextTransactionLink nl JOIN transaction t ON t.id = nl.nextdoc ' +
-                        'WHERE nl.previousdoc = ' + id
-                    ));
-
-                    send(reqId, { current: current, sources: sources, targets: targets }, null);
-                } catch (e) {
-                    send(reqId, null, e.name + ': ' + e.message);
-                }
+        const run = (sql, limit) => new Promise((resolve, reject) => {
+            T.run({ rest: sql, sql: sql, limit: limit || 1000 }, (err, rows) => {
+                if (err) reject(new Error(err.message || err.code || 'query'));
+                else resolve(rows || []);
             });
-        } catch (e) {
-            send(reqId, null, e.name + ': ' + e.message);
-        }
+        });
+
+        Promise.all([
+            run(
+                'SELECT id, type, BUILTIN.DF(type) AS typename, tranid, trandate, BUILTIN.DF(status) AS status ' +
+                'FROM transaction WHERE id = ' + id, 1
+            ),
+            run(
+                'SELECT pl.previousdoc AS id, pl.linktype, t.type, BUILTIN.DF(t.type) AS typename, t.tranid, t.trandate, BUILTIN.DF(t.status) AS status ' +
+                'FROM PreviousTransactionLink pl JOIN transaction t ON t.id = pl.previousdoc ' +
+                'WHERE pl.nextdoc = ' + id
+            ),
+            run(
+                'SELECT nl.nextdoc AS id, nl.linktype, t.type, BUILTIN.DF(t.type) AS typename, t.tranid, t.trandate, BUILTIN.DF(t.status) AS status ' +
+                'FROM NextTransactionLink nl JOIN transaction t ON t.id = nl.nextdoc ' +
+                'WHERE nl.previousdoc = ' + id
+            )
+        ]).then((res) => {
+            send(reqId, {
+                current: res[0][0] ? node(res[0][0]) : null,
+                sources: groupLinks(res[1]),
+                targets: groupLinks(res[2])
+            }, null);
+        }).catch((e) => {
+            send(reqId, null, (e && e.message) ? e.message : String(e));
+        });
     }
 
     function node(r) {
