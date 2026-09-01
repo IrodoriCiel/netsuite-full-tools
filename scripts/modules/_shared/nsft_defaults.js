@@ -1,6 +1,6 @@
 globalThis.NSFT_DEFAULTS = {
     enableViewRecordObject: true,
-    viewRecordObjectTheme: "github-dark",
+    viewRecordObjectTheme: "atom-one-light",
     viewRecordObjectThemeOverridden: false,
     viewRecordObjectOpenMode: "modal",
 
@@ -10,6 +10,8 @@ globalThis.NSFT_DEFAULTS = {
     enableRecordTrail: true,
 
     enableCopyFieldAndSublistIds: true,
+    enableSearchSummaryBulk: true,
+    copyIdsMode: 'shift',
     copyIdsNoButton: true,
     enableOpenCustomRecordBtn: true,
     enableSetFieldValues: true,
@@ -55,7 +57,7 @@ globalThis.NSFT_DEFAULTS = {
     enableEditorTheme: true,
     enableEditorCloseAfterSave: true,
     editorTheme: "github-dark",
-    editorThemeAutoSwitch: false,
+    editorThemeAutoSwitch: true,
     editorFontFamily: 'JetBrains Mono',
     editorFontSize: 14,
     editorCustomBg: '#1e1e1e',
@@ -68,9 +70,26 @@ globalThis.NSFT_DEFAULTS = {
     editorCustomProperty: '#9cdcfe',
     editorCustomComment: '#6a9955',
     enableEditorOpenInNewTab: true,
+    enableAdvancedEditor: true,
+    advancedEditorWrap: false,
+    advancedEditorTree: true,
+    advancedEditorMinimap: false,
+    advancedEditorTheme: 'atom-one-light',
+    advancedEditorThemeOverridden: false,
+    advancedEditorRuler: 0,
     enableScriptAutoName: true,
 
     enableCommandPalette: true,
+    enableCustomizationFinder: true,
+    enableSuiteScriptConsole: true,
+    suitescriptConsoleTheme: "atom-one-light",
+    suitescriptConsoleThemeOverridden: false,
+    suitescriptConsoleHistoryMax: 30,
+    codeEditorKeymap: 'vscode',
+    codeEditorInlayHints: true,
+    codeEditorLightLines: 800,
+    suitescriptConsoleAiComplete: true,
+    suitescriptConsoleAiModel: "",
     commandPaletteCustomUrls: [],
     enablePagePerformance: true,
     enableShortcutsCheatsheet: true,
@@ -90,14 +109,14 @@ globalThis.NSFT_DEFAULTS = {
     envBadgeColorSb: '#16a34a',
     envBadgeColorRp: '#2563eb',
     envBadgeLetters: '3',
-    enableProductionBanner: true,
+    enableProductionBanner: false,
     productionBannerPosition: 'bottom',
     enableUpdateNotice: true,
     enableGroupedTabs: true,
     enableGroupedTabsAutomatic: true,
     groupedTabsAutoUseCompanyName: true,
     groupedTabsAutoCollapse: false,
-    enableColorThemes: true,
+    enableColorThemes: false,
     enableDarkMode: false,
     darkModeStyle: 'gray',
     darkModeScope: 'all',
@@ -105,6 +124,12 @@ globalThis.NSFT_DEFAULTS = {
     colorThemeHue: 216,
     colorThemeSat: 23,
     colorThemeLig: 49,
+    colorThemeMode: 'global',
+    colorThemeByEnv: false,
+    colorThemeEnvPrd: '#9a606a',
+    colorThemeEnvSb: '#609a73',
+    colorThemeEnvRp: '#60779a',
+    colorThemeAccounts: {},
     enableBetterPageTitles: true,
     enableFixedSublistColumn: true,
     enableFixedSublistHeaders: true,
@@ -127,7 +152,9 @@ globalThis.NSFT_DEFAULTS = {
     enableAiAssistant: true,
     aiAssistantPage: true,
     aiAssistantSuiteql: true,
-    suiteqlTheme: "eclipse",
+    aiAssistantConsole: true,
+    aiAssistantAdv: true,
+    suiteqlTheme: "atom-one-light",
     suiteqlThemeOverridden: false,
     suiteqlHistoryMax: 30,
     suiteqlMaxRecords: 5000,
@@ -138,6 +165,8 @@ globalThis.NSFT_DEFAULTS = {
     suiteqlManyRowsAction: 'ask',
     suiteqlManyRowsThreshold: 20000,
     suiteqlAutoSchema: true,
+    suiteqlAiComplete: true,
+    suiteqlAiModel: "",
 
     enableSearchFieldsFinder: true,
     enableSavedSearchSplit: true,
@@ -170,8 +199,9 @@ globalThis.NSFT_DEFAULTS = {
     jsonFormatterMaxAutoExpandDepth: 2,
     jsonFormatterMaxChildrenPreview: 60,
     enableDiscreetMode: false,
-    enablePortletRefresher: false,
+    enablePortletRefresher: true,
     portletRefresherInterval: 600,
+    portletRefresherAutoStart: false,
     enableRoleFinder: true,
     enableScriptUpload: true,
     enableGithubBackup: true,
@@ -189,6 +219,8 @@ globalThis.NSFT_DEFAULTS = {
     enableFloatingFieldGroupsBeta: true,
     enableSublistLineNumbersBeta: true,
     enableMaxlengthCounterBeta: true,
+    enableDateFormatHint: true,
+    enableShiftRangeSelect: true,
     enableMultiselectHierarchyBeta: true,
     enableSublistPagingBeta: true,
     sublistPagingPageSize: 1,
@@ -212,6 +244,23 @@ globalThis.NSFT_DEFAULTS = {
     enableNetSuiteVersionBadgeBeta: true
 };
 
+globalThis.NSFT_AI_FAST = {
+    nombres: {
+        claude: 'Claude', gemini: 'Gemini', openai: 'OpenAI', deepseek: 'DeepSeek',
+        mistral: 'Mistral', kimi: 'Kimi', grok: 'Grok', openrouter: 'OpenRouter'
+    },
+    rapidos: {
+        claude: 'haiku',
+        gemini: 'flash',
+        openai: 'nano|mini',
+        deepseek: 'chat|flash|lite',
+        mistral: 'codestral|small',
+        grok: 'fast|mini',
+        kimi: 'instruct'
+    },
+    generico: 'haiku|flash|nano|mini|lite|fast|small|codestral|turbo'
+};
+
 globalThis.NSFT_SYNC_PRIMARY_KEYS = ['colorThemeHue', 'colorThemeSat', 'colorThemeLig'];
 
 globalThis.NSFT_SYNC_MIRRORED_KEYS = [
@@ -220,5 +269,11 @@ globalThis.NSFT_SYNC_MIRRORED_KEYS = [
     'envBadgeColorSb',
     'envBadgeColorRp',
     'envBadgeLetters',
+    'colorThemeMode',
+    'colorThemeByEnv',
+    'colorThemeEnvPrd',
+    'colorThemeEnvSb',
+    'colorThemeEnvRp',
+    'colorThemeAccounts',
     'quickSearchCreationLinks'
 ];

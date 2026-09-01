@@ -265,6 +265,14 @@ html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error {
     color: var(--rt-text-dim);
 }
 
+.nsft-rtrail-rel {
+    margin-top: 4px;
+    font-size: 11.5px;
+    font-style: italic;
+    color: var(--rt-text-dim);
+    opacity: 0.85;
+}
+
 .nsft-rtrail-status {
     margin-top: 5px;
     display: flex;

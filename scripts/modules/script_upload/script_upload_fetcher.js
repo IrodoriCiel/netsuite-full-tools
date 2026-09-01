@@ -19,7 +19,9 @@
         diffConfirm: 'Subir y reemplazar',
         diffNoChanges: 'Sin cambios. El archivo es idéntico al actual.',
         diffTooLarge: 'Archivo demasiado grande para mostrar el diff completo. Se mostrarán solo las primeras 5000 líneas.',
-        diffLoadFailed: 'No se pudo obtener el archivo actual. Se mostrará solo el nuevo contenido.'
+        diffLoadFailed: 'No se pudo obtener el archivo actual. Se mostrará solo el nuevo contenido.',
+        diffLines: 'líneas',
+        diffChars: 'caracteres'
     };
 
     let initialI18n = I18N_FALLBACK;
@@ -69,7 +71,7 @@
 
         function applyTheme(newTheme) {
             _theme = newTheme || 'light';
-            const overlay = document.getElementById(PREVIEW_OVERLAY_ID);
+            const overlay = document.getElementById('nsft-diff-overlay');
             if (overlay) overlay.setAttribute('data-theme', resolveTheme());
         }
 
@@ -208,7 +210,28 @@
                     current = { state: 'failed', content: '' };
                 }
 
-                const confirmed = await showDiffModal(current, newContent, picked.name);
+                let confirmed = true;
+                if (window.NSFT_Diff) {
+                    confirmed = await window.NSFT_Diff.show({
+                        current: current,
+                        newContent: newContent,
+                        fileName: picked.name,
+                        theme: resolveTheme(),
+                        labels: {
+                            Title: i18n.diffTitle,
+                            Subtitle: i18n.diffSubtitle,
+                            Left: i18n.diffLeft,
+                            Right: i18n.diffRight,
+                            Cancel: i18n.diffCancel,
+                            Confirm: i18n.diffConfirm,
+                            NoChanges: i18n.diffNoChanges,
+                            TooLarge: i18n.diffTooLarge,
+                            LoadFailed: i18n.diffLoadFailed,
+                            lines: i18n.diffLines,
+                            chars: i18n.diffChars
+                        }
+                    });
+                }
                 const zone = document.getElementById(DROP_ZONE_ID);
                 if (zone) zone.dataset.state = '';
                 if (!confirmed) return;
@@ -405,277 +428,6 @@
             if (zone) zone.dataset.state = 'fail';
         }
 
-        const PREVIEW_OVERLAY_ID = 'nsft-su-diff-overlay';
-        const MAX_PREVIEW_LINES = 5000;
-        const MAX_LCS_CELLS = 4000000;
-
-        function el(tag, className) {
-            const n = document.createElement(tag);
-            if (className) n.className = className;
-            return n;
-        }
-
-        function showDiffModal(current, newContent, fileName) {
-            return new Promise((resolve) => {
-                const existing = document.getElementById(PREVIEW_OVERLAY_ID);
-                if (existing) existing.remove();
-
-                const isDiff = current && current.state === 'ok';
-                const loadFailed = current && current.state === 'failed';
-
-                const overlay = el('div', 'nsft-su-diff-overlay');
-                overlay.id = PREVIEW_OVERLAY_ID;
-                overlay.setAttribute('data-theme', resolveTheme());
-                const modal = el('div', 'nsft-su-diff-modal');
-
-                const header = el('div', 'nsft-su-diff-header');
-                const titleWrap = el('div', 'nsft-su-diff-title-wrap');
-                const title = el('h3', 'nsft-su-diff-title');
-                title.textContent = i18n.diffTitle + ': ' + fileName;
-                const subtitle = el('p', 'nsft-su-diff-subtitle');
-                subtitle.textContent = i18n.diffSubtitle;
-                titleWrap.appendChild(title);
-                titleWrap.appendChild(subtitle);
-                header.appendChild(titleWrap);
-                const stats = el('div', 'nsft-su-diff-stats');
-                header.appendChild(stats);
-                modal.appendChild(header);
-
-                let diffRows = null;
-                let approx = false;
-                let identical = false;
-
-                if (isDiff) {
-                    const curLines = String(current.content || '').split(/\r?\n/);
-                    const newLines = String(newContent || '').split(/\r?\n/);
-                    const result = computeLineDiff(curLines, newLines);
-                    diffRows = result.rows;
-                    approx = result.approx;
-                    let adds = 0, removes = 0;
-                    for (const r of diffRows) {
-                        if (r.type === 'add') adds++;
-                        else if (r.type === 'remove') removes++;
-                    }
-                    identical = adds === 0 && removes === 0;
-                    const addBadge = el('span', 'nsft-su-diff-stat-add');
-                    addBadge.textContent = '+' + adds;
-                    const remBadge = el('span', 'nsft-su-diff-stat-remove');
-                    remBadge.textContent = '−' + removes;
-                    stats.appendChild(addBadge);
-                    stats.appendChild(remBadge);
-                } else {
-                    const allLines = String(newContent || '').split(/\r?\n/);
-                    const lineBadge = el('span', 'nsft-su-diff-stat-add');
-                    lineBadge.textContent = allLines.length + ' líneas';
-                    const charBadge = el('span', 'nsft-su-diff-stat-add');
-                    charBadge.textContent = String(newContent || '').length + ' chars';
-                    stats.appendChild(lineBadge);
-                    stats.appendChild(charBadge);
-                }
-
-                if (loadFailed) {
-                    const info = el('div', 'nsft-su-diff-info');
-                    info.textContent = i18n.diffLoadFailed;
-                    modal.appendChild(info);
-                }
-                if (identical) {
-                    const info = el('div', 'nsft-su-diff-info');
-                    info.textContent = i18n.diffNoChanges;
-                    modal.appendChild(info);
-                }
-
-                const body = el('div', 'nsft-su-diff-body');
-
-                if (isDiff) {
-                    const colheader = el('div', 'nsft-su-diff-colheader');
-                    const cLeft = el('div', 'nsft-su-diff-colheader-cell');
-                    cLeft.textContent = i18n.diffLeft;
-                    const cRight = el('div', 'nsft-su-diff-colheader-cell');
-                    cRight.textContent = i18n.diffRight;
-                    colheader.appendChild(cLeft);
-                    colheader.appendChild(cRight);
-                    body.appendChild(colheader);
-
-                    const truncated = diffRows.length > MAX_PREVIEW_LINES;
-                    const rows = truncated ? diffRows.slice(0, MAX_PREVIEW_LINES) : diffRows;
-                    if (approx || truncated) {
-                        const warn = el('div', 'nsft-su-diff-warn');
-                        warn.textContent = i18n.diffTooLarge;
-                        modal.insertBefore(warn, body);
-                    }
-
-                    const panes = el('div', 'nsft-su-diff-panes');
-                    const leftPane = el('div', 'nsft-su-diff-pane');
-                    const rightPane = el('div', 'nsft-su-diff-pane');
-                    const lf = document.createDocumentFragment();
-                    const rf = document.createDocumentFragment();
-                    for (const r of rows) {
-                        const leftKind = r.type === 'remove' ? 'remove' : (r.type === 'add' ? 'blank' : 'equal');
-                        const rightKind = r.type === 'add' ? 'add' : (r.type === 'remove' ? 'blank' : 'equal');
-                        lf.appendChild(buildPaneRow(r.l, r.lt, leftKind));
-                        rf.appendChild(buildPaneRow(r.r, r.rt, rightKind));
-                    }
-                    leftPane.appendChild(lf);
-                    rightPane.appendChild(rf);
-                    panes.appendChild(leftPane);
-                    panes.appendChild(rightPane);
-                    body.appendChild(panes);
-
-                    syncScroll(leftPane, rightPane);
-                } else {
-                    const allLines = String(newContent || '').split(/\r?\n/);
-                    const truncated = allLines.length > MAX_PREVIEW_LINES;
-                    const lines = truncated ? allLines.slice(0, MAX_PREVIEW_LINES) : allLines;
-                    if (truncated) {
-                        const warn = el('div', 'nsft-su-diff-warn');
-                        warn.textContent = i18n.diffTooLarge;
-                        modal.insertBefore(warn, body);
-                    }
-                    const table = el('div', 'nsft-su-diff-table nsft-su-preview-table');
-                    const frag = document.createDocumentFragment();
-                    for (let i = 0; i < lines.length; i++) frag.appendChild(buildPreviewRow(i + 1, lines[i]));
-                    table.appendChild(frag);
-                    body.appendChild(table);
-                }
-                modal.appendChild(body);
-
-                const footer = el('div', 'nsft-su-diff-footer');
-                const cancelBtn = el('button', 'nsft-su-diff-btn nsft-su-diff-btn-cancel');
-                cancelBtn.type = 'button';
-                cancelBtn.textContent = i18n.diffCancel;
-                const confirmBtn = el('button', 'nsft-su-diff-btn nsft-su-diff-btn-confirm');
-                confirmBtn.type = 'button';
-                confirmBtn.textContent = i18n.diffConfirm;
-                footer.appendChild(cancelBtn);
-                footer.appendChild(confirmBtn);
-                modal.appendChild(footer);
-
-                overlay.appendChild(modal);
-                document.body.appendChild(overlay);
-
-                setTimeout(() => { confirmBtn.focus(); }, 50);
-
-                const cleanup = () => {
-                    overlay.remove();
-                    document.removeEventListener('keydown', onKey);
-                };
-                const onCancel = () => { cleanup(); resolve(false); };
-                const onConfirm = () => { cleanup(); resolve(true); };
-                const onKey = (e) => {
-                    if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
-                };
-                cancelBtn.addEventListener('click', onCancel);
-                confirmBtn.addEventListener('click', onConfirm);
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) onCancel();
-                });
-                document.addEventListener('keydown', onKey);
-            });
-        }
-
-        function buildPreviewRow(num, text) {
-            const row = el('div', 'nsft-su-preview-row');
-            const numCell = el('div', 'nsft-su-diff-linenum');
-            numCell.textContent = num;
-            const textCell = el('div', 'nsft-su-diff-text');
-            textCell.textContent = text;
-            row.appendChild(numCell);
-            row.appendChild(textCell);
-            return row;
-        }
-
-        function buildPaneRow(num, text, kind) {
-            const row = el('div', 'nsft-su-diff-pane-row nsft-su-diff-pane-row-' + kind);
-            const ln = el('div', 'nsft-su-diff-pane-linenum');
-            ln.textContent = num == null ? '' : num;
-            const code = el('div', 'nsft-su-diff-pane-code');
-            code.textContent = text || '';
-            row.appendChild(ln);
-            row.appendChild(code);
-            return row;
-        }
-
-        function syncScroll(a, b) {
-            let lock = false;
-            const mirror = (src, dst) => () => {
-                if (lock) return;
-                lock = true;
-                dst.scrollTop = src.scrollTop;
-                dst.scrollLeft = src.scrollLeft;
-                lock = false;
-            };
-            a.addEventListener('scroll', mirror(a, b));
-            b.addEventListener('scroll', mirror(b, a));
-        }
-
-        function computeLineDiff(aLines, bLines) {
-            const aN = aLines.length, bN = bLines.length;
-            const rows = [];
-
-            let start = 0;
-            const minLen = Math.min(aN, bN);
-            while (start < minLen && aLines[start] === bLines[start]) start++;
-
-            let aEnd = aN, bEnd = bN;
-            while (aEnd > start && bEnd > start && aLines[aEnd - 1] === bLines[bEnd - 1]) { aEnd--; bEnd--; }
-
-            for (let i = 0; i < start; i++) {
-                rows.push({ type: 'equal', l: i + 1, lt: aLines[i], r: i + 1, rt: bLines[i] });
-            }
-
-            const aMid = aLines.slice(start, aEnd);
-            const bMid = bLines.slice(start, bEnd);
-            let approx = false;
-
-            if (aMid.length * bMid.length > MAX_LCS_CELLS) {
-                approx = true;
-                for (let i = 0; i < aMid.length; i++) {
-                    rows.push({ type: 'remove', l: start + i + 1, lt: aMid[i], r: null, rt: '' });
-                }
-                for (let j = 0; j < bMid.length; j++) {
-                    rows.push({ type: 'add', l: null, lt: '', r: start + j + 1, rt: bMid[j] });
-                }
-            } else {
-                const midRows = lcsDiff(aMid, bMid, start);
-                for (const mr of midRows) rows.push(mr);
-            }
-
-            for (let k = 0; k < aN - aEnd; k++) {
-                rows.push({ type: 'equal', l: aEnd + k + 1, lt: aLines[aEnd + k], r: bEnd + k + 1, rt: bLines[bEnd + k] });
-            }
-
-            return { rows, approx };
-        }
-
-        function lcsDiff(a, b, offset) {
-            const n = a.length, m = b.length;
-            const rows = [];
-            if (n === 0 && m === 0) return rows;
-            const dp = [];
-            for (let i = 0; i <= n; i++) dp.push(new Uint32Array(m + 1));
-            for (let i = n - 1; i >= 0; i--) {
-                for (let j = m - 1; j >= 0; j--) {
-                    if (a[i] === b[j]) dp[i][j] = dp[i + 1][j + 1] + 1;
-                    else dp[i][j] = dp[i + 1][j] >= dp[i][j + 1] ? dp[i + 1][j] : dp[i][j + 1];
-                }
-            }
-            let i = 0, j = 0;
-            while (i < n && j < m) {
-                if (a[i] === b[j]) {
-                    rows.push({ type: 'equal', l: offset + i + 1, lt: a[i], r: offset + j + 1, rt: b[j] });
-                    i++; j++;
-                } else if (dp[i + 1][j] >= dp[i][j + 1]) {
-                    rows.push({ type: 'remove', l: offset + i + 1, lt: a[i], r: null, rt: '' });
-                    i++;
-                } else {
-                    rows.push({ type: 'add', l: null, lt: '', r: offset + j + 1, rt: b[j] });
-                    j++;
-                }
-            }
-            while (i < n) { rows.push({ type: 'remove', l: offset + i + 1, lt: a[i], r: null, rt: '' }); i++; }
-            while (j < m) { rows.push({ type: 'add', l: null, lt: '', r: offset + j + 1, rt: b[j] }); j++; }
-            return rows;
-        }
 
         function teardown() {
             const container = document.getElementById(CONTAINER_ID);
@@ -683,7 +435,7 @@
                 const tr = container.closest('tr.' + ROW_CLASS);
                 (tr || container).remove();
             }
-            const previewOverlay = document.getElementById(PREVIEW_OVERLAY_ID);
+            const previewOverlay = document.getElementById('nsft-diff-overlay');
             if (previewOverlay) previewOverlay.remove();
             scriptName = '';
             folder = null;

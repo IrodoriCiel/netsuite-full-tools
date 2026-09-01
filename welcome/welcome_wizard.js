@@ -127,10 +127,22 @@
         if (caja) caja.hidden = !on;
     }
 
+    let _pendiente = null;
+
     function showPreview(item) {
         const pv = window.NSFT_PV;
-        if (!pv || !pv.pintar) return;
+        if (!pv || !pv.pintar) { _pendiente = item; return; }
+        _pendiente = null;
         pv.pintar($('wizPreview'), item, { rotulos: rotulos });
+    }
+
+    document.addEventListener('nsft-pv-listo', () => {
+        if (_pendiente) showPreview(_pendiente);
+    });
+
+    function alPrincipio() {
+        const b = $('wizBody');
+        if (b) b.scrollTop = 0;
     }
 
     function renderProfiles() {
@@ -178,6 +190,7 @@
         });
 
         body.appendChild(list);
+        alPrincipio();
         $('wizNext').textContent = t(profile === 'custom' ? 'welcomeWizContinue' : 'welcomeWizConfirm');
     }
 
@@ -257,6 +270,7 @@
             list.appendChild(row);
         });
         body.appendChild(list);
+        alPrincipio();
 
         if (step.items.length) showPreview(step.items[0]);
     }
@@ -270,7 +284,7 @@
         showBar(true);
         $('wizBar').style.width = '100%';
         $('wizBarCount').textContent = '';
-        $('wizBack').hidden = true;
+        $('wizBack').hidden = false;
         $('wizSkip').hidden = true;
         $('wizNext').textContent = t('welcomeWizOpenSettings');
 
@@ -278,6 +292,7 @@
         nota.className = 'wizard-done-note';
         nota.textContent = t('welcomeWizDoneMore');
         $('wizBody').replaceChildren(nota);
+        alPrincipio();
     }
 
     function save(done) {
@@ -308,6 +323,12 @@
     }
 
     function back() {
+        if (doneMode) {
+            doneMode = false;
+            if (index < 0) renderProfiles();
+            else renderStep();
+            return;
+        }
         if (index === 0 && conPerfiles) { index = -1; renderProfiles(); return; }
         if (index <= 0) return;
         index--;

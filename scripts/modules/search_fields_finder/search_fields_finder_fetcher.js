@@ -28,16 +28,30 @@
         ));
     }
 
+    function ffFold(s) {
+        const TS = window.NSFT_TextSearch;
+        return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
+    }
+
     function ffWords(query) {
-        return String(query == null ? '' : query).toLowerCase().split(/\s+/).filter(Boolean);
+        return ffFold(query).split(/\s+/).filter(Boolean);
     }
 
     function ffWordPositions(text, word) {
-        const t = String(text == null ? '' : text).toLowerCase();
+        const original = String(text == null ? '' : text);
         const w = String(word || '');
         if (!w) return [];
 
         const pos = [];
+        const TS = window.NSFT_TextSearch;
+        if (TS) {
+            TS.ranges(original, w).forEach((r) => {
+                for (let i = r.start; i < r.end; i++) pos.push(i);
+            });
+            return pos.length ? pos : null;
+        }
+
+        const t = original.toLowerCase();
         let from = 0;
         let idx = t.indexOf(w, from);
         while (idx !== -1) {
@@ -146,6 +160,7 @@
             };
             this.searchInputField = document.createElement("input");
             this.fieldFinderElement = document.createElement("div");
+            this.clearButton = null;
 
             this.dataTypeFilter = null;
 
@@ -652,6 +667,7 @@
             this.searchInputField.addEventListener("input", (e) => {
                 e.stopPropagation();
                 this.handleTextInput();
+                this.syncClearButton();
             });
 
             this.searchInputField.addEventListener("keydown", (e) => {
@@ -668,7 +684,40 @@
             this.searchInputField.addEventListener("keyup", (e) => e.stopPropagation());
             this.searchInputField.addEventListener("keypress", (e) => e.stopPropagation());
 
-            this.fieldFinderElement.appendChild(this.searchInputField);
+            const wrap = document.createElement("div");
+            wrap.className = "nsft-ff-search-wrap";
+
+            const clearLabel = (this.settings.i18n && this.settings.i18n.clear_search) || "Limpiar búsqueda";
+            const clearBtn = document.createElement("button");
+            clearBtn.type = "button";
+            clearBtn.className = "nsft-ff-clear";
+            clearBtn.textContent = "✕";
+            clearBtn.title = clearLabel;
+            clearBtn.setAttribute("aria-label", clearLabel);
+            clearBtn.hidden = true;
+
+            clearBtn.addEventListener("mousedown", (e) => { e.preventDefault(); e.stopPropagation(); });
+            clearBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); });
+            clearBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.searchInputField.value = "";
+                this.handleTextInput();
+                this.syncClearButton();
+                this.setFocusOnTextBox();
+            });
+            clearBtn.addEventListener("keydown", (e) => e.stopPropagation());
+
+            this.clearButton = clearBtn;
+            wrap.appendChild(this.searchInputField);
+            wrap.appendChild(clearBtn);
+            this.fieldFinderElement.appendChild(wrap);
+            this.syncClearButton();
+        }
+
+        syncClearButton() {
+            if (!this.clearButton || !this.searchInputField) return;
+            this.clearButton.hidden = !this.searchInputField.value;
         }
 
         addFieldFinderFilterElements() {
@@ -718,6 +767,7 @@
 
         reset() {
             this.searchInputField.value = "";
+            this.syncClearButton();
             this.dataTypeFilterValue = "";
             if (this.dataTypeLabel) {
                 this.dataTypeLabel.textContent = this.settings.i18n.type_all;

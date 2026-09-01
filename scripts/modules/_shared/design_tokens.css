@@ -6,6 +6,26 @@
     --nsft-dk-hover:   #1E2025;  
     --nsft-dk-border:  #282A30;  
     --nsft-dk-border2: #34373E;  
+
+    --nsft-hl-bg:        rgba(234, 179, 8, 0.42);
+
+    --nsft-ai-a:         #6E7CF5;
+    --nsft-ai-b:         #9B6EF5;
+    --nsft-ai-face:      #FDFCFF;
+    --nsft-ai-text:      #6D28D9;
+    --nsft-ai-glow:      rgba(155, 110, 245, 0.20);
+    --nsft-ai-glow-in:   rgba(155, 110, 245, 0.12);
+
+    --nsft-ai-a-dark:    rgba(110, 124, 245, 0.9);
+    --nsft-ai-b-dark:    rgba(190, 110, 245, 0.9);
+    --nsft-ai-face-dark: rgba(20, 24, 34, 0.85);
+    --nsft-ai-text-dark: #D6C6FB;
+    --nsft-ai-glow-dark: rgba(155, 110, 245, 0.35);
+    --nsft-ai-glow-in-dark: rgba(155, 110, 245, 0.25);
+    --nsft-hl-ring:      rgba(180, 130, 0, 0.25);
+    --nsft-hl-bg-dark:   rgba(234, 179, 8, 0.55);
+    --nsft-hl-fg-dark:   #0D1410;
+    --nsft-hl-ring-dark: rgba(234, 179, 8, 0.5);
 }
 
 [data-nsft-ui] {

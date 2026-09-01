@@ -8,8 +8,11 @@
 
     const IDS = {
         SEARCH: 'nsft-role-search',
+        CLEAR: 'nsft-role-clear',
         DATALIST: 'nsft-roles-list'
     };
+
+    const TS = window.NSFT_TextSearch;
 
     const SELECTORS = {
         refreshed: {
@@ -169,21 +172,53 @@
         const datalist = document.createElement('datalist');
         datalist.id = IDS.DATALIST;
 
-        container.appendChild(input);
+        const wrap = document.createElement('div');
+        wrap.className = 'nsft-role-search-wrap';
+
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.id = IDS.CLEAR;
+        clear.className = 'nsft-role-clear';
+        clear.hidden = true;
+        const clearLabel = chrome.i18n.getMessage('ro_clear_search') || 'Limpiar búsqueda';
+        clear.title = clearLabel;
+        clear.setAttribute('aria-label', clearLabel);
+        clear.textContent = '✕';
+
+        wrap.appendChild(input);
+        wrap.appendChild(clear);
+
+        container.appendChild(wrap);
         container.appendChild(datalist);
         return container;
+    }
+
+    function foldAligned(text) {
+        if (!TS) return text.toUpperCase();
+        let out = '';
+        for (let i = 0; i < text.length; i++) {
+            const ch = text.charAt(i);
+            const f = TS.fold(ch);
+            out += f.length === 1 ? f : (f ? f.charAt(0) : ch);
+        }
+        return out;
+    }
+
+    function isCombining(ch) {
+        return !!TS && TS.fold(ch) === '';
     }
 
     function attachSearchHandler(entries) {
         const input = document.getElementById(IDS.SEARCH);
         if (!input) return;
+        const clearBtn = document.getElementById(IDS.CLEAR);
         let raf = 0;
         let visible = [];
         let selIdx = -1;
 
         function fuzzyIndices(text, q) {
-            const t = text.toUpperCase();
-            const ql = q.toUpperCase();
+            const t = foldAligned(text);
+            const ql = TS ? TS.fold(q) : q.toUpperCase();
             const idx = [];
             let j = 0;
             for (let i = 0; i < t.length && j < ql.length; i++) {
@@ -217,9 +252,11 @@
                 for (let i = 0; i < text.length; i++) {
                     if (set.has(i)) {
                         if (buffer) { frag.appendChild(document.createTextNode(buffer)); buffer = ''; }
+                        let piece = text[i];
+                        while (i + 1 < text.length && !set.has(i + 1) && isCombining(text[i + 1])) piece += text[++i];
                         const span = document.createElement('span');
                         span.className = 'nsft-rf-hl';
-                        span.textContent = text[i];
+                        span.textContent = piece;
                         frag.appendChild(span);
                     } else {
                         buffer += text[i];
@@ -240,7 +277,14 @@
             }
         }
 
+        function syncClear() {
+            const hasText = !!(input.value && input.value.length);
+            if (clearBtn) clearBtn.hidden = !hasText;
+            input.classList.toggle('has-text', hasText);
+        }
+
         function runFilter() {
+            syncClear();
             const q = input.value ? input.value.trim() : '';
             visible = [];
             for (const e of entries) {
@@ -271,6 +315,23 @@
                 if (target && target.link) target.link.click();
             }
         });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('mousedown', (evt) => evt.preventDefault());
+            clearBtn.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                evt.stopPropagation();
+                input.value = '';
+                runFilter();
+                input.focus();
+            });
+            clearBtn.addEventListener('keydown', (evt) => {
+                if (evt.key === 'Enter' || evt.key === ' ') evt.stopPropagation();
+            });
+        }
+
+        input.addEventListener('input', syncClear);
+        syncClear();
     }
 
     function findElement(theme, key) {

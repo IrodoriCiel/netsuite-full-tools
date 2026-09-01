@@ -1,0 +1,162 @@
+/*!
+ * Synthwave '84 para CodeMirror 5 — .cm-s-synthwave-84
+ *
+ * Colores tomados del tema de VS Code de Robb Owen
+ * (github.com/robb0wen/synthwave-vscode, MIT), portados a los tokens de
+ * CodeMirror. El brillo de neon —lo que hace que este tema sea ESTE tema— sale
+ * de su hoja `synthwave84.css`, donde en VS Code hay que inyectarla a mano
+ * porque Electron no deja; aqui es CSS normal y ya esta.
+ *
+ * DOS DIFERENCIAS DELIBERADAS CON EL ORIGINAL, las dos por el mismo motivo —
+ * que aqui el editor vive dentro de NetSuite y no a pantalla completa:
+ *
+ * 1. El brillo lleva DOS capas de sombra en vez de cuatro. A tamano normal se
+ *    ve igual, y cada capa es una pasada de pintado mas por cada palabra de la
+ *    pantalla. El tema entero deja de tener gracia si escribir da tirones.
+ * 2. La seleccion sube de #ffffff20 a un 18%. Sobre el degradado del fondo, el
+ *    12% del original se pierde: se ve que hay algo seleccionado, no cuanto.
+ *
+ * El `.min` del nombre es lo que esperan los tres modulos que cargan temas
+ * (`.../theme/<nombre>.min.css`); este archivo es NUESTRO, no una copia
+ * minificada de nadie, y por eso se lee.
+ */
+
+/* EL FONDO VA PLANO, y ese es el color que el tema declara: `editor.background`
+   es #262335 y punto.
+
+   Llevaba encima el degradado #2a2139 → #34294f, que en el original NO es el
+   fondo del editor: sale de su hoja del brillo, donde tiñe otra superficie. Se
+   puso aqui por parecerse mas al original de un vistazo.
+
+   Medido, el problema no estaba donde parecia: #2a2139 tiene practicamente la
+   MISMA luminancia que #262335 (36,6 contra 36,9) — es mas morado, no mas
+   claro. Quien aclaraba era el otro extremo: #34294f sube a 46,1, un 25% mas, y
+   arrastraba consigo la mitad de abajo de la pantalla. Sobre un fondo mas claro
+   el neon —que es lo que de verdad se reconoce de este tema— pierde justo el
+   contraste del que vive. */
+.cm-s-synthwave-84.CodeMirror {
+    background-color: #262335 !important;
+    background-image: none !important;
+    color: #ffffff !important;
+    border: none;
+}
+
+.cm-s-synthwave-84 .CodeMirror-gutters {
+    background-color: #262335 !important;
+    border-right: 1px solid #34294f;
+    color: #495495;
+}
+
+.cm-s-synthwave-84 .CodeMirror-linenumber { color: rgba(255, 255, 255, 0.45); }
+.cm-s-synthwave-84 .CodeMirror-activeline-gutter .CodeMirror-linenumber { color: rgba(255, 255, 255, 0.8); }
+
+.cm-s-synthwave-84 .CodeMirror-cursor { border-left: solid thin #f97e72; }
+.cm-s-synthwave-84 .cm-fat-cursor .CodeMirror-cursor { background: rgba(249, 126, 114, 0.5); }
+
+.cm-s-synthwave-84 .CodeMirror-selected { background: rgba(255, 255, 255, 0.18); }
+.cm-s-synthwave-84 .CodeMirror-line::selection,
+.cm-s-synthwave-84 .CodeMirror-line > span::selection,
+.cm-s-synthwave-84 .CodeMirror-line > span > span::selection { background: rgba(255, 255, 255, 0.18); }
+.cm-s-synthwave-84 .CodeMirror-line::-moz-selection,
+.cm-s-synthwave-84 .CodeMirror-line > span::-moz-selection,
+.cm-s-synthwave-84 .CodeMirror-line > span > span::-moz-selection { background: rgba(255, 255, 255, 0.18); }
+
+/* En el original la linea activa se marca con un BORDE morado. Un borde en
+   CodeMirror obliga a jugar con el alto de la linea; el mismo morado de fondo
+   dice lo mismo sin mover nada. */
+.cm-s-synthwave-84 .CodeMirror-activeline-background { background: rgba(112, 89, 171, 0.22); }
+
+.cm-s-synthwave-84 .CodeMirror-matchingbracket {
+    background: rgba(52, 41, 79, 0.9);
+    color: #36f9f6 !important;
+    text-decoration: none;
+}
+.cm-s-synthwave-84 .CodeMirror-nonmatchingbracket { color: #fe4450 !important; }
+
+.cm-s-synthwave-84 .CodeMirror-guttermarker { color: #f97e72; }
+.cm-s-synthwave-84 .CodeMirror-guttermarker-subtle { color: #495495; }
+.cm-s-synthwave-84 .CodeMirror-foldmarker { color: #36f9f6; text-shadow: none; }
+
+/* ---------- los tokens ---------- */
+
+.cm-s-synthwave-84 span.cm-comment { color: #848bbd; font-style: italic; }
+
+.cm-s-synthwave-84 span.cm-string,
+.cm-s-synthwave-84 span.cm-string-2 { color: #ff8b39; }
+
+.cm-s-synthwave-84 span.cm-number,
+.cm-s-synthwave-84 span.cm-atom { color: #f97e72; }
+
+.cm-s-synthwave-84 span.cm-keyword,
+.cm-s-synthwave-84 span.cm-operator,
+.cm-s-synthwave-84 span.cm-attribute { color: #fede5d; }
+
+.cm-s-synthwave-84 span.cm-def,
+.cm-s-synthwave-84 span.cm-builtin { color: #36f9f6; }
+
+/* `objectkey` NO ES UN TOKEN DE CODEMIRROR: lo inventa el modo de JavaScript de
+   la extension para las claves de un objeto —`{ id: …, type: … }`, que en
+   SuiteScript es medio archivo— y lo marca con nombre propio justamente para
+   que el tema que no lo conozca las deje del color del texto. Sin esta regla
+   salen en blanco, que es como se vio la primera vez. Van del rosa de las
+   propiedades porque son lo mismo: el nombre de un miembro. */
+.cm-s-synthwave-84 span.cm-variable,
+.cm-s-synthwave-84 span.cm-variable-2,
+.cm-s-synthwave-84 span.cm-property,
+.cm-s-synthwave-84 span.cm-objectkey { color: #ff7edb; }
+
+/* Las llaves y los corchetes, del gris de la puntuacion. Los emite el mismo
+   modo propio y le pasaba lo mismo. */
+.cm-s-synthwave-84 span.cm-bracket { color: #b6b1b1; }
+
+.cm-s-synthwave-84 span.cm-type,
+.cm-s-synthwave-84 span.cm-variable-3 { color: #fe4450; }
+
+.cm-s-synthwave-84 span.cm-tag,
+.cm-s-synthwave-84 span.cm-qualifier { color: #72f1b8; }
+
+.cm-s-synthwave-84 span.cm-meta,
+.cm-s-synthwave-84 span.cm-punctuation { color: #b6b1b1; }
+
+.cm-s-synthwave-84 span.cm-link { color: #36f9f6; text-decoration: underline; }
+.cm-s-synthwave-84 span.cm-error { color: #fe4450; }
+
+/* ---------- el neon ----------
+
+   Dos capas: una oscura y pegada, que despega la letra del fondo, y una ancha
+   del color del token, que es el halo. Los colores del halo son los del
+   original —no los del texto—, que es lo que hace que el cyan brille en
+   turquesa y el amarillo en ambar en vez de en si mismos. */
+
+.cm-s-synthwave-84 span.cm-def,
+.cm-s-synthwave-84 span.cm-builtin {
+    text-shadow: 0 0 2px #001716, 0 0 8px rgba(3, 237, 249, 0.46);
+}
+
+.cm-s-synthwave-84 span.cm-keyword,
+.cm-s-synthwave-84 span.cm-operator,
+.cm-s-synthwave-84 span.cm-attribute {
+    text-shadow: 0 0 2px #393a33, 0 0 8px rgba(243, 159, 5, 0.46);
+}
+
+.cm-s-synthwave-84 span.cm-variable,
+.cm-s-synthwave-84 span.cm-variable-2,
+.cm-s-synthwave-84 span.cm-property,
+.cm-s-synthwave-84 span.cm-objectkey {
+    text-shadow: 0 0 2px #100c0f, 0 0 7px rgba(220, 7, 142, 0.4);
+}
+
+.cm-s-synthwave-84 span.cm-type,
+.cm-s-synthwave-84 span.cm-variable-3,
+.cm-s-synthwave-84 span.cm-error {
+    text-shadow: 0 0 2px #000000, 0 0 8px rgba(252, 31, 44, 0.46);
+}
+
+.cm-s-synthwave-84 span.cm-tag,
+.cm-s-synthwave-84 span.cm-qualifier {
+    text-shadow: 0 0 2px #100c0f, 0 0 8px rgba(37, 124, 85, 0.46);
+}
+
+/* Los comentarios y las cadenas NO brillan, igual que en el original: son lo
+   que mas texto ocupa de una pantalla y encenderlos convierte el archivo en
+   una mancha. El contraste del tema sale de que solo brille lo que es codigo. */

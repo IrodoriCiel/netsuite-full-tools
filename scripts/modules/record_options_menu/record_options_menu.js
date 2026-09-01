@@ -22,6 +22,7 @@
     let _envEnabled = false;
     let _sqlEnabled = false;
     let _copyHandler = null;
+    let _sscEnabled = false;
     let _delEnabled = false, _delMode = 'button';
     let _easEnabled = false, _easMode = 'button';
     let _saeEnabled = false, _saeMode = 'button';
@@ -31,6 +32,7 @@
         [STORAGE_KEY]: true,
         enableOpenInOtherEnv: true,
         enableSuiteQLRunner: true,
+        enableSuiteScriptConsole: true,
         enableDeleteRecordButton: true,
         enableEditAndSaveButton: true,
         enableSaveAndEditButton: true,
@@ -42,6 +44,7 @@
         if (!setting[STORAGE_KEY]) return;
         _envEnabled = !!setting.enableOpenInOtherEnv;
         _sqlEnabled = !!setting.enableSuiteQLRunner;
+        _sscEnabled = !!setting.enableSuiteScriptConsole;
         _delEnabled = !!setting.enableDeleteRecordButton;
         _easEnabled = !!setting.enableEditAndSaveButton;
         _saeEnabled = !!setting.enableSaveAndEditButton;
@@ -185,18 +188,25 @@
     function getPageContext() {
         const url = window.location.href.toLowerCase();
         const params = new URLSearchParams(window.location.search);
-        const isCustomTransaction = url.includes('transactions/custom.nl');
         const cleanId = (v) => (v && ID_RE.test(v)) ? v : null;
+        const isTransaction = url.includes('/transactions/') && !url.includes('scriptlet.nl');
+
+        let customtype = cleanId(params.get('customtype'));
+        if (!customtype && isTransaction) {
+            const input = document.querySelector('input[name="customtype"]');
+            if (input && ID_RE.test(input.value)) customtype = input.value;
+        }
+        const isCustomTransaction = isTransaction && !!customtype;
 
         return {
             isCustomRecord: url.includes('custrecordentry.nl'),
             isCustomTransaction: isCustomTransaction,
-            isStandardTransaction: url.includes('/transactions/') && !isCustomTransaction && !url.includes('scriptlet.nl'),
+            isStandardTransaction: isTransaction && !isCustomTransaction,
             isEntity: url.includes('/app/common/entity/'),
             isItem: url.includes('/app/common/item/'),
             rectype: cleanId(params.get('rectype')),
             id: cleanId(params.get('id')),
-            customtype: cleanId(params.get('customtype')),
+            customtype: customtype,
             searchString: window.location.search.substring(1)
         };
     }
@@ -235,6 +245,7 @@
         trail: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/><path d="M5 17v-2a4 4 0 0 1 4-4h6a4 4 0 0 0 4-4V7"/></svg>`,
         xml: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="14 2 14 8 20 8"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="10 13 8 15 10 17"/><polyline points="14 13 16 15 14 17"/></svg>`,
         suiteql: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>`,
+        suitescript_console: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><rect x="3" y="4" width="18" height="16" rx="2"/><polyline points="7 9 10 12 7 15"/><line x1="13" y1="15" x2="17" y2="15"/></svg>`,
         open_in_env: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
         link: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
         save: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
@@ -259,6 +270,34 @@
         if (_delEnabled && _delMode === 'menu') {
             actions.push(createActionMenuItem(chrome.i18n.getMessage('btn_delete'), 'trash',
                 `if(typeof nsft_deleteRecord=='function'){nsft_deleteRecord();}return false;`));
+        }
+
+        if (_sscEnabled) {
+            const codigo = [
+                '// ' + (chrome.i18n.getMessage('ssc_load_tpl_1') || 'The record open on this page'),
+                'const cr = currentRecord.get();',
+                '',
+                '// ' + (chrome.i18n.getMessage('ssc_load_tpl_2') || 'Loaded again from the server, whole'),
+                'const r = record.load({',
+                '    type: cr.type,',
+                '    id: cr.id',
+                '});',
+                '',
+                'r'
+            ].join('\n');
+            const titulo = chrome.i18n.getMessage('ssc_load_tab_title') || 'Record';
+            const onclick = '(function(){'
+                + 'var t=null,i=null;'
+                + "try{if(typeof nlapiGetRecordType==='function')t=nlapiGetRecordType();}catch(e){}"
+                + "try{if(typeof nlapiGetRecordId==='function')i=nlapiGetRecordId();}catch(e){}"
+                + 'window.dispatchEvent(new CustomEvent(\'nsft-show-suitescript-console\',{detail:{'
+                + 'prefillRecord:{type:t,id:i},'
+                + 'prefillCode:' + JSON.stringify(codigo) + ','
+                + 'prefillTitle:' + JSON.stringify(titulo)
+                + '}}));})();return false;';
+            actions.push(createActionMenuItem(
+                chrome.i18n.getMessage('recordOptionLoadInConsole') || 'Load in SuiteScript Console',
+                'suitescript_console', onclick));
         }
         return actions;
     }
@@ -293,11 +332,7 @@
         }
 
         if (context.isCustomTransaction) {
-            let cType = context.customtype;
-            if (!cType) {
-                const input = document.querySelector('input[name="customtype"]');
-                if (input && ID_RE.test(input.value)) cType = input.value;
-            }
+            const cType = context.customtype;
             if (cType) {
                 items.push(createMenuItem(chrome.i18n.getMessage('recordOptionOpenCustomTransaction'),
                     `/app/common/custom/customtransaction.nl?id=${cType}&e=T`, 'settings'));

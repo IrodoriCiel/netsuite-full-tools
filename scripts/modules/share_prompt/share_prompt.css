@@ -1,0 +1,205 @@
+
+#nsft-share-prompt {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 10050;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    max-width: 340px;
+    padding: 14px 34px 14px 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#nsft-share-prompt.nsft-shr-visible {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #nsft-share-prompt { transition: none; }
+}
+
+#nsft-share-prompt .nsft-shr-logo {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+}
+
+#nsft-share-prompt .nsft-shr-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.35;
+}
+
+#nsft-share-prompt .nsft-shr-body {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 3px;
+    line-height: 1.45;
+}
+
+#nsft-share-prompt .nsft-shr-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+#nsft-share-prompt .nsft-shr-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 5px 12px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: #157A4C;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+}
+
+#nsft-share-prompt .nsft-shr-btn:hover { background: #10613C; }
+
+#nsft-share-prompt .nsft-shr-btn svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+}
+
+#nsft-share-prompt .nsft-shr-iconos {
+    display: flex;
+    gap: 6px;
+}
+
+#nsft-share-prompt .nsft-shr-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #6b7280;
+    cursor: pointer;
+    transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+#nsft-share-prompt .nsft-shr-icon svg {
+    width: 15px;
+    height: 15px;
+}
+
+#nsft-share-prompt .nsft-shr-icon:hover { background: #f9fafb; }
+#nsft-share-prompt .nsft-shr-icon.is-fb:hover { color: #1877F2; border-color: #1877F2; }
+#nsft-share-prompt .nsft-shr-icon.is-x:hover { color: #111827; border-color: #111827; }
+#nsft-share-prompt .nsft-shr-icon.is-wa:hover { color: #25D366; border-color: #25D366; }
+#nsft-share-prompt .nsft-shr-icon.is-mas:hover { color: #157A4C; border-color: #157A4C; }
+
+#nsft-share-prompt .nsft-shr-never {
+    display: block;
+    margin-top: 9px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    color: #9ca3af;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+#nsft-share-prompt .nsft-shr-never:hover { color: #4b5563; }
+
+#nsft-share-prompt .nsft-shr-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#nsft-share-prompt .nsft-shr-close:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt {
+    background: var(--nsft-dk-surface);
+    border-color: var(--nsft-dk-border);
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-title {
+    color: #E6EBF2;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-body {
+    color: #9AA4B5;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-btn {
+    background: #4E9E74;
+    color: #0C1A13;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-btn:hover {
+    background: #5CB183;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-icon {
+    background: var(--nsft-dk-panel);
+    border-color: var(--nsft-dk-border2);
+    color: #9AA4B5;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-icon:hover {
+    background: var(--nsft-dk-hover);
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-icon.is-x:hover {
+    color: #E6EBF2;
+    border-color: #E6EBF2;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-icon.is-mas:hover {
+    color: #5CB183;
+    border-color: #5CB183;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-never {
+    color: #8A93A3;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-never:hover {
+    color: #C6CEDB;
+}
+
+html[data-nsft-theme="dark"] #nsft-share-prompt .nsft-shr-close:hover {
+    background: var(--nsft-dk-hover);
+    color: #E6EBF2;
+}

@@ -164,11 +164,13 @@
     transform: scale(1.35);
 }
 
-.nsft-qsc-suggestion mark {
-    background: transparent;
-    color: var(--nsft-ns-accent, #4c87b3);
+.nsft-qsc-suggestion mark,
+mark.nsft-qsc-hl {
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
+    color: inherit;
     font-weight: 700;
     padding: 0;
+    border-radius: 2px;
 }
 
 .nsft-qsc-suggestion-label {
@@ -541,8 +543,10 @@
     background: var(--nsft-ns-accent, #3b82f6);
 }
 
-#nsft-qsc-panel[data-theme="dark"] .nsft-qsc-suggestion mark {
-    color: #B3C1FF;
+#nsft-qsc-panel[data-theme="dark"] .nsft-qsc-suggestion mark,
+#nsft-qsc-panel[data-theme="dark"] mark.nsft-qsc-hl {
+    background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
+    color: var(--nsft-hl-fg-dark, #0D1410);
 }
 
 #nsft-qsc-panel[data-theme="dark"] .nsft-qsc-suggestion-star {

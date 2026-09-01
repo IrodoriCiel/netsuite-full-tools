@@ -59,6 +59,16 @@
     list-style: disc outside;
 }
 
+#nsft-update-notice .nsft-un-list li.is-new {
+    color: #1f2937;
+}
+
+#nsft-update-notice .nsft-un-list li.is-new::marker {
+    content: "\2726\00a0";
+    color: #157A4C;
+    font-size: 11px;
+}
+
 #nsft-update-notice .nsft-un-btn {
     margin-top: 8px;
     padding: 5px 12px;
@@ -110,6 +120,14 @@ html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-body {
 
 html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-list {
     color: #C6CEDB;
+}
+
+html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-list li.is-new {
+    color: #E6EBF2;
+}
+
+html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-list li.is-new::marker {
+    color: #4E9E74;
 }
 
 html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-close:hover {

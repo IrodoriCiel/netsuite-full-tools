@@ -1,5 +1,5 @@
 .nsft-cmdp-overlay {
-    --cmdp-backdrop: rgba(17, 24, 39, 0.35);
+    --cmdp-backdrop: rgba(0, 0, 0, 0.5);
     --cmdp-panel-bg: #ffffff;
     --cmdp-panel-border: #e5e7eb;
     --cmdp-panel-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -8,7 +8,7 @@
     --cmdp-text-muted: #9ca3af;
     --cmdp-text-subtle: #6b7280;
     --cmdp-divider: #f3f4f6;
-    --cmdp-footer-bg: #fafafa;
+    --cmdp-footer-bg: #ffffff;
     --cmdp-selected-bg: #f0f7ff;
     --cmdp-selected-label: #0056b3;
     --cmdp-selected-cat: #0070f3;
@@ -35,20 +35,20 @@
 }
 
 .nsft-cmdp-overlay[data-theme="dark"] {
-    --cmdp-backdrop: rgba(0, 0, 0, 0.55);
-    --cmdp-panel-bg: var(--nsft-dk-panel);
+    --cmdp-backdrop: rgba(0, 0, 0, 0.65);
+    --cmdp-panel-bg: var(--nsft-dk-hover, #1E2025);
     --cmdp-panel-border: var(--nsft-dk-border);
-    --cmdp-panel-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --cmdp-panel-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.45);
     --cmdp-text-primary: #E6EBF2;
     --cmdp-text-secondary: #C6CEDB;
     --cmdp-text-muted: #9AA4B5;
     --cmdp-text-subtle: #9AA4B5;
-    --cmdp-divider: #1C222C;
-    --cmdp-footer-bg: var(--nsft-dk-deepest);
+    --cmdp-divider: var(--nsft-dk-border, #282A30);
+    --cmdp-footer-bg: var(--nsft-dk-hover, #1E2025);
     --cmdp-selected-bg: rgba(110, 124, 245, 0.18);
     --cmdp-selected-label: #8FA3FF;
     --cmdp-selected-cat: #B3C1FF;
-    --cmdp-kbd-bg: var(--nsft-dk-hover);
+    --cmdp-kbd-bg: var(--nsft-dk-border);
     --cmdp-kbd-border: var(--nsft-dk-border2);
     --cmdp-kbd-text: #C6CEDB;
     --cmdp-kbd-shadow: none;
@@ -118,6 +118,44 @@
     color: var(--cmdp-text-muted) !important;
     -webkit-text-fill-color: var(--cmdp-text-muted) !important;
     opacity: 1;
+}
+
+.nsft-cmdp-overlay .nsft-cmdp-input:focus,
+.nsft-cmdp-overlay .nsft-cmdp-input:focus-visible,
+.nsft-cmdp-overlay .nsft-cmdp-input:hover {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.nsft-cmdp-overlay .nsft-cmdp-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    color: var(--cmdp-text-muted) !important;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.nsft-cmdp-overlay .nsft-cmdp-clear[hidden] {
+    display: none !important;
+}
+
+.nsft-cmdp-overlay .nsft-cmdp-clear:hover {
+    background: var(--cmdp-selected-bg) !important;
+    color: var(--cmdp-text-primary) !important;
 }
 
 .nsft-cmdp-list {
@@ -191,14 +229,15 @@
 }
 
 .nsft-cmdp-item-label mark.nsft-cmdp-match {
-    background: rgba(255, 220, 80, 0.32);
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
     color: inherit;
     border-radius: 2px;
     padding: 0;
 }
 
 .nsft-cmdp-overlay[data-theme="dark"] .nsft-cmdp-item-label mark.nsft-cmdp-match {
-    background: rgba(255, 220, 80, 0.18);
+    background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
+    color: var(--nsft-hl-fg-dark, #0D1410);
 }
 
 .nsft-cmdp-item-cat {

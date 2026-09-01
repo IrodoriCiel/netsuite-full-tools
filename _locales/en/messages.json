@@ -649,6 +649,27 @@
   "autoRefresh": {
     "message": "Auto Refresh"
   },
+  "portletRefresherCtrl": {
+    "message": "Auto-refresh"
+  },
+  "portletRefresherPause": {
+    "message": "Pause auto-refresh"
+  },
+  "portletRefresherResume": {
+    "message": "Resume auto-refresh"
+  },
+  "portletRefresherNow": {
+    "message": "Refresh now"
+  },
+  "portletRefresherUnit": {
+    "message": "secs"
+  },
+  "portletRefresherIntervalTitle": {
+    "message": "Seconds between refreshes"
+  },
+  "portletRefresherAutoStartLabel": {
+    "message": "Start active"
+  },
   "autoRefreshAutoStartLabel": {
     "message": "Start Active"
   },
@@ -720,6 +741,9 @@
   },
   "cl_cat_search": {
     "message": "Search & SQL Tools"
+  },
+  "cl_cat_ai": {
+    "message": "AI Assistant"
   },
   "cl_cat_technical": {
     "message": "🛠️ Technical & Stability"
@@ -1102,6 +1126,12 @@
   "closeModal": {
     "message": "Close"
   },
+  "modalMinimise": {
+    "message": "Minimise"
+  },
+  "modalMaximise": {
+    "message": "Maximise"
+  },
   "col_date": {
     "message": "Date"
   },
@@ -1456,6 +1486,9 @@
   "aiAssistantSuiteqlLabel": {
     "message": "SuiteQL Runner"
   },
+  "aiAssistantConsoleLabel": {
+    "message": "SuiteScript Console"
+  },
   "sqlai_model_reset": {
     "message": "Restore suggested"
   },
@@ -1569,6 +1602,9 @@
   },
   "cmdp_act_script_queue": {
     "message": "Script Queue Monitor"
+  },
+  "cmdp_act_mapreduce_status": {
+    "message": "Map/Reduce Script Status"
   },
   "cmdp_act_sdf_integrations": {
     "message": "SuiteCloud Development Integrations"
@@ -1851,41 +1887,41 @@
   "colorThemePresetCustom": {
     "message": "Custom"
   },
-  "colorThemePresetCrimson": {
-    "message": "Crimson"
-  },
-  "colorThemePresetForestGreen": {
-    "message": "Forest Green"
-  },
-  "colorThemePresetGitHubDark": {
-    "message": "GitHub Dark"
-  },
-  "colorThemePresetGraphite": {
-    "message": "Graphite"
-  },
-  "colorThemePresetHighContrast": {
-    "message": "High Contrast"
-  },
   "colorThemePresetLabel": {
     "message": "Preset"
   },
-  "colorThemePresetLightMint": {
-    "message": "Light Mint"
+  "colorThemePresetRed": {
+    "message": "Red"
   },
-  "colorThemePresetMidnight": {
-    "message": "Midnight"
+  "colorThemePresetOrange": {
+    "message": "Orange"
+  },
+  "colorThemePresetGold": {
+    "message": "Gold"
+  },
+  "colorThemePresetOlive": {
+    "message": "Olive"
+  },
+  "colorThemePresetGreen": {
+    "message": "Green"
+  },
+  "colorThemePresetTeal": {
+    "message": "Teal"
+  },
+  "colorThemePresetCyan": {
+    "message": "Cyan"
+  },
+  "colorThemePresetIndigo": {
+    "message": "Indigo"
+  },
+  "colorThemePresetPurple": {
+    "message": "Purple"
+  },
+  "colorThemePresetMagenta": {
+    "message": "Magenta"
   },
   "colorThemePresetNetSuiteBlue": {
     "message": "NetSuite Blue"
-  },
-  "colorThemePresetRoyalPurple": {
-    "message": "Royal Purple"
-  },
-  "colorThemePresetSlackAubergine": {
-    "message": "Slack Aubergine"
-  },
-  "colorThemePresetSunsetOrange": {
-    "message": "Sunset Orange"
   },
   "colorThemeResetBtn": {
     "message": "Reset"
@@ -2194,7 +2230,7 @@
     "message": "Make the NetSuite UI respect your monitor, your hue preference and your sanity."
   },
   "welcomeCatUiItem1": {
-    "message": "Colour themes (HSL tuning) & dark mode"
+    "message": "Colour themes (HSL tuning, one per environment or account) & dark mode"
   },
   "welcomeCatUiItem2": {
     "message": "Fixed sublist headers / columns / tabs"
@@ -2268,6 +2304,9 @@
   "welcomeCatPowerItem1": {
     "message": "Command Palette (Ctrl+Shift+Space)"
   },
+  "welcomeCatPowerItem12": {
+    "message": "Customization finder (scripts, workflows, fields…)"
+  },
   "welcomeCatPowerItem2": {
     "message": "Keyboard shortcuts cheat sheet (Ctrl+Shift+?)"
   },
@@ -2291,6 +2330,9 @@
   },
   "welcomeCatSqlItem9": {
     "message": "Reusable variables and snippet library"
+  },
+  "welcomeCatSqlItem10": {
+    "message": "Bulk summary type on saved search columns"
   },
   "welcomeCatRecordItem5": {
     "message": "View Record Scripts"
@@ -2343,6 +2385,12 @@
   "welcomeCatRecordItem21": {
     "message": "View Record Logs (filtered execution logs)"
   },
+  "welcomeCatRecordItem22": {
+    "message": "Date format shown inside empty date fields"
+  },
+  "welcomeCatRecordItem23": {
+    "message": "Shift to tick a whole range of checkboxes"
+  },
   "welcomeCatScriptItem5": {
     "message": "Code editor theme"
   },
@@ -2363,6 +2411,9 @@
   },
   "welcomeCatScriptItem11": {
     "message": "Backup SuiteScripts to GitHub"
+  },
+  "welcomeCatScriptItem12": {
+    "message": "SuiteScript console (run code, see the result)"
   },
   "welcomeCatUiItem5": {
     "message": "Remove NetSuite animations"
@@ -2545,7 +2596,262 @@
     "message": "Better Page Titles"
   },
   "enableColorThemesDesc": {
-    "message": "Customize NetSuite's color scheme."
+    "message": "Customize NetSuite's color scheme, optionally with a different colour per environment."
+  },
+  "colorThemeModeLabel": {
+    "message": "Scope"
+  },
+  "colorThemeModeGlobal": {
+    "message": "One colour for everything"
+  },
+  "colorThemeModeAccounts": {
+    "message": "A colour per account"
+  },
+  "colorThemeModeEnv": {
+    "message": "A colour per environment"
+  },
+  "colorThemeByEnvHint": {
+    "message": "Pick which one the controls below aim at. All sandboxes share their colour, and wherever there is none of its own the \"One colour for everything\" one is used."
+  },
+  "colorThemeAccountsLink": {
+    "message": "Configure accounts →"
+  },
+  "colorThemeAccountsHint": {
+    "message": "Each account can take a single colour or one per environment. The controls below still edit the colour used by accounts you have not configured."
+  },
+  "cta_search_placeholder": {
+    "message": "Search account…"
+  },
+  "cta_search_empty": {
+    "message": "No account matches your search."
+  },
+  "cta_add_mode_one": {
+    "message": "One account"
+  },
+  "cta_add_mode_many": {
+    "message": "Several at once"
+  },
+  "cta_bulk_placeholder": {
+    "message": "1234567\n7450041-sb1\n5629199-rp, 8812004"
+  },
+  "cta_bulk_hint": {
+    "message": "One per line, or separated by commas. Environment suffixes are detected and folded into the same account."
+  },
+  "cta_bulk_btn": {
+    "message": "Add accounts"
+  },
+  "cta_bulk_btn_n": {
+    "message": "Add $1 accounts",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "cta_bulk_added": {
+    "message": "$1 new accounts added.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "cta_detect_created": {
+    "message": "Detected $1 → account $2 (created)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "cta_detect_existing": {
+    "message": "Detected $1 → account $2 (already there)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "cta_no_selection": {
+    "message": "Add an account to get started."
+  },
+  "cta_name_label": {
+    "message": "Account name"
+  },
+  "cta_removed": {
+    "message": "Account removed."
+  },
+  "cta_mode_title": {
+    "message": "Colour mode"
+  },
+  "cta_mode_single_title": {
+    "message": "One colour"
+  },
+  "cta_mode_single_desc": {
+    "message": "The same colour in Production, Sandbox and Release Preview."
+  },
+  "cta_mode_env_title": {
+    "message": "One colour per environment"
+  },
+  "cta_mode_env_desc": {
+    "message": "A different colour for each environment of this account."
+  },
+  "cta_slots_title": {
+    "message": "Active colours"
+  },
+  "cta_slots_hint": {
+    "message": "Click a row to edit it"
+  },
+  "cta_single_hint": {
+    "message": "Applies to all three environments"
+  },
+  "cta_badge_account": {
+    "message": "ACCOUNT"
+  },
+  "cta_env_prd_hint": {
+    "message": "The subdomain with no suffix"
+  },
+  "cta_env_sb_hint": {
+    "message": "Suffixes -sb1, -sb2…"
+  },
+  "cta_env_rp_hint": {
+    "message": "Suffix -rp"
+  },
+  "cta_editor_title": {
+    "message": "Colour editor"
+  },
+  "cta_editor_all_envs": {
+    "message": "all environments"
+  },
+  "cta_hue": {
+    "message": "Hue"
+  },
+  "cta_sat": {
+    "message": "Saturation"
+  },
+  "cta_lig": {
+    "message": "Lightness"
+  },
+  "cta_apply_all": {
+    "message": "Apply to all 3 environments"
+  },
+  "cta_switch_to_env": {
+    "message": "Switch to one colour per environment"
+  },
+  "cta_palette_title": {
+    "message": "Suggested palette"
+  },
+  "cta_preview_title": {
+    "message": "How it looks in the browser"
+  },
+  "cta_data_btn": {
+    "message": "Import / export"
+  },
+  "cta_data_title": {
+    "message": "Import and export"
+  },
+  "cta_data_desc": {
+    "message": "All your per-account colours in one JSON file."
+  },
+  "cta_data_export": {
+    "message": "Export"
+  },
+  "cta_data_import": {
+    "message": "Import"
+  },
+  "cta_data_copy": {
+    "message": "Copy to clipboard"
+  },
+  "cta_data_copied": {
+    "message": "Copied."
+  },
+  "cta_data_download": {
+    "message": "Download file"
+  },
+  "cta_data_from_file": {
+    "message": "From a file…"
+  },
+  "cta_data_import_placeholder": {
+    "message": "Paste the exported JSON here…"
+  },
+  "cta_data_replace": {
+    "message": "Replace settings"
+  },
+  "cta_data_merge": {
+    "message": "Merge"
+  },
+  "cta_data_invalid": {
+    "message": "Invalid JSON, or no accounts in it."
+  },
+  "cta_data_imported": {
+    "message": "$1 accounts imported.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "cta_data_merged": {
+    "message": "$1 new accounts added.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "cta_data_close": {
+    "message": "Close"
+  },
+  "cta_detected_title": {
+    "message": "Detected"
+  },
+  "cta_ghost_hint": {
+    "message": "uses the global colour"
+  },
+  "cta_off_module": {
+    "message": "Colour Themes is off: these colours are not applied until you turn it on from the popup."
+  },
+  "cta_off_scope": {
+    "message": "The Colour Themes scope is not “per account”: these colours are not applied. Change it in the popup for them to count."
+  },
+  "cta_title": {
+    "message": "Colour by account"
+  },
+  "cta_desc": {
+    "message": "Give each NetSuite account a colour of its own."
+  },
+  "cta_add_title": {
+    "message": "Add an account"
+  },
+  "cta_account_label": {
+    "message": "Account"
+  },
+  "cta_account_placeholder": {
+    "message": "e.g. 1234567 or acme"
+  },
+  "cta_account_hint": {
+    "message": "Write the subdomain without the environment suffix: all of that account's environments share one card."
+  },
+  "cta_add_btn": {
+    "message": "Add"
+  },
+  "cta_list_title": {
+    "message": "Configured accounts"
+  },
+  "cta_empty": {
+    "message": "No account has a colour of its own yet. Open NetSuite's switch-account menu once and yours will show up here on their own; the ones you do not add keep the global colour."
+  },
+  "cta_remove": {
+    "message": "Remove"
+  },
+  "cta_single_color": {
+    "message": "Account colour"
   },
   "enableDarkModeLabel": {
     "message": "Dark mode"
@@ -2582,6 +2888,290 @@
   },
   "enableCommandPaletteDesc": {
     "message": "Quick command palette to navigate and run tools with Ctrl+Shift+Space."
+  },
+  "enableCustomizationFinderLabel": {
+    "message": "Customization Finder"
+  },
+  "enableCustomizationFinderDesc": {
+    "message": "One window to find the account’s scripts, workflows, fields, saved searches, templates, files, deployments and lists."
+  },
+  "enableSuiteScriptConsoleLabel": {
+    "message": "SuiteScript Console"
+  },
+  "enableSuiteScriptConsoleDesc": {
+    "message": "Write SuiteScript and run it right away, with your account’s N/* modules at hand, API help as you type and a confirmation before it writes."
+  },
+  "ssc_run": {
+    "message": "Run"
+  },
+  "ssc_tpl_1": {
+    "message": "The N/* modules are ready: record, search, query, runtime…"
+  },
+  "ssc_running": {
+    "message": "Running…"
+  },
+  "ssc_logs_ok": {
+    "message": "Script executed"
+  },
+  "ssc_took": {
+    "message": "Took $1 ms"
+  },
+  "ssc_mods": {
+    "message": "$1 modules"
+  },
+  "ssc_mods_no": {
+    "message": "Not available here:"
+  },
+  "ssc_mods_missing": {
+    "message": "Could not load: $1"
+  },
+  "ssc_cut_rows": {
+    "message": "$1 of $2 shown"
+  },
+  "ssc_err_bridge": {
+    "message": "The bridge could not be injected."
+  },
+  "ssc_confirm": {
+    "message": "This code writes to the account"
+  },
+  "ssc_confirm_prd": {
+    "message": "This writes to PRODUCTION"
+  },
+  "ssc_confirm_word": {
+    "message": "RUN"
+  },
+  "ssc_confirm_type": {
+    "message": "Type $1 to continue"
+  },
+  "ssc_confirm_go": {
+    "message": "Run anyway"
+  },
+  "ssc_confirm_cancel": {
+    "message": "Cancel"
+  },
+  "ssc_cancelled": {
+    "message": "Cancelled."
+  },
+  "ssc_ai_ran": {
+    "message": "Run from the assistant: the result is in the chat."
+  },
+  "sscAiModelLabel": {
+    "message": "Suggestions model:"
+  },
+  "sscAiModelSameChat": {
+    "message": "Same as the chat"
+  },
+  "sscAiModelOnlyFast": {
+    "message": "Only the fast models from your keys, fit for completing while you type."
+  },
+  "ssc_ghost_btn_title": {
+    "message": "AI code suggestions — Tab accepts · click: on/off · right-click: pick model"
+  },
+  "sscAiCompleteLabel": {
+    "message": "AI code suggestions (Tab accepts)"
+  },
+  "sscAiCompleteDesc": {
+    "message": "When you stop typing, the AI suggests how to continue and Tab writes it. Each suggestion queries your AI provider with your key."
+  },
+  "sqlAiCompleteLabel": {
+    "message": "AI SQL suggestions (Tab accepts)"
+  },
+  "sql_ghost_btn_title": {
+    "message": "AI SQL suggestions — Tab accepts · click: on/off · right-click: pick model"
+  },
+  "themeAuto": {
+    "message": "Automatic (follows dark mode)"
+  },
+  "ssc_lint_falta": {
+    "message": "“$1” is never closed",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_lint_sobra": {
+    "message": "there is a “$1” with nothing open to close",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_lint_cruzado": {
+    "message": "“$1” opened here is closed with “$2”",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "ssc_lint_en_linea": {
+    "message": "Line $1: $2",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "recordOptionLoadInConsole": {
+    "message": "Load in SuiteScript Console"
+  },
+  "ssc_load_tpl_1": {
+    "message": "The record open on this page"
+  },
+  "ssc_load_tpl_2": {
+    "message": "Loaded again from the server, whole"
+  },
+  "ssc_load_tab_title": {
+    "message": "Record"
+  },
+  "ssc_boot_step_types": {
+    "message": "Measuring the account's types…"
+  },
+  "ssc_types_measured": {
+    "message": "Measured types:"
+  },
+  "ssc_out_filter_group": {
+    "message": "Filter output"
+  },
+  "ssc_out_f_all": {
+    "message": "All"
+  },
+  "ssc_out_f_logs": {
+    "message": "Logs"
+  },
+  "ssc_out_f_errors": {
+    "message": "Errors"
+  },
+  "ssc_out_filter_ph": {
+    "message": "Filter output…"
+  },
+  "ssc_out_nomatch": {
+    "message": "Nothing matches the filter."
+  },
+  "ssc_out_keys": {
+    "message": "$1 keys",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_out_items": {
+    "message": "$1 items",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_out_at_line": {
+    "message": "line $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_out_ret": {
+    "message": "script return value"
+  },
+  "ssc_out_ret_void": {
+    "message": "the script returned nothing"
+  },
+  "cfind_open": {
+    "message": "Open"
+  },
+  "cfind_open_list": {
+    "message": "List"
+  },
+  "cfind_filters": {
+    "message": "Filters"
+  },
+  "cfind_search": {
+    "message": "Search"
+  },
+  "cfind_ph": {
+    "message": "Search by name or ID…"
+  },
+  "cfind_export": {
+    "message": "Export"
+  },
+  "cfind_export_csv": {
+    "message": "Export CSV"
+  },
+  "cfind_copied_id": {
+    "message": "ID copied: $1"
+  },
+  "cfind_col_name": {
+    "message": "Name"
+  },
+  "cfind_col_kind": {
+    "message": "Type"
+  },
+  "cfind_col_sid": {
+    "message": "Internal ID"
+  },
+  "cfind_col_status": {
+    "message": "Status"
+  },
+  "cfind_results_n": {
+    "message": "$1 results"
+  },
+  "cfind_hints": {
+    "message": "↑↓ navigate · ↵ open · Ctrl+C copy · Esc close"
+  },
+  "cfind_copy_id": {
+    "message": "Copy ID"
+  },
+  "cfind_exported": {
+    "message": "$1 rows exported to CSV"
+  },
+  "cfind_loading": {
+    "message": "Searching the account…"
+  },
+  "cfind_none": {
+    "message": "Nothing found with that name."
+  },
+  "cfind_error": {
+    "message": "The account could not be queried."
+  },
+  "cfind_stale": {
+    "message": "Reload the tab and try again."
+  },
+  "cfind_t_script": {
+    "message": "Scripts"
+  },
+  "cfind_t_wf": {
+    "message": "Workflows"
+  },
+  "cfind_t_rec": {
+    "message": "Records"
+  },
+  "cfind_t_field": {
+    "message": "Fields"
+  },
+  "cfind_t_ss": {
+    "message": "Searches"
+  },
+  "cfind_t_pdf": {
+    "message": "PDF templates"
+  },
+  "cfind_t_file": {
+    "message": "Files"
+  },
+  "cfind_t_deploy": {
+    "message": "Deployments"
+  },
+  "cfind_t_list": {
+    "message": "Lists"
   },
   "enableCommandPaletteLabel": {
     "message": "Command Palette"
@@ -2745,6 +3335,63 @@
   "rr_view_all": {
     "message": "All recent records"
   },
+  "rr_kind_employee": {
+    "message": "Employee"
+  },
+  "rr_kind_customer": {
+    "message": "Customer"
+  },
+  "rr_kind_vendor": {
+    "message": "Vendor"
+  },
+  "rr_kind_contact": {
+    "message": "Contact"
+  },
+  "rr_kind_partner": {
+    "message": "Partner"
+  },
+  "rr_kind_entity": {
+    "message": "Entity"
+  },
+  "rr_kind_item": {
+    "message": "Item"
+  },
+  "rr_kind_media": {
+    "message": "File"
+  },
+  "rr_kind_transaction": {
+    "message": "Transaction"
+  },
+  "rr_kind_customrecord_type": {
+    "message": "Custom record type"
+  },
+  "rr_kind_customrecord": {
+    "message": "Custom record"
+  },
+  "rr_kind_customfield": {
+    "message": "Custom field"
+  },
+  "rr_kind_form": {
+    "message": "Form"
+  },
+  "rr_kind_role": {
+    "message": "Role"
+  },
+  "rr_kind_script": {
+    "message": "Script"
+  },
+  "rr_kind_workflow": {
+    "message": "Workflow"
+  },
+  "rr_kind_search": {
+    "message": "Search"
+  },
+  "rr_kind_crm": {
+    "message": "CRM"
+  },
+  "rr_kind_config": {
+    "message": "Configuration"
+  },
   "rr_search_placeholder": {
     "message": "Search record..."
   },
@@ -2854,7 +3501,7 @@
     "message": "Go to record by tranid/id"
   },
   "cheatsheet_title": {
-    "message": "NSFT keyboard shortcuts"
+    "message": "Keyboard shortcuts"
   },
   "cheatsheet_close": {
     "message": "Close"
@@ -2909,6 +3556,9 @@
   },
   "cheatsheet_item_open_runner": {
     "message": "Open SuiteQL Runner"
+  },
+  "cheatsheet_item_open_ssc": {
+    "message": "Open SuiteScript Console"
   },
   "cheatsheet_item_findfield": {
     "message": "Find Field by ID"
@@ -3065,6 +3715,21 @@
   "enableEditorOpenInNewTabDesc": {
     "message": "Adds an \"Open in new tab\" link next to each file linked from a scripting page."
   },
+  "enableAdvancedEditorLabel": {
+    "message": "Advanced Editor"
+  },
+  "enableAdvancedEditorDesc": {
+    "message": "Opens File Cabinet files in a full editor: SuiteScript autocomplete, syntax warnings, find and replace, and formatting."
+  },
+  "adv_open_link": {
+    "message": "Open in Advanced Editor"
+  },
+  "adv_ghost_title": {
+    "message": "AI suggestions while you type"
+  },
+  "adv_wrap_title": {
+    "message": "Wrap long lines"
+  },
   "enableEditorOpenInNewTabLabel": {
     "message": "Open file in new tab"
   },
@@ -3109,6 +3774,12 @@
   },
   "copyIdsNoButtonLabel": {
     "message": "No copy icons (use Shift+Click on the field)"
+  },
+  "copyIdsAlwaysLabel": {
+    "message": "ID always visible, under the label (click to copy)"
+  },
+  "cfsi_copied": {
+    "message": "Copied"
   },
   "copyIdsWithButtonLabel": {
     "message": "Show copy icons"
@@ -3529,7 +4200,10 @@
   "rlv_scripts_of": {
     "message": "On $TYPE$",
     "placeholders": {
-      "type": { "content": "$1", "example": "salesorder" }
+      "type": {
+        "content": "$1",
+        "example": "salesorder"
+      }
     }
   },
   "rlv_search_script": {
@@ -3607,7 +4281,10 @@
   "rlv_export_capped": {
     "message": "The file holds the first $ROWS$ rows; the query has more.",
     "placeholders": {
-      "rows": { "content": "$1", "example": "10,000" }
+      "rows": {
+        "content": "$1",
+        "example": "10,000"
+      }
     }
   },
   "rlv_export_failed": {
@@ -3619,7 +4296,10 @@
   "rlv_types_more": {
     "message": "Show more ($COUNT$)",
     "placeholders": {
-      "count": { "content": "$1", "example": "8" }
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
     }
   },
   "rlv_types_less": {
@@ -3631,13 +4311,19 @@
   "rlv_group_entries": {
     "message": "$COUNT$ entries",
     "placeholders": {
-      "count": { "content": "$1", "example": "14" }
+      "count": {
+        "content": "$1",
+        "example": "14"
+      }
     }
   },
   "rlv_of_events": {
     "message": "of $TOTAL$ events",
     "placeholders": {
-      "total": { "content": "$1", "example": "37500" }
+      "total": {
+        "content": "$1",
+        "example": "37500"
+      }
     }
   },
   "rlv_loading_more": {
@@ -3688,8 +4374,14 @@
   "rlv_open_note": {
     "message": "Script note"
   },
-  "rlv_ctx_script_id": {
-    "message": "Script ID"
+  "rlv_open": {
+    "message": "Open"
+  },
+  "rlv_ctx_deploy": {
+    "message": "Deployment"
+  },
+  "rlv_edit_file": {
+    "message": "Edit file"
   },
   "rlv_ctx_note_id": {
     "message": "Note ID"
@@ -3757,7 +4449,10 @@
   "rlv_filters_n": {
     "message": "Filters · $COUNT$",
     "placeholders": {
-      "count": { "content": "$1", "example": "3" }
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
     }
   },
   "rlv_copied": {
@@ -3786,6 +4481,51 @@
   },
   "enableSearchFieldsFinderLabel": {
     "message": "Search Fields Finder"
+  },
+  "enableSearchSummaryBulkLabel": {
+    "message": "Bulk Summary Type"
+  },
+  "enableSearchSummaryBulkDesc": {
+    "message": "On a saved search's Results tab, adds a strip to set or clear the summary type — group, sum, count… — on every column at once, instead of going one by one."
+  },
+  "ssb_title": {
+    "message": "Summary type on all:"
+  },
+  "ssb_apply": {
+    "message": "Apply to all"
+  },
+  "ssb_clear": {
+    "message": "Clear on all"
+  },
+  "ssb_working": {
+    "message": "Applying…"
+  },
+  "ssb_done": {
+    "message": "Done on $1 columns — save the search"
+  },
+  "ssb_empty": {
+    "message": "No columns to apply it to"
+  },
+  "ssb_fail": {
+    "message": "Could not apply it"
+  },
+  "ssb_group": {
+    "message": "Group"
+  },
+  "ssb_count": {
+    "message": "Count"
+  },
+  "ssb_sum": {
+    "message": "Sum"
+  },
+  "ssb_avg": {
+    "message": "Average"
+  },
+  "ssb_min": {
+    "message": "Minimum"
+  },
+  "ssb_max": {
+    "message": "Maximum"
   },
   "enableSetFieldValuesDesc": {
     "message": "Enables advanced utilities in field help: edit value, copy ID, view technical info."
@@ -3856,13 +4596,19 @@
   "es_meta_lines": {
     "message": "$COUNT$ lines",
     "placeholders": {
-      "count": { "content": "$1", "example": "26" }
+      "count": {
+        "content": "$1",
+        "example": "26"
+      }
     }
   },
   "es_info_type": {
     "message": "Type: $TYPE$",
     "placeholders": {
-      "type": { "content": "$1", "example": "employee" }
+      "type": {
+        "content": "$1",
+        "example": "employee"
+      }
     }
   },
   "es_info_columns_one": {
@@ -3871,7 +4617,10 @@
   "es_info_columns": {
     "message": "$COUNT$ columns",
     "placeholders": {
-      "count": { "content": "$1", "example": "8" }
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
     }
   },
   "es_info_filters_one": {
@@ -3880,7 +4629,10 @@
   "es_info_filters": {
     "message": "$COUNT$ filters",
     "placeholders": {
-      "count": { "content": "$1", "example": "3" }
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
     }
   },
   "es_with_loop_title": {
@@ -4083,6 +4835,9 @@
   },
   "ffi_prompt_generic": {
     "message": "Find Field by ID or Label:"
+  },
+  "ffi_modal_title": {
+    "message": "Find Field by ID"
   },
   "ffi_color_green": {
     "message": "Green"
@@ -4408,6 +5163,49 @@
   "gt_saved_msg": {
     "message": "Saved!"
   },
+  "gt_env_detected": {
+    "message": "Detected environment: $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "gt_env_sb_n": {
+    "message": "Sandbox $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "gt_preview_label": {
+    "message": "Preview"
+  },
+  "gt_preview_unnamed": {
+    "message": "Unnamed"
+  },
+  "gt_from_accounts": {
+    "message": "From the accounts you already use"
+  },
+  "gt_from_accounts_empty": {
+    "message": "Your NetSuite accounts show up here. Open the switch-account menu once and they all appear."
+  },
+  "gt_row_color_title": {
+    "message": "Change the group colour"
+  },
+  "gt_chrome_preview_title": {
+    "message": "How it looks in Chrome"
+  },
+  "gt_chrome_preview_empty": {
+    "message": "The groups you define show up here."
+  },
+  "gt_off_module": {
+    "message": "Grouped Tabs is off: this list is not used until you turn it on from the popup."
+  },
+  "gt_off_automatic": {
+    "message": "Automatic groups are on: tabs group by account on their own and this list is not used. Turn them off in the popup for it to count."
+  },
   "gt_account_help": {
     "message": "The account ID or the URL subdomain: either one works."
   },
@@ -4443,6 +5241,9 @@
   },
   "log_view_repaired": {
     "message": "View repaired"
+  },
+  "log_view_formatted": {
+    "message": "View formatted"
   },
   "liveMode": {
     "message": "Live"
@@ -4692,6 +5493,324 @@
   },
   "ro_hide_empty_label": {
     "message": "Hide empty"
+  },
+  "ro_view_friendly": {
+    "message": "Friendly view"
+  },
+  "ro_fv_tech_show": {
+    "message": "Show technical"
+  },
+  "ro_fv_tech_hide": {
+    "message": "Hide technical"
+  },
+  "ro_fv_structure": {
+    "message": "Structure"
+  },
+  "ro_fv_to_top": {
+    "message": "Back to the top"
+  },
+  "ro_fv_click_copy": {
+    "message": "click to copy"
+  },
+  "ro_fv_copied": {
+    "message": "copied ✓"
+  },
+  "ro_fv_none": {
+    "message": "No value"
+  },
+  "ro_fv_yes": {
+    "message": "Yes"
+  },
+  "ro_fv_no": {
+    "message": "No"
+  },
+  "ro_fv_row_n": {
+    "message": "Item $1"
+  },
+  "ro_fv_g_body": {
+    "message": "Header fields"
+  },
+  "ro_fv_g_lines": {
+    "message": "Line sublists"
+  },
+  "ro_fv_badge_empty": {
+    "message": "empty"
+  },
+  "ro_fv_badge_values": {
+    "message": "$1 values"
+  },
+  "ro_fv_badge_rows": {
+    "message": "$1 rows"
+  },
+  "ro_fv_badge_fields": {
+    "message": "$1 fields"
+  },
+  "ro_fv_badge_subs": {
+    "message": "$1 subgroups"
+  },
+  "ro_fv_badge_mix": {
+    "message": "$1 fields · $2 subgroups"
+  },
+  "ro_fv_empty_note": {
+    "message": "No items."
+  },
+  "ro_fv_sum": {
+    "message": "Sum of $1"
+  },
+  "ro_fv_values_listed": {
+    "message": "$1 values"
+  },
+  "ro_fv_sublists_n": {
+    "message": "$1 sublists"
+  },
+  "ro_fv_hidden_n": {
+    "message": "$1 empty/technical hidden"
+  },
+  "ro_fv_hidden_shown": {
+    "message": "$1 empty/technical shown"
+  },
+  "ro_fv_pins_title": {
+    "message": "Pinned for $1"
+  },
+  "ro_fv_pins_clear": {
+    "message": "remove all"
+  },
+  "ro_fv_pin_add": {
+    "message": "Pin at the top for this record type"
+  },
+  "ro_fv_pin_remove": {
+    "message": "Unpin"
+  },
+  "ro_fv_pin_missing": {
+    "message": "not present on this record"
+  },
+  "ro_fv_more": {
+    "message": "Show the $1 remaining rows"
+  },
+  "ro_fv_no_results": {
+    "message": "No matches for “$1”"
+  },
+  "ro_fv_foot_hint": {
+    "message": "<strong>Ctrl + Click</strong> a field to find it on the form · <strong>★</strong> to pin it"
+  },
+  "ro_fv_field_notfound": {
+    "message": "The field is not visible on this form."
+  },
+  "ro_k_id": {
+    "message": "Internal ID"
+  },
+  "ro_k_tranid": {
+    "message": "Document number"
+  },
+  "ro_k_trandate": {
+    "message": "Date"
+  },
+  "ro_k_total": {
+    "message": "Total"
+  },
+  "ro_k_amount": {
+    "message": "Amount"
+  },
+  "ro_k_created": {
+    "message": "Created"
+  },
+  "ro_k_lastmodified": {
+    "message": "Last modified"
+  },
+  "ro_k_lastmodifiedby": {
+    "message": "Modified by"
+  },
+  "ro_k_isinactive": {
+    "message": "Inactive"
+  },
+  "ro_k_owner": {
+    "message": "Owner"
+  },
+  "ro_k_ownerid": {
+    "message": "Owner ID"
+  },
+  "ro_k_status": {
+    "message": "Status"
+  },
+  "ro_k_entity": {
+    "message": "Entity"
+  },
+  "ro_k_subsidiary": {
+    "message": "Subsidiary"
+  },
+  "ro_k_quantity": {
+    "message": "Quantity"
+  },
+  "ro_k_rate": {
+    "message": "Rate"
+  },
+  "ro_k_account": {
+    "message": "Account"
+  },
+  "ro_k_line": {
+    "message": "Line"
+  },
+  "ro_k_name": {
+    "message": "Name"
+  },
+  "ro_k_memo": {
+    "message": "Memo"
+  },
+  "ro_k_currency": {
+    "message": "Currency"
+  },
+  "ro_k_email": {
+    "message": "Email"
+  },
+  "ro_k_type": {
+    "message": "Type"
+  },
+  "ro_k_item": {
+    "message": "Item"
+  },
+  "ro_k_itemname": {
+    "message": "Item"
+  },
+  "ro_k_links": {
+    "message": "Related records"
+  },
+  "ro_k_usernotes": {
+    "message": "User notes"
+  },
+  "ro_k_linkurl": {
+    "message": "Link URL"
+  },
+  "ro_k_location": {
+    "message": "Location"
+  },
+  "ro_k_department": {
+    "message": "Department"
+  },
+  "cl_7_0_0_adved_title": {
+    "message": "Advanced Editor for files"
+  },
+  "cl_7_0_0_adved_desc": {
+    "message": "Added “Open in Advanced Editor” when editing a file, plus its Tools menu entry, with autocomplete that shows each function’s types and governance, search across every file, a File Cabinet tree and formatting."
+  },
+  "cl_7_0_0_synthwave_title": {
+    "message": "Synthwave '84 theme"
+  },
+  "cl_7_0_0_synthwave_desc": {
+    "message": "Added the Synthwave '84 theme, neon glow included, to the extension's code editors and viewers."
+  },
+  "cl_7_0_0_ssc_title": {
+    "message": "SuiteScript console"
+  },
+  "cl_7_0_0_ssc_desc": {
+    "message": "Added a console to write SuiteScript and run it right away, with API help as you type and a warning before anything is changed in the account."
+  },
+  "cl_7_0_0_cfind_title": {
+    "message": "Customization finder"
+  },
+  "cl_7_0_0_cfind_desc": {
+    "message": "Added a window to find the account’s scripts, workflows, fields and other customizations by name."
+  },
+  "cl_7_0_0_rofv_title": {
+    "message": "Friendly view in View Record Object"
+  },
+  "cl_7_0_0_rofv_desc": {
+    "message": "Added a friendly record view to View Record Object: a card with labeled fields, sublists as tables, a side index and pinnable fields."
+  },
+  "cl_7_0_0_ctenv_title": {
+    "message": "A different colour per environment"
+  },
+  "cl_7_0_0_ctenv_desc": {
+    "message": "Added to Colour Themes the option of a colour of its own for Production, Sandbox and Release Preview, to tell where you are."
+  },
+  "cl_7_0_0_ctacc_title": {
+    "message": "A different colour per account"
+  },
+  "cl_7_0_0_ctacc_desc": {
+    "message": "Added to Colour Themes a page where each account gets a colour of its own, single or split across its three environments."
+  },
+  "cl_7_0_0_ssb_title": {
+    "message": "Summary type on every column"
+  },
+  "cl_7_0_0_ssb_desc": {
+    "message": "Added a strip on a saved search's results that sets or clears the summary type on all of its columns at once."
+  },
+  "cl_7_0_0_fcddfolder_title": {
+    "message": "The File Cabinet returns to the folder you uploaded into"
+  },
+  "cl_7_0_0_fcddfolder_desc": {
+    "message": "Fixed the File Cabinet going back to the root folder after dropping a file into a subfolder."
+  },
+  "cl_7_0_0_dialogs_title": {
+    "message": "Notices are no longer the browser's"
+  },
+  "cl_7_0_0_dialogs_desc": {
+    "message": "Replaced the browser's alerts and confirmations with the extension's own windows, with dark mode and without freezing the page."
+  },
+  "cl_7_0_0_advprevia_title": {
+    "message": "Each preview in its own tab"
+  },
+  "cl_7_0_0_advprevia_desc": {
+    "message": "Changed the Advanced Editor preview, which covered the editor, into one more tab alongside the open files."
+  },
+  "cl_7_0_0_fcbusy_title": {
+    "message": "Rename and delete show they are working"
+  },
+  "cl_7_0_0_fcbusy_desc": {
+    "message": "Fixed renaming or deleting in the File Cabinet looking like nothing happened while it waited; the button now shows it."
+  },
+  "cl_7_0_0_fcdddiff_title": {
+    "message": "See what changes in the file you are replacing"
+  },
+  "cl_7_0_0_fcdddiff_desc": {
+    "message": "Added a side-by-side comparison between the file already in the folder and the one you drag on top of it."
+  },
+  "cl_7_0_0_fcdddup_title": {
+    "message": "A warning before replacing a file"
+  },
+  "cl_7_0_0_fcdddup_desc": {
+    "message": "Added a warning when dragging in files whose name already exists in the folder, with the option to skip them or continue."
+  },
+  "cl_7_0_0_rr_hl_title": {
+    "message": "Recent records highlight what you typed"
+  },
+  "cl_7_0_0_rr_hl_desc": {
+    "message": "Added match highlighting when filtering Recent Records, both in the name and in the line below it."
+  },
+  "cl_7_0_0_shiftsel_title": {
+    "message": "Tick several checkboxes with Shift"
+  },
+  "cl_7_0_0_shiftsel_desc": {
+    "message": "Added range selection: holding Shift ticks every checkbox between the previous one and the one clicked."
+  },
+  "cl_7_0_0_dfh_title": {
+    "message": "Date fields show their format"
+  },
+  "cl_7_0_0_dfh_desc": {
+    "message": "Added the user’s date format inside empty date fields, so day and month are never in doubt."
+  },
+  "cl_7_0_0_gtcfg_title": {
+    "message": "The tab group settings show how it will look"
+  },
+  "cl_7_0_0_gtcfg_desc": {
+    "message": "Added the detected environment, shortcuts to your accounts, a colour picker on every row and a preview of how they look in Chrome to the Grouped Tabs settings."
+  },
+  "cl_7_0_0_gtoff_title": {
+    "message": "The group list says when it is not in use"
+  },
+  "cl_7_0_0_gtoff_desc": {
+    "message": "Added a notice to the Grouped Tabs settings for when the module is off or automatic groups are on, which is when the list is not applied."
+  },
+  "cl_7_0_0_envbadge_title": {
+    "message": "The environment badge keeps its shape"
+  },
+  "cl_7_0_0_envbadge_desc": {
+    "message": "Fixed the environment badge in the account switcher turning into a rectangle in the classic theme when hovering over its row."
+  },
+  "cl_7_0_0_ctpresets_title": {
+    "message": "Theme presets that match NetSuite"
+  },
+  "cl_7_0_0_ctpresets_desc": {
+    "message": "Changed the Colour Themes presets to a wheel of hues sharing the NetSuite blue's saturation and lightness, so any of them carries the same visual weight as the default."
   },
   "ro_hide_empty_title": {
     "message": "Hide null, empty strings, and empty arrays/objects. Not persisted — always starts off."
@@ -5908,11 +7027,27 @@
       }
     }
   },
+  "ssc_tab_close_bulk_body": {
+    "message": "This closes $COUNT$ tabs. Their code is not saved when they close.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
   "sql_tab_close_bulk_ok": {
     "message": "Close them"
   },
   "sql_tab_rename_taken": {
     "message": "There is already a saved query named \"$NAME$\"; the tab keeps its own.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_tab_rename_taken": {
+    "message": "There is already a saved script named \"$NAME$\"; the tab keeps its own.",
     "placeholders": {
       "name": {
         "content": "$1"
@@ -6072,6 +7207,9 @@
   "sql_tab_default_title": {
     "message": "Query"
   },
+  "ssc_tab_default_title": {
+    "message": "Script"
+  },
   "sql_tab_record_title": {
     "message": "Record"
   },
@@ -6081,14 +7219,224 @@
   "sql_tab_new": {
     "message": "New query tab"
   },
+  "ssc_tab_new": {
+    "message": "New script tab"
+  },
   "sql_tabulator_placeholder": {
     "message": "No data to display"
   },
   "sql_title": {
     "message": "NetSuite Full Tools - SuiteQL Runner"
   },
+  "ssc_title": {
+    "message": "NetSuite Full Tools - SuiteScript Console"
+  },
   "sql_title_minimised": {
     "message": "SuiteQL"
+  },
+  "ssc_title_minimised": {
+    "message": "SuiteScript"
+  },
+  "ssc_ai_hint_sub": {
+    "message": "Tell me what you want to do and I will write the SuiteScript — and run it if you want."
+  },
+  "ssc_boot_step_shell": {
+    "message": "Preparing the console…"
+  },
+  "ssc_boot_step_editor": {
+    "message": "Loading the editor…"
+  },
+  "ssc_boot_step_modules": {
+    "message": "Probing the N/* modules…"
+  },
+  "ssc_boot_step_tools": {
+    "message": "Setting up panels and tools…"
+  },
+  "ssc_status_ok": {
+    "message": "Done · $1 ms"
+  },
+  "ssc_running_btn": {
+    "message": "Running…"
+  },
+  "ssc_already_running": {
+    "message": "Something is already running."
+  },
+  "ssc_run_timeout": {
+    "message": "The script never answered; you can try again."
+  },
+  "ssc_out_empty": {
+    "message": "Run the script to see its result here."
+  },
+  "ssc_copy_ok": {
+    "message": "Output copied"
+  },
+  "ssc_copy_empty": {
+    "message": "There is no output to copy yet"
+  },
+  "ssc_clear_results_title": {
+    "message": "Clear the output"
+  },
+  "ssc_results_toggle_title": {
+    "message": "Show/hide the output"
+  },
+  "ssc_tab_output": {
+    "message": "Output"
+  },
+  "ssc_menu_hide_output": {
+    "message": "Hide Output"
+  },
+  "ssc_menu_show_output": {
+    "message": "Show Output"
+  },
+  "ssc_submenu_api_docs": {
+    "message": "SuiteScript API Reference"
+  },
+  "ssc_save_prompt": {
+    "message": "Script name:"
+  },
+  "ssc_save_placeholder": {
+    "message": "My Script..."
+  },
+  "ssc_open_dialog_title": {
+    "message": "Saved Scripts"
+  },
+  "ssc_no_saved_scripts": {
+    "message": "No saved scripts found."
+  },
+  "ssc_confirm_delete": {
+    "message": "Delete script \"$1\"?"
+  },
+  "ssc_loaded": {
+    "message": "Script loaded"
+  },
+  "ssc_import_btn": {
+    "message": "Import scripts"
+  },
+  "ssc_import_ok": {
+    "message": "$1 scripts imported ($2 renamed)"
+  },
+  "ssc_export_btn": {
+    "message": "Export scripts"
+  },
+  "ssc_export_ok": {
+    "message": "$1 scripts exported"
+  },
+  "ssc_export_empty": {
+    "message": "No saved scripts to export"
+  },
+  "ssc_fav_save_current": {
+    "message": "Add current script to favorites..."
+  },
+  "ssc_history_empty": {
+    "message": "No executed scripts yet"
+  },
+  "ssc_logs_code_sent": {
+    "message": "Script sent"
+  },
+  "ssc_logs_copy_code": {
+    "message": "Copy script"
+  },
+  "ssc_logs_loaded": {
+    "message": "Script loaded in the editor"
+  },
+  "ssc_logs_filter_ph": {
+    "message": "Filter by text or error code"
+  },
+  "ssc_logs_clear_confirm": {
+    "message": "Clear the whole log? This also clears the script history, which is where the earlier entries come from."
+  },
+  "ssc_ai_toggle_title": {
+    "message": "Console Assistant (AI) — show/hide the chat"
+  },
+  "ssc_ai_fix_prompt": {
+    "message": "This client-side SuiteScript snippet failed. Explain why in one line and give me the corrected code."
+  },
+  "ssc_err_generic_title": {
+    "message": "The script failed"
+  },
+  "ssc_err_server_title": {
+    "message": "Server-only module"
+  },
+  "ssc_err_server_hint": {
+    "message": "\"$1\" is a SuiteScript module that only exists on the server: the browser cannot load it, which is why it shows as not defined. To try server-side code, use NetSuite’s script debugger."
+  },
+  "ssc_err_governance_title": {
+    "message": "Governance limit reached"
+  },
+  "ssc_err_governance_hint": {
+    "message": "The script used up the page’s usage points. Reload the tab to restore them, and do the work in fewer calls (searches with filters instead of loading records one by one)."
+  },
+  "ssc_err_permission_title": {
+    "message": "Permission denied"
+  },
+  "ssc_err_permission_hint": {
+    "message": "Your role cannot perform that operation on that record. Try with the record open, or with a role that has more permissions."
+  },
+  "ssc_err_missingarg_title": {
+    "message": "Missing required argument"
+  },
+  "ssc_err_missingarg_hint": {
+    "message": "The call is missing the \"$1\" argument. SuiteScript functions take ONE object with named properties: record.load({ type: ..., id: ... })."
+  },
+  "ssc_err_rectype_title": {
+    "message": "Invalid record type"
+  },
+  "ssc_err_rectype_hint": {
+    "message": "That record type does not exist under that name. Use the enums (record.Type.SALES_ORDER) or the custom record’s exact scriptid."
+  },
+  "ssc_err_norecord_title": {
+    "message": "Record does not exist"
+  },
+  "ssc_err_norecord_hint": {
+    "message": "There is no record with that id (or your role cannot see it). Check both the id and the type: a valid id of another type gives this same error."
+  },
+  "ssc_err_search_title": {
+    "message": "Invalid search"
+  },
+  "ssc_err_search_hint": {
+    "message": "Some search filter or column is not valid for that record type. Check the field names and the operators."
+  },
+  "ssc_err_fieldvalue_title": {
+    "message": "Invalid field value"
+  },
+  "ssc_err_fieldvalue_hint": {
+    "message": "The value does not match what that field accepts. List fields take the internal id, not the text shown on screen."
+  },
+  "ssc_err_sql_title": {
+    "message": "The inner query failed"
+  },
+  "ssc_err_sql_hint": {
+    "message": "The error comes from the SQL the script runs, not from the JavaScript. To debug the query comfortably, use the SuiteQL Runner."
+  },
+  "ssc_err_notafunction_title": {
+    "message": "Not a function"
+  },
+  "ssc_err_notafunction_hint": {
+    "message": "\"$1\" does not exist as a function: usually a typo, or a method from another module. Autocomplete (Ctrl+Space after the dot) lists the real ones."
+  },
+  "ssc_err_ref_title": {
+    "message": "Undefined variable"
+  },
+  "ssc_err_ref_hint": {
+    "message": "\"$1\" is not declared. The live modules are already preloaded under their name (record, search, query…); anything else must be declared before use."
+  },
+  "ssc_err_type_title": {
+    "message": "Type error"
+  },
+  "ssc_err_type_hint": {
+    "message": "A value was used as if it were another type (reading a property of null, calling something that is not a function…). Check the marked line in the script."
+  },
+  "ssc_err_syntax_title": {
+    "message": "Syntax error"
+  },
+  "ssc_err_syntax_hint": {
+    "message": "The code does not compile: a parenthesis, brace or comma is missing or extra. The marked line shows where parsing stopped."
+  },
+  "ssc_err_unexpected_title": {
+    "message": "Unexpected NetSuite error"
+  },
+  "ssc_err_unexpected_hint": {
+    "message": "NetSuite swallowed the real cause. It is almost always a value in the script itself (an id or a type that does not fit): review it before blaming the server."
   },
   "sr_api": {
     "message": "API"
@@ -6469,6 +7817,12 @@
   "themeLabel": {
     "message": "Theme:"
   },
+  "advRulerLabel": {
+    "message": "Column ruler"
+  },
+  "advRulerOff": {
+    "message": "No ruler"
+  },
   "openModeLabel": {
     "message": "Open in:"
   },
@@ -6552,6 +7906,18 @@
   },
   "enableMaxlengthCounterBetaDesc": {
     "message": "Shows characters used vs. max on capped fields. Turns amber near the limit, red when reached."
+  },
+  "enableDateFormatHintLabel": {
+    "message": "Date format in sight"
+  },
+  "enableDateFormatHintDesc": {
+    "message": "Writes your user’s date format inside empty date fields, so day and month are never in doubt."
+  },
+  "enableShiftRangeSelectLabel": {
+    "message": "Shift range selection"
+  },
+  "enableShiftRangeSelectDesc": {
+    "message": "Ticks every checkbox between the last one you clicked and the next one, as long as you hold Shift."
   },
   "mlc_tooltip": {
     "message": "Max"
@@ -6708,6 +8074,87 @@
   },
   "fcdd_dismiss": {
     "message": "Dismiss"
+  },
+  "dlg_ok": {
+    "message": "Got it"
+  },
+  "dlg_accept": {
+    "message": "Accept"
+  },
+  "dlg_cancel": {
+    "message": "Cancel"
+  },
+  "dlg_title_alert": {
+    "message": "Notice"
+  },
+  "dlg_title_confirm": {
+    "message": "Confirm"
+  },
+  "dlg_title_prompt": {
+    "message": "Enter a value"
+  },
+  "fcdd_diff_see": {
+    "message": "See differences"
+  },
+  "fcdd_diff_title": {
+    "message": "Differences"
+  },
+  "fcdd_diff_subtitle": {
+    "message": "On the left, the file already in the folder. On the right, the one you dropped."
+  },
+  "fcdd_diff_left": {
+    "message": "In the folder"
+  },
+  "fcdd_diff_right": {
+    "message": "Dropped"
+  },
+  "fcdd_diff_close": {
+    "message": "Close"
+  },
+  "fcdd_diff_same": {
+    "message": "They are identical: replacing it changes nothing."
+  },
+  "fcdd_diff_big": {
+    "message": "The file is too large to compare in full. The first 5000 lines are shown."
+  },
+  "fcdd_diff_failed": {
+    "message": "Could not read the file already in the folder. Only the dropped one is shown."
+  },
+  "fcdd_diff_lines": {
+    "message": "lines"
+  },
+  "fcdd_diff_chars": {
+    "message": "characters"
+  },
+  "fcdd_dup_title": {
+    "message": "$1$ file(s) with that name already exist in this folder",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "fcdd_dup_warn": {
+    "message": "NetSuite does not allow two files with the same name in one folder: uploading these will replace the ones already there."
+  },
+  "fcdd_dup_rest": {
+    "message": "The other $1$ file(s) are new.",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fcdd_dup_go": {
+    "message": "Upload anyway"
+  },
+  "fcdd_dup_skip": {
+    "message": "Skip the duplicates"
+  },
+  "fcdd_dup_cancel": {
+    "message": "Cancel"
   },
   "enableFileCabinetEditFileBetaLabel": {
     "message": "Edit file from row"
@@ -7045,6 +8492,12 @@
   "suDiffTooLarge": {
     "message": "File too large to show full diff. Only the first 5000 lines will be displayed."
   },
+  "suDiffLines": {
+    "message": "lines"
+  },
+  "suDiffChars": {
+    "message": "characters"
+  },
   "suDiffLoadFailed": {
     "message": "Could not retrieve the current file. Uploading without preview."
   },
@@ -7127,53 +8580,140 @@
   "lnm_pick_count": {
     "message": "$SEL$ of $TOTAL$ selected",
     "placeholders": {
-      "sel": { "content": "$1", "example": "11" },
-      "total": { "content": "$2", "example": "27" }
+      "sel": {
+        "content": "$1",
+        "example": "11"
+      },
+      "total": {
+        "content": "$2",
+        "example": "27"
+      }
     }
   },
-  "lnm_mod_action": { "message": "Execute record actions" },
-  "lnm_mod_auth": { "message": "Change your NetSuite login credentials" },
-  "lnm_mod_bignumber": { "message": "High-precision arithmetic" },
-  "lnm_mod_cache": { "message": "Cache data to improve performance" },
-  "lnm_mod_config": { "message": "Access NetSuite configuration settings" },
-  "lnm_mod_crypto": { "message": "Hashing, hmac and symmetrical encryption" },
-  "lnm_mod_currency": { "message": "Exchange rate between two currencies, by date" },
-  "lnm_mod_currentrecord": { "message": "The record you are working on, client-side" },
-  "lnm_mod_dataset": { "message": "Analytics datasets" },
-  "lnm_mod_datasetlink": { "message": "Joins several datasets" },
-  "lnm_mod_email": { "message": "Send regular, bulk and campaign email" },
-  "lnm_mod_encode": { "message": "Convert a string to another encoding" },
-  "lnm_mod_error": { "message": "Create custom errors to abort the script" },
-  "lnm_mod_file": { "message": "Work with files in NetSuite" },
-  "lnm_mod_format": { "message": "Convert strings to a format, and back" },
-  "lnm_mod_http": { "message": "HTTP calls, with any content type" },
-  "lnm_mod_https": { "message": "HTTPS calls, and secure access to credentials" },
-  "lnm_mod_log": { "message": "Log script execution details" },
-  "lnm_mod_plugin": { "message": "Load custom plug-in implementations" },
-  "lnm_mod_portlet": { "message": "Resize or refresh a form portlet" },
-  "lnm_mod_query": { "message": "SuiteQL queries" },
-  "lnm_mod_record": { "message": "Work with NetSuite records" },
-  "lnm_mod_recordcontext": { "message": "Context of a record" },
-  "lnm_mod_redirect": { "message": "Redirect to a URL, Suitelet, record or search" },
-  "lnm_mod_render": { "message": "Forms and email from templates; print to PDF" },
-  "lnm_mod_runtime": { "message": "Runtime settings: company, script, session and user" },
-  "lnm_mod_search": { "message": "Create and run searches, and walk their results" },
-  "lnm_mod_sftp": { "message": "Connect over SFTP and transfer files" },
-  "lnm_mod_sso": { "message": "Generate SuiteSignOn tokens" },
-  "lnm_mod_suiteappinfo": { "message": "SuiteApp information" },
-  "lnm_mod_task": { "message": "Queue tasks: scripts, Map/Reduce, CSV and workflows" },
-  "lnm_mod_transaction": { "message": "Void transactions" },
-  "lnm_mod_translation": { "message": "Translated string collections" },
-  "lnm_mod_ui": { "message": "Dialogs, messages and interface widgets" },
-  "lnm_mod_url": { "message": "NetSuite navigation paths and URLs" },
-  "lnm_mod_util": { "message": "Utility methods, as on the global util object" },
-  "lnm_mod_workbook": { "message": "Analytics workbooks" },
-  "lnm_mod_workflow": { "message": "Initiate or trigger workflow instances" },
-  "lnm_mod_xml": { "message": "Validate, parse, read and modify XML" },
+  "lnm_mod_action": {
+    "message": "Execute record actions"
+  },
+  "lnm_mod_auth": {
+    "message": "Change your NetSuite login credentials"
+  },
+  "lnm_mod_bignumber": {
+    "message": "High-precision arithmetic"
+  },
+  "lnm_mod_cache": {
+    "message": "Cache data to improve performance"
+  },
+  "lnm_mod_config": {
+    "message": "Access NetSuite configuration settings"
+  },
+  "lnm_mod_crypto": {
+    "message": "Hashing, hmac and symmetrical encryption"
+  },
+  "lnm_mod_currency": {
+    "message": "Exchange rate between two currencies, by date"
+  },
+  "lnm_mod_currentrecord": {
+    "message": "The record you are working on, client-side"
+  },
+  "lnm_mod_dataset": {
+    "message": "Analytics datasets"
+  },
+  "lnm_mod_datasetlink": {
+    "message": "Joins several datasets"
+  },
+  "lnm_mod_email": {
+    "message": "Send regular, bulk and campaign email"
+  },
+  "lnm_mod_encode": {
+    "message": "Convert a string to another encoding"
+  },
+  "lnm_mod_error": {
+    "message": "Create custom errors to abort the script"
+  },
+  "lnm_mod_file": {
+    "message": "Work with files in NetSuite"
+  },
+  "lnm_mod_format": {
+    "message": "Convert strings to a format, and back"
+  },
+  "lnm_mod_http": {
+    "message": "HTTP calls, with any content type"
+  },
+  "lnm_mod_https": {
+    "message": "HTTPS calls, and secure access to credentials"
+  },
+  "lnm_mod_log": {
+    "message": "Log script execution details"
+  },
+  "lnm_mod_plugin": {
+    "message": "Load custom plug-in implementations"
+  },
+  "lnm_mod_portlet": {
+    "message": "Resize or refresh a form portlet"
+  },
+  "lnm_mod_query": {
+    "message": "SuiteQL queries"
+  },
+  "lnm_mod_record": {
+    "message": "Work with NetSuite records"
+  },
+  "lnm_mod_recordcontext": {
+    "message": "Context of a record"
+  },
+  "lnm_mod_redirect": {
+    "message": "Redirect to a URL, Suitelet, record or search"
+  },
+  "lnm_mod_render": {
+    "message": "Forms and email from templates; print to PDF"
+  },
+  "lnm_mod_runtime": {
+    "message": "Runtime settings: company, script, session and user"
+  },
+  "lnm_mod_search": {
+    "message": "Create and run searches, and walk their results"
+  },
+  "lnm_mod_sftp": {
+    "message": "Connect over SFTP and transfer files"
+  },
+  "lnm_mod_sso": {
+    "message": "Generate SuiteSignOn tokens"
+  },
+  "lnm_mod_suiteappinfo": {
+    "message": "SuiteApp information"
+  },
+  "lnm_mod_task": {
+    "message": "Queue tasks: scripts, Map/Reduce, CSV and workflows"
+  },
+  "lnm_mod_transaction": {
+    "message": "Void transactions"
+  },
+  "lnm_mod_translation": {
+    "message": "Translated string collections"
+  },
+  "lnm_mod_ui": {
+    "message": "Dialogs, messages and interface widgets"
+  },
+  "lnm_mod_url": {
+    "message": "NetSuite navigation paths and URLs"
+  },
+  "lnm_mod_util": {
+    "message": "Utility methods, as on the global util object"
+  },
+  "lnm_mod_workbook": {
+    "message": "Analytics workbooks"
+  },
+  "lnm_mod_workflow": {
+    "message": "Initiate or trigger workflow instances"
+  },
+  "lnm_mod_xml": {
+    "message": "Validate, parse, read and modify XML"
+  },
   "lnm_btn_load": {
     "message": "Load ($COUNT$)",
     "placeholders": {
-      "count": { "content": "$1", "example": "8" }
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
     }
   },
   "lnm_btn_cancel": {
@@ -7723,16 +9263,16 @@
     "message": "Developer mode is already enabled"
   },
   "devResetNoticeLabel": {
-    "message": "Reset the what's-new notice"
+    "message": "Show the what’s-new notice"
   },
   "devResetNoticeDesc": {
-    "message": "Makes it show up again on NetSuite tabs after a refresh."
+    "message": "Shows it right away on your open NetSuite tabs."
   },
   "devResetNoticeTitle": {
-    "message": "Show the what's-new notice again"
+    "message": "Show the what’s-new notice now"
   },
   "devResetNoticeDone": {
-    "message": "Notice reset. Refresh a NetSuite tab to see it."
+    "message": "Update notice reset. It now appears on your open NetSuite tabs."
   },
   "devFreshInstallLabel": {
     "message": "Simulate a fresh install"
@@ -7744,16 +9284,16 @@
     "message": "Open the welcome page as on a fresh install"
   },
   "devResetRateLabel": {
-    "message": "Reset the rate-us prompt"
+    "message": "Show the rate-us prompt"
   },
   "devResetRateDesc": {
-    "message": "Makes it show up again on NetSuite tabs after a refresh."
+    "message": "Shows it right away on your open NetSuite tabs."
   },
   "devResetRateTitle": {
-    "message": "Show the rate-us prompt again"
+    "message": "Show the rate-us prompt now"
   },
   "devResetRateDone": {
-    "message": "Rate prompt reset. Refresh a NetSuite tab to see it."
+    "message": "Rating notice reset. It now appears on your open NetSuite tabs."
   },
   "devDisableLabel": {
     "message": "Leave developer mode"
@@ -8844,6 +10384,38 @@
   "sqlai_new_chat": {
     "message": "New conversation"
   },
+  "sqlai_hist_title": {
+    "message": "History"
+  },
+  "sqlai_hist_empty": {
+    "message": "No saved conversations yet"
+  },
+  "sqlai_hist_clear": {
+    "message": "Clear all"
+  },
+  "sqlai_hist_delete": {
+    "message": "Delete this conversation"
+  },
+  "sqlai_hist_msgs": {
+    "message": "$1 messages",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_hist_untitled": {
+    "message": "Untitled"
+  },
+  "sqlai_hist_done": {
+    "message": "done"
+  },
+  "sqlai_cfg_history": {
+    "message": "Save conversation history"
+  },
+  "sqlai_cfg_history_hint": {
+    "message": "Keeps conversations on this machine so you can pick them up again. It stores real data from your account; turn it off if you would rather leave no trace."
+  },
   "sqlai_settings": {
     "message": "Settings"
   },
@@ -8900,6 +10472,17 @@
   },
   "sqlai_done": {
     "message": "Done"
+  },
+  "sqlai_turn_cost": {
+    "message": " · $1s · $2 steps",
+    "placeholders": {
+      "secs": {
+        "content": "$1"
+      },
+      "steps": {
+        "content": "$2"
+      }
+    }
   },
   "sqlai_copied": {
     "message": "Copied ✓"
@@ -9036,11 +10619,8 @@
   "sqlai_pref_steps_hint": {
     "message": "Every query it tried and how it went. Off, you only get the final answer."
   },
-  "sqlai_step_analyzing": {
-    "message": "Analysing the request…"
-  },
   "sqlai_step_reasoning": {
-    "message": "Reasoning (step $1 of $2)…",
+    "message": "step $1 of $2",
     "placeholders": {
       "step": {
         "content": "$1"
@@ -9049,6 +10629,9 @@
         "content": "$2"
       }
     }
+  },
+  "sqlai_thinking_words": {
+    "message": "Thinking…|Analysing…|Searching…|Checking…|Calculating…|Looking it up…|Double-checking…|Sorting…|Comparing…|Filtering…|Adding it up…|Counting…|Reviewing…|Adjusting…|Fine-tuning…|Polishing…|Tracking it down…|Rummaging…|Digging…|Cross-checking…|Combing the data…|Doing the maths…|Connecting dots…|Pulling the thread…|Turning it over…|Tidying up…|Fitting pieces…|Figuring it out…|Working it out…|Plotting…|Scheming…|Snooping…|Cooking…|Kneading…|Juggling…|Consulting the oracle…|Finding the needle…|Scratching my head…|Breaking a sweat…|Asking NetSuite…|Digging through the archive…|Looking twice…|On second thought…|Almost there…|One moment…"
   },
   "sqlai_limit_status": {
     "message": "Paused: out of steps"
@@ -9095,6 +10678,9 @@
   "sqlai_step_rejected": {
     "message": "Rejected (not SELECT/WITH)"
   },
+  "sqlai_step_empty": {
+    "message": "Discarded (arrived with no query)"
+  },
   "sqlai_pref_iters": {
     "message": "Max steps per query"
   },
@@ -9114,6 +10700,9 @@
         "content": "$1"
       }
     }
+  },
+  "sqlai_tokens_cached": {
+    "message": "$1 served from cache"
   },
   "sqlai_tokens_title": {
     "message": "$1 in · $2 out",
@@ -9216,6 +10805,87 @@
   },
   "sqlai_write_title": {
     "message": "The AI wants to modify a record"
+  },
+  "sqlai_ask_title": {
+    "message": "Before I continue"
+  },
+  "sqlai_no_text": {
+    "message": "(No answer text.)"
+  },
+  "sqlai_no_text_cut": {
+    "message": "The model ran out of answer room before writing anything. This is common with reasoning models: try lowering the reasoning level, or use a different model."
+  },
+  "sqlai_step_more_room": {
+    "message": "The reply was cut short: retrying with more room…"
+  },
+  "sqlai_ask_step": {
+    "message": "Step $1 of $2"
+  },
+  "sqlai_ask_step_done": {
+    "message": "Complete"
+  },
+  "sqlai_ask_step_one": {
+    "message": "Just this change"
+  },
+  "sqlai_ask_editing": {
+    "message": "Changing only: $1"
+  },
+  "sqlai_ask_change": {
+    "message": "Change"
+  },
+  "sqlai_ask_cancel": {
+    "message": "Cancel"
+  },
+  "sqlai_ask_edit": {
+    "message": "Edit"
+  },
+  "sqlai_ask_back": {
+    "message": "Back"
+  },
+  "sqlai_ask_keys": {
+    "message": "$1 to choose"
+  },
+  "sqlai_ask_keys_back": {
+    "message": "$1 · ← back"
+  },
+  "sqlai_ask_noanswer": {
+    "message": "No answer"
+  },
+  "sqlai_ask_nuance_add": {
+    "message": "Add a nuance or some context"
+  },
+  "sqlai_ask_nuance_save": {
+    "message": "Save nuance"
+  },
+  "sqlai_ask_nuance_scope": {
+    "message": "Applies to the whole task"
+  },
+  "sqlai_ask_nuance_label": {
+    "message": "Nuance"
+  },
+  "sqlai_ask_nuance_ph": {
+    "message": "E.g.: only the North branch, exclude returns…"
+  },
+  "sqlai_ask_confirm_copy": {
+    "message": "Review the answers above. Nothing runs until you confirm."
+  },
+  "sqlai_ask_confirm": {
+    "message": "Confirm and continue"
+  },
+  "sqlai_ask_review": {
+    "message": "Review all"
+  },
+  "sqlai_ask_send": {
+    "message": "Send"
+  },
+  "sqlai_ask_placeholder": {
+    "message": "Type your answer…"
+  },
+  "sqlai_ask_skip": {
+    "message": "You decide for me"
+  },
+  "sqlai_ask_skipped": {
+    "message": "No answer: the assistant decides and says so."
   },
   "sqlai_write_target": {
     "message": "Record: $1 · internal ID $2",
@@ -9638,6 +11308,12 @@
   "aiFaqDesc": {
     "message": "What data is sent, to whom, and how to control it."
   },
+  "apiDocsCreditLabel": {
+    "message": "API documentation"
+  },
+  "apiDocsCreditDesc": {
+    "message": "The SuiteScript help shown as you type comes from the stubs published by Oracle NetSuite."
+  },
   "sqlai_faq_title": {
     "message": "FAQ: assistant privacy & data"
   },
@@ -9666,7 +11342,7 @@
     "message": "Standard"
   },
   "sqlai_lvl_3_desc": {
-    "message": "Adds the key SuiteQL rules and gotchas plus the tables already seen in your account."
+    "message": "Adds the full reasoning method, the SuiteQL rules and gotchas, and the tables already seen in your account."
   },
   "sqlai_lvl_4": {
     "message": "Advanced"
@@ -9712,6 +11388,18 @@
   },
   "sql_find_clear": {
     "message": "Clear search"
+  },
+  "sql_findbar_ph": {
+    "message": "Find in editor…"
+  },
+  "sql_findbar_next": {
+    "message": "Next (Enter)"
+  },
+  "sql_findbar_prev": {
+    "message": "Previous (Shift+Enter)"
+  },
+  "sql_findbar_close": {
+    "message": "Close (Esc)"
   },
   "sql_via_rest_title": {
     "message": "Ran through the REST endpoint: it spends no governance and does not freeze the tab."
@@ -9764,25 +11452,25 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "On install, a wizard lets you pick which features you start with."
+    "message": "* Advanced Editor: open any File Cabinet file in a full editor."
   },
   "un_hl_2": {
-    "message": "Every feature shows an animated preview before you turn it on."
+    "message": "* SuiteScript Console: write SuiteScript and run it right away, without leaving the account."
   },
   "un_hl_3": {
-    "message": "The AI Assistant takes less time to answer each question."
+    "message": "* Customization finder: find scripts, workflows, fields or saved searches by name."
   },
   "un_hl_4": {
-    "message": "In sublists, whatever stays fixed no longer lets the text underneath show through."
+    "message": "The AI Assistant knows your account’s tables, answers in far fewer steps and keeps your conversations."
   },
   "un_hl_5": {
-    "message": "The line you are editing and its buttons stay in view when you scroll right."
+    "message": "The SuiteQL Runner suggests how to continue your query as you type: Tab writes it."
   },
   "un_hl_6": {
-    "message": "The field finder in searches matches whole words, and takes several of them in any order."
+    "message": "New colours, editing shortcuts and multiple cursors in every code editor."
   },
   "un_hl_7": {
-    "message": "Other bugs fixed too: plain text formatted as code, panels stuck in one language and the account ID with an underscore. See the changelog for details."
+    "message": "Searches find your text with or without accents, and highlight it the same everywhere."
   },
   "un_thanks": {
     "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
@@ -10092,6 +11780,318 @@
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Fixed the labels in the field info panel always coming out in Spanish."
   },
+  "cl_ver_7_0_0": {
+    "message": "v7.0.0"
+  },
+  "cl_date_7_0_0": {
+    "message": "2026-08-31"
+  },
+  "cl_ver_6_5_2": {
+    "message": "v6.5.2"
+  },
+  "cl_date_6_5_2": {
+    "message": "2026-08-25"
+  },
+  "cl_6_5_2_log_stack_title": {
+    "message": "Error stack traces read line by line"
+  },
+  "cl_6_5_2_log_stack_desc": {
+    "message": "Added a view for the Execution Log error stack traces, with every call on its own line, showing its file and position."
+  },
+  "cl_6_5_2_log_raw_title": {
+    "message": "A log’s original text is one click away"
+  },
+  "cl_6_5_2_log_raw_desc": {
+    "message": "Added a button to see the unformatted log on every block, not just on repaired JSON."
+  },
+  "cl_6_5_2_log_note_title": {
+    "message": "Standalone log entries get formatted too"
+  },
+  "cl_6_5_2_log_note_desc": {
+    "message": "Added formatting of the detail on a log entry’s own page, which previously only happened in the table."
+  },
+  "cl_6_5_2_prettier_raw_title": {
+    "message": "A code field’s original value is one click away"
+  },
+  "cl_6_5_2_prettier_raw_desc": {
+    "message": "Added a button to see the unformatted value on record code fields."
+  },
+  "cl_6_5_2_prettier_copy_title": {
+    "message": "Copying a code field confirms it copied"
+  },
+  "cl_6_5_2_prettier_copy_desc": {
+    "message": "Fixed the code field copy button copying with no confirmation, and not copying at all on some pages."
+  },
+  "cl_6_5_2_csvrv_link_title": {
+    "message": "A CSV import response opens without downloading it"
+  },
+  "cl_6_5_2_csvrv_link_desc": {
+    "message": "Fixed the View button, which opens the response as an editable table, not showing on the CSV import status page."
+  },
+  "cl_7_0_0_ai_catalog_title": {
+    "message": "The AI Assistant now knows which tables exist"
+  },
+  "cl_7_0_0_ai_catalog_desc": {
+    "message": "Fixed the assistant being unable to read the account record catalog, which made it write queries against tables that do not exist."
+  },
+  "cl_7_0_0_ai_via_title": {
+    "message": "The AI Assistant no longer gets stuck on the slow path"
+  },
+  "cl_7_0_0_ai_via_desc": {
+    "message": "Fixed the assistant switching to the slow path for the rest of the session after a single slow query."
+  },
+  "cl_7_0_0_ai_ask_title": {
+    "message": "The AI Assistant asks instead of assuming"
+  },
+  "cl_7_0_0_ai_ask_desc": {
+    "message": "Added a clarifying question when the request can be read in two ways that would give different results."
+  },
+  "cl_7_0_0_ai_format_title": {
+    "message": "The AI Assistant answers in lists and tables"
+  },
+  "cl_7_0_0_ai_format_desc": {
+    "message": "Fixed answers with several results running together in a paragraph instead of showing as a list or a table."
+  },
+  "cl_7_0_0_ai_align_title": {
+    "message": "Numbers in the AI Assistant tables line up"
+  },
+  "cl_7_0_0_ai_align_desc": {
+    "message": "Added right alignment for numeric columns in answers so amounts can be compared at a glance."
+  },
+  "cl_7_0_0_ai_prov_title": {
+    "message": "The AI Assistant adds Kimi, Grok and Mistral"
+  },
+  "cl_7_0_0_ai_prov_desc": {
+    "message": "Added Kimi (Moonshot), xAI (Grok) and Mistral to the providers the AI Assistant can use."
+  },
+  "cl_7_0_0_ai_models_title": {
+    "message": "The AI Assistant model list is up to date"
+  },
+  "cl_7_0_0_ai_models_desc": {
+    "message": "Updated the models each provider offers to the current generation, keeping the earlier ones that still work."
+  },
+  "cl_7_0_0_ai_hist_title": {
+    "message": "The AI Assistant keeps a conversation history"
+  },
+  "cl_7_0_0_ai_hist_desc": {
+    "message": "Added a history that lets you pick up earlier assistant conversations, with the option to turn it off or clear it."
+  },
+  "cl_7_0_0_ai_spin_title": {
+    "message": "Clearer sign that the AI Assistant is still working"
+  },
+  "cl_7_0_0_ai_spin_desc": {
+    "message": "Replaced the waiting indicator with one that keeps changing, so a long query no longer looks like it has frozen."
+  },
+  "cl_7_0_0_ai_blank_title": {
+    "message": "An empty reply no longer breaks the conversation"
+  },
+  "cl_7_0_0_ai_blank_desc": {
+    "message": "Fixed the AI Assistant refusing to answer for the rest of the conversation after the model returned an empty reply."
+  },
+  "cl_7_0_0_ai_cut_title": {
+    "message": "The assistant no longer finishes with no answer"
+  },
+  "cl_7_0_0_ai_cut_desc": {
+    "message": "Fixed the AI Assistant ending a turn with no answer when the model ran out of answer room before writing anything."
+  },
+  "cl_7_0_0_ai_cache_title": {
+    "message": "The AI Assistant spends less on every step"
+  },
+  "cl_7_0_0_ai_cache_desc": {
+    "message": "Added reuse of the context the assistant already sent to the provider, so every step consumes less."
+  },
+  "cl_7_0_0_ai_steps_title": {
+    "message": "The AI Assistant answers in fewer steps"
+  },
+  "cl_7_0_0_ai_steps_desc": {
+    "message": "Reduced the number of queries the assistant runs before answering, so the answer arrives much sooner."
+  },
+  "cl_7_0_0_ai_cost_title": {
+    "message": "The AI Assistant reports how long it took"
+  },
+  "cl_7_0_0_ai_cost_desc": {
+    "message": "Added the elapsed time and the number of steps next to the assistant’s completion notice."
+  },
+  "cl_7_0_0_ai_curr_title": {
+    "message": "The AI Assistant no longer mislabels the currency"
+  },
+  "cl_7_0_0_ai_curr_desc": {
+    "message": "Fixed the assistant naming the wrong currency when summarising amounts on accounts whose base currency is not the dollar."
+  },
+  "cl_7_0_0_ai_nodata_title": {
+    "message": "The AI Assistant no longer says there is no data when there is"
+  },
+  "cl_7_0_0_ai_nodata_desc": {
+    "message": "Fixed the assistant answering that no documents of a type exist when the type name did not match."
+  },
+  "cl_7_0_0_ai_bubble_title": {
+    "message": "The AI Assistant answers stand out from the background"
+  },
+  "cl_7_0_0_ai_bubble_desc": {
+    "message": "Fixed the assistant answers blending into the panel background in the light theme."
+  },
+  "cl_7_0_0_rtrail_title": {
+    "message": "The record trail shows the amount and the relationship"
+  },
+  "cl_7_0_0_rtrail_desc": {
+    "message": "Added the amount and the relationship type to each document in the trail, with the columns now sorted."
+  },
+  "cl_7_0_0_portlet_title": {
+    "message": "The dashboard auto-refresh can be paused"
+  },
+  "cl_7_0_0_portlet_desc": {
+    "message": "Added a control on the dashboard itself to pause the auto-refresh, run it right away and change its interval."
+  },
+  "cl_7_0_0_portletstart_title": {
+    "message": "Dashboard auto-refresh starts paused"
+  },
+  "cl_7_0_0_portletstart_desc": {
+    "message": "Added an option to choose whether the dashboard auto-refresh starts running or paused when the page opens."
+  },
+  "cl_7_0_0_findbar_title": {
+    "message": "The editor's find bar works in dark mode"
+  },
+  "cl_7_0_0_findbar_desc": {
+    "message": "Fixed the editor's find bar showing up white over dark mode and untranslated, in the Runner and the Console."
+  },
+  "cl_7_0_0_palqueue_title": {
+    "message": "Script Queue Monitor opens its page"
+  },
+  "cl_7_0_0_palqueue_desc": {
+    "message": "Fixed the Command Palette's Script Queue Monitor entry not leading to any page."
+  },
+  "cl_7_0_0_palmr_title": {
+    "message": "Map/Reduce script status in the Palette"
+  },
+  "cl_7_0_0_palmr_desc": {
+    "message": "Added a Command Palette entry that opens the Map/Reduce script status page."
+  },
+  "cl_7_0_0_wftitle_title": {
+    "message": "Workflows name their tab"
+  },
+  "cl_7_0_0_wftitle_desc": {
+    "message": "Fixed the workflow editor titling its tab without the workflow name, leaving its Recent Records entries indistinguishable."
+  },
+  "cl_7_0_0_rrsub_title": {
+    "message": "Record type below the name in Recents"
+  },
+  "cl_7_0_0_rrsub_desc": {
+    "message": "Fixed many Recent Records rows missing the record type below the name, or showing it glued to it."
+  },
+  "cl_7_0_0_rrsearch_title": {
+    "message": "Saved searches open their form"
+  },
+  "cl_7_0_0_rrsearch_desc": {
+    "message": "Fixed a saved search opened from Recent Records not landing on its form, where NetSuite's own list takes it."
+  },
+  "cl_7_0_0_qsc_title": {
+    "message": "Quick search creation, only where it belongs"
+  },
+  "cl_7_0_0_qsc_desc": {
+    "message": "Fixed the quick search creation bar showing up when returning to the criteria of an advanced search."
+  },
+  "cl_7_0_0_ctran_title": {
+    "message": "Open the type of any custom transaction"
+  },
+  "cl_7_0_0_ctran_desc": {
+    "message": "Fixed the options menu offering to open a custom transaction's type on only one of its styles, and not on the rest."
+  },
+  "cl_7_0_0_idsvis_title": {
+    "message": "Field IDs, always in sight"
+  },
+  "cl_7_0_0_idsvis_desc": {
+    "message": "Added a third mode to Copy Internal IDs that shows the ID under each field's label and copies it on click."
+  },
+  "cl_7_0_0_modalskin_title": {
+    "message": "Every window, one same design"
+  },
+  "cl_7_0_0_modalskin_desc": {
+    "message": "Fixed each extension window having its own look: they now share the same header, box and tones, in light and dark."
+  },
+  "cl_7_0_0_rlvscope_title": {
+    "message": "The logs viewer announces its real scope"
+  },
+  "cl_7_0_0_rlvscope_desc": {
+    "message": "Fixed Record Logs Viewer announcing the open record as its scope when, that record having no scripts, the list was showing everyone's."
+  },
+  "cl_7_0_0_rlvbtns_title": {
+    "message": "More at hand in the logs viewer"
+  },
+  "cl_7_0_0_rlvbtns_desc": {
+    "message": "Added log-detail access to open its script, deployments and note from each row, a button to edit the file, and the script id next to the name in the lists."
+  },
+  "cl_7_0_0_findclear_title": {
+    "message": "The clear cross reaches the remaining search boxes"
+  },
+  "cl_7_0_0_findclear_desc": {
+    "message": "Added the cross that empties in one click to the search boxes and filters that did not have it yet."
+  },
+  "cl_7_0_0_hlcolor_title": {
+    "message": "Matches are highlighted the same way everywhere"
+  },
+  "cl_7_0_0_hlcolor_desc": {
+    "message": "Changed search highlighting to a single yellow across the extension, readable in dark mode too."
+  },
+  "cl_7_0_0_acentos_title": {
+    "message": "Search boxes find words with or without accents"
+  },
+  "cl_7_0_0_acentos_desc": {
+    "message": "Fixed the extension's search boxes not finding \"Artículo\" when typed without its accent."
+  },
+  "cl_7_0_0_sqlghost_title": {
+    "message": "The SuiteQL Runner suggests how to continue the query"
+  },
+  "cl_7_0_0_sqlghost_desc": {
+    "message": "Added that the editor suggests the continuation of the query when you stop typing, using the AI Assistant's provider; Tab writes it."
+  },
+  "cl_7_0_0_openfocus_title": {
+    "message": "The Runner opens ready to type"
+  },
+  "cl_7_0_0_openfocus_desc": {
+    "message": "Fixed having to click the editor before typing when opening the SuiteQL Runner."
+  },
+  "cl_7_0_0_tabfocus_title": {
+    "message": "New tabs arrive ready to type"
+  },
+  "cl_7_0_0_tabfocus_desc": {
+    "message": "Fixed having to click the editor before being able to type after opening a new tab in the SuiteQL Runner."
+  },
+  "cl_7_0_0_subq_title": {
+    "message": "Subqueries no longer make up tables"
+  },
+  "cl_7_0_0_subq_desc": {
+    "message": "Fixed a query with a subquery triggering schema lookups for tables that do not exist, with their table-not-found warning."
+  },
+  "cl_7_0_0_cmborder_title": {
+    "message": "The editor loses its light frame in dark mode"
+  },
+  "cl_7_0_0_cmborder_desc": {
+    "message": "Fixed the SuiteQL Runner editor drawing an almost white frame around itself while dark mode was on."
+  },
+  "cl_7_0_0_atomone_title": {
+    "message": "New colours for the editor"
+  },
+  "cl_7_0_0_atomone_desc": {
+    "message": "Added the Atom One light and dark themes to the SuiteQL Runner editor, and they become the ones applied when switching mode."
+  },
+  "cl_7_0_0_sqljump_title": {
+    "message": "Hiding the results no longer jumps"
+  },
+  "cl_7_0_0_sqljump_desc": {
+    "message": "Fixed the SuiteQL Runner results panel growing over the editor for an instant before closing when hidden."
+  },
+  "cl_7_0_0_sqlsplit_title": {
+    "message": "The results panel returns at the size you left"
+  },
+  "cl_7_0_0_sqlsplit_desc": {
+    "message": "Fixed the SuiteQL Runner losing the size chosen with the divider when showing the editor or the results again."
+  },
+  "cl_7_0_0_portletfix_title": {
+    "message": "The dashboard auto-refresh works again"
+  },
+  "cl_7_0_0_portletfix_desc": {
+    "message": "Fixed the dashboard auto-refresh not reloading any portlet on the current NetSuite interface."
+  },
   "cl_ver_6_5_1": {
     "message": "v6.5.1"
   },
@@ -10368,5 +12368,760 @@
   },
   "sql_slow_no_order": {
     "message": "This query has no ORDER BY and NetSuite is paging it very slowly. Ordering by an indexed column —ORDER BY id, for instance— usually makes it far faster."
+  },
+  "adv_tree_title": {
+    "message": "File Cabinet files"
+  },
+  "adv_find_title": {
+    "message": "Find and replace (Ctrl+F)"
+  },
+  "adv_format_title": {
+    "message": "Format document (Shift+Alt+F)"
+  },
+  "adv_find_placeholder": {
+    "message": "Find"
+  },
+  "adv_replace_placeholder": {
+    "message": "Replace with"
+  },
+  "adv_find_case": {
+    "message": "Match case"
+  },
+  "adv_find_prev": {
+    "message": "Previous match"
+  },
+  "adv_find_next": {
+    "message": "Next match"
+  },
+  "adv_find_close": {
+    "message": "Close"
+  },
+  "adv_replace_one": {
+    "message": "Replace"
+  },
+  "adv_replace_all": {
+    "message": "All"
+  },
+  "adv_find_count": {
+    "message": "$1 of $2",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_find_none": {
+    "message": "No matches"
+  },
+  "adv_replace_done": {
+    "message": "$1 replacements",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_diag_ok": {
+    "message": "No errors"
+  },
+  "adv_cursor": {
+    "message": "Ln $1, Col $2",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_cursor_sel": {
+    "message": "Ln $1, Col $2 ($3 sel.)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      },
+      "3": {
+        "content": "$3"
+      }
+    }
+  },
+  "adv_counts": {
+    "message": "$1 lines · $2 chars",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_indent_tabs": {
+    "message": "Tabs"
+  },
+  "adv_indent_spaces": {
+    "message": "Spaces: $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_saved": {
+    "message": "Saved"
+  },
+  "adv_dirty": {
+    "message": "Unsaved changes"
+  },
+  "adv_leave_confirm": {
+    "message": "This file has unsaved changes. Leave anyway?"
+  },
+  "adv_leave_varias": {
+    "message": "$1 open files have unsaved changes. Leave anyway?",
+    "placeholders": {
+      "cuantos": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "adv_dlg_leave_tit": {
+    "message": "Unsaved changes"
+  },
+  "adv_dlg_leave_si": {
+    "message": "Leave without saving"
+  },
+  "adv_dlg_cancel": {
+    "message": "Cancel"
+  },
+  "adv_save_no_button": {
+    "message": "Save button not found on this page"
+  },
+  "adv_format_done": {
+    "message": "Document formatted"
+  },
+  "adv_format_none": {
+    "message": "Nothing to tidy up"
+  },
+  "adv_goto_prompt": {
+    "message": "Go to line (1-$1):",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_tree_loading": {
+    "message": "Loading…"
+  },
+  "adv_tree_empty": {
+    "message": "Empty folder"
+  },
+  "adv_tree_error": {
+    "message": "Could not read the folder"
+  },
+  "cmdp_act_adv_save": {
+    "message": "Save file to the File Cabinet"
+  },
+  "cmdp_act_adv_find": {
+    "message": "Find and replace in the file"
+  },
+  "cmdp_act_adv_goto": {
+    "message": "Go to line…"
+  },
+  "cmdp_act_adv_format": {
+    "message": "Format document"
+  },
+  "cmdp_act_adv_tree": {
+    "message": "Show the folder files"
+  },
+  "cmdp_act_adv_wrap": {
+    "message": "Wrap long lines"
+  },
+  "welcomeCatScriptItem13": {
+    "message": "Advanced Editor for File Cabinet files"
+  },
+  "adv_save": {
+    "message": "Save"
+  },
+  "adv_menu_file": {
+    "message": "File"
+  },
+  "adv_ai_apply": {
+    "message": "Apply to the file"
+  },
+  "adv_ai_applied": {
+    "message": "Applied"
+  },
+  "adv_menu_ai": {
+    "message": "AI assistant"
+  },
+  "adv_menu_edit": {
+    "message": "Edit"
+  },
+  "adv_menu_view": {
+    "message": "View"
+  },
+  "adv_menu_go": {
+    "message": "Go"
+  },
+  "adv_quick_titulo_corto": {
+    "message": "Open file"
+  },
+  "adv_find_title_corto": {
+    "message": "Find and replace"
+  },
+  "adv_bus_titulo_corto": {
+    "message": "Search in every file"
+  },
+  "adv_format_title_corto": {
+    "message": "Format document"
+  },
+  "adv_goto_title_corto": {
+    "message": "Go to line"
+  },
+  "adv_cerrar_archivo": {
+    "message": "Close the file"
+  },
+  "adv_tab_cerrar": {
+    "message": "Close this tab"
+  },
+  "adv_tab_cerrar_derecha": {
+    "message": "Close tabs to the right"
+  },
+  "adv_tab_cerrar_izquierda": {
+    "message": "Close tabs to the left"
+  },
+  "adv_tab_cerrar_otras": {
+    "message": "Close other tabs"
+  },
+  "adv_tab_cerrar_bloque": {
+    "message": "$1 of the files you are closing have unsaved changes. Close them anyway?",
+    "placeholders": {
+      "cuantos": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "adv_tab_cerrar_sucia": {
+    "message": "$1 has unsaved changes. Close it anyway?",
+    "placeholders": {
+      "archivo": {
+        "content": "$1",
+        "example": "cliente_lib.js"
+      }
+    }
+  },
+  "adv_close": {
+    "message": "Close"
+  },
+  "adv_close_title": {
+    "message": "Close the editor and go to the dashboard"
+  },
+  "adv_save_title": {
+    "message": "Save the file (Ctrl+S)"
+  },
+  "adv_sin_nombre": {
+    "message": "Untitled file"
+  },
+  "adv_save_failed": {
+    "message": "NetSuite did not save the file. Check the page before retrying"
+  },
+  "adv_save_desync": {
+    "message": "Reload the page before saving: the form no longer matches this file"
+  },
+  "adv_quick_ph_dir": {
+    "message": "Type a folder name"
+  },
+  "adv_vacio_dir": {
+    "message": "Open folder"
+  },
+  "adv_dir_quitar": {
+    "message": "Show the whole File Cabinet"
+  },
+  "adv_velo_abriendo": {
+    "message": "Opening $1…",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_titulo_marca": {
+    "message": "Advanced Editor · NSFT"
+  },
+  "adv_vacio_marca": {
+    "message": "from NetSuite Full Tools"
+  },
+  "adv_velo_1": {
+    "message": "Preparing the editor…"
+  },
+  "adv_velo_2": {
+    "message": "Loading the file…"
+  },
+  "adv_velo_3": {
+    "message": "Ready"
+  },
+  "adv_raw_open": {
+    "message": "Open raw file"
+  },
+  "adv_download": {
+    "message": "Download from the server"
+  },
+  "adv_visor_close": {
+    "message": "Back to the editor"
+  },
+  "adv_visor_title": {
+    "message": "File preview"
+  },
+  "adv_visor_zoom_in": {
+    "message": "Zoom in"
+  },
+  "adv_visor_zoom_out": {
+    "message": "Zoom out"
+  },
+  "adv_visor_fit": {
+    "message": "Fit to the window"
+  },
+  "adv_visor_real": {
+    "message": "Actual size"
+  },
+  "adv_visor_record": {
+    "message": "Open the file record"
+  },
+  "adv_vacio_title": {
+    "message": "No file open"
+  },
+  "adv_vacio_start": {
+    "message": "Start"
+  },
+  "adv_vacio_recent": {
+    "message": "Recent"
+  },
+  "adv_vacio_none": {
+    "message": "You have not opened any file yet"
+  },
+  "cl_7_0_0_frpdark_title": {
+    "message": "File preview keeps its colours"
+  },
+  "cl_7_0_0_frpdark_desc": {
+    "message": "Fixed the File Cabinet file preview showing inverted colours while dark mode was on."
+  },
+  "adv_menu_open": {
+    "message": "Open Advanced Editor"
+  },
+  "adv_tab_symbols": {
+    "message": "Symbols"
+  },
+  "adv_sym_none": {
+    "message": "Nothing to list in this file"
+  },
+  "adv_reload": {
+    "message": "Reload from the server"
+  },
+  "adv_diff_title": {
+    "message": "Compare with the saved version"
+  },
+  "adv_diff_corto": {
+    "message": "Changes"
+  },
+  "adv_minimapa_lento": {
+    "message": "The minimap can slow down navigation in large files"
+  },
+  "adv_tabs_prev": {
+    "message": "Previous tabs"
+  },
+  "adv_tabs_next": {
+    "message": "Next tabs"
+  },
+  "adv_velo_arbol": {
+    "message": "Loading the File Cabinet…"
+  },
+  "adv_tab_nueva": {
+    "message": "New tab"
+  },
+  "adv_ai_hint_sub": {
+    "message": "Tell me what you want to do and I will write the SuiteScript right here."
+  },
+  "adv_grp_archivo": {
+    "message": "File"
+  },
+  "adv_grp_codigo": {
+    "message": "Code"
+  },
+  "adv_grp_tools": {
+    "message": "Tools"
+  },
+  "adv_goto_ir": {
+    "message": "Go"
+  },
+  "adv_dlg_ok": {
+    "message": "OK"
+  },
+  "adv_api1_title": {
+    "message": "SuiteScript 1.0 file: only nlapi*/nlobj* are suggested"
+  },
+  "adv_api2_title": {
+    "message": "SuiteScript 2.x file: only the N/* modules are suggested"
+  },
+  "adv_diff_igual": {
+    "message": "No changes: this is what is saved"
+  },
+  "adv_diff_excede": {
+    "message": "The file changed too much to compare line by line"
+  },
+  "adv_diff_cuenta": {
+    "message": "$1 added, $2 removed",
+    "placeholders": {
+      "anadidas": {
+        "content": "$1",
+        "example": "12"
+      },
+      "quitadas": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "adv_stale_confirm": {
+    "message": "This file changed on the server after you opened it. Saving overwrites that change. Save anyway?"
+  },
+  "adv_dlg_stale_tit": {
+    "message": "The file changed on the server"
+  },
+  "adv_dlg_stale_si": {
+    "message": "Save anyway"
+  },
+  "codeEditorKeymapLabel": {
+    "message": "Editor shortcuts"
+  },
+  "codeEditorKeymapDesc": {
+    "message": "Which keys the code editors use to comment, move, duplicate or select. Applies right away."
+  },
+  "codeEditorKeymapVscode": {
+    "message": "VS Code"
+  },
+  "codeEditorKeymapWebstorm": {
+    "message": "WebStorm / IntelliJ"
+  },
+  "adv_bus_titulo": {
+    "message": "Search in files (Ctrl+Shift+F)"
+  },
+  "adv_bus_ph": {
+    "message": "Search this folder and its subfolders"
+  },
+  "adv_quick_ph": {
+    "message": "Type a file name"
+  },
+  "adv_quick_nada": {
+    "message": "No file with that name"
+  },
+  "adv_quick_vacio": {
+    "message": "Type to search the File Cabinet"
+  },
+  "adv_quick_pie": {
+    "message": "$1 files · ↑↓ to move · Enter to open",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_quick_pie_rec": {
+    "message": "Recent files"
+  },
+  "adv_quick_reciente": {
+    "message": "recent"
+  },
+  "adv_quick_titulo": {
+    "message": "Open file… (Ctrl+P)"
+  },
+  "adv_bus_ir": {
+    "message": "Search"
+  },
+  "adv_bus_parar": {
+    "message": "Stop"
+  },
+  "adv_bus_corto": {
+    "message": "Type at least two characters"
+  },
+  "adv_bus_sin_carpeta": {
+    "message": "No folder to search in"
+  },
+  "adv_bus_listando": {
+    "message": "Listing files…"
+  },
+  "adv_bus_listando_n": {
+    "message": "$1 folders · $2 files",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_bus_nada_que_mirar": {
+    "message": "No text files in this folder"
+  },
+  "adv_bus_yendo": {
+    "message": "$1 of $2 · $3 with matches",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      },
+      "3": {
+        "content": "$3"
+      }
+    }
+  },
+  "adv_bus_hecho": {
+    "message": "$1 matches in $2 files · $3 searched",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      },
+      "3": {
+        "content": "$3"
+      }
+    }
+  },
+  "adv_bus_parado": {
+    "message": "Stopped · $1 matches in $2 files",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "cl_7_0_0_cmkeys_title": {
+    "message": "Editing shortcuts in the code editors"
+  },
+  "cl_7_0_0_cmkeys_desc": {
+    "message": "Added shortcuts to comment, move, duplicate and delete lines, choosing between the VS Code and WebStorm ones."
+  },
+  "cl_7_0_0_cmmulti_title": {
+    "message": "Several cursors at once"
+  },
+  "cl_7_0_0_cmmulti_desc": {
+    "message": "Added placing several cursors with Alt and click, and selecting the word’s next occurrence, to type in several places at once."
+  },
+  "cl_7_0_0_hintlag_title": {
+    "message": "The column dropdown no longer holds up typing"
+  },
+  "cl_7_0_0_hintlag_desc": {
+    "message": "Fixed the typed dot taking a moment to appear while the list of columns was being prepared."
+  },
+  "cai_doc_params": {
+    "message": "Parameters"
+  },
+  "cai_doc_opt": {
+    "message": "optional"
+  },
+  "cai_doc_returns": {
+    "message": "Returns"
+  },
+  "cai_doc_gov": {
+    "message": "Governance"
+  },
+  "codeEditorInlayHintsLabel": {
+    "message": "Inline hints"
+  },
+  "codeEditorInlayHintsDesc": {
+    "message": "Shows the variable’s type and each argument’s name inside the code itself. They switch off on their own in files over 800 lines, so typing stays fluid."
+  },
+  "cai_doc_propia": {
+    "message": "Defined in this file"
+  },
+  "cai_doc_ns": {
+    "message": "SuiteScript API"
+  },
+  "cai_doc_ro": {
+    "message": "read-only"
+  },
+  "adv_sym_todo": {
+    "message": "Expand or collapse all"
+  },
+  "adv_split_alto": {
+    "message": "Drag to resize the height"
+  },
+  "adv_split_ancho": {
+    "message": "Drag to resize the width"
+  },
+  "cai_doc_scroll": {
+    "message": "Alt+↑↓ to scroll"
+  },
+  "adv_download_edit": {
+    "message": "Download what you have now"
+  },
+  "adv_diff_solo_espacios": {
+    "message": "Only the spacing changed: not a single line says anything different"
+  },
+  "adv_minimapa": {
+    "message": "Minimap"
+  },
+  "adv_crumb_lista": {
+    "message": "Other items at the level of $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_recargar_tit": {
+    "message": "You have unsaved changes"
+  },
+  "adv_recargar_txt": {
+    "message": "Reloading brings back what is on the server and loses what you wrote."
+  },
+  "adv_recargar_guardar": {
+    "message": "Save"
+  },
+  "adv_recargar_sin": {
+    "message": "Reload and lose them"
+  },
+  "adv_quick_pie_dir": {
+    "message": "$1 folders · ↑↓ to move · Enter to open",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_quick_pie_dir_vacio": {
+    "message": "Folders already loaded"
+  },
+  "adv_quick_nada_dir": {
+    "message": "No folder with that name"
+  },
+  "adv_csv_titulo": {
+    "message": "Table view"
+  },
+  "adv_csv_pista": {
+    "message": "Double-click a cell to edit it"
+  },
+  "adv_csv_cerrar": {
+    "message": "Back to the text"
+  },
+  "adv_csv_cuenta": {
+    "message": "$1 rows · $2 columns",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_csv_enorme": {
+    "message": "Too many rows to show as a table ($1)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_format_json_mal": {
+    "message": "This is not valid JSON: nothing was changed"
+  },
+  "aiAssistantAdvLabel": {
+    "message": "Advanced Editor"
+  },
+  "shareTitle": {
+    "message": "Would this help someone on your team?"
+  },
+  "shareBody": {
+    "message": "Pass NetSuite Full Tools along. It is free and installs in one click."
+  },
+  "shareMsg": {
+    "message": "NetSuite Full Tools: 100+ tools for NetSuite, free."
+  },
+  "shareCopy": {
+    "message": "Copy link"
+  },
+  "shareCopyTitle": {
+    "message": "Copy the Chrome Web Store link"
+  },
+  "shareCopied": {
+    "message": "Link copied"
+  },
+  "shareFacebook": {
+    "message": "Share on Facebook"
+  },
+  "shareX": {
+    "message": "Share on X"
+  },
+  "shareWhatsapp": {
+    "message": "Share on WhatsApp"
+  },
+  "shareMore": {
+    "message": "More sharing options"
+  },
+  "shareNever": {
+    "message": "Don’t show again"
+  },
+  "shareCloseTitle": {
+    "message": "Not now"
+  },
+  "devResetShareLabel": {
+    "message": "Show the share notice"
+  },
+  "devResetShareDesc": {
+    "message": "Shows it right away on your open NetSuite tabs."
+  },
+  "devResetShareTitle": {
+    "message": "Show the share notice now"
+  },
+  "devResetShareDone": {
+    "message": "Share notice reset. It now appears on your open NetSuite tabs."
+  },
+  "cl_7_0_0_share_title": {
+    "message": "Share the extension"
+  },
+  "cl_7_0_0_share_desc": {
+    "message": "Added a notice to pass the extension along, with a copyable link and Facebook, X and WhatsApp options."
+  },
+  "devModuleNotLoaded": {
+    "message": "That module is not in the loaded extension yet. Reload it at chrome://extensions and refresh the NetSuite tab."
+  },
+  "devPromptFailed": {
+    "message": "The notice never became visible"
+  },
+  "devPromptNoAnswer": {
+    "message": "no NetSuite tab answered — refresh it and try again"
+  },
+  "un_hl_8": {
+    "message": "Field IDs can stay visible under their label, and copy with one click."
+  },
+  "un_hl_9": {
+    "message": "Set or clear the summary type on every column of a saved search at once."
+  },
+  "un_hl_10": {
+    "message": "A different colour per environment or per account, to see at a glance where you are."
+  },
+  "un_hl_11": {
+    "message": "Dragging files into the File Cabinet warns you before replacing one, and shows what changed."
+  },
+  "un_hl_12": {
+    "message": "Fixed details in the AI Assistant, the dashboard auto-refresh, the Runner and the File Cabinet, and the browser's alerts are now the extension's own windows. More in the changelog."
   }
 }

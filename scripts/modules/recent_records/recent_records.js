@@ -320,6 +320,7 @@
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <input type="text" class="nsft-rr-search" placeholder="${escapeHtml(i18n('rr_search_placeholder', 'Buscar...'))}" autocomplete="off" spellcheck="false">
+                    <button type="button" class="nsft-rr-clear" data-role="clear" title="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}" aria-label="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}" hidden>✕</button>
                     <span class="nsft-rr-count" data-role="count"></span>
                 </div>
             </div>
@@ -346,6 +347,19 @@
         const input = panel.querySelector('.nsft-rr-search');
         if (!input) return;
         input.addEventListener('input', () => filterRows(panel, input.value || ''));
+
+        const clearBtn = panel.querySelector('[data-role="clear"]');
+        if (clearBtn) {
+            clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                input.value = '';
+                filterRows(panel, '');
+                input.focus();
+            });
+        }
+
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (input.value) { input.value = ''; filterRows(panel, ''); e.preventDefault(); e.stopPropagation(); }
@@ -455,6 +469,22 @@
         }
     }
 
+    function esUrlEditorAvanzado(u) {
+        if (!u || u === '#') return false;
+        return /[?&]nsft-advanced-editor=T(?:&|$)/i.test(u);
+    }
+
+    function isSavedSearchUrl(u) {
+        if (!u || u === '#') return false;
+        try {
+            const url = new URL(u, location.origin);
+            return /\/app\/common\/search\/search\.nl$/i.test(url.pathname)
+                && !!url.searchParams.get('id');
+        } catch (e) {
+            return false;
+        }
+    }
+
     function isTrackableUrl(href) {
         try {
             const url = new URL(href, location.origin);
@@ -491,12 +521,15 @@
             VISIT_STRIP_PARAMS.forEach((p) => url.searchParams.delete(p));
             url.hash = '';
             const viewUrl = url.pathname + url.search;
-            const name = cleanTitle(document.title);
+            const stampName = document.documentElement.getAttribute('data-nsft-page-name') || '';
+            const stampType = document.documentElement.getAttribute('data-nsft-page-type') || '';
+            const name = stampName || cleanTitle(document.title);
             if (!name) return;
             const visit = {
                 url: viewUrl,
                 editUrl: viewUrl + (viewUrl.indexOf('?') >= 0 ? '&' : '?') + 'e=T',
                 name,
+                secondary: stampName ? stampType : '',
                 kind: kindForUrl(viewUrl),
                 ts: Date.now()
             };
@@ -526,7 +559,7 @@
             const s = byKey.get(k);
             merged.push({
                 name: (s && s.name) || v.name,
-                secondary: (s && s.secondary) || '',
+                secondary: (s && s.secondary) || v.secondary || '',
                 date: fmtVisitTs(v.ts),
                 ts: v.ts,
                 viewUrl: v.url,
@@ -664,14 +697,31 @@
     }
 
     function rowHtml(item, isPinned) {
-        const url = item.url || item.viewUrl || item.editUrl || '#';
-        const secondary = item.secondary && item.secondary !== ' ' ? item.secondary : '';
-        const viewUrl = item.viewUrl || url;
+        let url = item.url || item.viewUrl || item.editUrl || '#';
+        const kind = item.kind || 'file';
+        const isSaved = isSavedSearchUrl(url);
+        let secondary = item.secondary && item.secondary !== ' ' ? item.secondary : '';
+        if (!secondary) {
+            const kl = kindLabel(kind);
+            if (kl && kl !== String(item.name || '').trim()) secondary = kl;
+        }
+        let viewUrl = item.viewUrl || url;
         let editUrl = item.editUrl || '';
-        if (!editUrl && isPinned && url !== '#' && /\.nl(\?|$)/i.test(url) && !/[?&]e=T/i.test(url)) {
+        const esEditorAvanzado = esUrlEditorAvanzado(url);
+        if (esEditorAvanzado) {
+            secondary = i18n('enableAdvancedEditorLabel', 'Advanced Editor');
+            if (!/[?&]e=T(?:&|$)/i.test(url)) {
+                url += (url.indexOf('?') >= 0 ? '&' : '?') + 'e=T';
+            }
+            viewUrl = url;
+        }
+        if (!editUrl && (isPinned || isSaved) && url !== '#' && /\.nl(\?|$)/i.test(url) && !/[?&]e=T/i.test(url)) {
             editUrl = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'e=T';
         }
-        const kind = item.kind || 'file';
+        if (isSaved && editUrl) {
+            url = editUrl;
+            viewUrl = editUrl;
+        }
         const date = isPinned ? '' : (item.date || '');
         const viewTitle = i18n('rr_action_open', 'Abrir');
         const editTitle = i18n('rr_action_edit', 'Editar');
@@ -685,7 +735,7 @@
                  data-name="${escapeHtml(item.name || '')}"
                  data-kind="${escapeHtml(kind)}"
                  data-secondary="${escapeHtml(secondary)}"
-                 data-haystack="${escapeHtml(((item.name || '') + ' ' + secondary).toLowerCase())}">
+                 data-haystack="${escapeHtml(rrFold((item.name || '') + ' ' + secondary))}">
                 <a class="nsft-rr-rowmain" href="${escapeHtml(url)}">
                     <span class="nsft-rr-icon nsft-rr-icon-${escapeHtml(kind)}">${iconSvg(kind)}</span>
                     <span class="nsft-rr-body">
@@ -702,7 +752,7 @@
                             <line x1="10" y1="14" x2="21" y2="3"></line>
                         </svg>
                     </a>
-                    ${editUrl ? `
+                    ${editUrl && !isSaved && !esEditorAvanzado ? `
                     <a class="nsft-rr-action nsft-rr-action-edit" href="${escapeHtml(editUrl)}" title="${escapeHtml(editTitle)}" aria-label="${escapeHtml(editTitle)}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M12 20h9"></path>
@@ -768,10 +818,31 @@
         return rows[0] || null;
     }
 
+    function rrFold(s) {
+        const TS = window.NSFT_TextSearch;
+        return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
+    }
+
+    function marcaFila(row, term) {
+        const TS = window.NSFT_TextSearch;
+        ['.nsft-rr-name', '.nsft-rr-secondary'].forEach((sel) => {
+            const el = row.querySelector(sel);
+            if (!el) return;
+            if (el._nsftText === undefined) el._nsftText = el.textContent;
+            if (!term || !TS) {
+                if (el.firstElementChild) el.textContent = el._nsftText;
+                return;
+            }
+            TS.mark(el, el._nsftText, term, 'nsft-rr-hl');
+        });
+    }
+
     function filterRows(panel, query) {
         const list = panel.querySelector('[data-role="list"]');
         if (!list) return;
-        const q = query.trim().toLowerCase();
+        const q = rrFold(query.trim());
+        const clearBtn = panel.querySelector('[data-role="clear"]');
+        if (clearBtn) clearBtn.hidden = !String(query || '').length;
         _kbIndex = -1;
         const rows = list.querySelectorAll('.nsft-rr-row');
         let shown = 0;
@@ -785,6 +856,7 @@
             const match = !q || haystack.indexOf(q) !== -1;
             r.style.display = match ? '' : 'none';
             if (match) shown++;
+            if (match) marcaFila(r, q);
         });
         let header = null, headerHasVisible = false;
         Array.from(list.children).forEach((ch) => {
@@ -848,6 +920,33 @@
         if (u.includes('/app/crm/')) return 'crm';
         if (u.includes('/app/webservices/')) return 'config';
         return 'file';
+    }
+
+    const KIND_LABELS = {
+        employee: ['rr_kind_employee', 'Empleado'],
+        customer: ['rr_kind_customer', 'Cliente'],
+        vendor: ['rr_kind_vendor', 'Proveedor'],
+        contact: ['rr_kind_contact', 'Contacto'],
+        partner: ['rr_kind_partner', 'Socio'],
+        entity: ['rr_kind_entity', 'Entidad'],
+        item: ['rr_kind_item', 'Artículo'],
+        media: ['rr_kind_media', 'Archivo'],
+        transaction: ['rr_kind_transaction', 'Transacción'],
+        customrecord_type: ['rr_kind_customrecord_type', 'Tipo de registro personalizado'],
+        customrecord: ['rr_kind_customrecord', 'Registro personalizado'],
+        customfield: ['rr_kind_customfield', 'Campo personalizado'],
+        form: ['rr_kind_form', 'Formulario'],
+        role: ['rr_kind_role', 'Rol'],
+        script: ['rr_kind_script', 'Script'],
+        workflow: ['rr_kind_workflow', 'Flujo de trabajo'],
+        search: ['rr_kind_search', 'Búsqueda'],
+        crm: ['rr_kind_crm', 'CRM'],
+        config: ['rr_kind_config', 'Configuración']
+    };
+
+    function kindLabel(kind) {
+        const def = KIND_LABELS[kind];
+        return def ? i18n(def[0], def[1]) : '';
     }
 
     const RR_ICON_ENTITY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';

@@ -295,9 +295,13 @@
                 border-radius: 2px;
             }
             #nsft-wf-indexer-panel .wfi-filters { padding: 12px 16px; border-bottom: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+            /* El aspa se superpone DENTRO del cuadro: el envoltorio relativo la
+               ancla y el padding-right del input le abre el hueco, así que la
+               columna de filtros no cambia de alto ni de ancho. */
+            #nsft-wf-indexer-panel .wfi-search-wrap { position: relative; display: block; }
             #nsft-wf-indexer-panel .wfi-search {
                 width: 100%;
-                padding: 8px 10px;
+                padding: 8px 30px 8px 10px;
                 border: 1px solid #d1d5db;
                 border-radius: 6px;
                 font-size: 12.5px;
@@ -306,6 +310,34 @@
                 box-sizing: border-box;
             }
             #nsft-wf-indexer-panel .wfi-search:focus { border-color: #4a6fa5; box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.18); }
+            /* El input es type="search" y Chrome le pone SU propia aspa; con la
+               nuestra al lado salían dos. Se retira la del navegador, que ni se
+               puede estilar ni respeta el tema. */
+            #nsft-wf-indexer-panel .wfi-search::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+            #nsft-wf-indexer-panel .wfi-search-clear {
+                position: absolute;
+                right: 6px;
+                top: 50%;
+                transform: translateY(-50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 20px;
+                height: 20px;
+                padding: 0;
+                border: none;
+                border-radius: 5px;
+                background: transparent;
+                color: #9ca3af;
+                font-family: inherit;
+                font-size: 11px;
+                line-height: 1;
+                cursor: pointer;
+                transition: background-color 0.12s, color 0.12s;
+            }
+            #nsft-wf-indexer-panel .wfi-search-clear[hidden] { display: none; }
+            #nsft-wf-indexer-panel .wfi-search-clear:hover { background: #f3f4f6; color: #374151; }
+            #nsft-wf-indexer-panel .wfi-search-clear:focus-visible { outline: 2px solid #4a6fa5; outline-offset: 1px; }
             #nsft-wf-indexer-panel .wfi-filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
             #nsft-wf-indexer-panel .wfi-filter {
                 flex: 1;
@@ -376,6 +408,15 @@
                 color: #9ca3af;
                 font-size: 12.5px;
             }
+            /* Resaltado del filtro: el amarillo comun, con respaldo por si el
+               CSS de _shared no llegara. */
+            #nsft-wf-indexer-panel mark.wfi-hl {
+                background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
+                color: inherit;
+                border-radius: 3px;
+                padding: 0 1px;
+                font-weight: 700;
+            }
 
             #nsft-wf-indexer-panel[data-theme="dark"] { background: #1f2430; color: #e6e9ef; border-color: rgba(255,255,255,0.08); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-head { background: #1f2430; color: #e6e9ef; border-color: rgba(255,255,255,0.08); }
@@ -392,6 +433,10 @@
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab { color: #a5adba; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab:hover { color: #cbd5e1; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab.is-active { color: #88a8d4; }
+            #nsft-wf-indexer-panel[data-theme="dark"] mark.wfi-hl {
+                background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
+                color: var(--nsft-hl-fg-dark, #0D1410);
+            }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab.is-active::after { background: #88a8d4; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-filters,
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-count { border-color: rgba(255,255,255,0.08); }
@@ -399,6 +444,14 @@
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search,
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-filter { background: #2a3142; border-color: rgba(255,255,255,0.1); color: #e6e9ef; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search:focus { border-color: #88a8d4; box-shadow: 0 0 0 3px rgba(136, 168, 212, 0.2); }
+            /* Oscuro por el gatillo del módulo (data-theme en el panel, alimentado
+               desde nsftTheme por el content script), NUNCA por el tema del sistema.
+               El hover tira del token compartido con respaldo: este CSS lo inyecta
+               el fetcher en el mundo principal y las variables sólo llegan si el
+               bloque _shared ha cargado. */
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search-clear { color: #94a3b8; }
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search-clear:hover { background: var(--nsft-dk-hover, rgba(255,255,255,0.08)); color: #e6e9ef; }
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search-clear:focus-visible { outline-color: #88a8d4; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-checkbox { color: #a5adba; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-item { border-color: rgba(255,255,255,0.04); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-item:hover { background: rgba(255,255,255,0.03); }
@@ -772,6 +825,11 @@
         }
     };
 
+    function wfsFold(s) {
+        const TS = window.NSFT_TextSearch;
+        return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
+    }
+
     function countActions() {
         const wf = workflowData[workflowId];
         if (!wf || !wf.states) return 0;
@@ -806,7 +864,10 @@
                 <button class="wfi-tab" data-tab="transitions" type="button">${t('wfs_transitions', 'Transiciones')}</button>
             </div>
             <div class="wfi-filters">
-                <input class="wfi-search" type="search" placeholder="${t('wfs_search_ph', 'Buscar nombre, campo, valor, fórmula…')}" />
+                <div class="wfi-search-wrap">
+                    <input class="wfi-search" type="search" placeholder="${t('wfs_search_ph', 'Buscar nombre, campo, valor, fórmula…')}" />
+                    <button class="wfi-search-clear" type="button" hidden aria-label="${t('ro_clear_search', 'Limpiar búsqueda')}" title="${t('ro_clear_search', 'Limpiar búsqueda')}">&#x2715;</button>
+                </div>
                 <div class="wfi-filter-row" data-row="actions">
                     <select class="wfi-filter" data-filter="actionType"><option value="all">${t('wfs_all_types', 'Todos los tipos')}</option></select>
                     <select class="wfi-filter" data-filter="triggerType"><option value="all">${t('wfs_all_triggers', 'Todos los triggers')}</option></select>
@@ -971,10 +1032,31 @@
         });
 
         const search = panel.querySelector('.wfi-search');
+        const searchClear = panel.querySelector('.wfi-search-clear');
+
+        const syncSearchClear = () => {
+            if (searchClear) searchClear.hidden = !search.value;
+        };
+
         search.addEventListener('input', () => {
-            INDEXER_UI.filters.search = search.value.trim().toLowerCase();
+            INDEXER_UI.filters.search = wfsFold(search.value.trim());
+            syncSearchClear();
             renderIndexerResults();
         });
+
+        if (searchClear) {
+            searchClear.addEventListener('mousedown', (e) => e.preventDefault());
+            searchClear.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                search.value = '';
+                INDEXER_UI.filters.search = '';
+                syncSearchClear();
+                renderIndexerResults();
+                search.focus();
+            });
+        }
+        syncSearchClear();
 
         panel.querySelectorAll('.wfi-filter').forEach(sel => {
             sel.addEventListener('change', () => {
@@ -1094,8 +1176,8 @@
                 if (f.actionType !== 'all' && a.actionType !== f.actionType) continue;
                 if (f.triggerType !== 'all' && a.triggerType !== f.triggerType) continue;
                 if (q) {
-                    const hay = [a.actionType, a.stringId, a.field, a.value, a.conditionText, a.conditionFormula, a.buttonLabel, state.name]
-                        .filter(Boolean).join(' ').toLowerCase();
+                    const hay = wfsFold([a.actionType, a.stringId, a.field, a.value, a.conditionText, a.conditionFormula, a.buttonLabel, state.name]
+                        .filter(Boolean).join(' '));
                     if (!hay.includes(q)) continue;
                 }
                 out.push({ ...a, stateName: state.name || stateKey, _url: a.url });
@@ -1110,7 +1192,7 @@
         for (const key in wf.states) {
             const s = wf.states[key];
             if (q) {
-                const hay = [s.name, s.actionName, key].filter(Boolean).join(' ').toLowerCase();
+                const hay = wfsFold([s.name, s.actionName, key].filter(Boolean).join(' '));
                 if (!hay.includes(q)) continue;
             }
             const actionsCount = Object.keys(s.actions || {}).length;
@@ -1126,7 +1208,7 @@
         for (const key in wf.transitions || {}) {
             const t = wf.transitions[key];
             if (q) {
-                const hay = JSON.stringify(t).toLowerCase();
+                const hay = wfsFold(JSON.stringify(t));
                 if (!hay.includes(q)) continue;
             }
             out.push({ ...t, key });
@@ -1141,21 +1223,21 @@
         if (tab === 'actions') {
             const title = item.actionType || t('wfs_no_type', '(sin tipo)');
             const inactive = item.inactive ? `<span class="wfi-pill is-inactive">${t('wfs_inactive', 'Inactiva')}</span>` : '';
-            const stringId = item.stringId ? `<code>${escapeHtml(item.stringId)}</code>` : '';
+            const stringId = item.stringId ? `<code>${hl(item.stringId)}</code>` : '';
             const metaLines = [];
-            metaLines.push(`<b>${t('wfs_lbl_state', 'Estado')}:</b> ${escapeHtml(item.stateName)}`);
-            if (item.triggerType) metaLines.push(`<b>${t('wfs_lbl_trigger', 'Trigger')}:</b> <code>${escapeHtml(item.triggerType)}</code>`);
-            if (item.field) metaLines.push(`<b>${t('wfs_lbl_field', 'Campo')}:</b> <code>${escapeHtml(item.field)}</code>`);
-            if (item.value !== undefined && item.value !== null && item.value !== '') metaLines.push(`<b>${t('wfs_lbl_value', 'Valor')}:</b> ${escapeHtml(item.value)}`);
-            if (item.buttonLabel) metaLines.push(`<b>${t('wfs_lbl_button', 'Botón')}:</b> ${escapeHtml(item.buttonLabel)}`);
-            if (item.conditionFormula) metaLines.push(`<b>${t('wfs_lbl_formula', 'Fórmula')}:</b> <code>${escapeHtml(truncate(item.conditionFormula, 120))}</code>`);
-            else if (item.conditionText) metaLines.push(`<b>${t('wfs_lbl_condition', 'Condición')}:</b> ${escapeHtml(truncate(item.conditionText, 120))}`);
-            if (item.executionContexts) metaLines.push(`<b>${t('wfs_lbl_contexts', 'Contextos')}:</b> ${escapeHtml(item.executionContexts.replace(/,\s*$/, ''))}`);
+            metaLines.push(`<b>${t('wfs_lbl_state', 'Estado')}:</b> ${hl(item.stateName)}`);
+            if (item.triggerType) metaLines.push(`<b>${t('wfs_lbl_trigger', 'Trigger')}:</b> <code>${hl(item.triggerType)}</code>`);
+            if (item.field) metaLines.push(`<b>${t('wfs_lbl_field', 'Campo')}:</b> <code>${hl(item.field)}</code>`);
+            if (item.value !== undefined && item.value !== null && item.value !== '') metaLines.push(`<b>${t('wfs_lbl_value', 'Valor')}:</b> ${hl(item.value)}`);
+            if (item.buttonLabel) metaLines.push(`<b>${t('wfs_lbl_button', 'Botón')}:</b> ${hl(item.buttonLabel)}`);
+            if (item.conditionFormula) metaLines.push(`<b>${t('wfs_lbl_formula', 'Fórmula')}:</b> <code>${hl(truncate(item.conditionFormula, 120))}</code>`);
+            else if (item.conditionText) metaLines.push(`<b>${t('wfs_lbl_condition', 'Condición')}:</b> ${hl(truncate(item.conditionText, 120))}`);
+            if (item.executionContexts) metaLines.push(`<b>${t('wfs_lbl_contexts', 'Contextos')}:</b> ${hl(item.executionContexts.replace(/,\s*$/, ''))}`);
 
             return `
                 <div class="wfi-item" ${dataUrl}>
                     <div class="wfi-item-head">
-                        <span class="wfi-title-text">${escapeHtml(title)}</span>
+                        <span class="wfi-title-text">${hl(title)}</span>
                         ${stringId}
                         ${inactive}
                     </div>
@@ -1169,10 +1251,10 @@
             return `
                 <div class="wfi-item" ${dataUrl}>
                     <div class="wfi-item-head">
-                        <span class="wfi-title-text">${escapeHtml(item.name)}</span>
+                        <span class="wfi-title-text">${hl(item.name)}</span>
                         ${startPill}
                     </div>
-                    <div class="wfi-item-meta"><b>${t('wfs_lbl_actions', 'Acciones')}:</b> ${item.actionsCount} &middot; <b>${t('wfs_lbl_key', 'Clave')}:</b> <code>${escapeHtml(item.key)}</code></div>
+                    <div class="wfi-item-meta"><b>${t('wfs_lbl_actions', 'Acciones')}:</b> ${item.actionsCount} &middot; <b>${t('wfs_lbl_key', 'Clave')}:</b> <code>${hl(item.key)}</code></div>
                 </div>
             `;
         }
@@ -1182,9 +1264,9 @@
         return `
             <div class="wfi-item" ${dataUrl}>
                 <div class="wfi-item-head">
-                    <span class="wfi-title-text">${escapeHtml(tName)}</span>
+                    <span class="wfi-title-text">${hl(tName)}</span>
                 </div>
-                <div class="wfi-item-meta">${fromTo ? `<b>${t('wfs_lbl_flow', 'Flujo')}:</b> ${escapeHtml(fromTo)} &middot; ` : ''}<b>${t('wfs_lbl_key', 'Clave')}:</b> <code>${escapeHtml(item.key)}</code></div>
+                <div class="wfi-item-meta">${fromTo ? `<b>${t('wfs_lbl_flow', 'Flujo')}:</b> ${hl(fromTo)} &middot; ` : ''}<b>${t('wfs_lbl_key', 'Clave')}:</b> <code>${hl(item.key)}</code></div>
             </div>
         `;
     }
@@ -1196,6 +1278,13 @@
 
     function escapeHtml(v) {
         return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function hl(v) {
+        const TS = window.NSFT_TextSearch;
+        const q = INDEXER_UI && INDEXER_UI.filters ? INDEXER_UI.filters.search : '';
+        if (!q || !TS || !TS.markHtml) return escapeHtml(v);
+        return TS.markHtml(String(v ?? ''), q, 'wfi-hl');
     }
 
     initWorkflowData(workflowId);

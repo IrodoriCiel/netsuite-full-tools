@@ -1,9 +1,9 @@
 #nsft-frp-preview {
     margin: 20px 0;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--nsft-border, #e5e7eb);
     border-radius: 8px;
     overflow: hidden;
-    background: #ffffff;
+    background: var(--nsft-surface-0, #ffffff);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
 }
@@ -13,15 +13,15 @@
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
-    background: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+    background: var(--nsft-surface-1, #f9fafb);
+    border-bottom: 1px solid var(--nsft-border, #e5e7eb);
     font-size: 13px;
 }
 
 #nsft-frp-preview .nsft-frp-title {
     flex: 1;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--nsft-text-1, #1f2937);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -42,17 +42,17 @@
     padding: 5px 12px;
     font-size: 12px;
     font-weight: 600;
-    color: #374151;
-    background: #ffffff;
-    border: 1px solid #d1d5db;
+    color: var(--nsft-text-2, #374151);
+    background: var(--nsft-surface-0, #ffffff);
+    border: 1px solid var(--nsft-border-strong, #d1d5db);
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 #nsft-frp-preview .nsft-frp-copy:hover {
-    background: #f3f4f6;
-    color: #111827;
+    background: var(--nsft-surface-2, #f3f4f6);
+    color: var(--nsft-text-1, #111827);
 }
 
 #nsft-frp-preview .nsft-frp-copy.nsft-frp-copied {
@@ -87,7 +87,7 @@
 
 #nsft-frp-preview .nsft-frp-msg {
     padding: 18px 16px;
-    color: #6b7280;
+    color: var(--nsft-text-3, #6b7280);
     font-size: 13px;
     font-style: italic;
     text-align: center;
@@ -133,3 +133,47 @@
     max-width: 720px;
     outline: none;
 }
+
+
+html[data-nsft-theme="dark"] #nsft-frp-preview {
+    border-color: var(--nsft-dk-border, #282A30);
+    background: var(--nsft-dk-panel, #111215);
+}
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-head {
+    background: var(--nsft-dk-surface, #141519);
+    border-bottom-color: var(--nsft-dk-border, #282A30);
+}
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-title { color: #E6EBF2; }
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-badge {
+    background: var(--nsft-dk-hover, #1E2025);
+    border-color: var(--nsft-dk-border2, #34373E);
+}
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-copy {
+    background: var(--nsft-dk-panel, #111215);
+    border-color: var(--nsft-dk-border, #282A30);
+    color: #B9C3D0;
+}
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-copy:hover {
+    background: var(--nsft-dk-hover, #1E2025);
+    border-color: var(--nsft-dk-border2, #34373E);
+    color: #E6EBF2;
+}
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-body {
+    background: var(--nsft-dk-deepest, #0C0D10);
+}
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-body.nsft-frp-body-embed {
+    background: var(--nsft-dk-surface, #141519);
+}
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-body.nsft-frp-body-image {
+    background: repeating-conic-gradient(var(--nsft-dk-hover, #1E2025) 0% 25%, var(--nsft-dk-surface, #141519) 0% 50%) 50% / 20px 20px;
+}
+
+html[data-nsft-theme="dark"] #nsft-frp-preview .nsft-frp-msg { color: #8A94A3; }

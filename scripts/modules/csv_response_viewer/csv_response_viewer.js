@@ -2,7 +2,7 @@
     'use strict';
 
     const STORAGE_KEY = 'enableCsvResponseViewer';
-    const CSV_LINK_SELECTOR = 'a[href*="/app/setup/upload/csv/uploadlogcsv.nl?wqid="]';
+    const CSV_LINK_SELECTOR = 'a[href*="uploadlogcsv.nl?wqid="], a[onclick*="uploadlogcsv.nl?wqid="]';
     const BOUND_ATTR = 'data-nsft-csv-bound';
     const ORIGINAL_TEXT_ATTR = 'data-nsft-original-text';
 
@@ -14,6 +14,7 @@
         TITLE: 'nsft-csv-response-title',
         HELP: 'nsft-csv-response-help',
         MINIMISE: 'nsft-csv-response-minimise',
+        FULLSCREEN: 'nsft-csv-response-fullscreen',
         MAXIMISE: 'nsft-csv-response-maximise',
         CLOSE: 'nsft-csv-response-close',
         CONTENT: 'nsft-csv-response-content',
@@ -27,19 +28,40 @@
         unsubscribe: null,
         dragHandlers: null,
         modalKeyHandler: null,
-        lastFocusedEl: null
+        lastFocusedEl: null,
+        theme: 'light',
+        lastMaxTop: '2.5vh',
+        lastMaxLeft: '2.5vw'
     };
+
+    function restoreMaximised(modal) {
+        if (!modal) return;
+        modal.dataset.state = 'maximised';
+        modal.style.top = state.lastMaxTop;
+        modal.style.left = state.lastMaxLeft;
+        modal.style.right = 'auto';
+        modal.style.bottom = 'auto';
+    }
 
     function shouldRun(settings) {
         return !!settings[STORAGE_KEY] && !settings.enableDiscreetMode;
     }
 
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
+    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false, nsftTheme: 'light' }, (settings) => {
+        state.theme = settings.nsftTheme === 'dark' ? 'dark' : 'light';
         if (shouldRun(settings)) start();
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local' || (!changes[STORAGE_KEY] && !changes.enableDiscreetMode)) return;
+        if (area !== 'local') return;
+
+        if (changes.nsftTheme) {
+            state.theme = changes.nsftTheme.newValue === 'dark' ? 'dark' : 'light';
+            const modal = document.getElementById(IDS.MODAL);
+            if (modal) modal.dataset.theme = state.theme;
+        }
+
+        if (!changes[STORAGE_KEY] && !changes.enableDiscreetMode) return;
         chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
             if (shouldRun(settings)) start();
             else stop();
@@ -59,16 +81,26 @@
         const downloadText = chrome.i18n.getMessage('csvRvDownload') || 'Download';
         const resetText = chrome.i18n.getMessage('csvRvReset') || 'Reset';
 
+        const TITLE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18"/><path d="M9 9.5V20"/></svg>';
+
+        const minLabel = chrome.i18n.getMessage('modalMinimise') || 'Minimise';
+        const maxLabel = chrome.i18n.getMessage('modalMaximise') || 'Maximise';
+        const fsLabel = chrome.i18n.getMessage('sql_fullscreen_enter') || 'Fullscreen';
+        const closeLabel = chrome.i18n.getMessage('closeModal') || 'Close';
+
         const modalHtml = `
-            <div id="${IDS.MODAL}" class="nsft-csv-response-modal" data-nsft-ui data-state="maximised"
+            <div id="${IDS.MODAL}" class="nsft-modal nsft-modal--window nsft-csv-response-modal" data-nsft-ui
+                 data-theme="${state.theme}" data-state="maximised" tabindex="-1"
                  role="dialog" aria-modal="true" aria-labelledby="${IDS.TITLE}" style="display: none;">
-                <div class="nsft-csv-response-header" id="${IDS.HEADER}">
-                    <span id="${IDS.TITLE}">${escapeHtml(titleText)}</span>
-                    <span style="float: right;">
-                        <span id="${IDS.MINIMISE}" role="button" tabindex="0" aria-label="Minimise">&nbsp;</span>
-                        <span id="${IDS.MAXIMISE}" role="button" tabindex="0" aria-label="Maximise">&nbsp;</span>
-                        <span id="${IDS.CLOSE}" role="button" tabindex="0" aria-label="Close">X</span>
+                <div class="nsft-modal-header nsft-csv-response-header" id="${IDS.HEADER}">
+                    <span class="nsft-modal-title" id="${IDS.TITLE}">${TITLE_ICON}<span>${escapeHtml(titleText)}</span></span>
+                    <span class="nsft-header-actions">
+                        <span id="${IDS.MINIMISE}" class="nsft-modal-btn-minimise" role="button" tabindex="0" aria-label="${escapeAttr(minLabel)}" title="${escapeAttr(minLabel)}"></span>
+                        <span id="${IDS.FULLSCREEN}" class="nsft-modal-btn-fullscreen" role="button" tabindex="0" aria-label="${escapeAttr(fsLabel)}" title="${escapeAttr(fsLabel)}"></span>
+                        <span id="${IDS.MAXIMISE}" class="nsft-modal-btn-maximise" role="button" tabindex="0" aria-label="${escapeAttr(maxLabel)}" title="${escapeAttr(maxLabel)}"></span>
+                        <span id="${IDS.CLOSE}" class="nsft-modal-btn-close" role="button" tabindex="0" aria-label="${escapeAttr(closeLabel)}" title="${escapeAttr(closeLabel)}">✕</span>
                     </span>
+                    <div class="nsft-modal-header-line"></div>
                 </div>
                 <div class="nsft-csv-response-content" id="${IDS.CONTENT}"></div>
                 <div class="nsft-csv-response-footer" id="${IDS.FOOTER}">
@@ -81,18 +113,27 @@
         addDragFunctionality();
 
         document.getElementById(IDS.MINIMISE).addEventListener('click', () => {
-            document.getElementById(IDS.MODAL).dataset.state = 'minimised';
+            const modal = document.getElementById(IDS.MODAL);
+            modal.dataset.state = 'minimised';
+            setTimeout(() => snapToEdge(modal), 10);
         });
         document.getElementById(IDS.MAXIMISE).addEventListener('click', () => {
+            restoreMaximised(document.getElementById(IDS.MODAL));
+        });
+        document.getElementById(IDS.FULLSCREEN).addEventListener('click', () => {
             const modal = document.getElementById(IDS.MODAL);
-            modal.style.removeProperty('top');
-            modal.style.removeProperty('left');
-            modal.dataset.state = 'maximised';
+            if (modal.dataset.state === 'fullscreen') { restoreMaximised(modal); return; }
+            modal.dataset.state = 'fullscreen';
         });
         document.getElementById(IDS.CLOSE).addEventListener('click', closeModal);
         document.getElementById(IDS.HEADER).addEventListener('dblclick', () => {
             const el = document.getElementById(IDS.MODAL);
-            el.dataset.state = el.dataset.state === 'maximised' ? 'minimised' : 'maximised';
+            if (el.dataset.state === 'maximised') {
+                el.dataset.state = 'minimised';
+                setTimeout(() => snapToEdge(el), 10);
+            } else {
+                restoreMaximised(el);
+            }
         });
 
         document.getElementById(IDS.DOWNLOAD).addEventListener('click', downloadCsv);
@@ -118,7 +159,7 @@
             if (link.hasAttribute(BOUND_ATTR)) return;
             link.setAttribute(BOUND_ATTR, '1');
 
-            const fileId = extractFileId(link.href);
+            const fileId = extractFileId(link);
             if (!fileId) return;
 
             if (!link.hasAttribute(ORIGINAL_TEXT_ATTR)) link.setAttribute(ORIGINAL_TEXT_ATTR, link.textContent);
@@ -141,13 +182,20 @@
         });
     }
 
-    function extractFileId(href) {
-        try {
-            const url = new URL(href, window.location.origin);
-            return url.searchParams.get('wqid') || '';
-        } catch (e) {
-            return '';
+    function extractFileId(link) {
+        if (!link || !link.getAttribute) return '';
+        const href = link.getAttribute('href') || '';
+
+        if (/uploadlogcsv\.nl\?wqid=/.test(href)) {
+            try {
+                const url = new URL(href, window.location.origin);
+                const id = url.searchParams.get('wqid');
+                if (id) return id;
+            } catch (e) { }
         }
+
+        const m = (href + ' ' + (link.getAttribute('onclick') || '')).match(/wqid=(\d+)/);
+        return m ? m[1] : '';
     }
 
     function showCSVResponse(evt) {
@@ -159,17 +207,17 @@
         const modal = document.getElementById(IDS.MODAL);
         state.lastFocusedEl = document.activeElement;
 
-        modal.style.removeProperty('top');
-        modal.style.removeProperty('left');
-        modal.style.display = 'block';
-        modal.dataset.state = 'maximised';
+        modal.style.display = 'flex';
+        restoreMaximised(modal);
         focusFirstControl(modal);
         if (modal.dataset.fileId === fileId) return;
 
         modal.dataset.fileId = fileId;
-        let [title, messageEl] = generateModalTitle(viewLink);
+        let [title, messageEl, jobName] = generateModalTitle(viewLink);
+        modal.dataset.jobName = jobName || '';
         if (!title) title = chrome.i18n.getMessage('csvRvTitle') || 'CSV Response';
-        modal.querySelector(`#${IDS.TITLE}`).textContent = title;
+        const tituloEl = modal.querySelector(`#${IDS.TITLE} > span`) || modal.querySelector(`#${IDS.TITLE}`);
+        tituloEl.textContent = title;
 
         displayCsvResponse(modal, fileId, messageEl);
     }
@@ -184,6 +232,7 @@
                 let table;
                 const csv = Papa.parse(responseText);
                 const lines = csv.data;
+                modal.dataset.delimiter = (csv.meta && csv.meta.delimiter) || ',';
                 const looksLikeCsv = lines.length > 1 && Array.isArray(lines[0]) && lines[0].length > 1;
 
                 if (!looksLikeCsv) {
@@ -249,25 +298,30 @@
         const title = `${prefix} - ${jobName} - ${date} - ${percentage}`;
         const messageEl = document.createElement('div');
         messageEl.textContent = message;
-        return [title, messageEl];
+        return [title, messageEl, jobName];
     }
 
     function resetCsvData() {
         const confirmMsg = chrome.i18n.getMessage('csvRvConfirmReset') || 'Are you sure you want to reset the CSV data?';
-        if (!confirm(confirmMsg)) return;
-
-        const modal = document.getElementById(IDS.MODAL);
-        const fileId = modal.dataset.fileId;
-        const messageEl = document.querySelector(`.nsft-csv-response-content > div`);
-        displayCsvResponse(modal, fileId, messageEl);
+        const rehacer = () => {
+            const modal = document.getElementById(IDS.MODAL);
+            const fileId = modal.dataset.fileId;
+            const messageEl = document.querySelector(`.nsft-csv-response-content > div`);
+            displayCsvResponse(modal, fileId, messageEl);
+        };
+        if (window.NSFT_Dialog) {
+            window.NSFT_Dialog.confirm({ body: confirmMsg }).then((si) => { if (si) rehacer(); });
+        } else if (confirm(confirmMsg)) {
+            rehacer();
+        }
     }
 
     function downloadCsv() {
         let downloadElement = null;
         try {
-            let title = document.getElementById(IDS.TITLE).textContent.split('-')[2] || '';
-            if (title) title = ` - ${title.trim()}`;
-            if (title.includes('.csv')) title = title.replace('.csv', '');
+            const modal = document.getElementById(IDS.MODAL);
+            let title = ((modal && modal.dataset.jobName) || '').trim().replace(/\.csv$/i, '');
+            if (title) title = ` - ${title}`;
 
             const csv = getCsvData();
             const baseName = chrome.i18n.getMessage('csvRvFileName') || 'Updated CSV Response';
@@ -281,7 +335,9 @@
             downloadElement.click();
             document.body.removeChild(downloadElement);
         } catch (e) {
-            alert(chrome.i18n.getMessage('csvRvDownloadError') || 'There was a problem downloading the CSV');
+            const err = chrome.i18n.getMessage('csvRvDownloadError') || 'There was a problem downloading the CSV';
+            if (window.NSFT_Dialog) window.NSFT_Dialog.alert({ body: err });
+            else alert(err);
             console.error('downloadCsv', e);
         }
     }
@@ -300,7 +356,9 @@
             }
             csv.push(csvRow);
         }
-        return Papa.unparse(csv);
+        const modal = document.getElementById(IDS.MODAL);
+        const delimiter = (modal && modal.dataset.delimiter) || ',';
+        return Papa.unparse(csv, { delimiter });
     }
 
     function closeModal() {
@@ -365,6 +423,41 @@
         state.built = false;
     }
 
+    function constrainModalToWindow(el) {
+        if (!el || (!el.style.left && !el.style.top)) return;
+        if (el.dataset.state === 'fullscreen') return;
+
+        const rect = el.getBoundingClientRect();
+        let newLeft = rect.left;
+        let newTop = rect.top;
+
+        if (newLeft + rect.width > window.innerWidth) newLeft = window.innerWidth - rect.width - 15;
+        if (newLeft < 15) newLeft = 15;
+        if (newTop + rect.height > window.innerHeight) newTop = window.innerHeight - rect.height - 15;
+        if (newTop < 15) newTop = 15;
+
+        if (Math.abs(newLeft - rect.left) > 0.5 || Math.abs(newTop - rect.top) > 0.5) {
+            el.style.left = newLeft + 'px';
+            el.style.top = newTop + 'px';
+        }
+    }
+
+    function snapToEdge(el) {
+        if (!el) return;
+        el.style.right = 'auto';
+        el.style.bottom = 'auto';
+
+        const rect = el.getBoundingClientRect();
+        const targetWidth = el.dataset.state === 'minimised' ? 165 : rect.width;
+        const centerX = rect.left + (rect.width / 2);
+        const p = 15;
+
+        el.style.left = (centerX < (window.innerWidth / 2))
+            ? p + 'px'
+            : (window.innerWidth - targetWidth - p) + 'px';
+        constrainModalToWindow(el);
+    }
+
     function addDragFunctionality() {
         let mouseIsDown = false;
         let initialX = 0;
@@ -376,16 +469,29 @@
             initialY = event.clientY;
         });
 
-        const onUp = () => { mouseIsDown = false; };
+        const onUp = () => {
+            if (!mouseIsDown) return;
+            mouseIsDown = false;
+            const el = document.getElementById(IDS.MODAL);
+            if (!el) return;
+            el.classList.remove('nsft-dragging');
+            if (el.dataset.state === 'minimised') requestAnimationFrame(() => snapToEdge(el));
+            else constrainModalToWindow(el);
+        };
         const onMove = (event) => {
             if (!mouseIsDown) return;
             const el = document.getElementById(IDS.MODAL);
+            el.classList.add('nsft-dragging');
             const left = el.offsetLeft - (initialX - event.clientX);
             const top = el.offsetTop - (initialY - event.clientY);
             initialX = event.clientX;
             initialY = event.clientY;
             el.style.top = `${top}px`;
             el.style.left = `${left}px`;
+            if (el.dataset.state === 'maximised') {
+                state.lastMaxTop = `${top}px`;
+                state.lastMaxLeft = `${left}px`;
+            }
         };
 
         window.addEventListener('mouseup', onUp);

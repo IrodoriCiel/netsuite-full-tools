@@ -17,6 +17,11 @@
     let savedAliases = null;
     let DESCRIPTIONS = {};
 
+    function lnmFold(s) {
+        const TS = window.NSFT_TextSearch;
+        return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
+    }
+
     const I18N_FALLBACK = {
         lnm_loaded: 'Módulo N cargado. Variables disponibles en la consola.',
         lnm_toast_short: 'Módulo N + $1 submódulos cargados',
@@ -38,6 +43,7 @@
         lnm_pick_badge: 'Ya cargado',
         lnm_pick_count: '$1 de $2 seleccionados',
         lnm_pick_search: 'Buscar módulo… p. ej. record, https',
+        ro_clear_search: 'Limpiar búsqueda',
         lnm_pick_foot: 'Los módulos elegidos quedan disponibles en la consola sin el prefijo «N.».',
         lnm_btn_load: 'Cargar ($1)',
         lnm_btn_cancel: 'Cancelar'
@@ -185,8 +191,11 @@
         const content = el('div', { class: 'nsft-lrc-modal-content nsft-lnm-picker' });
 
         const header = el('div', { class: 'nsft-lrc-modal-header' });
+        const titleEl = el('span', { class: 'nsft-lrc-modal-title' });
+        titleEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>';
+        titleEl.append('NetSuite Full Tools - ' + MSG.lnm_modal_title);
         header.append(
-            el('span', { class: 'nsft-lrc-modal-title', text: MSG.lnm_modal_title }),
+            titleEl,
             el('button', { class: 'nsft-lrc-close-btn', text: '✕', type: 'button' })
         );
         const closeBtn = header.querySelector('.nsft-lrc-close-btn');
@@ -199,7 +208,13 @@
             class: 'nsft-lnm-input', type: 'text', spellcheck: 'false',
             placeholder: MSG.lnm_pick_search
         });
-        searchRow.append(searchInput);
+        const clearBtn = el('button', {
+            class: 'nsft-lnm-clear', type: 'button', text: '✕',
+            title: MSG.ro_clear_search || 'Limpiar búsqueda',
+            'aria-label': MSG.ro_clear_search || 'Limpiar búsqueda'
+        });
+        clearBtn.hidden = true;
+        searchRow.append(searchInput, clearBtn);
         body.append(searchRow);
 
         const tools = el('div', { class: 'nsft-lnm-tools' });
@@ -238,7 +253,7 @@
 
             label.append(box, col);
 
-            const row = { name: name, box: box, label: label, hay: (name + ' ' + desc).toLowerCase() };
+            const row = { name: name, box: box, label: label, hay: lnmFold(name + ' ' + desc) };
             rows.push(row);
 
             box.addEventListener('change', () => {
@@ -280,13 +295,24 @@
             applyFilter();
         }
 
+        function markNode(node, needle) {
+            const TS = window.NSFT_TextSearch;
+            if (!node || !TS || !TS.mark) return;
+            if (node.dataset.nsftOrig == null) node.dataset.nsftOrig = node.textContent;
+            TS.mark(node, node.dataset.nsftOrig, needle, 'nsft-lnm-hl');
+        }
+
         function applyFilter() {
-            const q = searchInput.value.trim().toLowerCase();
+            clearBtn.hidden = !searchInput.value;
+            const raw = searchInput.value.trim();
+            const q = lnmFold(raw);
             let visible = 0;
             rows.forEach((r) => {
                 const show = !q || r.hay.indexOf(q) !== -1;
                 r.label.style.display = show ? '' : 'none';
                 if (show) visible++;
+                markNode(r.label.querySelector('.nsft-lnm-name'), show ? raw : '');
+                markNode(r.label.querySelector('.nsft-lnm-desc'), show ? raw : '');
             });
             list.classList.toggle('is-empty', visible === 0);
         }
@@ -305,6 +331,14 @@
         ));
 
         searchInput.addEventListener('input', applyFilter);
+
+        clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
+        clearBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            searchInput.value = '';
+            applyFilter();
+            searchInput.focus();
+        });
 
         const close = () => closeActiveModal();
         cancelBtn.addEventListener('click', close);

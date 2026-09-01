@@ -54,9 +54,25 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function init() {
-    renderColorOptions('colorOptions', 'selectedColor');
+    checkGroupingScope();
+    renderColorOptions('colorOptions', 'selectedColor', 'grey', renderNewGroupPill);
     document.getElementById('addBtn').addEventListener('click', addGroup);
+
+    const idInput = document.getElementById('accountId');
+    const labelInput = document.getElementById('visibleLabel');
+    if (idInput) {
+        idInput.addEventListener('input', () => { renderEnvDetected(); renderNewGroupPill(); });
+        idInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addGroup(); });
+    }
+    if (labelInput) {
+        labelInput.addEventListener('input', renderNewGroupPill);
+        labelInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addGroup(); });
+    }
+    renderEnvDetected();
+    renderNewGroupPill();
+
     renderList();
+    loadKnownAccounts(renderKnownAccounts);
     wireToolsSection();
 }
 
@@ -150,7 +166,34 @@ function isValidAccountId(id) {
     return /^[a-z0-9-]+$/.test(id);
 }
 
-function renderColorOptions(containerId, inputId, preselectedColor = 'grey') {
+function describeEnv(rawId) {
+    const id = normalizeAccountId(rawId);
+    if (!isValidAccountId(id)) return null;
+    const parts = id.split('-');
+    const suffix = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : '';
+    const m = /^(SB(\d*)|RP|TD)$/.exec(suffix);
+    if (!m) {
+        return { code: 'PRD', label: chrome.i18n.getMessage('envBadgeColorPrdLabel') || 'Production' };
+    }
+    if (m[1] === 'RP') {
+        return { code: 'RP', label: chrome.i18n.getMessage('envBadgeColorRpLabel') || 'Release Preview' };
+    }
+    const base = chrome.i18n.getMessage('envBadgeColorSbLabel') || 'Sandbox';
+    const label = m[2]
+        ? (chrome.i18n.getMessage('gt_env_sb_n', [m[2]]) || base + ' ' + m[2])
+        : base;
+    return { code: 'SB', label: label };
+}
+
+function baseAccountId(id) {
+    const norm = normalizeAccountId(id);
+    const parts = norm.split('-');
+    if (parts.length < 2) return norm;
+    const suffix = parts[parts.length - 1].toUpperCase();
+    return /^(SB\d*|RP|TD)$/.test(suffix) ? parts.slice(0, -1).join('-') : norm;
+}
+
+function renderColorOptions(containerId, inputId, preselectedColor = 'grey', onPick) {
     const container = document.getElementById(containerId);
     const hiddenInput = document.getElementById(inputId);
 
@@ -162,7 +205,8 @@ function renderColorOptions(containerId, inputId, preselectedColor = 'grey') {
         const dot = document.createElement('div');
         dot.className = `color-dot ${color === preselectedColor ? 'selected' : ''}`;
         dot.style.setProperty('--group-color', COLOR_MAP[color]);
-        dot.title = color.charAt(0).toUpperCase() + color.slice(1);
+        dot.title = chrome.i18n.getMessage('gt_color_' + color)
+            || color.charAt(0).toUpperCase() + color.slice(1);
 
         dot.onclick = () => {
             container.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
@@ -171,6 +215,7 @@ function renderColorOptions(containerId, inputId, preselectedColor = 'grey') {
             if (hiddenInput) {
                 hiddenInput.value = color;
             }
+            if (onPick) onPick(color);
         };
 
         dot.dataset.color = color;
@@ -183,6 +228,11 @@ function renderList() {
     if (!list) return;
 
     list.innerHTML = '';
+
+    const count = document.getElementById('groupsCount');
+    if (count) count.textContent = String(currentConfig.length);
+    renderChromePreview();
+    renderKnownAccounts();
 
     if (currentConfig.length === 0) {
         const empty = document.createElement('div');
@@ -253,6 +303,31 @@ function renderViewRow(group, index) {
     info.appendChild(title);
     info.appendChild(subtitle);
 
+    const env = describeEnv(group.id);
+    const badge = document.createElement('span');
+    badge.className = 'env-badge' + (env && env.code === 'PRD' ? ' is-prd' : '');
+    badge.textContent = env ? env.label : '';
+
+    const colors = document.createElement('div');
+    colors.className = 'row-colors';
+    colors.title = chrome.i18n.getMessage('gt_row_color_title') || 'Change the group colour';
+    AVAILABLE_COLORS.forEach(color => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'color-dot row-dot' + (color === group.color ? ' selected' : '');
+        dot.style.setProperty('--group-color', COLOR_MAP[color]);
+        dot.title = chrome.i18n.getMessage('gt_color_' + color)
+            || color.charAt(0).toUpperCase() + color.slice(1);
+        dot.onclick = (e) => {
+            e.stopPropagation();
+            if (currentConfig[index].color === color) return;
+            currentConfig[index].color = color;
+            renderList();
+            persistConfig();
+        };
+        colors.appendChild(dot);
+    });
+
     const actions = document.createElement('div');
     actions.className = 'group-actions';
 
@@ -280,6 +355,8 @@ function renderViewRow(group, index) {
 
     item.appendChild(indicator);
     item.appendChild(info);
+    item.appendChild(badge);
+    item.appendChild(colors);
     item.appendChild(actions);
 
     return item;
@@ -385,7 +462,9 @@ function addGroup() {
     idInput.value = '';
     labelInput.value = '';
     colorInput.value = 'grey';
-    renderColorOptions('colorOptions', 'selectedColor', 'grey');
+    renderColorOptions('colorOptions', 'selectedColor', 'grey', renderNewGroupPill);
+    renderEnvDetected();
+    renderNewGroupPill();
 
     renderList();
     persistConfig();
@@ -397,6 +476,197 @@ function removeGroup(index) {
         renderList();
         persistConfig();
     });
+}
+
+
+function checkGroupingScope() {
+    chrome.storage.local.get({
+        enableGroupedTabs: false,
+        enableGroupedTabsAutomatic: true
+    }, (items) => {
+        const box = document.getElementById('gtOffNotice');
+        const text = document.getElementById('gtOffText');
+        if (!box || !text) return;
+        let msg = '';
+        if (!items.enableGroupedTabs) {
+            msg = chrome.i18n.getMessage('gt_off_module')
+                || 'Grouped Tabs is off: this list is not used.';
+        } else if (items.enableGroupedTabsAutomatic) {
+            msg = chrome.i18n.getMessage('gt_off_automatic')
+                || 'Automatic groups are on: tabs group by account on their own and this list is not used.';
+        }
+        text.textContent = msg;
+        box.hidden = !msg;
+    });
+}
+
+chrome.storage.onChanged.addListener((ch, area) => {
+    if (area === 'local' && (ch.enableGroupedTabs || ch.enableGroupedTabsAutomatic)) {
+        checkGroupingScope();
+    }
+});
+
+
+function renderEnvDetected() {
+    const out = document.getElementById('envDetected');
+    const input = document.getElementById('accountId');
+    if (!out || !input) return;
+    const env = input.value.trim() ? describeEnv(input.value) : null;
+    out.textContent = env
+        ? (chrome.i18n.getMessage('gt_env_detected', [env.label]) || 'Detected environment: ' + env.label)
+        : (chrome.i18n.getMessage('gt_account_help') || '');
+    out.classList.toggle('is-detected', !!env);
+}
+
+function renderNewGroupPill() {
+    const pill = document.getElementById('newGroupPill');
+    if (!pill) return;
+    const label = (document.getElementById('visibleLabel') || {}).value || '';
+    const id = (document.getElementById('accountId') || {}).value || '';
+    const color = (document.getElementById('selectedColor') || {}).value || 'grey';
+    pill.textContent = label.trim() || id.trim()
+        || chrome.i18n.getMessage('gt_preview_unnamed') || 'Unnamed';
+    pill.style.backgroundColor = COLOR_MAP[color] || COLOR_MAP['grey'];
+}
+
+let knownAccounts = null;
+
+function loadKnownAccounts(cb) {
+    chrome.storage.local.get({ nsftAccountInfoCache: {}, colorThemeAccounts: {} }, (it) => {
+        const vistas = it.nsftAccountInfoCache || {};
+        const fichas = it.colorThemeAccounts || {};
+        const mapa = new Map();
+        const anota = (rawId, nombre) => {
+            const base = baseAccountId(rawId);
+            if (!isValidAccountId(base)) return;
+            if (nombre) {
+                const esc = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[-_]/g, '[-_]');
+                nombre = nombre.replace(new RegExp(esc + '(?:[-_](?:sb\\d*|rp|td))?', 'gi'), ' ')
+                    .replace(/\s+/g, ' ').trim();
+            }
+            if (!mapa.has(base)) mapa.set(base, nombre || '');
+            else if (!mapa.get(base) && nombre) mapa.set(base, nombre);
+        };
+
+        Object.keys(vistas).forEach((companyId) => {
+            anota(companyId, (vistas[companyId] && vistas[companyId].companyName) || '');
+        });
+        Object.keys(fichas).forEach((id) => {
+            anota(id, (fichas[id] && fichas[id].nombre) || '');
+        });
+
+        knownAccounts = mapa;
+        if (cb) cb();
+    });
+}
+
+const KNOWN_ENVS = [
+    { code: 'PRD', suffix: '', color: 'red', i18n: 'envBadgeColorPrdLabel', fallback: 'Production' },
+    { code: 'SB1', suffix: '-sb1', color: 'green', i18n: null, fallback: 'Sandbox 1' },
+    { code: 'RP', suffix: '-rp', color: 'blue', i18n: 'envBadgeColorRpLabel', fallback: 'Release Preview' }
+];
+
+function knownEnvLabel(env) {
+    if (env.code === 'SB1') return chrome.i18n.getMessage('gt_env_sb_n', ['1']) || env.fallback;
+    return chrome.i18n.getMessage(env.i18n) || env.fallback;
+}
+
+function renderKnownAccounts() {
+    const box = document.getElementById('knownAccounts');
+    const empty = document.getElementById('knownAccountsEmpty');
+    if (!box) return;
+    box.innerHTML = '';
+    if (!knownAccounts) return;
+
+    const configurados = new Set(currentConfig.map(g => g.id));
+    let visibles = 0;
+
+    [...knownAccounts.keys()].sort().forEach((base) => {
+        const nombre = knownAccounts.get(base);
+        const libres = KNOWN_ENVS.filter(e => !configurados.has(base + e.suffix));
+        if (!libres.length) return;
+        visibles++;
+
+        const row = document.createElement('div');
+        row.className = 'known-chip';
+
+        const txt = document.createElement('span');
+        txt.className = 'known-chip-txt';
+        txt.textContent = nombre || base;
+        txt.title = nombre || base;
+        row.appendChild(txt);
+
+        const sub = document.createElement('span');
+        sub.className = 'known-chip-id';
+        sub.textContent = base;
+        row.appendChild(sub);
+
+        const envs = document.createElement('span');
+        envs.className = 'known-envs';
+        libres.forEach((e) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'known-env';
+            b.textContent = e.code;
+            b.title = knownEnvLabel(e);
+            b.onclick = () => {
+                const idInput = document.getElementById('accountId');
+                const labelInput = document.getElementById('visibleLabel');
+                if (idInput) idInput.value = base + e.suffix;
+                if (labelInput) {
+                    labelInput.value = nombre ? nombre + ' — ' + knownEnvLabel(e) : base + e.suffix;
+                }
+                const colorInput = document.getElementById('selectedColor');
+                if (colorInput) colorInput.value = e.color;
+                renderColorOptions('colorOptions', 'selectedColor', e.color, renderNewGroupPill);
+                renderEnvDetected();
+                renderNewGroupPill();
+                if (labelInput) labelInput.focus();
+            };
+            envs.appendChild(b);
+        });
+        row.appendChild(envs);
+        box.appendChild(row);
+    });
+
+    if (empty) empty.hidden = visibles > 0;
+}
+
+const PREVIEW_MAX_GROUPS = 3;
+
+function renderChromePreview() {
+    const box = document.getElementById('chromePreview');
+    const win = document.getElementById('chromePreviewWin');
+    const url = document.getElementById('chromePreviewUrl');
+    const empty = document.getElementById('chromePreviewEmpty');
+    if (!box) return;
+    box.innerHTML = '';
+    if (empty) empty.hidden = currentConfig.length > 0;
+    if (win) win.hidden = currentConfig.length === 0;
+    if (!currentConfig.length) return;
+
+    currentConfig.slice(0, PREVIEW_MAX_GROUPS).forEach((group) => {
+        const color = COLOR_MAP[group.color || 'grey'] || COLOR_MAP['grey'];
+
+        const wrap = document.createElement('span');
+        wrap.className = 'nsft-pv-group';
+        wrap.style.backgroundColor = color + '2E';
+
+        const label = document.createElement('span');
+        label.className = 'nsft-pv-glabel';
+        label.style.backgroundColor = color;
+        label.textContent = group.label;
+        wrap.appendChild(label);
+
+        const tab = document.createElement('span');
+        tab.className = 'nsft-pv-tab';
+        tab.textContent = group.id;
+        wrap.appendChild(tab);
+
+        box.appendChild(wrap);
+    });
+
+    if (url) url.textContent = currentConfig[0].id + '.app.netsuite.com';
 }
 
 

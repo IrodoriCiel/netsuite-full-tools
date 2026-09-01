@@ -1,5 +1,6 @@
 
-.nsft-new-tab-btn {
+.nsft-new-tab-btn,
+.nsft-adv-editor-btn {
     margin-left: 10px;
     cursor: pointer;
     font-size: 11px;
@@ -7,6 +8,7 @@
     text-decoration: underline;
 }
 
-.nsft-new-tab-btn:hover {
+.nsft-new-tab-btn:hover,
+.nsft-adv-editor-btn:hover {
     color: #f58220;
 }

@@ -1,0 +1,147 @@
+
+.nsft-dlg {
+    width: 420px;
+    max-width: min(92vw, 560px);
+}
+
+.nsft-dlg-body {
+    padding: 16px 18px 4px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #374151;
+    max-height: 56vh;
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+}
+
+.nsft-dlg-p {
+    margin: 0 0 10px;
+}
+
+.nsft-dlg-p:last-of-type {
+    margin-bottom: 6px;
+}
+
+.nsft-dlg-input {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 4px 0 8px;
+    padding: 9px 11px;
+    font-family: inherit;
+    font-size: 13.5px;
+    color: #111827;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.nsft-dlg-input:focus {
+    border-color: var(--nsft-ns-accent, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.nsft-dlg-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 18px 14px;
+}
+
+.nsft-dlg-btn {
+    padding: 7px 15px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.nsft-dlg-btn:focus-visible {
+    outline: 2px solid var(--nsft-ns-accent, #2563eb);
+    outline-offset: 2px;
+}
+
+.nsft-dlg-btn-cancel {
+    background: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.nsft-dlg-btn-cancel:hover {
+    background: #f3f4f6;
+}
+
+.nsft-dlg-btn-ok {
+    background: var(--nsft-ns-accent, #2563eb);
+    color: #ffffff;
+    border: 1px solid var(--nsft-ns-accent, #2563eb);
+}
+
+.nsft-dlg-btn-ok:hover {
+    background: var(--nsft-ns-accent-hover, #1d4ed8);
+    border-color: var(--nsft-ns-accent-hover, #1d4ed8);
+}
+
+.nsft-dlg-btn-danger,
+.nsft-dlg-btn-danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+.nsft-dlg-btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-body {
+    color: #C6CEDB;
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-input {
+    color: #E6EBF2;
+    background: var(--nsft-dk-surface);
+    border-color: var(--nsft-dk-border);
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-input:focus {
+    border-color: var(--nsft-ns-accent-light, #7FB0FF);
+    box-shadow: 0 0 0 3px rgba(127, 176, 255, 0.18);
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-btn-cancel {
+    background: var(--nsft-dk-surface);
+    color: #C6CEDB;
+    border-color: var(--nsft-dk-border);
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-btn-cancel:hover {
+    background: var(--nsft-dk-hover);
+    border-color: var(--nsft-dk-border2);
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-btn-ok {
+    background: var(--nsft-ns-accent, #3b82f6);
+    border-color: var(--nsft-ns-accent-light, #7FB0FF);
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-btn-danger,
+.nsft-dlg[data-theme="dark"] .nsft-dlg-btn-danger:hover {
+    background: #C0455C;
+    border-color: #F0708A;
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-btn-danger:hover {
+    background: #A73A4E;
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-dlg-body::-webkit-scrollbar-thumb {
+    background: var(--nsft-dk-border2);
+    border-radius: 5px;
+}

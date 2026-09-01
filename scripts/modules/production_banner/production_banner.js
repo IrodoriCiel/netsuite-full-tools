@@ -15,7 +15,7 @@
     let _unsub = null;
 
     chrome.storage.local.get({
-        [STORAGE_KEY]: true,
+        [STORAGE_KEY]: false,
         [COLOR_KEY]: '#dc2626',
         [POSITION_KEY]: 'bottom'
     }, (items) => {
@@ -38,7 +38,7 @@
             _position = changes[POSITION_KEY].newValue || 'bottom';
             try { sessionStorage.removeItem(DISMISS_FLAG); } catch (e) { }
             remove();
-            chrome.storage.local.get({ [STORAGE_KEY]: true }, (it) => {
+            chrome.storage.local.get({ [STORAGE_KEY]: false }, (it) => {
                 if (it[STORAGE_KEY]) init();
             });
         }

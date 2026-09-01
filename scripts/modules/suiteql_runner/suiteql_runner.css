@@ -436,6 +436,10 @@
     writing-mode: horizontal-tb;
 }
 
+#nsft-sql-modal .nsft-sql-editor-container .CodeMirror .CodeMirror-lines {
+    padding-bottom: min(18vh, 120px);
+}
+
 #nsft-sql-modal .nsft-sql-editor-container .CodeMirror-linenumber {
     padding-left: 26px;
 }
@@ -1321,6 +1325,91 @@ body[data-nsft-sql-theme="dark"] .nsft-sql-schema-details-head {
 #nsft-sql-modal[data-theme="dark"] .nsft-sql-find-clear:hover {
     background: var(--nsft-dk-border2);
     color: #e5e7eb;
+}
+
+#nsft-sql-modal .nsft-sql-findbar {
+    position: absolute;
+    top: 5px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border: 1px solid var(--nsft-border, #ddd);
+    border-radius: 4px;
+    background: var(--nsft-surface-0, #fff);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    font-family: var(--nsft-font, sans-serif);
+    font-size: 13px;
+}
+
+#nsft-sql-modal .nsft-sql-findbar-input {
+    width: 150px;
+    padding: 2px 5px;
+    border: 1px solid var(--nsft-border-strong, #ccc);
+    border-radius: 3px;
+    background: var(--nsft-surface-0, #fff);
+    color: var(--nsft-text-1, #111827);
+    font-size: 13px;
+    outline: none;
+}
+
+#nsft-sql-modal .nsft-sql-findbar-btn {
+    padding: 2px;
+    border: none;
+    background: none;
+    color: inherit;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+#nsft-sql-modal .nsft-sql-findbar-close {
+    margin-left: 4px;
+    padding: 0 4px;
+    font-size: 16px;
+    color: #666;
+}
+
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-findbar {
+    background: var(--sqlv2-bg2);
+    border-color: var(--sqlv2-ctl);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-findbar-input {
+    background: var(--sqlv2-bg1);
+    border-color: var(--sqlv2-ctl);
+    color: var(--sqlv2-text);
+}
+
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-findbar-input::placeholder {
+    color: var(--sqlv2-dim);
+}
+
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-findbar-btn { color: var(--sqlv2-text-soft); }
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-findbar-btn:hover { color: var(--sqlv2-text); }
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-findbar-close { color: var(--sqlv2-muted); }
+
+#nsft-sql-modal .nsft-sql-find-join {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+#nsft-sql-modal .nsft-sql-find-join .nsft-sql-join-filter {
+    width: 100%;
+    padding-right: 24px;
+}
+
+#nsft-sql-modal .nsft-sql-find-catalog .nsft-sql-schema-catalog-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 26px;
+}
+
+#nsft-sql-modal .nsft-sql-find-catalog .nsft-sql-find-clear {
+    right: 6px;
 }
 
 #nsft-sql-modal .nsft-sql-find-schema .nsft-sql-find-clear {
@@ -3248,18 +3337,18 @@ body[data-nsft-sql-theme="dark"] .CodeMirror-hints::-webkit-scrollbar-corner {
 #nsft-sql-modal[data-theme="dark"] #nsft-sql-tool-ai {
     border: 2px solid transparent !important;
     background:
-        linear-gradient(rgba(20, 24, 34, 0.85), rgba(20, 24, 34, 0.85)) padding-box,
-        linear-gradient(135deg, rgba(110, 124, 245, 0.9), rgba(190, 110, 245, 0.9), rgba(110, 124, 245, 0.9)) border-box !important;
-    color: var(--sqlv2-purple-text) !important;
+        linear-gradient(var(--nsft-ai-face-dark, rgba(20, 24, 34, 0.85)), var(--nsft-ai-face-dark, rgba(20, 24, 34, 0.85))) padding-box,
+        linear-gradient(135deg, var(--nsft-ai-a-dark, rgba(110, 124, 245, 0.9)), var(--nsft-ai-b-dark, rgba(190, 110, 245, 0.9)), var(--nsft-ai-a-dark, rgba(110, 124, 245, 0.9))) border-box !important;
+    color: var(--nsft-ai-text-dark, #D6C6FB) !important;
     font-weight: 600 !important;
-    box-shadow: 0 0 18px var(--sqlv2-purple-glow), inset 0 0 8px rgba(155, 110, 245, 0.25) !important;
+    box-shadow: 0 0 18px var(--nsft-ai-glow-dark, rgba(155, 110, 245, 0.35)), inset 0 0 8px var(--nsft-ai-glow-in-dark, rgba(155, 110, 245, 0.25)) !important;
     text-shadow: 0 0 8px rgba(196, 173, 250, 0.5);
 }
 
 #nsft-sql-modal[data-theme="dark"] #nsft-sql-tool-ai:hover {
     background:
         linear-gradient(rgba(30, 36, 52, 0.85), rgba(30, 36, 52, 0.85)) padding-box,
-        linear-gradient(135deg, #6E7CF5, #9B6EF5, #6E7CF5) border-box !important;
+        linear-gradient(135deg, var(--nsft-ai-a, #6E7CF5), var(--nsft-ai-b, #9B6EF5), var(--nsft-ai-a, #6E7CF5)) border-box !important;
     color: #EAE0FE !important;
     box-shadow: 0 0 26px rgba(155, 110, 245, 0.60), inset 0 0 10px rgba(155, 110, 245, 0.35) !important;
 }
@@ -3399,6 +3488,10 @@ body[data-nsft-sql-theme="dark"] .CodeMirror-hints::-webkit-scrollbar-corner {
 #nsft-sql-modal[data-theme="dark"] .nsft-sql-editor-container .CodeMirror-gutters {
     background: var(--sqlv2-bg1) !important;
     border-right: 1px solid var(--sqlv2-border) !important;
+}
+
+#nsft-sql-modal[data-theme="dark"] .CodeMirror {
+    border-color: var(--sqlv2-border) !important;
 }
 
 #nsft-sql-modal[data-theme="dark"] .nsft-sql-editor-container .CodeMirror-linenumber {
@@ -3727,7 +3820,7 @@ body[data-nsft-sql-theme="dark"] .CodeMirror-hint-active {
 #nsft-sql-modal #nsft-sql-tool-ai {
     border: 2px solid transparent;
     background:
-        linear-gradient(#FDFCFF, #FDFCFF) padding-box,
+        linear-gradient(var(--nsft-ai-face, #FDFCFF), var(--nsft-ai-face, #FDFCFF)) padding-box,
         linear-gradient(135deg, #6E7CF5, #9B6EF5, #6E7CF5) border-box;
     color: #6D28D9;
     font-weight: 600;
@@ -5129,6 +5222,17 @@ body[data-nsft-sql-theme="dark"] .CodeMirror-hint-active {
     color: #6b7280;
     font-size: 10.5px;
     font-style: italic;
+}
+
+#nsft-sql-modal .nsft-sql-erd-legfind .nsft-sql-find-clear {
+    right: 6px;
+    width: 16px;
+    height: 16px;
+    font-size: 14px;
+}
+
+#nsft-sql-modal .nsft-sql-erd-legfind .nsft-sql-erd-legfilter {
+    padding-right: 26px;
 }
 
 #nsft-sql-modal[data-theme="dark"] .nsft-sql-erd-legfilter {
@@ -6620,7 +6724,7 @@ html[data-nsft-theme="dark"] .nsft-sql-boot {
     padding: 6px 12px;
     border: 2px solid transparent;
     background:
-        linear-gradient(#FDFCFF, #FDFCFF) padding-box,
+        linear-gradient(var(--nsft-ai-face, #FDFCFF), var(--nsft-ai-face, #FDFCFF)) padding-box,
         linear-gradient(135deg, #6E7CF5, #9B6EF5, #6E7CF5) border-box;
     color: #6D28D9;
     box-shadow: 0 0 5px rgba(155, 110, 245, .16), inset 0 0 4px rgba(155, 110, 245, .10);
@@ -7048,12 +7152,164 @@ html[data-nsft-theme="dark"] .nsft-sql-boot {
 }
 
 #nsft-sql-modal mark.nsft-sql-hl {
-    background: #fde68a;
-    color: #111827;
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
+    color: inherit;
     border-radius: 2px;
     padding: 0 1px;
 }
 #nsft-sql-modal[data-theme="dark"] mark.nsft-sql-hl {
-    background: rgba(250, 204, 21, 0.28);
-    color: #fde68a;
+    background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
+    color: var(--nsft-hl-fg-dark, #0D1410);
 }
+
+
+#nsft-sql-modal .CodeMirror .nsft-sql-ghost {
+    color: #9ca3af;
+    opacity: 0.75;
+    font-style: italic;
+    white-space: pre;
+}
+
+#nsft-sql-modal[data-theme="dark"] .CodeMirror .nsft-sql-ghost { color: var(--sqlv2-dim); }
+
+#nsft-sql-modal .CodeMirror .nsft-sql-ghost-block {
+    margin: 0;
+    padding: 0 0 0 4px;
+    border: none;
+    background: transparent;
+    font: inherit;
+    line-height: inherit;
+    white-space: pre;
+}
+
+#nsft-sql-modal #nsft-sql-tool-ghost[hidden] { display: none !important; }
+
+#nsft-sql-modal #nsft-sql-tool-ghost:not(.is-on) svg { opacity: 0.35; }
+
+#nsft-sql-modal #nsft-sql-tool-ghost.is-on {
+    border: 2px solid transparent !important;
+    background:
+        linear-gradient(var(--nsft-ai-face, #FDFCFF), var(--nsft-ai-face, #FDFCFF)) padding-box,
+        linear-gradient(135deg, var(--nsft-ai-a, #6E7CF5), var(--nsft-ai-b, #9B6EF5), var(--nsft-ai-a, #6E7CF5)) border-box !important;
+    color: var(--nsft-ai-text, #6D28D9) !important;
+    box-shadow: 0 0 8px var(--nsft-ai-glow, rgba(155, 110, 245, 0.20)), inset 0 0 6px var(--nsft-ai-glow-in, rgba(155, 110, 245, 0.12)) !important;
+}
+
+#nsft-sql-modal[data-theme="dark"] #nsft-sql-tool-ghost.is-on {
+    background:
+        linear-gradient(var(--nsft-ai-face-dark, rgba(20, 24, 34, 0.85)), var(--nsft-ai-face-dark, rgba(20, 24, 34, 0.85))) padding-box,
+        linear-gradient(135deg, var(--nsft-ai-a-dark, rgba(110, 124, 245, 0.9)), var(--nsft-ai-b-dark, rgba(190, 110, 245, 0.9)), var(--nsft-ai-a-dark, rgba(110, 124, 245, 0.9))) border-box !important;
+    color: var(--nsft-ai-text-dark, #D6C6FB) !important;
+    box-shadow: 0 0 18px var(--nsft-ai-glow-dark, rgba(155, 110, 245, 0.35)), inset 0 0 8px var(--nsft-ai-glow-in-dark, rgba(155, 110, 245, 0.25)) !important;
+}
+
+#nsft-sql-modal #nsft-sql-tool-ghost .nsft-sql-ghost-spin { display: none; }
+
+#nsft-sql-modal #nsft-sql-tool-ghost.is-busy svg { display: none; }
+
+#nsft-sql-modal #nsft-sql-tool-ghost.is-busy .nsft-sql-ghost-spin {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 2.5px solid rgba(155, 110, 245, 0.30);
+    border-top-color: #7C3AED;
+    border-radius: 50%;
+    animation: nsft-spin 0.7s linear infinite;
+    flex: 0 0 auto;
+}
+
+#nsft-sql-modal[data-theme="dark"] #nsft-sql-tool-ghost.is-busy .nsft-sql-ghost-spin {
+    border-color: rgba(155, 110, 245, 0.35);
+    border-top-color: var(--sqlv2-purple-text, #D6C6FB);
+}
+
+@keyframes nsft-sql-ghost-late {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.55) saturate(1.35); }
+}
+
+#nsft-sql-modal #nsft-sql-tool-ghost.is-busy {
+    animation: nsft-sql-ghost-late 0.9s ease-in-out infinite;
+}
+
+#nsft-sql-modal .nsft-sql-ghost-menu {
+    position: fixed;
+    z-index: 2147483000;
+    min-width: 200px;
+    max-width: 280px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 6px;
+    border: 1px solid var(--nsft-border-strong, #cbd5e1);
+    border-radius: 8px;
+    background: var(--nsft-surface-0, #fff);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+    font-family: var(--nsft-font, 'Segoe UI', system-ui, sans-serif);
+    font-size: 12px;
+}
+
+#nsft-sql-modal .nsft-sql-ghost-menu-title {
+    padding: 4px 8px 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--nsft-text-3, #64748b);
+}
+
+#nsft-sql-modal .nsft-sql-ghost-menu-note {
+    padding: 0 8px 6px;
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: var(--nsft-text-muted, #94a3b8);
+    white-space: normal;
+    border-bottom: 1px solid var(--nsft-divider, #f1f5f9);
+    margin-bottom: 4px;
+}
+
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-ghost-menu-note {
+    color: var(--sqlv2-dim);
+    border-bottom-color: var(--sqlv2-border);
+}
+
+#nsft-sql-modal .nsft-sql-ghost-menu-group {
+    padding: 6px 8px 2px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--nsft-text-muted, #94a3b8);
+}
+
+#nsft-sql-modal .nsft-sql-ghost-menu-item {
+    display: block;
+    width: 100%;
+    padding: 5px 8px;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    font: inherit;
+    color: var(--nsft-text-1, #0f172a);
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#nsft-sql-modal .nsft-sql-ghost-menu-item:hover { background: var(--nsft-surface-2, #eef1f6); }
+
+#nsft-sql-modal .nsft-sql-ghost-menu-item.is-current {
+    color: #6D28D9;
+    font-weight: 600;
+}
+#nsft-sql-modal .nsft-sql-ghost-menu-item.is-current::before { content: '✓ '; }
+
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-ghost-menu {
+    background: var(--sqlv2-bg2);
+    border-color: var(--sqlv2-ctl);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-ghost-menu-title { color: var(--sqlv2-muted); }
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-ghost-menu-group { color: var(--sqlv2-dim); }
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-ghost-menu-item { color: var(--sqlv2-text); }
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-ghost-menu-item:hover { background: var(--sqlv2-hover); }
+#nsft-sql-modal[data-theme="dark"] .nsft-sql-ghost-menu-item.is-current { color: var(--sqlv2-purple-text, #D6C6FB); }

@@ -3,7 +3,7 @@
 
     const STORAGE_KEY = 'enableUpdateNotice';
     const SEEN_KEY = 'nsftUpdateSeenVersion';
-    const UN_MAX_HIGHLIGHTS = 8;
+    const UN_MAX_HIGHLIGHTS = 12;
 
     const RB = window.NSFT_RecordButtons;
     if (RB && RB.isHeaderlessPage && RB.isHeaderlessPage()) return;
@@ -23,7 +23,14 @@
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local' || !changes[SEEN_KEY]) return;
-        if (changes[SEEN_KEY].newValue === VERSION) removeToast();
+        if (changes[SEEN_KEY].newValue === VERSION) { removeToast(); return; }
+
+        if (changes[SEEN_KEY].newValue === undefined || changes[SEEN_KEY].newValue === '') {
+            chrome.storage.local.get({ [STORAGE_KEY]: true }, (it) => {
+                if (chrome.runtime.lastError || !it[STORAGE_KEY]) return;
+                show();
+            });
+        }
     });
 
     function removeToast() {
@@ -58,9 +65,13 @@
         const list = document.createElement('ul');
         list.className = 'nsft-un-list';
         for (let i = 1; i <= UN_MAX_HIGHLIGHTS; i++) {
-            const msg = chrome.i18n.getMessage('un_hl_' + i);
+            let msg = chrome.i18n.getMessage('un_hl_' + i);
             if (!msg) continue;
             const li = document.createElement('li');
+            if (msg.charAt(0) === '*') {
+                li.className = 'is-new';
+                msg = msg.slice(1).replace(/^\s+/, '');
+            }
             li.textContent = msg;
             list.appendChild(li);
         }

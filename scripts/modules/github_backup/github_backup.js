@@ -35,7 +35,11 @@
         if (changes[NSFT_THEME_KEY]) {
             _theme = changes[NSFT_THEME_KEY].newValue || 'light';
             const m = document.getElementById(MODAL_ID);
-            if (m) m.setAttribute('data-theme', resolveTheme());
+            if (m) {
+                m.setAttribute('data-theme', resolveTheme());
+                const card = m.querySelector('.nsft-ghb-card');
+                if (card) card.setAttribute('data-theme', resolveTheme());
+            }
         }
     });
 
@@ -457,25 +461,28 @@
 
         const overlay = document.createElement('div');
         overlay.id = MODAL_ID;
-        overlay.className = 'nsft-ghb-overlay';
+        overlay.className = 'nsft-ghb-overlay nsft-modal-backdrop';
         overlay.setAttribute('data-theme', resolveTheme());
         overlay.addEventListener('mousedown', (e) => { if (e.target === overlay && !_abort) closeModal(); });
 
         const lastTs = await new Promise((r) => chrome.storage.local.get({ nsftGithubLastBackup: 0 }, (it) => r(it.nsftGithubLastBackup || 0)));
 
         const card = document.createElement('div');
-        card.className = 'nsft-ghb-card';
+        card.className = 'nsft-ghb-card nsft-modal nsft-modal--dialog';
+        card.setAttribute('data-theme', resolveTheme());
         card.innerHTML =
-            '<div class="nsft-ghb-head">' +
-                '<span class="nsft-ghb-headicon">' + GH_ICON + '</span>' +
-                '<div class="nsft-ghb-headtext">' +
-                    '<div class="nsft-ghb-title">' + esc(msg('ghb_title', null, 'Respaldar SuiteScripts a GitHub')) + '</div>' +
-                    '<div class="nsft-ghb-sub">' + esc(msg('ghb_sub', null, 'Solo se subirán los scripts que hayan cambiado desde el último respaldo.')) + '</div>' +
+            '<div class="nsft-modal-header">' +
+                '<span class="nsft-modal-title">' +
+                    '<span class="nsft-ghb-headicon">' + GH_ICON + '</span>' +
+                    'NetSuite Full Tools - ' + esc(msg('ghb_title', null, 'Respaldar SuiteScripts a GitHub')) +
+                '</span>' +
+                '<div class="nsft-header-actions">' +
+                    '<button type="button" class="nsft-ghb-x nsft-modal-btn-close" title="' + esc(msg('ghb_close', null, 'Cerrar')) + '">✕</button>' +
                 '</div>' +
-                '<button type="button" class="nsft-ghb-x" title="' + esc(msg('ghb_close', null, 'Cerrar')) + '">✕</button>' +
             '</div>' +
             '<div class="nsft-ghb-body">' +
                 '<div class="nsft-ghb-col nsft-ghb-col-left">' +
+                    '<div class="nsft-ghb-sub">' + esc(msg('ghb_sub', null, 'Solo se subirán los scripts que hayan cambiado desde el último respaldo.')) + '</div>' +
                     '<details class="nsft-ghb-guide" open>' +
                         '<summary class="nsft-ghb-guide-sum">' +
                             '<span class="nsft-ghb-guide-i">i</span>' +

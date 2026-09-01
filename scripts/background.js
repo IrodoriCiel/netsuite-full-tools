@@ -60,6 +60,45 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
         }
     });
 
+    const OLD_PRESET_HEX = {
+        '#a3293d': '#9a606a',
+        '#b4622a': '#9a7860',
+        '#8a7420': '#9a8b60',
+        '#2f9e6f': '#609a73',
+        '#367d4d': '#609a73',
+        '#2f6fed': '#60779a',
+        '#3f454c': '#60779a',
+        '#6f4f9c': '#87609a',
+        '#123028': '#609a90'
+    };
+    const remapHex = (hex) => OLD_PRESET_HEX[String(hex || '').toLowerCase()] || null;
+    chrome.storage.local.get({
+        colorThemeEnvPrd: '', colorThemeEnvSb: '', colorThemeEnvRp: '',
+        colorThemeAccounts: {}
+    }, (cur) => {
+        if (chrome.runtime.lastError) return;
+        const out = {};
+        ['colorThemeEnvPrd', 'colorThemeEnvSb', 'colorThemeEnvRp'].forEach((k) => {
+            const nuevo = remapHex(cur[k]);
+            if (nuevo) out[k] = nuevo;
+        });
+        const fichas = cur.colorThemeAccounts || {};
+        let fichasCambian = false;
+        Object.keys(fichas).forEach((id) => {
+            const f = fichas[id];
+            if (!f || typeof f !== 'object') return;
+            ['color', 'PRD', 'SB', 'RP'].forEach((campo) => {
+                const nuevo = remapHex(f[campo]);
+                if (nuevo) { f[campo] = nuevo; fichasCambian = true; }
+            });
+        });
+        if (fichasCambian) out.colorThemeAccounts = fichas;
+        if (!Object.keys(out).length) return;
+        chrome.storage.local.set(out);
+        try { chrome.storage.sync.set(out, () => void chrome.runtime.lastError); }
+        catch (e) { }
+    });
+
     const syncKeys = [
         ...(globalThis.NSFT_SYNC_PRIMARY_KEYS || []),
         ...(globalThis.NSFT_SYNC_MIRRORED_KEYS || [])
@@ -1064,8 +1103,18 @@ function nsftAiUsage(u) {
     const tin = num(u.input_tokens) + num(u.prompt_tokens) + num(u.total_input_tokens);
     const tout = num(u.output_tokens) + num(u.completion_tokens) + num(u.total_output_tokens);
     const total = num(u.total_tokens) || (tin + tout);
+    const det = u.prompt_tokens_details || u.input_tokens_details || {};
+    const cached = num(u.cache_read_input_tokens)
+        + num(det.cached_tokens)
+        + num(u.prompt_cache_hit_tokens)
+        + num(u.cached_content_token_count);
     if (!tin && !tout && !total) return null;
-    return { in: tin, out: tout, total: total };
+    return { in: tin, out: tout, total: total, cached: cached };
+}
+
+function nsftAiTruncated(reason) {
+    const r = String(reason || '').toLowerCase();
+    return r === 'length' || r === 'max_tokens' || r === 'max_output_tokens' || r === 'maxtokens';
 }
 
 function nsftAiSleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
@@ -1133,7 +1182,9 @@ async function nsftAiClaude(req) {
             name: t.name, description: t.description, input_schema: t.input_schema
         }))
     };
-    if (req.system) body.system = req.system;
+    if (req.system) {
+        body.system = [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }];
+    }
 
     const r = await nsftAiFetchJson(url, headers, body);
     if (!r.ok) return r;
@@ -1148,6 +1199,7 @@ async function nsftAiClaude(req) {
     return {
         ok: true, text, toolCalls,
         stopReason: toolCalls.length ? 'tool_use' : 'end',
+        truncated: nsftAiTruncated(r.data && r.data.stop_reason),
         usage: nsftAiUsage(r.data && r.data.usage)
     };
 }
@@ -1201,6 +1253,7 @@ async function nsftAiOpenAICompat(req) {
         max_tokens: req.maxTokens || 4096,
         messages: oaiMessages
     };
+    if (req.thinking) body.thinking = req.thinking;
     if (req.tools && req.tools.length) {
         body.tools = req.tools.map(t => ({
             type: 'function',
@@ -1233,6 +1286,7 @@ async function nsftAiOpenAICompat(req) {
         text: typeof msg.content === 'string' ? msg.content : '',
         toolCalls,
         stopReason: toolCalls.length ? 'tool_use' : 'end',
+        truncated: nsftAiTruncated(choice && choice.finish_reason),
         usage: nsftAiUsage(r.data && r.data.usage)
     };
 }
@@ -1307,6 +1361,8 @@ async function nsftAiGeminiInteractions(req) {
         text,
         toolCalls,
         stopReason: toolCalls.length ? 'tool_use' : 'end',
+        truncated: nsftAiTruncated(data.finish_reason || data.status
+            || ((data.steps || [])[(data.steps || []).length - 1] || {}).finish_reason),
         interactionId: data.id || null,
         usage: nsftAiUsage(data.usage)
     };

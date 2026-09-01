@@ -73,7 +73,11 @@
         if (changes[THEME_KEY]) {
             _theme = changes[THEME_KEY].newValue || 'light';
             const open = document.getElementById(MODAL_ID);
-            if (open) open.setAttribute('data-theme', resolveTheme());
+            if (open) {
+                open.setAttribute('data-theme', resolveTheme());
+                const panel = open.querySelector('.nsft-cheatsheet-panel');
+                if (panel) panel.setAttribute('data-theme', resolveTheme());
+            }
         }
         if (changes[STORAGE_KEY]) {
             if (changes[STORAGE_KEY].newValue) enable();
@@ -166,7 +170,7 @@
 
         const overlay = document.createElement('div');
         overlay.id = MODAL_ID;
-        overlay.className = 'nsft-cheatsheet-overlay';
+        overlay.className = 'nsft-cheatsheet-overlay nsft-modal-backdrop';
         overlay.setAttribute('data-theme', resolveTheme());
         overlay.innerHTML = getRenderedHtml();
         overlay.addEventListener('click', (ev) => {
@@ -221,6 +225,17 @@
             search.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') { e.stopPropagation(); closeCheatsheet(); }
             });
+
+            const clearBtn = overlay.querySelector('.nsft-cheatsheet-search-clear');
+            if (clearBtn) {
+                clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
+                clearBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    search.value = '';
+                    applyFilter(overlay, '');
+                    search.focus();
+                });
+            }
         }
 
         overlay.addEventListener('click', (ev) => {
@@ -247,12 +262,23 @@
         }, 0);
     }
 
+    function csFold(s) {
+        const TS = window.NSFT_TextSearch;
+        return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
+    }
+
     function applyFilter(overlay, raw) {
-        const term = String(raw || '').trim().toLowerCase();
+        const term = csFold(String(raw || '').trim());
+        const clearBtn = overlay.querySelector('.nsft-cheatsheet-search-clear');
+        if (clearBtn) clearBtn.hidden = !String(raw || '').length;
+        const needle = String(raw || '').trim();
         const rows = overlay.querySelectorAll('.nsft-cheatsheet-row');
         rows.forEach(row => {
-            const hay = (row.dataset.search || '').toLowerCase();
-            row.style.display = (!term || hay.indexOf(term) !== -1) ? '' : 'none';
+            const hay = row.dataset.search || '';
+            const visible = !term || hay.indexOf(term) !== -1;
+            row.style.display = visible ? '' : 'none';
+            markSpan(row.querySelector('.nsft-cheatsheet-label-text'), visible ? needle : '');
+            markSpan(row.querySelector('.nsft-cheatsheet-ctx-badge'), visible ? needle : '');
         });
         overlay.querySelectorAll('.nsft-cheatsheet-group').forEach(g => {
             const anyVisible = g.querySelector('.nsft-cheatsheet-row:not([style*="display: none"])');
@@ -265,11 +291,18 @@
         if (body) body.classList.toggle('nsft-cheatsheet-filtering', !!term);
     }
 
+    function markSpan(el, needle) {
+        const TS = window.NSFT_TextSearch;
+        if (!el || !TS || !TS.mark) return;
+        if (el.dataset.nsftOrig == null) el.dataset.nsftOrig = el.textContent;
+        TS.mark(el, el.dataset.nsftOrig, needle, 'nsft-cheatsheet-hl');
+    }
+
     function trapFocus(e) {
         if (e.key !== 'Tab') return;
         const overlay = e.currentTarget;
         const focusables = overlay.querySelectorAll(
-            'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            'a[href], button:not([disabled]):not([hidden]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
         );
         if (!focusables.length) return;
         const first = focusables[0];
@@ -390,7 +423,7 @@
                                     data-ctx="${escapeHtml(ctx)}"
                                     data-action="${escapeHtml(action || '')}"
                                     data-storage-key="${escapeHtml(storageKey || '')}"
-                                    data-search="${escapeHtml(label.toLowerCase() + ' ' + combo.toLowerCase() + ' ' + badge.toLowerCase())}">
+                                    data-search="${escapeHtml(csFold(label + ' ' + combo + ' ' + badge))}">
                                     <td class="nsft-cheatsheet-label">
                                         ${tryBtn}<span class="nsft-cheatsheet-label-text">${escapeHtml(label)}</span>${badgeHtml}
                                     </td>
@@ -407,23 +440,26 @@
         `).join('');
 
         return `
-            <div class="nsft-cheatsheet-panel" role="dialog" aria-modal="true" aria-labelledby="nsft-cheatsheet-title" tabindex="-1">
-                <header class="nsft-cheatsheet-header">
-                    <h2 id="nsft-cheatsheet-title">${escapeHtml(i18n('cheatsheet_title', 'NSFT keyboard shortcuts'))}</h2>
-                    <div class="nsft-cheatsheet-header-actions">
+            <div class="nsft-cheatsheet-panel nsft-modal nsft-modal--dialog" data-theme="${escapeHtml(resolveTheme())}" role="dialog" aria-modal="true" aria-labelledby="nsft-cheatsheet-title" tabindex="-1">
+                <header class="nsft-cheatsheet-header nsft-modal-header">
+                    <h2 id="nsft-cheatsheet-title" class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><line x1="6" y1="10" x2="6.01" y2="10"></line><line x1="10" y1="10" x2="10.01" y2="10"></line><line x1="14" y1="10" x2="14.01" y2="10"></line><line x1="18" y1="10" x2="18.01" y2="10"></line><line x1="8" y1="14" x2="16" y2="14"></line></svg>NetSuite Full Tools - ${escapeHtml(i18n('cheatsheet_title', 'Keyboard shortcuts'))}</h2>
+                    <div class="nsft-cheatsheet-header-actions nsft-header-actions">
                         <button type="button" class="nsft-cheatsheet-reset"
                                 title="${escapeHtml(i18n('cheatsheet_reset_title', 'Restore default shortcuts'))}"
                                 aria-label="${escapeHtml(i18n('cheatsheet_reset_title', 'Restore default shortcuts'))}">⟲</button>
                         <button type="button" class="nsft-cheatsheet-print"
                                 title="${escapeHtml(i18n('cheatsheet_print_title', 'Print / Save as PDF'))}"
                                 aria-label="${escapeHtml(i18n('cheatsheet_print_title', 'Print / Save as PDF'))}">⎙</button>
-                        <button type="button" class="nsft-cheatsheet-close" aria-label="${escapeHtml(i18n('cheatsheet_close', 'Close'))}">×</button>
+                        <button type="button" class="nsft-cheatsheet-close nsft-modal-btn-close" aria-label="${escapeHtml(i18n('cheatsheet_close', 'Close'))}">✕</button>
                     </div>
                 </header>
                 <div class="nsft-cheatsheet-search">
                     <input type="text" class="nsft-cheatsheet-search-input"
                            placeholder="${escapeHtml(i18n('cheatsheet_search_placeholder', 'Filter shortcuts…'))}"
                            aria-label="${escapeHtml(i18n('cheatsheet_search_placeholder', 'Filter shortcuts…'))}">
+                    <button type="button" class="nsft-cheatsheet-search-clear"
+                            title="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}"
+                            aria-label="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}" hidden>✕</button>
                 </div>
                 <div class="nsft-cheatsheet-body">
                     ${groupsHtml}

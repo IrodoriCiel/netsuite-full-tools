@@ -1,104 +1,29 @@
 
-.nsft-csv-response-modal {
-    display: none;
-    position: fixed;
-    top: 4%;
-    left: 4%;
-    width: 92%;
-    height: 92%;
-    background: var(--nsft-surface-0);
-    border: 1px solid var(--nsft-border);
-    border-radius: var(--nsft-radius-lg);
-    box-shadow: var(--nsft-shadow-lg);
-    z-index: var(--nsft-z-modal);
-    will-change: top, left;
+#nsft-csv-response-title { gap: 6px; }
+#nsft-csv-response-title svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+#nsft-csv-response-title > span {
+    min-width: 0;
     overflow: hidden;
-    animation: nsft-pop-in var(--nsft-dur-base) var(--nsft-ease-spring);
-    font-family: var(--nsft-font);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.nsft-csv-response-modal[data-state="minimised"] {
-    top: auto !important;
-    bottom: 20px;
-    left: 20px;
-    width: 280px !important;
-    height: auto;
-    border-radius: var(--nsft-radius-pill);
+.nsft-csv-response-modal {
+    display: none;
 }
 
 .nsft-csv-response-modal[data-state="minimised"] .nsft-csv-response-content,
-.nsft-csv-response-modal[data-state="minimised"] .nsft-csv-response-footer,
-.nsft-csv-response-modal[data-state="minimised"] #nsft-csv-response-minimise {
+.nsft-csv-response-modal[data-state="minimised"] .nsft-csv-response-footer {
     display: none;
 }
-
-.nsft-csv-response-modal[data-state="maximised"] #nsft-csv-response-maximise {
-    display: none;
-}
-
-.nsft-csv-response-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 18px;
-    background: linear-gradient(135deg, var(--nsft-accent), var(--nsft-accent-hover));
-    color: #fff;
-    font-weight: 600;
-    font-size: 13.5px;
-    cursor: grab;
-    user-select: none;
-}
-
-.nsft-csv-response-header:active { cursor: grabbing; }
-
-#nsft-csv-response-title {
-    flex: 1;
-    pointer-events: none;
-    letter-spacing: 0.01em;
-}
-
-#nsft-csv-response-title::before {
-    content: '';
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    margin-right: 10px;
-    border-radius: 50%;
-    background: #4ade80;
-    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.3);
-    vertical-align: middle;
-}
-
-#nsft-csv-response-maximise,
-#nsft-csv-response-minimise,
-#nsft-csv-response-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: var(--nsft-radius-sm);
-    cursor: pointer;
-    transition: background var(--nsft-dur-fast) var(--nsft-ease);
-    font-size: 12px;
-    font-weight: 700;
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.08);
-}
-
-#nsft-csv-response-maximise::before { content: '▢'; }
-#nsft-csv-response-minimise::before { content: '—'; }
-#nsft-csv-response-close::before { content: '×'; font-size: 18px; }
-
-#nsft-csv-response-maximise:hover,
-#nsft-csv-response-minimise:hover { background: rgba(255, 255, 255, 0.2); }
-#nsft-csv-response-close:hover { background: var(--nsft-danger); border-color: transparent; }
 
 .nsft-csv-response-content {
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 16px 20px;
     font-size: 13px;
     overflow: auto;
-    height: calc(100% - 54px - 60px);
     background: var(--nsft-surface-1);
     color: var(--nsft-text-1);
 }
@@ -115,6 +40,7 @@
 }
 
 .nsft-csv-response-content table tr { border-top: 1px solid var(--nsft-divider); }
+
 .nsft-csv-response-content table tr:first-child {
     background: var(--nsft-surface-2) !important;
     color: var(--nsft-text-2);
@@ -123,7 +49,9 @@
     top: 0;
     z-index: 1;
 }
-.nsft-csv-response-content table tr:hover { background: var(--nsft-accent-soft); }
+
+.nsft-csv-response-content table tr:hover { background: color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 10%, transparent); }
+
 .nsft-csv-response-content table td:first-child {
     background: var(--nsft-surface-2) !important;
     color: var(--nsft-text-3);
@@ -132,7 +60,9 @@
     text-align: center;
     min-width: 44px;
 }
+
 .nsft-csv-response-content table td { padding: 8px 12px; }
+
 .nsft-csv-response-content table td p {
     margin: 0;
     padding: 4px 8px;
@@ -140,19 +70,18 @@
     border-radius: var(--nsft-radius-sm);
     transition: border-color var(--nsft-dur-fast) var(--nsft-ease);
 }
+
 .nsft-csv-response-content table td[contenteditable="true"]:hover p {
     border-color: var(--nsft-border);
 }
+
 .nsft-csv-response-content table td:focus-within p {
-    border-color: var(--nsft-accent);
-    background: var(--nsft-accent-soft);
+    border-color: var(--nsft-ns-accent, #3b82f6);
+    background: color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 10%, transparent);
 }
 
 .nsft-csv-response-footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    flex: 0 0 auto;
     display: flex;
     gap: 10px;
     justify-content: flex-end;
@@ -162,7 +91,7 @@
 }
 
 .nsft-csv-response-button {
-    font-family: var(--nsft-font);
+    font-family: inherit;
     font-size: 13px;
     font-weight: 600;
     padding: 8px 16px;
@@ -171,20 +100,21 @@
     border: 1px solid var(--nsft-border);
     background: var(--nsft-surface-1);
     color: var(--nsft-text-2);
-    transition: all var(--nsft-dur-fast) var(--nsft-ease);
+    transition: background var(--nsft-dur-fast) var(--nsft-ease), color var(--nsft-dur-fast) var(--nsft-ease);
 }
 
 .nsft-csv-response-button:hover {
     background: var(--nsft-surface-2);
     color: var(--nsft-text-1);
-    transform: translateY(-1px);
 }
 
-.nsft-csv-response-button:active { transform: translateY(0); }
-
 #nsft-csv-response-download {
-    background: var(--nsft-accent);
+    background: var(--nsft-ns-accent, #3b82f6);
     color: #fff;
     border-color: transparent;
 }
-#nsft-csv-response-download:hover { background: var(--nsft-accent-hover); box-shadow: var(--nsft-shadow-sm); }
+
+#nsft-csv-response-download:hover {
+    background: var(--nsft-ns-accent-hover, #2563eb);
+    box-shadow: var(--nsft-shadow-sm);
+}

@@ -135,16 +135,25 @@
         if (!wrap || !logo) return;
 
         if (!reduceMotion) {
+            let ultimo = null;
+            let pedido = false;
             wrap.addEventListener('mousemove', (e) => {
-                const rect = wrap.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                gsap.to(logo, {
-                    rotationY: x * 26,
-                    rotationX: -y * 26,
-                    scale: 1.06,
-                    duration: 0.4,
-                    ease: 'power2.out'
+                ultimo = { x: e.clientX, y: e.clientY };
+                if (pedido) return;
+                pedido = true;
+                requestAnimationFrame(() => {
+                    pedido = false;
+                    if (!ultimo) return;
+                    const rect = wrap.getBoundingClientRect();
+                    const x = (ultimo.x - rect.left) / rect.width - 0.5;
+                    const y = (ultimo.y - rect.top) / rect.height - 0.5;
+                    gsap.to(logo, {
+                        rotationY: x * 26,
+                        rotationX: -y * 26,
+                        scale: 1.06,
+                        duration: 0.4,
+                        ease: 'power2.out'
+                    });
                 });
             });
             wrap.addEventListener('mouseleave', () => {

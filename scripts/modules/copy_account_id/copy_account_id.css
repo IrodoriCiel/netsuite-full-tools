@@ -91,6 +91,49 @@ body:not([data-page-theme="redwood"]) .td-option.nsft-env-badge--propia {
     color: inherit !important;
 }
 
+body:not([data-page-theme="redwood"]) .sb-option.nsft-env-code,
+body:not([data-page-theme="redwood"]) .rp-option.nsft-env-code,
+body:not([data-page-theme="redwood"]) .pd-option.nsft-env-code,
+body:not([data-page-theme="redwood"]) .td-option.nsft-env-code {
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+body:not([data-page-theme="redwood"]) .sb-option.nsft-env-code::after,
+body:not([data-page-theme="redwood"]) .rp-option.nsft-env-code::after,
+body:not([data-page-theme="redwood"]) .pd-option.nsft-env-code::after,
+body:not([data-page-theme="redwood"]) .td-option.nsft-env-code::after {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 22px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+body:not([data-page-theme="redwood"]) .sb-option.nsft-env-code::after {
+    background: linear-gradient(to bottom, #f6ffed 0%, #eaffdb 100%);
+}
+
+body:not([data-page-theme="redwood"]) .rp-option.nsft-env-code::after {
+    background: linear-gradient(to bottom, #e6f7ff 0%, #cbebff 100%);
+}
+
+body:not([data-page-theme="redwood"]) .pd-option.nsft-env-code::after {
+    background: linear-gradient(to bottom, #e6fffb 0%, #b7e8de 100%);
+}
+
+body:not([data-page-theme="redwood"]) .td-option.nsft-env-code::after {
+    background: linear-gradient(to bottom, #f9f0ff 0%, #efdbff 100%);
+}
+
 body[data-page-theme="redwood"] .sb-option,
 body[data-page-theme="redwood"] .rp-option {
     min-width: 22px;

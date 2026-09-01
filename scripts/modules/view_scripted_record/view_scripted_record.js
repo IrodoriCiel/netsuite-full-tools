@@ -1185,8 +1185,8 @@
                         const apiAttr = s.apiVersion || '-';
 
                         const fnNames = (s.functions || []).map(f => f.name).filter(Boolean).join(' ');
-                        const searchHaystack = [s.name, s.owner, s.scriptTextId, s.deploymentTextId, fnNames]
-                            .filter(Boolean).join(' ').toLowerCase();
+                        const searchHaystack = srFold([s.name, s.owner, s.scriptTextId, s.deploymentTextId, fnNames]
+                            .filter(Boolean).join(' '));
 
                         return `<tr class="${rowInactiveClass}" data-sr-active="${escapeHtml(activeAttr)}" data-sr-release="${escapeHtml(releaseAttr)}" data-sr-api="${escapeHtml(apiAttr)}" data-sr-deployed="${escapeHtml(deployedAttr)}" data-sr-script-inactive="${s.isInactive === 'T' ? 'T' : 'F'}" data-sr-deployment-id="${escapeHtml(s.deploymentId || '')}" data-sr-script-id="${escapeHtml(s.scriptId || '')}" data-sr-search="${escapeHtml(searchHaystack)}">
                           <td class="nsft-sr-td-bulk" style="text-align:center;"><input type="checkbox" class="nsft-sr-bulk-row" data-sr-bulk-row data-sr-deployment-id="${escapeHtml(s.deploymentId || '')}"></td>
@@ -1256,8 +1256,13 @@
         animateTabContent(activeIndex);
     }
 
+    function srFold(s) {
+        const TS = window.NSFT_TextSearch;
+        return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
+    }
+
     function filterScripts(q) {
-        q = (q || '').toLowerCase().trim();
+        q = srFold((q || '').trim());
         const clearBtn = document.getElementById('nsft-scripted-rec-search-clear');
         if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
 
@@ -1271,10 +1276,58 @@
         }
         if (!q) {
             style.textContent = '';
+            srDesmarca();
             return;
         }
         const safe = _cssAttrEscape(q);
         style.textContent = `#nsft-scripted-rec-modal .nsft-scripted-rec-table tr[data-sr-search]:not([data-sr-search*="${safe}"]) { display: none; }`;
+        srMarca(q);
+    }
+
+    const SR_HL = 'nsft-sr-hl';
+
+    function srDesmarca() {
+        const modal = document.getElementById('nsft-scripted-rec-modal');
+        if (!modal) return;
+        modal.querySelectorAll('mark.' + SR_HL).forEach((mk) => {
+            const p = mk.parentNode;
+            if (!p) return;
+            p.replaceChild(document.createTextNode(mk.textContent), mk);
+            p.normalize();
+        });
+    }
+
+    function srMarca(q) {
+        srDesmarca();
+        const TS = window.NSFT_TextSearch;
+        const modal = document.getElementById('nsft-scripted-rec-modal');
+        if (!TS || !modal || !q) return;
+        modal.querySelectorAll('tr[data-sr-search]').forEach((tr) => {
+            if ((tr.getAttribute('data-sr-search') || '').indexOf(q) === -1) return;
+            const walker = document.createTreeWalker(tr, NodeFilter.SHOW_TEXT);
+            const hits = [];
+            let node;
+            while ((node = walker.nextNode())) {
+                if (node.nodeValue && TS.ranges(node.nodeValue, q).length) hits.push(node);
+            }
+            hits.forEach((tn) => {
+                const t = tn.nodeValue;
+                const tramos = TS.ranges(t, q);
+                if (!tramos.length || !tn.parentNode) return;
+                const frag = document.createDocumentFragment();
+                let from = 0;
+                tramos.forEach((r) => {
+                    if (r.start > from) frag.appendChild(document.createTextNode(t.slice(from, r.start)));
+                    const mk = document.createElement('mark');
+                    mk.className = SR_HL;
+                    mk.textContent = t.slice(r.start, r.end);
+                    frag.appendChild(mk);
+                    from = r.end;
+                });
+                if (from < t.length) frag.appendChild(document.createTextNode(t.slice(from)));
+                tn.parentNode.replaceChild(frag, tn);
+            });
+        });
     }
 
     const getLoadingHtml = (text) => {
@@ -1364,14 +1417,14 @@
          </div>
          <div class="nsft-sr-content">
              
-             <!-- TABS -->
+             
              <div class="nsft-sr-tabs-wrap" style="display: flex; border-bottom: 1px solid #e5e7eb; background-color: #fff; z-index: 2;">
                 <div class="nsft-scripted-rec-tab active" id="nsft-scripted-rec-tab-user" data-index="0" style="flex: 1; text-align: center; padding: 10px 0; cursor: pointer; font-size: 12px; font-weight: 600; color: #0070f3; border-bottom: 2px solid #0070f3;">${chrome.i18n.getMessage('sr_tab_user')}</div>
                 <div class="nsft-scripted-rec-tab" id="nsft-scripted-rec-tab-client" data-index="1" style="flex: 1; text-align: center; padding: 10px 0; cursor: pointer; font-size: 12px; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent;">${chrome.i18n.getMessage('sr_tab_client')}</div>
                 <div class="nsft-scripted-rec-tab" id="nsft-scripted-rec-tab-workflow" data-index="2" style="flex: 1; text-align: center; padding: 10px 0; cursor: pointer; font-size: 12px; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent;">${chrome.i18n.getMessage('sr_tab_workflow')}</div>
              </div>
              
-             <!-- SEARCH + FILTROS INDEPENDIENTES POR TAB -->
+             
              <div class="nsft-scripted-rec-search-container">
                   <div class="nsft-sr-search-wrap">
                     <input id="nsft-scripted-rec-search-input" placeholder="${chrome.i18n.getMessage('sr_search_placeholder')}" autocomplete="off">
@@ -1383,12 +1436,12 @@
                   ${buildWorkflowFiltersHtml(2)}
              </div>
 
-             <!-- LOADING -->
+             
              <div id="nsft-scripted-rec-global-loading" style="position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; top: 88px;">
                  ${getLoadingHtml()}
              </div>
 
-             <!-- BULK ACTION TOOLBAR (visible cuando hay rows checkeados) -->
+             
              <div id="nsft-sr-bulk-toolbar" class="nsft-sr-bulk-toolbar" style="display: none;">
                 <span id="nsft-sr-bulk-count">${chrome.i18n.getMessage('sr_bulk_count_zero') || '0 seleccionados'}</span>
                 <button type="button" id="nsft-sr-bulk-enable" class="nsft-sr-bulk-action nsft-sr-bulk-enable">${chrome.i18n.getMessage('sr_bulk_enable') || 'Activar'}</button>
@@ -1397,14 +1450,13 @@
                 <span id="nsft-sr-bulk-status" class="nsft-sr-bulk-status"></span>
              </div>
 
-             <!-- BANNER persistente para resultados/errores de bulk (sobrevive
-                  al clearBulkSelection que oculta el toolbar). Cerrable. -->
+             
              <div id="nsft-sr-banner" class="nsft-sr-banner" style="display: none;" role="status" aria-live="polite">
                 <span id="nsft-sr-banner-text" class="nsft-sr-banner-text"></span>
                 <button type="button" id="nsft-sr-banner-close" class="nsft-sr-banner-close" aria-label="Cerrar">✕</button>
              </div>
 
-             <!-- SLIDER CONTENT -->
+             
              <div id="nsft-scripted-rec-container" style="flex: 1; overflow: hidden; position: relative;">
                   <div id="nsft-scripted-rec-slider" style="display: flex; width: 300%; height: 100%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);">
                       <div id="nsft-scripted-rec-content-user" class="nsft-scripted-rec-tab-content" style="flex: 0 0 33.333%; padding: 12px 12px 2px 12px; box-sizing: border-box;"></div>
@@ -1412,8 +1464,7 @@
                       <div id="nsft-scripted-rec-content-workflow" class="nsft-scripted-rec-tab-content" style="flex: 0 0 33.333%; padding: 12px 12px 2px 12px; box-sizing: border-box;"></div>
                   </div>
 
-                  <!-- LOGS PANEL: overlay sobre el slider cuando el usuario clickea el icono de logs.
-                       Su contenido se renderiza dinámicamente y "Volver" lo oculta. -->
+                  
                   <div id="nsft-sr-logs-panel" class="nsft-sr-logs-panel" style="display: none;">
                       <div class="nsft-sr-logs-header">
                           <button type="button" id="nsft-sr-logs-back" class="nsft-sr-logs-back">
@@ -1422,15 +1473,15 @@
                           </button>
                           <span id="nsft-sr-logs-title" class="nsft-sr-logs-title"></span>
                           <div class="nsft-sr-logs-header-actions">
-                              <!-- Modo en vivo: re-ejecuta el SQL en intervalo. Inicia desactivado. -->
+                              
                               <button type="button" id="nsft-sr-logs-live" class="nsft-sr-logs-action nsft-sr-icon-only nsft-sr-logs-live" data-tooltip="${escapeHtml(chrome.i18n.getMessage('liveMode') || 'Modo en vivo')}" aria-label="${escapeHtml(chrome.i18n.getMessage('liveMode') || 'Modo en vivo')}" aria-pressed="false">
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                               </button>
-                              <!-- Refresh: re-ejecuta el SQL contra ScriptNote para ver logs nuevos. -->
+                              
                               <button type="button" id="nsft-sr-logs-refresh" class="nsft-sr-logs-action nsft-sr-icon-only" data-tooltip="${escapeHtml(chrome.i18n.getMessage('sr_logs_refresh') || 'Refrescar logs')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sr_logs_refresh') || 'Refrescar logs')}">
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path></svg>
                               </button>
-                              <!-- Dropdown "Columnas" para mostrar/ocultar columnas del table -->
+                              
                               <div class="nsft-sr-cols-wrap">
                                   <button type="button" id="nsft-sr-cols-toggle" class="nsft-sr-logs-action nsft-sr-icon-only" data-tooltip="${escapeHtml(chrome.i18n.getMessage('sr_logs_cols') || 'Columnas')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sr_logs_cols') || 'Columnas')}" aria-haspopup="true" aria-expanded="false">
                                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
@@ -1443,15 +1494,15 @@
                                       <label><input type="checkbox" data-sr-col="detail">${chrome.i18n.getMessage('sr_logs_col_detail') || 'Detalle'}</label>
                                   </div>
                               </div>
-                              <!-- Abre el script record en una pestaña nueva. -->
+                              
                               <a id="nsft-sr-logs-open-script" class="nsft-sr-logs-action nsft-sr-icon-only" target="_blank" rel="noopener noreferrer" href="#" data-tooltip="${escapeHtml(chrome.i18n.getMessage('sr_logs_open_script') || 'Abrir script record')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sr_logs_open_script') || 'Abrir script record')}">
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                               </a>
-                              <!-- Editar el file del script (archivo .js en el File Cabinet). -->
+                              
                               <a id="nsft-sr-logs-edit-file" class="nsft-sr-logs-action nsft-sr-icon-only" target="_blank" rel="noopener noreferrer" href="#" data-tooltip="${escapeHtml(chrome.i18n.getMessage('sr_logs_edit_file') || 'Editar archivo del script')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sr_logs_edit_file') || 'Editar archivo del script')}">
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                               </a>
-                              <!-- Abre el archivo completo de logs (scriptnotearchive.nl) en una pestaña nueva. -->
+                              
                               <a id="nsft-sr-logs-full" class="nsft-sr-logs-action nsft-sr-icon-only nsft-sr-logs-full" target="_blank" rel="noopener noreferrer" href="#" data-tooltip="${escapeHtml(chrome.i18n.getMessage('sr_logs_full') || 'Logs completos')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sr_logs_full') || 'Logs completos')}">
                                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                               </a>
@@ -1462,7 +1513,7 @@
              </div>
          </div>
          <div class="nsft-sr-footer">
-             <!-- Footer content -->
+             
          </div>
        </div>
        <div id="nsft-sr-global-tooltip" class="nsft-sr-global-tooltip"></div>`;

@@ -779,7 +779,7 @@
                  </div>
             </div>
             <div class="nsft-rec-obj-footer">
-                <!-- Footer placeholder -->
+                
             </div>
         </div>`;
 

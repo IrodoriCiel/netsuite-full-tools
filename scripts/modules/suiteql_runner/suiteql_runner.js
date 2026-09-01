@@ -39,7 +39,7 @@
     })();
     let lastMaximizedLeft = '2.5vw';
     let lastMaximizedTop = '2.5vh';
-    let currentTheme = 'eclipse';
+    let currentTheme = 'atom-one-light';
     let currentFileName = null;
     let _nsftTheme = 'light';
     let cachedSidebarSide = 'left';
@@ -156,6 +156,16 @@
         };
         tabs.push(t);
         activateTab(t.id);
+        if (editor) {
+            editor.focus();
+            if (t.query === DEFAULT_QUERY) {
+                const ult = editor.lastLine();
+                editor.setSelection(
+                    { line: ult, ch: editor.getLine(ult).length },
+                    { line: 0, ch: 0 }
+                );
+            }
+        }
     }
 
     function closeTab(id) {
@@ -686,6 +696,9 @@
         const s = (text === null || text === undefined) ? '' : String(text);
         if (!termLc || !s) return escapeHtml(s);
 
+        const TS = window.NSFT_TextSearch;
+        if (TS) return TS.markHtml(s, termLc, 'nsft-sql-hl');
+
         const low = s.toLowerCase();
         let i = low.indexOf(termLc);
         if (i === -1) return escapeHtml(s);
@@ -710,6 +723,11 @@
         return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
         }[c]));
+    }
+
+    function tsFold(s) {
+        const TS = window.NSFT_TextSearch;
+        return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
     }
 
     function _nsftResolveTheme() {
@@ -737,7 +755,7 @@
     function _syncCodeThemeFromNsftTheme() {
         chrome.storage.local.get({ suiteqlThemeOverridden: false }, (items) => {
             if (items.suiteqlThemeOverridden) return;
-            const target = _nsftResolveTheme() === 'dark' ? 'dracula' : 'eclipse';
+            const target = _nsftResolveTheme() === 'dark' ? 'atom-one-dark' : 'atom-one-light';
             if (currentTheme === target) return;
             updateTheme(target);
         });
@@ -751,7 +769,11 @@
         '/app/bundler/previewbundleupdate.nl'
     ];
 
+    function esTomaDelEditor() {
+        return /[?&]nsft-advanced-editor=T/i.test(window.location.search);
+    }
     function isRunnerExcludedPage() {
+        if (esTomaDelEditor()) return false;
         const href = window.location.href;
         if (RUNNER_EXTRA_EXCLUDED.some(p => href.includes(p))) return true;
         if (window.NSFT_RecordButtons && typeof window.NSFT_RecordButtons.isExcludedPage === 'function') {
@@ -762,7 +784,7 @@
 
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
-        suiteqlTheme: 'eclipse',
+        suiteqlTheme: 'atom-one-light',
         suiteqlThemeOverridden: false,
         suiteqlHistoryMax: 30,
         suiteqlMaxRecords: 5000,
@@ -781,14 +803,24 @@
         [VARIABLES_STORAGE_KEY]: []
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
-        if (isRunnerExcludedPage()) return;
-        bindRunnerShortcut();
-        cachedSidebarSide = items.nsft_sql_sidebar_side === 'right' ? 'right' : 'left';
-        cachedSidebarOpen = items.nsft_sql_sidebar_open !== false;
-        cachedSidebarWidth = Number(items.nsft_sql_sidebar_width) || 0;
-        cachedViewState = items.nsft_sql_view_state || 'both';
-        sqlVariables = normalizeVariables(items[VARIABLES_STORAGE_KEY]);
-        init(items);
+
+        let _arranco = false;
+        const arranca = () => {
+            if (_arranco) return;
+            _arranco = true;
+            bindRunnerShortcut();
+            cachedSidebarSide = items.nsft_sql_sidebar_side === 'right' ? 'right' : 'left';
+            cachedSidebarOpen = items.nsft_sql_sidebar_open !== false;
+            cachedSidebarWidth = Number(items.nsft_sql_sidebar_width) || 0;
+            cachedViewState = items.nsft_sql_view_state || 'both';
+            sqlVariables = normalizeVariables(items[VARIABLES_STORAGE_KEY]);
+            init(items);
+        };
+
+        if (!isRunnerExcludedPage()) { arranca(); return; }
+        window.addEventListener('nsft-adv-ready', () => {
+            if (!isRunnerExcludedPage()) arranca();
+        });
     });
 
     function bindRunnerShortcut() {
@@ -836,9 +868,9 @@
         REST_FILL_COLUMNS = !!items.suiteqlRestFillColumns;
         AUTO_SCHEMA = items.suiteqlAutoSchema !== false;
         if (items.suiteqlThemeOverridden) {
-            currentTheme = items.suiteqlTheme || 'eclipse';
+            currentTheme = items.suiteqlTheme || 'atom-one-light';
         } else {
-            currentTheme = _nsftResolveTheme() === 'dark' ? 'dracula' : 'eclipse';
+            currentTheme = _nsftResolveTheme() === 'dark' ? 'atom-one-dark' : 'atom-one-light';
         }
         setupListeners();
     }
@@ -881,7 +913,7 @@
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local') {
             if (changes.suiteqlTheme) {
-                updateTheme(changes.suiteqlTheme.newValue || 'eclipse');
+                updateTheme(changes.suiteqlTheme.newValue || 'atom-one-light');
             }
             if (changes.nsft_sql_sidebar_side) {
                 cachedSidebarSide = changes.nsft_sql_sidebar_side.newValue === 'right' ? 'right' : 'left';
@@ -948,6 +980,7 @@
             }
             bringToFront();
             applyPrefill();
+            focusEditorOnOpen();
         });
 
         window.addEventListener('nsft-layout-update', () => {
@@ -1541,11 +1574,11 @@
 
     function logMatchesFilter(e) {
         if (_logFilter !== 'all' && e.status !== _logFilter) return false;
-        const q = (_logQuery || '').trim().toLowerCase();
+        const q = tsFold((_logQuery || '').trim());
         if (!q) return true;
         const info = e.status === 'error' ? describeSqlError(e.errorMsg) : null;
         return [e.query, e.errorMsg, info && info.code, info && info.title]
-            .filter(Boolean).some((s) => String(s).toLowerCase().includes(q));
+            .filter(Boolean).some((s) => tsFold(s).includes(q));
     }
 
     function renderLogsList() {
@@ -1587,12 +1620,13 @@
 
             const g = logGlyph(e);
 
+            const qLog = tsFold((_logQuery || '').trim());
             const top = oneLine(e.query);
             let bottom;
             if (e.status === 'error') {
                 const info = describeSqlError(e.errorMsg);
-                bottom = `<span class="nsft-sql-log-what">${escapeHtml(info.title)}</span>` +
-                    (info.code ? `<span class="nsft-sql-log-code">${escapeHtml(info.code)}</span>` : '');
+                bottom = `<span class="nsft-sql-log-what">${markMatches(info.title, qLog)}</span>` +
+                    (info.code ? `<span class="nsft-sql-log-code">${markMatches(info.code, qLog)}</span>` : '');
             } else {
                 bottom = `<span class="nsft-sql-log-what">${escapeHtml(
                     chrome.i18n.getMessage('sql_results_meta', [String(e.rows), String(e.durationMs)])
@@ -1603,7 +1637,7 @@
                         data-log-id="${e.id}" role="listitem" tabindex="0">
                         <span class="nsft-sql-log-glyph is-${g.cls}">${g.ch}</span>
                         <span class="nsft-sql-log-body">
-                            <span class="nsft-sql-log-label is-sql">${escapeHtml(top)}</span>
+                            <span class="nsft-sql-log-label is-sql">${markMatches(top, qLog)}</span>
                             ${bottom ? `<span class="nsft-sql-log-sub">${bottom}</span>` : ''}
                         </span>
                         <span class="nsft-sql-log-time">${escapeHtml(logTimeLabel(e.at))}</span>
@@ -1690,16 +1724,9 @@
                     <div class="nsft-sql-logs-dident">
                         <span class="nsft-sql-logs-dicon is-${g.cls}">${g.ch}</span>
                         <div class="nsft-sql-logs-dtitles">
-                            <!-- La chapa de la vía va con el TÍTULO y no con la
-                                 hora: es de la ejecución, igual que el icono de
-                                 éxito o error, no un dato de cuándo pasó. -->
+                            
                             <div class="nsft-sql-logs-dtitle">${escapeHtml(title)}${viaBadgeHtml(entry.via)}</div>
-                            <!-- El mensaje crudo de NetSuite incrusta la consulta
-                                 ENTERA, así que con un SQL largo ocupa media ficha
-                                 y empuja fuera de vista el bloque de la consulta
-                                 con la marca de la posición del error, que es lo
-                                 que se viene a mirar. Se recorta a dos líneas y se
-                                 despliega a petición. -->
+                            
                             ${subtitle ? `<div class="nsft-sql-logs-dsub" id="nsft-sql-logs-dsub">${escapeHtml(subtitle)}</div>
                             <button type="button" class="nsft-sql-logs-dsub-more" id="nsft-sql-logs-dsub-more" hidden
                                 title="${escapeHtml(chrome.i18n.getMessage('sql_logs_sub_more') || 'Ver mensaje completo')}"
@@ -1716,10 +1743,7 @@
                             aria-label="${escapeHtml(chrome.i18n.getMessage('sql_logs_delete') || 'Delete')}">${TRASH_SVG}</button>
                     </div>
                 </div>
-                <!-- Orden del prototipo: primero lo que actúa sobre la consulta
-                     (cargar / reparar / reejecutar), separador, y después lo que
-                     sólo copia. El separador agrupa por consecuencia: a la
-                     izquierda cambian algo, a la derecha no. -->
+                
                 <div class="nsft-sql-logs-actions">
                     ${entry.query ? `<button type="button" class="is-primary" data-log-act="to-editor">${ARROW_SVG}${escapeHtml(chrome.i18n.getMessage('sql_logs_to_editor') || 'Load in editor')}</button>` : ''}
                     ${isError && entry.query && aiAvailable() ? `<button type="button" class="is-ai" data-log-act="ai-fix">${AI_SPARK_SVG}${escapeHtml(chrome.i18n.getMessage('sql_logs_ai_fix') || 'Fix with AI')}</button>` : ''}
@@ -1731,17 +1755,13 @@
             </div>
 
             <div class="nsft-sql-logs-dbody">
-                <!-- La pista va plegada: explica, y por tanto ocupa. Desplegada
-                     por defecto empujaba hacia abajo la consulta y el mensaje de
-                     NetSuite, que es lo que uno viene a mirar primero. El titular
-                     dice qué hay dentro para que se abra a propósito, no por
-                     curiosidad. -->
+                
                 ${hint ? `<details class="nsft-sql-logs-hint">
                     <summary>${HINT_SVG}<span>${escapeHtml(chrome.i18n.getMessage('sql_logs_hint_summary') || 'Posible causa del error')}</span></summary>
                     <div class="nsft-sql-logs-hint-body">${escapeHtml(hint)}</div>
                 </details>` : ''}
 
-                <!-- La corrección se inyecta aquí al pulsar "Reparar con IA". -->
+                
                 <div id="nsft-sql-fix-slot"></div>
 
                 ${entry.query ? `
@@ -1963,10 +1983,7 @@
                 <div class="nsft-sql-fix-title">${AI_SPARK_SVG}${escapeHtml(
                     chrome.i18n.getMessage('sql_logs_fix_title') || 'Suggested fix')}</div>
                 ${explain ? `<p class="nsft-sql-fix-explain">${escapeHtml(explain)}</p>` : ''}
-                <!-- Las acciones van DENTRO del diff y pegadas a su borde
-                     inferior: con una consulta larga el diff scrollea, y si los
-                     botones colgaran debajo habría que bajar hasta el final para
-                     aplicar. Así se alcanzan desde cualquier punto. -->
+                
                 <div class="nsft-sql-fix-diff">
                     <div class="nsft-sql-fix-actions">
                         <button type="button" class="is-primary" data-log-act="apply-fix">${escapeHtml(
@@ -2609,7 +2626,7 @@
 
     function hintRank(id, needleLc) {
         if (!needleLc) return 0;
-        const idx = String(id || '').toLowerCase().indexOf(needleLc);
+        const idx = tsFold(id).indexOf(tsFold(needleLc));
         return idx < 0 ? -1 : (idx === 0 ? 0 : 1);
     }
 
@@ -2621,20 +2638,30 @@
             .map(x => x.it);
     }
 
-    function appendHighlighted(parent, text, needleLc, norm) {
+    function appendHighlighted(parent, text, needleLc) {
         const str = String(text == null ? '' : text);
-        const hay = norm ? norm(str) : str.toLowerCase();
-        const idx = (needleLc && hay.length === str.length) ? hay.indexOf(needleLc) : -1;
-        if (idx < 0) {
-            parent.appendChild(document.createTextNode(str));
-            return;
+        if (!needleLc || !str) { parent.appendChild(document.createTextNode(str)); return; }
+
+        const TS = window.NSFT_TextSearch;
+        let tramos;
+        if (TS) {
+            tramos = TS.ranges(str, needleLc);
+        } else {
+            const i = str.toLowerCase().indexOf(String(needleLc).toLowerCase());
+            tramos = i < 0 ? [] : [{ start: i, end: i + needleLc.length }];
         }
-        parent.appendChild(document.createTextNode(str.slice(0, idx)));
-        const mark = document.createElement('span');
-        mark.className = 'nsft-sql-hint-mark';
-        mark.textContent = str.slice(idx, idx + needleLc.length);
-        parent.appendChild(mark);
-        parent.appendChild(document.createTextNode(str.slice(idx + needleLc.length)));
+        if (!tramos.length) { parent.appendChild(document.createTextNode(str)); return; }
+
+        let desde = 0;
+        tramos.forEach((r) => {
+            if (r.start > desde) parent.appendChild(document.createTextNode(str.slice(desde, r.start)));
+            const mark = document.createElement('span');
+            mark.className = 'nsft-sql-hint-mark';
+            mark.textContent = str.slice(r.start, r.end);
+            parent.appendChild(mark);
+            desde = r.end;
+        });
+        if (desde < str.length) parent.appendChild(document.createTextNode(str.slice(desde)));
     }
 
     function buildHintRenderer(field, needleLc) {
@@ -2910,19 +2937,55 @@
         }));
     }
 
+    function walkFromClauses(content, cb) {
+        const s = String(content || '');
+        const re = /\bFROM\b/gi;
+        const KW_FIN = /^(WHERE|GROUP|HAVING|ORDER|LIMIT|UNION|FETCH|MINUS|INTERSECT|EXCEPT|SELECT)$/;
+        const KW_JOIN_PRE = /^(INNER|LEFT|RIGHT|OUTER|CROSS|FULL)$/;
+        let m;
+        while ((m = re.exec(s))) {
+            let i = re.lastIndex;
+            let depth = 0;
+            let esperaTabla = true;
+            let tabla = null;
+            let trasAs = false;
+            const cierra = () => { if (tabla) { cb(tabla.tok, null); tabla = null; } };
+            while (i < s.length) {
+                const c = s.charAt(i);
+                if (/\s/.test(c)) { i++; continue; }
+                if (c === '(') { depth++; i++; esperaTabla = false; continue; }
+                if (c === ')') {
+                    if (depth === 0) break;
+                    depth--; i++; continue;
+                }
+                if (depth > 0) { i++; continue; }
+                if (c === ',') { cierra(); esperaTabla = true; i++; continue; }
+                const w = (s.slice(i).match(/^[A-Za-z0-9_."$]+/) || [''])[0];
+                if (!w) { i++; continue; }
+                const W = w.toUpperCase();
+                if (KW_FIN.test(W)) break;
+                if (KW_JOIN_PRE.test(W)) { i += w.length; continue; }
+                if (W === 'JOIN') { cierra(); esperaTabla = true; i += w.length; continue; }
+                if (W === 'ON' || W === 'USING') { cierra(); i += w.length; continue; }
+                if (W === 'AS') { trasAs = true; i += w.length; continue; }
+                if (esperaTabla) {
+                    tabla = { tok: w };
+                    esperaTabla = false;
+                } else if (tabla) {
+                    cb(tabla.tok, w);
+                    tabla = null;
+                    trasAs = false;
+                }
+                i += w.length;
+            }
+            cierra();
+        }
+    }
+
     function parseTablesFromQuery(content) {
-        const fromBlockMatch = content.match(/FROM\s+([\s\S]+?)(?=\s+(?:WHERE|GROUP|HAVING|ORDER|LIMIT|UNION)|$)/i);
-        if (!fromBlockMatch || !fromBlockMatch[1]) return [];
-
-        const normalized = fromBlockMatch[1]
-            .replace(/\s*,\s*/g, '___SEP___')
-            .replace(/\s+(?:INNER|LEFT|RIGHT|OUTER|CROSS|FULL)?\s*JOIN\s+/gi, '___SEP___');
-
         const tables = [];
-        normalized.split('___SEP___').forEach(chunk => {
-            const text = chunk.trim();
-            if (!text) return;
-            let tableName = text.split(/\s+/)[0].replace(/[()]/g, '');
+        walkFromClauses(content, (tok) => {
+            const tableName = String(tok || '').replace(/^"|"$/g, '');
             if (tableName && tableName.length > 1 && /^[a-z0-9_.]+$/i.test(tableName)) {
                 tables.push(normalizeTableName(tableName));
             }
@@ -2932,25 +2995,10 @@
 
     function parseAliasMap(content) {
         const map = {};
-        const fromBlockMatch = content.match(/FROM\s+([\s\S]+?)(?=\s+(?:WHERE|GROUP|HAVING|ORDER|LIMIT|UNION)|$)/i);
-        if (!fromBlockMatch || !fromBlockMatch[1]) return map;
-
-        const normalized = fromBlockMatch[1]
-            .replace(/\s*,\s*/g, '___SEP___')
-            .replace(/\s+(?:INNER|LEFT|RIGHT|OUTER|CROSS|FULL)?\s*JOIN\s+/gi, '___SEP___');
-
-        normalized.split('___SEP___').forEach(chunk => {
-            const parts = chunk.trim().split(/\s+/).filter(Boolean);
-            if (!parts.length) return;
-            const table = normalizeTableName(parts[0].replace(/[()]/g, ''));
-            if (!table) return;
-            let alias = '';
-            if (parts.length >= 3 && parts[1].toUpperCase() === 'AS') {
-                alias = parts[2];
-            } else if (parts.length >= 2 && parts[1].toUpperCase() !== 'ON') {
-                alias = parts[1];
-            }
-            alias = (alias || '').replace(/[^a-z0-9_]/gi, '').toLowerCase();
+        walkFromClauses(content, (tok, aliasTok) => {
+            const table = normalizeTableName(String(tok || '').replace(/^"|"$/g, ''));
+            if (!table || !/^[a-z0-9_.]+$/i.test(table)) return;
+            const alias = String(aliasTok || '').replace(/[^a-z0-9_]/gi, '').toLowerCase();
             if (alias) map[alias] = table;
             map[table] = table;
         });
@@ -3348,7 +3396,7 @@
     }
 
     function catalogNorm(s) {
-        return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return tsFold(s);
     }
 
     function openErdView() {
@@ -4036,7 +4084,8 @@
             const fields = Object.values(meta.fields).filter(f => f.isAvailable && !f.removed).sort((a, b) => a.id.localeCompare(b.id));
             const renderList = (q) => {
                 list.textContent = '';
-                fields.filter(f => !q || f.id.toLowerCase().includes(q)).slice(0, 200).forEach(f => {
+                fields.filter(f => !q || tsFold(f.id).includes(q) || tsFold(f.label).includes(q))
+                    .slice(0, 200).forEach(f => {
                     const row = document.createElement('div');
                     row.className = 'nsft-sql-erdn-row';
                     const isPk = f.id === 'id';
@@ -4050,14 +4099,14 @@
                         : /date|time/.test(dt) ? 'date'
                         : /bool|check/.test(dt) ? 'bool'
                         : dt ? 'str' : '';
-                    row.innerHTML = badge + '<span>' + escapeHtml(f.id) + '</span>' +
+                    row.innerHTML = badge + '<span>' + markMatches(f.id, q) + '</span>' +
                         '<span class="nsft-sql-erdn-t">' + abbr + '</span>';
                     row.title = (f.label || f.id) + (f.dataType ? ' · ' + f.dataType : '');
                     list.appendChild(row);
                 });
             };
             renderList('');
-            find.addEventListener('input', () => renderList(find.value.trim().toLowerCase()));
+            find.addEventListener('input', () => renderList(tsFold(find.value.trim())));
             find.addEventListener('mousedown', (e) => e.stopPropagation());
             card.appendChild(list);
 
@@ -4181,15 +4230,18 @@
             row.appendChild(sw);
             const tx = document.createElement('span');
             tx.className = 'nsft-sql-erd-legtx';
-            tx.textContent = label;
+            const TS = window.NSFT_TextSearch;
+            const qLeg = tsFold((ctx.legendFilter || '').trim());
+            if (TS && qLeg) TS.mark(tx, label, qLeg, 'nsft-sql-hl');
+            else tx.textContent = label;
             row.appendChild(tx);
             (host || legBody).appendChild(row);
         };
-        const legGroup = (title) => {
+        const legGroup = (title, host) => {
             const h = document.createElement('div');
             h.className = 'nsft-sql-erd-leggroup';
             h.textContent = title;
-            legBody.appendChild(h);
+            (host || legBody).appendChild(h);
         };
         legGroup(chrome.i18n.getMessage('sql_erd_leg_tables') || 'Tablas');
         const legActs = document.createElement('div');
@@ -4216,6 +4268,7 @@
         findWrap.className = 'nsft-sql-find nsft-sql-erd-legfind';
         const find = document.createElement('input');
         find.type = 'text';
+        find.id = 'nsft-sql-erd-legfilter';
         find.className = 'nsft-sql-erd-legfilter';
         find.placeholder = chrome.i18n.getMessage('sql_erd_leg_filter') || 'Buscar tabla…';
         find.value = ctx.legendFilter || '';
@@ -4229,34 +4282,44 @@
         const LEG_MAX = 200;
         const pintarLista = () => {
             legList.innerHTML = '';
-            const q = (ctx.legendFilter || '').trim().toLowerCase();
+            legendChecks.length = 0;
+            const q = tsFold((ctx.legendFilter || '').trim());
             const rank = (t) => {
-                if (!q || t === q) return 0;
-                if (t.startsWith(q)) return 1;
-                if (t.includes(q)) return 2;
+                if (!q) return 0;
+                const tf = tsFold(t);
+                if (tf === q) return 0;
+                if (tf.startsWith(q)) return 1;
+                if (tf.includes(q)) return 2;
                 return 3;
             };
             const candidatas = (ctx.all || tables)
-                .filter(t => !q || t.includes(q)
-                    || String((_schemaIndexMem[t] || {}).label || '').toLowerCase().includes(q))
+                .filter(t => !q || tsFold(t).includes(q)
+                    || tsFold((_schemaIndexMem[t] || {}).label).includes(q))
                 .sort((a, b) => (rank(a) - rank(b)) || a.localeCompare(b));
 
-            const fijas = tables.filter(t => candidatas.indexOf(t) === -1);
-            const lista = fijas.concat(candidatas);
-            const recorte = lista.slice(0, LEG_MAX);
-
+            const recorte = candidatas.slice(0, LEG_MAX);
             recorte.forEach((t2, i2) => {
                 const label = (sqlTableMeta[t2] && sqlTableMeta[t2].label)
                     || String((_schemaIndexMem[t2] || {}).label || '') || t2;
                 legRow(DOTS[i2 % DOTS.length], label === t2 ? t2 : (t2 + ' — ' + label), 't', t2,
                     visto.has(t2), legList);
             });
-            if (lista.length > recorte.length) {
+            if (candidatas.length > recorte.length) {
+                const restan = candidatas.length - recorte.length;
                 const mas = document.createElement('div');
                 mas.className = 'nsft-sql-erd-legmore';
-                mas.textContent = chrome.i18n.getMessage('sql_erd_leg_more', [String(lista.length - recorte.length)])
-                    || ('… y ' + (lista.length - recorte.length) + ' más — afina la búsqueda');
+                mas.textContent = chrome.i18n.getMessage('sql_erd_leg_more', [String(restan)])
+                    || ('… y ' + restan + ' más — afina la búsqueda');
                 legList.appendChild(mas);
+            }
+
+            const edgesVis = edges.filter(e2 => !q || tsFold(e2.a + ' ' + e2.b).includes(q));
+            if (edgesVis.length) {
+                legGroup(chrome.i18n.getMessage('sql_erd_leg_links') || 'Uniones', legList);
+                edgesVis.forEach(e2 => {
+                    legRow(e2.el.style.stroke || '#94a3b8', e2.a + ' ↔ ' + e2.b, 'e', e2,
+                        undefined, legList);
+                });
             }
         };
 
@@ -4269,12 +4332,7 @@
         ['click', 'mousedown', 'pointerdown', 'wheel'].forEach(ev =>
             findWrap.addEventListener(ev, (e) => e.stopPropagation()));
         pintarLista();
-        if (edges.length) {
-            legGroup(chrome.i18n.getMessage('sql_erd_leg_links') || 'Uniones');
-            edges.forEach(e2 => {
-                legRow(e2.el.style.stroke || '#94a3b8', e2.a + ' ↔ ' + e2.b, 'e', e2);
-            });
-        }
+        wireFindClear('nsft-sql-erd-legfilter');
         setTimeout(() => {
             if (!ctx.fitted) { ctx.fitted = true; fit(); } else { apply(); }
             syncEdges();
@@ -4609,10 +4667,10 @@
             rowIcon.textContent = '+';
             const rowId = document.createElement('span');
             rowId.className = 'nsft-sql-schema-id';
-            appendHighlighted(rowId, t.id, q, catalogNorm);
+            appendHighlighted(rowId, t.id, q);
             const rowLbl = document.createElement('span');
             rowLbl.className = 'nsft-sql-schema-lbl';
-            appendHighlighted(rowLbl, (t.label && t.label !== t.id) ? t.label : '', q, catalogNorm);
+            appendHighlighted(rowLbl, (t.label && t.label !== t.id) ? t.label : '', q);
             row.appendChild(rowIcon);
             row.appendChild(rowId);
             row.appendChild(rowLbl);
@@ -4824,6 +4882,28 @@
         setTimeout(() => el.remove(), 220);
     }
 
+    function focusEditorOnOpen() {
+        if (!editor) return;
+        requestAnimationFrame(() => {
+            const modal = document.getElementById('nsft-sql-modal');
+            if (!modal || modal.style.display === 'none') return;
+            if (modal.dataset.state === 'minimised') return;
+            const act = document.activeElement;
+            if (act && act !== document.body && modal.contains(act) &&
+                /^(INPUT|SELECT)$/.test(act.tagName)) return;
+            try {
+                editor.focus();
+                if (!editor.somethingSelected()) {
+                    const cur = editor.getCursor();
+                    if (cur.line === 0 && cur.ch === 0) {
+                        const ultima = editor.lastLine();
+                        editor.setCursor({ line: ultima, ch: editor.getLine(ultima).length });
+                    }
+                }
+            } catch (e) { }
+        });
+    }
+
     function finishBoot() {
         _sqlBooting = false;
         clearTimeout(_bootWatchdog);
@@ -4831,6 +4911,7 @@
         hideBootOverlay();
         const pending = _sqlBootQueue.splice(0);
         pending.forEach((fn) => { try { fn(); } catch (err) { } });
+        focusEditorOnOpen();
     }
 
     async function initModal() {
@@ -4850,6 +4931,7 @@
             setBootStep('sql_boot_step_editor', 'Cargando el editor SQL…', 2);
 
 
+            let _sqlTeclas = {};
             const textArea = document.getElementById("nsft-sql-query-input");
             if (textArea && typeof CodeMirror !== 'undefined') {
                 editor = CodeMirror.fromTextArea(textArea, {
@@ -4859,11 +4941,21 @@
                     matchBrackets: true,
                     autoCloseBrackets: true,
 
-                    extraKeys: {
+                    cursorScrollMargin: 80,
+
+                    configureMouse: (window.NSFT_CodeEditor && window.NSFT_CodeEditor.ratonMultiCursor)
+                        || ((cm, repeat, ev) => ({ addNew: ev.altKey || ev.ctrlKey || ev.metaKey })),
+
+                    extraKeys: Object.assign(
+                        (window.NSFT_CodeEditor && window.NSFT_CodeEditor.atajosEdicion)
+                            ? window.NSFT_CodeEditor.atajosEdicion() : {},
+                        (_sqlTeclas = {
                         'Ctrl-F': () => { handleEditFind(); },
                         'Cmd-F': () => { handleEditFind(); },
-                        'Ctrl-Space': 'autocomplete'
-                    },
+                        'Ctrl-Space': 'autocomplete',
+                        'Tab': (cm) => { if (!sqlGhostAcepta()) return CodeMirror.Pass; },
+                        'Esc': () => { if (_sqlGhost) sqlGhostLimpia(); else return CodeMirror.Pass; }
+                    })),
 
                     hintOptions: {
                         hint: sqlHintWithChain,
@@ -4874,19 +4966,39 @@
                     }
                 });
 
+                if (window.NSFT_CodeEditor && window.NSFT_CodeEditor.registraEditor) {
+                    window.NSFT_CodeEditor.registraEditor(editor, _sqlTeclas);
+                }
+
                 watchHintsPopup();
+
+                editor.on('inputRead', sqlGhostProgramar);
+                editor.on('endCompletion', sqlGhostProgramar);
+                editor.on('change', (cm, ch) => {
+                    if (ch.origin !== '+nsftGhost') sqlGhostLimpia();
+                });
+                editor.on('cursorActivity', () => { if (_sqlGhost) sqlGhostLimpia(); });
+                editor.on('blur', sqlGhostLimpia);
+
+                const hintTrasPintar = (cm) => {
+                    const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+                    raf(() => setTimeout(() => {
+                        if (!editor || !cm.hasFocus()) return;
+                        cm.showHint({ completeSingle: false });
+                    }, 0));
+                };
 
                 editor.on("inputRead", (cm, change) => {
                     const typedCh = change.text[0];
                     if (typedCh === ".") {
-                        cm.showHint({ completeSingle: false });
+                        hintTrasPintar(cm);
                         return;
                     }
                     if (!/[\w$]/.test(typedCh || '')) return;
                     const tok = cm.getTokenAt(cm.getCursor());
                     const word = tok && tok.string ? tok.string : '';
                     if (word.length < 3 || !/^[a-z_][a-z0-9_]*$/i.test(word)) return;
-                    if (resolveSingleTableHint(cm)) cm.showHint({ completeSingle: false });
+                    if (resolveSingleTableHint(cm)) hintTrasPintar(cm);
                 });
 
                 editor.setSize("100%", "100%");
@@ -5091,6 +5203,7 @@
             wireFindClear('nsft-sql-schema-filter');
             wireFindClear('nsft-sql-results-search');
             wireFindClear('nsft-sql-logs-filter');
+            wireFindClear('nsft-sql-schema-catalog-input');
             const treeEl = document.getElementById('nsft-sql-schema-tree');
             if (treeEl) treeEl.addEventListener('scroll', () => renderSchemaTree(), { passive: true });
 
@@ -5203,13 +5316,14 @@
         if (buscador) {
             let searchTimer = 0;
             buscador.addEventListener('input', (e) => {
-                const val = e.target.value.toLowerCase();
+                const val = tsFold(e.target.value);
                 clearTimeout(searchTimer);
                 searchTimer = setTimeout(() => {
                     _resultsSearchTerm = val;
                     if (!resultTable) return;
+                    const TS = window.NSFT_TextSearch;
                     resultTable.setFilter((row) => {
-                        return Object.values(row).some(v => String(v).toLowerCase().includes(val));
+                        return Object.values(row).some(v => (TS ? TS.fold(v) : String(v).toLowerCase()).includes(val));
                     });
                     try { resultTable.redraw(true); } catch (err) { }
                 }, 160);
@@ -5690,6 +5804,239 @@
         return "string";
     }
 
+    let _sqlGhostOn = true;
+    let _sqlGhostTimer = null;
+    let _sqlGhostSeq = 0;
+    let _sqlGhostPedido = null;
+    let _sqlGhost = null;
+
+    let _sqlGhostMaster = true;
+    let _sqlGhostScope = true;
+
+    chrome.storage.local.get({
+        suiteqlAiComplete: true,
+        enableAiAssistant: true,
+        aiAssistantSuiteql: true
+    }, (it) => {
+        _sqlGhostOn = it.suiteqlAiComplete !== false;
+        _sqlGhostMaster = it.enableAiAssistant !== false;
+        _sqlGhostScope = it.aiAssistantSuiteql !== false;
+        sqlGhostPintaBoton();
+    });
+    chrome.storage.onChanged.addListener((ch, area) => {
+        if (area !== 'local') return;
+        if (!ch.suiteqlAiComplete && !ch.enableAiAssistant && !ch.aiAssistantSuiteql) return;
+        if (ch.suiteqlAiComplete) {
+            _sqlGhostOn = ch.suiteqlAiComplete.newValue !== false;
+            if (!_sqlGhostOn) sqlGhostLimpia();
+        }
+        if (ch.enableAiAssistant) _sqlGhostMaster = ch.enableAiAssistant.newValue !== false;
+        if (ch.aiAssistantSuiteql) _sqlGhostScope = ch.aiAssistantSuiteql.newValue !== false;
+        sqlGhostPintaBoton();
+    });
+
+    function sqlGhostPintaBoton() {
+        const btn = document.getElementById('nsft-sql-tool-ghost');
+        if (!btn) return;
+        btn.hidden = !(_sqlGhostMaster && _sqlGhostScope);
+        btn.classList.toggle('is-on', _sqlGhostOn);
+        btn.classList.toggle('is-busy', !!_sqlGhostPedido);
+    }
+
+    function sqlGhostMenuCierra() {
+        const m = document.getElementById('nsft-sql-ghost-menu');
+        if (m) m.remove();
+    }
+
+    function sqlGhostMenuAbre(btn) {
+        sqlGhostMenuCierra();
+        chrome.storage.local.get({ nsft_ai_configs: {}, suiteqlAiModel: '' }, (st) => {
+            const cfgs = st.nsft_ai_configs || {};
+            const actual = String(st.suiteqlAiModel || '');
+            const FAST = window.NSFT_AI_FAST || { nombres: {}, rapidos: {} };
+
+            const menu = document.createElement('div');
+            menu.id = 'nsft-sql-ghost-menu';
+            menu.className = 'nsft-sql-ghost-menu';
+
+            const titulo = document.createElement('div');
+            titulo.className = 'nsft-sql-ghost-menu-title';
+            titulo.textContent = chrome.i18n.getMessage('sscAiModelLabel') || 'Modelo para sugerencias:';
+            menu.appendChild(titulo);
+
+            const nota = document.createElement('div');
+            nota.className = 'nsft-sql-ghost-menu-note';
+            nota.textContent = chrome.i18n.getMessage('sscAiModelOnlyFast')
+                || 'Sólo los modelos rápidos, aptos para completar mientras escribes.';
+            menu.appendChild(nota);
+
+            const item = (valor, texto) => {
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.className = 'nsft-sql-ghost-menu-item' + (valor === actual ? ' is-current' : '');
+                el.textContent = texto;
+                el.addEventListener('click', () => {
+                    try { chrome.storage.local.set({ suiteqlAiModel: valor }); } catch (e) { }
+                    sqlGhostMenuCierra();
+                });
+                menu.appendChild(el);
+            };
+
+            item('', chrome.i18n.getMessage('sscAiModelSameChat') || 'El mismo del chat');
+
+            Object.keys(cfgs).forEach((pk) => {
+                const c = cfgs[pk];
+                if (!c || c.disabled) return;
+                const visibles = (c.models || []).filter((m) => (c.hidden || []).indexOf(m) === -1);
+                if (!visibles.length) return;
+                const re = new RegExp(FAST.rapidos[pk] || FAST.generico || 'haiku|flash|nano|mini|lite|fast', 'i');
+                const lista = visibles.filter((m) => re.test(String(m)));
+                if (!lista.length) return;
+                const grupo = document.createElement('div');
+                grupo.className = 'nsft-sql-ghost-menu-group';
+                grupo.textContent = (FAST.nombres || {})[pk] || pk;
+                menu.appendChild(grupo);
+                lista.forEach((m) => item(pk + '::' + m, m));
+            });
+
+            const modal = document.getElementById('nsft-sql-modal');
+            (modal || document.body).appendChild(menu);
+
+            const r = btn.getBoundingClientRect();
+            menu.style.top = (r.bottom + 6) + 'px';
+            menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - menu.offsetWidth - 8)) + 'px';
+
+            const fuera = (e) => {
+                if (menu.contains(e.target)) return;
+                sqlGhostMenuCierra();
+                document.removeEventListener('mousedown', fuera, true);
+                document.removeEventListener('keydown', tecla, true);
+            };
+            const tecla = (e) => {
+                if (e.key !== 'Escape') return;
+                e.preventDefault();
+                e.stopPropagation();
+                sqlGhostMenuCierra();
+                document.removeEventListener('mousedown', fuera, true);
+                document.removeEventListener('keydown', tecla, true);
+            };
+            document.addEventListener('mousedown', fuera, true);
+            document.addEventListener('keydown', tecla, true);
+        });
+    }
+
+    function sqlGhostToggle() {
+        try { chrome.storage.local.set({ suiteqlAiComplete: !_sqlGhostOn }); } catch (e) { }
+    }
+
+    function sqlGhostLimpia() {
+        clearTimeout(_sqlGhostTimer);
+        _sqlGhostPedido = null;
+        if (_sqlGhost) {
+            try { _sqlGhost.mark.clear(); } catch (e) { }
+            if (_sqlGhost.widget) { try { _sqlGhost.widget.clear(); } catch (e) { } }
+            _sqlGhost = null;
+        }
+        sqlGhostPintaBoton();
+    }
+
+    function sqlGhostAcepta() {
+        if (!_sqlGhost || !editor) return false;
+        const texto = _sqlGhost.text;
+        const cur = editor.getCursor();
+        sqlGhostLimpia();
+        const resto = editor.getLine(cur.line).slice(cur.ch);
+        let k = 0;
+        while (k < resto.length && k < 4
+            && ')]}\'"`'.indexOf(resto.charAt(k)) >= 0
+            && texto.indexOf(resto.charAt(k)) >= 0) k++;
+        editor.replaceRange(texto, cur, { line: cur.line, ch: cur.ch + k }, '+nsftGhost');
+        clearTimeout(_sqlGhostTimer);
+        _sqlGhostTimer = setTimeout(sqlGhostPedir, 250);
+        return true;
+    }
+
+    function sqlGhostMuestra(texto) {
+        if (!editor) return;
+        sqlGhostLimpia();
+        const lineas = String(texto).split('\n');
+        const cur = editor.getCursor();
+        const span = document.createElement('span');
+        span.className = 'nsft-sql-ghost';
+        span.textContent = lineas[0];
+        const mark = editor.setBookmark(cur, { widget: span, insertLeft: false });
+        let widget = null;
+        let alto = 0;
+        if (lineas.length > 1) {
+            const block = document.createElement('pre');
+            block.className = 'nsft-sql-ghost nsft-sql-ghost-block';
+            block.textContent = lineas.slice(1).join('\n');
+            widget = editor.addLineWidget(cur.line, block);
+            alto = block.offsetHeight || 0;
+        }
+        _sqlGhost = { mark, widget, text: texto };
+        try { editor.scrollIntoView({ line: cur.line, ch: cur.ch }, alto + 24); } catch (e) { }
+    }
+
+    function sqlGhostDebug() {
+        try { console.debug.apply(console, ['[NSFT] ghost:'].concat([].slice.call(arguments))); } catch (e) { }
+    }
+
+    function sqlGhostPedir() {
+        if (!(_sqlGhostMaster && _sqlGhostScope)) { sqlGhostDebug('el asistente está apagado en el popup'); return; }
+        if (!_sqlGhostOn || !editor) { sqlGhostDebug('apagado o sin editor'); return; }
+        if (!editor.hasFocus() || editor.somethingSelected()) { sqlGhostDebug('sin foco o con selección'); return; }
+        if (editor.state.completionActive) { sqlGhostDebug('desplegable abierto'); return; }
+        const cur = editor.getCursor();
+        const prefix = editor.getRange({ line: 0, ch: 0 }, cur);
+        if (!prefix.trim()) { sqlGhostDebug('documento vacío'); return; }
+        const finDoc = { line: editor.lastLine(), ch: editor.getLine(editor.lastLine()).length };
+        const suffix = editor.getRange(cur, finDoc);
+        const id = 'g' + (++_sqlGhostSeq);
+        _sqlGhostPedido = { id, gen: editor.changeGeneration(), line: cur.line, ch: cur.ch };
+        window.dispatchEvent(new CustomEvent('nsft-sql-ai-complete', {
+            detail: {
+                id,
+                prefix: prefix.slice(-3000),
+                suffix: suffix.slice(0, 800),
+                line: editor.getLine(cur.line).slice(0, cur.ch)
+            }
+        }));
+        sqlGhostDebug('pedido', id);
+        sqlGhostPintaBoton();
+        setTimeout(() => {
+            if (_sqlGhostPedido && _sqlGhostPedido.id === id) {
+                _sqlGhostPedido = null;
+                sqlGhostDebug(id, 'caducó sin respuesta (15 s) — ¿el agente no está escuchando?');
+                sqlGhostPintaBoton();
+            }
+        }, 15000);
+    }
+
+    window.addEventListener('nsft-sql-ai-complete-result', (ev) => {
+        const d = ev && ev.detail;
+        if (!d) return;
+        if (!_sqlGhostPedido || d.id !== _sqlGhostPedido.id) { sqlGhostDebug(d.id, 'respuesta huérfana (el pedido ya no espera)'); return; }
+        const p = _sqlGhostPedido;
+        _sqlGhostPedido = null;
+        sqlGhostPintaBoton();
+        if (!d.ok || !d.text || !editor) { sqlGhostDebug(d.id, 'el agente contestó sin sugerencia'); return; }
+        const cur = editor.getCursor();
+        if (editor.changeGeneration() !== p.gen || cur.line !== p.line || cur.ch !== p.ch) {
+            sqlGhostDebug(d.id, 'descartada: el texto o el cursor se movieron mientras viajaba');
+            return;
+        }
+        if (!editor.hasFocus()) { sqlGhostDebug(d.id, 'descartada: el editor perdió el foco'); return; }
+        sqlGhostDebug(d.id, 'mostrada (' + d.text.length + ' chars)');
+        sqlGhostMuestra(String(d.text));
+    });
+
+    function sqlGhostProgramar() {
+        clearTimeout(_sqlGhostTimer);
+        if (!_sqlGhostOn) return;
+        _sqlGhostTimer = setTimeout(sqlGhostPedir, 800);
+    }
+
     function getSqlHintTables() {
         return sqlHintTables;
     }
@@ -5743,6 +6090,8 @@
     }
 
     let _modalKeysBound = false;
+
+    let _sqlEditorPct = 0;
 
     const MODAL_COMMANDS = [
         ['Mod+Enter', () => executeCurrentQuery()],
@@ -5798,6 +6147,7 @@
                 chrome.storage.local.get(['nsft_sql_editor_height_pct'], (it) => {
                     const pct = Number(it && it.nsft_sql_editor_height_pct);
                     if (pct >= 15 && pct <= 80) {
+                        _sqlEditorPct = pct;
                         mainPanel.style.flex = 'none';
                         mainPanel.style.height = pct + '%';
                         resultsPanel.style.flex = '1';
@@ -5856,6 +6206,7 @@
                         const h = mainPanel.getBoundingClientRect().height;
                         if (total > 0 && h > 0) {
                             const pct = Math.max(15, Math.min(80, Math.round((h / total) * 100)));
+                            _sqlEditorPct = pct;
                             chrome.storage.local.set({ nsft_sql_editor_height_pct: pct });
                         }
                     } catch (e) { }
@@ -6064,6 +6415,17 @@
         registerAction('nsft-sql-tool-join', handleInsertJoin);
         registerAction('nsft-sql-tool-schema-toggle', toggleSchemaSidebar);
         registerAction('nsft-sql-tool-results-toggle', handleViewTable);
+        registerAction('nsft-sql-tool-ghost', sqlGhostToggle);
+        sqlGhostPintaBoton();
+        const ghostBtn = document.getElementById('nsft-sql-tool-ghost');
+        if (ghostBtn && !ghostBtn.dataset.menuWired) {
+            ghostBtn.dataset.menuWired = '1';
+            ghostBtn.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                sqlGhostMenuAbre(ghostBtn);
+            });
+        }
         registerAction('nsft-sql-edge-schema', toggleSchemaSidebar);
         registerAction('nsft-sql-edge-results', handleViewTable);
         registerAction('nsft-sql-edge-ai', () => {
@@ -7350,46 +7712,33 @@
 
         widget = document.createElement('div');
         widget.id = 'nsft-sql-search-widget';
-        widget.style.cssText = `
-            position: absolute;
-            top: 5px; right: 20px;
-            z-index: 100;
-            background: white;
-            padding: 4px 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: sans-serif;
-            font-size: 13px;
-        `;
+        widget.className = 'nsft-sql-findbar';
 
         const input = document.createElement('input');
-        input.placeholder = 'Find...';
-        input.style.cssText = `
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            padding: 2px 5px;
-            font-size: 13px;
-            width: 150px;
-            outline: none;
-        `;
+        input.type = 'text';
+        input.className = 'nsft-sql-findbar-input';
+        input.placeholder = chrome.i18n.getMessage('sql_findbar_ph') || 'Find in editor…';
 
         const btnNext = document.createElement('button');
+        btnNext.type = 'button';
+        btnNext.className = 'nsft-sql-findbar-btn';
         btnNext.innerHTML = '&#9660;';
-        btnNext.title = "Find Next (Enter)";
-        btnNext.style.cssText = 'border:none; background:none; cursor:pointer; font-size:12px; padding:2px;';
+        btnNext.title = chrome.i18n.getMessage('sql_findbar_next') || 'Next (Enter)';
+        btnNext.setAttribute('aria-label', btnNext.title);
 
         const btnPrev = document.createElement('button');
+        btnPrev.type = 'button';
+        btnPrev.className = 'nsft-sql-findbar-btn';
         btnPrev.innerHTML = '&#9650;';
-        btnPrev.title = "Find Previous (Shift+Enter)";
-        btnPrev.style.cssText = 'border:none; background:none; cursor:pointer; font-size:12px; padding:2px;';
+        btnPrev.title = chrome.i18n.getMessage('sql_findbar_prev') || 'Previous (Shift+Enter)';
+        btnPrev.setAttribute('aria-label', btnPrev.title);
 
         const btnClose = document.createElement('button');
+        btnClose.type = 'button';
+        btnClose.className = 'nsft-sql-findbar-btn nsft-sql-findbar-close';
         btnClose.innerHTML = '&times;';
-        btnClose.style.cssText = 'border:none; background:none; cursor:pointer; font-size:16px; margin-left:4px; padding:0 4px; color:#666;';
+        btnClose.title = chrome.i18n.getMessage('sql_findbar_close') || 'Close (Esc)';
+        btnClose.setAttribute('aria-label', btnClose.title);
         btnClose.onclick = () => { widget.style.display = 'none'; editor.focus(); };
 
         widget.appendChild(input);
@@ -7414,8 +7763,10 @@
             }
 
             const content = editor.getValue();
-            const lowerContent = content.toLowerCase();
-            const lowerQuery = query.toLowerCase();
+            const TS = window.NSFT_TextSearch;
+            const alinea = (s) => (TS ? TS.foldAligned(s) : String(s).toLowerCase());
+            const lowerContent = alinea(content);
+            const lowerQuery = alinea(query);
 
 
             let searchStart;
@@ -7446,8 +7797,9 @@
                     css: "background-color: #fef08a !important; color: black !important;"
                 });
             } else {
+                editor.setSelection(editor.getCursor('start'), editor.getCursor('start'));
                 input.style.borderColor = '#ef4444';
-                setTimeout(() => input.style.borderColor = '#ccc', 500);
+                setTimeout(() => { input.style.borderColor = ''; }, 500);
             }
         };
 
@@ -7769,7 +8121,7 @@
             mainPanel.classList.remove('nsft-sql-panel-collapsed');
             mainPanel.style.display = 'flex';
             mainPanel.style.flex = 'none';
-            mainPanel.style.height = '300px';
+            mainPanel.style.height = (_sqlEditorPct >= 15 && _sqlEditorPct <= 80) ? _sqlEditorPct + '%' : '300px';
 
             if (tableMenuItem) tableMenuItem.textContent = chrome.i18n.getMessage('sql_menu_hide_table') || 'Hide Results Table';
             if (editorMenuItem) editorMenuItem.textContent = chrome.i18n.getMessage('sql_menu_hide_editor') || 'Hide Editor';
@@ -7779,8 +8131,8 @@
 
             mainPanel.classList.remove('nsft-sql-panel-collapsed');
             mainPanel.style.display = 'flex';
-            mainPanel.style.flex = '1';
-            mainPanel.style.height = 'auto';
+            mainPanel.style.flex = 'none';
+            mainPanel.style.height = '100%';
 
             if (tableMenuItem) tableMenuItem.textContent = chrome.i18n.getMessage('sql_menu_show_table') || 'Show Results Table';
             if (editorMenuItem) editorMenuItem.textContent = chrome.i18n.getMessage('sql_menu_hide_editor') || 'Hide Editor';
@@ -7808,7 +8160,7 @@
             mainPanel.classList.remove('nsft-sql-panel-collapsed');
             mainPanel.style.display = 'flex';
             mainPanel.style.flex = 'none';
-            mainPanel.style.height = '300px';
+            mainPanel.style.height = (_sqlEditorPct >= 15 && _sqlEditorPct <= 80) ? _sqlEditorPct + '%' : '300px';
 
             resizer.classList.remove('nsft-sql-resizer-hidden');
             resultsPanel.classList.remove('nsft-sql-panel-collapsed');
@@ -7950,12 +8302,12 @@
         if (!filterLc || !meta) return { fields: false, joins: false };
         const fields = Object.values(meta.fields || {}).some((f) =>
             f && f.isAvailable && !f.removed && (
-                String(f.id || '').toLowerCase().includes(filterLc) ||
-                String(f.label || '').toLowerCase().includes(filterLc)));
+                tsFold(f.id).includes(filterLc) ||
+                tsFold(f.label).includes(filterLc)));
         const joins = Object.values(meta.joins || {}).some((j) =>
             j && j.isAvailable &&
-            (String(j.id || '') + ' ' + String(j.targetTable || '') + ' ' + String(j.targetLabel || ''))
-                .toLowerCase().includes(filterLc));
+            tsFold(String(j.id || '') + ' ' + String(j.targetTable || '') + ' ' + String(j.targetLabel || ''))
+                .includes(filterLc));
         return { fields: fields, joins: joins };
     }
 
@@ -8089,20 +8441,30 @@
         const tree = document.getElementById('nsft-sql-schema-tree');
         if (!tree) return;
 
-        const filterLc = schemaFilter.trim().toLowerCase();
+        const filterLc = tsFold(schemaFilter.trim());
 
         const cargadas = getLoadedTableNames();
-        const coincide = (t) => !filterLc || t.includes(filterLc)
-            || String((_schemaIndexMem[t] || {}).label || '').toLowerCase().includes(filterLc);
+        const coincide = (t) => !filterLc || tsFold(t).includes(filterLc)
+            || tsFold((_schemaIndexMem[t] || {}).label).includes(filterLc);
+
+        const casaPorDentro = (t) => {
+            const m = schemaMatchesIn(sqlTableMeta[t], filterLc);
+            return m.fields || m.joins;
+        };
+        const cargadasVisibles = !filterLc
+            ? cargadas
+            : cargadas.filter((t) => coincide(t) || casaPorDentro(t));
 
         const rank = (t) => {
-            if (!filterLc || t === filterLc) return 0;
-            if (t.startsWith(filterLc)) return 1;
-            if (t.includes(filterLc)) return 2;
+            if (!filterLc) return 0;
+            const tf = tsFold(t);
+            if (tf === filterLc) return 0;
+            if (tf.startsWith(filterLc)) return 1;
+            if (tf.includes(filterLc)) return 2;
             return 3;
         };
         const todas = Array.from(new Set(
-            cargadas.concat(Object.keys(_schemaIndexMem).filter(coincide))
+            cargadasVisibles.concat(Object.keys(_schemaIndexMem).filter(coincide))
         )).sort((a, b) => (rank(a) - rank(b)) || a.localeCompare(b));
 
         if (!todas.length) {
@@ -8302,7 +8664,7 @@
             dataTypes.forEach(dt => {
                 const groupKey = 'G:' + tableName + ':' + dt;
                 const groupFiltered = filterLc
-                    ? groups[dt].filter(f => f.id.toLowerCase().includes(filterLc) || (f.label || '').toLowerCase().includes(filterLc))
+                    ? groups[dt].filter(f => tsFold(f.id).includes(filterLc) || tsFold(f.label).includes(filterLc))
                     : groups[dt];
                 if (filterLc && !groupFiltered.length) return;
                 const groupOpen = schemaIsOpen(groupKey, !!filterLc && !!groupFiltered.length);
@@ -8331,7 +8693,7 @@
             const joinsKey = 'J:' + tableName;
             const joinsOpen = schemaIsOpen(joinsKey, hits.joins);
             const joinsFiltered = joinsAvailable
-                .filter(j => !filterLc || (j.id + ' ' + (j.targetTable || '') + ' ' + (j.targetLabel || '')).toLowerCase().includes(filterLc))
+                .filter(j => !filterLc || tsFold(j.id + ' ' + (j.targetTable || '') + ' ' + (j.targetLabel || '')).includes(filterLc))
                 .sort((a, b) => a.id.localeCompare(b.id));
             const joinsHead = document.createElement('div');
             joinsHead.className = 'nsft-sql-schema-node nsft-sql-schema-node-section';
@@ -9360,12 +9722,17 @@
         const header = document.createElement('div');
         header.className = 'nsft-sql-join-toolbar';
 
+        const findWrap = document.createElement('div');
+        findWrap.className = 'nsft-sql-find nsft-sql-find-join';
+
         const filter = document.createElement('input');
         filter.type = 'text';
+        filter.id = 'nsft-sql-join-filter';
         filter.className = 'nsft-sql-join-filter';
         filter.placeholder = chrome.i18n.getMessage('sql_join_filter_placeholder') || 'Filter by name or target…';
         filter.addEventListener('click', (e) => e.stopPropagation());
-        header.appendChild(filter);
+        findWrap.appendChild(filter);
+        header.appendChild(findWrap);
 
         const typeSelect = document.createElement('select');
         typeSelect.className = 'nsft-sql-join-type';
@@ -9385,6 +9752,7 @@
         header.appendChild(typeSelect);
 
         menu.appendChild(header);
+        wireFindClear('nsft-sql-join-filter');
 
         const listEl = document.createElement('div');
         listEl.className = 'nsft-sql-join-list';
@@ -9392,11 +9760,11 @@
 
         const draw = (q) => {
             listEl.innerHTML = '';
-            const needle = (q || '').toLowerCase().trim();
+            const needle = tsFold((q || '').trim());
             let lastRoot = '';
             let count = 0;
             entries.forEach(({ rootTable, join }) => {
-                const haystack = `${join.id} ${join.targetTable || ''} ${join.targetLabel || ''}`.toLowerCase();
+                const haystack = tsFold(`${join.id} ${join.targetTable || ''} ${join.targetLabel || ''}`);
                 if (needle && !haystack.includes(needle)) return;
 
                 if (rootTable !== lastRoot) {
@@ -9415,15 +9783,21 @@
                 iconEl.textContent = '→';
                 row.appendChild(iconEl);
 
+                const marca = (el, texto) => {
+                    const TS = window.NSFT_TextSearch;
+                    if (TS && needle) TS.mark(el, texto, needle, 'nsft-sql-hl');
+                    else el.textContent = texto;
+                };
+
                 const target = document.createElement('span');
                 target.className = 'nsft-sql-join-target';
-                target.textContent = join.targetTable || '?';
+                marca(target, join.targetTable || '?');
                 row.appendChild(target);
 
                 if (join.targetLabel && join.targetLabel !== join.targetTable) {
                     const label = document.createElement('span');
                     label.className = 'nsft-sql-join-label';
-                    label.textContent = ' — ' + join.targetLabel;
+                    marca(label, ' — ' + join.targetLabel);
                     row.appendChild(label);
                 }
 
@@ -10231,6 +10605,13 @@
                     </div>
                     <div class="nsft-sql-toolbar-spacer"></div>
 
+                    
+                    <button class="nsft-sql-toolbar-button nsft-sql-iconbtn" id="nsft-sql-tool-ghost" hidden
+                        title="${escapeHtml(chrome.i18n.getMessage('sql_ghost_btn_title') || 'AI SQL suggestions — Tab accepts (click to toggle)')}"
+                        aria-label="${escapeHtml(chrome.i18n.getMessage('sql_ghost_btn_title') || 'AI SQL suggestions')}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6 4.7 1.8-4.7 1.8L12 16l-1.8-4.8-4.7-1.8 4.7-1.8z"></path><path d="M4 21h10"></path></svg>
+                        <span class="nsft-sql-ghost-spin" aria-hidden="true"></span>
+                    </button>
                     <button class="nsft-sql-toolbar-button nsft-sql-iconbtn" id="nsft-sql-tool-schema-toggle" title="${chrome.i18n.getMessage('sql_schema_toggle_title') || 'Toggle Schema explorer'} (${KBD_MOD}B)">
                         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"></rect><path d="M6 2.5v11"></path></svg>
                     </button>
@@ -10241,9 +10622,7 @@
                         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8.5l3.5 3.5 7.5-8"></path></svg>
                     </button>
                 </div>
-                <!-- Las flechas van FUERA de la barra que se desplaza: dentro se
-                     irían con ella y dejarían de estar donde se las busca.
-                     Aparecen sólo cuando las pestañas no caben. -->
+                
                 <div class="nsft-sql-tabs-row">
                     <button type="button" class="nsft-sql-tabs-nav" id="nsft-sql-tabs-prev" hidden
                         title="${escapeHtml(chrome.i18n.getMessage('sql_tabs_scroll_prev') || 'Pestañas anteriores')}"
@@ -10254,12 +10633,7 @@
                         aria-label="${escapeHtml(chrome.i18n.getMessage('sql_tabs_scroll_next') || 'Pestañas siguientes')}">›</button>
                 </div>
                 <div class="nsft-sql-workzone${cachedSidebarSide === 'right' ? ' sidebar-right' : ''}">
-                    <!-- Pestañas de borde: una por panel plegado, pegada al lado
-                         por donde reaparece (esquema al costado, IA a la derecha,
-                         resultados abajo). Quién se ve lo decide el CSS mirando
-                         las clases de plegado de cada panel: aquí no hay estado
-                         que sincronizar. Reabren con el MISMO camino que los
-                         botones de la barra. -->
+                    
                     <button type="button" class="nsft-sql-edge-tab nsft-sql-edge-tab-schema" id="nsft-sql-edge-schema"
                         title="${chrome.i18n.getMessage('sql_schema_toggle_title') || 'Toggle Schema explorer'} (${KBD_MOD}B)">${chrome.i18n.getMessage('sql_schema_title') || 'Esquema'}</button>
                     <button type="button" class="nsft-sql-edge-tab nsft-sql-edge-tab-ai" id="nsft-sql-edge-ai"
@@ -10268,69 +10642,36 @@
                     <div class="nsft-sql-schema-header">
                         <div class="nsft-sql-schema-header-row">
                             <span class="nsft-sql-schema-title" data-i18n="sql_schema_title">${chrome.i18n.getMessage('sql_schema_title') || 'Schema'}</span>
-                            <!-- Cerrar el panel desde el propio panel. Hace lo mismo
-                                 que el interruptor de la barra de herramientas: se
-                                 registra contra la MISMA función, para que no haya
-                                 dos maneras de plegar que puedan divergir. -->
+                            
                             <button type="button" class="nsft-sql-panel-close" id="nsft-sql-schema-close"
                                 title="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}"
                                 aria-label="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}">${CLOSE_SVG}</button>
                         </div>
-                        <!-- LOS BOTONES VAN EN SU PROPIA FILA, no a la derecha del
-                             título. Apretados junto a "Esquema" competían con él
-                             por un ancho que el usuario puede estrechar a mano, y
-                             al hacerlo eran los primeros en desbordarse. Abajo
-                             tienen el ancho entero y quedan alineados con el
-                             filtro, que es el otro control de la lista.
-
-                             Separados en tres grupos: traer esquema (agregar,
-                             actualizar, automático) · destructivo (vaciar) · otra
-                             vista (diagrama). Vaciar aislado a propósito, y el
-                             diagrama aparte porque no toca la caché: abre otra
-                             pantalla. -->
+                        
                         <div class="nsft-sql-schema-actions">
-                            <!-- Tabla + lupa: buscar una tabla de la cuenta. El
-                                 «+» a secas decía «añadir algo», no «buscar una
-                                 tabla», que es lo que abre. -->
+                            
                             <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn" id="nsft-sql-schema-add" title="${escapeHtml(chrome.i18n.getMessage('sql_schema_catalog_ph') || 'Buscar tabla en la cuenta…')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sql_schema_catalog_ph') || 'Buscar tabla en la cuenta…')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.5h13v9.5"/><path d="M3.5 5.5v10.5h7"/><path d="M3.5 9.2h13M8.6 5.5V16"/><circle cx="16.6" cy="16.6" r="4.1"/><path d="M19.6 19.6 22 22"/></svg></button>
-                            <!-- Actualizar. Estaba en la barra de herramientas,
-                                 pero es una acción SOBRE la lista de al lado: su
-                                 sitio es la cabecera de esa lista. Dos arcos con
-                                 punta: es sincronizar con la cuenta, no rehacer
-                                 una sola cosa. Gira mientras dura. -->
+                            
                             <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn" id="nsft-sql-schema-refresh" title="${escapeHtml(chrome.i18n.getMessage('sql_menu_refresh_schema') || 'Actualizar esquema')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12a8.5 8.5 0 0 1-14.6 5.9"/><path d="M3.5 12a8.5 8.5 0 0 1 14.6-5.9"/><path d="M18.1 2.6v3.8h-3.8M5.9 21.4v-3.8h3.8"/></svg></button>
-                            <!-- Descarga automática del esquema al escribir la
-                                 tabla en el FROM. Vive AQUÍ y no en el popup: se
-                                 decide mientras se trabaja en el editor, mirando
-                                 el propio panel, no antes de abrirlo. -->
+                            
                             <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn nsft-sql-schema-auto" id="nsft-sql-schema-auto" aria-pressed="true"></button>
                             <span class="nsft-sql-schema-actions-sep" aria-hidden="true"></span>
-                            <!-- Vaciar la caché de esquemas de ESTA cuenta. La
-                                 mecánica ya existía (clearSchemaCache sin tabla),
-                                 pero no había forma de llamarla: sólo se podía ir
-                                 quitando tabla por tabla desde su menú. -->
+                            
                             <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn is-danger" id="nsft-sql-schema-wipe" title="${escapeHtml(chrome.i18n.getMessage('sql_schema_wipe_title') || 'Vaciar la caché de esquemas de esta cuenta')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sql_schema_wipe_title') || 'Vaciar la caché de esquemas de esta cuenta')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.6h16"/><path d="M9.4 6.6V4.5h5.2v2.1"/><path d="M6.2 6.6l.9 12.2a1.6 1.6 0 0 0 1.6 1.5h6.6a1.6 1.6 0 0 0 1.6-1.5l.9-12.2"/><path d="M10 10.6v6M14 10.6v6" opacity=".6"/></svg></button>
                             <span class="nsft-sql-schema-actions-sep" aria-hidden="true"></span>
                             <button type="button" class="nsft-sql-schema-add nsft-sql-schema-iconbtn" id="nsft-sql-schema-erd" title="${escapeHtml(chrome.i18n.getMessage('sql_erd_title') || 'Diagrama de relaciones (tablas en caché)')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sql_erd_title') || 'Diagrama de relaciones (tablas en caché)')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.6" y="2.8" width="6.8" height="5" rx="1.4"/><rect x="2.4" y="16.2" width="6.8" height="5" rx="1.4"/><rect x="14.8" y="16.2" width="6.8" height="5" rx="1.4"/><path d="M12 7.8v3.6M12 11.4H5.8v4.8M12 11.4h6.2v4.8"/></svg></button>
                         </div>
-                        <!-- Envuelto sólo para colgarle el aspa de limpiar. Sin
-                             span de lupa, a diferencia de los otros dos: éste ya
-                             la trae como imagen de fondo del propio campo, y
-                             añadir otra la duplicaba.
-                             (Cuidado al editar aquí: esto va dentro de un
-                             template literal, así que un acento grave cierra la
-                             cadena y lo de detrás se lee como código.) -->
+                        
                         <div class="nsft-sql-find nsft-sql-find-schema">
                             <input type="text" class="nsft-sql-schema-filter" id="nsft-sql-schema-filter" placeholder="${chrome.i18n.getMessage('sql_schema_filter_placeholder') || 'Filter fields…'}">
                         </div>
                         <div class="nsft-sql-schema-catalog-pop" id="nsft-sql-schema-catalog-pop" hidden>
+                            
+                            <div class="nsft-sql-find nsft-sql-find-catalog">
                             <input type="text" class="nsft-sql-schema-catalog-input" id="nsft-sql-schema-catalog-input" autocomplete="off" spellcheck="false" placeholder="${chrome.i18n.getMessage('sql_schema_catalog_ph') || 'Buscar tabla en la cuenta…'}">
+                            </div>
                             <div class="nsft-sql-schema-catalog-results" id="nsft-sql-schema-catalog-results"></div>
-                            <!-- Bajar el esquema de TODA la cuenta. Va aquí, al
-                                 pie del buscador del catálogo, porque es el sitio
-                                 donde ya está la lista completa de tablas: la
-                                 cabecera del panel tiene sus cuatro botones y un
-                                 quinto ya no se lee. -->
+                            
                             <button type="button" class="nsft-sql-schema-catalog-all" id="nsft-sql-schema-all"></button>
                         </div>
                     </div>
@@ -10338,16 +10679,12 @@
                 </aside>
                 <div class="nsft-sql-schema-resizer" id="nsft-sql-schema-resizer" title="${chrome.i18n.getMessage('sql_schema_resizer_title') || 'Drag to resize'}"></div>
                 <div class="nsft-sql-center">
-                    <!-- Anclada a la COLUMNA CENTRAL, no a la workzone: la
-                         workzone incluye el chat de IA, y con él abierto la
-                         pestaña caía encima de su cajón de escribir. -->
+                    
                     <button type="button" class="nsft-sql-edge-tab nsft-sql-edge-tab-results" id="nsft-sql-edge-results"
                         title="${chrome.i18n.getMessage('sql_results_toggle_title') || 'Show/hide results'}">${chrome.i18n.getMessage('sql_tab_results') || 'Resultados'}</button>
                 <div class="nsft-sql-main-panel">
                     <div class="nsft-sql-editor-container">
-                        <!-- Sale de DEFAULT_QUERY para que no haya dos ejemplos
-                             que mantener: el textarea es lo que CodeMirror lee al
-                             montarse, así que si divergen, el que se ve es éste. -->
+                        
                         <textarea id="nsft-sql-query-input" class="nsft-sql-textarea" spellcheck="false">${escapeHtml(DEFAULT_QUERY)}</textarea>
                     </div>
                 </div>
@@ -10355,9 +10692,7 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="1"></circle><circle cx="12" cy="15" r="1"></circle><circle cx="5" cy="9" r="1"></circle><circle cx="5" cy="15" r="1"></circle><circle cx="19" cy="9" r="1"></circle><circle cx="19" cy="15" r="1"></circle></svg>
                 </div>
                 <div class="nsft-sql-results-panel">
-                    <!-- Pestañas del panel inferior. El estado de la ejecución NO vive
-                         aquí dentro: se queda en la barra de abajo, visible desde las
-                         dos, para que un error nunca dependa de qué pestaña mires. -->
+                    
                     <div class="nsft-sql-panel-tabs" role="tablist">
                         <button type="button" class="nsft-sql-panel-tab is-active" data-panel-tab="results"
                             role="tab" aria-selected="true">${chrome.i18n.getMessage('sql_tab_results') || 'Results'}</button>
@@ -10367,12 +10702,10 @@
                             <span class="nsft-sql-logs-badge" id="nsft-sql-logs-badge" hidden>0</span>
                         </button>
                         <span class="nsft-sql-panel-tabs-spacer"></span>
-                        <!-- Sólo visible en la pestaña de Registro (ver CSS). -->
+                        
                         <button type="button" class="nsft-sql-logs-clear" id="nsft-sql-logs-clear"
                             >${chrome.i18n.getMessage('sql_logs_clear') || 'Clear all'}</button>
-                        <!-- Cierra el panel inferior. Va el último, igual que la X
-                             del esquema va al final de su fila: el gesto de cerrar
-                             siempre en la esquina. -->
+                        
                         <button type="button" class="nsft-sql-panel-close" id="nsft-sql-results-close"
                             title="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}"
                             aria-label="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}">${CLOSE_SVG}</button>
@@ -10382,10 +10715,7 @@
                             <span class="nsft-sql-search-glyph" aria-hidden="true">${SEARCH_SVG}</span>
                             <input id="nsft-sql-results-search" placeholder="${chrome.i18n.getMessage('sql_search_placeholder') || 'Search results...'}">
                         </div>
-                        <!-- Vaciar la tabla. Va pegado al buscador y no con los de
-                             la derecha porque actúa sobre lo MISMO que él: las
-                             filas que hay delante. Los otros tres se las llevan a
-                             otro sitio (gráfica, portapapeles, fichero). -->
+                        
                         <button type="button" id="nsft-sql-clear-btn" class="nsft-sql-chart-toggle nsft-sql-clear-btn" disabled
                             title="${escapeHtml(chrome.i18n.getMessage('sql_clear_results_title') || 'Clear the results table')}"
                             aria-label="${escapeHtml(chrome.i18n.getMessage('sql_clear_results_title') || 'Clear the results table')}">
@@ -10402,30 +10732,19 @@
                         <button type="button" id="nsft-sql-export-btn" class="nsft-sql-chart-toggle" title="${chrome.i18n.getMessage('sql_submenu_export') || 'Export'} (${KBD_MOD}${KBD_SHIFT}E)">
                             <span class="nsft-sql-btn-glyph">⇩</span><span>${chrome.i18n.getMessage('sql_submenu_export') || 'Export'}</span>
                         </button>
-                        <!-- Sólo en la vista de gráfica (lo alterna toggleChartView).
-                             Va aquí, con Tabla y PNG, y no en la barra de ejes: es
-                             una acción sobre la vista, no un parámetro de la
-                             gráfica. Comparte clase con sus vecinos para verse
-                             igual y heredar su regla [hidden]. -->
+                        
                         <button type="button" id="nsft-sql-chart-popout" class="nsft-sql-chart-toggle" hidden
                             title="${escapeHtml(chrome.i18n.getMessage('sql_chart_popout_title') || 'Abrir la gráfica en una pestaña')}">
                             <span class="nsft-sql-btn-glyph">⧉</span><span>${escapeHtml(chrome.i18n.getMessage('sql_chart_popout') || 'Abrir en pestaña')}</span>
                         </button>
                     </div>
-                    <!-- Aviso COMPACTO de ejecución. Sustituye al velo grande
-                         siempre que haya algo debajo que merezca seguir
-                         leyéndose: la tabla de la consulta anterior, o la lista
-                         del Registro. Va en el flujo, no flotando, para no tapar
-                         la primera fila de lo que hay debajo. -->
+                    
                     <div id="nsft-sql-run-pill" class="nsft-sql-run-pill" hidden>
                         <span class="nsft-ui-spinner nsft-sql-run-pill-spin" aria-hidden="true"></span>
                         <span id="nsft-sql-run-pill-text"></span>
                     </div>
                     <div id="nsft-sql-trunc-banner" class="nsft-sql-trunc-banner" hidden></div>
-                    <!-- Aviso en la pestaña de RESULTADOS cuando la última ejecución
-                         falló: la tabla se vacía, así que sin esto sólo se vería un
-                         "sin datos" sin explicar por qué. En Registro no aparece —
-                         allí el error ya está delante, con todo su detalle. -->
+                    
                     <div id="nsft-sql-results-error" class="nsft-sql-results-error" hidden>
                         <span>${chrome.i18n.getMessage('sql_results_failed') || 'The last query failed, so there are no results to show.'}</span>
                         <button type="button" id="nsft-sql-results-error-cta"
@@ -10459,15 +10778,10 @@
                         <div id="nsft-sql-chart-msg" class="nsft-sql-chart-msg" hidden></div>
                         <div class="nsft-sql-chart-canvas-wrap"><canvas id="nsft-sql-chart-canvas"></canvas></div>
                     </div>
-                    <!-- Vista de LOGS: lista a la izquierda, detalle a la derecha.
-                         Bajo cierto ancho el detalle pasa debajo (ver CSS), para que
-                         la lista no se ahogue cuando el modal está estrecho. -->
+                    
                     <div id="nsft-sql-logs-view" class="nsft-sql-logs-view" hidden>
                         <div class="nsft-sql-logs-side">
-                            <!-- Los filtros van en la MISMA fila del título, entre
-                                 él y el contador: ahorran una fila entera de alto
-                                 y la lista gana ese espacio. Si el panel se
-                                 estrecha, la fila envuelve y bajan solos. -->
+                            
                             <div class="nsft-sql-logs-side-head">
                                 <div class="nsft-sql-logs-side-titlerow">
                                     <span class="nsft-sql-logs-side-title">${chrome.i18n.getMessage('sql_logs_side_title') || 'History'}</span>
@@ -10497,11 +10811,7 @@
             <div class="suiteql-runner-footer">
                 <span class="nsft-sql-footer-left">
                     <span id="nsft-sql-conn-status" class="nsft-sql-footer-status">● ${chrome.i18n.getMessage('sql_footer_connected') || 'Connected'}</span>
-                    <!-- Medidor de gobernanza. Vive en el pie y no en el panel de
-                         resultados a propósito: el pie se ve desde las dos
-                         pestañas y con el modal en cualquier tamaño, y esto hay
-                         que poder mirarlo justo mientras la descarga corre.
-                         Oculto hasta que llega la primera lectura. -->
+                    
                     <span id="nsft-sql-gov" class="nsft-sql-gov" hidden>
                         <span class="nsft-sql-gov-label">${chrome.i18n.getMessage('sql_gov_label') || 'Governance'}</span>
                         <span class="nsft-sql-gov-bar"><span class="nsft-sql-gov-fill"></span></span>

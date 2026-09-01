@@ -138,7 +138,7 @@
         btn.addEventListener('click', (ev) => {
             ev.preventDefault();
             ev.stopPropagation();
-            handleRename(info, row);
+            handleRename(info, row, btn);
         });
         bar.appendChild(btn);
     }
@@ -158,18 +158,22 @@
         return bar;
     }
 
-    async function handleRename(info, row) {
+    async function handleRename(info, row, btn) {
         const typeLabel = info.isFolder
             ? (chrome.i18n.getMessage('fcr_type_folder') || 'Folder')
             : (chrome.i18n.getMessage('fcr_type_file') || 'File');
         const promptMsg = (chrome.i18n.getMessage('fcr_prompt') || 'Rename {type}').replace('{type}', typeLabel);
 
-        await renameLoop(info, typeLabel, promptMsg, info.name, null, row);
+        try {
+            await renameLoop(info, typeLabel, promptMsg, info.name, null, row, btn);
+        } finally {
+            ocupado(btn, false);
+        }
     }
 
-    async function renameLoop(info, typeLabel, promptMsg, currentName, prevError, row) {
+    async function renameLoop(info, typeLabel, promptMsg, currentName, prevError, row, btn) {
         const full = prevError ? prevError + '\n\n' + promptMsg : promptMsg;
-        const newName = window.prompt(full, currentName || '');
+        const newName = await pedirNombre(full, currentName || '', typeLabel);
         if (newName == null) return;
         const trimmed = newName.trim();
         if (!trimmed || trimmed === currentName) return;
@@ -178,19 +182,20 @@
         if (ILLEGAL.test(trimmed)) {
             const errIllegal = chrome.i18n.getMessage('fcr_error_illegal') ||
                 'The name cannot contain any of these characters: / \\ : * ? " < > |';
-            return renameLoop(info, typeLabel, promptMsg, trimmed, errIllegal, row);
+            return renameLoop(info, typeLabel, promptMsg, trimmed, errIllegal, row, btn);
         }
 
+        ocupado(btn, true);
         const targetUrl = info.isFolder ? FOLDER_URL : FILE_URL;
         let csrf;
         try {
             csrf = await fetchCsrf(targetUrl, { e: 'T', id: info.id });
         } catch (e) {
-            window.alert((chrome.i18n.getMessage('fcr_error_generic') || 'Error') + '\n\n' + e.message);
+            await avisar((chrome.i18n.getMessage('fcr_error_generic') || 'Error') + '\n\n' + e.message);
             return;
         }
         if (!csrf) {
-            window.alert(chrome.i18n.getMessage('fcr_error_csrf') || 'Could not retrieve security token');
+            await avisar(chrome.i18n.getMessage('fcr_error_csrf') || 'Could not retrieve security token');
             return;
         }
 
@@ -219,12 +224,37 @@
             const doc = new DOMParser().parseFromString(text, 'text/html');
             const errMsg = (doc.querySelector('.uir-error-page-message')?.textContent || '').trim();
             if (errMsg) {
-                return renameLoop(info, typeLabel, promptMsg, trimmed, errMsg, row);
+                ocupado(btn, false);
+                return renameLoop(info, typeLabel, promptMsg, trimmed, errMsg, row, btn);
             }
             applyRenameToRow(info, trimmed);
         } catch (e) {
-            window.alert((chrome.i18n.getMessage('fcr_error_generic') || 'Error') + '\n\n' + e.message);
+            await avisar((chrome.i18n.getMessage('fcr_error_generic') || 'Error') + '\n\n' + e.message);
         }
+    }
+
+
+
+    function ocupado(btn, si) {
+        if (!btn) return;
+        btn.classList.toggle('is-busy', !!si);
+    }
+
+    function avisar(texto) {
+        if (window.NSFT_Dialog) return window.NSFT_Dialog.alert({ body: texto });
+        window.alert(texto);
+        return Promise.resolve();
+    }
+
+    function pedirNombre(cuerpo, valor, typeLabel) {
+        if (window.NSFT_Dialog) {
+            return window.NSFT_Dialog.prompt({
+                title: (chrome.i18n.getMessage('fcr_prompt') || 'Rename {type}').replace('{type}', typeLabel),
+                body: cuerpo,
+                value: valor
+            });
+        }
+        return Promise.resolve(window.prompt(cuerpo, valor));
     }
 
     function applyRenameToRow(info, newName) {

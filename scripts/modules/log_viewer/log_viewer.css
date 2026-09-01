@@ -31,10 +31,10 @@ tr.nsft-lv-hidden {
 }
 
 mark.nsft-lv-hl {
-    background: rgba(234, 179, 8, 0.42);
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
     color: inherit;
     border-radius: 3px;
     padding: 0 1px;
     font-weight: 700;
-    box-shadow: 0 0 0 1px rgba(180, 130, 0, 0.25);
+    box-shadow: 0 0 0 1px var(--nsft-hl-ring, rgba(180, 130, 0, 0.25));
 }

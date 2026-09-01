@@ -649,6 +649,27 @@
   "autoRefresh": {
     "message": "Auto-Actualizar"
   },
+  "portletRefresherCtrl": {
+    "message": "Auto-refresco"
+  },
+  "portletRefresherPause": {
+    "message": "Pausar el auto-refresco"
+  },
+  "portletRefresherResume": {
+    "message": "Reanudar el auto-refresco"
+  },
+  "portletRefresherNow": {
+    "message": "Refrescar ahora"
+  },
+  "portletRefresherUnit": {
+    "message": "segs"
+  },
+  "portletRefresherIntervalTitle": {
+    "message": "Segundos entre refrescos"
+  },
+  "portletRefresherAutoStartLabel": {
+    "message": "Iniciar activado"
+  },
   "autoRefreshAutoStartLabel": {
     "message": "Iniciar activado"
   },
@@ -720,6 +741,9 @@
   },
   "cl_cat_search": {
     "message": "Herramientas de Búsquedas y SQL"
+  },
+  "cl_cat_ai": {
+    "message": "Asistente de IA"
   },
   "cl_cat_technical": {
     "message": "🛠️ Técnicas y Estabilidad"
@@ -1102,6 +1126,12 @@
   "closeModal": {
     "message": "Cerrar"
   },
+  "modalMinimise": {
+    "message": "Minimizar"
+  },
+  "modalMaximise": {
+    "message": "Maximizar"
+  },
   "col_date": {
     "message": "Fecha"
   },
@@ -1456,6 +1486,9 @@
   "aiAssistantSuiteqlLabel": {
     "message": "SuiteQL Runner"
   },
+  "aiAssistantConsoleLabel": {
+    "message": "Consola de SuiteScript"
+  },
   "sqlai_model_reset": {
     "message": "Restablecer sugeridos"
   },
@@ -1569,6 +1602,9 @@
   },
   "cmdp_act_script_queue": {
     "message": "Monitor de Cola de Scripts"
+  },
+  "cmdp_act_mapreduce_status": {
+    "message": "Estado de Scripts Map/Reduce"
   },
   "cmdp_act_sdf_integrations": {
     "message": "Integraciones SuiteCloud (SDF)"
@@ -1851,41 +1887,41 @@
   "colorThemePresetCustom": {
     "message": "Personalizado"
   },
-  "colorThemePresetCrimson": {
-    "message": "Carmesí"
-  },
-  "colorThemePresetForestGreen": {
-    "message": "Verde Bosque"
-  },
-  "colorThemePresetGitHubDark": {
-    "message": "GitHub Oscuro"
-  },
-  "colorThemePresetGraphite": {
-    "message": "Grafito"
-  },
-  "colorThemePresetHighContrast": {
-    "message": "Alto Contraste"
-  },
   "colorThemePresetLabel": {
     "message": "Preset"
   },
-  "colorThemePresetLightMint": {
-    "message": "Menta Claro"
+  "colorThemePresetRed": {
+    "message": "Rojo"
   },
-  "colorThemePresetMidnight": {
-    "message": "Medianoche"
+  "colorThemePresetOrange": {
+    "message": "Naranja"
+  },
+  "colorThemePresetGold": {
+    "message": "Dorado"
+  },
+  "colorThemePresetOlive": {
+    "message": "Oliva"
+  },
+  "colorThemePresetGreen": {
+    "message": "Verde"
+  },
+  "colorThemePresetTeal": {
+    "message": "Turquesa"
+  },
+  "colorThemePresetCyan": {
+    "message": "Cian"
+  },
+  "colorThemePresetIndigo": {
+    "message": "Índigo"
+  },
+  "colorThemePresetPurple": {
+    "message": "Púrpura"
+  },
+  "colorThemePresetMagenta": {
+    "message": "Magenta"
   },
   "colorThemePresetNetSuiteBlue": {
     "message": "Azul NetSuite"
-  },
-  "colorThemePresetRoyalPurple": {
-    "message": "Púrpura Real"
-  },
-  "colorThemePresetSlackAubergine": {
-    "message": "Berenjena Slack"
-  },
-  "colorThemePresetSunsetOrange": {
-    "message": "Naranja Atardecer"
   },
   "colorThemeResetBtn": {
     "message": "Restablecer"
@@ -2194,7 +2230,7 @@
     "message": "Haz que la UI de NetSuite respete tu monitor, tu preferencia de color y tu paciencia."
   },
   "welcomeCatUiItem1": {
-    "message": "Temas de color (ajuste HSL) y modo oscuro"
+    "message": "Temas de color (ajuste HSL, uno por entorno o por cuenta) y modo oscuro"
   },
   "welcomeCatUiItem2": {
     "message": "Cabeceras de sublist, columnas y pestañas fijas"
@@ -2268,6 +2304,9 @@
   "welcomeCatPowerItem1": {
     "message": "Paleta de Comandos (Ctrl+Shift+Espacio)"
   },
+  "welcomeCatPowerItem12": {
+    "message": "Buscador de personalizaciones (scripts, workflows, campos…)"
+  },
   "welcomeCatPowerItem2": {
     "message": "Hoja de atajos de teclado (Ctrl+Shift+?)"
   },
@@ -2291,6 +2330,9 @@
   },
   "welcomeCatSqlItem9": {
     "message": "Variables reutilizables y librería de snippets"
+  },
+  "welcomeCatSqlItem10": {
+    "message": "Tipo de resumen en bloque en las columnas de una búsqueda guardada"
   },
   "welcomeCatRecordItem5": {
     "message": "Ver Scripts del Registro"
@@ -2343,6 +2385,12 @@
   "welcomeCatRecordItem21": {
     "message": "Ver Logs del Registro (logs de ejecución filtrados)"
   },
+  "welcomeCatRecordItem22": {
+    "message": "Formato de fecha dentro de los campos de fecha vacíos"
+  },
+  "welcomeCatRecordItem23": {
+    "message": "Shift para marcar un rango entero de casillas"
+  },
   "welcomeCatScriptItem5": {
     "message": "Tema del editor de código"
   },
@@ -2363,6 +2411,9 @@
   },
   "welcomeCatScriptItem11": {
     "message": "Respaldo de SuiteScripts a GitHub"
+  },
+  "welcomeCatScriptItem12": {
+    "message": "Consola de SuiteScript (ejecuta código y ves el resultado)"
   },
   "welcomeCatUiItem5": {
     "message": "Quitar animaciones de NetSuite"
@@ -2545,7 +2596,262 @@
     "message": "Mejorar Títulos de Página"
   },
   "enableColorThemesDesc": {
-    "message": "Personalizar el esquema de colores de NetSuite."
+    "message": "Personalizar el esquema de colores de NetSuite, con la opción de un color distinto por entorno."
+  },
+  "colorThemeModeLabel": {
+    "message": "Alcance"
+  },
+  "colorThemeModeGlobal": {
+    "message": "Un color para todo"
+  },
+  "colorThemeModeAccounts": {
+    "message": "Un color por cuenta"
+  },
+  "colorThemeModeEnv": {
+    "message": "Un color por entorno"
+  },
+  "colorThemeByEnvHint": {
+    "message": "Elige a cuál apuntan los controles de abajo. Todas las sandbox comparten su color, y donde no haya uno propio se usa el de «Un color para todo»."
+  },
+  "colorThemeAccountsLink": {
+    "message": "Configurar las cuentas →"
+  },
+  "colorThemeAccountsHint": {
+    "message": "Cada cuenta puede llevar un color único o uno por entorno. Los controles de abajo siguen editando el color que usan las cuentas sin configurar."
+  },
+  "cta_search_placeholder": {
+    "message": "Buscar cuenta…"
+  },
+  "cta_search_empty": {
+    "message": "Ninguna cuenta coincide con lo que buscas."
+  },
+  "cta_add_mode_one": {
+    "message": "Una cuenta"
+  },
+  "cta_add_mode_many": {
+    "message": "Varias a la vez"
+  },
+  "cta_bulk_placeholder": {
+    "message": "1234567\n7450041-sb1\n5629199-rp, 8812004"
+  },
+  "cta_bulk_hint": {
+    "message": "Una por línea o separadas por coma. Los sufijos de entorno se detectan y caen bajo la misma cuenta."
+  },
+  "cta_bulk_btn": {
+    "message": "Agregar cuentas"
+  },
+  "cta_bulk_btn_n": {
+    "message": "Agregar $1 cuentas",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "cta_bulk_added": {
+    "message": "$1 cuentas nuevas agregadas.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "cta_detect_created": {
+    "message": "Detectado $1 → cuenta $2 (creada)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "cta_detect_existing": {
+    "message": "Detectado $1 → cuenta $2 (ya estaba)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "cta_no_selection": {
+    "message": "Agrega una cuenta para empezar."
+  },
+  "cta_name_label": {
+    "message": "Nombre de la cuenta"
+  },
+  "cta_removed": {
+    "message": "Cuenta quitada."
+  },
+  "cta_mode_title": {
+    "message": "Modo de color"
+  },
+  "cta_mode_single_title": {
+    "message": "Un color"
+  },
+  "cta_mode_single_desc": {
+    "message": "El mismo color en Producción, Sandbox y Release Preview."
+  },
+  "cta_mode_env_title": {
+    "message": "Un color por entorno"
+  },
+  "cta_mode_env_desc": {
+    "message": "Un color distinto para cada entorno de esta cuenta."
+  },
+  "cta_slots_title": {
+    "message": "Colores activos"
+  },
+  "cta_slots_hint": {
+    "message": "Toca una fila para editarla"
+  },
+  "cta_single_hint": {
+    "message": "Se aplica a los tres entornos"
+  },
+  "cta_badge_account": {
+    "message": "CUENTA"
+  },
+  "cta_env_prd_hint": {
+    "message": "El subdominio sin sufijo"
+  },
+  "cta_env_sb_hint": {
+    "message": "Sufijos -sb1, -sb2…"
+  },
+  "cta_env_rp_hint": {
+    "message": "Sufijo -rp"
+  },
+  "cta_editor_title": {
+    "message": "Editor de color"
+  },
+  "cta_editor_all_envs": {
+    "message": "todos los entornos"
+  },
+  "cta_hue": {
+    "message": "Matiz"
+  },
+  "cta_sat": {
+    "message": "Saturación"
+  },
+  "cta_lig": {
+    "message": "Luminosidad"
+  },
+  "cta_apply_all": {
+    "message": "Aplicar a los 3 entornos"
+  },
+  "cta_switch_to_env": {
+    "message": "Pasar a un color por entorno"
+  },
+  "cta_palette_title": {
+    "message": "Paleta sugerida"
+  },
+  "cta_preview_title": {
+    "message": "Cómo se ve en el navegador"
+  },
+  "cta_data_btn": {
+    "message": "Importar / exportar"
+  },
+  "cta_data_title": {
+    "message": "Importar y exportar"
+  },
+  "cta_data_desc": {
+    "message": "Todos tus colores por cuenta en un solo JSON."
+  },
+  "cta_data_export": {
+    "message": "Exportar"
+  },
+  "cta_data_import": {
+    "message": "Importar"
+  },
+  "cta_data_copy": {
+    "message": "Copiar al portapapeles"
+  },
+  "cta_data_copied": {
+    "message": "Copiado."
+  },
+  "cta_data_download": {
+    "message": "Descargar archivo"
+  },
+  "cta_data_from_file": {
+    "message": "Desde un archivo…"
+  },
+  "cta_data_import_placeholder": {
+    "message": "Pega aquí el JSON exportado…"
+  },
+  "cta_data_replace": {
+    "message": "Reemplazar la configuración"
+  },
+  "cta_data_merge": {
+    "message": "Fusionar"
+  },
+  "cta_data_invalid": {
+    "message": "JSON inválido, o sin cuentas dentro."
+  },
+  "cta_data_imported": {
+    "message": "$1 cuentas importadas.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "cta_data_merged": {
+    "message": "$1 cuentas nuevas agregadas.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "cta_data_close": {
+    "message": "Cerrar"
+  },
+  "cta_detected_title": {
+    "message": "Detectadas"
+  },
+  "cta_ghost_hint": {
+    "message": "usa el color global"
+  },
+  "cta_off_module": {
+    "message": "Temas de Color está apagado: estos colores no se aplican hasta que lo enciendas en el popup."
+  },
+  "cta_off_scope": {
+    "message": "El alcance de Temas de Color no es «por cuenta»: estos colores no se aplican. Cámbialo en el popup para que valgan."
+  },
+  "cta_title": {
+    "message": "Color por cuenta"
+  },
+  "cta_desc": {
+    "message": "Dale a cada cuenta de NetSuite un color propio."
+  },
+  "cta_add_title": {
+    "message": "Agregar una cuenta"
+  },
+  "cta_account_label": {
+    "message": "Cuenta"
+  },
+  "cta_account_placeholder": {
+    "message": "p. ej. 1234567 o acme"
+  },
+  "cta_account_hint": {
+    "message": "Escribe el subdominio sin el sufijo de entorno: todos los entornos de esa cuenta comparten una misma ficha."
+  },
+  "cta_add_btn": {
+    "message": "Agregar"
+  },
+  "cta_list_title": {
+    "message": "Cuentas configuradas"
+  },
+  "cta_empty": {
+    "message": "Todavía no hay ninguna cuenta con color propio. Abre una vez el menú de cambiar de cuenta en NetSuite y las tuyas aparecerán aquí solas; las que no agregues usan el color global."
+  },
+  "cta_remove": {
+    "message": "Quitar"
+  },
+  "cta_single_color": {
+    "message": "Color de la cuenta"
   },
   "enableDarkModeLabel": {
     "message": "Modo oscuro"
@@ -2582,6 +2888,290 @@
   },
   "enableCommandPaletteDesc": {
     "message": "Paleta de comandos rápida para navegar y ejecutar herramientas con Ctrl+Shift+Espacio."
+  },
+  "enableCustomizationFinderLabel": {
+    "message": "Buscador de personalizaciones"
+  },
+  "enableCustomizationFinderDesc": {
+    "message": "Una sola ventana para encontrar scripts, workflows, campos, búsquedas guardadas, plantillas, archivos, despliegues y listas de la cuenta."
+  },
+  "enableSuiteScriptConsoleLabel": {
+    "message": "Consola de SuiteScript"
+  },
+  "enableSuiteScriptConsoleDesc": {
+    "message": "Escribe SuiteScript y ejecútalo al momento, con los módulos N/* de tu cuenta a mano, la ayuda de la API mientras escribes y confirmación antes de escribir."
+  },
+  "ssc_run": {
+    "message": "Ejecutar"
+  },
+  "ssc_tpl_1": {
+    "message": "Los módulos N/* están listos: record, search, query, runtime…"
+  },
+  "ssc_running": {
+    "message": "Ejecutando…"
+  },
+  "ssc_logs_ok": {
+    "message": "Script ejecutado"
+  },
+  "ssc_took": {
+    "message": "Tardó $1 ms"
+  },
+  "ssc_mods": {
+    "message": "$1 módulos"
+  },
+  "ssc_mods_no": {
+    "message": "Aquí no están disponibles:"
+  },
+  "ssc_mods_missing": {
+    "message": "No se pudieron cargar: $1"
+  },
+  "ssc_cut_rows": {
+    "message": "$1 de $2 mostrados"
+  },
+  "ssc_err_bridge": {
+    "message": "No se pudo inyectar el puente."
+  },
+  "ssc_confirm": {
+    "message": "Este código escribe en la cuenta"
+  },
+  "ssc_confirm_prd": {
+    "message": "Esto escribe en PRODUCCIÓN"
+  },
+  "ssc_confirm_word": {
+    "message": "EJECUTAR"
+  },
+  "ssc_confirm_type": {
+    "message": "Escribe $1 para continuar"
+  },
+  "ssc_confirm_go": {
+    "message": "Ejecutar de todos modos"
+  },
+  "ssc_confirm_cancel": {
+    "message": "Cancelar"
+  },
+  "ssc_cancelled": {
+    "message": "Cancelado."
+  },
+  "ssc_ai_ran": {
+    "message": "Ejecutado desde el asistente: el resultado está en el chat."
+  },
+  "sscAiModelLabel": {
+    "message": "Modelo para sugerencias:"
+  },
+  "sscAiModelSameChat": {
+    "message": "El mismo del chat"
+  },
+  "sscAiModelOnlyFast": {
+    "message": "Sólo los modelos rápidos de tus claves, aptos para completar mientras escribes."
+  },
+  "ssc_ghost_btn_title": {
+    "message": "Sugerencias de código con IA — Tab acepta · clic: encender/apagar · clic derecho: elegir modelo"
+  },
+  "sscAiCompleteLabel": {
+    "message": "Sugerencias de código con IA (Tab acepta)"
+  },
+  "sscAiCompleteDesc": {
+    "message": "Al dejar de teclear, la IA sugiere cómo seguir y Tab lo escribe. Cada sugerencia consulta a tu proveedor de IA con tu clave."
+  },
+  "sqlAiCompleteLabel": {
+    "message": "Sugerencias de SQL con IA (Tab acepta)"
+  },
+  "sql_ghost_btn_title": {
+    "message": "Sugerencias de SQL con IA — Tab acepta · clic: encender/apagar · clic derecho: elegir modelo"
+  },
+  "themeAuto": {
+    "message": "Automático (sigue el modo oscuro)"
+  },
+  "ssc_lint_falta": {
+    "message": "falta cerrar «$1»",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_lint_sobra": {
+    "message": "hay un «$1» y no queda nada abierto que cerrar",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_lint_cruzado": {
+    "message": "«$1» abierto aquí se cierra con «$2»",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "ssc_lint_en_linea": {
+    "message": "Línea $1: $2",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "recordOptionLoadInConsole": {
+    "message": "Cargar en la Consola de SuiteScript"
+  },
+  "ssc_load_tpl_1": {
+    "message": "El registro abierto en esta página"
+  },
+  "ssc_load_tpl_2": {
+    "message": "Se recarga entero del servidor"
+  },
+  "ssc_load_tab_title": {
+    "message": "Registro"
+  },
+  "ssc_boot_step_types": {
+    "message": "Midiendo los tipos de la cuenta…"
+  },
+  "ssc_types_measured": {
+    "message": "Tipos medidos:"
+  },
+  "ssc_out_filter_group": {
+    "message": "Filtrar la salida"
+  },
+  "ssc_out_f_all": {
+    "message": "Todo"
+  },
+  "ssc_out_f_logs": {
+    "message": "Logs"
+  },
+  "ssc_out_f_errors": {
+    "message": "Errores"
+  },
+  "ssc_out_filter_ph": {
+    "message": "Filtrar salida…"
+  },
+  "ssc_out_nomatch": {
+    "message": "Nada coincide con el filtro."
+  },
+  "ssc_out_keys": {
+    "message": "$1 claves",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_out_items": {
+    "message": "$1 elementos",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_out_at_line": {
+    "message": "línea $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_out_ret": {
+    "message": "valor de retorno"
+  },
+  "ssc_out_ret_void": {
+    "message": "el script no devolvió nada"
+  },
+  "cfind_open": {
+    "message": "Abrir"
+  },
+  "cfind_open_list": {
+    "message": "Lista"
+  },
+  "cfind_filters": {
+    "message": "Filtros"
+  },
+  "cfind_search": {
+    "message": "Buscar"
+  },
+  "cfind_ph": {
+    "message": "Busca por nombre o por ID…"
+  },
+  "cfind_export": {
+    "message": "Exportar"
+  },
+  "cfind_export_csv": {
+    "message": "Exportar CSV"
+  },
+  "cfind_copied_id": {
+    "message": "ID copiado: $1"
+  },
+  "cfind_col_name": {
+    "message": "Nombre"
+  },
+  "cfind_col_kind": {
+    "message": "Tipo"
+  },
+  "cfind_col_sid": {
+    "message": "ID interno"
+  },
+  "cfind_col_status": {
+    "message": "Estado"
+  },
+  "cfind_results_n": {
+    "message": "$1 resultados"
+  },
+  "cfind_hints": {
+    "message": "↑↓ navegar · ↵ abrir · Ctrl+C copiar · Esc cerrar"
+  },
+  "cfind_copy_id": {
+    "message": "Copiar ID"
+  },
+  "cfind_exported": {
+    "message": "$1 filas exportadas a CSV"
+  },
+  "cfind_loading": {
+    "message": "Buscando en la cuenta…"
+  },
+  "cfind_none": {
+    "message": "No hay nada con ese nombre."
+  },
+  "cfind_error": {
+    "message": "No se pudo consultar la cuenta."
+  },
+  "cfind_stale": {
+    "message": "Recarga la pestaña y vuelve a intentarlo."
+  },
+  "cfind_t_script": {
+    "message": "Scripts"
+  },
+  "cfind_t_wf": {
+    "message": "Workflows"
+  },
+  "cfind_t_rec": {
+    "message": "Registros"
+  },
+  "cfind_t_field": {
+    "message": "Campos"
+  },
+  "cfind_t_ss": {
+    "message": "Búsquedas"
+  },
+  "cfind_t_pdf": {
+    "message": "Plantillas PDF"
+  },
+  "cfind_t_file": {
+    "message": "Archivos"
+  },
+  "cfind_t_deploy": {
+    "message": "Despliegues"
+  },
+  "cfind_t_list": {
+    "message": "Listas"
   },
   "enableCommandPaletteLabel": {
     "message": "Paleta de Comandos"
@@ -2745,6 +3335,63 @@
   "rr_view_all": {
     "message": "Todos los registros recientes"
   },
+  "rr_kind_employee": {
+    "message": "Empleado"
+  },
+  "rr_kind_customer": {
+    "message": "Cliente"
+  },
+  "rr_kind_vendor": {
+    "message": "Proveedor"
+  },
+  "rr_kind_contact": {
+    "message": "Contacto"
+  },
+  "rr_kind_partner": {
+    "message": "Socio"
+  },
+  "rr_kind_entity": {
+    "message": "Entidad"
+  },
+  "rr_kind_item": {
+    "message": "Artículo"
+  },
+  "rr_kind_media": {
+    "message": "Archivo"
+  },
+  "rr_kind_transaction": {
+    "message": "Transacción"
+  },
+  "rr_kind_customrecord_type": {
+    "message": "Tipo de registro personalizado"
+  },
+  "rr_kind_customrecord": {
+    "message": "Registro personalizado"
+  },
+  "rr_kind_customfield": {
+    "message": "Campo personalizado"
+  },
+  "rr_kind_form": {
+    "message": "Formulario"
+  },
+  "rr_kind_role": {
+    "message": "Rol"
+  },
+  "rr_kind_script": {
+    "message": "Script"
+  },
+  "rr_kind_workflow": {
+    "message": "Flujo de trabajo"
+  },
+  "rr_kind_search": {
+    "message": "Búsqueda"
+  },
+  "rr_kind_crm": {
+    "message": "CRM"
+  },
+  "rr_kind_config": {
+    "message": "Configuración"
+  },
   "rr_search_placeholder": {
     "message": "Buscar registro..."
   },
@@ -2854,7 +3501,7 @@
     "message": "Ir al record por tranid/id"
   },
   "cheatsheet_title": {
-    "message": "Atajos de teclado NSFT"
+    "message": "Atajos de teclado"
   },
   "cheatsheet_close": {
     "message": "Cerrar"
@@ -2912,6 +3559,9 @@
   },
   "cheatsheet_item_open_runner": {
     "message": "Abrir SuiteQL Runner"
+  },
+  "cheatsheet_item_open_ssc": {
+    "message": "Abrir Consola de SuiteScript"
   },
   "cheatsheet_item_help": {
     "message": "Mostrar esta hoja de atajos"
@@ -3065,6 +3715,21 @@
   "enableEditorOpenInNewTabDesc": {
     "message": "Agrega un enlace \"Abrir en nueva pestaña\" junto a cada archivo enlazado desde una página de scripting."
   },
+  "enableAdvancedEditorLabel": {
+    "message": "Editor Avanzado"
+  },
+  "enableAdvancedEditorDesc": {
+    "message": "Abre los archivos del File Cabinet en un editor completo: autocompletado de SuiteScript, aviso de sintaxis, buscar y reemplazar, y formateo."
+  },
+  "adv_open_link": {
+    "message": "Abrir en Editor Avanzado"
+  },
+  "adv_ghost_title": {
+    "message": "Sugerencias con IA mientras escribes"
+  },
+  "adv_wrap_title": {
+    "message": "Ajustar las líneas largas"
+  },
   "enableEditorOpenInNewTabLabel": {
     "message": "Abrir archivo en nueva pestaña"
   },
@@ -3109,6 +3774,12 @@
   },
   "copyIdsNoButtonLabel": {
     "message": "Sin iconos de copiar (usar Shift+clic en el campo)"
+  },
+  "copyIdsAlwaysLabel": {
+    "message": "ID siempre a la vista, bajo la etiqueta (clic para copiar)"
+  },
+  "cfsi_copied": {
+    "message": "Copiado"
   },
   "copyIdsWithButtonLabel": {
     "message": "Con iconos de copiar"
@@ -3529,7 +4200,10 @@
   "rlv_scripts_of": {
     "message": "De $TYPE$",
     "placeholders": {
-      "type": { "content": "$1", "example": "salesorder" }
+      "type": {
+        "content": "$1",
+        "example": "salesorder"
+      }
     }
   },
   "rlv_search_script": {
@@ -3607,7 +4281,10 @@
   "rlv_export_capped": {
     "message": "El fichero lleva las primeras $ROWS$ filas; la consulta tiene más.",
     "placeholders": {
-      "rows": { "content": "$1", "example": "10.000" }
+      "rows": {
+        "content": "$1",
+        "example": "10.000"
+      }
     }
   },
   "rlv_export_failed": {
@@ -3619,7 +4296,10 @@
   "rlv_types_more": {
     "message": "Ver más ($COUNT$)",
     "placeholders": {
-      "count": { "content": "$1", "example": "8" }
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
     }
   },
   "rlv_types_less": {
@@ -3631,13 +4311,19 @@
   "rlv_group_entries": {
     "message": "$COUNT$ entradas",
     "placeholders": {
-      "count": { "content": "$1", "example": "14" }
+      "count": {
+        "content": "$1",
+        "example": "14"
+      }
     }
   },
   "rlv_of_events": {
     "message": "de $TOTAL$ eventos",
     "placeholders": {
-      "total": { "content": "$1", "example": "37500" }
+      "total": {
+        "content": "$1",
+        "example": "37500"
+      }
     }
   },
   "rlv_loading_more": {
@@ -3688,8 +4374,14 @@
   "rlv_open_note": {
     "message": "Anotación de script"
   },
-  "rlv_ctx_script_id": {
-    "message": "ID de script"
+  "rlv_open": {
+    "message": "Abrir"
+  },
+  "rlv_ctx_deploy": {
+    "message": "Despliegue"
+  },
+  "rlv_edit_file": {
+    "message": "Editar archivo"
   },
   "rlv_ctx_note_id": {
     "message": "ID de anotación"
@@ -3757,7 +4449,10 @@
   "rlv_filters_n": {
     "message": "Filtros · $COUNT$",
     "placeholders": {
-      "count": { "content": "$1", "example": "3" }
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
     }
   },
   "rlv_copied": {
@@ -3786,6 +4481,51 @@
   },
   "enableSearchFieldsFinderLabel": {
     "message": "Buscador de Campos en Búsquedas"
+  },
+  "enableSearchSummaryBulkLabel": {
+    "message": "Tipo de Resumen en Bloque"
+  },
+  "enableSearchSummaryBulkDesc": {
+    "message": "En la pestaña Resultados de una búsqueda guardada, agrega una franja para poner o quitar el tipo de resumen —agrupar, sumar, contar…— en todas las columnas de una vez, en lugar de ir una por una."
+  },
+  "ssb_title": {
+    "message": "Tipo de resumen en todas:"
+  },
+  "ssb_apply": {
+    "message": "Aplicar a todas"
+  },
+  "ssb_clear": {
+    "message": "Quitar de todas"
+  },
+  "ssb_working": {
+    "message": "Aplicando…"
+  },
+  "ssb_done": {
+    "message": "Listo en $1 columnas — guarda la búsqueda"
+  },
+  "ssb_empty": {
+    "message": "No hay columnas a las que aplicarlo"
+  },
+  "ssb_fail": {
+    "message": "No se pudo aplicar"
+  },
+  "ssb_group": {
+    "message": "Agrupar"
+  },
+  "ssb_count": {
+    "message": "Recuento"
+  },
+  "ssb_sum": {
+    "message": "Suma"
+  },
+  "ssb_avg": {
+    "message": "Promedio"
+  },
+  "ssb_min": {
+    "message": "Mínimo"
+  },
+  "ssb_max": {
+    "message": "Máximo"
   },
   "enableSetFieldValuesDesc": {
     "message": "Habilita utilidades avanzadas en la ayuda de campo: editar valor, copiar ID, ver info técnica."
@@ -3856,13 +4596,19 @@
   "es_meta_lines": {
     "message": "$COUNT$ líneas",
     "placeholders": {
-      "count": { "content": "$1", "example": "26" }
+      "count": {
+        "content": "$1",
+        "example": "26"
+      }
     }
   },
   "es_info_type": {
     "message": "Tipo: $TYPE$",
     "placeholders": {
-      "type": { "content": "$1", "example": "employee" }
+      "type": {
+        "content": "$1",
+        "example": "employee"
+      }
     }
   },
   "es_info_columns_one": {
@@ -3871,7 +4617,10 @@
   "es_info_columns": {
     "message": "$COUNT$ columnas",
     "placeholders": {
-      "count": { "content": "$1", "example": "8" }
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
     }
   },
   "es_info_filters_one": {
@@ -3880,7 +4629,10 @@
   "es_info_filters": {
     "message": "$COUNT$ filtros",
     "placeholders": {
-      "count": { "content": "$1", "example": "3" }
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
     }
   },
   "es_with_loop_title": {
@@ -4083,6 +4835,9 @@
   },
   "ffi_prompt_generic": {
     "message": "Buscar Campo por ID o Etiqueta:"
+  },
+  "ffi_modal_title": {
+    "message": "Buscar Campo por ID"
   },
   "ffi_color_green": {
     "message": "Verde"
@@ -4408,6 +5163,49 @@
   "gt_saved_msg": {
     "message": "¡Guardado!"
   },
+  "gt_env_detected": {
+    "message": "Entorno detectado: $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "gt_env_sb_n": {
+    "message": "Sandbox $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "gt_preview_label": {
+    "message": "Vista previa"
+  },
+  "gt_preview_unnamed": {
+    "message": "Sin nombre"
+  },
+  "gt_from_accounts": {
+    "message": "Desde las cuentas que ya usas"
+  },
+  "gt_from_accounts_empty": {
+    "message": "Aquí salen tus cuentas de NetSuite. Abre una vez el menú de cambiar de cuenta y aparecerán todas."
+  },
+  "gt_row_color_title": {
+    "message": "Cambiar el color del grupo"
+  },
+  "gt_chrome_preview_title": {
+    "message": "Cómo se ve en Chrome"
+  },
+  "gt_chrome_preview_empty": {
+    "message": "Los grupos que definas se ven aquí."
+  },
+  "gt_off_module": {
+    "message": "Agrupar Pestañas está apagado: esta lista no se usa hasta que lo enciendas en el popup."
+  },
+  "gt_off_automatic": {
+    "message": "Los grupos automáticos están encendidos: las pestañas se agrupan por cuenta solas y esta lista no se usa. Apágalos en el popup para que valga."
+  },
   "gt_account_help": {
     "message": "El ID de cuenta o el subdominio de la URL: valen los dos."
   },
@@ -4443,6 +5241,9 @@
   },
   "log_view_repaired": {
     "message": "Ver reparado"
+  },
+  "log_view_formatted": {
+    "message": "Ver formateado"
   },
   "liveMode": {
     "message": "En vivo"
@@ -4692,6 +5493,324 @@
   },
   "ro_hide_empty_label": {
     "message": "Ocultar vacíos"
+  },
+  "ro_view_friendly": {
+    "message": "Vista amigable"
+  },
+  "ro_fv_tech_show": {
+    "message": "Mostrar técnicos"
+  },
+  "ro_fv_tech_hide": {
+    "message": "Ocultar técnicos"
+  },
+  "ro_fv_structure": {
+    "message": "Estructura"
+  },
+  "ro_fv_to_top": {
+    "message": "Volver arriba"
+  },
+  "ro_fv_click_copy": {
+    "message": "clic para copiar"
+  },
+  "ro_fv_copied": {
+    "message": "copiado ✓"
+  },
+  "ro_fv_none": {
+    "message": "Sin valor"
+  },
+  "ro_fv_yes": {
+    "message": "Sí"
+  },
+  "ro_fv_no": {
+    "message": "No"
+  },
+  "ro_fv_row_n": {
+    "message": "Elemento $1"
+  },
+  "ro_fv_g_body": {
+    "message": "Campos de cabecera"
+  },
+  "ro_fv_g_lines": {
+    "message": "Sublistas de líneas"
+  },
+  "ro_fv_badge_empty": {
+    "message": "vacío"
+  },
+  "ro_fv_badge_values": {
+    "message": "$1 valores"
+  },
+  "ro_fv_badge_rows": {
+    "message": "$1 filas"
+  },
+  "ro_fv_badge_fields": {
+    "message": "$1 campos"
+  },
+  "ro_fv_badge_subs": {
+    "message": "$1 subgrupos"
+  },
+  "ro_fv_badge_mix": {
+    "message": "$1 campos · $2 subgrupos"
+  },
+  "ro_fv_empty_note": {
+    "message": "Sin elementos."
+  },
+  "ro_fv_sum": {
+    "message": "Suma de $1"
+  },
+  "ro_fv_values_listed": {
+    "message": "$1 valores"
+  },
+  "ro_fv_sublists_n": {
+    "message": "$1 sublistas"
+  },
+  "ro_fv_hidden_n": {
+    "message": "$1 vacíos/técnicos ocultos"
+  },
+  "ro_fv_hidden_shown": {
+    "message": "$1 vacíos/técnicos visibles"
+  },
+  "ro_fv_pins_title": {
+    "message": "Anclados para $1"
+  },
+  "ro_fv_pins_clear": {
+    "message": "quitar todos"
+  },
+  "ro_fv_pin_add": {
+    "message": "Anclar arriba para este tipo de registro"
+  },
+  "ro_fv_pin_remove": {
+    "message": "Quitar de anclados"
+  },
+  "ro_fv_pin_missing": {
+    "message": "no presente en este registro"
+  },
+  "ro_fv_more": {
+    "message": "Ver las $1 filas restantes"
+  },
+  "ro_fv_no_results": {
+    "message": "Sin coincidencias para “$1”"
+  },
+  "ro_fv_foot_hint": {
+    "message": "<strong>Ctrl + Clic</strong> en un campo para buscarlo en el formulario · <strong>★</strong> para anclarlo"
+  },
+  "ro_fv_field_notfound": {
+    "message": "El campo no está visible en este formulario."
+  },
+  "ro_k_id": {
+    "message": "ID interno"
+  },
+  "ro_k_tranid": {
+    "message": "N.º de documento"
+  },
+  "ro_k_trandate": {
+    "message": "Fecha"
+  },
+  "ro_k_total": {
+    "message": "Total"
+  },
+  "ro_k_amount": {
+    "message": "Importe"
+  },
+  "ro_k_created": {
+    "message": "Creado"
+  },
+  "ro_k_lastmodified": {
+    "message": "Última modificación"
+  },
+  "ro_k_lastmodifiedby": {
+    "message": "Modificado por"
+  },
+  "ro_k_isinactive": {
+    "message": "Inactivo"
+  },
+  "ro_k_owner": {
+    "message": "Propietario"
+  },
+  "ro_k_ownerid": {
+    "message": "ID propietario"
+  },
+  "ro_k_status": {
+    "message": "Estado"
+  },
+  "ro_k_entity": {
+    "message": "Entidad"
+  },
+  "ro_k_subsidiary": {
+    "message": "Subsidiaria"
+  },
+  "ro_k_quantity": {
+    "message": "Cantidad"
+  },
+  "ro_k_rate": {
+    "message": "Precio"
+  },
+  "ro_k_account": {
+    "message": "Cuenta"
+  },
+  "ro_k_line": {
+    "message": "Línea"
+  },
+  "ro_k_name": {
+    "message": "Nombre"
+  },
+  "ro_k_memo": {
+    "message": "Nota"
+  },
+  "ro_k_currency": {
+    "message": "Moneda"
+  },
+  "ro_k_email": {
+    "message": "Correo"
+  },
+  "ro_k_type": {
+    "message": "Tipo"
+  },
+  "ro_k_item": {
+    "message": "Artículo"
+  },
+  "ro_k_itemname": {
+    "message": "Artículo"
+  },
+  "ro_k_links": {
+    "message": "Registros relacionados"
+  },
+  "ro_k_usernotes": {
+    "message": "Notas de usuario"
+  },
+  "ro_k_linkurl": {
+    "message": "URL del enlace"
+  },
+  "ro_k_location": {
+    "message": "Ubicación"
+  },
+  "ro_k_department": {
+    "message": "Departamento"
+  },
+  "cl_7_0_0_adved_title": {
+    "message": "Editor Avanzado para los archivos"
+  },
+  "cl_7_0_0_adved_desc": {
+    "message": "Se agregó «Abrir en Editor Avanzado» al editar un archivo, y su entrada en el menú Herramientas, con autocompletado que dice los tipos y el governance de cada función, buscar en todos los archivos, árbol del File Cabinet y formateo."
+  },
+  "cl_7_0_0_synthwave_title": {
+    "message": "Tema Synthwave '84"
+  },
+  "cl_7_0_0_synthwave_desc": {
+    "message": "Se agregó el tema Synthwave '84, con su brillo de neón, a los editores de código y a los visores de la extensión."
+  },
+  "cl_7_0_0_ssc_title": {
+    "message": "Consola de SuiteScript"
+  },
+  "cl_7_0_0_ssc_desc": {
+    "message": "Se agregó una consola para escribir SuiteScript y ejecutarlo al momento, con ayuda de la API mientras escribes y aviso antes de cualquier cambio en la cuenta."
+  },
+  "cl_7_0_0_cfind_title": {
+    "message": "Buscador de personalizaciones"
+  },
+  "cl_7_0_0_cfind_desc": {
+    "message": "Se agregó una ventana para encontrar scripts, workflows, campos y demás personalizaciones de la cuenta por su nombre."
+  },
+  "cl_7_0_0_rofv_title": {
+    "message": "Vista amigable en Ver Objeto"
+  },
+  "cl_7_0_0_rofv_desc": {
+    "message": "Se agregó a Ver Objeto una vista amigable del registro: ficha con sus campos etiquetados, sublistas como tablas, índice lateral y campos anclables."
+  },
+  "cl_7_0_0_ctenv_title": {
+    "message": "Un color distinto por entorno"
+  },
+  "cl_7_0_0_ctenv_desc": {
+    "message": "Se agregó a Temas de Color la opción de dar un color propio a Producción, Sandbox y Release Preview, para saber dónde se está."
+  },
+  "cl_7_0_0_ctacc_title": {
+    "message": "Un color distinto por cuenta"
+  },
+  "cl_7_0_0_ctacc_desc": {
+    "message": "Se agregó a Temas de Color una página donde cada cuenta recibe su propio color, único o repartido entre sus tres entornos."
+  },
+  "cl_7_0_0_ssb_title": {
+    "message": "Tipo de resumen en todas las columnas"
+  },
+  "cl_7_0_0_ssb_desc": {
+    "message": "Se agregó una franja en los resultados de una búsqueda guardada que pone o quita el tipo de resumen en todas sus columnas de una vez."
+  },
+  "cl_7_0_0_fcddfolder_title": {
+    "message": "El Archivador vuelve a la carpeta donde subiste"
+  },
+  "cl_7_0_0_fcddfolder_desc": {
+    "message": "Se arregló que, tras subir un archivo arrastrándolo a una subcarpeta, el Archivador volviera a la carpeta raíz."
+  },
+  "cl_7_0_0_dialogs_title": {
+    "message": "Los avisos dejan de ser los del navegador"
+  },
+  "cl_7_0_0_dialogs_desc": {
+    "message": "Se cambiaron los avisos y confirmaciones del navegador por ventanas propias, con modo oscuro y sin bloquear la página."
+  },
+  "cl_7_0_0_advprevia_title": {
+    "message": "Cada vista previa, en su propia pestaña"
+  },
+  "cl_7_0_0_advprevia_desc": {
+    "message": "Se cambió la vista previa del Editor Avanzado, que tapaba el editor, por una pestaña más junto a los archivos abiertos."
+  },
+  "cl_7_0_0_fcbusy_title": {
+    "message": "Renombrar y borrar avisan de que están trabajando"
+  },
+  "cl_7_0_0_fcbusy_desc": {
+    "message": "Se arregló que renombrar o borrar en el Archivador pareciera no hacer nada durante la espera; ahora el botón lo indica."
+  },
+  "cl_7_0_0_fcdddiff_title": {
+    "message": "Ver en qué cambia el archivo que vas a sustituir"
+  },
+  "cl_7_0_0_fcdddiff_desc": {
+    "message": "Se agregó la comparación lado a lado entre el archivo que ya está en la carpeta y el que arrastras encima."
+  },
+  "cl_7_0_0_fcdddup_title": {
+    "message": "Aviso antes de sustituir un archivo"
+  },
+  "cl_7_0_0_fcdddup_desc": {
+    "message": "Se agregó un aviso al arrastrar archivos cuyo nombre ya existe en la carpeta, con la opción de omitirlos o seguir."
+  },
+  "cl_7_0_0_rr_hl_title": {
+    "message": "Los registros recientes marcan lo que buscas"
+  },
+  "cl_7_0_0_rr_hl_desc": {
+    "message": "Se agregó el resaltado de las coincidencias al filtrar en Registros Recientes, tanto en el nombre como en la línea de debajo."
+  },
+  "cl_7_0_0_shiftsel_title": {
+    "message": "Marcar varias casillas con Shift"
+  },
+  "cl_7_0_0_shiftsel_desc": {
+    "message": "Se agregó la selección por rango: al mantener Shift se marcan todas las casillas entre la anterior y la pulsada."
+  },
+  "cl_7_0_0_dfh_title": {
+    "message": "Los campos de fecha dicen su formato"
+  },
+  "cl_7_0_0_dfh_desc": {
+    "message": "Se agregó el formato de fecha del usuario dentro de los campos de fecha vacíos, para no dudar entre el día y el mes."
+  },
+  "cl_7_0_0_gtcfg_title": {
+    "message": "La configuración de grupos enseña cómo va a quedar"
+  },
+  "cl_7_0_0_gtcfg_desc": {
+    "message": "Se agregó a la configuración de Grupos de Pestañas el entorno detectado, atajos a tus cuentas, el color en cada fila y una vista previa de cómo quedan en Chrome."
+  },
+  "cl_7_0_0_gtoff_title": {
+    "message": "La lista de grupos avisa cuando no se usa"
+  },
+  "cl_7_0_0_gtoff_desc": {
+    "message": "Se agregó a la configuración de Grupos de Pestañas un aviso cuando el módulo está apagado o los grupos automáticos encendidos, que es cuando la lista no se aplica."
+  },
+  "cl_7_0_0_envbadge_title": {
+    "message": "La chapa de entorno conserva su forma"
+  },
+  "cl_7_0_0_envbadge_desc": {
+    "message": "Se arregló que en el tema clásico la chapa de entorno del selector de cuentas se volviera un rectángulo al pasar el ratón por su fila."
+  },
+  "cl_7_0_0_ctpresets_title": {
+    "message": "Los presets del tema, a juego con NetSuite"
+  },
+  "cl_7_0_0_ctpresets_desc": {
+    "message": "Se cambiaron los presets de Temas de Color por una rueda de tonos que comparte la saturación y luminosidad del azul de NetSuite, para que cualquiera pese igual que el de fábrica."
   },
   "ro_hide_empty_title": {
     "message": "Ocultar campos null, vacíos, arrays/objetos sin contenido. No se guarda — siempre arranca desactivado."
@@ -5908,11 +7027,27 @@
       }
     }
   },
+  "ssc_tab_close_bulk_body": {
+    "message": "Se cerrarán $COUNT$ pestañas. Su código no se guarda al cerrarlas.",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
   "sql_tab_close_bulk_ok": {
     "message": "Cerrarlas"
   },
   "sql_tab_rename_taken": {
     "message": "Ya hay una consulta guardada con el nombre «$NAME$»; la pestaña conserva el suyo.",
+    "placeholders": {
+      "name": {
+        "content": "$1"
+      }
+    }
+  },
+  "ssc_tab_rename_taken": {
+    "message": "Ya hay un script guardado con el nombre «$NAME$»; la pestaña conserva el suyo.",
     "placeholders": {
       "name": {
         "content": "$1"
@@ -6072,6 +7207,9 @@
   "sql_tab_default_title": {
     "message": "Consulta"
   },
+  "ssc_tab_default_title": {
+    "message": "Script"
+  },
   "sql_tab_record_title": {
     "message": "Registro"
   },
@@ -6081,14 +7219,224 @@
   "sql_tab_new": {
     "message": "Nueva pestaña de consulta"
   },
+  "ssc_tab_new": {
+    "message": "Nueva pestaña de script"
+  },
   "sql_tabulator_placeholder": {
     "message": "Sin datos para mostrar"
   },
   "sql_title": {
     "message": "NetSuite Full Tools - SuiteQL Runner"
   },
+  "ssc_title": {
+    "message": "NetSuite Full Tools - Consola de SuiteScript"
+  },
   "sql_title_minimised": {
     "message": "SuiteQL"
+  },
+  "ssc_title_minimised": {
+    "message": "SuiteScript"
+  },
+  "ssc_ai_hint_sub": {
+    "message": "Dime qué quieres hacer y te escribo el SuiteScript — y lo ejecuto si quieres."
+  },
+  "ssc_boot_step_shell": {
+    "message": "Preparando la consola…"
+  },
+  "ssc_boot_step_editor": {
+    "message": "Cargando el editor…"
+  },
+  "ssc_boot_step_modules": {
+    "message": "Sondeando los módulos N/*…"
+  },
+  "ssc_boot_step_tools": {
+    "message": "Ajustando paneles y herramientas…"
+  },
+  "ssc_status_ok": {
+    "message": "Listo · $1 ms"
+  },
+  "ssc_running_btn": {
+    "message": "Ejecutando…"
+  },
+  "ssc_already_running": {
+    "message": "Ya hay algo en marcha."
+  },
+  "ssc_run_timeout": {
+    "message": "El script no ha respondido; puedes volver a intentarlo."
+  },
+  "ssc_out_empty": {
+    "message": "Ejecuta el script para ver aquí su resultado."
+  },
+  "ssc_copy_ok": {
+    "message": "Salida copiada"
+  },
+  "ssc_copy_empty": {
+    "message": "Todavía no hay salida que copiar"
+  },
+  "ssc_clear_results_title": {
+    "message": "Vaciar la salida"
+  },
+  "ssc_results_toggle_title": {
+    "message": "Mostrar/ocultar la salida"
+  },
+  "ssc_tab_output": {
+    "message": "Salida"
+  },
+  "ssc_menu_hide_output": {
+    "message": "Ocultar la salida"
+  },
+  "ssc_menu_show_output": {
+    "message": "Mostrar la salida"
+  },
+  "ssc_submenu_api_docs": {
+    "message": "Referencia de la API de SuiteScript"
+  },
+  "ssc_save_prompt": {
+    "message": "Nombre del script:"
+  },
+  "ssc_save_placeholder": {
+    "message": "Mi script..."
+  },
+  "ssc_open_dialog_title": {
+    "message": "Scripts guardados"
+  },
+  "ssc_no_saved_scripts": {
+    "message": "No hay scripts guardados."
+  },
+  "ssc_confirm_delete": {
+    "message": "¿Eliminar script \"$1\"?"
+  },
+  "ssc_loaded": {
+    "message": "Script cargado"
+  },
+  "ssc_import_btn": {
+    "message": "Importar scripts"
+  },
+  "ssc_import_ok": {
+    "message": "$1 script(s) importado(s) ($2 renombrado(s))"
+  },
+  "ssc_export_btn": {
+    "message": "Exportar scripts"
+  },
+  "ssc_export_ok": {
+    "message": "$1 script(s) exportado(s)"
+  },
+  "ssc_export_empty": {
+    "message": "No hay scripts guardados para exportar"
+  },
+  "ssc_fav_save_current": {
+    "message": "Agregar script actual a favoritos..."
+  },
+  "ssc_history_empty": {
+    "message": "Aún no hay scripts ejecutados"
+  },
+  "ssc_logs_code_sent": {
+    "message": "Script enviado"
+  },
+  "ssc_logs_copy_code": {
+    "message": "Copiar script"
+  },
+  "ssc_logs_loaded": {
+    "message": "Script cargado en el editor"
+  },
+  "ssc_logs_filter_ph": {
+    "message": "Filtrar por texto o código de error"
+  },
+  "ssc_logs_clear_confirm": {
+    "message": "¿Borrar todo el registro? También se borra el historial de scripts ejecutados, que es de donde salen las entradas anteriores."
+  },
+  "ssc_ai_toggle_title": {
+    "message": "Asistente de la consola (IA) — mostrar/ocultar el chat"
+  },
+  "ssc_ai_fix_prompt": {
+    "message": "Este fragmento de SuiteScript de cliente falló. Explica por qué en una línea y dame el código corregido."
+  },
+  "ssc_err_generic_title": {
+    "message": "El script falló"
+  },
+  "ssc_err_server_title": {
+    "message": "Módulo de servidor"
+  },
+  "ssc_err_server_hint": {
+    "message": "«$1» es un módulo de SuiteScript que sólo existe en el servidor: el navegador no lo carga, por eso aparece como no definido. Para probar código de servidor está el depurador de scripts de NetSuite."
+  },
+  "ssc_err_governance_title": {
+    "message": "Se agotó la gobernanza"
+  },
+  "ssc_err_governance_hint": {
+    "message": "El script gastó los puntos de uso de la página. Recarga la pestaña para reponerlos, y reparte el trabajo en menos llamadas (búsquedas con filtros en vez de cargar registros de uno en uno)."
+  },
+  "ssc_err_permission_title": {
+    "message": "Sin permiso"
+  },
+  "ssc_err_permission_hint": {
+    "message": "Tu rol no puede hacer esa operación sobre ese registro. Prueba con el registro en cuestión abierto, o con un rol con más permisos."
+  },
+  "ssc_err_missingarg_title": {
+    "message": "Falta un argumento obligatorio"
+  },
+  "ssc_err_missingarg_hint": {
+    "message": "A la llamada le falta el argumento «$1». Las funciones de SuiteScript reciben UN objeto con propiedades con nombre: record.load({ type: ..., id: ... })."
+  },
+  "ssc_err_rectype_title": {
+    "message": "Tipo de registro no válido"
+  },
+  "ssc_err_rectype_hint": {
+    "message": "Ese tipo de registro no existe con ese nombre. Usa los enumerados (record.Type.SALES_ORDER) o el scriptid exacto del custom record."
+  },
+  "ssc_err_norecord_title": {
+    "message": "El registro no existe"
+  },
+  "ssc_err_norecord_hint": {
+    "message": "No hay ningún registro con ese id (o tu rol no lo ve). Comprueba el id y el tipo: un id válido de otro tipo da este mismo error."
+  },
+  "ssc_err_search_title": {
+    "message": "Búsqueda mal armada"
+  },
+  "ssc_err_search_hint": {
+    "message": "Algún filtro o columna de la búsqueda no es válido para ese tipo de registro. Revisa los nombres de campo y los operadores."
+  },
+  "ssc_err_fieldvalue_title": {
+    "message": "Valor de campo no válido"
+  },
+  "ssc_err_fieldvalue_hint": {
+    "message": "El valor no encaja con lo que ese campo admite. En los campos de lista va el id interno, no el texto que se ve en pantalla."
+  },
+  "ssc_err_sql_title": {
+    "message": "La consulta interna falló"
+  },
+  "ssc_err_sql_hint": {
+    "message": "El error viene del SQL que ejecuta el script, no del JavaScript. Para depurar la consulta a gusto está el SuiteQL Runner."
+  },
+  "ssc_err_notafunction_title": {
+    "message": "Eso no es una función"
+  },
+  "ssc_err_notafunction_hint": {
+    "message": "«$1» no existe como función: suele ser una letra bailada o un método de otro módulo. El autocompletado (Ctrl+Espacio tras el punto) lista los de verdad."
+  },
+  "ssc_err_ref_title": {
+    "message": "Variable sin definir"
+  },
+  "ssc_err_ref_hint": {
+    "message": "«$1» no está declarado. Los módulos vivos ya están precargados con su nombre (record, search, query…); cualquier otra cosa hay que declararla antes de usarla."
+  },
+  "ssc_err_type_title": {
+    "message": "Error de tipo"
+  },
+  "ssc_err_type_hint": {
+    "message": "Se usó un valor como si fuera de otro tipo (leer una propiedad de null, llamar a algo que no es función…). Mira la línea marcada en el script."
+  },
+  "ssc_err_syntax_title": {
+    "message": "Error de sintaxis"
+  },
+  "ssc_err_syntax_hint": {
+    "message": "El código no compila: falta o sobra un paréntesis, una llave o una coma. La línea marcada señala dónde se detuvo el análisis."
+  },
+  "ssc_err_unexpected_title": {
+    "message": "Error inesperado de NetSuite"
+  },
+  "ssc_err_unexpected_hint": {
+    "message": "NetSuite se comió la causa real. Casi siempre es un dato del propio script (un id o un tipo que no encaja): revísalo antes de sospechar del servidor."
   },
   "sr_api": {
     "message": "API"
@@ -6469,6 +7817,12 @@
   "themeLabel": {
     "message": "Tema:"
   },
+  "advRulerLabel": {
+    "message": "Regla de columna"
+  },
+  "advRulerOff": {
+    "message": "Sin regla"
+  },
   "openModeLabel": {
     "message": "Abrir en:"
   },
@@ -6552,6 +7906,18 @@
   },
   "enableMaxlengthCounterBetaDesc": {
     "message": "Muestra caracteres usados vs. máximo en campos con límite. Se pone amarillo cerca del tope y rojo al alcanzarlo."
+  },
+  "enableDateFormatHintLabel": {
+    "message": "Formato de fecha a la vista"
+  },
+  "enableDateFormatHintDesc": {
+    "message": "Escribe el formato de fecha de tu usuario dentro de los campos vacíos, para no dudar entre el día y el mes."
+  },
+  "enableShiftRangeSelectLabel": {
+    "message": "Selección por rango con Shift"
+  },
+  "enableShiftRangeSelectDesc": {
+    "message": "Marca de golpe todas las casillas que hay entre la última que pulsaste y la siguiente, si mantienes Shift."
   },
   "mlc_tooltip": {
     "message": "Máximo"
@@ -6708,6 +8074,87 @@
   },
   "fcdd_dismiss": {
     "message": "Cerrar"
+  },
+  "dlg_ok": {
+    "message": "Entendido"
+  },
+  "dlg_accept": {
+    "message": "Aceptar"
+  },
+  "dlg_cancel": {
+    "message": "Cancelar"
+  },
+  "dlg_title_alert": {
+    "message": "Aviso"
+  },
+  "dlg_title_confirm": {
+    "message": "Confirmar"
+  },
+  "dlg_title_prompt": {
+    "message": "Escribe un valor"
+  },
+  "fcdd_diff_see": {
+    "message": "Ver diferencias"
+  },
+  "fcdd_diff_title": {
+    "message": "Diferencias"
+  },
+  "fcdd_diff_subtitle": {
+    "message": "A la izquierda, el archivo que ya está en la carpeta. A la derecha, el que has soltado."
+  },
+  "fcdd_diff_left": {
+    "message": "En la carpeta"
+  },
+  "fcdd_diff_right": {
+    "message": "El que sueltas"
+  },
+  "fcdd_diff_close": {
+    "message": "Cerrar"
+  },
+  "fcdd_diff_same": {
+    "message": "Son idénticos: sustituirlo no cambia nada."
+  },
+  "fcdd_diff_big": {
+    "message": "El archivo es demasiado grande para compararlo entero. Se muestran las primeras 5000 líneas."
+  },
+  "fcdd_diff_failed": {
+    "message": "No se pudo leer el archivo que ya está en la carpeta. Se muestra solo el que has soltado."
+  },
+  "fcdd_diff_lines": {
+    "message": "líneas"
+  },
+  "fcdd_diff_chars": {
+    "message": "caracteres"
+  },
+  "fcdd_dup_title": {
+    "message": "Ya hay $1$ archivo(s) con ese nombre en esta carpeta",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "2"
+      }
+    }
+  },
+  "fcdd_dup_warn": {
+    "message": "NetSuite no admite dos archivos con el mismo nombre en una carpeta: si los subes, sustituirán a los que ya están."
+  },
+  "fcdd_dup_rest": {
+    "message": "Los otros $1$ archivo(s) son nuevos.",
+    "placeholders": {
+      "1": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "fcdd_dup_go": {
+    "message": "Subir de todas formas"
+  },
+  "fcdd_dup_skip": {
+    "message": "Omitir los repetidos"
+  },
+  "fcdd_dup_cancel": {
+    "message": "Cancelar"
   },
   "enableFileCabinetEditFileBetaLabel": {
     "message": "Editar archivo desde fila"
@@ -7045,6 +8492,12 @@
   "suDiffTooLarge": {
     "message": "Archivo demasiado grande para mostrar el diff completo. Se mostrarán solo las primeras 5000 líneas."
   },
+  "suDiffLines": {
+    "message": "líneas"
+  },
+  "suDiffChars": {
+    "message": "caracteres"
+  },
   "suDiffLoadFailed": {
     "message": "No se pudo obtener el archivo actual. Se subirá sin previsualización."
   },
@@ -7127,53 +8580,140 @@
   "lnm_pick_count": {
     "message": "$SEL$ de $TOTAL$ seleccionados",
     "placeholders": {
-      "sel": { "content": "$1", "example": "11" },
-      "total": { "content": "$2", "example": "27" }
+      "sel": {
+        "content": "$1",
+        "example": "11"
+      },
+      "total": {
+        "content": "$2",
+        "example": "27"
+      }
     }
   },
-  "lnm_mod_action": { "message": "Ejecuta acciones de registro" },
-  "lnm_mod_auth": { "message": "Cambia las credenciales de acceso" },
-  "lnm_mod_bignumber": { "message": "Aritmética de precisión alta" },
-  "lnm_mod_cache": { "message": "Guarda datos en caché para ir más rápido" },
-  "lnm_mod_config": { "message": "Ajustes de configuración de la cuenta" },
-  "lnm_mod_crypto": { "message": "Hash, hmac y cifrado simétrico" },
-  "lnm_mod_currency": { "message": "Tipo de cambio entre dos monedas, por fecha" },
-  "lnm_mod_currentrecord": { "message": "El registro en el que trabajas, del lado del cliente" },
-  "lnm_mod_dataset": { "message": "Conjuntos de datos de Analytics" },
-  "lnm_mod_datasetlink": { "message": "Une varios datasets" },
-  "lnm_mod_email": { "message": "Envía correo: normal, masivo y de campaña" },
-  "lnm_mod_encode": { "message": "Convierte una cadena a otra codificación" },
-  "lnm_mod_error": { "message": "Crea errores propios para abortar el script" },
-  "lnm_mod_file": { "message": "Trabaja con los archivos de NetSuite" },
-  "lnm_mod_format": { "message": "Convierte cadenas a un formato, y al revés" },
-  "lnm_mod_http": { "message": "Llamadas HTTP, con cualquier tipo de contenido" },
-  "lnm_mod_https": { "message": "Llamadas HTTPS, y acceso seguro a credenciales" },
-  "lnm_mod_log": { "message": "Registra detalles de la ejecución del script" },
-  "lnm_mod_plugin": { "message": "Carga implementaciones de plug-ins propios" },
-  "lnm_mod_portlet": { "message": "Redimensiona o refresca un portlet de formulario" },
-  "lnm_mod_query": { "message": "Consultas SuiteQL" },
-  "lnm_mod_record": { "message": "Trabaja con los registros de NetSuite" },
-  "lnm_mod_recordcontext": { "message": "Contexto de un registro" },
-  "lnm_mod_redirect": { "message": "Redirige a una URL, Suitelet, registro o búsqueda" },
-  "lnm_mod_render": { "message": "Formularios y correos desde plantilla; imprime a PDF" },
-  "lnm_mod_runtime": { "message": "Ajustes de ejecución: empresa, script, sesión y usuario" },
-  "lnm_mod_search": { "message": "Crea y ejecuta búsquedas, y recorre sus resultados" },
-  "lnm_mod_sftp": { "message": "Conecta por SFTP y transfiere archivos" },
-  "lnm_mod_sso": { "message": "Genera tokens de SuiteSignOn" },
-  "lnm_mod_suiteappinfo": { "message": "Información de la SuiteApp" },
-  "lnm_mod_task": { "message": "Encola tareas: scripts, Map/Reduce, CSV y workflows" },
-  "lnm_mod_transaction": { "message": "Anula transacciones" },
-  "lnm_mod_translation": { "message": "Colecciones de cadenas traducidas" },
-  "lnm_mod_ui": { "message": "Diálogos, mensajes y widgets de interfaz" },
-  "lnm_mod_url": { "message": "Rutas de navegación y URLs de NetSuite" },
-  "lnm_mod_util": { "message": "Métodos de utilidad, como el objeto global util" },
-  "lnm_mod_workbook": { "message": "Libros de Analytics" },
-  "lnm_mod_workflow": { "message": "Inicia o dispara instancias de workflow" },
-  "lnm_mod_xml": { "message": "Valida, analiza, lee y modifica XML" },
+  "lnm_mod_action": {
+    "message": "Ejecuta acciones de registro"
+  },
+  "lnm_mod_auth": {
+    "message": "Cambia las credenciales de acceso"
+  },
+  "lnm_mod_bignumber": {
+    "message": "Aritmética de precisión alta"
+  },
+  "lnm_mod_cache": {
+    "message": "Guarda datos en caché para ir más rápido"
+  },
+  "lnm_mod_config": {
+    "message": "Ajustes de configuración de la cuenta"
+  },
+  "lnm_mod_crypto": {
+    "message": "Hash, hmac y cifrado simétrico"
+  },
+  "lnm_mod_currency": {
+    "message": "Tipo de cambio entre dos monedas, por fecha"
+  },
+  "lnm_mod_currentrecord": {
+    "message": "El registro en el que trabajas, del lado del cliente"
+  },
+  "lnm_mod_dataset": {
+    "message": "Conjuntos de datos de Analytics"
+  },
+  "lnm_mod_datasetlink": {
+    "message": "Une varios datasets"
+  },
+  "lnm_mod_email": {
+    "message": "Envía correo: normal, masivo y de campaña"
+  },
+  "lnm_mod_encode": {
+    "message": "Convierte una cadena a otra codificación"
+  },
+  "lnm_mod_error": {
+    "message": "Crea errores propios para abortar el script"
+  },
+  "lnm_mod_file": {
+    "message": "Trabaja con los archivos de NetSuite"
+  },
+  "lnm_mod_format": {
+    "message": "Convierte cadenas a un formato, y al revés"
+  },
+  "lnm_mod_http": {
+    "message": "Llamadas HTTP, con cualquier tipo de contenido"
+  },
+  "lnm_mod_https": {
+    "message": "Llamadas HTTPS, y acceso seguro a credenciales"
+  },
+  "lnm_mod_log": {
+    "message": "Registra detalles de la ejecución del script"
+  },
+  "lnm_mod_plugin": {
+    "message": "Carga implementaciones de plug-ins propios"
+  },
+  "lnm_mod_portlet": {
+    "message": "Redimensiona o refresca un portlet de formulario"
+  },
+  "lnm_mod_query": {
+    "message": "Consultas SuiteQL"
+  },
+  "lnm_mod_record": {
+    "message": "Trabaja con los registros de NetSuite"
+  },
+  "lnm_mod_recordcontext": {
+    "message": "Contexto de un registro"
+  },
+  "lnm_mod_redirect": {
+    "message": "Redirige a una URL, Suitelet, registro o búsqueda"
+  },
+  "lnm_mod_render": {
+    "message": "Formularios y correos desde plantilla; imprime a PDF"
+  },
+  "lnm_mod_runtime": {
+    "message": "Ajustes de ejecución: empresa, script, sesión y usuario"
+  },
+  "lnm_mod_search": {
+    "message": "Crea y ejecuta búsquedas, y recorre sus resultados"
+  },
+  "lnm_mod_sftp": {
+    "message": "Conecta por SFTP y transfiere archivos"
+  },
+  "lnm_mod_sso": {
+    "message": "Genera tokens de SuiteSignOn"
+  },
+  "lnm_mod_suiteappinfo": {
+    "message": "Información de la SuiteApp"
+  },
+  "lnm_mod_task": {
+    "message": "Encola tareas: scripts, Map/Reduce, CSV y workflows"
+  },
+  "lnm_mod_transaction": {
+    "message": "Anula transacciones"
+  },
+  "lnm_mod_translation": {
+    "message": "Colecciones de cadenas traducidas"
+  },
+  "lnm_mod_ui": {
+    "message": "Diálogos, mensajes y widgets de interfaz"
+  },
+  "lnm_mod_url": {
+    "message": "Rutas de navegación y URLs de NetSuite"
+  },
+  "lnm_mod_util": {
+    "message": "Métodos de utilidad, como el objeto global util"
+  },
+  "lnm_mod_workbook": {
+    "message": "Libros de Analytics"
+  },
+  "lnm_mod_workflow": {
+    "message": "Inicia o dispara instancias de workflow"
+  },
+  "lnm_mod_xml": {
+    "message": "Valida, analiza, lee y modifica XML"
+  },
   "lnm_btn_load": {
     "message": "Cargar ($COUNT$)",
     "placeholders": {
-      "count": { "content": "$1", "example": "8" }
+      "count": {
+        "content": "$1",
+        "example": "8"
+      }
     }
   },
   "lnm_btn_cancel": {
@@ -7723,16 +9263,16 @@
     "message": "El modo desarrollador ya está activado"
   },
   "devResetNoticeLabel": {
-    "message": "Reiniciar el aviso de novedades"
+    "message": "Ver el aviso de novedades"
   },
   "devResetNoticeDesc": {
-    "message": "Lo vuelve a mostrar en las pestañas de NetSuite al refrescar."
+    "message": "Lo muestra al momento en tus pestañas de NetSuite abiertas."
   },
   "devResetNoticeTitle": {
-    "message": "Volver a mostrar el aviso de novedades"
+    "message": "Mostrar ahora el aviso de novedades"
   },
   "devResetNoticeDone": {
-    "message": "Aviso reiniciado. Refresca una pestaña de NetSuite para verlo."
+    "message": "Aviso de novedades reiniciado. Ya aparece en tus pestañas de NetSuite abiertas."
   },
   "devFreshInstallLabel": {
     "message": "Simular instalación nueva"
@@ -7744,16 +9284,16 @@
     "message": "Abrir la bienvenida como en una instalación nueva"
   },
   "devResetRateLabel": {
-    "message": "Reiniciar el aviso de califícanos"
+    "message": "Ver el aviso de califícanos"
   },
   "devResetRateDesc": {
-    "message": "Lo vuelve a mostrar en las pestañas de NetSuite al refrescar."
+    "message": "Lo muestra al momento en tus pestañas de NetSuite abiertas."
   },
   "devResetRateTitle": {
-    "message": "Volver a mostrar el aviso de califícanos"
+    "message": "Mostrar ahora el aviso de califícanos"
   },
   "devResetRateDone": {
-    "message": "Aviso de calificación reiniciado. Refresca una pestaña de NetSuite para verlo."
+    "message": "Aviso de calificación reiniciado. Ya aparece en tus pestañas de NetSuite abiertas."
   },
   "devDisableLabel": {
     "message": "Salir del modo desarrollador"
@@ -8844,6 +10384,38 @@
   "sqlai_new_chat": {
     "message": "Nueva conversación"
   },
+  "sqlai_hist_title": {
+    "message": "Historial"
+  },
+  "sqlai_hist_empty": {
+    "message": "Todavía no hay conversaciones guardadas"
+  },
+  "sqlai_hist_clear": {
+    "message": "Borrar todo"
+  },
+  "sqlai_hist_delete": {
+    "message": "Borrar esta conversación"
+  },
+  "sqlai_hist_msgs": {
+    "message": "$1 mensajes",
+    "placeholders": {
+      "n": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_hist_untitled": {
+    "message": "Sin título"
+  },
+  "sqlai_hist_done": {
+    "message": "hecho"
+  },
+  "sqlai_cfg_history": {
+    "message": "Guardar el historial de conversaciones"
+  },
+  "sqlai_cfg_history_hint": {
+    "message": "Deja las conversaciones en este equipo para poder retomarlas. Guarda datos reales de tu cuenta; apágalo si prefieres que no quede nada."
+  },
   "sqlai_settings": {
     "message": "Ajustes"
   },
@@ -8900,6 +10472,17 @@
   },
   "sqlai_done": {
     "message": "Listo"
+  },
+  "sqlai_turn_cost": {
+    "message": " · $1 s · $2 pasos",
+    "placeholders": {
+      "seg": {
+        "content": "$1"
+      },
+      "pasos": {
+        "content": "$2"
+      }
+    }
   },
   "sqlai_copied": {
     "message": "Copiado ✓"
@@ -9036,11 +10619,8 @@
   "sqlai_pref_steps_hint": {
     "message": "Cada consulta que probó y cómo le fue. Desactivado, solo ves la respuesta final."
   },
-  "sqlai_step_analyzing": {
-    "message": "Analizando la petición…"
-  },
   "sqlai_step_reasoning": {
-    "message": "Razonando (paso $1 de $2)…",
+    "message": "paso $1 de $2",
     "placeholders": {
       "step": {
         "content": "$1"
@@ -9049,6 +10629,9 @@
         "content": "$2"
       }
     }
+  },
+  "sqlai_thinking_words": {
+    "message": "Pensando…|Analizando…|Buscando…|Revisando…|Calculando…|Consultando…|Comprobando…|Ordenando…|Comparando…|Filtrando…|Sumando…|Contando…|Repasando…|Ajustando…|Afinando…|Puliendo…|Rastreando…|Rebuscando…|Escarbando…|Cruzando datos…|Peinando datos…|Haciendo cuentas…|Atando cabos…|Tirando del hilo…|Dándole vueltas…|Poniendo orden…|Encajando piezas…|Descifrando…|Deduciendo…|Tramando…|Maquinando…|Husmeando…|Cocinando…|Amasando…|Haciendo malabares…|Consultando el oráculo…|Buscando la aguja…|Rascándose la cabeza…|Sudando la gota gorda…|Preguntándole a NetSuite…|Removiendo el archivo…|Mirando dos veces…|Pensándolo mejor…|Casi lo tengo…|Un momento…"
   },
   "sqlai_limit_status": {
     "message": "En pausa: se acabaron los pasos"
@@ -9095,6 +10678,9 @@
   "sqlai_step_rejected": {
     "message": "Rechazada (no es SELECT/WITH)"
   },
+  "sqlai_step_empty": {
+    "message": "Descartada (llegó sin consulta)"
+  },
   "sqlai_pref_iters": {
     "message": "Máx. pasos por consulta"
   },
@@ -9114,6 +10700,9 @@
         "content": "$1"
       }
     }
+  },
+  "sqlai_tokens_cached": {
+    "message": "$1 servidos desde caché"
   },
   "sqlai_tokens_title": {
     "message": "$1 de entrada · $2 de salida",
@@ -9216,6 +10805,87 @@
   },
   "sqlai_write_title": {
     "message": "La IA quiere modificar un registro"
+  },
+  "sqlai_ask_title": {
+    "message": "Antes de seguir"
+  },
+  "sqlai_no_text": {
+    "message": "(Sin texto de respuesta.)"
+  },
+  "sqlai_no_text_cut": {
+    "message": "El modelo se quedó sin espacio de respuesta antes de escribir nada. Suele pasar con modelos de razonamiento: prueba a bajar el nivel de razonamiento, o a usar otro modelo."
+  },
+  "sqlai_step_more_room": {
+    "message": "La respuesta se cortó: reintentando con más espacio…"
+  },
+  "sqlai_ask_step": {
+    "message": "Paso $1 de $2"
+  },
+  "sqlai_ask_step_done": {
+    "message": "Completado"
+  },
+  "sqlai_ask_step_one": {
+    "message": "Sólo este cambio"
+  },
+  "sqlai_ask_editing": {
+    "message": "Cambiando sólo: $1"
+  },
+  "sqlai_ask_change": {
+    "message": "Cambiar"
+  },
+  "sqlai_ask_cancel": {
+    "message": "Cancelar"
+  },
+  "sqlai_ask_edit": {
+    "message": "Editar"
+  },
+  "sqlai_ask_back": {
+    "message": "Atrás"
+  },
+  "sqlai_ask_keys": {
+    "message": "$1 para elegir"
+  },
+  "sqlai_ask_keys_back": {
+    "message": "$1 · ← atrás"
+  },
+  "sqlai_ask_noanswer": {
+    "message": "Sin respuesta"
+  },
+  "sqlai_ask_nuance_add": {
+    "message": "Añadir un matiz o contexto"
+  },
+  "sqlai_ask_nuance_save": {
+    "message": "Guardar matiz"
+  },
+  "sqlai_ask_nuance_scope": {
+    "message": "Se aplica a todo el encargo"
+  },
+  "sqlai_ask_nuance_label": {
+    "message": "Matiz"
+  },
+  "sqlai_ask_nuance_ph": {
+    "message": "Ej.: sólo la sucursal Norte, excluye devoluciones…"
+  },
+  "sqlai_ask_confirm_copy": {
+    "message": "Repasa las respuestas de arriba. Nada se ejecuta hasta que confirmes."
+  },
+  "sqlai_ask_confirm": {
+    "message": "Confirmar y seguir"
+  },
+  "sqlai_ask_review": {
+    "message": "Revisar todo"
+  },
+  "sqlai_ask_send": {
+    "message": "Enviar"
+  },
+  "sqlai_ask_placeholder": {
+    "message": "Escribe tu respuesta…"
+  },
+  "sqlai_ask_skip": {
+    "message": "Decide tú por mí"
+  },
+  "sqlai_ask_skipped": {
+    "message": "Sin respuesta: el asistente decide y lo dice."
   },
   "sqlai_write_target": {
     "message": "Registro: $1 · ID interno $2",
@@ -9638,6 +11308,12 @@
   "aiFaqDesc": {
     "message": "Qué datos se envían, a quién y cómo controlarlo."
   },
+  "apiDocsCreditLabel": {
+    "message": "Documentación de la API"
+  },
+  "apiDocsCreditDesc": {
+    "message": "La ayuda de SuiteScript que aparece al escribir procede de los stubs publicados por Oracle NetSuite."
+  },
   "sqlai_faq_title": {
     "message": "Preguntas frecuentes: privacidad y datos del asistente"
   },
@@ -9666,7 +11342,7 @@
     "message": "Estándar"
   },
   "sqlai_lvl_3_desc": {
-    "message": "Añade las reglas y trampas clave de SuiteQL y las tablas ya vistas en tu cuenta."
+    "message": "Añade el método de razonamiento completo, las reglas y trampas de SuiteQL y las tablas ya vistas en tu cuenta."
   },
   "sqlai_lvl_4": {
     "message": "Avanzado"
@@ -9712,6 +11388,18 @@
   },
   "sql_find_clear": {
     "message": "Limpiar la búsqueda"
+  },
+  "sql_findbar_ph": {
+    "message": "Buscar en el editor…"
+  },
+  "sql_findbar_next": {
+    "message": "Siguiente (Enter)"
+  },
+  "sql_findbar_prev": {
+    "message": "Anterior (Mayús+Enter)"
+  },
+  "sql_findbar_close": {
+    "message": "Cerrar (Esc)"
   },
   "sql_via_rest_title": {
     "message": "Se ejecutó por el endpoint REST: no gasta gobernanza y no congela la pestaña."
@@ -9764,25 +11452,25 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "Al instalar, un asistente te deja elegir con qué funciones empiezas."
+    "message": "* Editor Avanzado: abre cualquier archivo del File Cabinet en un editor completo."
   },
   "un_hl_2": {
-    "message": "Cada función se ve en un dibujo animado antes de encenderla."
+    "message": "* Consola de SuiteScript: escribe SuiteScript y ejecútalo al momento, sin salir de la cuenta."
   },
   "un_hl_3": {
-    "message": "El Asistente de IA tarda menos en responder a cada pregunta."
+    "message": "* Buscador de personalizaciones: encuentra scripts, workflows, campos o búsquedas por su nombre."
   },
   "un_hl_4": {
-    "message": "En las sublistas, lo que queda fijo ya no deja ver el texto que pasa por debajo."
+    "message": "El Asistente de IA conoce las tablas de tu cuenta, responde en muchos menos pasos y guarda tus conversaciones."
   },
   "un_hl_5": {
-    "message": "La línea que estás editando y sus botones se quedan a la vista al desplazarte a la derecha."
+    "message": "El SuiteQL Runner sugiere cómo seguir la consulta mientras escribes: Tab la escribe."
   },
   "un_hl_6": {
-    "message": "El buscador de campos de las búsquedas encuentra por palabras completas, y admite varias en cualquier orden."
+    "message": "Colores nuevos, atajos de edición y varios cursores a la vez en todos los editores de código."
   },
   "un_hl_7": {
-    "message": "Y se arreglaron otros fallos: textos corrientes formateados como código, paneles que salían siempre en español y el ID de cuenta con guion bajo. Más detalles en el changelog."
+    "message": "Los buscadores encuentran escribas o no los acentos, y resaltan igual en todas partes."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -10089,6 +11777,318 @@
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
   },
+  "cl_ver_7_0_0": {
+    "message": "v7.0.0"
+  },
+  "cl_date_7_0_0": {
+    "message": "2026-08-31"
+  },
+  "cl_ver_6_5_2": {
+    "message": "v6.5.2"
+  },
+  "cl_date_6_5_2": {
+    "message": "2026-08-25"
+  },
+  "cl_6_5_2_log_stack_title": {
+    "message": "Las trazas de error se leen desglosadas"
+  },
+  "cl_6_5_2_log_stack_desc": {
+    "message": "Se agregó una vista de las trazas de error del Execution Log, con cada llamada en su línea, su archivo y su posición."
+  },
+  "cl_6_5_2_log_raw_title": {
+    "message": "El texto original de un log, a un clic"
+  },
+  "cl_6_5_2_log_raw_desc": {
+    "message": "Se agregó un botón para ver el log sin formatear en todos los bloques, no sólo en el JSON reparado."
+  },
+  "cl_6_5_2_log_note_title": {
+    "message": "La anotación suelta de un log también se formatea"
+  },
+  "cl_6_5_2_log_note_desc": {
+    "message": "Se agregó el formateo del detalle en la página propia de una anotación de log, que antes sólo salía en la tabla."
+  },
+  "cl_6_5_2_prettier_raw_title": {
+    "message": "El valor original de un campo de código, a un clic"
+  },
+  "cl_6_5_2_prettier_raw_desc": {
+    "message": "Se agregó un botón para ver el valor sin formatear en los campos de código de los registros."
+  },
+  "cl_6_5_2_prettier_copy_title": {
+    "message": "Copiar un campo de código avisa de que copió"
+  },
+  "cl_6_5_2_prettier_copy_desc": {
+    "message": "Se arregló que el botón de copiar de los campos de código copiara sin avisar, y que no copiara nada en algunas páginas."
+  },
+  "cl_6_5_2_csvrv_link_title": {
+    "message": "La respuesta de una importación CSV se abre sin bajarla"
+  },
+  "cl_6_5_2_csvrv_link_desc": {
+    "message": "Se arregló que en el estado de importaciones CSV no saliera el botón Ver, que abre la respuesta como tabla editable."
+  },
+  "cl_7_0_0_ai_catalog_title": {
+    "message": "El Asistente de IA ya sabe qué tablas existen"
+  },
+  "cl_7_0_0_ai_catalog_desc": {
+    "message": "Se arregló que el asistente no pudiera consultar el catálogo de registros de la cuenta y escribiera consultas contra tablas inexistentes."
+  },
+  "cl_7_0_0_ai_via_title": {
+    "message": "El Asistente de IA ya no se queda en la vía lenta"
+  },
+  "cl_7_0_0_ai_via_desc": {
+    "message": "Se arregló que tras una consulta lenta el asistente pasara a la vía lenta durante el resto de la sesión."
+  },
+  "cl_7_0_0_ai_ask_title": {
+    "message": "El Asistente de IA pregunta en vez de suponer"
+  },
+  "cl_7_0_0_ai_ask_desc": {
+    "message": "Se agregó que el asistente pida una aclaración cuando la petición admite dos lecturas que darían resultados distintos."
+  },
+  "cl_7_0_0_ai_format_title": {
+    "message": "Las respuestas del Asistente de IA salen en lista o en tabla"
+  },
+  "cl_7_0_0_ai_format_desc": {
+    "message": "Se arregló que las respuestas con varios resultados salieran en un párrafo de corrido en vez de en lista o en tabla."
+  },
+  "cl_7_0_0_ai_align_title": {
+    "message": "Las cifras de las tablas del Asistente de IA van alineadas"
+  },
+  "cl_7_0_0_ai_align_desc": {
+    "message": "Se agregó que las columnas de cifras de las respuestas se alineen a la derecha para poder compararlas de un vistazo."
+  },
+  "cl_7_0_0_ai_prov_title": {
+    "message": "El Asistente de IA suma Kimi, Grok y Mistral"
+  },
+  "cl_7_0_0_ai_prov_desc": {
+    "message": "Se agregaron Kimi (Moonshot), xAI (Grok) y Mistral a los proveedores que puede usar el Asistente de IA."
+  },
+  "cl_7_0_0_ai_models_title": {
+    "message": "Los modelos del Asistente de IA están al día"
+  },
+  "cl_7_0_0_ai_models_desc": {
+    "message": "Se actualizaron los modelos que ofrece cada proveedor a la generación vigente, conservando los anteriores que siguen funcionando."
+  },
+  "cl_7_0_0_ai_hist_title": {
+    "message": "El Asistente de IA guarda el historial de conversaciones"
+  },
+  "cl_7_0_0_ai_hist_desc": {
+    "message": "Se agregó un historial que permite retomar conversaciones anteriores del asistente, con la opción de desactivarlo o borrarlo."
+  },
+  "cl_7_0_0_ai_spin_title": {
+    "message": "Se ve mejor que el Asistente de IA sigue trabajando"
+  },
+  "cl_7_0_0_ai_spin_desc": {
+    "message": "Se cambió el indicador de espera por uno que va cambiando, para que una consulta larga no parezca que se quedó colgada."
+  },
+  "cl_7_0_0_ai_blank_title": {
+    "message": "Una respuesta vacía ya no rompe la conversación"
+  },
+  "cl_7_0_0_ai_blank_desc": {
+    "message": "Se arregló que el Asistente de IA dejara de responder durante el resto de la conversación cuando el modelo devolvía una respuesta en blanco."
+  },
+  "cl_7_0_0_ai_cut_title": {
+    "message": "El asistente ya no acaba sin contestar"
+  },
+  "cl_7_0_0_ai_cut_desc": {
+    "message": "Se arregló que el Asistente de IA terminara el turno sin respuesta cuando el modelo agotaba el espacio de contestación antes de escribir."
+  },
+  "cl_7_0_0_ai_cache_title": {
+    "message": "El Asistente de IA gasta menos en cada paso"
+  },
+  "cl_7_0_0_ai_cache_desc": {
+    "message": "Se agregó que el asistente reaproveche el contexto que ya envió al proveedor, con lo que cada paso consume menos."
+  },
+  "cl_7_0_0_ai_steps_title": {
+    "message": "El Asistente de IA responde en menos pasos"
+  },
+  "cl_7_0_0_ai_steps_desc": {
+    "message": "Se redujeron las consultas que necesita el asistente antes de responder, con lo que la respuesta llega mucho antes."
+  },
+  "cl_7_0_0_ai_cost_title": {
+    "message": "El Asistente de IA dice cuánto tardó"
+  },
+  "cl_7_0_0_ai_cost_desc": {
+    "message": "Se agregó el tiempo y el número de pasos junto al aviso de respuesta terminada del asistente."
+  },
+  "cl_7_0_0_ai_curr_title": {
+    "message": "El Asistente de IA ya no se equivoca de moneda"
+  },
+  "cl_7_0_0_ai_curr_desc": {
+    "message": "Se arregló que el asistente nombrara una moneda equivocada al resumir importes en cuentas cuya moneda base no es el dólar."
+  },
+  "cl_7_0_0_ai_nodata_title": {
+    "message": "El Asistente de IA ya no dice que no hay datos cuando sí los hay"
+  },
+  "cl_7_0_0_ai_nodata_desc": {
+    "message": "Se arregló que el asistente respondiera que no existen documentos de un tipo cuando el nombre del tipo no coincidía."
+  },
+  "cl_7_0_0_ai_bubble_title": {
+    "message": "Las respuestas del Asistente de IA se distinguen del fondo"
+  },
+  "cl_7_0_0_ai_bubble_desc": {
+    "message": "Se arregló que las respuestas del asistente se confundieran con el fondo del panel en el tema claro."
+  },
+  "cl_7_0_0_rtrail_title": {
+    "message": "El rastro del registro muestra el importe y la relación"
+  },
+  "cl_7_0_0_rtrail_desc": {
+    "message": "Se agregó a cada documento del rastro su importe y su tipo de relación, y las columnas salen ordenadas."
+  },
+  "cl_7_0_0_portlet_title": {
+    "message": "El auto-refresco del dashboard se puede pausar"
+  },
+  "cl_7_0_0_portlet_desc": {
+    "message": "Se agregó un control en el propio dashboard para pausar el auto-refresco, lanzarlo al momento y cambiar su intervalo."
+  },
+  "cl_7_0_0_portletstart_title": {
+    "message": "El auto-refresco del dashboard arranca en pausa"
+  },
+  "cl_7_0_0_portletstart_desc": {
+    "message": "Se agregó una opción para elegir si el auto-refresco del dashboard arranca encendido o en pausa al abrir la página."
+  },
+  "cl_7_0_0_findbar_title": {
+    "message": "El buscador del editor se ve en modo oscuro"
+  },
+  "cl_7_0_0_findbar_desc": {
+    "message": "Se arregló que el buscador del editor saliera en blanco sobre el modo oscuro y sin traducir, en el Runner y en la Consola."
+  },
+  "cl_7_0_0_palqueue_title": {
+    "message": "El Monitor de Cola de Scripts abre su página"
+  },
+  "cl_7_0_0_palqueue_desc": {
+    "message": "Se arregló que el acceso al Monitor de Cola de Scripts de la Paleta de Comandos no llevara a ninguna página."
+  },
+  "cl_7_0_0_palmr_title": {
+    "message": "Estado de scripts Map/Reduce en la Paleta"
+  },
+  "cl_7_0_0_palmr_desc": {
+    "message": "Se agregó a la Paleta de Comandos el acceso a la página de estado de los scripts Map/Reduce."
+  },
+  "cl_7_0_0_wftitle_title": {
+    "message": "El workflow dice su nombre en la pestaña"
+  },
+  "cl_7_0_0_wftitle_desc": {
+    "message": "Se arregló que el editor de workflows titulara la pestaña sin el nombre del workflow, dejando indistinguibles sus Registros Recientes."
+  },
+  "cl_7_0_0_rrsub_title": {
+    "message": "El tipo, debajo del nombre en Recientes"
+  },
+  "cl_7_0_0_rrsub_desc": {
+    "message": "Se arregló que muchas filas de Registros Recientes quedaran sin el tipo del registro debajo del nombre, o lo llevaran pegado a él."
+  },
+  "cl_7_0_0_rrsearch_title": {
+    "message": "Las búsquedas guardadas abren su formulario"
+  },
+  "cl_7_0_0_rrsearch_desc": {
+    "message": "Se arregló que una búsqueda guardada abierta desde Registros Recientes no llegara a su formulario, al que sí lleva la lista de NetSuite."
+  },
+  "cl_7_0_0_qsc_title": {
+    "message": "La creación rápida de búsquedas, sólo donde toca"
+  },
+  "cl_7_0_0_qsc_desc": {
+    "message": "Se arregló que la barra de creación rápida de búsquedas apareciera al volver a los criterios de una búsqueda avanzada."
+  },
+  "cl_7_0_0_ctran_title": {
+    "message": "Abrir el tipo de cualquier transacción a medida"
+  },
+  "cl_7_0_0_ctran_desc": {
+    "message": "Se arregló que el menú de opciones sólo ofreciera abrir el tipo de una transacción a medida en uno de sus estilos, y no en el resto."
+  },
+  "cl_7_0_0_idsvis_title": {
+    "message": "Los ID de campo, siempre a la vista"
+  },
+  "cl_7_0_0_idsvis_desc": {
+    "message": "Se agregó a Copiar IDs Internos un tercer modo que enseña el ID debajo de la etiqueta de cada campo y lo copia al hacer clic."
+  },
+  "cl_7_0_0_modalskin_title": {
+    "message": "Todas las ventanas, con el mismo diseño"
+  },
+  "cl_7_0_0_modalskin_desc": {
+    "message": "Se arregló que cada ventana de la extensión tuviera un diseño distinto: ahora comparten cabecera, caja y tonos, en claro y en oscuro."
+  },
+  "cl_7_0_0_rlvscope_title": {
+    "message": "El visor de logs anuncia su ámbito real"
+  },
+  "cl_7_0_0_rlvscope_desc": {
+    "message": "Se arregló que Ver Logs del Registro anunciara como ámbito el registro abierto cuando, al no tener este scripts, la lista enseñaba los de todos."
+  },
+  "cl_7_0_0_rlvbtns_title": {
+    "message": "Más a mano en el visor de logs"
+  },
+  "cl_7_0_0_rlvbtns_desc": {
+    "message": "Se agregó al detalle del log el abrir su script, despliegues y anotación desde cada fila, un botón para editar el archivo, y el id del script junto al nombre en las listas."
+  },
+  "cl_7_0_0_findclear_title": {
+    "message": "El aspa para limpiar llega al resto de buscadores"
+  },
+  "cl_7_0_0_findclear_desc": {
+    "message": "Se agregó el aspa para vaciar de un clic los buscadores y filtros que todavía no la tenían."
+  },
+  "cl_7_0_0_hlcolor_title": {
+    "message": "Las coincidencias se resaltan igual en todas partes"
+  },
+  "cl_7_0_0_hlcolor_desc": {
+    "message": "Se cambió el resaltado de las búsquedas a un mismo amarillo en toda la extensión, legible también en modo oscuro."
+  },
+  "cl_7_0_0_acentos_title": {
+    "message": "Los buscadores encuentran con o sin acentos"
+  },
+  "cl_7_0_0_acentos_desc": {
+    "message": "Se arregló que los buscadores de la extensión no encontraran «Artículo» al escribirlo sin la tilde."
+  },
+  "cl_7_0_0_sqlghost_title": {
+    "message": "El SuiteQL Runner sugiere cómo seguir la consulta"
+  },
+  "cl_7_0_0_sqlghost_desc": {
+    "message": "Se agregó que el editor sugiera la continuación de la consulta al dejar de teclear, con el proveedor del Asistente de IA; Tab la escribe."
+  },
+  "cl_7_0_0_openfocus_title": {
+    "message": "El Runner se abre listo para escribir"
+  },
+  "cl_7_0_0_openfocus_desc": {
+    "message": "Se arregló que al abrir el SuiteQL Runner hubiera que hacer clic en el editor antes de poder escribir."
+  },
+  "cl_7_0_0_tabfocus_title": {
+    "message": "La pestaña nueva llega lista para escribir"
+  },
+  "cl_7_0_0_tabfocus_desc": {
+    "message": "Se arregló que al abrir una pestaña nueva en el SuiteQL Runner hubiera que hacer clic en el editor antes de poder escribir."
+  },
+  "cl_7_0_0_subq_title": {
+    "message": "Las subconsultas ya no inventan tablas"
+  },
+  "cl_7_0_0_subq_desc": {
+    "message": "Se arregló que una consulta con subconsulta hiciera buscar el esquema de tablas que no existen, con su aviso de tabla no encontrada."
+  },
+  "cl_7_0_0_cmborder_title": {
+    "message": "El editor pierde su recuadro claro en oscuro"
+  },
+  "cl_7_0_0_cmborder_desc": {
+    "message": "Se arregló que el editor del SuiteQL Runner dibujara un marco casi blanco alrededor cuando el modo oscuro estaba encendido."
+  },
+  "cl_7_0_0_atomone_title": {
+    "message": "Colores nuevos para el editor"
+  },
+  "cl_7_0_0_atomone_desc": {
+    "message": "Se agregaron los temas Atom One claro y oscuro al editor del SuiteQL Runner, y pasan a ser los que se aplican al cambiar de modo."
+  },
+  "cl_7_0_0_sqljump_title": {
+    "message": "Ocultar los resultados ya no da un salto"
+  },
+  "cl_7_0_0_sqljump_desc": {
+    "message": "Se arregló que, al ocultar los resultados del SuiteQL Runner, el panel creciera un instante sobre el editor antes de cerrarse."
+  },
+  "cl_7_0_0_sqlsplit_title": {
+    "message": "El panel de resultados vuelve al tamaño que dejaste"
+  },
+  "cl_7_0_0_sqlsplit_desc": {
+    "message": "Se arregló que, al volver a enseñar el editor o los resultados del SuiteQL Runner, se perdiera el tamaño elegido con el divisor."
+  },
+  "cl_7_0_0_portletfix_title": {
+    "message": "El auto-refresco del dashboard vuelve a refrescar"
+  },
+  "cl_7_0_0_portletfix_desc": {
+    "message": "Se arregló que el auto-refresco del dashboard no recargara ningún portlet en la interfaz actual de NetSuite."
+  },
   "cl_ver_6_5_1": {
     "message": "v6.5.1"
   },
@@ -10368,5 +12368,760 @@
   },
   "sql_slow_no_order": {
     "message": "Esta consulta no lleva ORDER BY y NetSuite la está paginando muy despacio. Ordenar por una columna indexada —por ejemplo, ORDER BY id— suele multiplicar la velocidad."
+  },
+  "adv_tree_title": {
+    "message": "Archivos del File Cabinet"
+  },
+  "adv_find_title": {
+    "message": "Buscar y reemplazar (Ctrl+F)"
+  },
+  "adv_format_title": {
+    "message": "Formatear el documento (Shift+Alt+F)"
+  },
+  "adv_find_placeholder": {
+    "message": "Buscar"
+  },
+  "adv_replace_placeholder": {
+    "message": "Reemplazar por"
+  },
+  "adv_find_case": {
+    "message": "Distinguir mayúsculas"
+  },
+  "adv_find_prev": {
+    "message": "Coincidencia anterior"
+  },
+  "adv_find_next": {
+    "message": "Coincidencia siguiente"
+  },
+  "adv_find_close": {
+    "message": "Cerrar"
+  },
+  "adv_replace_one": {
+    "message": "Reemplazar"
+  },
+  "adv_replace_all": {
+    "message": "Todas"
+  },
+  "adv_find_count": {
+    "message": "$1 de $2",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_find_none": {
+    "message": "Sin coincidencias"
+  },
+  "adv_replace_done": {
+    "message": "$1 reemplazos",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_diag_ok": {
+    "message": "Sin errores"
+  },
+  "adv_cursor": {
+    "message": "Ln $1, Col $2",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_cursor_sel": {
+    "message": "Ln $1, Col $2 ($3 sel.)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      },
+      "3": {
+        "content": "$3"
+      }
+    }
+  },
+  "adv_counts": {
+    "message": "$1 líneas · $2 caracteres",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_indent_tabs": {
+    "message": "Tabuladores"
+  },
+  "adv_indent_spaces": {
+    "message": "Espacios: $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_saved": {
+    "message": "Guardado"
+  },
+  "adv_dirty": {
+    "message": "Cambios sin guardar"
+  },
+  "adv_leave_confirm": {
+    "message": "Este archivo tiene cambios sin guardar. ¿Salir de todos modos?"
+  },
+  "adv_leave_varias": {
+    "message": "Hay $1 archivos abiertos con cambios sin guardar. ¿Salir de todos modos?",
+    "placeholders": {
+      "cuantos": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "adv_dlg_leave_tit": {
+    "message": "Cambios sin guardar"
+  },
+  "adv_dlg_leave_si": {
+    "message": "Salir sin guardar"
+  },
+  "adv_dlg_cancel": {
+    "message": "Cancelar"
+  },
+  "adv_save_no_button": {
+    "message": "No se encontró el botón Guardar en esta página"
+  },
+  "adv_format_done": {
+    "message": "Documento formateado"
+  },
+  "adv_format_none": {
+    "message": "No había nada que ordenar"
+  },
+  "adv_goto_prompt": {
+    "message": "Ir a la línea (1-$1):",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_tree_loading": {
+    "message": "Cargando…"
+  },
+  "adv_tree_empty": {
+    "message": "Carpeta vacía"
+  },
+  "adv_tree_error": {
+    "message": "No se pudo leer la carpeta"
+  },
+  "cmdp_act_adv_save": {
+    "message": "Guardar el archivo en el File Cabinet"
+  },
+  "cmdp_act_adv_find": {
+    "message": "Buscar y reemplazar en el archivo"
+  },
+  "cmdp_act_adv_goto": {
+    "message": "Ir a la línea…"
+  },
+  "cmdp_act_adv_format": {
+    "message": "Formatear el documento"
+  },
+  "cmdp_act_adv_tree": {
+    "message": "Mostrar los archivos de la carpeta"
+  },
+  "cmdp_act_adv_wrap": {
+    "message": "Envolver las líneas largas"
+  },
+  "welcomeCatScriptItem13": {
+    "message": "Editor Avanzado para los archivos del File Cabinet"
+  },
+  "adv_save": {
+    "message": "Guardar"
+  },
+  "adv_menu_file": {
+    "message": "Archivo"
+  },
+  "adv_ai_apply": {
+    "message": "Aplicar al archivo"
+  },
+  "adv_ai_applied": {
+    "message": "Aplicado"
+  },
+  "adv_menu_ai": {
+    "message": "Asistente de IA"
+  },
+  "adv_menu_edit": {
+    "message": "Editar"
+  },
+  "adv_menu_view": {
+    "message": "Ver"
+  },
+  "adv_menu_go": {
+    "message": "Ir a"
+  },
+  "adv_quick_titulo_corto": {
+    "message": "Abrir archivo"
+  },
+  "adv_find_title_corto": {
+    "message": "Buscar y reemplazar"
+  },
+  "adv_bus_titulo_corto": {
+    "message": "Buscar en todos los archivos"
+  },
+  "adv_format_title_corto": {
+    "message": "Formatear documento"
+  },
+  "adv_goto_title_corto": {
+    "message": "Ir a la línea"
+  },
+  "adv_cerrar_archivo": {
+    "message": "Cerrar el archivo"
+  },
+  "adv_tab_cerrar": {
+    "message": "Cerrar esta pestaña"
+  },
+  "adv_tab_cerrar_derecha": {
+    "message": "Cerrar las de la derecha"
+  },
+  "adv_tab_cerrar_izquierda": {
+    "message": "Cerrar las de la izquierda"
+  },
+  "adv_tab_cerrar_otras": {
+    "message": "Cerrar las demás"
+  },
+  "adv_tab_cerrar_bloque": {
+    "message": "$1 de los archivos que vas a cerrar tienen cambios sin guardar. ¿Cerrarlos de todos modos?",
+    "placeholders": {
+      "cuantos": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "adv_tab_cerrar_sucia": {
+    "message": "$1 tiene cambios sin guardar. ¿Cerrarlo de todos modos?",
+    "placeholders": {
+      "archivo": {
+        "content": "$1",
+        "example": "cliente_lib.js"
+      }
+    }
+  },
+  "adv_close": {
+    "message": "Cerrar"
+  },
+  "adv_close_title": {
+    "message": "Cerrar el editor y volver al panel de inicio"
+  },
+  "adv_save_title": {
+    "message": "Guardar el archivo (Ctrl+S)"
+  },
+  "adv_sin_nombre": {
+    "message": "Archivo sin nombre"
+  },
+  "adv_save_failed": {
+    "message": "NetSuite no guardó el archivo. Revisa la página antes de reintentar"
+  },
+  "adv_save_desync": {
+    "message": "Recarga la página antes de guardar: el formulario ya no corresponde a este archivo"
+  },
+  "adv_quick_ph_dir": {
+    "message": "Escribe el nombre de una carpeta"
+  },
+  "adv_vacio_dir": {
+    "message": "Abrir carpeta"
+  },
+  "adv_dir_quitar": {
+    "message": "Ver el File Cabinet entero"
+  },
+  "adv_velo_abriendo": {
+    "message": "Abriendo $1…",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_titulo_marca": {
+    "message": "Editor Avanzado · NSFT"
+  },
+  "adv_vacio_marca": {
+    "message": "de NetSuite Full Tools"
+  },
+  "adv_velo_1": {
+    "message": "Preparando el editor…"
+  },
+  "adv_velo_2": {
+    "message": "Cargando el archivo…"
+  },
+  "adv_velo_3": {
+    "message": "Listo"
+  },
+  "adv_raw_open": {
+    "message": "Abrir archivo raw"
+  },
+  "adv_download": {
+    "message": "Descargar del servidor"
+  },
+  "adv_visor_close": {
+    "message": "Volver al editor"
+  },
+  "adv_visor_title": {
+    "message": "Vista previa del archivo"
+  },
+  "adv_visor_zoom_in": {
+    "message": "Acercar"
+  },
+  "adv_visor_zoom_out": {
+    "message": "Alejar"
+  },
+  "adv_visor_fit": {
+    "message": "Ajustar a la ventana"
+  },
+  "adv_visor_real": {
+    "message": "Tamaño original"
+  },
+  "adv_visor_record": {
+    "message": "Abrir la ficha del archivo"
+  },
+  "adv_vacio_title": {
+    "message": "Ningún archivo abierto"
+  },
+  "adv_vacio_start": {
+    "message": "Inicio"
+  },
+  "adv_vacio_recent": {
+    "message": "Reciente"
+  },
+  "adv_vacio_none": {
+    "message": "Todavía no has abierto ningún archivo"
+  },
+  "cl_7_0_0_frpdark_title": {
+    "message": "La vista previa de archivos, con sus colores"
+  },
+  "cl_7_0_0_frpdark_desc": {
+    "message": "Se arregló que la vista previa de un archivo del File Cabinet se viera con los colores invertidos al tener el modo oscuro activo."
+  },
+  "adv_menu_open": {
+    "message": "Abrir Editor Avanzado"
+  },
+  "adv_tab_symbols": {
+    "message": "Símbolos"
+  },
+  "adv_sym_none": {
+    "message": "Nada que listar en este archivo"
+  },
+  "adv_reload": {
+    "message": "Recargar del servidor"
+  },
+  "adv_diff_title": {
+    "message": "Comparar con lo guardado"
+  },
+  "adv_diff_corto": {
+    "message": "Cambios"
+  },
+  "adv_minimapa_lento": {
+    "message": "El minimapa puede ralentizar la navegación en archivos grandes"
+  },
+  "adv_tabs_prev": {
+    "message": "Pestañas anteriores"
+  },
+  "adv_tabs_next": {
+    "message": "Pestañas siguientes"
+  },
+  "adv_velo_arbol": {
+    "message": "Cargando el Archivador…"
+  },
+  "adv_tab_nueva": {
+    "message": "Pestaña nueva"
+  },
+  "adv_ai_hint_sub": {
+    "message": "Dime qué quieres hacer y te escribo el SuiteScript aquí mismo."
+  },
+  "adv_grp_archivo": {
+    "message": "Archivo"
+  },
+  "adv_grp_codigo": {
+    "message": "Código"
+  },
+  "adv_grp_tools": {
+    "message": "Herramientas"
+  },
+  "adv_goto_ir": {
+    "message": "Ir"
+  },
+  "adv_dlg_ok": {
+    "message": "Aceptar"
+  },
+  "adv_api1_title": {
+    "message": "Archivo de SuiteScript 1.0: sólo se sugieren nlapi*/nlobj*"
+  },
+  "adv_api2_title": {
+    "message": "Archivo de SuiteScript 2.x: sólo se sugieren los módulos N/*"
+  },
+  "adv_diff_igual": {
+    "message": "Sin cambios: esto es lo que hay guardado"
+  },
+  "adv_diff_excede": {
+    "message": "El archivo cambió demasiado para compararlo línea a línea"
+  },
+  "adv_diff_cuenta": {
+    "message": "$1 añadidas, $2 quitadas",
+    "placeholders": {
+      "anadidas": {
+        "content": "$1",
+        "example": "12"
+      },
+      "quitadas": {
+        "content": "$2",
+        "example": "3"
+      }
+    }
+  },
+  "adv_stale_confirm": {
+    "message": "Este archivo cambió en el servidor después de que lo abriste. Si guardas, ese cambio se pierde. ¿Guardar de todos modos?"
+  },
+  "adv_dlg_stale_tit": {
+    "message": "El archivo cambió en el servidor"
+  },
+  "adv_dlg_stale_si": {
+    "message": "Guardar de todos modos"
+  },
+  "codeEditorKeymapLabel": {
+    "message": "Atajos del editor"
+  },
+  "codeEditorKeymapDesc": {
+    "message": "Qué teclas usan los editores de código para comentar, mover, duplicar o seleccionar. Cambia al momento."
+  },
+  "codeEditorKeymapVscode": {
+    "message": "VS Code"
+  },
+  "codeEditorKeymapWebstorm": {
+    "message": "WebStorm / IntelliJ"
+  },
+  "adv_bus_titulo": {
+    "message": "Buscar en los archivos (Ctrl+Shift+F)"
+  },
+  "adv_bus_ph": {
+    "message": "Buscar en esta carpeta y sus subcarpetas"
+  },
+  "adv_quick_ph": {
+    "message": "Escribe el nombre de un archivo"
+  },
+  "adv_quick_nada": {
+    "message": "Ningún archivo con ese nombre"
+  },
+  "adv_quick_vacio": {
+    "message": "Escribe para buscar en el File Cabinet"
+  },
+  "adv_quick_pie": {
+    "message": "$1 archivos · ↑↓ para moverte · Enter para abrir",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_quick_pie_rec": {
+    "message": "Archivos recientes"
+  },
+  "adv_quick_reciente": {
+    "message": "reciente"
+  },
+  "adv_quick_titulo": {
+    "message": "Abrir archivo… (Ctrl+P)"
+  },
+  "adv_bus_ir": {
+    "message": "Buscar"
+  },
+  "adv_bus_parar": {
+    "message": "Parar"
+  },
+  "adv_bus_corto": {
+    "message": "Escribe al menos dos caracteres"
+  },
+  "adv_bus_sin_carpeta": {
+    "message": "No hay carpeta en la que buscar"
+  },
+  "adv_bus_listando": {
+    "message": "Listando archivos…"
+  },
+  "adv_bus_listando_n": {
+    "message": "$1 carpetas · $2 archivos",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_bus_nada_que_mirar": {
+    "message": "No hay archivos de texto en esta carpeta"
+  },
+  "adv_bus_yendo": {
+    "message": "$1 de $2 · $3 con coincidencias",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      },
+      "3": {
+        "content": "$3"
+      }
+    }
+  },
+  "adv_bus_hecho": {
+    "message": "$1 coincidencias en $2 archivos · $3 revisados",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      },
+      "3": {
+        "content": "$3"
+      }
+    }
+  },
+  "adv_bus_parado": {
+    "message": "Detenido · $1 coincidencias en $2 archivos",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "cl_7_0_0_cmkeys_title": {
+    "message": "Atajos de edición en los editores de código"
+  },
+  "cl_7_0_0_cmkeys_desc": {
+    "message": "Se agregó comentar, mover, duplicar y borrar líneas con atajos, a elegir entre los de VS Code y los de WebStorm."
+  },
+  "cl_7_0_0_cmmulti_title": {
+    "message": "Varios cursores a la vez"
+  },
+  "cl_7_0_0_cmmulti_desc": {
+    "message": "Se agregó poner varios cursores con Alt y clic, y seleccionar la siguiente aparición de la palabra, para escribir en varios sitios de golpe."
+  },
+  "cl_7_0_0_hintlag_title": {
+    "message": "El desplegable de columnas ya no frena la escritura"
+  },
+  "cl_7_0_0_hintlag_desc": {
+    "message": "Se arregló que al escribir un punto el carácter tardara en aparecer mientras se preparaba la lista de columnas."
+  },
+  "cai_doc_params": {
+    "message": "Parámetros"
+  },
+  "cai_doc_opt": {
+    "message": "opcional"
+  },
+  "cai_doc_returns": {
+    "message": "Devuelve"
+  },
+  "cai_doc_gov": {
+    "message": "Governance"
+  },
+  "codeEditorInlayHintsLabel": {
+    "message": "Pistas en la línea"
+  },
+  "codeEditorInlayHintsDesc": {
+    "message": "Muestra el tipo de la variable y el nombre de cada argumento dentro del propio código. En archivos de más de 800 líneas se apagan solas, para que escribir siga siendo fluido."
+  },
+  "cai_doc_propia": {
+    "message": "Definida en este archivo"
+  },
+  "cai_doc_ns": {
+    "message": "API de SuiteScript"
+  },
+  "cai_doc_ro": {
+    "message": "sólo lectura"
+  },
+  "adv_sym_todo": {
+    "message": "Desplegar o plegar todo"
+  },
+  "adv_split_alto": {
+    "message": "Arrastra para repartir el alto"
+  },
+  "adv_split_ancho": {
+    "message": "Arrastra para repartir el ancho"
+  },
+  "cai_doc_scroll": {
+    "message": "Alt+↑↓ para desplazar"
+  },
+  "adv_download_edit": {
+    "message": "Descargar lo que tienes ahora"
+  },
+  "adv_diff_solo_espacios": {
+    "message": "Sólo cambió el espaciado: ninguna línea dice nada distinto"
+  },
+  "adv_minimapa": {
+    "message": "Minimapa"
+  },
+  "adv_crumb_lista": {
+    "message": "Otros elementos al nivel de $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_recargar_tit": {
+    "message": "Tienes cambios sin guardar"
+  },
+  "adv_recargar_txt": {
+    "message": "Recargar trae lo que hay en el servidor y se lleva lo que escribiste."
+  },
+  "adv_recargar_guardar": {
+    "message": "Guardar"
+  },
+  "adv_recargar_sin": {
+    "message": "Recargar y perderlos"
+  },
+  "adv_quick_pie_dir": {
+    "message": "$1 carpetas · ↑↓ para moverse · Enter para abrir",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_quick_pie_dir_vacio": {
+    "message": "Carpetas ya cargadas"
+  },
+  "adv_quick_nada_dir": {
+    "message": "Ninguna carpeta con ese nombre"
+  },
+  "adv_csv_titulo": {
+    "message": "Vista de tabla"
+  },
+  "adv_csv_pista": {
+    "message": "Doble clic en una celda para editarla"
+  },
+  "adv_csv_cerrar": {
+    "message": "Volver al texto"
+  },
+  "adv_csv_cuenta": {
+    "message": "$1 filas · $2 columnas",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "adv_csv_enorme": {
+    "message": "Demasiadas filas para enseñarlas en tabla ($1)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_format_json_mal": {
+    "message": "Esto no es un JSON válido: no se cambió nada"
+  },
+  "aiAssistantAdvLabel": {
+    "message": "Editor Avanzado"
+  },
+  "shareTitle": {
+    "message": "¿Le serviría a alguien de tu equipo?"
+  },
+  "shareBody": {
+    "message": "Pásale NetSuite Full Tools. Es gratis y se instala en un clic."
+  },
+  "shareMsg": {
+    "message": "NetSuite Full Tools: más de 100 herramientas para NetSuite, gratis."
+  },
+  "shareCopy": {
+    "message": "Copiar enlace"
+  },
+  "shareCopyTitle": {
+    "message": "Copiar el enlace de la Chrome Web Store"
+  },
+  "shareCopied": {
+    "message": "Enlace copiado"
+  },
+  "shareFacebook": {
+    "message": "Compartir en Facebook"
+  },
+  "shareX": {
+    "message": "Compartir en X"
+  },
+  "shareWhatsapp": {
+    "message": "Compartir por WhatsApp"
+  },
+  "shareMore": {
+    "message": "Más opciones para compartir"
+  },
+  "shareNever": {
+    "message": "No volver a mostrar"
+  },
+  "shareCloseTitle": {
+    "message": "Ahora no"
+  },
+  "devResetShareLabel": {
+    "message": "Ver el aviso de compartir"
+  },
+  "devResetShareDesc": {
+    "message": "Lo muestra al momento en tus pestañas de NetSuite abiertas."
+  },
+  "devResetShareTitle": {
+    "message": "Mostrar ahora el aviso de compartir"
+  },
+  "devResetShareDone": {
+    "message": "Aviso de compartir reiniciado. Ya aparece en tus pestañas de NetSuite abiertas."
+  },
+  "cl_7_0_0_share_title": {
+    "message": "Compartir la extensión"
+  },
+  "cl_7_0_0_share_desc": {
+    "message": "Se agregó un aviso para pasarle la extensión a alguien, con el enlace copiable y las opciones de Facebook, X y WhatsApp."
+  },
+  "devModuleNotLoaded": {
+    "message": "Ese módulo aún no está en la extensión cargada. Recárgala en chrome://extensions y refresca la pestaña de NetSuite."
+  },
+  "devPromptFailed": {
+    "message": "El aviso no llegó a verse"
+  },
+  "devPromptNoAnswer": {
+    "message": "ninguna pestaña de NetSuite respondió — refréscala y vuelve a intentarlo"
+  },
+  "un_hl_8": {
+    "message": "Los ID de campo pueden verse siempre bajo su etiqueta, y se copian con un clic."
+  },
+  "un_hl_9": {
+    "message": "Pon o quita el tipo de resumen en todas las columnas de una búsqueda de una vez."
+  },
+  "un_hl_10": {
+    "message": "Un color distinto por entorno o por cuenta, para saber de un vistazo dónde estás."
+  },
+  "un_hl_11": {
+    "message": "Al arrastrar archivos al Archivador se avisa si vas a sustituir alguno, y puedes ver en qué cambian."
+  },
+  "un_hl_12": {
+    "message": "Se corrigieron detalles del Asistente de IA, del auto-refresco del dashboard, del Runner y del Archivador, y los avisos del navegador pasaron a ser ventanas propias. Más detalles en el changelog."
   }
 }

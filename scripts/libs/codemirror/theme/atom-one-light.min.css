@@ -1,0 +1,59 @@
+/* Atom One Light para CodeMirror 5.
+
+   CodeMirror 5 no trae esta paleta, y los paquetes que la publican
+   (@codemirror/theme-one-dark, @uiw/codemirror-theme-atomone) son de
+   CodeMirror 6: no son CSS, son módulos JavaScript que construyen una extensión
+   sobre las etiquetas de Lezer. No se pueden aprovechar aquí.
+
+   LA REFERENCIA ES EL TEMA DE ATOM, no el `atom-one-light` de highlight.js que
+   la extensión usa para resaltar código. Ese archivo es un port y se separa del
+   original en los literales: a `null` / `true` / `false` les pone cian, y Atom
+   los pinta del naranja de los números. Como este archivo se llama
+   «atom-one-light», manda el original — si alguien lo vuelve a comparar con el
+   de hljs, esa diferencia es intencionada.
+
+   La paleta de One Light, por si hay que ampliarla:
+     fondo #fafafa · texto #383a42 · comentario #a0a1a7
+     hue-1 #0184bc cian    · hue-2 #4078f2 azul   · hue-3 #a626a4 morado
+     hue-4 #50a14f verde   · hue-5 #e45649 rojo   · hue-6 #986801 naranja
+     hue-6-2 #c18401 dorado */
+
+.cm-s-atom-one-light.CodeMirror { background: #fafafa; color: #383a42; }
+.cm-s-atom-one-light div.CodeMirror-selected { background: #e5e5e6; }
+.cm-s-atom-one-light .CodeMirror-line::selection,
+.cm-s-atom-one-light .CodeMirror-line > span::selection,
+.cm-s-atom-one-light .CodeMirror-line > span > span::selection { background: #e5e5e6; }
+.cm-s-atom-one-light .CodeMirror-gutters { background: #fafafa; border-right: 1px solid #e5e5e6; }
+.cm-s-atom-one-light .CodeMirror-guttermarker { color: #e45649; }
+.cm-s-atom-one-light .CodeMirror-guttermarker-subtle { color: #a0a1a7; }
+.cm-s-atom-one-light .CodeMirror-linenumber { color: #9d9d9f; }
+.cm-s-atom-one-light .CodeMirror-cursor { border-left: 2px solid #526fff; }
+.cm-s-atom-one-light .CodeMirror-activeline-background { background: #f2f2f2; }
+.cm-s-atom-one-light .CodeMirror-matchingbracket { color: #0184bc !important; text-decoration: underline; }
+.cm-s-atom-one-light .CodeMirror-nonmatchingbracket { color: #e45649 !important; }
+
+.cm-s-atom-one-light span.cm-comment { color: #a0a1a7; font-style: italic; }
+.cm-s-atom-one-light span.cm-string,
+.cm-s-atom-one-light span.cm-string-2 { color: #50a14f; }
+.cm-s-atom-one-light span.cm-number { color: #986801; }
+.cm-s-atom-one-light span.cm-keyword { color: #a626a4; }
+/* `null`, `true`, `false`: del naranja de los números, como en Atom. */
+.cm-s-atom-one-light span.cm-atom { color: #986801; }
+.cm-s-atom-one-light span.cm-variable { color: #383a42; }
+/* Propiedad que sólo se LEE (`r.id`): del color del texto. */
+.cm-s-atom-one-light span.cm-property { color: #383a42; }
+/* Propiedad que se LLAMA (`r.getValue(...)`) — lo que más se busca al leer. */
+.cm-s-atom-one-light span.cm-def { color: #4078f2; }
+/* Clave de un objeto literal (`total: …`). */
+.cm-s-atom-one-light span.cm-objectkey { color: #e45649; }
+.cm-s-atom-one-light span.cm-variable-2 { color: #c18401; }
+.cm-s-atom-one-light span.cm-type,
+.cm-s-atom-one-light span.cm-variable-3 { color: #c18401; }
+.cm-s-atom-one-light span.cm-operator { color: #0184bc; }
+.cm-s-atom-one-light span.cm-builtin { color: #0184bc; }
+.cm-s-atom-one-light span.cm-meta { color: #383a42; }
+.cm-s-atom-one-light span.cm-qualifier { color: #a626a4; }
+.cm-s-atom-one-light span.cm-tag { color: #e45649; }
+.cm-s-atom-one-light span.cm-attribute { color: #986801; }
+.cm-s-atom-one-light span.cm-link { color: #4078f2; text-decoration: underline; }
+.cm-s-atom-one-light span.cm-error { color: #fff; background: #e45649; }

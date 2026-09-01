@@ -9,6 +9,13 @@
     const STORAGE_KEY = 'enableCopyFieldAndSublistIds';
     const OPEN_REC_KEY = 'enableOpenCustomRecordBtn';
     const NO_BUTTON_KEY = 'copyIdsNoButton';
+    const MODE_KEY = 'copyIdsMode';
+
+    function resolveMode(items) {
+        const m = items[MODE_KEY];
+        if (m === 'icons' || m === 'shift' || m === 'always') return m;
+        return items[NO_BUTTON_KEY] === false ? 'icons' : 'shift';
+    }
 
     const FIELD_BTN_CLASS = 'nsft-copy-fs-id-field';
     const SUBLIST_BTN_CLASS = 'nsft-copy-fs-id-sublist';
@@ -27,7 +34,13 @@
     const RESET_DELAY = 900;
     const RECMACH_PREFIX = 'recmach';
     const CUSTRECORD_LOOKUP_TIMEOUT = 4000;
-    const ALL_BTN_SELECTOR = '.' + [FIELD_BTN_CLASS, SUBLIST_BTN_CLASS, OPEN_REC_BTN_CLASS, ADD_FIELD_BTN_CLASS, REC_TYPE_BTN_CLASS, ROW_ID_BTN_CLASS].join(', .');
+    const ID_TAG_CLASS = 'nsft-copy-fs-idtag';
+    const ID_TAG_TXT_CLASS = 'nsft-copy-fs-idtag-t';
+    const PADRE_TAG_CLASS = 'nsft-copy-fs-conid';
+    const ALL_BTN_SELECTOR = '.' + [FIELD_BTN_CLASS, SUBLIST_BTN_CLASS, OPEN_REC_BTN_CLASS, ADD_FIELD_BTN_CLASS, REC_TYPE_BTN_CLASS, ROW_ID_BTN_CLASS, ID_TAG_CLASS].join(', .');
+    const esc = (window.NSFT_DOM && window.NSFT_DOM.escapeHtml)
+        ? window.NSFT_DOM.escapeHtml
+        : (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const _customRecordCache = new Map();
     const ID_COLUMN_LABELS = new Set([
         'id', 'script id', 'id de script', 'identificador',
@@ -38,7 +51,7 @@
     ]);
 
     let openCustomRecordEnabled = true;
-    let _noButton = false;
+    let _modo = 'shift';
     let _enabled = false;
     let _unsubObserver = null;
     let _delegatedBound = false;
@@ -50,12 +63,13 @@
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
         [OPEN_REC_KEY]: true,
-        [NO_BUTTON_KEY]: true
+        [NO_BUTTON_KEY]: true,
+        [MODE_KEY]: null
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
         if (RB && RB.isExcludedPage && RB.isExcludedPage()) return;
         openCustomRecordEnabled = items[OPEN_REC_KEY] !== false;
-        _noButton = items[NO_BUTTON_KEY] !== false;
+        _modo = resolveMode(items);
         init();
     });
 
@@ -74,9 +88,13 @@
             document.querySelectorAll('.' + MENU_CLASS).forEach(el => el.remove());
             if (_enabled && openCustomRecordEnabled) runAll();
         }
-        if (changes[NO_BUTTON_KEY]) {
-            _noButton = changes[NO_BUTTON_KEY].newValue === true;
-            if (_enabled) { removeAllButtons(); runAll(); }
+        if (changes[MODE_KEY] || changes[NO_BUTTON_KEY]) {
+            chrome.storage.local.get({ [NO_BUTTON_KEY]: true, [MODE_KEY]: null }, (it) => {
+                const next = resolveMode(it);
+                if (next === _modo) return;
+                _modo = next;
+                if (_enabled) { removeAllButtons(); runAll(); }
+            });
         }
     });
 
@@ -251,8 +269,15 @@
             : document.querySelectorAll(HEADER_SELECTOR);
         headers.forEach(header => {
             if (header.querySelector(`.${FIELD_BTN_CLASS}`)) return;
+            if (header.querySelector('.' + ID_TAG_CLASS)) return;
             const fieldId = findFieldNameByHeader(header);
             if (!fieldId) return;
+            if (_modo === 'always') {
+                const tag = tagId(fieldId, 'is-col');
+                marcaPadre(header);
+                header.appendChild(tag);
+                return;
+            }
             const btn = createButton({
                 className: FIELD_BTN_CLASS,
                 html: COPY_ICON_SVG,
@@ -265,9 +290,19 @@
         const wrappers = DOM
             ? DOM.qAll(['.uir-field-wrapper', '[data-field-name][data-nsps-label]'], { module: 'copy_field_sublist_id', purpose: 'field wrappers' })
             : document.querySelectorAll('.uir-field-wrapper');
+        const pendientes = [];
         wrappers.forEach(wrapper => {
             if (wrapper.dataset.copyAdded) return;
-            if (_noButton && !wrapper.closest('[data-nsps-layer^="recmach"]')) return;
+            const enSublista = !!wrapper.closest('[data-nsps-layer^="recmach"]');
+            if (_modo !== 'icons' && !enSublista) {
+                if (_modo === 'shift') return;
+                const fid = wrapper.dataset.fieldName;
+                const lbl = wrapper.querySelector('.uir-label-span');
+                if (!fid || !lbl || wrapper.querySelector('.' + ID_TAG_CLASS)) return;
+                const cajaLbl = lbl.closest('.uir-label') || lbl.parentElement || lbl;
+                pendientes.push({ wrapper, fid, cajaLbl });
+                return;
+            }
             const fieldId = wrapper.dataset.fieldName;
             const label = wrapper.querySelector('.uir-label-span');
             if (!fieldId || !label) return;
@@ -280,6 +315,34 @@
             label.appendChild(btn);
             wrapper.dataset.copyAdded = 'true';
         });
+
+        if (pendientes.length) colocaEtiquetas(pendientes);
+    }
+
+    function colocaEtiquetas(lista) {
+        lista.forEach((p) => { p.enFila = filaDeDosColumnas(p.wrapper, p.cajaLbl); });
+
+        lista.forEach((p) => {
+            const tag = tagId(p.fid, p.enFila ? 'is-fila' : '');
+            if (p.enFila) {
+                marcaPadre(p.cajaLbl);
+                p.cajaLbl.appendChild(tag);
+            } else {
+                marcaPadre(p.cajaLbl.parentElement);
+                p.cajaLbl.insertAdjacentElement('afterend', tag);
+            }
+            p.wrapper.dataset.copyAdded = 'true';
+        });
+    }
+
+    function filaDeDosColumnas(wrapper, cajaLbl) {
+        const valor = wrapper.lastElementChild;
+        if (!valor || valor === cajaLbl || cajaLbl.contains(valor)) return false;
+        const a = cajaLbl.getBoundingClientRect();
+        const b = valor.getBoundingClientRect();
+        if (!a.height || !b.height) return false;
+        const comun = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+        return comun > a.height / 2;
     }
 
     function addSublistButtons() {
@@ -420,6 +483,21 @@
     }
 
     const _btnCfg = new WeakMap();
+
+    function tagId(fieldId, extra) {
+        const copiado = chrome.i18n.getMessage('cfsi_copied') || 'Copiado';
+        const caja = (t) => '<span class="' + ID_TAG_TXT_CLASS + '">' + esc(t) + '</span>';
+        return createButton({
+            className: ID_TAG_CLASS + (extra ? ' ' + extra : ''),
+            html: caja(fieldId),
+            title: tooltipHint(fieldId),
+            cfg: { kind: 'copy', value: fieldId, baseHtml: caja(fieldId), copiedHtml: caja(copiado) }
+        });
+    }
+
+    function marcaPadre(el) {
+        if (el) el.classList.add(PADRE_TAG_CLASS);
+    }
 
     function createButton({ className, html, title, cfg }) {
         const btn = document.createElement('span');

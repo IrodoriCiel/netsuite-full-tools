@@ -177,9 +177,27 @@
         if (lang) td.dataset[FORMATTED_ATTR] = lang;
     };
 
+    const IS_NOTE_PAGE = /\/scripting\/scriptnote(?:archive)?\.nl/i.test(window.location.pathname);
+    const NOTE_SELECTOR = 'td.uir-field.inputreadonly, td.inputreadonly, span.uir-field.inputreadonly';
+
+    function noteNameParts() {
+        let id = '';
+        try { id = new URLSearchParams(location.search).get('id') || ''; } catch (e) { }
+        return ['scriptnote', id ? 'id-' + id : ''];
+    }
+
+    const formatNoteField = (el) => {
+        if (!el || el.dataset[FORMATTED_ATTR]) return;
+        if (el.querySelector && el.querySelector('.nsft-logfmt-wrapper')) return;
+        const lang = window.NSFT_LogFormat.renderInto(el, null, { nameParts: noteNameParts() });
+        if (lang) el.dataset[FORMATTED_ATTR] = lang;
+    };
+
     const scan = (root) => {
-        if (root && root.querySelectorAll) {
-            Array.from(root.querySelectorAll(SELECTOR)).forEach(formatTD);
+        if (!root || !root.querySelectorAll) return;
+        Array.from(root.querySelectorAll(SELECTOR)).forEach(formatTD);
+        if (IS_NOTE_PAGE) {
+            Array.from(root.querySelectorAll(NOTE_SELECTOR)).reverse().forEach(formatNoteField);
         }
     };
 
@@ -208,7 +226,9 @@
             unsubscribeObserver = null;
         }
         document.documentElement.classList.remove(ACTIVE_CLASS);
-        document.querySelectorAll(`${SELECTOR}[data-nsft-formatted]`).forEach((td) => {
+        const yaFormateado = `${SELECTOR}[data-nsft-formatted]`
+            + (IS_NOTE_PAGE ? ', ' + NOTE_SELECTOR.split(', ').map((s) => s + '[data-nsft-formatted]').join(', ') : '');
+        document.querySelectorAll(yaFormateado).forEach((td) => {
             const wrapper = td.querySelector('.nsft-logfmt-wrapper');
             const raw = wrapper ? extractRawText(wrapper) : td.textContent;
             td.textContent = raw;

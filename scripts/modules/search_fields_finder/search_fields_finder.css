@@ -17,6 +17,48 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
+.nsft-ff-search-wrap {
+    position: relative;
+    flex: 1 1 100%;
+    width: 100%;
+    display: flex;
+    min-width: 0;
+}
+
+.nsft-ff-clear {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    color: #999 !important;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.12s, color 0.12s;
+}
+
+.nsft-ff-clear[hidden] { display: none !important; }
+
+.nsft-ff-clear:hover {
+    background: #f0f0f0 !important;
+    color: #333 !important;
+}
+
+.nsft-ff-clear:focus-visible {
+    outline: 2px solid var(--nsft-ns-accent, #3b82f6) !important;
+    outline-offset: 1px;
+}
+
 .nsft-ff-textbox {
     pointer-events: all;
     flex: 1 1 100%;
@@ -25,7 +67,7 @@
     background-color: #ffffff !important;
     border: none !important;
     border-bottom: 1px solid #f0f0f0 !important;
-    padding: 10px 12px !important;
+    padding: 10px 30px 10px 12px !important;
     border-radius: 0 !important;
     font-size: 13px;
     outline: none;
@@ -290,7 +332,7 @@ mark.nsft-ff-highlight {
 }
 
 .nsft-ff-div .nsft-ff-mark {
-    background: rgba(245, 158, 11, 0.28);
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
     color: inherit;
     border-radius: 2px;
     padding: 0;

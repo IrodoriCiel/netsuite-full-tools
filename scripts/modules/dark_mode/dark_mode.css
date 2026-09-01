@@ -32,7 +32,8 @@ html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([i
 }
 
 html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) .nsft-code-fields-prettier-wrapper,
-html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) .nsft-logfmt-wrapper {
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) .nsft-logfmt-wrapper,
+html.nsft-dark-on:not(.nsft-editor-themed) body > *:not([class*="nsft-"]):not([id*="nsft-"]) #nsft-frp-preview {
     filter: var(--nsft-reinv) !important;
 }
 

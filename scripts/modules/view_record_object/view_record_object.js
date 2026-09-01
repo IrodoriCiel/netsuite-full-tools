@@ -25,6 +25,14 @@
   let _stalenessTimer = null;
   let _diffPaths = null;
 
+  let _viewMode = 'json';
+  let _fvShowTech = false;
+  let _fvOpenTables = {};
+  let _fvPins = null;
+  let _fvSectionEls = {};
+  const FV_PINS_KEY = 'nsftInspectorPins';
+  let _fvDisplay = {};
+
   function _nsftResolveTheme() {
     return _nsftTheme === 'dark' ? 'dark' : 'light';
   }
@@ -338,6 +346,20 @@
       hideEmpty.checked = _hideEmptyFields;
       hideEmpty.addEventListener('change', (e) => {
         _hideEmptyFields = !!e.target.checked;
+        renderRecord();
+      });
+    }
+
+    const viewJsonBtn = document.getElementById('rec-obj-view-json');
+    const viewFriendlyBtn = document.getElementById('rec-obj-view-friendly');
+    if (viewJsonBtn && viewFriendlyBtn) {
+      viewJsonBtn.addEventListener('click', () => setViewMode('json'));
+      viewFriendlyBtn.addEventListener('click', () => setViewMode('friendly'));
+    }
+    const fvTechBtn = document.getElementById('rec-obj-fv-tech');
+    if (fvTechBtn) {
+      fvTechBtn.addEventListener('click', () => {
+        _fvShowTech = !_fvShowTech;
         renderRecord();
       });
     }
@@ -727,19 +749,30 @@
              <div id="nsft-rec-obj-container">
                  <div id="nsft-rec-obj-search-container">
                      <div class="nsft-rec-obj-search-row">
+                       
                        <div class="nsft-rec-obj-search-wrap">
                          <input id="rec-obj-search" name="rec-obj-search" placeholder="${chrome.i18n.getMessage('ro_search_placeholder')}" autocomplete="off">
                          <span id="rec-obj-clear" title="${chrome.i18n.getMessage('ro_clear_search')}" class="nsft-clear-search">✕</span>
+                       </div>
+                       
+                       <div class="nsft-ro-viewseg" role="tablist">
+                         <button type="button" id="rec-obj-view-json" class="nsft-ro-viewbtn is-on" role="tab">JSON</button>
+                         <button type="button" id="rec-obj-view-friendly" class="nsft-ro-viewbtn" role="tab">${chrome.i18n.getMessage('ro_view_friendly') || 'Vista amigable'}</button>
                        </div>
                        <label class="nsft-rec-obj-hide-empty" title="${chrome.i18n.getMessage('ro_hide_empty_title') || 'Ocultar campos vacíos o null'}">
                          <input type="checkbox" id="rec-obj-hide-empty">
                          <span>${chrome.i18n.getMessage('ro_hide_empty_label') || 'Ocultar vacíos'}</span>
                        </label>
+                       
+                       <button type="button" id="rec-obj-fv-tech" class="nsft-ro-fv-toggle" style="display:none"></button>
+                       
+                       <span id="nsft-ro-rail-trigger"></span>
                      </div>
                  </div>
                  <div id="nsft-record-object-container" class="hljs">
                       ${getLoadingHtml()}
                  </div>
+                 <div id="nsft-ro-friendly" class="nsft-ro-friendly" style="display:none"></div>
              </div>
          </div>
          <div class="nsft-rec-obj-footer">
@@ -820,6 +853,8 @@
         return loadRecordXml(true);
       }
 
+      _fvDisplay = {};
+
       const recordObject = { recordType: null, id: null, bodyFields: {}, lineFields: {} };
       if (!STATE.type && record.getAttribute('recordType')) STATE.type = record.getAttribute('recordType');
       if (!STATE.id && record.getAttribute('id')) STATE.id = record.getAttribute('id');
@@ -878,6 +913,7 @@
       updateStatus(chrome.i18n.getMessage('ro_loading_record'));
 
       await enrichRecordObject(recordObject, noneEdit);
+      recogeTextosDeCampos(recordObject);
 
       const inventoryDetailIds = xmlInventoryDetailIds;
 
@@ -1049,6 +1085,7 @@
         return;
       }
       if ('id' in v && 'links' in v && Object.keys(v).length <= 3) {
+        if (v.refName != null && v.refName !== '') _fvDisplay[String(k).toLowerCase()] = String(v.refName);
         body[k] = (v.refName != null && v.refName !== '')
           ? v.id + ' (' + v.refName + ')'
           : v.id;
@@ -1293,6 +1330,19 @@
     }
   };
 
+  const recogeTextosDeCampos = (recordObject) => {
+    const body = recordObject.bodyFields || {};
+    Object.keys(body).forEach((k) => {
+      const m = String(k).match(/^(.+?)(_display|_text)$/i);
+      if (!m) return;
+      const base = m[1].toLowerCase();
+      const texto = body[k];
+      if (texto === '' || texto == null) return;
+      if (!(m[1] in body)) return;
+      if (!_fvDisplay[base]) _fvDisplay[base] = String(texto);
+    });
+  };
+
   const shouldExcludeBodyField = (fieldId) => {
     const f = String(fieldId || '').toLowerCase();
     return BODY_PROPERTIES_TO_EXCLUDE.includes(f) || f.startsWith('nsapi') || f.startsWith('nlapi');
@@ -1332,7 +1382,724 @@
 
   let _lastRenderedSource = null;
 
+
+  const FV_TECH = /^(nl|wf|script|submitnext|entryform|customwhence|templatestored|baserecordtype|selectedtab|sys_id|recordid|rectype|nameorig|customform|whence|externalid|version)/i;
+  const FV_MONEY = /(amount|total|rate|cost|price|subtotal|balance)/i;
+  const FV_NAMEISH = /(name|title|tranid|descr|label|code)/i;
+  const FV_COL_PREF = ['tranid', 'itemname', 'name', 'title', 'descr', 'type', 'status', 'trandate', 'date', 'total', 'amount', 'quantity', 'rate', 'id'];
+  const FV_ROW_CAP = 12;
+
+  function fvI18n(key, fallback, subs) {
+    let out = '';
+    try { out = chrome.i18n.getMessage(key, subs) || ''; } catch (e) { out = ''; }
+    if (!out) {
+      out = fallback;
+      (subs || []).forEach((v, idx) => { out = out.split('$' + (idx + 1)).join(String(v)); });
+    }
+    return out;
+  }
+
+  function setViewMode(mode) {
+    _viewMode = mode === 'friendly' ? 'friendly' : 'json';
+    const modal = document.getElementById('nsft-rec-obj-modal');
+    const jsonC = document.getElementById('nsft-record-object-container');
+    const fvC = document.getElementById('nsft-ro-friendly');
+    const jsonBtn = document.getElementById('rec-obj-view-json');
+    const fvBtn = document.getElementById('rec-obj-view-friendly');
+    const hideEmptyLbl = document.querySelector('.nsft-rec-obj-hide-empty');
+    const fvTechBtn = document.getElementById('rec-obj-fv-tech');
+    const friendly = _viewMode === 'friendly';
+    if (jsonC) jsonC.style.display = friendly ? 'none' : '';
+    if (fvC) fvC.style.display = friendly ? 'flex' : 'none';
+    if (jsonBtn) jsonBtn.classList.toggle('is-on', !friendly);
+    if (fvBtn) fvBtn.classList.toggle('is-on', friendly);
+    if (hideEmptyLbl) hideEmptyLbl.style.display = friendly ? 'none' : '';
+    if (fvTechBtn) fvTechBtn.style.display = friendly ? '' : 'none';
+
+    if (modal && !PANEL_MODE) {
+      modal.classList.toggle('nsft-ro-wide', friendly);
+      clearTimeout(_fvResizeTimer);
+      _fvResizeTimer = setTimeout(() => {
+        constrainModalToWindow(modal);
+        fvMideHuecos();
+      }, 850);
+    }
+
+    renderRecord();
+  }
+  let _fvResizeTimer = null;
+
+  function fvIsObj(v) { return v && typeof v === 'object' && !Array.isArray(v); }
+  function fvIsArr(v) { return Array.isArray(v); }
+  function fvIsEmpty(v) {
+    return v === '' || v === null || v === undefined
+      || (fvIsArr(v) && v.length === 0) || (fvIsObj(v) && Object.keys(v).length === 0);
+  }
+
+  function fvHumanize(key) {
+    const dict = fvI18n('ro_k_' + String(key).toLowerCase(), '');
+    if (dict) return dict;
+    const k = String(key)
+      .replace(/^(custbody|custcol|custrecord|custentity|custitem|custevent|custpage)_/, '')
+      .replace(/_display$/, '')
+      .replace(/_/g, ' ')
+      .trim();
+    return k.charAt(0).toUpperCase() + k.slice(1);
+  }
+
+  function fvClassify(v) {
+    if (fvIsEmpty(v)) return 'empty';
+    if (fvIsArr(v)) return v.some(fvIsObj) ? 'objectArray' : 'scalarArray';
+    if (fvIsObj(v)) return 'object';
+    return 'scalar';
+  }
+
+  function fvMoney(n) {
+    try { return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    catch (e) { return String(n); }
+  }
+
+  function fvFmt(key, v) {
+    if (fvIsEmpty(v)) return { text: fvI18n('ro_fv_none', 'No value'), tone: 'neutral' };
+    if (v === 'T' || v === true) return { text: fvI18n('ro_fv_yes', 'Yes'), tone: 'yes' };
+    if (v === 'F' || v === false) return { text: fvI18n('ro_fv_no', 'No'), tone: 'no' };
+
+    const pegado = (typeof v === 'string') && v.match(/^(\d+)\s+\((.+)\)$/);
+    if (pegado) return { text: pegado[2], tone: '', raw: pegado[1] };
+
+    const texto = _fvDisplay[String(key).toLowerCase()];
+    if (texto && String(texto) !== String(v)) return { text: String(texto), tone: '', raw: String(v) };
+
+    const n = typeof v === 'number' ? v : (/^-?\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null);
+    if (n !== null && FV_MONEY.test(key)) return { text: fvMoney(n), tone: '' };
+    if (typeof v === 'string' && v.indexOf('/app/') === 0) return { text: v.split('?')[0], tone: '' };
+    return { text: String(v), tone: '' };
+  }
+
+  function fvIdKey(o) {
+    if (!fvIsObj(o)) return null;
+    const preferred = ['tranid', 'itemname', 'name', 'title', 'descr', 'label'];
+    for (let i = 0; i < preferred.length; i++) if (!fvIsEmpty(o[preferred[i]])) return preferred[i];
+    const scalars = Object.keys(o).filter((k) => fvClassify(o[k]) === 'scalar');
+    const nameish = scalars.filter((k) => FV_NAMEISH.test(k))[0];
+    if (nameish) return nameish;
+    const notLine = scalars.filter((k) => !/^(line|id)$/i.test(k))[0];
+    return notLine || scalars[0] || null;
+  }
+  function fvRowTitle(o, iRow) {
+    const k = fvIdKey(o);
+    return k ? fvFmt(k, o[k]).text : fvI18n('ro_fv_row_n', 'Item $1', [String(iRow)]);
+  }
+
+  function fvPickCols(rows) {
+    const score = {};
+    rows.forEach((r) => {
+      if (!fvIsObj(r)) return;
+      Object.keys(r).forEach((k) => {
+        if (!fvIsEmpty(r[k]) && fvClassify(r[k]) === 'scalar') score[k] = (score[k] || 0) + 1;
+      });
+    });
+    let keys = Object.keys(score).sort((a, b) => {
+      const pa = FV_COL_PREF.indexOf(a), pb = FV_COL_PREF.indexOf(b);
+      const ra = pa < 0 ? (FV_NAMEISH.test(a) ? 50 : 99) : pa;
+      const rb = pb < 0 ? (FV_NAMEISH.test(b) ? 50 : 99) : pb;
+      if (ra !== rb) return ra - rb;
+      return score[b] - score[a];
+    });
+    const forced = fvIdKey(rows.filter(fvIsObj)[0]);
+    if (forced) keys = [forced].concat(keys.filter((k) => k !== forced));
+    return keys.slice(0, 5);
+  }
+
+  function fvFlatten(node, trail, depth, out, stats) {
+    const entries = fvIsArr(node) ? [] : Object.keys(node).map((k) => [k, node[k]]);
+    const scalars = [], containers = [];
+
+    entries.forEach(([k, v]) => {
+      const cls = fvClassify(v);
+      if (depth === 0 && /^(recordtype|id|perm)$/i.test(k)) return;
+
+      const hermano = String(k).match(/^(.+?)(_display|_text)$/i);
+      if (hermano && _fvDisplay[hermano[1].toLowerCase()]) {
+        stats.hidden++;
+        if (!_fvShowTech) return;
+      }
+      const noisy = (cls === 'empty' && !fvIsArr(v) && !fvIsObj(v)) || FV_TECH.test(k);
+      if (noisy) { stats.hidden++; if (!_fvShowTech) return; }
+      if (cls === 'object' || cls === 'objectArray' || cls === 'scalarArray' || ((fvIsObj(v) || fvIsArr(v)) && cls === 'empty')) {
+        containers.push([k, v, cls]);
+      } else {
+        scalars.push([k, v]);
+      }
+    });
+
+    scalars.forEach(([k, v]) => {
+      const f = fvFmt(k, v);
+      stats.shown++;
+      out.push({
+        type: 'field', depth, trail, key: k, label: fvHumanize(k),
+        value: f.text, tone: f.tone, raw: f.raw || '',
+        hay: fvFold(k + ' ' + fvHumanize(k) + ' ' + f.text + ' ' + (f.raw || ''))
+      });
+    });
+
+    containers.forEach(([k, v, cls]) => {
+      const label = k === 'bodyFields' ? fvI18n('ro_fv_g_body', 'Header fields')
+        : k === 'lineFields' ? fvI18n('ro_fv_g_lines', 'Line sublists')
+        : fvHumanize(k);
+      const nextTrail = trail.concat(label);
+      const id = nextTrail.join('/') + '#' + depth;
+      const hay = fvFold(k + ' ' + label);
+
+      if (cls === 'empty') {
+        out.push({ type: 'section', depth, trail, label, id, badge: fvI18n('ro_fv_badge_empty', 'empty'), count: 0, hay });
+        out.push({ type: 'emptyNote', depth: depth + 1, trail: nextTrail, label: fvI18n('ro_fv_empty_note', 'No items.'), hay });
+        return;
+      }
+
+      if (cls === 'scalarArray') {
+        out.push({ type: 'section', depth, trail, label, id,
+          badge: fvI18n('ro_fv_badge_values', '$1 values', [String(v.length)]), count: v.length, list: true, hay });
+        out.push({ type: 'chips', depth: depth + 1, trail: nextTrail, chips: v.map(String), hay: fvFold(v.join(' ')) });
+        stats.shown += v.length;
+        return;
+      }
+
+      if (cls === 'objectArray') {
+        const cols = fvPickCols(v).map((c) => ({ key: c, label: fvHumanize(c) }));
+        const moneyCol = cols.filter((c) => FV_MONEY.test(c.key))[0];
+        const sum = moneyCol ? v.reduce((a, r) => a + (parseFloat(r && r[moneyCol.key]) || 0), 0) : null;
+
+        out.push({ type: 'section', depth, trail, label, id,
+          badge: fvI18n('ro_fv_badge_rows', '$1 rows', [String(v.length)]), count: v.length, list: true, hay });
+        out.push({
+          type: 'table', depth: depth + 1, trail: nextTrail, cols, count: v.length, tableId: id,
+          rows: v.map((r, iRow) => ({
+            idx: iRow + 1,
+            cells: cols.map((c) => fvFmt(c.key, r ? r[c.key] : '').text)
+          })),
+          total: sum,
+          totalLabel: moneyCol ? fvI18n('ro_fv_sum', 'Sum of $1', [fvHumanize(moneyCol.key)]) : null,
+          hay: fvFold(v.map((r) => Object.keys(r || {})
+            .filter((kk) => fvClassify(r[kk]) === 'scalar')
+            .map((kk) => kk + ' ' + r[kk]).join(' ')).join(' '))
+        });
+        stats.shown += v.length * cols.length;
+
+        v.forEach((row, iRow) => {
+          const hasKids = fvIsObj(row) && Object.keys(row).some((kk) =>
+            fvIsObj(row[kk]) || (fvIsArr(row[kk]) && row[kk].length));
+          if (hasKids) fvFlatten(row, nextTrail.concat('#' + (iRow + 1) + ' ' + fvRowTitle(row, iRow + 1)), depth + 1, out, stats);
+        });
+        return;
+      }
+
+      const kids = Object.keys(v).map((kk) => v[kk]);
+      const inner = kids.filter((x) => fvClassify(x) === 'scalar').length;
+      const subs = kids.filter((x) => fvIsObj(x) || fvIsArr(x)).length;
+      const badge = inner && subs
+        ? fvI18n('ro_fv_badge_mix', '$1 fields · $2 subgroups', [String(inner), String(subs)])
+        : inner ? fvI18n('ro_fv_badge_fields', '$1 fields', [String(inner)])
+        : subs ? fvI18n('ro_fv_badge_subs', '$1 subgroups', [String(subs)])
+        : fvI18n('ro_fv_badge_empty', 'empty');
+
+      out.push({ type: 'section', depth, trail, label, id, badge, count: inner + subs, hay });
+      fvFlatten(v, nextTrail, depth + 1, out, stats);
+    });
+  }
+
+  function fvMideHuecos() {
+    const bar = document.getElementById('nsft-rec-obj-search-container');
+    const modalEl = document.getElementById('nsft-rec-obj-modal');
+    const scrollerEl = document.querySelector('.nsft-rec-obj-content');
+    if (!bar || !modalEl) return;
+    const h = Math.round(bar.getBoundingClientRect().height) || 48;
+    modalEl.style.setProperty('--nsft-ro-bar-h', h + 'px');
+    const visible = scrollerEl ? Math.round(scrollerEl.clientHeight) : 0;
+    if (visible > 120) modalEl.style.setProperty('--nsft-ro-rail-max', (visible - h - 24) + 'px');
+
+    const mr = modalEl.getBoundingClientRect();
+    const sr = scrollerEl ? scrollerEl.getBoundingClientRect() : null;
+    if (sr && mr.height) {
+      modalEl.style.setProperty('--nsft-ro-view-top', Math.max(0, Math.round(sr.top - mr.top + h)) + 'px');
+      modalEl.style.setProperty('--nsft-ro-view-bottom', Math.max(0, Math.round(mr.bottom - sr.bottom)) + 'px');
+    }
+  }
+
+  const FV_NARROW_AT = 560;
+  const FV_TINY_AT = 400;
+  let _fvNarrow = false;
+  let _fvRailOpen = false;
+  let _fvWidthObs = null;
+
+  function fvVigilaAncho() {
+    const modalEl = document.getElementById('nsft-rec-obj-modal');
+    if (!modalEl || _fvWidthObs) return;
+    const aplica = () => {
+      const w = modalEl.clientWidth;
+      if (!w) return;
+      const narrow = w < FV_NARROW_AT;
+      modalEl.classList.toggle('nsft-ro-narrow', narrow);
+      modalEl.classList.toggle('nsft-ro-tiny', w < FV_TINY_AT);
+      if (narrow !== _fvNarrow) {
+        _fvNarrow = narrow;
+        if (!narrow) fvAbreCajon(false);
+        if (_viewMode === 'friendly') renderFriendly();
+      }
+      fvMideHuecos();
+    };
+    if (window.ResizeObserver) {
+      _fvWidthObs = new window.ResizeObserver(aplica);
+      _fvWidthObs.observe(modalEl);
+    } else {
+      window.addEventListener('resize', aplica);
+    }
+    aplica();
+  }
+
+  function fvAbreCajon(abrir) {
+    _fvRailOpen = !!abrir;
+    const modalEl = document.getElementById('nsft-rec-obj-modal');
+    if (modalEl) modalEl.classList.toggle('nsft-ro-rail-open', _fvRailOpen);
+  }
+
+  function fvEl(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = text;
+    return n;
+  }
+
+  let _fvQuery = '';
+
+  const fvTS = () => window.NSFT_TextSearch;
+
+  function fvFold(s) {
+    const TS = fvTS();
+    return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
+  }
+
+  function fvMarca(el, texto) {
+    const TS = fvTS();
+    if (TS) return TS.mark(el, texto, _fvQuery, 'nsft-ro-fv-hl');
+    el.textContent = String(texto == null ? '' : texto);
+    return el;
+  }
+
+  function fvElQ(tag, cls, text) {
+    return fvMarca(fvEl(tag, cls), text);
+  }
+
+  function fvSavePins() {
+    try { chrome.storage.local.set({ [FV_PINS_KEY]: _fvPins || {} }); } catch (e) { }
+  }
+
+  function renderFriendly() {
+    const host = document.getElementById('nsft-ro-friendly');
+    const searchbox = document.getElementById('rec-obj-search');
+    const clearBtn = document.getElementById('rec-obj-clear');
+    const techBtn = document.getElementById('rec-obj-fv-tech');
+    if (!host) return;
+
+    if (clearBtn) clearBtn.style.display = searchbox && searchbox.value ? 'block' : 'none';
+    if (techBtn) {
+      techBtn.textContent = _fvShowTech
+        ? fvI18n('ro_fv_tech_hide', 'Hide technical')
+        : fvI18n('ro_fv_tech_show', 'Show technical');
+      techBtn.classList.toggle('is-on', _fvShowTech);
+    }
+
+    if (_fvPins === null) {
+      _fvPins = {};
+      try {
+        chrome.storage.local.get({ [FV_PINS_KEY]: {} }, (items) => {
+          _fvPins = (items[FV_PINS_KEY] && typeof items[FV_PINS_KEY] === 'object') ? items[FV_PINS_KEY] : {};
+          if (_viewMode === 'friendly') renderFriendly();
+        });
+      } catch (e) { }
+    }
+
+    host.innerHTML = '';
+    _fvSectionEls = {};
+
+    if (!STATE.nsftRecordObject) {
+      host.appendChild(fvEl('div', 'nsft-ro-fv-state',
+        STATE.loaded ? chrome.i18n.getMessage('ro_load_error') : chrome.i18n.getMessage('ro_still_loading')));
+      return;
+    }
+
+    const record = STATE.nsftRecordObject;
+    const recordType = record.recordType || 'record';
+    const pins = (_fvPins && _fvPins[recordType]) || [];
+    _fvQuery = String(searchbox ? searchbox.value : '').trim();
+    const q = fvFold(_fvQuery);
+
+    const stats = { shown: 0, hidden: 0 };
+    const raw = [];
+    fvFlatten(record, [], 0, raw, stats);
+
+    let visible = raw;
+    if (q) {
+      const keep = {};
+      const keepAncestors = (i, depth) => {
+        let d = depth;
+        for (let j = i - 1; j >= 0; j--) {
+          if (raw[j].type === 'section' && raw[j].depth < d) { keep[j] = true; d = raw[j].depth; if (d === 0) break; }
+        }
+      };
+      raw.forEach((b, i) => {
+        if (!b.hay || b.hay.indexOf(q) === -1) return;
+        keep[i] = true;
+        keepAncestors(i, b.depth);
+        if (b.type === 'section') {
+          for (let j = i + 1; j < raw.length; j++) {
+            if (raw[j].type === 'section' && raw[j].depth <= b.depth) break;
+            keep[j] = true;
+          }
+        }
+      });
+      visible = raw.filter((_x, i) => keep[i]);
+    }
+
+    fvMideHuecos();
+    fvVigilaAncho();
+
+    const branches = raw.filter((b) => b.type === 'section' && b.depth <= 1);
+    const irArriba = () => {
+      const scroller = document.querySelector('.nsft-rec-obj-content');
+      if (scroller) scroller.scrollTop = 0;
+    };
+
+    const trigHost = document.getElementById('nsft-ro-rail-trigger');
+    if (trigHost) {
+      trigHost.innerHTML = '';
+      const trig = fvEl('button', 'nsft-ro-fv-rail-trigger');
+      trig.type = 'button';
+      trig.appendChild(fvEl('span', null, '☰ ' + fvI18n('ro_fv_structure', 'Structure')));
+      trig.appendChild(fvEl('span', 'sub', String(branches.length)));
+      trig.addEventListener('click', () => fvAbreCajon(!_fvRailOpen));
+      trigHost.appendChild(trig);
+    }
+
+    const velo = fvEl('div', 'nsft-ro-fv-backdrop');
+    velo.addEventListener('click', () => fvAbreCajon(false));
+    host.appendChild(velo);
+
+    const rail = fvEl('nav', 'nsft-ro-fv-rail');
+
+    const rhead = fvEl('div', 'nsft-ro-fv-rail-head');
+    rhead.appendChild(fvEl('span', 't', fvI18n('ro_fv_structure', 'Structure')));
+    const rclose = fvEl('button', null, '✕');
+    rclose.type = 'button';
+    rclose.title = fvI18n('sql_panel_close', 'Close');
+    rclose.addEventListener('click', () => fvAbreCajon(false));
+    rhead.appendChild(rclose);
+    rail.appendChild(rhead);
+
+    rail.appendChild(fvEl('div', 'nsft-ro-fv-rail-title', fvI18n('ro_fv_structure', 'Structure')));
+
+    const top0 = fvEl('button', 'nsft-ro-fv-rail-top');
+    top0.type = 'button';
+    top0.appendChild(fvEl('span', 'arrow', '▲'));
+    top0.appendChild(fvEl('span', null, fvI18n('ro_fv_to_top', 'Back to the top')));
+    top0.addEventListener('click', () => { irArriba(); fvAbreCajon(false); });
+    rail.appendChild(top0);
+
+    const rlist = fvEl('div', 'nsft-ro-fv-rail-list');
+    branches.forEach((b) => {
+      const btn = fvEl('button', 'nsft-ro-fv-rail-item depth-' + (b.depth === 0 ? '0' : 'n'));
+      btn.type = 'button';
+      btn.style.paddingLeft = (6 + b.depth * 12) + 'px';
+      btn.appendChild(fvElQ('span', 'label', b.label));
+      btn.appendChild(fvEl('span', 'count', b.count != null ? String(b.count) : '·'));
+      btn.addEventListener('click', () => {
+        const target = _fvSectionEls[b.id];
+        const scroller = document.querySelector('.nsft-rec-obj-content');
+        if (!target || !scroller) return;
+        const tr = target.getBoundingClientRect();
+        const sr = scroller.getBoundingClientRect();
+        const barra = document.getElementById('nsft-rec-obj-search-container');
+        const alto = barra ? Math.round(barra.getBoundingClientRect().height) : 48;
+        scroller.scrollTop += tr.top - sr.top - alto - 6;
+        fvAbreCajon(false);
+      });
+      rlist.appendChild(btn);
+    });
+    rail.appendChild(rlist);
+
+    const racts = fvEl('div', 'nsft-ro-fv-rail-actions');
+    const bTop = fvEl('button', 'nsft-ro-fv-btn', fvI18n('ro_fv_to_top', 'Back to the top'));
+    bTop.type = 'button';
+    bTop.addEventListener('click', () => { irArriba(); fvAbreCajon(false); });
+    const bClose = fvEl('button', 'nsft-ro-fv-btn is-primary', fvI18n('sql_tab_close', 'Close'));
+    bClose.type = 'button';
+    bClose.addEventListener('click', () => fvAbreCajon(false));
+    racts.appendChild(bTop);
+    racts.appendChild(bClose);
+    rail.appendChild(racts);
+
+    host.appendChild(rail);
+
+    const main = fvEl('div', 'nsft-ro-fv-main');
+    host.appendChild(main);
+
+    const hero = fvEl('div', 'nsft-ro-fv-hero');
+    const top = fvEl('div', 'nsft-ro-fv-hero-top');
+    top.appendChild(fvEl('span', 'nsft-ro-fv-type', recordType));
+    top.appendChild(fvEl('span', 'nsft-ro-fv-hero-meta', 'id ' + (record.id != null ? record.id : '—')));
+    hero.appendChild(top);
+    const body = record.bodyFields || {};
+    hero.appendChild(fvEl('h1', null, body.tranid || body.name || (recordType + ' ' + (record.id || ''))));
+    const st = fvEl('div', 'nsft-ro-fv-hero-stats');
+    st.appendChild(fvEl('span', null, fvI18n('ro_fv_values_listed', '$1 values listed', [String(stats.shown)])));
+    st.appendChild(fvEl('span', null, fvI18n('ro_fv_sublists_n', '$1 sublists',
+      [String(raw.filter((b) => b.type === 'table').length)])));
+    st.appendChild(fvEl('span', null, fvI18n(_fvShowTech ? 'ro_fv_hidden_shown' : 'ro_fv_hidden_n',
+      _fvShowTech ? '$1 empty/technical shown' : '$1 empty/technical hidden', [String(stats.hidden)])));
+    hero.appendChild(st);
+    main.appendChild(hero);
+
+    if (pins.length) main.appendChild(fvRenderPins(recordType, pins, raw));
+
+    let group = null;
+    visible.forEach((b) => {
+      if (b.type === 'field') {
+        if (!group || group.depth !== b.depth) {
+          group = { depth: b.depth, node: fvEl('div', 'nsft-ro-fv-fields') };
+          main.appendChild(fvWrap(b.depth, group.node));
+        }
+        group.node.appendChild(fvRenderField(b, recordType, pins));
+        return;
+      }
+      group = null;
+      if (b.type === 'section') main.appendChild(fvWrap(b.depth, fvRenderSection(b)));
+      else if (b.type === 'table') main.appendChild(fvWrap(b.depth, fvRenderTable(b)));
+      else if (b.type === 'chips') main.appendChild(fvWrap(b.depth, fvRenderChips(b)));
+      else if (b.type === 'emptyNote') main.appendChild(fvWrap(b.depth, fvEl('div', 'nsft-ro-fv-empty-note', b.label)));
+    });
+
+    if (q && !visible.length) {
+      main.appendChild(fvEl('div', 'nsft-ro-fv-noresults',
+        fvI18n('ro_fv_no_results', 'No matches for “$1”', [searchbox.value])));
+    }
+
+    const foot = fvEl('div', 'nsft-ro-fv-foothint');
+    foot.innerHTML = fvI18n('ro_fv_foot_hint',
+      '<strong>Ctrl + Click</strong> on a field to find it on the form · <strong>★</strong> to pin it');
+    main.appendChild(foot);
+  }
+
+  function fvWrap(depth, child) {
+    const w = fvEl('div', 'nsft-ro-fv-block');
+    w.style.paddingLeft = (Math.min(depth, 3) * 14) + 'px';
+    w.appendChild(child);
+    return w;
+  }
+
+  function fvRenderSection(b) {
+    const s = fvEl('div', 'nsft-ro-fv-section depth-' + (b.depth === 0 ? '0' : 'n'));
+    s.appendChild(fvElQ('span', 'h', b.label));
+    s.appendChild(fvEl('span', 'nsft-ro-fv-badge' + (b.list ? ' is-list' : ''), b.badge));
+    s.appendChild(fvEl('span', 'rule'));
+    s.appendChild(fvEl('span', 'trail', b.trail.length ? b.trail.join(' › ') : '$'));
+    if (b.id) _fvSectionEls[b.id] = s;
+    return s;
+  }
+
+  function fvRenderField(b, recordType, pins) {
+    const pinned = pins.indexOf(b.key) !== -1;
+    const f = fvEl('div', 'nsft-ro-fv-field');
+
+    const keys = fvEl('div', 'keys');
+    const lab = fvElQ('div', 'label', b.label);
+    lab.title = b.label;
+    const rk = fvElQ('div', 'rawkey', b.key);
+    rk.title = b.key;
+    keys.appendChild(lab);
+    keys.appendChild(rk);
+    f.appendChild(keys);
+
+    const val = fvEl('div', 'val');
+    if (b.tone === 'yes' || b.tone === 'no' || b.tone === 'neutral') {
+      val.appendChild(fvElQ('span', 'nsft-ro-fv-pill' + (b.tone === 'neutral' ? '' : ' is-' + b.tone), b.value));
+    } else {
+      const numerico = /^[-$\s\d.,:/]+$/.test(b.value);
+      const t = fvElQ('span', 'text' + (numerico ? ' is-num' : ''), b.value);
+      t.title = b.value + '  ·  ' + fvI18n('ro_fv_click_copy', 'click to copy');
+      t.addEventListener('click', (ev) => {
+        if (ev.ctrlKey || ev.metaKey) return;
+        const antes = Array.prototype.slice.call(t.childNodes);
+        const ok = () => {
+          t.textContent = fvI18n('ro_fv_copied', 'copied ✓');
+          setTimeout(() => {
+            t.textContent = '';
+            antes.forEach((n) => t.appendChild(n));
+          }, 700);
+        };
+        if (window.NSFT_Clipboard && window.NSFT_Clipboard.copy) window.NSFT_Clipboard.copy(b.value, { onSuccess: ok });
+        else if (navigator.clipboard) navigator.clipboard.writeText(b.value).then(ok).catch(() => {});
+      });
+      val.appendChild(t);
+      if (b.raw) val.appendChild(fvElQ('span', 'rawval', b.raw));
+    }
+    f.appendChild(val);
+
+    const pin = fvEl('button', 'nsft-ro-fv-pinbtn' + (pinned ? ' is-pinned' : ''), pinned ? '★' : '☆');
+    pin.type = 'button';
+    pin.title = pinned
+      ? fvI18n('ro_fv_pin_remove', 'Unpin')
+      : fvI18n('ro_fv_pin_add', 'Pin at the top for this record type');
+    pin.addEventListener('click', () => {
+      if (!_fvPins) _fvPins = {};
+      const list = (_fvPins[recordType] || []).slice();
+      const at = list.indexOf(b.key);
+      if (at === -1) list.push(b.key); else list.splice(at, 1);
+      _fvPins[recordType] = list;
+      fvSavePins();
+      renderFriendly();
+    });
+    f.appendChild(pin);
+
+    f.addEventListener('click', (ev) => {
+      if (!ev.ctrlKey && !ev.metaKey) return;
+      fvBuscarCampoEnPagina(b.key);
+    });
+
+    return f;
+  }
+
+  function fvRenderPins(recordType, pins, raw) {
+    const box = fvEl('div', 'nsft-ro-fv-pins');
+    const head = fvEl('div', 'nsft-ro-fv-pins-head');
+    head.appendChild(fvEl('span', 't', '★ ' + fvI18n('ro_fv_pins_title', 'Pinned for $1', [recordType])));
+    head.appendChild(fvEl('span', 'spacer'));
+    const clear = fvEl('button', null, fvI18n('ro_fv_pins_clear', 'remove all'));
+    clear.type = 'button';
+    clear.addEventListener('click', () => {
+      if (!_fvPins) _fvPins = {};
+      _fvPins[recordType] = [];
+      fvSavePins();
+      renderFriendly();
+    });
+    head.appendChild(clear);
+    box.appendChild(head);
+
+    const grid = fvEl('div', 'nsft-ro-fv-pins-grid');
+    pins.forEach((key) => {
+      const hit = raw.filter((b) => b.type === 'field' && b.key === key)[0];
+      const row = fvEl('div', 'nsft-ro-fv-pin');
+      row.appendChild(fvElQ('span', 'k', fvHumanize(key)));
+      row.appendChild(fvElQ('span', 'v', hit ? hit.value : fvI18n('ro_fv_pin_missing', 'not present on this record')));
+      const x = fvEl('button', null, '✕');
+      x.type = 'button';
+      x.addEventListener('click', () => {
+        if (!_fvPins) _fvPins = {};
+        _fvPins[recordType] = (_fvPins[recordType] || []).filter((k) => k !== key);
+        fvSavePins();
+        renderFriendly();
+      });
+      row.appendChild(x);
+      grid.appendChild(row);
+    });
+    box.appendChild(grid);
+    return box;
+  }
+
+  function fvMoreBtn(b) {
+    const more = fvEl('button', 'nsft-ro-fv-more',
+      fvI18n('ro_fv_more', 'Show the $1 remaining rows', [String(b.count - FV_ROW_CAP)]));
+    more.type = 'button';
+    more.addEventListener('click', () => { _fvOpenTables[b.tableId] = true; renderFriendly(); });
+    return more;
+  }
+
+  function fvTotalRow(b) {
+    const tot = fvEl('div', 'nsft-ro-fv-total');
+    tot.appendChild(fvEl('span', null, b.totalLabel));
+    tot.appendChild(fvEl('strong', null, fvMoney(b.total)));
+    return tot;
+  }
+
+  function fvRenderCards(b) {
+    const capped = b.count > FV_ROW_CAP && !_fvOpenTables[b.tableId];
+    const rows = capped ? b.rows.slice(0, FV_ROW_CAP) : b.rows;
+    const box = fvEl('div', 'nsft-ro-fv-cards');
+
+    rows.forEach((r) => {
+      const card = fvEl('div', 'nsft-ro-fv-card');
+      const head = fvEl('div', 'nsft-ro-fv-card-head');
+      head.appendChild(fvEl('span', 'idx', String(r.idx)));
+      head.appendChild(fvElQ('span', 'title', r.cells[0] || fvI18n('ro_fv_row_n', 'Item $1', [String(r.idx)])));
+      card.appendChild(head);
+      r.cells.slice(1).forEach((text, i) => {
+        const row = fvEl('div', 'nsft-ro-fv-card-row');
+        row.appendChild(fvElQ('span', 'k', b.cols[i + 1].label));
+        row.appendChild(fvElQ('span', 'v', text));
+        card.appendChild(row);
+      });
+      box.appendChild(card);
+    });
+
+    if (capped) box.appendChild(fvMoreBtn(b));
+    if (b.total != null && b.total > 0) box.appendChild(fvTotalRow(b));
+    return box;
+  }
+
+  function fvRenderTable(b) {
+    if (_fvNarrow) return fvRenderCards(b);
+
+    const capped = b.count > FV_ROW_CAP && !_fvOpenTables[b.tableId];
+    const rows = capped ? b.rows.slice(0, FV_ROW_CAP) : b.rows;
+
+    const t = fvEl('div', 'nsft-ro-fv-table');
+    const head = fvEl('div', 'nsft-ro-fv-tr head');
+    head.appendChild(fvEl('span', 'idx', '#'));
+    b.cols.forEach((c) => head.appendChild(fvElQ('span', 'nsft-ro-fv-th', c.label)));
+    t.appendChild(head);
+
+    rows.forEach((r) => {
+      const tr = fvEl('div', 'nsft-ro-fv-tr');
+      tr.appendChild(fvEl('span', 'idx', String(r.idx)));
+      r.cells.forEach((text) => tr.appendChild(fvElQ('span', 'nsft-ro-fv-td', text)));
+      t.appendChild(tr);
+    });
+
+    if (capped) t.appendChild(fvMoreBtn(b));
+    if (b.total != null && b.total > 0) t.appendChild(fvTotalRow(b));
+    return t;
+  }
+
+  function fvRenderChips(b) {
+    const box = fvEl('div', 'nsft-ro-fv-chips');
+    b.chips.forEach((c) => box.appendChild(fvElQ('span', 'nsft-ro-fv-chip', c)));
+    return box;
+  }
+
+  function fvBuscarCampoEnPagina(key) {
+    const k = String(key || '');
+    const candidatos = [
+      '#' + CSS.escape(k + '_fs_lbl'),
+      '#' + CSS.escape(k),
+      '[name="' + CSS.escape(k) + '"]',
+      '#' + CSS.escape('inpt_' + k)
+    ];
+    let target = null;
+    for (let i = 0; i < candidatos.length && !target; i++) {
+      try { target = document.querySelector(candidatos[i]); } catch (e) { }
+    }
+    if (!target) {
+      showToast(fvI18n('ro_fv_field_notfound', 'The field is not visible on this form.'));
+      return;
+    }
+    try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { target.scrollIntoView(); }
+    const box = target.closest('td, div') || target;
+    box.classList.add('nsft-ro-fv-flash');
+    setTimeout(() => box.classList.remove('nsft-ro-fv-flash'), 1800);
+  }
+
   const renderRecord = () => {
+    if (_viewMode === 'friendly') { renderFriendly(); return; }
+
     const container = document.getElementById('nsft-record-object-container');
     const searchbox = document.getElementById('rec-obj-search');
     const clearBtn = document.getElementById('rec-obj-clear');
@@ -1393,7 +2160,7 @@
 
   const buildVisibleSet = (source, searchTerm, hideEmpty) => {
     const visible = new Set();
-    const upper = searchTerm ? searchTerm.toUpperCase() : '';
+    const needle = searchTerm ? fvFold(searchTerm) : '';
 
     const walk = (obj, trail) => {
       if (obj === null || typeof obj !== 'object') return false;
@@ -1404,7 +2171,7 @@
 
         const childTrail = trail.concat(key);
         const childPath = JSON.stringify(childTrail);
-        const keyMatches = !upper || key.toString().toUpperCase().includes(upper);
+        const keyMatches = !needle || fvFold(key.toString()).includes(needle);
 
         if (value !== null && typeof value === 'object') {
           const descendantMatches = walk(value, childTrail);
@@ -1413,7 +2180,7 @@
             anyChildVisible = true;
           }
         } else {
-          const valueMatches = !upper || (value !== null && String(value).toUpperCase().includes(upper));
+          const valueMatches = !needle || (value !== null && fvFold(String(value)).includes(needle));
           if (keyMatches || valueMatches) {
             visible.add(childPath);
             anyChildVisible = true;
@@ -1462,17 +2229,14 @@
 
   const applySearchHighlight = (container, searchTerm) => {
     if (!searchTerm) return;
-    const regex = new RegExp('(' + escapeRegex(searchTerm) + ')', 'gi');
-    const DOM = window.NSFT_DOM;
-    const esc = (DOM && DOM.escapeHtml) ? DOM.escapeHtml : (s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])));
+    const TS = fvTS();
+    if (!TS) return;
 
     container.querySelectorAll('.nsft-fmt-row[data-path]:not(.nsft-fmt-hidden) .nsft-fmt-key, .nsft-fmt-row[data-path]:not(.nsft-fmt-hidden) .nsft-fmt-string').forEach(elem => {
       if (elem.firstElementChild) return;
       const text = elem.textContent;
-      regex.lastIndex = 0;
-      if (!regex.test(text)) return;
-      regex.lastIndex = 0;
-      elem.innerHTML = esc(text).replace(regex, '<span class="nsft-search-criteria">$1</span>');
+      if (!TS.ranges(text, searchTerm).length) return;
+      TS.mark(elem, text, searchTerm, 'nsft-search-criteria');
     });
   };
 
@@ -1526,17 +2290,17 @@
 
   const filterRecord = (object, searchTerm) => {
     const stringifyCache = new WeakMap();
-    return filterObject(object, searchTerm.toUpperCase(), stringifyCache);
+    return filterObject(object, fvFold(searchTerm), stringifyCache);
   };
 
   const filterObject = (object, searchTerm, stringifyCache) => {
     const filteredObject = {};
     for (const key in object) {
       const value = object[key];
-      const keyMatches = key.toString().toUpperCase().includes(searchTerm);
+      const keyMatches = fvFold(key.toString()).includes(searchTerm);
 
       if (value === null || typeof value !== 'object') {
-        if (keyMatches || (value && value.toString().toUpperCase().includes(searchTerm))) {
+        if (keyMatches || (value && fvFold(value.toString()).includes(searchTerm))) {
           filteredObject[key] = value;
         }
         continue;
@@ -1547,7 +2311,7 @@
       } else {
         let serialized = stringifyCache.get(value);
         if (serialized === undefined) {
-          serialized = JSON.stringify(value).toUpperCase();
+          serialized = fvFold(JSON.stringify(value));
           stringifyCache.set(value, serialized);
         }
         if (serialized.includes(searchTerm)) {

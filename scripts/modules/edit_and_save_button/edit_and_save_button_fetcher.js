@@ -15,7 +15,10 @@
         MODAL_TITLE: MESSAGES.ro_title || 'Record Options',
         BTN_OK: MESSAGES.btnOk || 'OK',
         ERR_REC_TYPE: MESSAGES.errorRecType || 'Could not determine record type',
-        PRD_CONFIRM: MESSAGES.prdConfirm || 'You are in PRODUCTION. Run Edit & Save on this record?'
+        PRD_CONFIRM: MESSAGES.prdConfirm || 'You are in PRODUCTION. Run Edit & Save on this record?',
+        DLG_TITLE: MESSAGES.dlgTitle || 'Confirm',
+        DLG_OK: MESSAGES.dlgOk || 'Accept',
+        DLG_CANCEL: MESSAGES.dlgCancel || 'Cancel'
     };
     const REQUIRE_PRD_CONFIRM = !!MESSAGES.requirePrdConfirm;
 
@@ -130,8 +133,20 @@
     }
 
     window.nsft_maoEditAndSave = function (element) {
-        if (REQUIRE_PRD_CONFIRM && !confirm(TXT.PRD_CONFIRM)) return;
+        if (!REQUIRE_PRD_CONFIRM) { editAndSaveAhora(element); return; }
+        if (window.NSFT_Dialog) {
+            window.NSFT_Dialog.confirm({
+                body: TXT.PRD_CONFIRM,
+                ok: TXT.DLG_OK,
+                cancel: TXT.DLG_CANCEL,
+                title: TXT.DLG_TITLE
+            }).then(function (si) { if (si) editAndSaveAhora(element); });
+            return;
+        }
+        if (confirm(TXT.PRD_CONFIRM)) editAndSaveAhora(element);
+    };
 
+    function editAndSaveAhora(element) {
         const originalText = btnLabel(element);
         const spinner = startSpinner(element, TXT.SAVING);
 
@@ -154,5 +169,5 @@
                     if (element) setTimeout(() => stopSpinner(element, null, originalText), 2000);
                 });
         }, 100);
-    };
+    }
 })();

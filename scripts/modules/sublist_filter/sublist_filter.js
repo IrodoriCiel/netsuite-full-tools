@@ -8,11 +8,26 @@
     const APPLIED_ATTR = 'data-nsft-sf';
     const TABLE_SEL = ':is(.uir-machine-table, .listtable)';
 
+    const TS = window.NSFT_TextSearch || null;
+
     function fold(s) {
+        if (TS) return TS.fold(s);
         let out = '';
         for (const ch of String(s)) {
             const f = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             out += f.length === ch.length ? f : ch;
+        }
+        return out.toLowerCase();
+    }
+
+    function foldRanges(text, needle) {
+        if (TS) return TS.ranges(text, needle);
+        const hay = fold(text);
+        const out = [];
+        let i = hay.indexOf(needle);
+        while (i !== -1) {
+            out.push({ start: i, end: i + needle.length });
+            i = hay.indexOf(needle, i + needle.length);
         }
         return out;
     }
@@ -106,7 +121,20 @@
 
     function scanView() {
         document.querySelectorAll('[data-nsps-layer]').forEach((layer) => {
-            if (layer.querySelector('.uir-machine-headerrow:not(.uir-loading-row)')) return;
+            if (layer.querySelector('.uir-machine-headerrow:not(.uir-loading-row)')) {
+                const pastilla = layer.querySelector('.' + BAR_CLASS + '.nsft-sf-pill');
+                if (pastilla) {
+                    (pastilla.closest('td.nsft-sf-cell') || pastilla).remove();
+                    layer.removeAttribute(APPLIED_ATTR);
+                    const franja = layer.querySelector('.' + BAR_CLASS + '.nsft-sf-strip');
+                    const suyo = franja && franja.querySelector('.nsft-sf-input');
+                    if (!suyo || !suyo.value) {
+                        layer.querySelectorAll('tr.' + HIDDEN_CLASS)
+                            .forEach((tr) => tr.classList.remove(HIDDEN_CLASS));
+                    }
+                }
+                return;
+            }
 
             const lvBar = layer.querySelector('.nsft-lv-bar');
             const bar = layer.querySelector('.' + BAR_CLASS);
@@ -270,20 +298,18 @@
         while (walker.nextNode()) nodes.push(walker.currentNode);
         nodes.forEach((node) => {
             const text = node.nodeValue;
-            const hay = fold(text.toLowerCase());
-            let idx = hay.indexOf(needle);
-            if (idx === -1) return;
+            const tramos = foldRanges(text, needle);
+            if (!tramos.length) return;
             const frag = document.createDocumentFragment();
             let last = 0;
-            while (idx !== -1) {
-                if (idx > last) frag.appendChild(document.createTextNode(text.slice(last, idx)));
+            tramos.forEach((r) => {
+                if (r.start > last) frag.appendChild(document.createTextNode(text.slice(last, r.start)));
                 const mark = document.createElement('mark');
                 mark.className = HL_CLASS;
-                mark.textContent = text.slice(idx, idx + needle.length);
+                mark.textContent = text.slice(r.start, r.end);
                 frag.appendChild(mark);
-                last = idx + needle.length;
-                idx = hay.indexOf(needle, last);
-            }
+                last = r.end;
+            });
             if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
             node.parentNode.replaceChild(frag, node);
         });

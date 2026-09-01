@@ -97,7 +97,7 @@
 
         const entry = entryFor(moduleId);
         if (entry.off) return;
-        if ((entry.seen || 0) >= MAX_SHOWS) return;
+        if (!(options && options.persist) && (entry.seen || 0) >= MAX_SHOWS) return;
 
         const info = lookup(moduleId);
         if (!info) return;

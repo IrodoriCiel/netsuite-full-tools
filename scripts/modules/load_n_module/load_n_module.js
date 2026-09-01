@@ -170,6 +170,7 @@
                     lnm_pick_badge: chrome.i18n.getMessage('lnm_pick_badge'),
                     lnm_pick_count: chrome.i18n.getMessage('lnm_pick_count', ['$1', '$2']),
                     lnm_pick_search: chrome.i18n.getMessage('lnm_pick_search'),
+                    ro_clear_search: chrome.i18n.getMessage('ro_clear_search'),
                     lnm_pick_foot: chrome.i18n.getMessage('lnm_pick_foot'),
                     lnm_btn_load: chrome.i18n.getMessage('lnm_btn_load', ['$1']),
                     lnm_btn_cancel: chrome.i18n.getMessage('lnm_btn_cancel')
@@ -184,13 +185,25 @@
             if (typeof onReady === 'function') onReady();
             return;
         }
+        injectTextSearch();
         const s = document.createElement('script');
         s.src = chrome.runtime.getURL(FETCHER_SCRIPT);
+        s.async = false;
         s.onload = function () {
             this.remove();
             _fetcherInjected = true;
             if (typeof onReady === 'function') onReady();
         };
+        appendTo('head').appendChild(s);
+    }
+
+    function injectTextSearch() {
+        if (document.getElementById('nsft-text-search-mw')) return;
+        const s = document.createElement('script');
+        s.id = 'nsft-text-search-mw';
+        s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
+        s.async = false;
+        s.onload = function () { this.remove(); };
         appendTo('head').appendChild(s);
     }
 

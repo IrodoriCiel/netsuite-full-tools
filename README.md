@@ -12,7 +12,7 @@
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Valoración" src="https://img.shields.io/chrome-web-store/rating/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&color=F59E0B&label=Rating"></a>
 </p>
 <p align="center">
-  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v6.5.1-555555?style=for-the-badge"></a>
+  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v7.0.0-555555?style=for-the-badge"></a>
   <a href="https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3"><img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-2C6E4E?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
   <a href="#ficha-técnica--technical-details"><img alt="JavaScript sin frameworks" src="https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"></a>
   <a href="#ficha-técnica--technical-details"><img alt="Sin telemetría ni servidores propios" src="https://img.shields.io/badge/Privacidad-100%25%20local-2C6E4E?style=for-the-badge"></a>
@@ -24,7 +24,7 @@
 
 ---
 
-**105 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
+**111 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
 
 ## Qué es este repositorio · About this repository
 
@@ -44,10 +44,11 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | Función | Qué hace |
 |---|---|
 | **Asistente de IA** | pregunta en lenguaje natural sobre el registro y tu cuenta, sin salir de la página (con tu propia clave). |
-| **Temas de color para NetSuite** | personaliza el esquema de colores a tu gusto. |
+| **Temas de color para NetSuite** | personaliza el esquema de colores a tu gusto, con la opción de un color distinto por entorno (Producción, Sandbox, Release Preview) o por cuenta, para saber de un vistazo dónde estás. |
 | **Modo oscuro global** | un tema oscuro para toda la interfaz, más cómodo para la vista. |
 | **Agrupar pestañas** | agrupa automáticamente tus pestañas por cuenta y entorno (ej. 123_SB1). |
 | **Paleta de comandos** | navega y ejecuta cualquier herramienta con Ctrl+Shift+Espacio. |
+| **Buscador de personalizaciones** | una ventana para encontrar scripts, workflows, campos, búsquedas guardadas, plantillas y archivos de la cuenta por su nombre. |
 | **Hoja de atajos de teclado** | todos los atajos de NSFT con Ctrl+Shift+?, incluidos los de Alt+Shift para abrir cada herramienta (personalizables). |
 | **Distintivo de entorno (PRD/SB/RP)** | el icono te dice siempre en qué entorno estás. |
 
@@ -55,7 +56,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Función | Qué hace |
 |---|---|
-| **Ver objeto del registro** | inspecciona el objeto completo del registro actual en un visor limpio. |
+| **Ver objeto del registro** | inspecciona el objeto completo del registro actual en un visor limpio, con vista amigable en forma de ficha. |
 | **Ver scripts del registro** | todos los scripts y workflows asociados, de un vistazo. |
 | **Ver logs del registro** | los logs de ejecución sin salir de la página, con los scripts del registro preseleccionados y filtros por nivel, tipo, texto y fechas; también puedes cambiar a otro tipo de registro desde la cabecera. |
 | **Record Trail** | documentos de origen y destino enlazados de una transacción, con salto rápido y copia de IDs. |
@@ -82,6 +83,8 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Función | Qué hace |
 |---|---|
+| **Editor Avanzado** | abre un archivo, o el editor entero desde el menú de Herramientas, con el editor de la extensión: el autocompletado te dice qué recibe y qué devuelve cada función de SuiteScript y cuánto governance gasta, con su documentación al lado y al pasar el ratón; Ctrl+clic salta a la declaración; un panel de símbolos recorre el archivo; y además aviso de sintaxis, sugerencias con IA, abrir cualquier archivo por su nombre, buscar en todos los de la carpeta, plegado, formateo y el File Cabinet entero al lado. |
+| **Consola de SuiteScript** | escribe SuiteScript y ejecútalo al momento, con los módulos N/* de tu cuenta, la ayuda de la API mientras escribes —tipos, qué devuelve cada función y su governance— y confirmación antes de escribir. |
 | **Tema del editor de código** | aplica un tema al editor. |
 | **Cerrar editor al guardar** | cierra la pestaña del editor en cuanto guardas. |
 | **Abrir archivo en nueva pestaña** | enlace directo junto a cada archivo de una página de scripting. |
@@ -105,6 +108,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Exportar búsquedas a SuiteScript** | convierte saved searches a SuiteScript 1.0 y 2.0. |
 | **Creación rápida de búsquedas** | selector con buscador y enlaces favoritos. |
 | **Buscador de campos en búsquedas** | filtros y búsqueda rápida en los selectores de campos. |
+| **Tipo de resumen en bloque** | pone o quita el tipo de resumen (agrupar, sumar, contar…) en todas las columnas de una búsqueda guardada a la vez. |
 | **Autocompletar fórmula de búsqueda** | sugiere IDs de campo dentro de { } en el editor de fórmulas. |
 | **Visor de respuesta CSV** | en el estado de importaciones CSV, añade un botón Ver junto al archivo de respuesta y lo abre como tabla editable, para revisar los errores, corregirlos y descargarlo sin salir de la página. |
 | **Preview inline de búsquedas** | panel inferior con la vista previa sin salir de la página. |
@@ -136,6 +140,8 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Multi-select jerárquico** | indenta las opciones según su jerarquía Padre : Hijo. |
 | **Contador en multi-select** | muestra "N / N" seleccionados junto al label. |
 | **Contador de caracteres** | usados vs. máximo; amarillo cerca del tope, rojo al alcanzarlo. |
+| **Formato de fecha a la vista** | escribe el formato de tu usuario dentro de los campos de fecha vacíos. |
+| **Selección por rango con Shift** | marca de golpe todas las casillas entre la anterior y la pulsada. |
 | **Textareas más altos** | más altura mínima y crecen con el contenido. |
 | **Nombres en filtro "From Bundle"** | muestra el nombre del bundle junto al ID. |
 | **Ocultar aprendizaje guiado** | elimina el botón flotante de Oracle Guided Learning. |
@@ -199,10 +205,11 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | Feature | What it does |
 |---|---|
 | **AI Assistant** | ask in plain language about the record and your account, without leaving the page (bring your own key). |
-| **Color Themes for NetSuite** | customize the color scheme to your taste. |
+| **Color Themes for NetSuite** | customize the color scheme to your taste, optionally with a different colour per environment (Production, Sandbox, Release Preview) or per account, so you can tell at a glance where you are. |
 | **Global Dark Mode** | a dark theme for the whole interface, easier on the eyes. |
 | **Grouped Tabs** | automatically group your tabs by account and environment (e.g. 123_SB1). |
 | **Command Palette** | navigate and run any tool with Ctrl+Shift+Space. |
+| **Customization Finder** | one window to find the account’s scripts, workflows, fields, saved searches, templates and files by name. |
 | **Keyboard Shortcuts Cheat Sheet** | every NSFT shortcut with Ctrl+Shift+?, including the Alt+Shift ones that open each tool (rebindable). |
 | **Environment Badge (PRD/SB/RP)** | the icon always tells you which environment you're in. |
 
@@ -210,7 +217,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Feature | What it does |
 |---|---|
-| **View Record Object** | inspect the full record object in a clean, searchable viewer. |
+| **View Record Object** | inspect the full record object in a clean, searchable viewer, with a friendly card-style view. |
 | **View Record Scripts** | every script and workflow tied to the record, at a glance. |
 | **View Record Logs** | execution logs without leaving the page, with the record's scripts preselected and filters by level, type, text and dates; you can also switch to another record type from the header. |
 | **Record Trail** | linked source and target documents of a transaction, with quick open and ID copy. |
@@ -237,6 +244,8 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Feature | What it does |
 |---|---|
+| **Advanced Editor** | opens a file, or the whole editor from the Tools menu, with the extension’s own editor: autocomplete tells you what each SuiteScript function takes and returns and how much governance it costs, with its documentation alongside and on hover; Ctrl+click jumps to the declaration; a symbols panel walks the file; plus syntax warnings, AI suggestions, open any file by name, search across every file in the folder, code folding, formatting and the whole File Cabinet alongside. |
+| **SuiteScript Console** | write SuiteScript and run it right away, with your account’s N/* modules, API help as you type —types, what each function returns and its governance— and a confirmation before it writes. |
 | **Code Editor Theme** | apply a theme to the editor. |
 | **Close Editor on Save** | closes the editor tab the moment you save. |
 | **Open File in New Tab** | direct link next to each file on a scripting page. |
@@ -260,6 +269,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Export Search to SuiteScript** | turn saved searches into SuiteScript 1.0 and 2.0. |
 | **Quick Search Creation** | record-type selector with search and favorite links. |
 | **Search Fields Finder** | filters and quick search in field selectors. |
+| **Bulk Summary Type** | sets or clears the summary type (group, sum, count…) on every column of a saved search at once. |
 | **Search Formula Autocomplete** | suggests field IDs inside { } in the formula editor. |
 | **CSV Response Viewer** | on the CSV import status page, adds a View button next to the response file and opens it as an editable table, so you can review errors, fix them and download it without leaving the page. |
 | **Inline Search Preview** | bottom panel with the preview without leaving the page. |
@@ -291,6 +301,8 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Hierarchical Multi-select** | indents options by their Parent : Child hierarchy. |
 | **Multi-select Counter** | shows "N / N" selected next to the label. |
 | **Character Counter** | used vs. max; amber near the limit, red when reached. |
+| **Date Format in Sight** | writes your user’s date format inside empty date fields. |
+| **Shift Range Selection** | ticks every checkbox between the previous one and the one clicked. |
 | **Taller Textareas** | larger minimum height, grows with content. |
 | **Names on "From Bundle" Filter** | shows the bundle name beside the ID. |
 | **Hide Guided Learning** | removes the floating Oracle Guided Learning button. |

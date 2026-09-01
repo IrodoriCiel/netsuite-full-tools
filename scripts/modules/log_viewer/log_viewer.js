@@ -252,34 +252,47 @@
         }
         hits.forEach((tn) => {
             const t = tn.nodeValue;
-            const hay = fold(t);
+            const tramos = foldRanges(t, needle);
+            if (!tramos.length) return;
             const frag = document.createDocumentFragment();
             let from = 0;
-            let i = hay.indexOf(needle);
-            while (i !== -1) {
-                if (i > from) frag.appendChild(document.createTextNode(t.slice(from, i)));
+            tramos.forEach((r) => {
+                if (r.start > from) frag.appendChild(document.createTextNode(t.slice(from, r.start)));
                 const mk = document.createElement('mark');
                 mk.className = 'nsft-lv-hl';
-                mk.textContent = t.slice(i, i + needle.length);
+                mk.textContent = t.slice(r.start, r.end);
                 frag.appendChild(mk);
-                from = i + needle.length;
-                i = hay.indexOf(needle, from);
-            }
+                from = r.end;
+            });
             if (from < t.length) frag.appendChild(document.createTextNode(t.slice(from)));
             tn.parentNode.replaceChild(frag, tn);
         });
     }
 
+    const TS = window.NSFT_TextSearch || null;
     const NON_ASCII = /[^\u0000-\u007F]/;
     const COMBINING = /[\u0300-\u036f]/g;
 
     function fold(text) {
+        if (TS) return TS.fold(text);
         const s = String(text == null ? '' : text);
         if (!NON_ASCII.test(s)) return s.toLowerCase();
         let out = '';
         for (const ch of s) {
             const f = ch.normalize('NFD').replace(COMBINING, '').toLowerCase();
             out += (f.length === ch.length ? f : ch);
+        }
+        return out;
+    }
+
+    function foldRanges(text, needle) {
+        if (TS) return TS.ranges(text, needle);
+        const hay = fold(text);
+        const out = [];
+        let i = hay.indexOf(needle);
+        while (i !== -1) {
+            out.push({ start: i, end: i + needle.length });
+            i = hay.indexOf(needle, i + needle.length);
         }
         return out;
     }

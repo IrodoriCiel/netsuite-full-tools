@@ -59,6 +59,27 @@
     border-radius: 0;
 }
 
+.nsft-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.nsft-modal-backdrop[data-theme="dark"] { background: rgba(0, 0, 0, 0.65); }
+
+.nsft-modal--dialog {
+    position: static;
+    max-width: 95vw;
+    max-height: 90vh;
+}
+
+.nsft-modal--dialog .nsft-modal-header { cursor: default; }
+
 .nsft-modal-header {
     display: flex;
     justify-content: space-between;
@@ -93,6 +114,7 @@
     min-width: 0;
     display: flex;
     align-items: center;
+    margin: 0;  
     font-size: 13px;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -102,6 +124,13 @@
     text-overflow: ellipsis;
 }
 
+.nsft-modal-title > svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    flex: 0 0 auto;
+}
+
 .nsft-modal .nsft-header-actions {
     display: flex;
     align-items: center;
@@ -109,13 +138,15 @@
     flex-shrink: 0;
 }
 
-.nsft-modal .nsft-header-actions > span {
+.nsft-modal .nsft-header-actions > span,
+.nsft-modal .nsft-header-actions > button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 22px;
     height: 22px;
     cursor: pointer;
+    border: none;
     border-radius: 4px;
     transition: all 0.2s ease;
     font-size: 11px;
@@ -126,7 +157,8 @@
     user-select: none;
 }
 
-.nsft-modal .nsft-header-actions > span:hover {
+.nsft-modal .nsft-header-actions > span:hover,
+.nsft-modal .nsft-header-actions > button:hover {
     background-color: #f3f4f6;
     color: #1f2937;
 }
@@ -165,9 +197,11 @@
 
 .nsft-modal[data-theme="dark"] .nsft-modal-title { color: #e5e7eb; }
 
-.nsft-modal[data-theme="dark"] .nsft-header-actions > span { color: #9ca3af; }
+.nsft-modal[data-theme="dark"] .nsft-header-actions > span,
+.nsft-modal[data-theme="dark"] .nsft-header-actions > button { color: #9ca3af; }
 
-.nsft-modal[data-theme="dark"] .nsft-header-actions > span:hover {
+.nsft-modal[data-theme="dark"] .nsft-header-actions > span:hover,
+.nsft-modal[data-theme="dark"] .nsft-header-actions > button:hover {
     background-color: var(--nsft-dk-border, #282A30);
     color: #e5e7eb;
 }

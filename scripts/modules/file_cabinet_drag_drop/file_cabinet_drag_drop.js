@@ -5,6 +5,7 @@
     const OVERLAY_ID = 'nsft-fcdd-overlay';
     const PROGRESS_ID = 'nsft-fcdd-progress';
     const APPLIED_ATTR = 'data-nsft-fcdd-applied';
+    const LIST_URL = '/app/common/media/mediaitemfolders.nl';
 
     let enabled = false;
     let _theme = 'light';
@@ -48,6 +49,8 @@
         document.addEventListener('dragover', onDragOver, false);
         document.addEventListener('dragleave', onDragLeave, false);
         document.addEventListener('drop', onDrop, false);
+
+        try { ensureBridge(); } catch (e) { }
     }
 
     function teardown() {
@@ -113,7 +116,218 @@
         removeOverlay();
         clearTreeHighlight();
         if (!files.length) return;
-        uploadFiles(files, treeFolderId);
+        avisarSiPisa(files, treeFolderId);
+    }
+
+
+    const CHOQUE_MAX_ARCHIVOS = 200;
+    const CHOQUE_TIMEOUT_MS = 4000;
+
+    let _puenteListo = false;
+    let _fetcherListo = false;
+    let _choqueToken = 0;
+    const _choquePendiente = new Map();
+    const _colaPreguntas = [];
+
+    function avisarSiPisa(files, treeFolderId) {
+        const folderId = treeFolderId != null ? treeFolderId : getTargetFolderId();
+        const seguir = (motivo) => {
+            if (motivo) console.warn('NSFT: fcdd — subiendo sin comprobar repetidos (' + motivo + ')');
+            uploadFiles(files, folderId);
+        };
+
+        if (folderId == null || !/^-?\d+$/.test(String(folderId))) { seguir('carpeta desconocida'); return; }
+        if (files.length > CHOQUE_MAX_ARCHIVOS) { seguir('mas de ' + CHOQUE_MAX_ARCHIVOS + ' archivos'); return; }
+
+        pedirNombresQueYaEstan(folderId, files.map(f => f.name), (err, existentes) => {
+            if (err) { seguir(err.code || 'error de consulta'); return; }
+            if (!existentes || !existentes.length) { seguir(); return; }
+            const porNombre = new Map();
+            existentes.forEach(e => { if (e && e.name) porNombre.set(e.name, e.id || null); });
+            const chocan = files.filter(f => porNombre.has(f.name));
+            if (!chocan.length) { seguir(); return; }
+            mostrarChoques(files, chocan, folderId, porNombre);
+        });
+    }
+
+    function pedirNombresQueYaEstan(folderId, names, cb) {
+        try {
+            ensureBridge();
+        } catch (e) { cb({ code: 'bridge' }, null); return; }
+
+        const token = ++_choqueToken;
+        const timer = setTimeout(() => {
+            if (!_choquePendiente.has(token)) return;
+            _choquePendiente.delete(token);
+            cb({ code: 'timeout' }, null);
+        }, CHOQUE_TIMEOUT_MS);
+
+        _choquePendiente.set(token, (err, nombres) => {
+            clearTimeout(timer);
+            cb(err, nombres);
+        });
+
+        const enviar = () => window.postMessage({
+            dest: 'fetcher_fcdd',
+            type: 'existingNames',
+            payload: { token: token, folderId: String(folderId), names: names }
+        }, '*');
+
+        if (_fetcherListo) enviar();
+        else _colaPreguntas.push(enviar);
+    }
+
+    function ensureBridge() {
+        if (_puenteListo) return;
+        _puenteListo = true;
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+            window.NSFT_SuiteQLRest.ensureTransport();
+        }
+        if (!document.getElementById('nsft-diff-mw')) {
+            const d = document.createElement('script');
+            d.id = 'nsft-diff-mw';
+            d.async = false;
+            d.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_diff.js');
+            d.onload = function () { this.remove(); };
+            (document.head || document.documentElement).appendChild(d);
+        }
+        const s = document.createElement('script');
+        s.id = 'nsft-fcdd-fetcher';
+        s.async = false;
+        s.src = chrome.runtime.getURL('scripts/modules/file_cabinet_drag_drop/file_cabinet_drag_drop_fetcher.js');
+        s.onload = function () { this.remove(); };
+        (document.head || document.documentElement).appendChild(s);
+    }
+
+    window.addEventListener('message', (event) => {
+        if (event.source !== window) return;
+        const d = event.data;
+        if (!d || d.dest !== 'extension_fcdd') return;
+        if (d.type === 'ready') {
+            _fetcherListo = true;
+            while (_colaPreguntas.length) _colaPreguntas.shift()();
+            return;
+        }
+        if (d.type === 'diffClosed') {
+            const b = _diffAbiertos.get((d.payload || {}).token);
+            if (b) { b.disabled = false; _diffAbiertos.delete(d.payload.token); }
+            return;
+        }
+        if (d.type !== 'existingNames') return;
+        const p = d.payload || {};
+        const cb = _choquePendiente.get(p.token);
+        if (!cb) return;
+        _choquePendiente.delete(p.token);
+        if (p.error) cb({ code: p.error }, null);
+        else cb(null, Array.isArray(p.names) ? p.names : []);
+    });
+
+    const EXT_TEXTO = new Set(['js', 'ts', 'json', 'xml', 'txt', 'html', 'htm', 'css',
+        'sdf', 'csv', 'md', 'sql', 'ftl', 'xsl', 'xslt', 'yaml', 'yml', 'svg', 'log']);
+    function esTexto(nombre) {
+        const m = String(nombre || '').match(/\.([^.]+)$/);
+        return !!(m && EXT_TEXTO.has(m[1].toLowerCase()));
+    }
+
+    let _diffToken = 0;
+    const _diffAbiertos = new Map();
+
+    function verDiferencias(file, fileId, boton) {
+        if (!window.NSFT_Diff && !_fetcherListo) return;
+        boton.disabled = true;
+        const token = ++_diffToken;
+        _diffAbiertos.set(token, boton);
+        file.text().then((texto) => {
+            window.postMessage({
+                dest: 'fetcher_fcdd',
+                type: 'showDiff',
+                payload: {
+                    token: token,
+                    fileId: fileId,
+                    fileName: file.name,
+                    newContent: texto,
+                    theme: resolveTheme(),
+                    labels: {
+                        Title: chrome.i18n.getMessage('fcdd_diff_title') || 'Differences',
+                        Subtitle: chrome.i18n.getMessage('fcdd_diff_subtitle')
+                            || 'On the left, the file already in the folder. On the right, the one you dropped.',
+                        Left: chrome.i18n.getMessage('fcdd_diff_left') || 'In the folder',
+                        Right: chrome.i18n.getMessage('fcdd_diff_right') || 'Dropped',
+                        Confirm: chrome.i18n.getMessage('fcdd_diff_close') || 'Close',
+                        NoChanges: chrome.i18n.getMessage('fcdd_diff_same') || 'They are identical: replacing it changes nothing.',
+                        TooLarge: chrome.i18n.getMessage('fcdd_diff_big') || 'File too large to compare in full. Only the first 5000 lines are shown.',
+                        LoadFailed: chrome.i18n.getMessage('fcdd_diff_failed') || 'Could not read the file already in the folder. Only the dropped one is shown.',
+                        lines: chrome.i18n.getMessage('fcdd_diff_lines') || 'lines',
+                        chars: chrome.i18n.getMessage('fcdd_diff_chars') || 'characters'
+                    }
+                }
+            }, '*');
+        }).catch(() => {
+            _diffAbiertos.delete(token);
+            boton.disabled = false;
+        });
+    }
+
+    function mostrarChoques(files, chocan, folderId, porNombre) {
+        const nuevos = files.filter(f => chocan.indexOf(f) === -1);
+        const modal = document.createElement('div');
+        modal.className = 'nsft-fcdd-modal is-warn';
+        modal.setAttribute('data-theme', resolveTheme());
+
+        const tpl = chrome.i18n.getMessage('fcdd_dup_title', [String(chocan.length)])
+            || (chocan.length + ' file(s) already exist in this folder');
+        const aviso = chrome.i18n.getMessage('fcdd_dup_warn')
+            || 'Uploading them will replace the files that are already there.';
+        const verTxt = chrome.i18n.getMessage('fcdd_diff_see') || 'See differences';
+        const filas = chocan.map((f, i) => {
+            const id = porNombre ? porNombre.get(f.name) : null;
+            const puede = !!id && esTexto(f.name);
+            return '<li><strong>' + escapeHtml(f.name) + '</strong>' +
+                (puede
+                    ? ' <button type="button" class="nsft-fcdd-diff-link" data-i="' + i + '">' + escapeHtml(verTxt) + '</button>'
+                    : '') +
+                '</li>';
+        }).join('');
+        const restantes = nuevos.length
+            ? '<div class="nsft-fcdd-warn-summary">' + escapeHtml(
+                chrome.i18n.getMessage('fcdd_dup_rest', [String(nuevos.length)])
+                || (nuevos.length + ' more file(s) are new')) + '</div>'
+            : '';
+
+        modal.innerHTML =
+            '<div class="nsft-fcdd-modal-box">' +
+                '<div class="nsft-fcdd-modal-head">' +
+                    '<span>\u26A0 ' + escapeHtml(tpl) + '</span>' +
+                    '<button type="button" class="nsft-fcdd-modal-close" aria-label="Close">\u00D7</button>' +
+                '</div>' +
+                '<div class="nsft-fcdd-warn-lead">' + escapeHtml(aviso) + '</div>' +
+                restantes +
+                '<ul class="nsft-fcdd-err-list">' + filas + '</ul>' +
+                '<div class="nsft-fcdd-modal-foot">' +
+                    '<button type="button" class="nsft-fcdd-modal-btn nsft-fcdd-modal-dismiss nsft-fcdd-dup-cancel">' +
+                        escapeHtml(chrome.i18n.getMessage('fcdd_dup_cancel') || 'Cancel') + '</button>' +
+                    (nuevos.length
+                        ? '<button type="button" class="nsft-fcdd-modal-btn nsft-fcdd-modal-dismiss nsft-fcdd-dup-skip">' +
+                            escapeHtml(chrome.i18n.getMessage('fcdd_dup_skip') || 'Skip the duplicates') + '</button>'
+                        : '') +
+                    '<button type="button" class="nsft-fcdd-modal-btn nsft-fcdd-modal-reload nsft-fcdd-dup-go">' +
+                        escapeHtml(chrome.i18n.getMessage('fcdd_dup_go') || 'Upload anyway') + '</button>' +
+                '</div>' +
+            '</div>';
+
+        document.body.appendChild(modal);
+        const cerrar = () => modal.remove();
+        modal.querySelector('.nsft-fcdd-modal-close').onclick = cerrar;
+        modal.querySelector('.nsft-fcdd-dup-cancel').onclick = cerrar;
+        modal.querySelector('.nsft-fcdd-dup-go').onclick = () => { cerrar(); uploadFiles(files, folderId); };
+        const skip = modal.querySelector('.nsft-fcdd-dup-skip');
+        if (skip) skip.onclick = () => { cerrar(); uploadFiles(nuevos, folderId); };
+        modal.querySelectorAll('.nsft-fcdd-diff-link').forEach((b) => {
+            b.onclick = () => {
+                const f = chocan[Number(b.getAttribute('data-i'))];
+                if (f) verDiferencias(f, porNombre.get(f.name), b);
+            };
+        });
     }
 
     function findFolderNode(el) {
@@ -173,6 +387,11 @@
 
     function getTargetFolderId() {
         try {
+            const input = document.getElementById('folder');
+            const v = input && input.value != null ? String(input.value).trim() : '';
+            if (/^-?\d+$/.test(v)) return v;
+        } catch (e) { }
+        try {
             const q = new URLSearchParams(location.search);
             const f = q.get('folder');
             if (f && /^-?\d+$/.test(f)) return f;
@@ -180,12 +399,45 @@
         return null;
     }
 
+    function reloadIntoFolder(folderId) {
+        if (folderId == null || !/^-?\d+$/.test(String(folderId))) { location.reload(); return; }
+        location.href = LIST_URL + '?folder=' + encodeURIComponent(folderId);
+    }
+
     function getActionForm() {
         return document.querySelector('form[name="footer_actions_form"]');
     }
 
+    async function preguntasZip(files) {
+        const ops = new Map();
+        for (const file of files) {
+            if (!isZip(file)) continue;
+            const extraer = await preguntar(
+                file.name,
+                chrome.i18n.getMessage('fcdd_zip_extract') || 'Would you like to extract this zip file here?');
+            if (!extraer) continue;
+            const pisar = await preguntar(
+                file.name,
+                chrome.i18n.getMessage('fcdd_zip_overwrite') || 'Would you like to overwrite any existing files?');
+            ops.set(file, { unzip: true, overwrite: !!pisar });
+        }
+        return ops;
+    }
+
+    function preguntar(titulo, cuerpo) {
+        if (window.NSFT_Dialog) return window.NSFT_Dialog.confirm({ title: titulo, body: cuerpo });
+        return Promise.resolve(window.confirm(
+            titulo + '\n\n' + cuerpo + '\n\n' +
+            (chrome.i18n.getMessage('fcdd_yes_no') || 'OK = Yes\nCancel = No')));
+    }
+
     function uploadFiles(files, overrideFolderId) {
+        preguntasZip(files).then((zipOps) => enviarArchivos(files, overrideFolderId, zipOps));
+    }
+
+    function enviarArchivos(files, overrideFolderId, zipOps) {
         const folderId = overrideFolderId != null ? overrideFolderId : getTargetFolderId();
+        const destino = folderId;
         const form = getActionForm();
         if (!form) {
             notify('No upload form found on this page. Open a folder view first.', true);
@@ -212,21 +464,10 @@
             fd.set('mediafile', fileToSend);
             if (folderId != null) fd.set('folder', folderId);
 
-            if (isZip(file)) {
-                const doExtract = confirm(
-                    file.name + '\n\n' +
-                    (chrome.i18n.getMessage('fcdd_zip_extract') || 'Would you like to extract this zip file here?') +
-                    '\n\n' + (chrome.i18n.getMessage('fcdd_yes_no') || 'OK = Yes\nCancel = No')
-                );
-                if (doExtract) {
-                    fd.set('unzip', 'T');
-                    const doOverwrite = confirm(
-                        file.name + '\n\n' +
-                        (chrome.i18n.getMessage('fcdd_zip_overwrite') || 'Would you like to overwrite any existing files?') +
-                        '\n\n' + (chrome.i18n.getMessage('fcdd_yes_no') || 'OK = Yes\nCancel = No')
-                    );
-                    fd.set('overwrite', doOverwrite ? 'T' : 'F');
-                }
+            const op = zipOps && zipOps.get(file);
+            if (op && op.unzip) {
+                fd.set('unzip', 'T');
+                fd.set('overwrite', op.overwrite ? 'T' : 'F');
             }
 
             const xhr = new XMLHttpRequest();
@@ -263,9 +504,9 @@
                     okList.length + ' ' + (chrome.i18n.getMessage('fcdd_ok_msg') || 'file(s) uploaded. Reloading…'),
                     false
                 );
-                setTimeout(() => location.reload(), 600);
+                setTimeout(() => reloadIntoFolder(destino), 600);
             } else {
-                showErrorList(okList.length, errList);
+                showErrorList(okList.length, errList, destino);
             }
         });
     }
@@ -291,7 +532,7 @@
         return null;
     }
 
-    function showErrorList(okCount, errList) {
+    function showErrorList(okCount, errList, folderId) {
         const modal = document.createElement('div');
         modal.className = 'nsft-fcdd-modal';
         modal.setAttribute('data-theme', resolveTheme());
@@ -317,7 +558,7 @@
         document.body.appendChild(modal);
         modal.querySelector('.nsft-fcdd-modal-close').onclick = () => modal.remove();
         modal.querySelector('.nsft-fcdd-modal-dismiss').onclick = () => modal.remove();
-        modal.querySelector('.nsft-fcdd-modal-reload').onclick = () => location.reload();
+        modal.querySelector('.nsft-fcdd-modal-reload').onclick = () => reloadIntoFolder(folderId);
     }
 
     function escapeHtml(s) {

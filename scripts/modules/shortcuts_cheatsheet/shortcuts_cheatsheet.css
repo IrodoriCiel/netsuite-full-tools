@@ -1,27 +1,13 @@
 
 .nsft-cheatsheet-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 2147483646;
-    display: flex;
     align-items: flex-start;
-    justify-content: center;
     padding: 60px 20px 20px;
-    background: rgba(17, 24, 39, 0.55);
-    backdrop-filter: blur(2px);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    z-index: 2147483646;
 }
 
 .nsft-cheatsheet-panel {
     width: min(640px, 100%);
     max-height: calc(100vh - 80px);
-    background: #ffffff;
-    color: #111827;
-    border-radius: 10px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.12);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
     animation: nsft-cheatsheet-pop 120ms ease-out;
 }
 
@@ -49,56 +35,13 @@
     to   { opacity: 1; transform: translateY(0)     scale(1);   }
 }
 
-.nsft-cheatsheet-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
-}
-
-.nsft-cheatsheet-header h2 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #111827;
-    letter-spacing: 0.2px;
-}
-
-.nsft-cheatsheet-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.nsft-cheatsheet-close,
 .nsft-cheatsheet-print,
 .nsft-cheatsheet-reset {
-    border: none;
-    background: transparent;
-    color: #6b7280;
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 4px 9px;
-    border-radius: 4px;
-    transition: background-color 0.12s ease, color 0.12s ease;
-}
-
-.nsft-cheatsheet-close {
-    font-size: 22px;
-    padding: 2px 8px;
-}
-
-.nsft-cheatsheet-close:hover,
-.nsft-cheatsheet-print:hover,
-.nsft-cheatsheet-reset:hover {
-    background: #e5e7eb;
-    color: #111827;
+    font-size: 14px;
 }
 
 .nsft-cheatsheet-search {
+    position: relative;
     padding: 10px 18px;
     border-bottom: 1px solid #e5e7eb;
     background: #ffffff;
@@ -107,13 +50,13 @@
 .nsft-cheatsheet-search-input {
     width: 100%;
     box-sizing: border-box;
-    padding: 7px 10px;
+    padding: 7px 30px 7px 10px;
     border: 1px solid #d1d5db;
-    border-radius: 6px;
+    border-radius: 6px;  
     font-size: 12.5px;
     font-family: inherit;
     color: #111827;
-    background: #f9fafb;
+    background: #ffffff;
     outline: none;
     transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
@@ -122,6 +65,37 @@
     border-color: #3b82f6;
     background: #ffffff;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.nsft-cheatsheet-search-clear {
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: #9ca3af;
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.nsft-cheatsheet-search-clear[hidden] {
+    display: none;
+}
+
+.nsft-cheatsheet-search-clear:hover {
+    background: #e5e7eb;
+    color: #111827;
 }
 
 .nsft-cheatsheet-body {
@@ -301,8 +275,8 @@
 
 .nsft-cheatsheet-footer {
     padding: 10px 18px;
-    border-top: 1px solid #e5e7eb;
-    background: #f9fafb;
+    border-top: 1px solid #f3f4f6;
+    background: #ffffff;
     font-size: 11px;
     color: #6b7280;
     text-align: center;
@@ -321,30 +295,10 @@
 .nsft-cheatsheet-overlay[data-theme="dark"] {
     background: rgba(0, 0, 0, 0.65);
 }
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-panel {
-    background: var(--nsft-dk-surface);
-    color: #E6EBF2;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-}
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-header,
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-footer {
-    background: var(--nsft-dk-panel);
+    background: var(--nsft-dk-hover, #1E2025);
     border-color: var(--nsft-dk-border);
     color: #9AA4B5;
-}
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-header h2 {
-    color: #E6EBF2;
-}
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-close,
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-print,
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-reset {
-    color: #9AA4B5;
-}
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-close:hover,
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-print:hover,
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-reset:hover {
-    background: var(--nsft-dk-hover);
-    color: #E6EBF2;
 }
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-group h3 {
     color: #9AA4B5;
@@ -369,7 +323,7 @@
     color: #5A6475;
 }
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-search {
-    background: var(--nsft-dk-panel);
+    background: var(--nsft-dk-hover, #1E2025);
     border-color: var(--nsft-dk-border);
 }
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-search-input {
@@ -381,6 +335,13 @@
     background: var(--nsft-dk-surface);
     border-color: var(--nsft-ns-accent-light, #7FB0FF);
     box-shadow: 0 0 0 2px rgba(110, 124, 245, 0.18);
+}
+.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-search-clear {
+    color: #9AA4B5;
+}
+.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-search-clear:hover {
+    background: var(--nsft-dk-hover);
+    color: #E6EBF2;
 }
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-empty {
     color: #9AA4B5;
@@ -454,4 +415,17 @@
     html[data-nsft-printing-cheatsheet] .nsft-cheatsheet-row[data-ctx]:not([data-ctx="global"]) .nsft-cheatsheet-label {
         color: inherit;
     }
+}
+
+.nsft-cheatsheet-overlay mark.nsft-cheatsheet-hl {
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 1px;
+    font-weight: 700;
+}
+
+.nsft-cheatsheet-overlay[data-theme="dark"] mark.nsft-cheatsheet-hl {
+    background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
+    color: var(--nsft-hl-fg-dark, #0D1410);
 }

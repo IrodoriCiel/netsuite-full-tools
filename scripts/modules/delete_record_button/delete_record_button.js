@@ -149,7 +149,8 @@
         const RB = window.NSFT_RecordButtons;
         const msgNotReady = chrome.i18n.getMessage('ro_delete_function_not_ready');
         const label = chrome.i18n.getMessage('btn_delete');
-        const onclick = `if(typeof nsft_deleteRecord=="function"){nsft_deleteRecord(this);}else{alert(${JSON.stringify(msgNotReady)});}`;
+        const onclick = `if(typeof nsft_deleteRecord=="function"){nsft_deleteRecord(this);}else{this.dispatchEvent(new CustomEvent(${JSON.stringify('nsft-fn-not-ready')},{bubbles:true}));}`;
+        escuchaAvisoNoListo(msgNotReady);
 
         if (!document.getElementById(IDS.BTN)) {
             const anchor = findAnchor(RED_ANCHOR_IDS);
@@ -226,4 +227,15 @@
         if (deleteTd.previousElementSibling === anchorTd) return;
         anchorTd.parentNode.insertBefore(deleteTd, anchorTd.nextSibling);
     }
+
+    let _oyenteAvisoPuesto = false;
+    function escuchaAvisoNoListo(mensaje) {
+        if (_oyenteAvisoPuesto) return;
+        _oyenteAvisoPuesto = true;
+        document.addEventListener('nsft-fn-not-ready', () => {
+            if (window.NSFT_Dialog) window.NSFT_Dialog.alert({ body: mensaje });
+            else window.alert(mensaje);
+        });
+    }
+
 })();

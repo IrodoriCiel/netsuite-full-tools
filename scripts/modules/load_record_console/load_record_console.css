@@ -97,12 +97,12 @@
 
 .nsft-lrc-btn-primary {
     border: none;
-    background: #007bff;
+    background: var(--nsft-ns-accent, #3b82f6);
     color: #fff;
 }
 
 .nsft-lrc-btn-primary:hover {
-    background: #0056b3;
+    background: var(--nsft-ns-accent-hover, #2563eb);
 }
 
 .nsft-lrc-timer {
@@ -116,15 +116,15 @@
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-modal-content {
-    background: var(--nsft-dk-surface);
-    color: #E6EBF2;
+    background: var(--nsft-dk-hover, #1E2025);
+    color: #e5e7eb;
     border-color: var(--nsft-dk-border);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.45);
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-modal-header {
-    background: var(--nsft-dk-panel);
-    color: #E6EBF2;
+    background: var(--nsft-dk-hover, #1E2025);
+    color: #e5e7eb;
     border-bottom-color: var(--nsft-dk-border);
 }
 
@@ -142,12 +142,12 @@
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-modal-body {
-    background: var(--nsft-dk-surface);
+    background: var(--nsft-dk-hover, #1E2025);
     color: #C6CEDB;
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-modal-footer {
-    background: var(--nsft-dk-panel);
+    background: var(--nsft-dk-hover, #1E2025);
     border-top-color: var(--nsft-dk-border);
 }
 

@@ -28,77 +28,12 @@
     transform: translateY(0);
 }
 
-.nsft-ffi-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999999;
-    font-family: 'Inter', -apple-system, sans-serif;
-}
-
 .nsft-ffi-modal-content {
-    background: #ffffff;
-    width: 450px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    color: #111827;
-}
-
-.nsft-ffi-modal-header {
-    background: #ffffff;
-    color: #111827;
-    padding: 8px 14px;
-    border-bottom: 1px solid #f3f4f6;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 40px;
-    box-sizing: border-box;
-}
-
-.nsft-ffi-modal-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-    margin: 0;
-    display: flex;
-    align-items: center;
-}
-
-.nsft-ffi-close-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    font-size: 11px;
-    color: #9ca3af;
-    background: transparent;
-    border: none;
-    padding: 0;
-}
-
-.nsft-ffi-close-btn:hover {
-    background-color: #fee2e2;
-    color: #ef4444;
+    width: 450px;  
 }
 
 .nsft-ffi-modal-body {
     padding: 20px;
-    background: #ffffff;
     display: flex;
     flex-direction: column;
 }
@@ -113,7 +48,7 @@
     padding: 8px 30px 8px 10px;
     margin-bottom: 0;
     border: 1px solid #d1d5db;
-    border-radius: 4px;
+    border-radius: 6px;  
     box-sizing: border-box;
     font-size: 13px;
     outline: none;
@@ -157,49 +92,11 @@
 }
 
 mark.nsft-ffi-hl-txt {
-    background: #ffe58a;
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
     color: inherit;
     font-weight: 600;
     padding: 0;
     border-radius: 2px;
-}
-
-.nsft-ffi-modal-footer {
-    padding: 10px 14px;
-    background: #ffffff;
-    border-top: 1px solid #f3f4f6;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-}
-
-.nsft-ffi-btn {
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.nsft-ffi-btn-cancel {
-    border: 1px solid #d1d5db;
-    background: #ffffff;
-    color: #374151;
-}
-
-.nsft-ffi-btn-cancel:hover {
-    background: #f9fafb;
-}
-
-.nsft-ffi-btn-confirm {
-    border: none;
-    background: #007bff;
-    color: #fff;
-}
-
-.nsft-ffi-btn-confirm:hover {
-    background: #0056b3;
 }
 
 .nsft-ffi-highlight {
@@ -294,39 +191,6 @@ html[data-nsft-theme="dark"] .nsft-ffi-hl-pink   { --ffi-c: #ffa5ff; --ffi-g: rg
 }
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-empty { color: #9AA4B5; }
 
-.nsft-ffi-modal-overlay[data-theme="dark"] {
-    background: rgba(0, 0, 0, 0.65);
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-content {
-    background: var(--nsft-dk-panel);
-    border-color: var(--nsft-dk-border);
-    color: #E6EBF2;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-header {
-    background: var(--nsft-dk-panel);
-    border-bottom-color: #1C222C;
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-title {
-    color: #E6EBF2;
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-close-btn {
-    color: #9AA4B5;
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-close-btn:hover {
-    background-color: rgba(239, 68, 68, 0.15);
-    color: #F0708A;
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-body {
-    background: var(--nsft-dk-panel);
-}
-
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-input {
     background: var(--nsft-dk-surface);
     border-color: var(--nsft-dk-border2);
@@ -353,29 +217,6 @@ html[data-nsft-theme="dark"] .nsft-ffi-hl-pink   { --ffi-c: #ffa5ff; --ffi-g: rg
 }
 
 .nsft-ffi-modal-overlay[data-theme="dark"] mark.nsft-ffi-hl-txt {
-    background: #FDE68A;
-    color: #1F2430;
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-footer {
-    background: var(--nsft-dk-panel);
-    border-top-color: #1C222C;
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-btn-cancel {
-    background: var(--nsft-dk-hover);
-    color: #E6EBF2;
-    border-color: var(--nsft-dk-border2);
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-btn-cancel:hover {
-    background: var(--nsft-dk-border2);
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-btn-confirm {
-    background: var(--nsft-ns-accent, #3b82f6);
-}
-
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-btn-confirm:hover {
-    background: var(--nsft-ns-accent-hover, #2563eb);
+    background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
+    color: var(--nsft-hl-fg-dark, #0D1410);
 }

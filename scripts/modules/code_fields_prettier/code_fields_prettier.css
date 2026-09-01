@@ -54,3 +54,8 @@
     color: #000;
     position: relative;
 }
+
+.nsft-code-fields-prettier-wrapper pre.nsft-code-fields-prettier-raw code.hljs {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}

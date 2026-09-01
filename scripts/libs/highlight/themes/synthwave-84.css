@@ -1,0 +1,150 @@
+/*!
+ * Synthwave '84 para highlight.js
+ *
+ * Colores del tema de VS Code de Robb Owen (github.com/robb0wen/synthwave-vscode,
+ * MIT), portados a las clases de highlight.js.
+ *
+ * ESTE ARCHIVO HACE DOBLE TURNO. Lo usan los visores tal cual, y ademas
+ * `build.js` lo pasa por `theme_transform.js` para sacar de el la version de
+ * CodeMirror 6 que se usa en los campos de codigo. Ese transformador saca de
+ * aqui, por expresion regular, el fondo y el texto de la regla base, el color
+ * de los comentarios (que reusa para la barra de desplazamiento) y el de la
+ * seleccion. Si esas tres reglas cambian de forma, el tema derivado sale con
+ * los colores por defecto y nadie avisa.
+ *
+ * Y OJO CON ESCRIBIR ESOS PATRONES EN UN COMENTARIO: el transformador no sabe
+ * que es un comentario y se queda con la PRIMERA coincidencia del archivo.
+ * Este mismo bloque los citaba de ejemplo y el tema derivado salio con el
+ * fondo puesto a los puntos suspensivos del ejemplo. Se cuentan con palabras,
+ * no con codigo.
+ *
+ * El nombre no lleva «light» ni «github», que es como el transformador
+ * decide si un tema es claro; correcto, este es oscuro y no tiene hermano.
+ */
+
+pre code.hljs { display: block; overflow-x: auto; padding: 1em; }
+code.hljs { padding: 3px 5px; }
+
+/* El fondo va PLANO, no en degradado como en el editor: aqui el bloque puede
+   medir diez lineas o diez mil, y un degradado repetido por bloque se ve como
+   una costura cada vez que empieza uno nuevo. */
+.hljs {
+    background: #262335;
+    color: #ffffff;
+}
+
+.hljs ::selection,
+.hljs::selection { background: rgba(255, 255, 255, 0.18); }
+
+.hljs-comment,
+.hljs-quote {
+    color: #848bbd;
+    font-style: italic;
+}
+
+.hljs-string,
+.hljs-subst,
+.hljs-template-string,
+.hljs-regexp { color: #ff8b39; }
+
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet { color: #f97e72; }
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-operator,
+.hljs-doctag,
+.hljs-meta-keyword,
+.hljs-attribute { color: #fede5d; }
+
+.hljs-title,
+.hljs-title.function_,
+.hljs-section,
+.hljs-built_in { color: #36f9f6; }
+
+/* ESTE BLOQUE VA DESPUES DEL DE LOS TITULOS, Y NO ES CASUALIDAD. En CodeMirror
+   6 no hay una clase para las variables y otra para los nombres de funcion:
+   hay UNA para los identificadores, y el transformador manda las dos de
+   highlight.js a ella. De los dos colores gana el que aparezca el ultimo en
+   este archivo, y se quiere el rosa, porque de los identificadores de un
+   archivo la inmensa mayoria son variables. Subir este bloque cambia, sin
+   tocar nada mas, el color de medio editor de campos de codigo. Lo mismo pasa
+   con los atributos y las propiedades, que tambien comparten clase alli: por
+   eso los atributos estan arriba, con las palabras clave.
+
+   Los nombres de clase no se citan a proposito: el transformador los reescribe
+   donde los vea, comentarios incluidos, y dejaba aqui una explicacion a medio
+   traducir. Es la misma piedra de la cabecera, dos bloques mas abajo. */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attr,
+.hljs-property,
+.hljs-selector-attr { color: #ff7edb; }
+
+.hljs-type,
+.hljs-title.class_,
+.hljs-selector-class { color: #fe4450; }
+
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id { color: #72f1b8; }
+
+.hljs-link,
+.hljs-params { color: #fede5d; }
+
+.hljs-meta,
+.hljs-punctuation { color: #b6b1b1; }
+
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }
+.hljs-link { text-decoration: underline; }
+
+/* Los diffs conservan su verde y su rojo: en un diff el color NO es sintaxis,
+   es la respuesta a «que cambio», y perderla por estetica seria caro. */
+.hljs-addition { color: #72f1b8; background: rgba(114, 241, 184, 0.1); }
+.hljs-deletion { color: #fe4450; background: rgba(254, 68, 80, 0.1); }
+
+/* ---------- el neon ----------
+
+   Igual que en el tema de CodeMirror: dos capas en vez de las cuatro del
+   original —una oscura pegada a la letra y un halo ancho— y SOLO sobre codigo.
+   Aqui importa mas todavia, porque highlight.js pinta el documento entero y no
+   solo lo que se ve: encender tambien cadenas y comentarios multiplicaria el
+   coste de pintado por toda la altura del bloque, no por la de la pantalla. */
+
+.hljs-title,
+.hljs-title.function_,
+.hljs-section,
+.hljs-built_in {
+    text-shadow: 0 0 2px #001716, 0 0 8px rgba(3, 237, 249, 0.46);
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-operator,
+.hljs-doctag,
+.hljs-meta-keyword,
+.hljs-attribute {
+    text-shadow: 0 0 2px #393a33, 0 0 8px rgba(243, 159, 5, 0.46);
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attr,
+.hljs-property {
+    text-shadow: 0 0 2px #100c0f, 0 0 7px rgba(220, 7, 142, 0.4);
+}
+
+.hljs-type,
+.hljs-title.class_,
+.hljs-selector-class {
+    text-shadow: 0 0 2px #000000, 0 0 8px rgba(252, 31, 44, 0.46);
+}
+
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id {
+    text-shadow: 0 0 2px #100c0f, 0 0 8px rgba(37, 124, 85, 0.46);
+}

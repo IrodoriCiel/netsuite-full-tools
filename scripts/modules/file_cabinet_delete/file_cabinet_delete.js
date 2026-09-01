@@ -144,7 +144,7 @@
         btn.addEventListener('click', (ev) => {
             ev.preventDefault();
             ev.stopPropagation();
-            handleDelete(info, row);
+            handleDelete(info, row, btn);
         });
         bar.appendChild(btn);
     }
@@ -164,7 +164,16 @@
         return bar;
     }
 
-    async function handleDelete(info, row) {
+    async function handleDelete(info, row, btn) {
+        ocupado(btn, true);
+        try {
+            await borrar(info, row, btn);
+        } finally {
+            ocupado(btn, false);
+        }
+    }
+
+    async function borrar(info, row, btn) {
         const typeLabel = info.isFolder
             ? (chrome.i18n.getMessage('fcd_type_folder') || 'folder')
             : (chrome.i18n.getMessage('fcd_type_file') || 'file');
@@ -179,7 +188,7 @@
             const text = await res.text();
             doc = new DOMParser().parseFromString(text, 'text/html');
         } catch (e) {
-            window.alert((chrome.i18n.getMessage('fcd_error_generic') || 'Error') + '\n\n' + e.message);
+            await avisar((chrome.i18n.getMessage('fcd_error_generic') || 'Error') + '\n\n' + e.message);
             return;
         }
 
@@ -187,13 +196,13 @@
         const checkboxId = `sa${info.id}fld${letter}`;
         const checkbox = doc.getElementById(checkboxId);
         if (!checkbox) {
-            window.alert(chrome.i18n.getMessage('fcd_error_not_found') || 'Item not found in delete form');
+            await avisar(chrome.i18n.getMessage('fcd_error_not_found') || 'Item not found in delete form');
             return;
         }
         checkbox.checked = true;
         const cell = checkbox.closest('td');
         if (!cell) {
-            window.alert(chrome.i18n.getMessage('fcd_error_not_found') || 'Item not found in delete form');
+            await avisar(chrome.i18n.getMessage('fcd_error_not_found') || 'Item not found in delete form');
             return;
         }
 
@@ -220,7 +229,9 @@
         const confirmMsg = `${info.name}\n\n` +
             (chrome.i18n.getMessage('fcd_confirm') || 'Are you sure you want to delete this {type}?').replace('{type}', typeLabel) +
             contents;
-        if (!window.confirm(confirmMsg)) return;
+        ocupado(btn, false);
+        if (!await preguntar(confirmMsg, true)) return;
+        ocupado(btn, true);
 
         row.classList.add(ROW_DELETED_CLASS);
         try {
@@ -236,14 +247,33 @@
             const errMsg = (errDoc.querySelector('.uir-error-page-message')?.textContent || '').trim();
             if (errMsg) {
                 row.classList.remove(ROW_DELETED_CLASS);
-                window.alert(errMsg);
+                await avisar(errMsg);
                 return;
             }
             setTimeout(() => row.remove(), 250);
         } catch (e) {
             row.classList.remove(ROW_DELETED_CLASS);
-            window.alert((chrome.i18n.getMessage('fcd_error_generic') || 'Error') + '\n\n' + e.message);
+            await avisar((chrome.i18n.getMessage('fcd_error_generic') || 'Error') + '\n\n' + e.message);
         }
+    }
+
+
+
+    function avisar(texto) {
+        if (window.NSFT_Dialog) return window.NSFT_Dialog.alert({ body: texto });
+        window.alert(texto);
+        return Promise.resolve();
+    }
+
+    function preguntar(texto, peligro) {
+        if (window.NSFT_Dialog) return window.NSFT_Dialog.confirm({ body: texto, danger: !!peligro });
+        return Promise.resolve(window.confirm(texto));
+    }
+
+
+    function ocupado(btn, si) {
+        if (!btn) return;
+        btn.classList.toggle('is-busy', !!si);
     }
 
     function svgTrash() {

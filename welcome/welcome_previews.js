@@ -17,6 +17,7 @@
     const NS = HABLA_ES
         ? { tx: 'Transacciones', li: 'Listas', re: 'Informes', do: 'Documentos', se: 'Configuración',
             edit: 'Editar', back: 'Atrás', name: 'Nombre', id: 'ID', date: 'Fecha', inactive: 'Inactivo',
+            startDate: 'Fecha de inicio', endDate: 'Fecha de fin', apply: 'Aplicar', invoice: 'Factura',
             role: 'Administrador', search: 'Buscar', user: 'Demo Usuario', ia: 'IA',
             ask1: 'hola',
             ans1: '¡Hola! ¿En qué te ayudo?',
@@ -46,6 +47,7 @@
             stSched: 'Programado', stRestlet: 'RESTlet', stSuitelet: 'Suitelet',
             savedSearch: 'Búsqueda guardada', tabCriteria: 'Criterios',
             tabResults: 'Resultados', tabAvail: 'Filtros disponibles',
+            summaryType: 'Tipo de resumen',
             field: 'Campo', formula: 'Fórmula', filtro: 'Filtro', descripcion: 'Descripción',
             newSavedSearch: 'Nueva búsqueda guardada', searchType: 'Tipo de búsqueda',
             actividad: 'Actividad', articulo: 'Artículo', cliente: 'Cliente',
@@ -107,6 +109,7 @@
             pvBnConn: 'Demo Conectores', pvSuiteInv: 'Demo Suite · Inventario', pvSuiteBuy: 'Demo Suite · Compras',
             pvSuiteRep: 'Demo Suite · Reportes', pvSuiteInt: 'Demo Suite · Integraciones',
             pvFileStyles: 'demo_estilos.css', pvFileData: 'demo_datos.csv', pvFileReport: 'demo_reporte.pdf',
+            pvFileForm: 'demo_cs_formulario.js', pvFileSync: 'demo_mr_sincronizar.js',
             pvFileResp15: 'demo_respuesta_15.csv', pvFileResp: 'demo_respuesta.csv',
             pvMail: 'demo.usuario@demo-co.mx', pvExpApp: 'Demo · Aprobación de gastos',
             pvWfCreate: 'Demo · Creación', pvWfDesc: 'Demo · Revisa el gasto antes de contabilizarlo.',
@@ -126,6 +129,7 @@
             pvJsonRecs: 'registros', pvJsonName: 'nombre', pvJsonActive: 'activo', pvJsonItem: 'articulo' }
         : { tx: 'Transactions', li: 'Lists', re: 'Reports', do: 'Documents', se: 'Setup',
             edit: 'Edit', back: 'Back', name: 'Name', id: 'ID', date: 'Date', inactive: 'Inactive',
+            startDate: 'Start Date', endDate: 'End Date', apply: 'Apply', invoice: 'Invoice',
             role: 'Administrator', search: 'Search', user: 'Demo User', ia: 'AI',
             ask1: 'hi',
             ans1: 'Hi! How can I help?',
@@ -155,6 +159,7 @@
             stSched: 'Scheduled', stRestlet: 'RESTlet', stSuitelet: 'Suitelet',
             savedSearch: 'Saved Search', tabCriteria: 'Criteria',
             tabResults: 'Results', tabAvail: 'Available Filters',
+            summaryType: 'Summary Type',
             field: 'Field', formula: 'Formula', filtro: 'Filter', descripcion: 'Description',
             newSavedSearch: 'New Saved Search', searchType: 'Search Type',
             actividad: 'Activity', articulo: 'Item', cliente: 'Customer',
@@ -214,6 +219,7 @@
             pvSuiteBuy: 'Demo Suite · Purchasing', pvSuiteRep: 'Demo Suite · Reports',
             pvSuiteInt: 'Demo Suite · Integrations', pvFileStyles: 'demo_styles.css', pvFileData: 'demo_data.csv',
             pvFileReport: 'demo_report.pdf', pvFileResp15: 'demo_response_15.csv', pvFileResp: 'demo_response.csv',
+            pvFileForm: 'demo_cs_form.js', pvFileSync: 'demo_mr_sync.js',
             pvMail: 'demo.user@demo-co.com', pvExpApp: 'Demo · Expense approval', pvWfCreate: 'Demo · Create',
             pvWfDesc: 'Demo · Review the expense before posting it.', pvWfRelease: 'Demo · Not started',
             pvWfSendMail: 'Send Email', pvWfSetField: 'Set Field Value', pvWfLock: 'Lock Record',
@@ -260,6 +266,29 @@
                     </div>
                     <div class="nsft-pv-foot">
                         <span class="nsft-pv-mono nsft-pv-grow">claude-opus-4-8 &#9662;</span>
+                        <span class="nsft-pv-mono">&#9776;</span>
+                    </div>
+                  </div>
+                </div>`;
+
+    const PANEL_IA = `
+                <div class="nsft-pv-side">
+                  <div class="nsft-pv-side-inner">
+                    <div class="nsft-pv-bar">
+                        <span class="nsft-pv-ai">&#10022;</span>
+                        <span class="nsft-pv-grow nsft-pv-tiny" data-pv-label></span>
+                        <span class="nsft-pv-badge is-rp">BETA</span>
+                    </div>
+                    <div class="nsft-pv-side-body">
+                        <span class="nsft-pv-emblem">&#10022;</span>
+                        <div class="nsft-pv-skel"><i></i><i class="is-half"></i><i></i></div>
+                    </div>
+                    <div class="nsft-pv-body nsft-pv-flex">
+                        <span class="nsft-pv-input nsft-pv-grow nsft-pv-mono nsft-pv-tiny">|</span>
+                        <span class="nsft-pv-send">&#8594;</span>
+                    </div>
+                    <div class="nsft-pv-foot">
+                        <span class="nsft-pv-mono nsft-pv-grow">deepseek-v4-pro &#9662;</span>
                         <span class="nsft-pv-mono">&#9776;</span>
                     </div>
                   </div>
@@ -1587,6 +1616,22 @@
     });
 
 
+    const CODIGO_JS = `
+                <div class="nsft-pv-edcode">
+                    <span class="g">1</span><span class="l"><i class="c">/** @NApiVersion 2.1 */</i></span>
+                    <span class="g">2</span><span class="l"><i class="k">define</i>([<i class="s">'N/record'</i>], (<i class="v">record</i>) =&gt; {</span>
+                    <span class="g">3</span><span class="l is-ind"><i class="k">const</i> <i class="v">{{pvConstType}}</i> = <i class="s">'customrecord_demo'</i>;</span>
+                    <span class="g">4</span><span class="l is-ind"><i class="k">const</i> <i class="v">{{pvConstCap}}</i> = <i class="n">18402.55</i>;</span>
+                    <span class="g">5</span><span class="l"></span>
+                    <span class="g">6</span><span class="l is-ind"><i class="k">function</i> <i class="f">beforeSubmit</i>(<i class="v">ctx</i>) {</span>
+                    <span class="g">7</span><span class="l is-ind2"><i class="k">const</i> <i class="v">total</i> = <i class="v">ctx</i>.<i class="p">newRecord</i>.<i class="f">getValue</i>(<i class="s">'custrecord_total'</i>);</span>
+                    <span class="g">8</span><span class="l is-ind2"><i class="k">return</i> <i class="v">total</i> &lt;= <i class="v">{{pvConstCap}}</i>;</span>
+                    <span class="g">9</span><span class="l is-ind">}</span>
+                    <span class="g">10</span><span class="l"></span>
+                    <span class="g">11</span><span class="l is-ind"><i class="k">return</i> { <i class="p">beforeSubmit</i> };</span>
+                    <span class="g">12</span><span class="l">});</span>
+                </div>`;
+
     function editorNS(seGuarda, nombre) {
         return `
                     <div class="nsft-pv-edhead">
@@ -1598,19 +1643,46 @@
                         </span>
                         <span class="nsft-pv-btn is-ghost">{{cancel}}</span>
                     </div>
-                    <div class="nsft-pv-edcode">
-                        <span class="g">1</span><span class="l"><i class="c">/** @NApiVersion 2.1 */</i></span>
-                        <span class="g">2</span><span class="l"><i class="k">define</i>([<i class="s">'N/record'</i>], (<i class="v">record</i>) =&gt; {</span>
-                        <span class="g">3</span><span class="l is-ind"><i class="k">const</i> <i class="v">{{pvConstType}}</i> = <i class="s">'customrecord_demo'</i>;</span>
-                        <span class="g">4</span><span class="l is-ind"><i class="k">const</i> <i class="v">{{pvConstCap}}</i> = <i class="n">18402.55</i>;</span>
-                        <span class="g">5</span><span class="l"></span>
-                        <span class="g">6</span><span class="l is-ind"><i class="k">function</i> <i class="f">beforeSubmit</i>(<i class="v">ctx</i>) {</span>
-                        <span class="g">7</span><span class="l is-ind2"><i class="k">const</i> <i class="v">total</i> = <i class="v">ctx</i>.<i class="p">newRecord</i>.<i class="f">getValue</i>(<i class="s">'custrecord_total'</i>);</span>
-                        <span class="g">8</span><span class="l is-ind2"><i class="k">return</i> <i class="v">total</i> &lt;= <i class="v">{{pvConstCap}}</i>;</span>
-                        <span class="g">9</span><span class="l is-ind">}</span>
-                        <span class="g">10</span><span class="l"></span>
-                        <span class="g">11</span><span class="l is-ind"><i class="k">return</i> { <i class="p">beforeSubmit</i> };</span>
-                        <span class="g">12</span><span class="l">});</span>
+${CODIGO_JS}`;
+    }
+
+    function editorAvanzadoNS() {
+        return `
+                    <div class="nsft-pv-advbar">
+                        <img class="nsft-pv-logomark" src="{{logo}}" alt="">
+                        <span class="nsft-pv-advenv">SB1</span>
+                        <span class="nsft-pv-advmenus">
+                            <span>{{@adv_menu_file}}</span>
+                            <span>{{@adv_menu_edit}}</span>
+                            <span>{{@adv_menu_view}}</span>
+                            <span>{{@adv_menu_go}}</span>
+                        </span>
+                        <span class="nsft-pv-grow"></span>
+                        <span class="nsft-pv-advicos">
+                            <span>${ICONO_LUPA}</span>
+                            <span>${ICONO_RAMA}</span>
+                            <span>${ICONO_CODIGO}</span>
+                        </span>
+                        <span class="nsft-pv-btn nsft-pv-edsave">{{save}}</span>
+                    </div>
+                    <div class="nsft-pv-advfile">
+                        <span class="nsft-pv-advname nsft-pv-mono">demo_ue_documentos.js</span>
+                    </div>
+                    <div class="nsft-pv-advmain">
+                        <div class="nsft-pv-advtree">
+                            <span class="nsft-pv-advtreet">{{@adv_tree_title}}</span>
+                            <span class="nsft-pv-mono">{{pvFileForm}}</span>
+                            <span class="nsft-pv-mono is-on">demo_ue_documentos.js</span>
+                            <span class="nsft-pv-mono">{{pvFileSync}}</span>
+                            <span class="nsft-pv-mono">demo_gateway.js</span>
+                        </div>
+                        ${CODIGO_JS}
+                    </div>
+                    <div class="nsft-pv-advstatus">
+                        <span class="nsft-pv-mono">8:24</span>
+                        <span class="nsft-pv-grow"></span>
+                        <span class="nsft-pv-mono">JavaScript</span>
+                        <span class="nsft-pv-mono">UTF-8</span>
                     </div>`;
     }
 
@@ -2139,8 +2211,8 @@
                         </div>
                     </div>
                     <div class="nsft-pv-subtabs">
-                        <span class="is-on">{{tabCriteria}}</span>
-                        <span>{{tabResults}}</span>
+                        <span${o.pestana === 'resultados' ? '' : ' class="is-on"'}>{{tabCriteria}}</span>
+                        <span${o.pestana === 'resultados' ? ' class="is-on"' : ''}>{{tabResults}}</span>
                         <span>{{tabAvail}}</span>
                     </div>
                     ${o.cuerpo || ''}`;
@@ -2412,6 +2484,33 @@
                         </div>
                     </div>
                 </div>`
+    });
+
+    P.enableSearchSummaryBulk = ventanaNS({
+        clase: 'nsft-pv-ssb',
+        url: '1234567.app.netsuite.com/app/common/search/search.nl?e=T&id=482',
+        cuerpo: busquedaNS({
+            pestana: 'resultados',
+            cuerpo: `
+                    <div class="nsft-pv-body">
+                        <div class="nsft-pv-ssbbar">
+                            <span class="nsft-pv-ssblbl">{{@ssb_title}}</span>
+                            <span class="nsft-pv-ssbsel">{{@ssb_group}} &#9662;</span>
+                            <span class="nsft-pv-ssbbtn">{{@ssb_apply}}
+                                <span class="nsft-pv-tap is-ssb" aria-hidden="true"></span>
+                                <span class="nsft-pv-cursor is-ssb" aria-hidden="true">${PUNTERO}</span>
+                            </span>
+                            <span class="nsft-pv-ssbbtn is-ghost">{{@ssb_clear}}</span>
+                        </div>
+                        <table class="nsft-pv-table nsft-pv-ssbtable">
+                            <tr><th>{{field}}</th><th>{{summaryType}}</th><th>{{formula}}</th></tr>
+                            <tr><td>{{name}}</td><td><span class="nsft-pv-ssbval">{{@ssb_group}}</span></td><td></td></tr>
+                            <tr><td>{{pvEstadoCol}}</td><td><span class="nsft-pv-ssbval">{{@ssb_group}}</span></td><td></td></tr>
+                            <tr><td>Demo &middot; Total</td><td><span class="nsft-pv-ssbval">{{@ssb_group}}</span></td><td></td></tr>
+                            <tr><td>{{date}}</td><td><span class="nsft-pv-ssbval">{{@ssb_group}}</span></td><td></td></tr>
+                        </table>
+                    </div>`
+        })
     });
 
     function sublistaLayout(o) {
@@ -2730,6 +2829,60 @@
         extra: floatLay('&#8942;')
     });
 
+    P.enableDateFormatHint = ventanaNS({
+        clase: 'nsft-pv-lay is-datefmt',
+        campos: `
+                            <span class="nsft-pv-field"><span class="lbl">{{date}}</span>
+                                <span class="nsft-pv-input nsft-pv-mono">16/11/2026</span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{id}}</span>
+                                <span class="nsft-pv-input nsft-pv-mono">1042</span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{startDate}}</span>
+                                <span class="nsft-pv-input"><span class="nsft-pv-dfhint">DD/MM/YYYY</span></span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{endDate}}</span>
+                                <span class="nsft-pv-input"><span class="nsft-pv-dfhint">DD/MM/YYYY</span></span></span>`,
+        sublista: true,
+        extra: floatLay('&#128197;')
+    });
+
+    P.enableShiftRangeSelect = ventanaNS({
+        clase: 'nsft-pv-sl is-shiftsel',
+        cuerpo: `
+                    <div class="nsft-pv-body nsft-pv-stack">
+                        <div class="nsft-pv-title">SO10482</div>
+                    </div>
+                    <div class="nsft-pv-subtabs">
+                        <span class="is-on">{{tabLines}}</span>
+                        <span>{{tabNotes}}</span>
+                        <span>{{tabFiles}}</span>
+                    </div>
+                    <div class="nsft-pv-subbar">
+                        <span class="nsft-pv-btn is-ghost">{{custView}}</span>
+                        <span class="nsft-pv-btn is-ghost">{{refresh}}</span>
+                    </div>
+                    <div class="nsft-pv-slscroll">
+                        <table class="nsft-pv-table nsft-pv-sltable nsft-pv-sstable">
+                            <tr><th>{{apply}}</th><th>{{invoice}}</th><th>{{date}}</th><th>{{total}}</th></tr>
+                            <tr><td><span class="nsft-pv-ssbox is-pre"></span></td>
+                                <td>INV20451</td><td class="nsft-pv-mono">02/11/2026</td><td class="nsft-pv-mono">12400.00</td></tr>
+                            <tr><td><span class="nsft-pv-ssbox is-a">
+                                    <span class="nsft-pv-tap is-ssa" aria-hidden="true"></span>
+                                    <span class="nsft-pv-cursor is-ssa" aria-hidden="true">${PUNTERO}</span>
+                                </span></td>
+                                <td>INV20452</td><td class="nsft-pv-mono">05/11/2026</td><td class="nsft-pv-mono">8900.00</td></tr>
+                            <tr><td><span class="nsft-pv-ssbox is-mid"></span></td>
+                                <td>INV20453</td><td class="nsft-pv-mono">09/11/2026</td><td class="nsft-pv-mono">4105.80</td></tr>
+                            <tr><td><span class="nsft-pv-ssbox is-mid"></span></td>
+                                <td>INV20454</td><td class="nsft-pv-mono">13/11/2026</td><td class="nsft-pv-mono">2380.10</td></tr>
+                            <tr><td><span class="nsft-pv-ssbox is-b">
+                                    <span class="nsft-pv-sskey" aria-hidden="true">&#8679;</span>
+                                    <span class="nsft-pv-tap is-ssb" aria-hidden="true"></span>
+                                    <span class="nsft-pv-cursor is-ssb" aria-hidden="true">${PUNTERO}</span>
+                                </span></td>
+                                <td>INV20455</td><td class="nsft-pv-mono">16/11/2026</td><td class="nsft-pv-mono">1042.00</td></tr>
+                        </table>
+                    </div>`
+    });
+
     P.enableTextareaMinHeightBeta = ventanaNS({
         clase: 'nsft-pv-lay is-textarea',
         sublista: true,
@@ -3045,6 +3198,178 @@
                                 </span>
                             </span>
                             <span class="nsft-pv-field"><span class="lbl">{{id}}</span><span class="val nsft-pv-mono">1042</span></span>`
+    });
+
+    P.enableCustomizationFinder = ventanaNS({
+        clase: 'nsft-pv-menuflow is-cfind',
+        acciones: `
+            <span class="nsft-pv-toolsbtn"><img class="nsft-pv-logomark" src="{{logo}}" alt=""> {{@menuTools}} &#9662;
+                <span class="nsft-pv-menu">
+                    <span class="nsft-pv-menu-item">&#9906; {{@enableCustomizationFinderLabel}}</span>
+                </span>
+                <span class="nsft-pv-tap is-cp" aria-hidden="true"></span>
+                <span class="nsft-pv-cursor is-cp" aria-hidden="true">${PUNTERO}</span>
+            </span>`,
+        extra: `
+            <div class="nsft-pv-modal is-cfind">
+                <div class="nsft-pv-cfhead">
+                    <span>&#9906; {{@enableCustomizationFinderLabel}}</span>
+                    <span class="nsft-pv-grow"></span>
+                    <span class="nsft-pv-cfx">&#10005;</span>
+                </div>
+                <div class="nsft-pv-cfbody">
+                    <div class="nsft-pv-cfbar">
+                        <span class="nsft-pv-cfinput">
+                            <span class="nsft-pv-mono">&#9906;</span>
+                            <span class="nsft-pv-grow nsft-pv-mono nsft-pv-mute">
+                                <span class="nsft-pv-type is-cf">Demo</span><span class="nsft-pv-caret"></span>
+                            </span>
+                        </span>
+                        <span class="nsft-pv-cfgo">{{@cfind_search}}</span>
+                        <span class="nsft-pv-cfexp">&#8615; {{@cfind_export}}</span>
+                    </div>
+                    <div class="nsft-pv-cftypes">
+                        <span class="is-on">{{@cfind_t_script}}</span>
+                        <span>{{@cfind_t_wf}}</span>
+                        <span>{{@cfind_t_rec}}</span>
+                        <span>{{@cfind_t_field}}</span>
+                        <span>{{@cfind_t_ss}}</span>
+                        <span>{{@cfind_t_pdf}}</span>
+                        <span>{{@cfind_t_file}}</span>
+                        <span>{{@cfind_t_deploy}}</span>
+                        <span>{{@cfind_t_list}}</span>
+                    </div>
+                    <table class="nsft-pv-table nsft-pv-cftable">
+                        <tr>
+                            <th>{{@cfind_col_name}}</th><th>{{@cfind_col_kind}}</th>
+                            <th>{{@cfind_col_sid}}</th><th>{{@cfind_col_status}}</th>
+                        </tr>
+                        <tr>
+                            <td>{{pvScrUeDoc}}</td><td class="nsft-pv-mono">USEREVENT</td>
+                            <td class="nsft-pv-mono">customscript_demo_1</td><td>{{pvActivo}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{pvScrMrSync}}</td><td class="nsft-pv-mono">MAPREDUCE</td>
+                            <td class="nsft-pv-mono">customscript_demo_2</td><td>{{pvActivo}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{pvScrSl}}</td><td class="nsft-pv-mono">SUITELET</td>
+                            <td class="nsft-pv-mono">customscript_demo_3</td><td>{{pvActivo}}</td>
+                        </tr>
+                    </table>
+                    <div class="nsft-pv-cffoot">
+                        <span class="nsft-pv-cfdot"></span>
+                        <span class="nsft-pv-grow"></span>
+                        <span class="nsft-pv-cfhints">{{@cfind_hints}}</span>
+                    </div>
+                </div>
+            </div>`
+    });
+
+    function consolaNS(conIA, desdeMenu) {
+        const cuerpo = `
+                <div class="nsft-pv-page">
+                    <div class="nsft-pv-runner is-solo">
+                        <div class="nsft-pv-main">
+                            <div class="nsft-pv-code is-light">
+                                <div><span class="ln">1</span><span class="k">const</span> rec = record.<span class="f">load</span>({</div>
+                                <div><span class="ln">2</span>&nbsp;&nbsp;type: <span class="s">'customer'</span>,</div>
+                                <div><span class="ln">3</span>&nbsp;&nbsp;id: <span class="n">1042</span></div>
+                                <div><span class="ln">4</span>});</div>
+                                <div><span class="ln">5</span></div>
+                                <div><span class="ln">6</span>rec.<span class="f">getValue</span>(<span class="s">'companyname'</span>)</div>
+                            </div>
+                            <div>
+                                <div class="nsft-pv-restabs">
+                                    <span class="is-on">{{@ssc_tab_output}}</span>
+                                    <span>{{@sql_tab_logs}}</span>
+                                </div>
+                                <div class="nsft-pv-toolbar">
+                                    <span class="nsft-pv-input nsft-pv-grow nsft-pv-tiny">&#9906;</span>
+                                    <span class="nsft-pv-chip">{{@copy}}</span>
+                                    <span class="nsft-pv-chip">{{@download}}</span>
+                                </div>
+                                <div class="nsft-pv-empty nsft-pv-mono">"Demo Co. S.A."</div>
+                                <div class="nsft-pv-resfoot">
+                                    <span class="nsft-pv-grow nsft-pv-mono">{{@ssc_out_ret}}</span>
+                                    <span class="nsft-pv-mono">18 ms</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+        const ventana = `
+        <div class="${desdeMenu ? 'nsft-pv-sqlwin' : 'nsft-pv-win'}">
+            <div class="nsft-pv-bar">
+                <span class="nsft-pv-mono nsft-pv-tiny">JS</span>
+                <span class="nsft-pv-grow nsft-pv-tiny">NetSuite Full Tools</span>
+                <span class="nsft-pv-bar-tail">&#9472; &#9723; &#10005;</span>
+            </div>
+            <div class="nsft-pv-menubar">
+                <span>{{@sql_menu_file}}</span><span>{{@sql_menu_edit}}</span>
+                <span>{{@sql_menu_run}}</span><span>{{@sql_menu_view}}</span><span>{{@sql_menu_help}}</span>
+            </div>
+            <div class="nsft-pv-toolbar">
+                <span class="nsft-pv-chip is-run">&#9654; {{@ssc_run}}${conIA ? '' : `
+                    <span class="nsft-pv-tap is-sscrun" aria-hidden="true"></span>
+                    <span class="nsft-pv-cursor is-sscrun" aria-hidden="true">${PUNTERO}</span>`}
+                </span>
+                <span class="nsft-pv-chip">{{@sql_submenu_format}}</span>
+                <span class="nsft-pv-chip">{{@ssc_load_tab_title}}</span>
+                <span class="nsft-pv-chip is-ai${conIA ? ' nsft-pv-hot' : ''}">&#10022; {{ia}}${conIA ? CURSOR_IA : ''}</span>
+                <span class="nsft-pv-grow"></span>
+                <span class="nsft-pv-chip">&#9707;</span>
+            </div>
+            <div class="nsft-pv-qtabs">
+                <span class="nsft-pv-qtab">{{@sql_tab_default_title}} 1 &#10005;</span>
+                <span class="nsft-pv-qtab is-on">{{@ssc_load_tab_title}} &#10005;</span>
+                <span class="nsft-pv-qtab is-plus">+</span>
+            </div>
+            <div class="${conIA ? 'nsft-pv-dock is-anim' : ''}">${cuerpo}${conIA ? PANEL_IA : ''}</div>
+            <div class="nsft-pv-statusbar">
+                <span class="is-ok nsft-pv-grow">&#9679;</span>
+                <span>6</span><span>1:1</span>
+            </div>
+        </div>`;
+
+        if (!desdeMenu) return ventana;
+
+        return ventanaNS({
+            clase: 'nsft-pv-sqlopen nsft-pv-menuflow',
+            sublista: true,
+            acciones: `
+            <span class="nsft-pv-toolsbtn"><img class="nsft-pv-logomark" src="{{logo}}" alt=""> {{@menuTools}} &#9662;
+                <span class="nsft-pv-menu">
+                    <span class="nsft-pv-menu-item">&#9002;_ {{@enableSuiteScriptConsoleLabel}}</span>
+                </span>
+                <span class="nsft-pv-tap is-cp" aria-hidden="true"></span>
+                <span class="nsft-pv-cursor is-cp" aria-hidden="true">${PUNTERO}</span>
+            </span>`,
+            extra: ventana
+        });
+    }
+    P.enableSuiteScriptConsole = consolaNS(false, true);
+
+    P.enableAdvancedEditor = ventanaNS({
+        clase: 'nsft-pv-menuflow nsft-pv-adv',
+        pestanas: `
+                <span class="nsft-pv-tab is-flt1">{{pvActRecs}}</span>
+                <span class="nsft-pv-tab is-flt2">demo_ue_documentos.js</span>`,
+        url: `<span class="nsft-pv-swap is-adv">
+                    <span class="u1">1234567.app.netsuite.com/app/common/custom/custrecordentry.nl</span>
+                    <span class="u2">1234567.app.netsuite.com/app/common/record/edittextmediaitem.nl?id=482&amp;e=T</span>
+                </span>`,
+        acciones: `
+            <span class="nsft-pv-toolsbtn"><img class="nsft-pv-logomark" src="{{logo}}" alt=""> {{@menuTools}} &#9662;
+                <span class="nsft-pv-menu">
+                    <span class="nsft-pv-menu-item">${ICONO_CODIGO} {{@adv_menu_open}}</span>
+                </span>
+                <span class="nsft-pv-tap is-cp" aria-hidden="true"></span>
+                <span class="nsft-pv-cursor is-cp" aria-hidden="true">${PUNTERO}</span>
+            </span>`,
+        destinoSinCabecera: true,
+        destino: editorAvanzadoNS()
     });
 
     P.enableCommandPalette = ventanaNS({
@@ -4112,28 +4437,6 @@
                                 </svg>
                             </span>`;
 
-    const PANEL_IA = `
-                <div class="nsft-pv-side">
-                  <div class="nsft-pv-side-inner">
-                    <div class="nsft-pv-bar">
-                        <span class="nsft-pv-ai">&#10022;</span>
-                        <span class="nsft-pv-grow nsft-pv-tiny" data-pv-label></span>
-                        <span class="nsft-pv-badge is-rp">BETA</span>
-                    </div>
-                    <div class="nsft-pv-side-body">
-                        <span class="nsft-pv-emblem">&#10022;</span>
-                        <div class="nsft-pv-skel"><i></i><i class="is-half"></i><i></i></div>
-                    </div>
-                    <div class="nsft-pv-body nsft-pv-flex">
-                        <span class="nsft-pv-input nsft-pv-grow nsft-pv-mono nsft-pv-tiny">|</span>
-                        <span class="nsft-pv-send">&#8594;</span>
-                    </div>
-                    <div class="nsft-pv-foot">
-                        <span class="nsft-pv-mono nsft-pv-grow">deepseek-v4-pro &#9662;</span>
-                        <span class="nsft-pv-mono">&#9776;</span>
-                    </div>
-                  </div>
-                </div>`;
 
     function runner(conIA, desdeMenu) {
         const cuerpo = `
@@ -4231,8 +4534,20 @@
     P.enableSuiteQLRunner = runner(false, true);
     P.aiAssistantSuiteql = runner(true);
 
+    P.aiAssistantConsole = consolaNS(true);
+
+    P.aiAssistantAdv = ventanaNS({
+        clase: 'nsft-pv-advia',
+        sinCabecera: true,
+        url: '1234567.app.netsuite.com/app/common/record/edittextmediaitem.nl?id=482&e=T',
+        cuerpo: editorAvanzadoNS(),
+        panel: PANEL_IA
+    });
+
     const NEEDS = {
         aiAssistantSuiteql: 'enableSuiteQLRunner',
+        aiAssistantConsole: 'enableSuiteScriptConsole',
+        aiAssistantAdv: 'enableAdvancedEditor',
         enableRecordTrail: 'enableRecordOptionsMenu',
         enableSaveAndEditButton: 'enableRecordOptionsMenu',
         saveAndEditModeMenu: 'enableRecordOptionsMenu',

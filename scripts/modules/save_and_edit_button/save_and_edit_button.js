@@ -114,7 +114,8 @@
         const DOM = window.NSFT_DOM;
         const msgNotReady = chrome.i18n.getMessage('ro_function_not_loaded');
         const label = chrome.i18n.getMessage('saveAndEdit');
-        const onclick = `if(typeof nsft_saveAndEdit=="function"){nsft_saveAndEdit(this);}else{alert(${JSON.stringify(msgNotReady)});}`;
+        const onclick = `if(typeof nsft_saveAndEdit=="function"){nsft_saveAndEdit(this);}else{this.dispatchEvent(new CustomEvent(${JSON.stringify('nsft-fn-not-ready')},{bubbles:true}));}`;
+        escuchaAvisoNoListo(msgNotReady);
 
         if (!document.getElementById(IDS.BTN)) {
             const anchor = RB.findSaveBtn();
@@ -148,4 +149,15 @@
             }
         }
     }
+
+    let _oyenteAvisoPuesto = false;
+    function escuchaAvisoNoListo(mensaje) {
+        if (_oyenteAvisoPuesto) return;
+        _oyenteAvisoPuesto = true;
+        document.addEventListener('nsft-fn-not-ready', () => {
+            if (window.NSFT_Dialog) window.NSFT_Dialog.alert({ body: mensaje });
+            else window.alert(mensaje);
+        });
+    }
+
 })();

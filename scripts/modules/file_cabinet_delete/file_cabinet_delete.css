@@ -45,3 +45,24 @@ tr.uir-list-row-tr.nsft-fcd-deleted {
     pointer-events: none;
     transition: opacity 0.25s ease;
 }
+
+.nsft-fcd-btn.is-busy {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.nsft-fcd-btn.is-busy > svg {
+    display: none;
+}
+
+.nsft-fcd-btn.is-busy::before {
+    content: '';
+    flex: 0 0 auto;
+    width: 11px;
+    height: 11px;
+    box-sizing: border-box;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: nsft-spin 0.7s linear infinite;
+}

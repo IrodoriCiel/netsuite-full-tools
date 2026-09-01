@@ -12,6 +12,9 @@
 
     const SEARCH_SELECTOR = '.nsft-jf-key, .nsft-jf-string, .nsft-jf-number, .nsft-jf-boolean, .nsft-jf-null';
 
+    const TS = window.NSFT_TextSearch;
+    const foldSearch = (s) => (TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase());
+
     const containerMeta = new WeakMap();
 
     const ric = (cb) => (typeof window.requestIdleCallback === 'function'
@@ -29,6 +32,7 @@
         searchPlaceholder: chrome.i18n.getMessage('jfSearchPlaceholder') || 'Buscar clave o valor…',
         prevTitle: chrome.i18n.getMessage('jfPrevTitle') || 'Anterior (Shift+Enter)',
         nextTitle: chrome.i18n.getMessage('jfNextTitle') || 'Siguiente (Enter)',
+        clearTitle: chrome.i18n.getMessage('ro_clear_search') || 'Limpiar búsqueda',
         expandAllTitle: chrome.i18n.getMessage('jfExpandAllTitle') || 'Expandir todo',
         collapseAllTitle: chrome.i18n.getMessage('jfCollapseAllTitle') || 'Colapsar todo',
         copyTitle: chrome.i18n.getMessage('jfCopyTitle') || 'Copiar JSON formateado',
@@ -264,6 +268,7 @@
             <div class="nsft-jf-search">
                 <svg class="nsft-jf-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <input type="search" class="nsft-jf-search-input" placeholder="${I18N.searchPlaceholder}" autocomplete="off" spellcheck="false">
+                <button type="button" class="nsft-jf-search-clear" title="${I18N.clearTitle}" aria-label="${I18N.clearTitle}" hidden>✕</button>
                 <span class="nsft-jf-search-count" hidden></span>
                 <button type="button" class="nsft-jf-search-nav" data-nav="prev" title="${I18N.prevTitle}" hidden>↑</button>
                 <button type="button" class="nsft-jf-search-nav" data-nav="next" title="${I18N.nextTitle}" hidden>↓</button>
@@ -554,9 +559,12 @@
 
     function wireSearch(header, tree, data) {
         const input = header.querySelector('.nsft-jf-search-input');
+        const clearBtn = header.querySelector('.nsft-jf-search-clear');
         const count = header.querySelector('.nsft-jf-search-count');
         const navPrev = header.querySelector('[data-nav="prev"]');
         const navNext = header.querySelector('[data-nav="next"]');
+
+        const syncClear = () => { if (clearBtn) clearBtn.hidden = !input.value.length; };
 
         let matches = [];
         let cursor = -1;
@@ -585,7 +593,7 @@
             tree.querySelectorAll('.nsft-jf-match').forEach((el) => el.classList.remove('nsft-jf-match'));
             if (!query) return;
             tree.querySelectorAll(SEARCH_SELECTOR).forEach((el) => {
-                if ((el.textContent || '').toLowerCase().includes(query)) el.classList.add('nsft-jf-match');
+                if (foldSearch(el.textContent || '').includes(query)) el.classList.add('nsft-jf-match');
             });
         };
 
@@ -602,7 +610,7 @@
         };
 
         const runSearch = (queryRaw, smooth) => {
-            query = (queryRaw || '').trim().toLowerCase();
+            query = foldSearch((queryRaw || '').trim());
             clearMarks();
             matches = [];
             cursor = -1;
@@ -621,9 +629,21 @@
 
         let typingTimer;
         input.addEventListener('input', () => {
+            syncClear();
             clearTimeout(typingTimer);
             typingTimer = setTimeout(() => runSearch(input.value, true), 120);
         });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
+            clearBtn.addEventListener('click', () => {
+                clearTimeout(typingTimer);
+                input.value = '';
+                syncClear();
+                runSearch('', false);
+                input.focus();
+            });
+        }
 
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
@@ -636,6 +656,7 @@
                 updateCount();
             } else if (e.key === 'Escape') {
                 input.value = '';
+                syncClear();
                 runSearch('', false);
             }
         });
@@ -666,12 +687,12 @@
                 for (const k of keys) {
                     if (out.length >= MAX) return;
                     const childPath = path.concat(k);
-                    if (!isArr && String(k).toLowerCase().includes(q)) out.push({ path: childPath, where: 'key' });
+                    if (!isArr && foldSearch(k).includes(q)) out.push({ path: childPath, where: 'key' });
                     walk(value[k], childPath);
                 }
             } else {
                 const text = value === null ? 'null' : String(value);
-                if (text.toLowerCase().includes(q)) out.push({ path, where: 'value' });
+                if (foldSearch(text).includes(q)) out.push({ path, where: 'value' });
             }
         };
         walk(data, []);

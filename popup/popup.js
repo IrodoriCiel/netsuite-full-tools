@@ -77,13 +77,43 @@ function resolveEffectiveTheme(mode) {
     return mode === 'dark' ? 'dark' : 'light';
 }
 
+const AUTO_THEME = 'auto';
+
+const CODE_THEME_OVERRIDE = {
+    viewRecordObjectTheme: 'viewRecordObjectThemeOverridden',
+    suiteqlTheme: 'suiteqlThemeOverridden',
+    suitescriptConsoleTheme: 'suitescriptConsoleThemeOverridden',
+    advancedEditorTheme: 'advancedEditorThemeOverridden'
+};
+
+const CODE_THEME_PAIR = {
+    viewRecordObjectTheme: { light: 'atom-one-light', dark: 'atom-one-dark' },
+    suiteqlTheme: { light: 'atom-one-light', dark: 'atom-one-dark' },
+    suitescriptConsoleTheme: { light: 'atom-one-light', dark: 'atom-one-dark' },
+    advancedEditorTheme: { light: 'atom-one-light', dark: 'atom-one-dark' }
+};
+
+function themeForMode(key, isDark) {
+    const par = CODE_THEME_PAIR[key];
+    if (!par) return null;
+    return isDark ? par.dark : par.light;
+}
+
+function isDarkNow() {
+    return document.documentElement.getAttribute('data-nsft-theme') === 'dark';
+}
+
 function applyCodeThemesForNsftTheme(resolvedTheme) {
     const isDark = resolvedTheme === 'dark';
     chrome.storage.local.get({
         viewRecordObjectThemeOverridden: false,
         suiteqlThemeOverridden: false,
+        suitescriptConsoleThemeOverridden: false,
+        advancedEditorThemeOverridden: false,
         viewRecordObjectTheme: null,
-        suiteqlTheme: null
+        suiteqlTheme: null,
+        suitescriptConsoleTheme: null,
+        advancedEditorTheme: null
     }, (items) => {
         const updates = {};
         if (!items.viewRecordObjectThemeOverridden) {
@@ -93,9 +123,21 @@ function applyCodeThemesForNsftTheme(resolvedTheme) {
             }
         }
         if (!items.suiteqlThemeOverridden) {
-            const target = isDark ? 'dracula' : 'eclipse';
+            const target = isDark ? 'atom-one-dark' : 'atom-one-light';
             if (items.suiteqlTheme !== target) {
                 updates.suiteqlTheme = target;
+            }
+        }
+        if (!items.suitescriptConsoleThemeOverridden) {
+            const target = isDark ? 'atom-one-dark' : 'atom-one-light';
+            if (items.suitescriptConsoleTheme !== target) {
+                updates.suitescriptConsoleTheme = target;
+            }
+        }
+        if (!items.advancedEditorThemeOverridden) {
+            const target = isDark ? 'atom-one-dark' : 'atom-one-light';
+            if (items.advancedEditorTheme !== target) {
+                updates.advancedEditorTheme = target;
             }
         }
         if (Object.keys(updates).length === 0) return;
@@ -108,6 +150,14 @@ function applyCodeThemesForNsftTheme(resolvedTheme) {
             if (updates.suiteqlTheme) {
                 const sel = document.getElementById('suiteqlTheme');
                 if (sel) sel.value = updates.suiteqlTheme;
+            }
+            if (updates.suitescriptConsoleTheme) {
+                const sel = document.getElementById('suitescriptConsoleTheme');
+                if (sel) sel.value = updates.suitescriptConsoleTheme;
+            }
+            if (updates.advancedEditorTheme) {
+                const sel = document.getElementById('advancedEditorTheme');
+                if (sel) sel.value = updates.advancedEditorTheme;
             }
         });
     });
@@ -213,7 +263,7 @@ const NSFT_DEV_TAP_WINDOW_MS = 3000;
             chrome.storage.local.remove('nsftUpdateSeenVersion', () => {
                 showToast(
                     chrome.i18n.getMessage('devResetNoticeDone') ||
-                    'Aviso reiniciado. Refresca una pestaña de NetSuite para verlo.',
+                    'Aviso de novedades reiniciado. Ya aparece en tus pestañas de NetSuite abiertas.',
                     { duration: 4000 }
                 );
             });
@@ -237,11 +287,63 @@ const NSFT_DEV_TAP_WINDOW_MS = 3000;
                 nsftRatePages: 25,
                 nsftRatePrompt: { off: false, snoozeUntil: 0 }
             }, () => {
+                chrome.storage.local.remove('nsftPromptGate', () => {
+                    showToast(
+                        chrome.i18n.getMessage('devResetRateDone') ||
+                        'Aviso de calificación reiniciado. Ya aparece en tus pestañas de NetSuite abiertas.',
+                        { duration: 4000 }
+                    );
+                });
+            });
+        });
+    }
+
+    const enElManifest = (ruta) => {
+        try {
+            const m = chrome.runtime.getManifest();
+            return (m.content_scripts || []).some((c) => (c.js || []).some((f) => f.indexOf(ruta) !== -1));
+        } catch (e) { return true; }
+    };
+
+    const resetShare = document.getElementById('nsftDevResetShare');
+    if (resetShare) {
+        resetShare.addEventListener('click', () => {
+            if (!enElManifest('share_prompt/share_prompt.js')) {
                 showToast(
-                    chrome.i18n.getMessage('devResetRateDone') ||
-                    'Aviso de calificación reiniciado. Refresca una pestaña de NetSuite para verlo.',
-                    { duration: 4000 }
+                    chrome.i18n.getMessage('devModuleNotLoaded') ||
+                    'Ese módulo aún no está en la extensión cargada. Recárgala en chrome://extensions y refresca la pestaña de NetSuite.',
+                    { duration: 7000 }
                 );
+                return;
+            }
+            chrome.storage.local.set({
+                nsftInstalledAt: Date.now() - (22 * 86400000),
+                nsftRatePages: 120,
+                nsftSharePrompt: { off: false, snoozeUntil: 0 },
+                nsftRatePrompt: { off: false, snoozeUntil: 130 }
+            }, () => {
+                chrome.storage.local.remove('nsftPromptGate', () => {
+                    setTimeout(() => {
+                        chrome.storage.local.get({ nsftPromptDebug: null }, (d) => {
+                            const r = d && d.nsftPromptDebug;
+                            const fresco = r && r.id === 'share' && (Date.now() - r.at) < 6000;
+                            if (fresco && r.que === 'pintado') {
+                                showToast(
+                                    chrome.i18n.getMessage('devResetShareDone') ||
+                                    'Aviso de compartir reiniciado. Ya aparece en tus pestañas de NetSuite abiertas.',
+                                    { duration: 4000 }
+                                );
+                                return;
+                            }
+                            const porQue = fresco ? r.que
+                                : (chrome.i18n.getMessage('devPromptNoAnswer') || 'ninguna pestaña respondió — refréscala');
+                            showToast(
+                                (chrome.i18n.getMessage('devPromptFailed') || 'El aviso no llegó a verse') + ': ' + porQue,
+                                { duration: 8000 }
+                            );
+                        });
+                    }, 900);
+                });
             });
         });
     }
@@ -348,8 +450,33 @@ function wireRecordActionModes(items) {
     });
 }
 
+function wireValueRadioGroups(items) {
+    const grupos = {
+        copyIdsMode: (it) => {
+            const m = it.copyIdsMode;
+            if (m === 'icons' || m === 'shift' || m === 'always') return m;
+            return it.copyIdsNoButton === false ? 'icons' : 'shift';
+        }
+    };
+    Object.entries(grupos).forEach(([key, deduce]) => {
+        const radios = document.querySelectorAll(`input[type="radio"][name="${key}"]`);
+        if (!radios.length) return;
+        const actual = deduce(items);
+        radios.forEach((radio) => {
+            radio.checked = (radio.value === actual);
+            radio.addEventListener('change', () => {
+                if (!radio.checked) return;
+                const val = radio.value;
+                chrome.storage.local.set({ [key]: val }, () => {
+                    chrome.storage.sync.set({ [key]: val });
+                });
+            });
+        });
+    });
+}
+
 function wireBooleanRadioGroups(items) {
-    const keys = ['copyIdsNoButton', 'setFieldValuesNoIcon'];
+    const keys = ['setFieldValuesNoIcon'];
     keys.forEach((key) => {
         const radios = document.querySelectorAll(`input[type="radio"][name="${key}"]`);
         if (!radios.length) return;
@@ -432,8 +559,52 @@ function ensurePopupEditorFonts() {
     }).catch(() => { });
 }
 
+function populateGhostModelSelect(items) {
+    const selects = [
+        { sel: document.getElementById('suitescriptConsoleAiModel'), key: 'suitescriptConsoleAiModel' },
+        { sel: document.getElementById('suiteqlAiModel'), key: 'suiteqlAiModel' }
+    ].filter((s) => s.sel);
+    if (!selects.length) return;
+    const FAST = globalThis.NSFT_AI_FAST || { nombres: {}, rapidos: {} };
+    const NOMBRES = FAST.nombres;
+    const RAPIDOS = {};
+    Object.keys(FAST.rapidos).forEach((k) => { RAPIDOS[k] = new RegExp(FAST.rapidos[k], 'i'); });
+    chrome.storage.local.get({ nsft_ai_configs: {} }, (st) => {
+        const configs = st.nsft_ai_configs || {};
+        selects.forEach(({ sel, key }) => {
+            sel.innerHTML = '';
+            const opt0 = document.createElement('option');
+            opt0.value = '';
+            opt0.textContent = chrome.i18n.getMessage('sscAiModelSameChat') || 'El mismo del chat';
+            sel.appendChild(opt0);
+            Object.keys(configs).forEach((pk) => {
+                const c = configs[pk];
+                if (!c || c.disabled) return;
+                const visibles = (c.models || []).filter((m) => (c.hidden || []).indexOf(m) === -1);
+                if (!visibles.length) return;
+                const re = RAPIDOS[pk] || new RegExp(FAST.generico || 'haiku|flash|nano|mini|lite|fast', 'i');
+                const lista = visibles.filter((m) => re.test(String(m)));
+                if (!lista.length) return;
+                const grupo = document.createElement('optgroup');
+                grupo.label = NOMBRES[pk] || pk;
+                lista.forEach((m) => {
+                    const o = document.createElement('option');
+                    o.value = pk + '::' + m;
+                    o.textContent = m;
+                    grupo.appendChild(o);
+                });
+                sel.appendChild(grupo);
+            });
+            const guardado = (items && items[key]) || '';
+            sel.value = guardado;
+            if (sel.value !== guardado) sel.value = '';
+        });
+    });
+}
+
 function applyStoredSettings(items) {
     populateEditorFontSelect();
+    populateGhostModelSelect(items);
     Object.keys(DEFAULTS).forEach(key => {
         const element = document.getElementById(key);
         if (element) {
@@ -441,6 +612,8 @@ function applyStoredSettings(items) {
 
             if (element.type === 'checkbox') {
                 element.checked = val;
+            } else if (CODE_THEME_OVERRIDE[key] && !items[CODE_THEME_OVERRIDE[key]]) {
+                element.value = AUTO_THEME;
             } else {
                 element.value = val;
             }
@@ -448,7 +621,7 @@ function applyStoredSettings(items) {
             const toggleVisibility = () => {
                 if (key === 'enableAiAssistant') {
                     const container = document.getElementById('aiAssistantScope');
-                    if (container) container.style.display = element.checked ? 'flex' : 'none';
+                    if (container) container.classList.toggle('is-off', !element.checked);
                 }
                 if (key === 'enableLogPrettier') {
                     const container = document.getElementById('theme-container-log');
@@ -485,6 +658,16 @@ function applyStoredSettings(items) {
                 if (key === 'enableSuiteQLRunner') {
                     const container = document.getElementById('theme-container-suiteql');
                     if (container) container.style.display = element.checked ? 'block' : 'none';
+                }
+                if (key === 'enableSuiteScriptConsole') {
+                    const container = document.getElementById('theme-container-ssc');
+                    if (container) container.style.display = element.checked ? 'block' : 'none';
+                }
+                if (key === 'enableAdvancedEditor') {
+                    const container = document.getElementById('theme-container-adv');
+                    if (container) container.style.display = element.checked ? 'block' : 'none';
+                    const regla = document.getElementById('ruler-container-adv');
+                    if (regla) regla.style.display = element.checked ? 'block' : 'none';
                 }
                 if (key === 'enableExportSearch') {
                     const container = document.getElementById('theme-container-es');
@@ -618,6 +801,10 @@ function applyStoredSettings(items) {
             }
 
             element.addEventListener('change', () => {
+                if (CT_SLIDER_KEYS.indexOf(key) !== -1) {
+                    ctGuardar(true);
+                    return;
+                }
                 const newValue = element.type === 'checkbox' ? element.checked : element.value;
 
                 if (key === 'editorTheme') updateEditorThemePreview(newValue);
@@ -625,15 +812,20 @@ function applyStoredSettings(items) {
                 if (key === 'editorFontSize') applyEditorFontSizeToPreview(newValue);
                 if (key.indexOf('editorCustom') === 0) updateEditorThemePreview('custom');
 
-                const codeThemeOverrideMap = {
-                    viewRecordObjectTheme: 'viewRecordObjectThemeOverridden',
-                    suiteqlTheme: 'suiteqlThemeOverridden'
-                };
-                const overrideKey = codeThemeOverrideMap[key];
-                const extraPayload = overrideKey ? { [overrideKey]: true } : {};
+                const overrideKey = CODE_THEME_OVERRIDE[key];
+                let extraPayload = {};
+                let valorAGuardar = newValue;
+                if (overrideKey) {
+                    if (newValue === AUTO_THEME) {
+                        extraPayload = { [overrideKey]: false };
+                        valorAGuardar = themeForMode(key, isDarkNow());
+                    } else {
+                        extraPayload = { [overrideKey]: true };
+                    }
+                }
 
-                chrome.storage.local.set({ [key]: newValue, ...extraPayload }, () => {
-                    chrome.storage.sync.set({ [key]: newValue });
+                chrome.storage.local.set({ [key]: valorAGuardar, ...extraPayload }, () => {
+                    chrome.storage.sync.set({ [key]: valorAGuardar });
                 });
 
                 if (element.type === 'checkbox' || element.tagName === 'SELECT') {
@@ -690,7 +882,7 @@ function applyStoredSettings(items) {
 
                 element.addEventListener('input', () => {
                     updateUI();
-                    chrome.storage.local.set({ [key]: element.value });
+                    ctGuardar(false);
                 });
 
                 updateUI();
@@ -742,6 +934,7 @@ function applyStoredSettings(items) {
 
     wireRecordActionModes(items);
     wireBooleanRadioGroups(items);
+    wireValueRadioGroups(items);
 
     const btnRepairGroups = document.getElementById('repairDuplicateGroupsBtn');
     const repairStatus = document.getElementById('repairDuplicateGroupsStatus');
@@ -785,6 +978,124 @@ function applyStoredSettings(items) {
             );
         });
     }
+
+    const CT_ENV_KEYS = { PRD: 'colorThemeEnvPrd', SB: 'colorThemeEnvSb', RP: 'colorThemeEnvRp' };
+    const CT_SLIDER_KEYS = ['colorThemeHue', 'colorThemeSat', 'colorThemeLig'];
+    const CT_DEFAULT_HSL = [216, 23, 49];
+    const CT_ENV_FALLBACK = { PRD: '#9a606a', SB: '#609a73', RP: '#60779a' };
+
+    let ctDestino = 'default';
+    let ctCargando = false;
+
+    function ctSliders() {
+        return CT_SLIDER_KEYS.map((k) => document.getElementById(k));
+    }
+
+    function ctLeerSliders() {
+        const [h, s, l] = ctSliders();
+        return [+h.value, +s.value, +l.value];
+    }
+
+    function ctGuardar(commit) {
+        if (ctCargando) return;
+        const [h, s, l] = ctLeerSliders();
+        let payload;
+        if (ctDestino === 'default') {
+            payload = { colorThemeHue: String(h), colorThemeSat: String(s), colorThemeLig: String(l) };
+        } else {
+            payload = { [CT_ENV_KEYS[ctDestino]]: nsftHslToHex(h, s, l) };
+        }
+        chrome.storage.local.set(payload);
+        if (commit) chrome.storage.sync.set(payload);
+        const punto = document.querySelector('.nsft-ct-target[data-ct-target="' + ctDestino + '"] .nsft-ct-dot');
+        if (punto) punto.style.background = `hsl(${h}, ${s}%, ${l}%)`;
+    }
+
+    function ctCargarDestino() {
+        const claves = ['colorThemeHue', 'colorThemeSat', 'colorThemeLig', ...Object.values(CT_ENV_KEYS)];
+        chrome.storage.local.get(claves, (items) => {
+            let hsl;
+            if (ctDestino === 'default') {
+                hsl = [
+                    items.colorThemeHue !== undefined ? +items.colorThemeHue : CT_DEFAULT_HSL[0],
+                    items.colorThemeSat !== undefined ? +items.colorThemeSat : CT_DEFAULT_HSL[1],
+                    items.colorThemeLig !== undefined ? +items.colorThemeLig : CT_DEFAULT_HSL[2]
+                ];
+            } else {
+                const hex = items[CT_ENV_KEYS[ctDestino]] || CT_ENV_FALLBACK[ctDestino];
+                hsl = nsftHexToHsl(hex) || CT_DEFAULT_HSL;
+            }
+            const [hEl, sEl, lEl] = ctSliders();
+            if (!hEl || !sEl || !lEl) return;
+            ctCargando = true;
+            hEl.value = hsl[0];
+            sEl.value = hsl[1];
+            lEl.value = Math.max(10, Math.min(90, hsl[2]));
+            hEl.dispatchEvent(new Event('input'));
+            sEl.dispatchEvent(new Event('input'));
+            lEl.dispatchEvent(new Event('input'));
+            ctCargando = false;
+        });
+    }
+
+    function ctPintarMuestras() {
+        const botones = document.querySelectorAll('.nsft-ct-target');
+        if (!botones.length) return;
+        const claves = ['colorThemeHue', 'colorThemeSat', 'colorThemeLig', ...Object.values(CT_ENV_KEYS)];
+        chrome.storage.local.get(claves, (items) => {
+            botones.forEach((b) => {
+                const dest = b.dataset.ctTarget;
+                const punto = b.querySelector('.nsft-ct-dot');
+                if (!punto) return;
+                if (dest === 'default') {
+                    const h = items.colorThemeHue !== undefined ? +items.colorThemeHue : CT_DEFAULT_HSL[0];
+                    const s = items.colorThemeSat !== undefined ? +items.colorThemeSat : CT_DEFAULT_HSL[1];
+                    const l = items.colorThemeLig !== undefined ? +items.colorThemeLig : CT_DEFAULT_HSL[2];
+                    punto.style.background = `hsl(${h}, ${s}%, ${l}%)`;
+                } else {
+                    punto.style.background = items[CT_ENV_KEYS[dest]] || CT_ENV_FALLBACK[dest];
+                }
+            });
+        });
+    }
+
+    document.querySelectorAll('.nsft-ct-target').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nsft-ct-target').forEach((b) => b.classList.toggle('is-active', b === btn));
+            ctDestino = btn.dataset.ctTarget || 'default';
+            ctCargarDestino();
+        });
+    });
+
+    const ctModo = document.getElementById('colorThemeMode');
+    function ctModoActual() {
+        const v = ctModo && ctModo.value;
+        return (v === 'env' || v === 'accounts') ? v : 'global';
+    }
+    function ctSincronizar(recargar) {
+        const modo = ctModoActual();
+        const contEnv = document.getElementById('color-theme-env-controls');
+        const contAcc = document.getElementById('color-theme-accounts-controls');
+        if (contEnv) contEnv.style.display = modo === 'env' ? 'block' : 'none';
+        if (contAcc) contAcc.style.display = modo === 'accounts' ? 'block' : 'none';
+
+        const activa = document.querySelector('.nsft-ct-target.is-active');
+        const destinoNuevo = modo === 'env' ? ((activa && activa.dataset.ctTarget) || 'PRD') : 'default';
+        if (destinoNuevo === ctDestino) { if (modo === 'env') ctPintarMuestras(); return; }
+        ctDestino = destinoNuevo;
+        if (modo === 'env') ctPintarMuestras();
+        if (recargar) ctCargarDestino();
+    }
+    if (ctModo) ctModo.addEventListener('change', () => ctSincronizar(true));
+
+    if (ctModo) {
+        const m = items[ctModo.id];
+        ctModo.value = (m === 'global' || m === 'accounts' || m === 'env')
+            ? m
+            : (items.colorThemeByEnv === true ? 'env' : 'global');
+    }
+    ctSincronizar(false);
+    if (ctModoActual() === 'env') ctCargarDestino();
 
     const presetSelect = document.getElementById('colorThemePreset');
     if (presetSelect) {
@@ -855,15 +1166,20 @@ function applyStoredSettings(items) {
     const btnResetColor = document.getElementById('colorThemeReset');
     if (btnResetColor) {
         btnResetColor.addEventListener('click', () => {
-            document.getElementById('colorThemeHue').value = 216;
-            document.getElementById('colorThemeSat').value = 23;
-            document.getElementById('colorThemeLig').value = 49;
-            document.getElementById('colorThemeHue').dispatchEvent(new Event('input'));
-            document.getElementById('colorThemeSat').dispatchEvent(new Event('input'));
-            document.getElementById('colorThemeLig').dispatchEvent(new Event('input'));
-            const defaults = { colorThemeHue: 216, colorThemeSat: 23, colorThemeLig: 49 };
-            chrome.storage.local.set(defaults);
-            chrome.storage.sync.set(defaults);
+            const base = ctDestino === 'default'
+                ? CT_DEFAULT_HSL
+                : (nsftHexToHsl(CT_ENV_FALLBACK[ctDestino]) || CT_DEFAULT_HSL);
+            const [hEl, sEl, lEl] = ctSliders();
+            if (!hEl || !sEl || !lEl) return;
+            ctCargando = true;
+            hEl.value = base[0];
+            sEl.value = base[1];
+            lEl.value = Math.max(10, Math.min(90, base[2]));
+            hEl.dispatchEvent(new Event('input'));
+            sEl.dispatchEvent(new Event('input'));
+            lEl.dispatchEvent(new Event('input'));
+            ctCargando = false;
+            ctGuardar(true);
         });
     }
 
@@ -956,12 +1272,12 @@ function wireEditorThemeExportImport() {
             try {
                 const parsed = JSON.parse(reader.result || '{}');
                 if (!parsed || parsed.schema !== 'nsft-editor-theme/1') {
-                    alert(chrome.i18n.getMessage('editorThemeImportInvalid') || 'Invalid theme file');
+                    showAlertDialog(chrome.i18n.getMessage('editorThemeImportInvalid') || 'Invalid theme file');
                     return;
                 }
                 applyImportedTheme(parsed);
             } catch (e) {
-                alert(chrome.i18n.getMessage('editorThemeImportInvalid') || 'Invalid theme file');
+                showAlertDialog(chrome.i18n.getMessage('editorThemeImportInvalid') || 'Invalid theme file');
             } finally {
                 fileInput.value = '';
             }
@@ -2151,6 +2467,15 @@ function hideToast() {
     _nsftToastHideTimeout = setTimeout(() => { toast.hidden = true; }, 280);
 }
 
+function showAlertDialog(body, title) {
+    return showConfirmDialog({
+        title: title || chrome.i18n.getMessage('dlg_title_alert') || 'Aviso',
+        body: body,
+        confirmLabel: chrome.i18n.getMessage('dlg_ok') || 'Entendido',
+        alertOnly: true
+    });
+}
+
 function showConfirmDialog(opts) {
     const o = opts || {};
     return new Promise((resolve) => {
@@ -2169,6 +2494,7 @@ function showConfirmDialog(opts) {
         okBtn.textContent = o.confirmLabel || 'OK';
         cancelBtn.textContent = chrome.i18n.getMessage('bulkConfirmCancel') || 'Cancelar';
         okBtn.classList.toggle('is-danger', !!o.danger);
+        cancelBtn.hidden = !!o.alertOnly;
 
         let done = false;
         const close = (result) => {
@@ -2176,6 +2502,7 @@ function showConfirmDialog(opts) {
             done = true;
             root.hidden = true;
             root.classList.remove('is-visible');
+            cancelBtn.hidden = false;
             document.removeEventListener('keydown', onKey, true);
             okBtn.removeEventListener('click', onOk);
             cancelBtn.removeEventListener('click', onCancel);
@@ -2333,7 +2660,7 @@ function importSettingsFromFile() {
                 settings = null;
             }
             if (!settings || typeof settings !== 'object') {
-                alert(chrome.i18n.getMessage('settingsImportFail') || 'Import failed: invalid JSON file.');
+                showAlertDialog(chrome.i18n.getMessage('settingsImportFail') || 'Import failed: invalid JSON file.');
                 return;
             }
 
@@ -2348,7 +2675,7 @@ function importSettingsFromFile() {
             });
 
             if (!count) {
-                alert(chrome.i18n.getMessage('settingsImportEmpty') || 'No recognised settings in that file.');
+                showAlertDialog(chrome.i18n.getMessage('settingsImportEmpty') || 'No recognised settings in that file.');
                 return;
             }
 
@@ -2431,11 +2758,26 @@ function _nsftEscapeHtml(s) {
     }[c]));
 }
 
+const _NSFT_TS = window.NSFT_TextSearch || null;
+
 function _nsftFold(s) {
+    if (_NSFT_TS) return _NSFT_TS.fold(s);
     let out = '';
     for (const ch of String(s)) {
         const folded = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         out += folded.length === ch.length ? folded : ch;
+    }
+    return out.toLowerCase();
+}
+
+function _nsftFoldRanges(text, needle) {
+    if (_NSFT_TS) return _NSFT_TS.ranges(text, needle);
+    const hay = _nsftFold(text);
+    const out = [];
+    let i = hay.indexOf(needle);
+    while (i !== -1) {
+        out.push({ start: i, end: i + needle.length });
+        i = hay.indexOf(needle, i + needle.length);
     }
     return out;
 }
@@ -2448,20 +2790,22 @@ function _nsftApplyHighlight(row, query) {
     row.querySelectorAll(sel).forEach((el) => {
         if (el.querySelector('input, select, textarea, button')) return;
         const original = el.textContent;
-        const hay = _nsftFold(original.toLowerCase());
-        let idx = hay.indexOf(needle);
-        if (idx === -1) return;
+        const tramos = _nsftFoldRanges(original, needle);
+        if (!tramos.length) return;
         if (!el.hasAttribute('data-nsft-orig')) {
             el.setAttribute('data-nsft-orig', original);
         }
+        if (_NSFT_TS) {
+            _NSFT_TS.mark(el, original, needle, 'nsft-search-hl');
+            return;
+        }
         let html = '';
         let last = 0;
-        while (idx !== -1) {
-            html += _nsftEscapeHtml(original.slice(last, idx));
-            html += `<mark class="nsft-search-hl">${_nsftEscapeHtml(original.slice(idx, idx + needle.length))}</mark>`;
-            last = idx + needle.length;
-            idx = hay.indexOf(needle, last);
-        }
+        tramos.forEach((r) => {
+            html += _nsftEscapeHtml(original.slice(last, r.start));
+            html += `<mark class="nsft-search-hl">${_nsftEscapeHtml(original.slice(r.start, r.end))}</mark>`;
+            last = r.end;
+        });
         html += _nsftEscapeHtml(original.slice(last));
         el.innerHTML = html;
     });

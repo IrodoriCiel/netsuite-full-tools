@@ -88,7 +88,16 @@
             postReinitMessage();
             return;
         }
+        if (!document.getElementById('nsft-diff-mw')) {
+            const d = document.createElement('script');
+            d.id = 'nsft-diff-mw';
+            d.async = false;
+            d.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_diff.js');
+            d.onload = function () { this.remove(); };
+            (document.head || document.documentElement).appendChild(d);
+        }
         const s = document.createElement('script');
+        s.async = false;
         s.src = chrome.runtime.getURL(FETCHER_PATH);
         s.dataset.nsftI18n = JSON.stringify(buildI18nPayload());
         s.dataset.nsftTheme = _theme;
@@ -127,7 +136,9 @@
             diffConfirm: get('suDiffConfirm', 'Subir y reemplazar'),
             diffNoChanges: get('suDiffNoChanges', 'Sin cambios. El archivo es idéntico al actual.'),
             diffTooLarge: get('suDiffTooLarge', 'Archivo demasiado grande para mostrar el diff completo. Se mostrarán solo las primeras 5000 líneas.'),
-            diffLoadFailed: get('suDiffLoadFailed', 'No se pudo obtener el archivo actual. Se mostrará solo el nuevo contenido.')
+            diffLoadFailed: get('suDiffLoadFailed', 'No se pudo obtener el archivo actual. Se mostrará solo el nuevo contenido.'),
+            diffLines: get('suDiffLines', 'líneas'),
+            diffChars: get('suDiffChars', 'caracteres')
         };
     }
 })();

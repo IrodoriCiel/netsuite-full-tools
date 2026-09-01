@@ -4,12 +4,17 @@
     const AT_KEY = 'nsftInstalledAt';
     const PAGES_KEY = 'nsftRatePages';
     const STATE_KEY = 'nsftRatePrompt';
+    const SHARE_STATE_KEY = 'nsftSharePrompt';
+    const GATE_KEY = 'nsftPromptGate';
     const TOAST_ID = 'nsft-rate-prompt';
 
     const MIN_DAYS = 7;
     const MIN_PAGES = 25;
     const SNOOZE_PAGES = 60;
     const SHOW_DELAY_MS = 4000;
+
+    const GAP_DAYS = 7;
+    const GAP_PAGES = 40;
 
     const STORE_URL = 'https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc/reviews';
     const COFFEE_URL = 'https://buymeacoffee.com/miguelgarcia93';
@@ -19,10 +24,13 @@
 
     if (window.top !== window) return;
 
+    try { document.documentElement.dataset.nsftRatePrompt = '1'; } catch (e) { }
+
     chrome.storage.local.get({
         [AT_KEY]: 0,
         [PAGES_KEY]: 0,
-        [STATE_KEY]: null
+        [STATE_KEY]: null,
+        [GATE_KEY]: null
     }, (items) => {
         if (chrome.runtime.lastError) return;
 
@@ -40,14 +48,38 @@
         if (pages < (state.snoozeUntil || 0)) return;
         if ((now - installedAt) / 86400000 < MIN_DAYS) return;
 
+        const gate = items[GATE_KEY];
+        if (gate) {
+            if (gate.at && (now - gate.at) / 86400000 < GAP_DAYS) return;
+            if (gate.pages && (pages - gate.pages) < GAP_PAGES) return;
+        }
+
         setTimeout(() => show(pages), SHOW_DELAY_MS);
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local' || !changes[STATE_KEY]) return;
-        const v = changes[STATE_KEY].newValue;
-        if (v && (v.off || v.snoozeUntil)) removeToast();
+        if (area !== 'local') return;
+
+        if (changes[STATE_KEY]) {
+            const v = changes[STATE_KEY].newValue;
+            if (v && (v.off || v.snoozeUntil)) { removeToast(); return; }
+            if (v && !v.off && !v.snoozeUntil) fuerza();
+            return;
+        }
+
+        if (changes[SHARE_STATE_KEY]) {
+            const o = changes[SHARE_STATE_KEY].newValue;
+            if (o && !o.off && !o.snoozeUntil) removeToast();
+        }
     });
+
+    function fuerza() {
+        chrome.storage.local.get({ [PAGES_KEY]: 0 }, (it) => {
+            if (chrome.runtime.lastError) return;
+            removeToast();
+            setTimeout(() => show(it[PAGES_KEY] || 0, true), 320);
+        });
+    }
 
     function silence() {
         try { chrome.storage.local.set({ [STATE_KEY]: { off: true, snoozeUntil: 0 } }); } catch (e) { }
@@ -86,12 +118,18 @@
         try { window.open(url, '_blank', 'noopener'); } catch (e) { }
     }
 
-    function show(pages) {
+    function marcaCompuerta(pages) {
+        try { chrome.storage.local.set({ [GATE_KEY]: { at: Date.now(), pages } }); } catch (e) { }
+    }
+
+    function show(pages, forzado) {
         if (!document.body || document.getElementById(TOAST_ID)) return;
+        if (!forzado && document.querySelector('[data-nsft-prompt]')) return;
 
         const toast = document.createElement('div');
         toast.id = TOAST_ID;
         toast.setAttribute('role', 'complementary');
+        toast.setAttribute('data-nsft-prompt', 'rate');
 
         const logo = document.createElement('img');
         logo.className = 'nsft-rp-logo';
@@ -152,6 +190,7 @@
         if (!(window.NSFT_Notices && window.NSFT_Notices.mount(toast))) {
             document.body.appendChild(toast);
         }
+        marcaCompuerta(pages);
         requestAnimationFrame(() => toast.classList.add('nsft-rp-visible'));
     }
 })();

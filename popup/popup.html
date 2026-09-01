@@ -24,6 +24,7 @@
     }
   </style>
   <script src="early-theme.js"></script>
+  <link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
   <link rel="stylesheet" href="popup.css">
   <link rel="stylesheet" href="../welcome/welcome_previews.css">
   <link rel="stylesheet" href="submenus.css">
@@ -260,16 +261,23 @@
               <input type="checkbox" id="enableAiAssistant">
               <span class="slider round"></span>
             </label>
-            <div id="aiAssistantScope" style="width: 100%; margin-top: 8px; display: flex; flex-direction: column; gap: 4px;">
-              <span style="font-size: 10px; font-weight: bold; color: var(--text-label);"
-                data-i18n="aiAssistantScopeLabel"></span>
-              <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); cursor: pointer;">
-                <input type="checkbox" id="aiAssistantPage" style="margin: 0;">
+            <div id="aiAssistantScope" class="nsft-ai-ambito">
+              <span class="nsft-ai-ambito-t" data-i18n="aiAssistantScopeLabel"></span>
+              <label>
+                <input type="checkbox" id="aiAssistantPage">
                 <span data-i18n="aiAssistantPageLabel"></span>
               </label>
-              <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); cursor: pointer;">
-                <input type="checkbox" id="aiAssistantSuiteql" style="margin: 0;">
+              <label>
+                <input type="checkbox" id="aiAssistantSuiteql">
                 <span data-i18n="aiAssistantSuiteqlLabel"></span>
+              </label>
+              <label>
+                <input type="checkbox" id="aiAssistantConsole">
+                <span data-i18n="aiAssistantConsoleLabel"></span>
+              </label>
+              <label>
+                <input type="checkbox" id="aiAssistantAdv">
+                <span data-i18n="aiAssistantAdvLabel"></span>
               </label>
             </div>
           </div>
@@ -285,6 +293,41 @@
             </label>
 
             <div id="color-themes-controls" style="width: 100%; margin-top: 10px; display: none;">
+              <section style="margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <label for="colorThemeMode" style="font-size: 10px; font-weight: bold; color: var(--text-label); flex-shrink: 0;"
+                    data-i18n="colorThemeModeLabel"></label>
+                  <select id="colorThemeMode"
+                    style="flex: 1; padding: 3px 6px; font-size: 11px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--input-bg); color: var(--text-primary); outline: none;">
+                    <option value="global" data-i18n="colorThemeModeGlobal"></option>
+                    <option value="env" data-i18n="colorThemeModeEnv"></option>
+                    <option value="accounts" data-i18n="colorThemeModeAccounts"></option>
+                  </select>
+                </div>
+
+                <section id="color-theme-env-controls" style="margin-top: 8px; display: none;">
+                  <div class="nsft-ct-targets">
+                    <button type="button" class="nsft-ct-target is-active" data-ct-target="PRD">
+                      <i class="nsft-ct-dot"></i><span data-i18n="envBadgeColorPrdLabel"></span>
+                    </button>
+                    <button type="button" class="nsft-ct-target" data-ct-target="SB">
+                      <i class="nsft-ct-dot"></i><span data-i18n="envBadgeColorSbLabel"></span>
+                    </button>
+                    <button type="button" class="nsft-ct-target" data-ct-target="RP">
+                      <i class="nsft-ct-dot"></i><span data-i18n="envBadgeColorRpLabel"></span>
+                    </button>
+                  </div>
+                  <div class="description" style="margin-top: 6px;" data-i18n="colorThemeByEnvHint"></div>
+                </section>
+
+                <section id="color-theme-accounts-controls" style="margin-top: 8px; display: none;">
+                  <a id="colorThemeAccountsLink" href="../scripts/modules/color_themes/color_theme_accounts.html"
+                    target="_blank" style="font-size: 11px; text-decoration: none; color: var(--accent-info); display: inline-block;"
+                    data-i18n="colorThemeAccountsLink"></a>
+                  <div class="description" style="margin-top: 6px;" data-i18n="colorThemeAccountsHint"></div>
+                </section>
+              </section>
+
               <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
                 <label for="colorThemePreset" style="font-size: 10px; font-weight: bold; color: var(--text-label); flex-shrink: 0;"
                   data-i18n="colorThemePresetLabel"></label>
@@ -292,16 +335,16 @@
                   style="flex: 1; padding: 3px 6px; font-size: 11px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--input-bg); color: var(--text-primary); outline: none;">
                   <option value="custom" data-i18n="colorThemePresetCustom"></option>
                   <option value="netsuite_blue" data-h="216" data-s="23" data-l="49" data-i18n="colorThemePresetNetSuiteBlue"></option>
-                  <option value="midnight" data-h="220" data-s="50" data-l="25" data-i18n="colorThemePresetMidnight"></option>
-                  <option value="github_dark" data-h="215" data-s="15" data-l="25" data-i18n="colorThemePresetGitHubDark"></option>
-                  <option value="slack_aubergine" data-h="300" data-s="33" data-l="30" data-i18n="colorThemePresetSlackAubergine"></option>
-                  <option value="forest_green" data-h="140" data-s="40" data-l="35" data-i18n="colorThemePresetForestGreen"></option>
-                  <option value="crimson" data-h="350" data-s="60" data-l="40" data-i18n="colorThemePresetCrimson"></option>
-                  <option value="sunset_orange" data-h="20" data-s="70" data-l="50" data-i18n="colorThemePresetSunsetOrange"></option>
-                  <option value="light_mint" data-h="160" data-s="40" data-l="55" data-i18n="colorThemePresetLightMint"></option>
-                  <option value="graphite" data-h="0" data-s="0" data-l="30" data-i18n="colorThemePresetGraphite"></option>
-                  <option value="royal_purple" data-h="270" data-s="50" data-l="40" data-i18n="colorThemePresetRoyalPurple"></option>
-                  <option value="high_contrast" data-h="0" data-s="0" data-l="15" data-i18n="colorThemePresetHighContrast"></option>
+                  <option value="red" data-h="350" data-s="23" data-l="49" data-i18n="colorThemePresetRed"></option>
+                  <option value="orange" data-h="25" data-s="23" data-l="49" data-i18n="colorThemePresetOrange"></option>
+                  <option value="gold" data-h="45" data-s="23" data-l="49" data-i18n="colorThemePresetGold"></option>
+                  <option value="olive" data-h="80" data-s="23" data-l="49" data-i18n="colorThemePresetOlive"></option>
+                  <option value="green" data-h="140" data-s="23" data-l="49" data-i18n="colorThemePresetGreen"></option>
+                  <option value="teal" data-h="170" data-s="23" data-l="49" data-i18n="colorThemePresetTeal"></option>
+                  <option value="cyan" data-h="195" data-s="23" data-l="49" data-i18n="colorThemePresetCyan"></option>
+                  <option value="indigo" data-h="250" data-s="23" data-l="49" data-i18n="colorThemePresetIndigo"></option>
+                  <option value="purple" data-h="280" data-s="23" data-l="49" data-i18n="colorThemePresetPurple"></option>
+                  <option value="magenta" data-h="315" data-s="23" data-l="49" data-i18n="colorThemePresetMagenta"></option>
                 </select>
               </div>
 
@@ -477,6 +520,17 @@
 
           <div class="option-row">
             <div>
+              <span id="label_enableCustomizationFinder" data-i18n="enableCustomizationFinderLabel"></span>
+              <div id="desc_enableCustomizationFinder" class="description" data-i18n="enableCustomizationFinderDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableCustomizationFinder">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
               <span id="label_enableShortcutsCheatsheet" data-i18n="enableShortcutsCheatsheetLabel"></span>
               <div id="desc_enableShortcutsCheatsheet" class="description" data-i18n="enableShortcutsCheatsheetDesc"></div>
             </div>
@@ -545,6 +599,7 @@
                   data-i18n="themeLabel"></label>
                 <select id="viewRecordObjectTheme"
                   style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="themeAuto"></option>
                   <option value="atom-one-dark">Atom One Dark</option>
                   <option value="atom-one-light">Atom One Light</option>
                   <option value="default">Default</option>
@@ -553,6 +608,7 @@
                   <option value="monokai">Monokai</option>
                   <option value="obsidian">Obsidian</option>
                   <option value="shades-of-purple">Shades of Purple</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
                   <option value="vs">Visual Studio</option>
                   <option value="vs2015">VS2015</option>
                   <option value="stackoverflow-light">StackOverflow Light</option>
@@ -695,8 +751,9 @@
               <div id="desc_enableCopyFieldAndSublistIds" class="description" data-i18n="enableFieldAndSublistIdsDesc">
               </div>
               <div id="copy-ids-controls" class="nsft-radio-group" style="margin-top: 5px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" id="copyIdsModeIcons" name="copyIdsNoButton" value="false"><span data-i18n="copyIdsWithButtonLabel"></span></label>
-                <label><input type="radio" id="copyIdsModeShift" name="copyIdsNoButton" value="true"><span data-i18n="copyIdsNoButtonLabel"></span></label>
+                <label><input type="radio" id="copyIdsModeIcons" name="copyIdsMode" value="icons"><span data-i18n="copyIdsWithButtonLabel"></span></label>
+                <label><input type="radio" id="copyIdsModeShift" name="copyIdsMode" value="shift"><span data-i18n="copyIdsNoButtonLabel"></span></label>
+                <label><input type="radio" id="copyIdsModeAlways" name="copyIdsMode" value="always"><span data-i18n="copyIdsAlwaysLabel"></span></label>
               </div>
             </div>
             <label class="switch">
@@ -891,6 +948,102 @@
 
           <div class="option-row">
             <div>
+              <span id="label_enableAdvancedEditor" data-i18n="enableAdvancedEditorLabel"></span>
+              <div id="desc_enableAdvancedEditor" class="description" data-i18n="enableAdvancedEditorDesc"></div>
+
+              <div id="theme-container-adv" style="margin-top: 5px; display: none;">
+                <label for="advancedEditorTheme" style="font-size: 12px; margin-right: 5px;" data-i18n="themeLabel"></label>
+                <select id="advancedEditorTheme"
+                  style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="themeAuto"></option>
+                  <option value="atom-one-light">Atom One Light</option>
+                  <option value="atom-one-dark">Atom One Dark</option>
+                  <option value="material-darker">Material Darker</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="monokai">Monokai</option>
+                  <option value="nord">Nord</option>
+                  <option value="darcula">Darcula</option>
+                  <option value="cobalt">Cobalt</option>
+                  <option value="night">Night</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
+                  <option value="eclipse">Eclipse</option>
+                  <option value="idea">IDEA</option>
+                  <option value="neo">Neo</option>
+                  <option value="solarized dark">Solarized Dark</option>
+                  <option value="solarized light">Solarized Light</option>
+                </select>
+              </div>
+
+              <div id="ruler-container-adv" style="margin-top: 5px; display: none;">
+                <label for="advancedEditorRuler" style="font-size: 12px; margin-right: 5px;"
+                  data-i18n="advRulerLabel"></label>
+                <select id="advancedEditorRuler"
+                  style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="0" data-i18n="advRulerOff"></option>
+                  <option value="80">80</option>
+                  <option value="100">100</option>
+                  <option value="120">120</option>
+                </select>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableAdvancedEditor">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableSuiteScriptConsole" data-i18n="enableSuiteScriptConsoleLabel"></span>
+              <div id="desc_enableSuiteScriptConsole" class="description" data-i18n="enableSuiteScriptConsoleDesc"></div>
+
+              <div id="theme-container-ssc" style="margin-top: 5px; display: none;">
+                <label for="suitescriptConsoleTheme" style="font-size: 12px; margin-right: 5px;" data-i18n="themeLabel"></label>
+                <select id="suitescriptConsoleTheme"
+                  style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="themeAuto"></option>
+                  <option value="atom-one-light">Atom One Light</option>
+                  <option value="atom-one-dark">Atom One Dark</option>
+                  <option value="material-darker">Material Darker</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="monokai">Monokai</option>
+                  <option value="nord">Nord</option>
+                  <option value="darcula">Darcula</option>
+                  <option value="cobalt">Cobalt</option>
+                  <option value="night">Night</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
+                  <option value="eclipse">Eclipse</option>
+                  <option value="idea">IDEA</option>
+                  <option value="neo">Neo</option>
+                  <option value="solarized dark">Solarized Dark</option>
+                  <option value="solarized light">Solarized Light</option>
+                </select>
+                <div style="margin-top: 6px;">
+                  <label for="suitescriptConsoleHistoryMax" style="font-size: 12px; margin-right: 5px;" data-i18n="suiteqlHistoryMaxLabel"></label>
+                  <input type="number" id="suitescriptConsoleHistoryMax" min="1" max="1000" step="1" style="width: 64px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                </div>
+                <div style="margin-top: 6px;">
+                  <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer;"
+                    data-i18n-title="sscAiCompleteDesc">
+                    <input type="checkbox" id="suitescriptConsoleAiComplete" style="margin: 0;">
+                    <span data-i18n="sscAiCompleteLabel"></span>
+                  </label>
+                </div>
+                <div style="margin-top: 6px;">
+                  <label for="suitescriptConsoleAiModel" style="font-size: 12px; margin-right: 5px;" data-i18n="sscAiModelLabel"></label>
+                  <select id="suitescriptConsoleAiModel"
+                    style="max-width: 180px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;"></select>
+                </div>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableSuiteScriptConsole">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
               <span id="label_enableEditorTheme" data-i18n="enableEditorThemeLabel"></span>
               <div id="desc_enableEditorTheme" class="description" data-i18n="enableEditorThemeDesc"></div>
 
@@ -906,6 +1059,7 @@
                   <option value="monokai">Monokai</option>
                   <option value="obsidian">Obsidian</option>
                   <option value="shades-of-purple">Shades of Purple</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
                   <option value="vs">Visual Studio</option>
                   <option value="vs2015">VS2015</option>
                   <option value="stackoverflow-light">StackOverflow Light</option>
@@ -1040,6 +1194,7 @@
                   <option value="monokai">Monokai</option>
                   <option value="obsidian">Obsidian</option>
                   <option value="shades-of-purple">Shades of Purple</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
                   <option value="vs">Visual Studio</option>
                   <option value="vs2015">VS2015</option>
                   <option value="stackoverflow-light">StackOverflow Light</option>
@@ -1206,6 +1361,9 @@
                 <label for="suiteqlTheme" style="font-size: 12px; margin-right: 5px;" data-i18n="themeLabel"></label>
                 <select id="suiteqlTheme"
                   style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="themeAuto"></option>
+                  <option value="atom-one-light">Atom One Light</option>
+                  <option value="atom-one-dark">Atom One Dark</option>
                   <option value="material-darker">Material Darker</option>
                   <option value="dracula">Dracula</option>
                   <option value="monokai">Monokai</option>
@@ -1213,6 +1371,7 @@
                   <option value="darcula">Darcula</option>
                   <option value="cobalt">Cobalt</option>
                   <option value="night">Night</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
                   <option value="eclipse">Eclipse</option>
                   <option value="idea">IDEA</option>
                   <option value="neo">Neo</option>
@@ -1222,6 +1381,18 @@
                 <div style="margin-top: 6px;">
                   <label for="suiteqlHistoryMax" style="font-size: 12px; margin-right: 5px;" data-i18n="suiteqlHistoryMaxLabel"></label>
                   <input type="number" id="suiteqlHistoryMax" min="1" max="1000" step="1" style="width: 64px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                </div>
+                <div style="margin-top: 6px;">
+                  <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer;"
+                    data-i18n-title="sscAiCompleteDesc">
+                    <input type="checkbox" id="suiteqlAiComplete" style="margin: 0;">
+                    <span data-i18n="sqlAiCompleteLabel"></span>
+                  </label>
+                </div>
+                <div style="margin-top: 6px;">
+                  <label for="suiteqlAiModel" style="font-size: 12px; margin-right: 5px;" data-i18n="sscAiModelLabel"></label>
+                  <select id="suiteqlAiModel"
+                    style="max-width: 180px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;"></select>
                 </div>
 
                 <section class="nsft-sqlset-group">
@@ -1297,6 +1468,7 @@
                   <option value="monokai">Monokai</option>
                   <option value="obsidian">Obsidian</option>
                   <option value="shades-of-purple">Shades of Purple</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
                   <option value="vs">Visual Studio</option>
                   <option value="vs2015">VS2015</option>
                   <option value="stackoverflow-light">StackOverflow Light</option>
@@ -1329,6 +1501,18 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableSearchFieldsFinder">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableSearchSummaryBulk" data-i18n="enableSearchSummaryBulkLabel"></span>
+              <div id="desc_enableSearchSummaryBulk" class="description" data-i18n="enableSearchSummaryBulkDesc">
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableSearchSummaryBulk">
               <span class="slider round"></span>
             </label>
           </div>
@@ -1701,6 +1885,28 @@
 
           <div class="option-row">
             <div>
+              <span id="label_enableDateFormatHint" data-i18n="enableDateFormatHintLabel"></span>
+              <div id="desc_enableDateFormatHint" class="description" data-i18n="enableDateFormatHintDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableDateFormatHint">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableShiftRangeSelect" data-i18n="enableShiftRangeSelectLabel"></span>
+              <div id="desc_enableShiftRangeSelect" class="description" data-i18n="enableShiftRangeSelectDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableShiftRangeSelect">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
               <span id="label_enableTextareaMinHeightBeta" data-i18n="enableTextareaMinHeightBetaLabel"></span>
               <div id="desc_enableTextareaMinHeightBeta" class="description" data-i18n="enableTextareaMinHeightBetaDesc"></div>
             </div>
@@ -1875,6 +2081,12 @@
                 <label for="portletRefresherInterval" style="font-size: 12px; margin-left: 5px;" data-i18n="secondsLabel"></label>
                 <input type="number" id="portletRefresherInterval" value="600" min="10" max="86400"
                   style="width: 70px; padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 12px;">
+
+                <div style="display: flex; align-items: center; margin-left: 10px;">
+                  <input type="checkbox" id="portletRefresherAutoStart" style="margin-right: 5px;">
+                  <label for="portletRefresherAutoStart" style="font-size: 12px; cursor: pointer;"
+                    data-i18n="portletRefresherAutoStartLabel"></label>
+                </div>
               </div>
             </div>
             <label class="switch">
@@ -1902,6 +2114,7 @@
                   <option value="monokai">Monokai</option>
                   <option value="obsidian">Obsidian</option>
                   <option value="shades-of-purple">Shades of Purple</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
                   <option value="vs">Visual Studio</option>
                   <option value="vs2015">VS2015</option>
                   <option value="stackoverflow-light">StackOverflow Light</option>
@@ -2056,6 +2269,7 @@
                   <option value="monokai">Monokai</option>
                   <option value="obsidian">Obsidian</option>
                   <option value="shades-of-purple">Shades of Purple</option>
+                  <option value="synthwave-84">Synthwave &#39;84</option>
                   <option value="vs">Visual Studio</option>
                   <option value="vs2015">VS2015</option>
                   <option value="stackoverflow-light">StackOverflow Light</option>
@@ -2264,6 +2478,34 @@
 
           <div class="nsft-settings-group">
             <h3 class="nsft-settings-group-title" data-i18n="settingsGroupPreferences">Preferencias</h3>
+
+            <div class="nsft-settings-row">
+              <div class="nsft-settings-row-icon is-site">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 10h.01"></path><path d="M10 10h.01"></path><path d="M14 10h.01"></path><path d="M18 10h.01"></path><path d="M7 14h10"></path></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="codeEditorKeymapLabel">Atajos del editor</strong>
+                <small data-i18n="codeEditorKeymapDesc">Qué teclas usan los editores de código para duplicar, borrar o seleccionar líneas.</small>
+              </div>
+              <select id="codeEditorKeymap" class="nsft-settings-row-select">
+                <option value="vscode" data-i18n="codeEditorKeymapVscode">VS Code</option>
+                <option value="webstorm" data-i18n="codeEditorKeymapWebstorm">WebStorm / IntelliJ</option>
+              </select>
+            </div>
+
+            <div class="nsft-settings-row">
+              <div class="nsft-settings-row-icon is-site">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h6"></path><path d="M4 12h10"></path><path d="M4 17h7"></path><path d="M14 7h6"></path><path d="M18 17h2"></path></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="codeEditorInlayHintsLabel">Pistas en la línea</strong>
+                <small data-i18n="codeEditorInlayHintsDesc">Muestra el tipo de la variable y el nombre de cada argumento dentro del propio código.</small>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="codeEditorInlayHints">
+                <span class="slider round"></span>
+              </label>
+            </div>
             <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftSettingsWizard">
               <div class="nsft-settings-row-icon nsft-settings-row-icon-accent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"></path><path d="M4 12h10"></path><path d="M4 18h7"></path><circle cx="18" cy="16" r="3"></circle></svg>
@@ -2452,6 +2694,15 @@
               </div>
               <span class="nsft-settings-row-chev" aria-hidden="true">↗</span>
             </a>
+            <div class="nsft-settings-row">
+              <div class="nsft-settings-row-icon is-credits">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="apiDocsCreditLabel">Documentación de la API</strong>
+                <small data-i18n="apiDocsCreditDesc">La ayuda de SuiteScript que aparece al escribir procede de los stubs publicados por Oracle NetSuite.</small>
+              </div>
+            </div>
           </div>
 
 
@@ -2475,13 +2726,35 @@
               </label>
             </div>
             <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevResetNotice"
-              data-i18n-title="devResetNoticeTitle" title="Volver a mostrar el aviso de novedades">
+              data-i18n-title="devResetNoticeTitle" title="Mostrar ahora el aviso de novedades">
               <div class="nsft-settings-row-icon is-update">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><polyline points="3 4 3 9 8 9"></polyline></svg>
               </div>
               <div class="nsft-settings-row-text">
-                <strong data-i18n="devResetNoticeLabel">Reiniciar el aviso de novedades</strong>
-                <small data-i18n="devResetNoticeDesc">Lo vuelve a mostrar en las pestañas de NetSuite al refrescar.</small>
+                <strong data-i18n="devResetNoticeLabel">Ver el aviso de novedades</strong>
+                <small data-i18n="devResetNoticeDesc">Lo muestra al momento en tus pestañas de NetSuite abiertas.</small>
+              </div>
+              <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
+            </button>
+            <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevResetRate"
+              data-i18n-title="devResetRateTitle" title="Mostrar ahora el aviso de califícanos">
+              <div class="nsft-settings-row-icon is-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 14.8 8.6 21 9.5 16.5 13.9 17.6 20 12 17.1 6.4 20 7.5 13.9 3 9.5 9.2 8.6"></polygon></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="devResetRateLabel">Ver el aviso de califícanos</strong>
+                <small data-i18n="devResetRateDesc">Lo muestra al momento en tus pestañas de NetSuite abiertas.</small>
+              </div>
+              <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
+            </button>
+            <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevResetShare"
+              data-i18n-title="devResetShareTitle" title="Mostrar ahora el aviso de compartir">
+              <div class="nsft-settings-row-icon is-feature">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="devResetShareLabel">Ver el aviso de compartir</strong>
+                <small data-i18n="devResetShareDesc">Lo muestra al momento en tus pestañas de NetSuite abiertas.</small>
               </div>
               <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
             </button>
@@ -2493,17 +2766,6 @@
               <div class="nsft-settings-row-text">
                 <strong data-i18n="devFreshInstallLabel">Simular instalación nueva</strong>
                 <small data-i18n="devFreshInstallDesc">Abre la bienvenida con el asistente, como al instalar por primera vez. No toca tus preferencias.</small>
-              </div>
-              <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
-            </button>
-            <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevResetRate"
-              data-i18n-title="devResetRateTitle" title="Volver a mostrar el aviso de califícanos">
-              <div class="nsft-settings-row-icon is-feature">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 14.8 8.6 21 9.5 16.5 13.9 17.6 20 12 17.1 6.4 20 7.5 13.9 3 9.5 9.2 8.6"></polygon></svg>
-              </div>
-              <div class="nsft-settings-row-text">
-                <strong data-i18n="devResetRateLabel">Reiniciar el aviso de califícanos</strong>
-                <small data-i18n="devResetRateDesc">Lo vuelve a mostrar en las pestañas de NetSuite al refrescar.</small>
               </div>
               <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
             </button>
@@ -2579,6 +2841,7 @@
   </div>
   <script src="../scripts/modules/_shared/nsft_mac_keys.js"></script>
   <script src="../scripts/modules/_shared/nsft_defaults.js"></script>
+  <script src="../scripts/modules/_shared/nsft_text_search.js"></script>
   <script src="../scripts/modules/editor_theme/theme_transform.js"></script>
   <script src="../welcome/welcome_previews.js"></script>
   <script src="popup.js"></script>

@@ -1,0 +1,50 @@
+/* Atom One Dark para CodeMirror 5. La pareja oscura de atom-one-light; ver la
+   cabecera de aquel para por qué no sirven los paquetes de npm (son de
+   CodeMirror 6) y por qué la referencia es el tema de Atom y no el port de
+   highlight.js.
+
+   La paleta de One Dark:
+     fondo #282c34 · texto #abb2bf · comentario #5c6370
+     hue-1 #56b6c2 cian    · hue-2 #61afef azul   · hue-3 #c678dd morado
+     hue-4 #98c379 verde   · hue-5 #e06c75 rojo   · hue-6 #d19a66 naranja
+     hue-6-2 #e5c07b dorado */
+
+.cm-s-atom-one-dark.CodeMirror { background: #282c34; color: #abb2bf; }
+.cm-s-atom-one-dark div.CodeMirror-selected { background: #3e4451; }
+.cm-s-atom-one-dark .CodeMirror-line::selection,
+.cm-s-atom-one-dark .CodeMirror-line > span::selection,
+.cm-s-atom-one-dark .CodeMirror-line > span > span::selection { background: #3e4451; }
+.cm-s-atom-one-dark .CodeMirror-gutters { background: #282c34; border-right: 1px solid #21252b; }
+.cm-s-atom-one-dark .CodeMirror-guttermarker { color: #e06c75; }
+.cm-s-atom-one-dark .CodeMirror-guttermarker-subtle { color: #5c6370; }
+.cm-s-atom-one-dark .CodeMirror-linenumber { color: #495162; }
+.cm-s-atom-one-dark .CodeMirror-cursor { border-left: 2px solid #528bff; }
+.cm-s-atom-one-dark .CodeMirror-activeline-background { background: #2c313a; }
+.cm-s-atom-one-dark .CodeMirror-matchingbracket { color: #56b6c2 !important; text-decoration: underline; }
+.cm-s-atom-one-dark .CodeMirror-nonmatchingbracket { color: #e06c75 !important; }
+
+.cm-s-atom-one-dark span.cm-comment { color: #5c6370; font-style: italic; }
+.cm-s-atom-one-dark span.cm-string,
+.cm-s-atom-one-dark span.cm-string-2 { color: #98c379; }
+.cm-s-atom-one-dark span.cm-number { color: #d19a66; }
+.cm-s-atom-one-dark span.cm-keyword { color: #c678dd; }
+/* `null`, `true`, `false`: del naranja de los números, como en Atom. */
+.cm-s-atom-one-dark span.cm-atom { color: #d19a66; }
+.cm-s-atom-one-dark span.cm-variable { color: #abb2bf; }
+/* Propiedad que sólo se LEE (`r.id`): del color del texto. */
+.cm-s-atom-one-dark span.cm-property { color: #abb2bf; }
+/* Propiedad que se LLAMA (`r.getValue(...)`) — lo que más se busca al leer. */
+.cm-s-atom-one-dark span.cm-def { color: #61afef; }
+/* Clave de un objeto literal (`total: …`). */
+.cm-s-atom-one-dark span.cm-objectkey { color: #e06c75; }
+.cm-s-atom-one-dark span.cm-variable-2 { color: #e5c07b; }
+.cm-s-atom-one-dark span.cm-type,
+.cm-s-atom-one-dark span.cm-variable-3 { color: #e5c07b; }
+.cm-s-atom-one-dark span.cm-operator { color: #56b6c2; }
+.cm-s-atom-one-dark span.cm-builtin { color: #56b6c2; }
+.cm-s-atom-one-dark span.cm-meta { color: #abb2bf; }
+.cm-s-atom-one-dark span.cm-qualifier { color: #c678dd; }
+.cm-s-atom-one-dark span.cm-tag { color: #e06c75; }
+.cm-s-atom-one-dark span.cm-attribute { color: #d19a66; }
+.cm-s-atom-one-dark span.cm-link { color: #61afef; text-decoration: underline; }
+.cm-s-atom-one-dark span.cm-error { color: #fff; background: #e06c75; }

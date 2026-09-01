@@ -305,10 +305,22 @@
         if (_autoTimer) { clearInterval(_autoTimer); _autoTimer = null; }
     }
 
+    function injectTextSearch() {
+        if (document.getElementById('nsft-text-search-mw')) return;
+        const t = document.createElement('script');
+        t.id = 'nsft-text-search-mw';
+        t.async = false;
+        t.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
+        t.onload = function () { this.remove(); };
+        (document.head || document.documentElement).appendChild(t);
+    }
+
     function injectFetcher(onReady) {
         if (PANEL_MODE) { onReady(); return; }
         if (_fetcherInjected) { onReady(); return; }
+        injectTextSearch();
         const s = document.createElement('script');
+        s.async = false;
         s.src = chrome.runtime.getURL(FETCHER_SCRIPT);
         s.onload = function () {
             this.remove();
@@ -478,12 +490,20 @@
             S.scopeLoading = false;
             if (!S.context) S.context = {};
             S.context.scripts = p.scripts || [];
+            if (!S.context.scripts.length) S.scopeType = null;
             S.selected = new Set(S.context.scripts.map((s) => s.id));
             S.stypes = new Set(typesOf(S.context.scripts));
             refreshHeaderCtx();
             renderTypeList();
             renderScriptList();
             refresh();
+        } else if (d.type === 'deploys_for') {
+            const p = d.payload || {};
+            const key = String(p.scriptId || '');
+            _deploys[key] = { deploys: p.deploys || [], fileId: p.fileId != null ? p.fileId : null };
+            const slot = _deploySlots[key];
+            delete _deploySlots[key];
+            paintDeploys(slot, _deploys[key]);
         } else if (d.type === 'logs') {
             const p = d.payload || {};
             if (isStale(p)) return;
@@ -608,6 +628,7 @@
             S.homeType = ctx.recordType ? String(ctx.recordType).toUpperCase() : null;
             S.scopeType = S.homeType;
             if (S.homeType && ctx.recordTypeName) S.recordNames[S.homeType] = String(ctx.recordTypeName);
+            if (S.scopeType && !(ctx.scripts || []).length) S.scopeType = null;
         }
         S.selected = new Set((ctx.scripts || []).map((s) => s.id));
         S.stypes = new Set(typesOf(ctx.scripts));
@@ -1021,10 +1042,21 @@
         if (btn) btn.hidden = !(input && input.value);
     }
 
+    const TS = window.NSFT_TextSearch;
+
+    function textHit(hay, needle) {
+        const n = String(needle == null ? '' : needle).trim();
+        if (!n) return true;
+        if (TS) return TS.match(hay, n);
+        return String(hay == null ? '' : hay).toLowerCase().includes(n.toLowerCase());
+    }
+
     function highlightInto(el, text, needle) {
-        el.textContent = '';
         const t = String(text == null ? '' : text);
         const n = String(needle || '').trim();
+        if (TS) { TS.mark(el, t, n, 'nsft-rlv-hl'); return; }
+
+        el.textContent = '';
         if (!n) { el.textContent = t; return; }
         const hay = t.toLowerCase();
         const pin = n.toLowerCase();
@@ -1453,20 +1485,20 @@
         const host = qs('#nsft-rlv-ctxlist');
         if (!host) return;
         const search = qs('#nsft-rlv-ctxsearch');
-        const q = String(filterText != null ? filterText : (search ? search.value : '')).toLowerCase();
+        const q = String(filterText != null ? filterText : (search ? search.value : ''));
 
         host.textContent = '';
 
         if (S.homeScript) {
             const nm = scriptScopeName(S.homeScript);
             const rid = String(S.homeScript.id);
-            if (!q || nm.toLowerCase().includes(q) || rid.includes(q)) {
+            if (textHit(nm, q) || textHit(rid, q)) {
                 host.appendChild(scopeRow(null, S.homeScript.name || null, rid, null, q, { script: true }));
             }
         }
 
         const allLabel = i18n('rlv_all_scripts', 'Todos los scripts');
-        if (!q || allLabel.toLowerCase().includes(q)) {
+        if (textHit(allLabel, q)) {
             host.appendChild(scopeRow(null, allLabel, null, null, q));
         }
 
@@ -1475,9 +1507,8 @@
             return;
         }
 
-        const list = scopeCatalogue().filter((t) => !q
-            || t.rt.toLowerCase().includes(q)
-            || (t.name && t.name.toLowerCase().includes(q)));
+        const list = scopeCatalogue().filter((t) => textHit(t.rt, q)
+            || (t.name && textHit(t.name, q)));
         if (!list.length) {
             host.appendChild(scopeNote(i18n('rlv_scope_empty', 'Ningún tipo de registro coincide.')));
             return;
@@ -1716,7 +1747,7 @@
         const ofRecordIds = new Set(ofRecord.map((s) => s.id));
         const rest = (ctx.allScripts || []).filter((s) => !ofRecordIds.has(s.id));
         const search = qs('#nsft-rlv-scriptsearch');
-        const q = String(filterText != null ? filterText : (search ? search.value : '')).toLowerCase();
+        const q = String(filterText != null ? filterText : (search ? search.value : ''));
 
         host.textContent = '';
 
@@ -1729,7 +1760,7 @@
         }
 
         const addGroup = (label, list) => {
-            const visible = list.filter((s) => !q || String(s.name || '').toLowerCase().includes(q));
+            const visible = list.filter((s) => textHit(s.name || '', q));
             if (!visible.length) return;
             const h = document.createElement('div');
             h.className = 'nsft-rlv-scriptgroup';
@@ -1755,11 +1786,14 @@
         const name = document.createElement('span');
         name.className = 'nsft-rlv-scriptname';
         highlightInto(name, s.name || ('#' + s.id), needle);
-        name.title = (s.name || '') + ' · ' + stypeLabel(s.stype);
+        name.title = (s.name || '') + ' · #' + s.id + ' · ' + stypeLabel(s.stype);
+        const sid = document.createElement('span');
+        sid.className = 'nsft-rlv-cscriptid';
+        sid.textContent = s.name ? ('#' + s.id) : '';
         const count = document.createElement('span');
         count.className = 'nsft-rlv-scriptcount';
         count.textContent = fmtCount(S.counts.scripts[String(s.id)]);
-        row.append(box, name, count);
+        row.append(box, name, sid, count);
         row.addEventListener('click', () => {
             if (S.selected.has(s.id)) S.selected.delete(s.id); else S.selected.add(s.id);
             row.classList.toggle('is-on', S.selected.has(s.id));
@@ -1945,7 +1979,9 @@
         stamp.textContent = first.logdate || '';
         const meta = document.createElement('span');
         meta.className = 'nsft-rlv-gmeta';
-        meta.textContent = (first.scriptname || '') + ' · ' + i18n('rlv_group_entries', '$1 entradas', [String(count)]);
+        meta.textContent = (first.scriptname || '')
+            + (first.scriptid != null ? ' #' + first.scriptid : '')
+            + ' · ' + i18n('rlv_group_entries', '$1 entradas', [String(count)]);
         const line = document.createElement('span');
         line.className = 'nsft-rlv-gline';
         const dur = document.createElement('span');
@@ -1975,8 +2011,16 @@
 
         const script = document.createElement('div');
         script.className = 'nsft-rlv-cscript';
-        script.textContent = r.scriptname || (r.scriptid ? ('#' + r.scriptid) : '—');
-        script.title = stypeLabel(r.stype);
+        const sname = document.createElement('span');
+        sname.textContent = r.scriptname || (r.scriptid ? ('#' + r.scriptid) : '—');
+        script.appendChild(sname);
+        if (r.scriptname && r.scriptid != null) {
+            const sid = document.createElement('span');
+            sid.className = 'nsft-rlv-cscriptid';
+            sid.textContent = '#' + r.scriptid;
+            script.appendChild(sid);
+        }
+        script.title = stypeLabel(r.stype) + (r.scriptid != null ? ' · #' + r.scriptid : '');
 
         const title = document.createElement('div');
         title.className = 'nsft-rlv-ctitle';
@@ -2130,29 +2174,37 @@
         clabel.textContent = i18n('rlv_context', 'Contexto');
         const meta = document.createElement('div');
         meta.className = 'nsft-rlv-dmeta';
-        [
-            [i18n('rlv_col_script', 'Script'), r.scriptname || '',
-                r.scriptid ? ['/app/common/scripting/script.nl?id=' + encodeURIComponent(r.scriptid), i18n('rlv_open_script', 'Abrir script')] : null],
-            [i18n('rlv_stypes', 'Tipo de script'), stypeLabel(r.stype), null],
-            [i18n('rlv_ctx_script_id', 'ID de script'), r.scriptid != null ? String(r.scriptid) : '', null],
-            [i18n('rlv_ctx_note_id', 'ID de anotación'), r.id != null ? String(r.id) : '',
-                r.id != null ? ['/app/common/scripting/scriptnote.nl?id=' + encodeURIComponent(r.id), i18n('rlv_open_note', 'Anotación de script')] : null]
-        ].forEach(([k, v, link]) => {
-            if (!v) return;
-            const row = document.createElement('div');
-            row.className = 'nsft-rlv-dmetarow';
-            const kk = document.createElement('span'); kk.textContent = k;
-            const vv = document.createElement('b');
-            if (link) vv.appendChild(extLink(link[0], v, link[1]));
-            else vv.textContent = v;
-            row.append(kk, vv);
-            meta.appendChild(row);
-        });
+        if (r.stype) {
+            metaRowInto(meta, i18n('rlv_stypes', 'Tipo de script'),
+                [document.createTextNode(stypeLabel(r.stype))], null);
+        }
+        if (r.scriptname || r.scriptid != null) {
+            const nodes = [document.createTextNode(r.scriptname || (r.scriptid != null ? '#' + r.scriptid : ''))];
+            if (r.scriptname && r.scriptid != null) {
+                const sid = document.createElement('span');
+                sid.className = 'nsft-rlv-cscriptid';
+                sid.textContent = '#' + r.scriptid;
+                nodes.push(sid);
+            }
+            metaRowInto(meta, i18n('rlv_col_script', 'Script'), nodes,
+                r.scriptid != null
+                    ? rowBtn('/app/common/scripting/script.nl?id=' + encodeURIComponent(r.scriptid), i18n('rlv_open_script', 'Abrir script'))
+                    : null);
+        }
+        let noteRow = null;
+        if (r.id != null) {
+            noteRow = metaRowInto(meta, i18n('rlv_ctx_note_id', 'ID de anotación'),
+                [document.createTextNode(String(r.id))],
+                rowBtn('/app/common/scripting/scriptnote.nl?id=' + encodeURIComponent(r.id), i18n('rlv_open_note', 'Anotación de script')));
+        }
         ctx.append(clabel, meta);
 
         if (r.scriptid) {
             const btns = document.createElement('div');
             btns.className = 'nsft-rlv-dbtns';
+            const dslot = document.createElement('span');
+            dslot.className = 'nsft-rlv-ddeploys';
+            btns.appendChild(dslot);
             const ns = extLink(
                 '/app/common/scripting/scriptnotearchive.nl?daterange=ALL&date=ALL&sortcol=timestamp&sortdir=DESC&loglevel=&scriptId=' + encodeURIComponent(r.scriptid),
                 i18n('rlv_open_ns', 'Ver logs completos'),
@@ -2160,6 +2212,7 @@
             ns.id = 'nsft-rlv-dns';
             btns.appendChild(ns);
             ctx.appendChild(btns);
+            fillDeployButtons({ meta: meta, before: noteRow, btns: dslot }, r.scriptid);
         }
 
         const cols = document.createElement('div');
@@ -2169,6 +2222,79 @@
         box.appendChild(card);
 
         return box;
+    }
+
+    const _deploys = {};
+    const _deploySlots = {};
+
+    function rowBtn(href, titleTxt) {
+        const a = document.createElement('a');
+        a.className = 'nsft-rlv-drowbtn';
+        a.href = href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.title = titleTxt;
+        const t = document.createElement('span');
+        t.textContent = i18n('rlv_open', 'Abrir');
+        const arrow = document.createElement('span');
+        arrow.className = 'nsft-rlv-extarrow';
+        arrow.textContent = '↗';
+        a.append(t, arrow);
+        return a;
+    }
+
+    function metaRowInto(meta, label, valueNodes, btn, before) {
+        const row = document.createElement('div');
+        row.className = 'nsft-rlv-dmetarow';
+        const kk = document.createElement('span'); kk.textContent = label;
+        const vv = document.createElement('b');
+        valueNodes.forEach((n) => vv.appendChild(n));
+        row.append(kk, vv);
+        if (btn) row.appendChild(btn);
+        if (before && before.parentNode === meta) meta.insertBefore(row, before);
+        else meta.appendChild(row);
+        return row;
+    }
+
+    function fillDeployButtons(target, scriptid) {
+        const key = String(scriptid);
+        if (_deploys[key]) { paintDeploys(target, _deploys[key]); return; }
+        _deploySlots[key] = target;
+        postToFetcher('deploys_for', { scriptId: scriptid });
+    }
+
+    function paintDeploys(target, data) {
+        if (!target || !data) return;
+        const list = data.deploys || [];
+        const meta = target.meta;
+        if (meta && meta.isConnected) {
+            list.forEach((d) => {
+                if (d == null || d.id == null) return;
+                const full = String(d.did || ('#' + d.id));
+                const shown = full.length > 30 ? full.slice(0, 29) + '…' : full;
+                const v = document.createElement('span');
+                v.textContent = shown;
+                v.title = full;
+                metaRowInto(meta, i18n('rlv_ctx_deploy', 'Despliegue'), [v],
+                    rowBtn('/app/common/scripting/scriptrecord.nl?id=' + encodeURIComponent(d.id), full),
+                    target.before);
+            });
+        }
+        if (target.btns && target.btns.isConnected && data.fileId != null) {
+            const a = document.createElement('a');
+            a.href = '/app/common/record/edittextmediaitem.nl?id=' + encodeURIComponent(data.fileId)
+                + '&e=T&l=T&target=filesize&syntaxHighlighting=T';
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.title = i18n('rlv_edit_file', 'Editar archivo');
+            const t = document.createElement('span');
+            t.textContent = i18n('rlv_edit_file', 'Editar archivo');
+            const arrow = document.createElement('span');
+            arrow.className = 'nsft-rlv-extarrow';
+            arrow.textContent = '↗';
+            a.append(t, arrow);
+            target.btns.appendChild(a);
+        }
     }
 
     function copyDetail(r, btn) {

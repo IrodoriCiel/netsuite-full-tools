@@ -73,6 +73,7 @@
             btn_related: chrome.i18n.getMessage("ff_btn_related"),
             btn_formula: chrome.i18n.getMessage("ff_btn_formula"),
             placeholder: chrome.i18n.getMessage("ff_placeholder"),
+            clear_search: chrome.i18n.getMessage("ro_clear_search"),
             showing_prefix: chrome.i18n.getMessage("ff_showing_prefix"),
             showing_middle: chrome.i18n.getMessage("ff_showing_middle"),
             showing_suffix: chrome.i18n.getMessage("ff_showing_suffix"),
@@ -107,8 +108,18 @@
         }
         input.setAttribute("data-options", JSON.stringify(settings));
 
+        if (!document.getElementById('nsft-text-search-mw')) {
+            const ts = document.createElement('script');
+            ts.id = 'nsft-text-search-mw';
+            ts.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
+            ts.async = false;
+            ts.onload = function () { this.remove(); };
+            (document.head || document.documentElement).appendChild(ts);
+        }
+
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL('scripts/modules/search_fields_finder/search_fields_finder_fetcher.js');
+        script.async = false;
         script.onload = function () { this.remove(); };
         (document.head || document.documentElement).appendChild(script);
     }

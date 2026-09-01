@@ -346,10 +346,15 @@
         const searchProp = searchType === 'name' ? 'formulaText' : 'formulaId';
         const criteria = document.getElementById(IDS.CRITERIA).value;
 
+        const TS = window.NSFT_TextSearch;
+        const plegar = TS
+            ? (s) => TS.fold(s)
+            : (s) => String(s == null ? '' : s).toLowerCase();
+        const needle = plegar(searchValue);
+
         let showCount = 0;
         items.forEach((item) => {
-            const haystack = item.dataset[searchProp].toLowerCase();
-            const needle = searchValue.toLowerCase();
+            const haystack = plegar(item.dataset[searchProp]);
             const validResult = criteria === 'startswith' ? haystack.startsWith(needle) : haystack.includes(needle);
 
             if (!validResult || showCount >= limit) {

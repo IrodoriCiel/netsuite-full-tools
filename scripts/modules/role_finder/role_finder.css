@@ -14,11 +14,16 @@
     margin-bottom: 6px;
 }
 
+.nsft-role-search-wrap {
+    position: relative;
+    display: block;
+}
+
 #nsft-role-search {
     width: 100% !important;
     min-width: 280px;
     height: 36px !important;
-    padding: 0 14px !important;
+    padding: 0 34px 0 14px !important;
     font-family: var(--nsft-font, 'Inter', 'Segoe UI', system-ui, sans-serif);
     font-size: 13px !important;
     color: #0f172a !important;
@@ -40,9 +45,48 @@
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25) !important;
 }
 
-.nsft-rf-hl {
-    background: #fde68a !important;
+#nsft-role-search.has-text {
+    background-image: none !important;
+}
+
+.nsft-role-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    color: #94a3b8 !important;
+    font-family: inherit;
+    font-size: 12px !important;
+    line-height: 1 !important;
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.nsft-role-clear[hidden] { display: none !important; }
+
+.nsft-role-clear:hover {
+    background: #f1f5f9 !important;
     color: #0f172a !important;
+}
+
+.nsft-role-clear:focus-visible {
+    outline: 2px solid var(--nsft-ns-accent, #3b82f6) !important;
+    outline-offset: 1px;
+}
+
+.nsft-rf-hl {
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42)) !important;
+    color: inherit !important;
     border-radius: 2px;
     font-weight: 700;
 }

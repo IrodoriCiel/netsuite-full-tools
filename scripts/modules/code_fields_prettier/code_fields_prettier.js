@@ -226,6 +226,15 @@
         return btn.querySelector('span') || btn;
     }
 
+    function addRawToggle(wrapper, btnGroup, viewEls, rawText, opts) {
+        const LF = window.NSFT_LogFormat;
+        if (!LF || !LF.addRawToggle || !rawText) return;
+        LF.addRawToggle(wrapper, btnGroup, viewEls, rawText, Object.assign({
+            makeBtn: (label) => barButton(label, 'raw'),
+            preClass: 'nsft-code-fields-prettier-raw'
+        }, opts || {}));
+    }
+
     function fieldNameOf(span) {
         let el = span;
         for (let i = 0; i < 4 && el; i++, el = el.parentElement) {
@@ -269,15 +278,21 @@
             e.preventDefault();
             e.stopPropagation();
             const textToCopy = type === 'JSON' ? JSON.stringify(content, null, 2) : content;
-            if (!navigator.clipboard) return;
-            navigator.clipboard.writeText(textToCopy).then(() => {
+
+            const acuse = () => {
                 btnLabel(copyBtn).textContent = chrome.i18n.getMessage('copied') + '!';
                 copyBtn.classList.add('copied');
                 setTimeout(() => {
                     setButtonText(copyBtn, type);
                     copyBtn.classList.remove('copied');
                 }, 1500);
-            });
+            };
+
+            if (window.NSFT_Clipboard) {
+                NSFT_Clipboard.copy(textToCopy, { toast: { preview: false }, onSuccess: acuse });
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(textToCopy).then(acuse);
+            }
         });
 
         const downloadBtn = barButton(chrome.i18n.getMessage('download') || 'Descargar', 'download');
@@ -314,11 +329,12 @@
         return group;
     }
 
-    function formatElement(span, type, content) {
+    function formatElement(span, type, content, rawSource) {
         const wrapper = document.createElement('div');
         wrapper.className = WRAPPER_CLASS;
 
-        wrapper.appendChild(createButtonGroup(content, type, fileNameParts(span)));
+        const btnGroup = createButtonGroup(content, type, fileNameParts(span));
+        wrapper.appendChild(btnGroup);
 
         const pre = document.createElement('pre');
         const code = document.createElement('code');
@@ -364,6 +380,8 @@
         code.textContent = textContent;
         pre.appendChild(code);
         wrapper.appendChild(pre);
+
+        addRawToggle(wrapper, btnGroup, [pre], rawSource);
 
         if (window.hljs) {
             try { window.hljs.highlightElement(code); } catch (err) { console.warn('[NSFT] Highlight error:', err); }
@@ -422,6 +440,8 @@
                 try { window.hljs.highlightElement(codeEl); highlighted = true; } catch (err) { }
             }
         });
+
+        addRawToggle(wrapper, btnGroup, [host, codePre], content, { alsoDisable: [toggleBtn] });
 
         span.replaceWith(wrapper);
     }
@@ -517,7 +537,7 @@
                 try {
                     const jsonObj = JSON.parse(text);
                     if (typeof jsonObj === 'object' && jsonObj !== null) {
-                        formatElement(span, 'JSON', jsonObj);
+                        formatElement(span, 'JSON', jsonObj, text);
                         span.dataset.nsftPrettierDone = '1';
                         return;
                     }
@@ -526,7 +546,7 @@
                         const decoded = decodeHtmlEntities(text);
                         const jsonObj2 = JSON.parse(decoded);
                         if (typeof jsonObj2 === 'object' && jsonObj2 !== null) {
-                            formatElement(span, 'JSON', jsonObj2);
+                            formatElement(span, 'JSON', jsonObj2, decoded);
                             span.dataset.nsftPrettierDone = '1';
                             return;
                         }
@@ -535,19 +555,19 @@
             }
 
             if (looksLikeFreeMarker(text)) {
-                formatElement(span, 'FTL', text);
+                formatElement(span, 'FTL', text, text);
                 span.dataset.nsftPrettierDone = '1';
                 return;
             }
 
             if (looksLikeSQL(text)) {
-                formatElement(span, 'SQL', text);
+                formatElement(span, 'SQL', text, text);
                 span.dataset.nsftPrettierDone = '1';
                 return;
             }
 
             if (looksLikeXml(text)) {
-                formatElement(span, 'XML', text);
+                formatElement(span, 'XML', text, text);
                 span.dataset.nsftPrettierDone = '1';
                 return;
             }

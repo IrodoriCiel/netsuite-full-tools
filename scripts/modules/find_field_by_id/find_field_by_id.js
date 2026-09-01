@@ -104,19 +104,33 @@
         const s = document.createElement('script');
         s.id = 'nsft-field-nav-mw';
         s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_field_nav.js');
+        s.async = false;
+        s.onload = function () { this.remove(); };
+        (document.head || document.documentElement).appendChild(s);
+    }
+
+    function injectTextSearch() {
+        if (document.getElementById('nsft-text-search-mw')) return;
+        const s = document.createElement('script');
+        s.id = 'nsft-text-search-mw';
+        s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
+        s.async = false;
         s.onload = function () { this.remove(); };
         (document.head || document.documentElement).appendChild(s);
     }
 
     function injectScript() {
         injectFieldNav();
+        injectTextSearch();
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL('scripts/modules/find_field_by_id/find_field_by_id_fetcher.js');
+        script.async = false;
         script.onload = function () {
             this.remove();
 
             const translations = {
                 ffi_prompt_generic: chrome.i18n.getMessage("ffi_prompt_generic"),
+                ffi_modal_title: chrome.i18n.getMessage("ffi_modal_title"),
                 ffi_field_not_found: chrome.i18n.getMessage("ffi_field_not_found"),
                 ffi_copy_manual: chrome.i18n.getMessage("ffi_copy_manual"),
                 ffi_placeholder: chrome.i18n.getMessage("ffi_placeholder"),

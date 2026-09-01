@@ -224,3 +224,82 @@
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+.nsft-copy-fs-conid { flex-wrap: wrap; }
+
+.nsft-copy-fs-idtag {
+    display: block;
+    width: 100%;
+    flex: 0 0 100%;
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-size: 0;
+    line-height: 0;
+    text-align: left;
+    pointer-events: none;
+    cursor: default;
+}
+
+.nsft-copy-fs-idtag-t {
+    display: inline-block;
+    max-width: 100%;
+    pointer-events: auto;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 3px;
+    background: rgba(120, 130, 145, 0.12);
+    color: #6b7280;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 10px;
+    line-height: 1.5;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.nsft-copy-fs-idtag:hover .nsft-copy-fs-idtag-t {
+    background: rgba(120, 130, 145, 0.22);
+    color: #111827;
+}
+
+html[data-nsft-theme="dark"] .nsft-copy-fs-idtag-t {
+    background: rgba(255, 255, 255, 0.08);
+    color: #9AA4B5;
+}
+
+html[data-nsft-theme="dark"] .nsft-copy-fs-idtag:hover .nsft-copy-fs-idtag-t {
+    background: rgba(255, 255, 255, 0.16);
+    color: #E6EBF2;
+}
+
+.nsft-copy-fs-idtag.is-col .nsft-copy-fs-idtag-t {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.nsft-copy-fs-idtag.is-fila .nsft-copy-fs-idtag-t {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.nsft-copy-fs-conid .nsft-copy-fs-idtag.is-fila .nsft-copy-fs-idtag-t {
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    margin: 0 !important;
+}
+
+.nsft-copy-fs-idtag.is-col { margin: 2px 0 0; text-align: inherit; }

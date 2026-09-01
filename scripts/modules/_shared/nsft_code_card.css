@@ -83,6 +83,23 @@ html[data-nsft-theme="dark"] .nsft-codecard {
 .nsft-codecard-btn.copied { color: var(--cc-ok-fg); font-weight: 600; }
 .nsft-codecard-btn.copied svg { opacity: 1; }
 
+.nsft-codecard-btn.is-on {
+    background: var(--cc-btn-hover-bg);
+    color: var(--cc-btn-hover-fg);
+}
+
+.nsft-codecard-btn.is-on svg { opacity: 1; }
+
+.nsft-codecard-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.nsft-codecard-btn:disabled:hover {
+    background: transparent;
+    color: var(--cc-btn-fg);
+}
+
 .nsft-codecard pre {
     margin: 0;
     border: none;

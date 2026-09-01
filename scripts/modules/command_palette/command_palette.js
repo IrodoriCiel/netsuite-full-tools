@@ -23,6 +23,7 @@
     const T = {
         placeholder: i18nMsg('cmdp_placeholder', 'Search tools and navigation...'),
         empty: i18nMsg('cmdp_empty', 'No results'),
+        clear: i18nMsg('ro_clear_search', 'Clear search'),
         recent: i18nMsg('cmdp_recent', 'Recent'),
         pinned: i18nMsg('cmdp_pinned', 'Pinned'),
         pinAction: i18nMsg('cmdp_pin_action', 'Pin to top'),
@@ -44,6 +45,7 @@
     let theme = 'light';
     let overlayEl = null;
     let inputEl = null;
+    let clearEl = null;
     let listEl = null;
     let selectedIndex = 0;
     let filteredActions = [];
@@ -55,6 +57,7 @@
 
     let hasAiAssistant = true;
     let hasGithubBackup = false;
+    let hasAdvEditor = false;
 
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
@@ -64,11 +67,13 @@
         [CUSTOM_URLS_KEY]: [],
         [THEME_KEY]: 'light',
         enableAiAssistant: true,
-        enableGithubBackup: false
+        enableGithubBackup: false,
+        enableAdvancedEditor: true
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
         hasAiAssistant = items.enableAiAssistant !== false;
         hasGithubBackup = items.enableGithubBackup === true;
+        hasAdvEditor = items.enableAdvancedEditor !== false && enPaginaDelEditor();
 
         if (items[SHORTCUT_KEY]) shortcut = items[SHORTCUT_KEY];
         if (Array.isArray(items[RECENT_KEY])) recent = items[RECENT_KEY];
@@ -136,6 +141,13 @@
         pinned: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24z"></path></svg>'
     };
 
+    function enPaginaDelEditor() {
+        try {
+            if (!/\/app\/common\/record\/edittextmediaitem\.nl/i.test(location.pathname)) return false;
+            return new URLSearchParams(location.search).get('nsft-advanced-editor') === 'T';
+        } catch (e) { return false; }
+    }
+
     function buildActions() {
         const i18n = i18nMsg;
 
@@ -167,7 +179,8 @@
             nav('cmdp_act_bundles_installed', 'Installed Bundles', '/app/bundler/bundlelist.nl?type=I', 'bundles suitebundler installed'),
             nav('cmdp_act_bundles_search', 'Search & Install Bundles', '/app/bundler/bundlelist.nl?type=S', 'bundles suitebundler search'),
             nav('cmdp_act_sdf_integrations', 'SuiteCloud Development Integrations', '/app/common/integration/integrappslist.nl', 'sdf sdk integration'),
-            nav('cmdp_act_script_queue', 'Script Queue Monitor', '/app/common/scripting/scheduledscriptstatus.nl', 'scheduled queue'),
+            nav('cmdp_act_script_queue', 'Script Queue Monitor', '/app/common/scripting/scriptstatus.nl', 'scheduled queue status'),
+            nav('cmdp_act_mapreduce_status', 'Map/Reduce Script Status', '/app/common/scripting/mapreducescriptstatus.nl', 'map reduce mr status queue'),
             nav('cmdp_act_ws_log', 'Web Services Log', '/app/webservices/wslog.nl', 'ws soap rest'),
 
             custom('cmdp_act_custom_records', 'Custom Records', '/app/common/custom/custrecords.nl', 'custom records list'),
@@ -400,6 +413,54 @@
                     window.dispatchEvent(new CustomEvent('nsft-ai-ask-record'));
                 }
             }] : []),
+            ...(hasAdvEditor ? [
+                {
+                    id: 'nsft:adv-save',
+                    label: i18n('cmdp_act_adv_save', 'Save file to the File Cabinet'),
+                    category: T.catNsft, iconKey: 'nsft',
+                    keywords: 'guardar save archivo file editor',
+                    shortcut: 'Ctrl+S',
+                    run: () => window.dispatchEvent(new CustomEvent('nsft-adv-save'))
+                },
+                {
+                    id: 'nsft:adv-find',
+                    label: i18n('cmdp_act_adv_find', 'Find and replace in the file'),
+                    category: T.catNsft, iconKey: 'nsft',
+                    keywords: 'buscar find replace reemplazar editor',
+                    shortcut: 'Ctrl+F',
+                    run: () => window.dispatchEvent(new CustomEvent('nsft-adv-find'))
+                },
+                {
+                    id: 'nsft:adv-goto',
+                    label: i18n('cmdp_act_adv_goto', 'Go to line'),
+                    category: T.catNsft, iconKey: 'nsft',
+                    keywords: 'ir linea line goto editor',
+                    shortcut: 'Ctrl+G',
+                    run: () => window.dispatchEvent(new CustomEvent('nsft-adv-goto'))
+                },
+                {
+                    id: 'nsft:adv-format',
+                    label: i18n('cmdp_act_adv_format', 'Format document'),
+                    category: T.catNsft, iconKey: 'nsft',
+                    keywords: 'formatear format sangrar indent editor',
+                    shortcut: 'Shift+Alt+F',
+                    run: () => window.dispatchEvent(new CustomEvent('nsft-adv-format'))
+                },
+                {
+                    id: 'nsft:adv-tree',
+                    label: i18n('cmdp_act_adv_tree', 'Show the folder files'),
+                    category: T.catNsft, iconKey: 'nsft',
+                    keywords: 'arbol tree carpeta folder archivos editor',
+                    run: () => window.dispatchEvent(new CustomEvent('nsft-adv-tree'))
+                },
+                {
+                    id: 'nsft:adv-wrap',
+                    label: i18n('cmdp_act_adv_wrap', 'Wrap long lines'),
+                    category: T.catNsft, iconKey: 'nsft',
+                    keywords: 'wrap envolver lineas largas editor',
+                    run: () => window.dispatchEvent(new CustomEvent('nsft-adv-wrap'))
+                }
+            ] : []),
             ...(hasGithubBackup ? [{
                 id: 'nsft:githubbackup',
                 label: i18n('cmdp_act_nsft_ghbackup', 'Respaldar SuiteScripts a GitHub'),
@@ -506,6 +567,7 @@
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <input type="text" class="nsft-cmdp-input" autocomplete="off" spellcheck="false" />
+                    <button type="button" class="nsft-cmdp-clear" title="${escapeHtml(T.clear)}" aria-label="${escapeHtml(T.clear)}" hidden>✕</button>
                 </div>
                 <div class="nsft-cmdp-list" role="listbox"></div>
                 <div class="nsft-cmdp-footer">
@@ -518,11 +580,22 @@
         document.body.appendChild(overlayEl);
 
         inputEl = overlayEl.querySelector('.nsft-cmdp-input');
+        clearEl = overlayEl.querySelector('.nsft-cmdp-clear');
         listEl = overlayEl.querySelector('.nsft-cmdp-list');
         inputEl.placeholder = T.placeholder;
 
         inputEl.addEventListener('input', () => renderList(inputEl.value));
         inputEl.addEventListener('keydown', onInputKeydown);
+
+        if (clearEl) {
+            clearEl.addEventListener('mousedown', (e) => e.preventDefault());
+            clearEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                inputEl.value = '';
+                renderList('');
+                inputEl.focus();
+            });
+        }
         overlayEl.addEventListener('click', (e) => {
             if (e.target === overlayEl) closePalette();
         });
@@ -536,6 +609,7 @@
         overlayEl.remove();
         overlayEl = null;
         inputEl = null;
+        clearEl = null;
         listEl = null;
         selectedIndex = 0;
         filteredActions = [];
@@ -579,7 +653,10 @@
         return `<span class="nsft-cmdp-item-kbd">${kbds}</span>`;
     }
 
+    const TS = window.NSFT_TextSearch || null;
+
     function foldText(s) {
+        if (TS) return TS.fold(s);
         return String(s == null ? '' : s)
             .normalize('NFD')
             .replace(/\p{M}/gu, '')
@@ -588,16 +665,21 @@
 
     function highlightLabel(label, query) {
         if (!query) return escapeHtml(label);
-        const ll = foldText(label);
         const ql = foldText(query);
-        if (ll.length !== label.length) return escapeHtml(label);
+        if (!ql) return escapeHtml(label);
+
         const matched = new Array(label.length).fill(false);
         let qi = 0;
-        for (let i = 0; i < ll.length && qi < ql.length; i++) {
-            if (ll[i] === ql[qi]) {
-                matched[i] = true;
-                qi++;
+        let prev = false;
+        for (let i = 0; i < label.length; i++) {
+            const f = foldText(label.charAt(i));
+            if (!f.length) { matched[i] = prev; continue; }
+            let hit = false;
+            for (let k = 0; k < f.length && qi < ql.length; k++) {
+                if (f.charAt(k) === ql.charAt(qi)) { hit = true; qi++; }
             }
+            matched[i] = hit;
+            prev = hit;
         }
         if (qi < ql.length) return escapeHtml(label);
 
@@ -666,6 +748,7 @@
 
     function renderList(query) {
         const raw = query || '';
+        if (clearEl) clearEl.hidden = !raw.length;
         const slash = parseSlash(raw);
         const slashSpec = slash && SLASH_PREFIXES[slash.prefix];
         const q = foldText(slash ? slash.term : raw.trim());
@@ -1255,8 +1338,8 @@
             if (e.target.hasAttribute('data-tpl-delete')) {
                 e.stopPropagation();
                 const name = e.target.getAttribute('data-tpl-delete');
-                if (!confirm(`${i18nMsg('cmdp_tpl_delete_confirm', 'Delete template')} "${name}"?`)) return;
-                loadFieldTemplates((all) => {
+                const pregunta = `${i18nMsg('cmdp_tpl_delete_confirm', 'Delete template')} "${name}"?`;
+                const borrar = () => loadFieldTemplates((all) => {
                     delete all[name];
                     saveFieldTemplates(all, () => {
                         close();
@@ -1266,6 +1349,11 @@
                         toast(i18nMsg('cmdp_tpl_save_failed', 'Failed to save template'), 'error');
                     });
                 });
+                if (window.NSFT_Dialog) {
+                    window.NSFT_Dialog.confirm({ body: pregunta, danger: true }).then((si) => { if (si) borrar(); });
+                } else if (confirm(pregunta)) {
+                    borrar();
+                }
                 return;
             }
             const item = e.target.closest('.nsft-cmdp-item');

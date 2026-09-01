@@ -119,9 +119,11 @@
         loadBookmarks((obj) => {
             const input = document.querySelector(`#${MODAL_ID} .nsft-gtr-input`);
             if (!input || !/^fav[:\s]/i.test(input.value || '')) return;
-            const f = (filter || '').toLowerCase();
+            const TS = window.NSFT_TextSearch;
+            const fold = (s) => (TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase());
+            const f = fold(filter || '');
             const rows = Object.keys(obj)
-                .filter((alias) => !f || alias.toLowerCase().includes(f))
+                .filter((alias) => !f || fold(alias).includes(f))
                 .sort()
                 .map((alias) => ({ kind: 'bookmark', alias, url: obj[alias].url, title: obj[alias].title }));
             renderSuggestions(rows);
@@ -189,7 +191,11 @@
         if (changes[NSFT_THEME_KEY]) {
             _theme = changes[NSFT_THEME_KEY].newValue || 'light';
             const modal = document.getElementById(MODAL_ID);
-            if (modal) modal.setAttribute('data-theme', resolveTheme());
+            if (modal) {
+                modal.setAttribute('data-theme', resolveTheme());
+                const card = modal.querySelector('.nsft-gtr-card');
+                if (card) card.setAttribute('data-theme', resolveTheme());
+            }
         }
         if (changes[OVERRIDE_KEY]) {
             _overrideNative = changes[OVERRIDE_KEY].newValue !== false;
@@ -231,6 +237,14 @@
         _fetcherInjected = true;
         if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
             window.NSFT_SuiteQLRest.ensureTransport();
+        }
+        if (!document.getElementById('nsft-text-search-mw')) {
+            const ts = document.createElement('script');
+            ts.id = 'nsft-text-search-mw';
+            ts.async = false;
+            ts.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
+            ts.onload = function () { this.remove(); };
+            (document.head || document.documentElement).appendChild(ts);
         }
         const s = document.createElement('script');
         s.async = false;
@@ -439,20 +453,28 @@
         ensureFetcher();
         const overlay = document.createElement('div');
         overlay.id = MODAL_ID;
-        overlay.className = 'nsft-gtr-overlay';
+        overlay.className = 'nsft-gtr-overlay nsft-modal-backdrop';
         overlay.setAttribute('data-theme', resolveTheme());
         overlay.innerHTML = `
-            <div class="nsft-gtr-card" role="dialog" aria-modal="true" aria-labelledby="nsft-gtr-title">
-                <header class="nsft-gtr-header">
-                    <h2 id="nsft-gtr-title">${escapeHtml(i18n('gtr_title', 'Go to record'))}</h2>
-                    <button type="button" class="nsft-gtr-close" aria-label="${escapeHtml(i18n('gtr_close_aria', 'Close'))}">×</button>
+            <div class="nsft-gtr-card nsft-modal nsft-modal--dialog" data-theme="${escapeHtml(resolveTheme())}" role="dialog" aria-modal="true" aria-labelledby="nsft-gtr-title">
+                <header class="nsft-modal-header">
+                    <h2 id="nsft-gtr-title" class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>NetSuite Full Tools - ${escapeHtml(i18n('gtr_title', 'Go to record'))}</h2>
+                    <div class="nsft-header-actions">
+                        <button type="button" class="nsft-gtr-close nsft-modal-btn-close" aria-label="${escapeHtml(i18n('gtr_close_aria', 'Close'))}">✕</button>
+                    </div>
                 </header>
                 <div class="nsft-gtr-body">
-                    <input type="text" class="nsft-gtr-input"
-                           placeholder="${escapeHtml(i18n('gtr_placeholder', 'e.g. INV-00123  ·  customer 942  ·  invoice 12847'))}"
-                           autocomplete="off" spellcheck="false"
-                           role="combobox" aria-autocomplete="list" aria-expanded="false"
-                           aria-controls="nsft-gtr-suggestions" />
+                    
+                    <div class="nsft-gtr-input-wrap">
+                        <input type="text" class="nsft-gtr-input"
+                               placeholder="${escapeHtml(i18n('gtr_placeholder', 'e.g. INV-00123  ·  customer 942  ·  invoice 12847'))}"
+                               autocomplete="off" spellcheck="false"
+                               role="combobox" aria-autocomplete="list" aria-expanded="false"
+                               aria-controls="nsft-gtr-suggestions" />
+                        <button type="button" class="nsft-gtr-clear" hidden
+                                title="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}"
+                                aria-label="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}">✕</button>
+                    </div>
                     <ul id="nsft-gtr-suggestions" class="nsft-gtr-suggestions" role="listbox" hidden></ul>
                     <p class="nsft-gtr-hint">${escapeHtml(i18n('gtr_hint', 'Search by document or transaction number, "type id", or a custom record name (id is optional). Enter to go · Esc to close.'))}</p>
                     <p class="nsft-gtr-status" aria-live="polite"></p>
@@ -497,11 +519,31 @@
             });
             input.addEventListener('input', onInputChange);
         }
+
+        const clearBtn = overlay.querySelector('.nsft-gtr-clear');
+        if (clearBtn && input) {
+            clearBtn.addEventListener('mousedown', (ev) => ev.preventDefault());
+            clearBtn.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                input.value = '';
+                onInputChange();
+                input.focus();
+            });
+        }
+        syncClearButton();
+    }
+
+    function syncClearButton() {
+        const input = document.querySelector(`#${MODAL_ID} .nsft-gtr-input`);
+        const clearBtn = document.querySelector(`#${MODAL_ID} .nsft-gtr-clear`);
+        if (!input || !clearBtn) return;
+        clearBtn.hidden = !input.value;
     }
 
     function onInputChange() {
         const input = document.querySelector(`#${MODAL_ID} .nsft-gtr-input`);
         if (!input) return;
+        syncClearButton();
         const value = input.value || '';
         if (_suggestTimer) clearTimeout(_suggestTimer);
 
@@ -678,19 +720,47 @@
         });
     }
 
+    function suggestNeedle() {
+        const input = document.querySelector(`#${MODAL_ID} .nsft-gtr-input`);
+        const value = String((input && input.value) || '');
+        let q = '';
+
+        const favMatch = /^fav[:\s]\s*(.*)$/i.exec(value);
+        if (!_selectedType && favMatch) {
+            q = favMatch[1].trim();
+        } else if (_selectedType) {
+            const nameLower = _selectedType.name.toLowerCase();
+            const valueLower = value.toLowerCase();
+            if (valueLower.trim() === nameLower) q = '';
+            else if (valueLower.startsWith(nameLower + ' ')) {
+                q = value.substring(_selectedType.name.length + 1).trim();
+            } else q = extractSuggestQuery(value);
+        } else {
+            q = extractSuggestQuery(value);
+        }
+
+        if (!q) return '';
+        const TS = window.NSFT_TextSearch;
+        return TS ? TS.fold(q) : q.toLowerCase();
+    }
+
     function makeSuggestItem(i, nameText, subText, extraClass) {
         const li = document.createElement('li');
         li.className = 'nsft-gtr-suggest-item' + (extraClass ? ' ' + extraClass : '');
         li.setAttribute('role', 'option');
         li.setAttribute('data-idx', String(i));
         li.setAttribute('aria-selected', 'false');
+        const TS = window.NSFT_TextSearch;
+        const q = suggestNeedle();
         const name = document.createElement('span');
         name.className = 'nsft-gtr-suggest-name';
-        name.textContent = nameText;
+        if (TS && q) TS.mark(name, nameText, q, 'nsft-gtr-hl');
+        else name.textContent = nameText;
         li.appendChild(name);
         const sub = document.createElement('span');
         sub.className = 'nsft-gtr-suggest-scriptid';
-        sub.textContent = subText || '';
+        if (TS && q && subText) TS.mark(sub, subText, q, 'nsft-gtr-hl');
+        else sub.textContent = subText || '';
         li.appendChild(sub);
         return li;
     }
@@ -766,6 +836,7 @@
 
         _selectedType = { rectypeId: row.rectypeId, scriptid: row.scriptid, name: row.name };
         input.value = `${row.name} `;
+        syncClearButton();
         input.focus();
         requestInstanceSuggestions('');
     }

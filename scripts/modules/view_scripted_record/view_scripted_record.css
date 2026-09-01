@@ -1416,3 +1416,16 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.35; }
 }
+
+.nsft-scripted-rec-modal mark.nsft-sr-hl {
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
+    color: inherit;
+    border-radius: 3px;
+    padding: 0 1px;
+    font-weight: 700;
+}
+
+.nsft-scripted-rec-modal[data-theme="dark"] mark.nsft-sr-hl {
+    background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
+    color: var(--nsft-hl-fg-dark, #0D1410);
+}

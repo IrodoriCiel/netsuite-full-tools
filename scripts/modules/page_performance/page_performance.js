@@ -126,18 +126,29 @@
 
         const overlay = document.createElement('div');
         overlay.id = OVERLAY_ID;
-        overlay.className = 'nsft-pp-overlay';
+        overlay.className = 'nsft-pp-overlay nsft-modal-backdrop';
         overlay.setAttribute('data-theme', resolveTheme());
         overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 
         const panel = document.createElement('div');
         panel.id = PANEL_ID;
-        panel.className = 'nsft-pp-panel';
+        panel.className = 'nsft-pp-panel nsft-modal nsft-modal--dialog';
+        panel.setAttribute('data-theme', resolveTheme());
+
+        const headHtml = '<div class="nsft-modal-header">'
+            + '<span class="nsft-modal-title">'
+            + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>'
+            + 'NetSuite Full Tools - ' + esc(i18n('pp_title', 'Page performance')) + '</span>'
+            + '<div class="nsft-header-actions">'
+            + '<button type="button" class="nsft-pp-x nsft-modal-btn-close" aria-label="Close">✕</button>'
+            + '</div>'
+            + '</div>';
 
         if (!m) {
-            panel.innerHTML = '<div class="nsft-pp-head"><span class="nsft-pp-title">'
-                + esc(i18n('pp_title', 'Page performance')) + '</span></div>'
+            panel.innerHTML = headHtml
                 + '<div class="nsft-pp-empty">' + esc(i18n('pp_unavailable', 'Timing data is not available on this page.')) + '</div>';
+            const x = panel.querySelector('.nsft-pp-x');
+            if (x) x.addEventListener('click', close);
             overlay.appendChild(panel);
             mount(overlay);
             return;
@@ -155,10 +166,7 @@
         }).join('');
 
         panel.innerHTML =
-            '<div class="nsft-pp-head">'
-            + '<span class="nsft-pp-title">' + esc(i18n('pp_title', 'Page performance')) + '</span>'
-            + '<button type="button" class="nsft-pp-x" aria-label="Close">×</button>'
-            + '</div>'
+            headHtml
             + '<div class="nsft-pp-hero">'
             + '<div class="nsft-pp-hero-item"><div class="nsft-pp-big">' + esc(fmtMs(m.total)) + (m.stillLoading ? ' <span class="nsft-pp-loading">…</span>' : '') + '</div><div class="nsft-pp-cap">' + esc(i18n('pp_total', 'Fully loaded')) + '</div></div>'
             + '<div class="nsft-pp-hero-item"><div class="nsft-pp-big2">' + esc(fmtMs(m.dcl)) + '</div><div class="nsft-pp-cap">' + esc(i18n('pp_dcl', 'DOMContentLoaded')) + '</div></div>'

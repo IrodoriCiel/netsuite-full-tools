@@ -32,6 +32,10 @@
         RECENT: 'nsft-qsc-recent'
     };
 
+    const HL_CLASS = 'nsft-qsc-hl';
+
+    const TS = window.NSFT_TextSearch || null;
+
     const CLOCK_SVG = '<svg class="nsft-qsc-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>';
 
     const STAR_FULL_SVG = '<svg class="nsft-qsc-icon" focusable="false" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>';
@@ -145,15 +149,18 @@
 
     function isInitialCreationScreen() {
         try {
+            if (!/\/search\.nl$/i.test(window.location.pathname)) return false;
             const p = new URLSearchParams(window.location.search);
+            if ((p.get('cu') || '').toUpperCase() !== 'T') return false;
             if (p.has('searchtype')) return false;
             if (p.has('rectype')) return false;
             if (p.has('id')) return false;
             if (p.has('searchid')) return false;
+            if (p.has('reload')) return false;
             if ((p.get('e') || '').toUpperCase() === 'T') return false;
             return true;
         } catch (e) {
-            return true;
+            return false;
         }
     }
 
@@ -541,13 +548,15 @@
     }
 
     function highlightMatch(name, query) {
+        if (TS) return TS.markHtml(name, query, HL_CLASS);
         const i = normalize(name).indexOf(query);
         if (i < 0) return escapeHtml(name);
-        return `${escapeHtml(name.slice(0, i))}<mark>${escapeHtml(name.slice(i, i + query.length))}</mark>${escapeHtml(name.slice(i + query.length))}`;
+        return `${escapeHtml(name.slice(0, i))}<mark class="${HL_CLASS}">${escapeHtml(name.slice(i, i + query.length))}</mark>${escapeHtml(name.slice(i + query.length))}`;
     }
 
     function normalize(s) {
-        return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+        if (TS) return TS.fold(s);
+        return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     }
 
     function escapeHtml(s) {

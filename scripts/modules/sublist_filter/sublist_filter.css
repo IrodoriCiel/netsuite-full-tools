@@ -141,7 +141,7 @@ tr.nsft-sf-hidden {
 }
 
 mark.nsft-sf-hl {
-    background: #ffe58a !important;
+    background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42)) !important;
     color: inherit !important;
     padding: 0 !important;
     border-radius: 2px;

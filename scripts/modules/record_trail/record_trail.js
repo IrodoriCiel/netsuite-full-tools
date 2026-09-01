@@ -226,6 +226,14 @@
         return col;
     }
 
+    function fmtAmount(v) {
+        const n = Number(v);
+        if (!isFinite(n)) return String(v || '');
+        try {
+            return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } catch (e) { return String(v); }
+    }
+
     function buildNode(n, isCurrent) {
         const card = document.createElement('div');
         card.className = 'nsft-rtrail-node' + (isCurrent ? ' nsft-rtrail-node-current' : '');
@@ -247,8 +255,19 @@
 
         const meta = document.createElement('div');
         meta.className = 'nsft-rtrail-meta';
-        meta.textContent = [n.typename || n.type, n.trandate].filter(Boolean).join(' · ');
+        meta.textContent = [
+            n.typename || n.type,
+            n.trandate,
+            (n.amount === null || n.amount === undefined) ? '' : fmtAmount(n.amount)
+        ].filter(Boolean).join(' · ');
         card.appendChild(meta);
+
+        if (n.linktypes) {
+            const rel = document.createElement('div');
+            rel.className = 'nsft-rtrail-rel';
+            rel.textContent = n.linktypes;
+            card.appendChild(rel);
+        }
 
         if (n.status) {
             const status = document.createElement('div');

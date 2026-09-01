@@ -10,6 +10,13 @@
     const STORAGE_KEY = 'enableFieldInlinePreview';
     const NSFT_THEME_KEY = 'nsftTheme';
     const NO_BUTTON_KEY = 'copyIdsNoButton';
+    const COPY_MODE_KEY = 'copyIdsMode';
+
+    function resolveCopyMode(items) {
+        const m = items[COPY_MODE_KEY];
+        if (m === 'icons' || m === 'shift' || m === 'always') return m;
+        return items[NO_BUTTON_KEY] === false ? 'icons' : 'shift';
+    }
     const DELAY_KEY = 'fieldInlinePreviewDelay';
     const TOOLTIP_ID = 'nsft-fip-tooltip';
     const ROOT_ID = 'nsft-fip-root';
@@ -57,10 +64,11 @@
         [STORAGE_KEY]: true,
         [NSFT_THEME_KEY]: 'light',
         [NO_BUTTON_KEY]: true,
+        [COPY_MODE_KEY]: null,
         [DELAY_KEY]: DEFAULT_DELAY_MS
     }, (items) => {
         _theme = items[NSFT_THEME_KEY] || 'light';
-        _noButton = items[NO_BUTTON_KEY] !== false;
+        _noButton = resolveCopyMode(items) === 'shift';
         _showDelayMs = normalizeDelay(items[DELAY_KEY]);
         if (!items[STORAGE_KEY]) return;
         if (RB && RB.isExcludedPage && RB.isExcludedPage()) return;
@@ -123,8 +131,10 @@
             const tip = document.getElementById(TOOLTIP_ID);
             if (tip) tip.setAttribute('data-theme', resolveTheme());
         }
-        if (changes[NO_BUTTON_KEY]) {
-            _noButton = changes[NO_BUTTON_KEY].newValue === true;
+        if (changes[NO_BUTTON_KEY] || changes[COPY_MODE_KEY]) {
+            chrome.storage.local.get({ [NO_BUTTON_KEY]: true, [COPY_MODE_KEY]: null }, (it) => {
+                _noButton = resolveCopyMode(it) === 'shift';
+            });
         }
         if (changes[DELAY_KEY]) {
             _showDelayMs = normalizeDelay(changes[DELAY_KEY].newValue);

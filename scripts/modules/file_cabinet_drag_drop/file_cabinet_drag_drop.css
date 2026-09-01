@@ -358,3 +358,96 @@
     background: var(--nsft-dk-hover);
     border-color: var(--nsft-dk-border2);
 }
+
+
+
+.nsft-fcdd-modal.is-warn .nsft-fcdd-modal-head {
+    background: #fffbeb;
+    border-bottom-color: #fde68a;
+    color: #92400e;
+}
+
+.nsft-fcdd-modal.is-warn .nsft-fcdd-modal-close {
+    color: #92400e;
+}
+
+.nsft-fcdd-modal.is-warn .nsft-fcdd-modal-close:hover {
+    color: #451a03;
+}
+
+.nsft-fcdd-warn-lead {
+    padding: 12px 18px 4px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #1f2937;
+}
+
+.nsft-fcdd-warn-summary {
+    padding: 8px 18px;
+    color: #6b7280;
+    font-size: 12.5px;
+}
+
+.nsft-fcdd-modal.is-warn .nsft-fcdd-err-list strong {
+    color: #92400e;
+}
+
+.nsft-fcdd-modal.is-warn[data-theme="dark"] .nsft-fcdd-modal-head {
+    background: rgba(245, 158, 11, 0.16);
+    border-bottom-color: rgba(245, 158, 11, 0.45);
+    color: #F5C168;
+}
+
+.nsft-fcdd-modal.is-warn[data-theme="dark"] .nsft-fcdd-modal-close {
+    color: #F5C168;
+}
+
+.nsft-fcdd-modal.is-warn[data-theme="dark"] .nsft-fcdd-modal-close:hover {
+    color: #E6EBF2;
+}
+
+.nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-warn-lead {
+    color: #C6CEDB;
+}
+
+.nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-warn-summary {
+    color: #8A94A6;
+}
+
+.nsft-fcdd-modal.is-warn[data-theme="dark"] .nsft-fcdd-err-list strong {
+    color: #F5C168;
+}
+
+.nsft-fcdd-diff-link {
+    margin-left: 8px;
+    padding: 2px 8px;
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #92400e;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 5px;
+    cursor: pointer;
+    vertical-align: baseline;
+    transition: background-color 0.12s ease;
+}
+
+.nsft-fcdd-diff-link:hover:not(:disabled) {
+    background: #fef3c7;
+}
+
+.nsft-fcdd-diff-link:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-diff-link {
+    color: #F5C168;
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-diff-link:hover:not(:disabled) {
+    background: rgba(245, 158, 11, 0.24);
+}

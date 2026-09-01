@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netsuite Full Tools</title>
+    <link rel="stylesheet" href="../_shared/design_tokens.css">
+    <link rel="stylesheet" href="../../../welcome/welcome_previews.css">
+    <link rel="stylesheet" href="color_theme_accounts.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="background-decor"></div>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <img src="../../../assets/icons/icon128.png" alt="Logo" class="logo">
+                <div class="header-text">
+                    <h1 data-i18n="cta_title">Colour by account</h1>
+                    <p data-i18n="cta_desc">Give each NetSuite account its own colour.</p>
+                </div>
+            </div>
+            <div class="header-bar">
+                <button type="button" id="ctaDataBtn" class="btn-ghost" data-i18n="cta_data_btn">Import / export</button>
+            </div>
+        </header>
+
+        <div id="ctaOffNotice" class="off-notice" hidden>
+            <span class="off-notice-icon" aria-hidden="true">!</span>
+            <span id="ctaOffText"></span>
+        </div>
+
+        <main class="cols">
+            <section class="card col-list">
+                <div class="col-head">
+                    <span class="kicker" data-i18n="cta_list_title">Configured accounts</span>
+                    <span id="ctaCount" class="count mono">0</span>
+                </div>
+                <div class="col-search">
+                    <input type="text" id="ctaSearch" class="inp" autocomplete="off" spellcheck="false"
+                        data-i18n-placeholder="cta_search_placeholder" placeholder="Search account…">
+                </div>
+                <div id="ctaList" class="accounts-list"></div>
+                <div id="ctaEmpty" class="empty-state">
+                    <p data-i18n="cta_empty">No account has a colour of its own yet. The ones you do not
+                        add here use the global colour.</p>
+                </div>
+                <div id="ctaNoMatch" class="empty-state is-dashed" hidden>
+                    <p data-i18n="cta_search_empty">No accounts match.</p>
+                </div>
+
+                <div class="col-add">
+                    <span class="kicker add-title" data-i18n="cta_add_title">Add an account</span>
+                    <div class="seg" id="ctaAddSeg">
+                        <button type="button" data-addmode="one" class="is-on"
+                            data-i18n="cta_add_mode_one">One account</button>
+                        <button type="button" data-addmode="many" data-i18n="cta_add_mode_many">Several at once</button>
+                    </div>
+
+                    <div id="ctaAddOne">
+                        <div class="add-row">
+                            <input type="text" id="ctaAccount" list="ctaKnown" autocomplete="off" spellcheck="false"
+                                class="inp mono" data-i18n-placeholder="cta_account_placeholder"
+                                data-i18n-title="cta_account_label" placeholder="e.g. 1234567 or acme">
+                            <datalist id="ctaKnown"></datalist>
+                            <button type="button" id="ctaAddBtn" class="btn-primary btn-square"
+                                data-i18n-title="cta_add_btn" title="Add">+</button>
+                        </div>
+                        <p class="hint" id="ctaDetect" data-i18n="cta_account_hint">
+                            Write the subdomain without the environment suffix: all of that account's
+                            environments share one card.
+                        </p>
+                    </div>
+
+                    <div id="ctaAddMany" hidden>
+                        <textarea id="ctaBulk" class="ta" rows="4" spellcheck="false"
+                            data-i18n-placeholder="cta_bulk_placeholder"></textarea>
+                        <button type="button" id="ctaBulkBtn" class="btn-primary btn-wide">Add accounts</button>
+                        <p class="hint" data-i18n="cta_bulk_hint">One per line or separated by commas. Environment
+                            suffixes are detected and folded into the same account.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card col-main">
+                <div id="ctaNoSel" class="nosel">
+                    <p data-i18n="cta_no_selection">Add an account to get started.</p>
+                </div>
+
+                <div id="ctaFicha" hidden>
+                    <div class="ficha-head">
+                        <div class="ficha-name">
+                            <span class="kicker" data-i18n="cta_name_label">Account name</span>
+                            <input type="text" id="ctaName" class="name-input" autocomplete="off">
+                        </div>
+                        <div class="ficha-actions">
+                            <span id="ctaFichaId" class="idchip mono"></span>
+                            <button type="button" id="ctaDelete" class="btn-remove"
+                                data-i18n="cta_remove">Remove</button>
+                        </div>
+                    </div>
+
+                    <div class="block">
+                        <div class="sub" data-i18n="cta_mode_title">Colour mode</div>
+                        <div class="modes" id="ctaModes">
+                            <button type="button" class="mode" data-mode="single">
+                                <span class="mode-top"><span class="dot"></span><span class="mode-title"
+                                        data-i18n="cta_mode_single_title">One colour</span></span>
+                                <span class="mode-desc" data-i18n="cta_mode_single_desc">The same colour in Production,
+                                    Sandbox and Release Preview.</span>
+                            </button>
+                            <button type="button" class="mode" data-mode="env">
+                                <span class="mode-top"><span class="dot"></span><span class="mode-title"
+                                        data-i18n="cta_mode_env_title">One colour per environment</span></span>
+                                <span class="mode-desc" data-i18n="cta_mode_env_desc">A different colour for each
+                                    environment of this account.</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="block">
+                        <div class="block-head">
+                            <div class="sub" data-i18n="cta_slots_title">Active colours</div>
+                            <span class="note" data-i18n="cta_slots_hint">Click a row to edit it</span>
+                        </div>
+                        <div id="ctaSlots" class="slots"></div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="col-side" id="ctaSide" hidden>
+                <section class="card">
+                    <div class="card-head">
+                        <span class="kicker" data-i18n="cta_editor_title">Colour editor</span>
+                        <span class="mono dim">HSL</span>
+                    </div>
+                    <div id="ctaEditorWhat" class="editor-what"></div>
+
+                    <label class="swatch-big" id="ctaBigSwatch">
+                        <input type="color" id="ctaBigPicker">
+                        <span id="ctaBigHex" class="mono"></span>
+                    </label>
+
+                    <div class="sliders">
+                        <div class="slider-row">
+                            <div class="slider-lbl"><span data-i18n="cta_hue">Hue</span><span id="ctaHueVal"
+                                    class="mono"></span></div>
+                            <input type="range" id="ctaHue" min="0" max="360" step="1" class="range is-hue">
+                        </div>
+                        <div class="slider-row">
+                            <div class="slider-lbl"><span data-i18n="cta_sat">Saturation</span><span id="ctaSatVal"
+                                    class="mono"></span></div>
+                            <input type="range" id="ctaSat" min="0" max="100" step="1" class="range">
+                        </div>
+                        <div class="slider-row">
+                            <div class="slider-lbl"><span data-i18n="cta_lig">Lightness</span><span id="ctaLigVal"
+                                    class="mono"></span></div>
+                            <input type="range" id="ctaLig" min="0" max="100" step="1" class="range">
+                        </div>
+                    </div>
+
+                    <div class="editor-foot">
+                        <input type="text" id="ctaHex" class="inp mono hex-input" maxlength="7" spellcheck="false"
+                            autocomplete="off">
+                        <button type="button" id="ctaApplyAll" class="btn-ghost grow"></button>
+                    </div>
+
+                    <div class="block">
+                        <span class="kicker" data-i18n="cta_palette_title">Suggested palette</span>
+                        <div id="ctaPalette" class="palette"></div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <span class="kicker" data-i18n="cta_preview_title">How it looks in the browser</span>
+                    <div class="nsft-pv-win preview-win">
+                        <div class="nsft-pv-tabs is-gt">
+                            <span class="nsft-pv-dots">
+                                <span class="nsft-pv-dot is-red"></span>
+                                <span class="nsft-pv-dot is-amber"></span>
+                                <span class="nsft-pv-dot is-green"></span>
+                            </span>
+                            <span id="ctaTabstrip" class="preview-tabs"></span>
+                        </div>
+                        <div class="nsft-pv-chrome">
+                            <span id="ctaUrl" class="nsft-pv-url"></span>
+                        </div>
+                        <div id="ctaNsbar" class="nsft-pv-nsnav preview-nav">
+                            <i></i><i></i><i></i><i></i><i></i>
+                        </div>
+                        <div class="nsft-pv-body">
+                            <div class="nsft-pv-skel nsft-pv-cols">
+                                <i></i><i></i><i class="is-half"></i><i class="is-short"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="ctaDataModal" class="modal-overlay" hidden>
+        <div class="modal-card modal-card--wide" role="dialog" aria-modal="true" aria-labelledby="ctaDataTitle">
+            <div class="modal-head">
+                <div>
+                    <h3 id="ctaDataTitle" data-i18n="cta_data_title">Import and export</h3>
+                    <p class="modal-help" data-i18n="cta_data_desc">All your per-account colours in one JSON file.</p>
+                </div>
+                <button type="button" id="ctaDataClose" class="btn-ghost btn-square" data-i18n-title="cta_data_close"
+                    title="Close">&times;</button>
+            </div>
+
+            <span class="kicker" data-i18n="cta_data_export">Export</span>
+            <textarea id="ctaExportText" class="ta is-readonly" rows="6" readonly spellcheck="false"></textarea>
+            <div class="modal-row">
+                <button type="button" id="ctaCopyBtn" class="btn-ghost"
+                    data-i18n="cta_data_copy">Copy to clipboard</button>
+                <button type="button" id="ctaDownloadBtn" class="btn-ghost"
+                    data-i18n="cta_data_download">Download file</button>
+            </div>
+
+            <div class="modal-sep"></div>
+
+            <span class="kicker" data-i18n="cta_data_import">Import</span>
+            <textarea id="ctaImportText" class="ta" rows="5" spellcheck="false"
+                data-i18n-placeholder="cta_data_import_placeholder"></textarea>
+            <div class="modal-row">
+                <button type="button" id="ctaReplaceBtn" class="btn-primary btn-compact"
+                    data-i18n="cta_data_replace">Replace settings</button>
+                <button type="button" id="ctaMergeBtn" class="btn-ghost" data-i18n="cta_data_merge">Merge</button>
+                <input type="file" id="ctaImportFile" accept=".json,application/json" hidden>
+                <button type="button" id="ctaImportFileBtn" class="btn-ghost"
+                    data-i18n="cta_data_from_file">From a file…</button>
+                <span id="ctaDataMsg" class="modal-msg"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="ctaToast" class="toast"></div>
+
+    <script src="color_theme_accounts.js"></script>
+</body>
+
+</html>

@@ -70,9 +70,24 @@
                             return items;
                         }
 
+                        function ffFold(s) {
+                            const TS = window.NSFT_TextSearch;
+                            return TS ? TS.fold(s) : String(s == null ? '' : s).toLowerCase();
+                        }
+
+                        function ffFoldChars(s) {
+                            const t = String(s == null ? '' : s);
+                            let out = '';
+                            for (let i = 0; i < t.length; i++) {
+                                const f = ffFold(t.charAt(i));
+                                out += (f.length === 1) ? f : (f.charAt(0) || t.charAt(i));
+                            }
+                            return out;
+                        }
+
                         function fuzzyScore(needle, hay) {
-                            needle = needle.toLowerCase();
-                            hay = String(hay || '').toLowerCase();
+                            needle = ffFold(needle);
+                            hay = ffFold(hay);
                             if (!needle) return 0;
                             let hi = 0, score = 0, consecutive = 0;
                             for (let i = 0; i < needle.length; i++) {
@@ -119,11 +134,13 @@
                             const prevFocus = document.activeElement;
                             const modalId = 'nsft-ffi-' + Date.now();
                             const html = `
-                                <div id="${modalId}" class="nsft-ffi-modal-overlay" data-theme="${NSFT_THEME}" role="dialog" aria-modal="true" aria-label="${esc(TRANSLATIONS.ffi_prompt_generic)}">
-                                    <div class="nsft-ffi-modal-content">
-                                        <div class="nsft-ffi-modal-header">
-                                            <span class="nsft-ffi-modal-title">${esc(TRANSLATIONS.ffi_prompt_generic)}</span>
-                                            <button id="${modalId}-close" class="nsft-ffi-close-btn" aria-label="${esc(TRANSLATIONS.ffi_btn_cancel)}">✕</button>
+                                <div id="${modalId}" class="nsft-ffi-modal-overlay nsft-modal-backdrop" data-theme="${NSFT_THEME}" role="dialog" aria-modal="true" aria-label="${esc(TRANSLATIONS.ffi_prompt_generic)}">
+                                    <div class="nsft-ffi-modal-content nsft-modal nsft-modal--dialog" data-theme="${NSFT_THEME}">
+                                        <div class="nsft-modal-header">
+                                            <span class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>NetSuite Full Tools - ${esc(TRANSLATIONS.ffi_modal_title || 'Buscar Campo por ID')}</span>
+                                            <div class="nsft-header-actions">
+                                                <button id="${modalId}-close" class="nsft-modal-btn-close" aria-label="${esc(TRANSLATIONS.ffi_btn_cancel)}">✕</button>
+                                            </div>
                                         </div>
                                         <div class="nsft-ffi-modal-body">
                                             <div class="nsft-ffi-input-wrap">
@@ -152,19 +169,35 @@
                                 const t = String(text || '');
                                 const n = String(needle || '').trim();
                                 if (!n) return esc(t);
-                                const lower = t.toLowerCase();
-                                const ln = n.toLowerCase();
-                                const at = lower.indexOf(ln);
-                                if (at !== -1) {
-                                    return esc(t.slice(0, at))
-                                        + '<mark class="nsft-ffi-hl-txt">' + esc(t.slice(at, at + n.length)) + '</mark>'
-                                        + esc(t.slice(at + n.length));
+
+                                const TS = window.NSFT_TextSearch;
+                                if (TS) {
+                                    const rs = TS.ranges(t, n);
+                                    if (rs.length) {
+                                        let out = '', from = 0;
+                                        rs.forEach((r) => {
+                                            out += esc(t.slice(from, r.start))
+                                                + '<mark class="nsft-ffi-hl-txt">' + esc(t.slice(r.start, r.end)) + '</mark>';
+                                            from = r.end;
+                                        });
+                                        return out + esc(t.slice(from));
+                                    }
+                                } else {
+                                    const at = t.toLowerCase().indexOf(n.toLowerCase());
+                                    if (at !== -1) {
+                                        return esc(t.slice(0, at))
+                                            + '<mark class="nsft-ffi-hl-txt">' + esc(t.slice(at, at + n.length)) + '</mark>'
+                                            + esc(t.slice(at + n.length));
+                                    }
                                 }
+
+                                const tf = ffFoldChars(t);
+                                const ln = ffFoldChars(n);
                                 let out = '';
                                 let j = 0;
                                 for (let i = 0; i < t.length; i++) {
                                     const c = t.charAt(i);
-                                    if (j < ln.length && c.toLowerCase() === ln.charAt(j)) {
+                                    if (j < ln.length && tf.charAt(i) === ln.charAt(j)) {
                                         out += '<mark class="nsft-ffi-hl-txt">' + esc(c) + '</mark>';
                                         j++;
                                     } else {

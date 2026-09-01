@@ -34,6 +34,28 @@
         return window.NSFT_SQL ? window.NSFT_SQL.lit(v) : "'" + String(v).replace(/'/g, "''") + "'";
     }
 
+
+    function colCmp(col, plegado) {
+        var TS = plegado ? window.NSFT_TextSearch : null;
+        return TS ? TS.sqlFold(col) : 'UPPER(' + col + ')';
+    }
+
+    function valCmp(v, plegado) {
+        var TS = plegado ? window.NSFT_TextSearch : null;
+        return TS ? TS.sqlTerm(v) : String(v).toUpperCase();
+    }
+
+    function runDosPasadas(hazSpec, termino, cb) {
+        runSql(hazSpec(false), function (err, rows) {
+            if (err) { cb(err, rows); return; }
+            var vale = !!window.NSFT_TextSearch && !!String(termino || '').trim();
+            if ((rows && rows.length) || !vale) { cb(null, rows); return; }
+            runSql(hazSpec(true), function (err2, rows2) {
+                cb(null, err2 ? rows : rows2);
+            });
+        });
+    }
+
     function lookupTranid(tranid) {
         tranid = String(tranid || '').trim();
         if (!tranid) {
@@ -179,29 +201,34 @@
             reply('customRecordError', { code: 'empty', message: 'Empty alias or id' });
             return;
         }
-        var aliasUpper = alias.toUpperCase();
         var head = 'SELECT ct.internalid, ct.scriptid, ct.name FROM customrecordtype ct WHERE ';
-        var spec;
-        if (/^customrecord[a-z0-9_]*$/i.test(alias)) {
-            spec = {
-                rest: head + 'UPPER(ct.scriptid) = ' + lit(aliasUpper),
-                sql: head + 'UPPER(ct.scriptid) = ? FETCH FIRST 5 ROWS ONLY',
-                params: [aliasUpper],
-                limit: 5
-            };
-        } else {
-            var underscoredUpper = 'CUSTOMRECORD_' + alias.replace(/\s+/g, '_').toUpperCase();
-            spec = {
-                rest: head + 'UPPER(ct.name) = ' + lit(aliasUpper) +
-                      ' OR UPPER(ct.scriptid) = ' + lit(aliasUpper) +
-                      ' OR UPPER(ct.scriptid) = ' + lit(underscoredUpper),
-                sql: head + 'UPPER(ct.name) = ? OR UPPER(ct.scriptid) = ? OR UPPER(ct.scriptid) = ?' +
+        var esScriptid = /^customrecord[a-z0-9_]*$/i.test(alias);
+
+        function spec(plegado) {
+            var val = valCmp(alias, plegado);
+            var colSid = colCmp('ct.scriptid', plegado);
+            if (esScriptid) {
+                return {
+                    rest: head + colSid + ' = ' + lit(val),
+                    sql: head + colSid + ' = ? FETCH FIRST 5 ROWS ONLY',
+                    params: [val],
+                    limit: 5
+                };
+            }
+            var colName = colCmp('ct.name', plegado);
+            var underscored = valCmp('CUSTOMRECORD_' + alias.replace(/\s+/g, '_'), plegado);
+            return {
+                rest: head + colName + ' = ' + lit(val) +
+                      ' OR ' + colSid + ' = ' + lit(val) +
+                      ' OR ' + colSid + ' = ' + lit(underscored),
+                sql: head + colName + ' = ? OR ' + colSid + ' = ? OR ' + colSid + ' = ?' +
                      ' FETCH FIRST 5 ROWS ONLY',
-                params: [aliasUpper, aliasUpper, underscoredUpper],
+                params: [val, val, underscored],
                 limit: 5
             };
         }
-        runSql(spec, function (err, rows) {
+
+        runDosPasadas(spec, esScriptid ? '' : alias, function (err, rows) {
             if (err) {
                 reply('customRecordError', { code: err.code || 'query', message: err.message || '' });
                 return;
@@ -224,33 +251,40 @@
             reply('customRecordSuggestions', { rows: [], query: query, token: token });
             return;
         }
-        var whereRest, whereSql, params;
-        if (fuzzy) {
-            var tokens = query.split(/\s+/).filter(Boolean).slice(0, 6);
-            var condsRest = [];
-            var condsSql = [];
-            params = [];
-            tokens.forEach(function (t) {
-                var like = '%' + t.toUpperCase() + '%';
-                params.push(like, like);
-                condsRest.push('(UPPER(ct.name) LIKE ' + lit(like) + ' OR UPPER(ct.scriptid) LIKE ' + lit(like) + ')');
-                condsSql.push('(UPPER(ct.name) LIKE ? OR UPPER(ct.scriptid) LIKE ?)');
-            });
-            whereRest = condsRest.join(' AND ') || '1=1';
-            whereSql = condsSql.join(' AND ') || '1=1';
-        } else {
-            var likeUpper = '%' + query.toUpperCase() + '%';
-            whereRest = 'UPPER(ct.name) LIKE ' + lit(likeUpper) + ' OR UPPER(ct.scriptid) LIKE ' + lit(likeUpper);
-            whereSql = 'UPPER(ct.name) LIKE ? OR UPPER(ct.scriptid) LIKE ?';
-            params = [likeUpper, likeUpper];
-        }
         var head = 'SELECT ct.internalid, ct.scriptid, ct.name FROM customrecordtype ct WHERE ';
-        runSql({
-            rest: head + whereRest + ' ORDER BY ct.name',
-            sql: head + whereSql + ' ORDER BY ct.name FETCH FIRST 15 ROWS ONLY',
-            params: params,
-            limit: 15
-        }, function (err, rows) {
+
+        function spec(plegado) {
+            var colName = colCmp('ct.name', plegado);
+            var colSid = colCmp('ct.scriptid', plegado);
+            var whereRest, whereSql;
+            var params = [];
+            if (fuzzy) {
+                var tokens = query.split(/\s+/).filter(Boolean).slice(0, 6);
+                var condsRest = [];
+                var condsSql = [];
+                tokens.forEach(function (t) {
+                    var like = '%' + valCmp(t, plegado) + '%';
+                    params.push(like, like);
+                    condsRest.push('(' + colName + ' LIKE ' + lit(like) + ' OR ' + colSid + ' LIKE ' + lit(like) + ')');
+                    condsSql.push('(' + colName + ' LIKE ? OR ' + colSid + ' LIKE ?)');
+                });
+                whereRest = condsRest.join(' AND ') || '1=1';
+                whereSql = condsSql.join(' AND ') || '1=1';
+            } else {
+                var likeUpper = '%' + valCmp(query, plegado) + '%';
+                whereRest = colName + ' LIKE ' + lit(likeUpper) + ' OR ' + colSid + ' LIKE ' + lit(likeUpper);
+                whereSql = colName + ' LIKE ? OR ' + colSid + ' LIKE ?';
+                params = [likeUpper, likeUpper];
+            }
+            return {
+                rest: head + whereRest + ' ORDER BY ct.name',
+                sql: head + whereSql + ' ORDER BY ct.name FETCH FIRST 15 ROWS ONLY',
+                params: params,
+                limit: 15
+            };
+        }
+
+        runDosPasadas(spec, query, function (err, rows) {
             if (err) {
                 reply('customRecordSuggestions', {
                     rows: [], query: query, token: token, code: err.code || '', error: err.message || err.code || ''
@@ -277,27 +311,32 @@
             });
             return;
         }
-        var whereRest = '';
-        var whereSql = '';
-        var params = [];
-        if (filter) {
-            var likeUpper = '%' + filter.toUpperCase() + '%';
-            if (/^\d+$/.test(filter)) {
-                whereRest = 'WHERE id = ' + lit(filter) + ' OR UPPER(name) LIKE ' + lit(likeUpper);
-                whereSql = 'WHERE id = ? OR UPPER(name) LIKE ?';
-                params = [filter, likeUpper];
-            } else {
-                whereRest = 'WHERE UPPER(name) LIKE ' + lit(likeUpper);
-                whereSql = 'WHERE UPPER(name) LIKE ?';
-                params = [likeUpper];
+        function spec(plegado) {
+            var whereRest = '';
+            var whereSql = '';
+            var params = [];
+            if (filter) {
+                var colName = colCmp('name', plegado);
+                var likeUpper = '%' + valCmp(filter, plegado) + '%';
+                if (/^\d+$/.test(filter)) {
+                    whereRest = 'WHERE id = ' + lit(filter) + ' OR ' + colName + ' LIKE ' + lit(likeUpper);
+                    whereSql = 'WHERE id = ? OR ' + colName + ' LIKE ?';
+                    params = [filter, likeUpper];
+                } else {
+                    whereRest = 'WHERE ' + colName + ' LIKE ' + lit(likeUpper);
+                    whereSql = 'WHERE ' + colName + ' LIKE ?';
+                    params = [likeUpper];
+                }
             }
+            return {
+                rest: 'SELECT id, name FROM ' + scriptid + ' ' + whereRest + ' ORDER BY id DESC',
+                sql: 'SELECT id, name FROM ' + scriptid + ' ' + whereSql + ' ORDER BY id DESC FETCH FIRST 15 ROWS ONLY',
+                params: params,
+                limit: 15
+            };
         }
-        runSql({
-            rest: 'SELECT id, name FROM ' + scriptid + ' ' + whereRest + ' ORDER BY id DESC',
-            sql: 'SELECT id, name FROM ' + scriptid + ' ' + whereSql + ' ORDER BY id DESC FETCH FIRST 15 ROWS ONLY',
-            params: params,
-            limit: 15
-        }, function (err, rows) {
+
+        runDosPasadas(spec, filter, function (err, rows) {
             if (err) {
                 reply('customRecordInstanceSuggestions', {
                     rows: [], filter: filter, token: token, scriptid: scriptid, rectypeId: rectypeId,

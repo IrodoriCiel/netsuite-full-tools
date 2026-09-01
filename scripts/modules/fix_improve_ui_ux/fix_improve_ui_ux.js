@@ -83,6 +83,14 @@
             pattern: '{0} ({1})'
         },
         {
+            when: () => /\/app\/common\/workflow\//i.test(location.pathname),
+            selectors: [
+                ['.page-title span.name', 'span.name'],
+                () => _betterTitlesOriginalLabel
+            ],
+            pattern: '{0} ({1})'
+        },
+        {
             selectors: ['.uir-record-id', ['.uir-record-type', '.uir-field-input']],
             pattern: '{0} ({1})'
         },
@@ -94,6 +102,7 @@
 
     let _betterTitlesActive = false;
     let _betterTitlesUnsub = null;
+    let _betterTitlesOriginalLabel = null;
 
     function resolveTitleSlot(slot) {
         const list = Array.isArray(slot) ? slot : [slot];
@@ -110,9 +119,15 @@
 
     function runBetterPageTitles() {
         for (const titleDef of PAGE_TITLE_DEFINITIONS) {
+            if (titleDef.when && !titleDef.when()) continue;
             const titleData = [];
 
             for (const slot of titleDef.selectors) {
+                if (typeof slot === 'function') {
+                    const v = slot();
+                    if (v) titleData.push(String(v));
+                    continue;
+                }
                 const el = resolveTitleSlot(slot);
                 if (!el) continue;
                 if (el.tagName === 'INPUT') {
@@ -130,11 +145,22 @@
                     newTitle = newTitle.replace(`{${index}}`, data);
                 });
 
+                const root = document.documentElement;
+                root.setAttribute('data-nsft-page-name', titleData[0] || '');
+                root.setAttribute('data-nsft-page-type', titleData.length > 1 ? (titleData[1] || '') : '');
+
                 const titleEl = document.querySelector('head title');
                 if (titleEl && titleEl.textContent !== newTitle) titleEl.textContent = newTitle;
                 return;
             }
         }
+        clearTitleStamps();
+    }
+
+    function clearTitleStamps() {
+        const root = document.documentElement;
+        root.removeAttribute('data-nsft-page-name');
+        root.removeAttribute('data-nsft-page-type');
     }
 
     function startBetterPageTitles() {
@@ -144,6 +170,10 @@
         } catch (e) { }
 
         _betterTitlesActive = true;
+        if (_betterTitlesOriginalLabel == null) {
+            _betterTitlesOriginalLabel = String(document.title || '')
+                .replace(/\s*-\s*NetSuite\b.*$/i, '').replace(/[\s ]+/g, ' ').trim();
+        }
         runBetterPageTitles();
         if (window.NSFT_Observer) {
             _betterTitlesUnsub = NSFT_Observer.subscribe(runBetterPageTitles, { throttle: 500 });
@@ -154,6 +184,7 @@
         if (!_betterTitlesActive) return;
         _betterTitlesActive = false;
         if (_betterTitlesUnsub) { _betterTitlesUnsub(); _betterTitlesUnsub = null; }
+        clearTitleStamps();
     }
 
     const FSC_CLASS = 'nsft-fsc-on';

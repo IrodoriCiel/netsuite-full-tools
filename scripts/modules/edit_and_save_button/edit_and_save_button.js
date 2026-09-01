@@ -77,6 +77,9 @@
             ro_title: chrome.i18n.getMessage('ro_title'),
             errorRecType: chrome.i18n.getMessage('ro_error_rec_type'),
             prdConfirm: chrome.i18n.getMessage('eas_prd_confirm'),
+            dlgTitle: chrome.i18n.getMessage('dlg_title_confirm'),
+            dlgOk: chrome.i18n.getMessage('dlg_accept'),
+            dlgCancel: chrome.i18n.getMessage('dlg_cancel'),
             requirePrdConfirm: !!confirmInPrd && isPrd()
         };
 
@@ -86,7 +89,17 @@
         msgData.textContent = JSON.stringify(messages);
         (document.head || document.documentElement).appendChild(msgData);
 
+        if (!document.getElementById('nsft-dialog-mw')) {
+            const d = document.createElement('script');
+            d.id = 'nsft-dialog-mw';
+            d.async = false;
+            d.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_dialog.js');
+            d.onload = function () { this.remove(); };
+            (document.head || document.documentElement).appendChild(d);
+        }
+
         const script = document.createElement('script');
+        script.async = false;
         script.src = chrome.runtime.getURL(FETCHER_PATH);
         script.onload = function () {
             this.remove();
@@ -100,7 +113,8 @@
         const DOM = window.NSFT_DOM;
         const msgNotReady = chrome.i18n.getMessage('ro_function_not_loaded');
         const label = chrome.i18n.getMessage('ro_edit_save');
-        const onclick = `if(typeof nsft_maoEditAndSave=="function"){nsft_maoEditAndSave(this);}else{alert(${JSON.stringify(msgNotReady)});}`;
+        const onclick = `if(typeof nsft_maoEditAndSave=="function"){nsft_maoEditAndSave(this);}else{this.dispatchEvent(new CustomEvent(${JSON.stringify('nsft-fn-not-ready')},{bubbles:true}));}`;
+        escuchaAvisoNoListo(msgNotReady);
 
         if (!document.getElementById(IDS.BTN)) {
             const anchor = RB.findEditBtn();
@@ -132,4 +146,15 @@
             }
         }
     }
+
+    let _oyenteAvisoPuesto = false;
+    function escuchaAvisoNoListo(mensaje) {
+        if (_oyenteAvisoPuesto) return;
+        _oyenteAvisoPuesto = true;
+        document.addEventListener('nsft-fn-not-ready', () => {
+            if (window.NSFT_Dialog) window.NSFT_Dialog.alert({ body: mensaje });
+            else window.alert(mensaje);
+        });
+    }
+
 })();

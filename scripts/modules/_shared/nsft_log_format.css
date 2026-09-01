@@ -26,3 +26,155 @@
     overflow: auto;
     position: relative;
 }
+
+
+.nsft-logfmt-err {
+    --lf-err-rule: #D93B41;
+    --lf-err-msg: #1C2024;
+    --lf-err-tok: #9A5B00;
+    --lf-err-num: #9AA4B0;
+    --lf-err-muted: #8B949E;
+    --lf-err-file: #3C4451;
+    --lf-err-pos: #1A7F4B;
+    --lf-err-hover: #F4F6F9;
+    --lf-err-fn-0: #B3261E;
+    --lf-err-fn-1: #0B57A4;
+    --lf-err-fn-2: #0A7B5A;
+    --lf-err-fn-3: #B3541E;
+}
+
+html[data-nsft-theme="dark"] .nsft-logfmt-err {
+    --lf-err-rule: #E5484D;
+    --lf-err-msg: #F0F3F7;
+    --lf-err-tok: #FFD479;
+    --lf-err-num: #4F5966;
+    --lf-err-muted: #5D6875;
+    --lf-err-file: #A8B2BE;
+    --lf-err-pos: #7FD88F;
+    --lf-err-hover: var(--nsft-dk-hover, #1E2025);
+    --lf-err-fn-0: #FFB4B6;
+    --lf-err-fn-1: #9ECBFF;
+    --lf-err-fn-2: #7AD7CD;
+    --lf-err-fn-3: #F0A97F;
+}
+
+.nsft-logfmt-err-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px 16px;
+    max-height: 400px;
+    overflow: auto;
+}
+
+
+.nsft-logfmt-err-msg {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.nsft-logfmt-err-rule {
+    flex: none;
+    width: 3px;
+    align-self: stretch;
+    border-radius: 2px;
+    background: var(--lf-err-rule);
+}
+
+.nsft-logfmt-err-msg-text {
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--lf-err-msg);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+}
+
+.nsft-logfmt-err-tok {
+    font-family: var(--nsft-font-mono, ui-monospace, monospace);
+    font-weight: 500;
+    color: var(--lf-err-tok);
+}
+
+
+.nsft-logfmt-err-frames {
+    display: flex;
+    flex-direction: column;
+}
+
+.nsft-logfmt-err-frame {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 10px;
+    align-items: baseline;
+    margin-left: 13px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: var(--nsft-font-mono, ui-monospace, monospace);
+    font-size: 12.5px;
+    line-height: 1.55;
+}
+
+.nsft-logfmt-err-frame:hover {
+    background: var(--lf-err-hover);
+}
+
+.nsft-logfmt-err-num {
+    font-size: 11px;
+    text-align: right;
+    color: var(--lf-err-num);
+    user-select: none;
+}
+
+.nsft-logfmt-err-line {
+    min-width: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.nsft-logfmt-err-at,
+.nsft-logfmt-err-punct,
+.nsft-logfmt-err-dir {
+    color: var(--lf-err-muted);
+}
+
+.nsft-logfmt-err-file { color: var(--lf-err-file); }
+.nsft-logfmt-err-pos { color: var(--lf-err-pos); }
+
+.nsft-logfmt-err-fn {
+    font-weight: 500;
+    color: var(--lf-err-fn-1);
+}
+
+.nsft-logfmt-err-frame[data-src="0"] .nsft-logfmt-err-fn { color: var(--lf-err-fn-0); }
+.nsft-logfmt-err-frame[data-src="1"] .nsft-logfmt-err-fn { color: var(--lf-err-fn-1); }
+.nsft-logfmt-err-frame[data-src="2"] .nsft-logfmt-err-fn { color: var(--lf-err-fn-2); }
+.nsft-logfmt-err-frame[data-src="3"] .nsft-logfmt-err-fn { color: var(--lf-err-fn-3); }
+
+.nsft-logfmt-err-note {
+    margin-left: 13px;
+    padding: 4px 6px;
+    font-size: 12.5px;
+    color: var(--lf-err-msg);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.nsft-logfmt-err-tail {
+    margin-left: 13px;
+    padding-top: 6px;
+    border-top: 1px solid var(--cc-card-bd);
+    font-family: var(--nsft-font-mono, ui-monospace, monospace);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--lf-err-muted);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.nsft-logfmt-wrapper pre.nsft-logfmt-raw code.hljs {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}

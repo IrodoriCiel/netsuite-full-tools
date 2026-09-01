@@ -30,14 +30,18 @@
                 'FROM transaction WHERE id = ' + id, 1
             ),
             run(
-                'SELECT pl.previousdoc AS id, pl.linktype, t.type, BUILTIN.DF(t.type) AS typename, t.tranid, t.trandate, BUILTIN.DF(t.status) AS status ' +
+                'SELECT pl.previousdoc AS id, pl.linktype, BUILTIN.DF(pl.linktype) AS linkname, ' +
+                't.type, BUILTIN.DF(t.type) AS typename, t.tranid, t.trandate, ' +
+                'BUILTIN.DF(t.status) AS status, t.foreigntotal AS amount ' +
                 'FROM PreviousTransactionLink pl JOIN transaction t ON t.id = pl.previousdoc ' +
-                'WHERE pl.nextdoc = ' + id
+                'WHERE pl.nextdoc = ' + id + ' ORDER BY t.trandate, t.type'
             ),
             run(
-                'SELECT nl.nextdoc AS id, nl.linktype, t.type, BUILTIN.DF(t.type) AS typename, t.tranid, t.trandate, BUILTIN.DF(t.status) AS status ' +
+                'SELECT nl.nextdoc AS id, nl.linktype, BUILTIN.DF(nl.linktype) AS linkname, ' +
+                't.type, BUILTIN.DF(t.type) AS typename, t.tranid, t.trandate, ' +
+                'BUILTIN.DF(t.status) AS status, t.foreigntotal AS amount ' +
                 'FROM NextTransactionLink nl JOIN transaction t ON t.id = nl.nextdoc ' +
-                'WHERE nl.previousdoc = ' + id
+                'WHERE nl.previousdoc = ' + id + ' ORDER BY t.type, t.trandate DESC'
             )
         ]).then((res) => {
             send(reqId, {
@@ -57,7 +61,8 @@
             typename: r.typename || '',
             tranid: r.tranid || '',
             trandate: r.trandate || '',
-            status: r.status || ''
+            status: r.status || '',
+            amount: (r.amount === null || r.amount === undefined) ? null : r.amount
         };
     }
 
@@ -71,7 +76,11 @@
                 byId[key].linktypeSet = {};
                 order.push(key);
             }
-            if (r.linktype) byId[key].linktypeSet[r.linktype] = true;
+            const rel = limpiaRel(r.linkname) || r.linktype;
+            if (rel) byId[key].linktypeSet[rel] = true;
+            if (byId[key].amount === null && r.amount !== null && r.amount !== undefined) {
+                byId[key].amount = r.amount;
+            }
         });
         return order.map(function (key) {
             const n = byId[key];
@@ -79,6 +88,11 @@
             delete n.linktypeSet;
             return n;
         });
+    }
+
+    function limpiaRel(s) {
+        const t = String(s || '').replace(/\{#[^?}]*\?([^#}]*)#\}/g, '$1').trim();
+        return t.indexOf('{#') >= 0 ? '' : t;
     }
 
     function send(reqId, payload, error) {

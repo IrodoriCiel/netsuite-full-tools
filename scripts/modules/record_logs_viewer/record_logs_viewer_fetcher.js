@@ -15,6 +15,7 @@
         if (data.type === 'context') sendContext(data.payload || {});
         else if (data.type === 'recordtypes') sendRecordTypes();
         else if (data.type === 'scripts_for') sendScriptsFor(data.payload || {});
+        else if (data.type === 'deploys_for') sendDeploysFor(data.payload || {});
         else if (data.type === 'logs') runLogs(data.payload || {});
         else if (data.type === 'logs_export') runExport(data.payload || {});
     });
@@ -64,7 +65,7 @@
     function scriptOfDeployment(query, id) {
         try {
             var rows = query.runSuiteQL({
-                query: 'SELECT sd.script AS sid FROM ScriptDeployment sd WHERE sd.id = ?',
+                query: 'SELECT sd.script AS sid FROM ScriptDeployment sd WHERE sd.primarykey = ?',
                 params: [id]
             }).asMappedResults();
             var sid = (rows && rows.length) ? parseInt(rows[0].sid, 10) : 0;
@@ -189,6 +190,34 @@
         });
     }
 
+    function sendDeploysFor(payload) {
+        var sid = payload.scriptId != null ? String(payload.scriptId) : '';
+        if (!sid || typeof require !== 'function') {
+            reply('deploys_for', { scriptId: sid, deploys: [], fileId: null });
+            return;
+        }
+        require(['N/query'], function (query) {
+            var deploys = [];
+            var fileId = null;
+            try {
+                deploys = query.runSuiteQL({
+                    query: 'SELECT sd.primarykey AS id, sd.scriptid AS did FROM ScriptDeployment sd WHERE sd.script = ? ORDER BY sd.primarykey',
+                    params: [sid]
+                }).asMappedResults().map(function (r) { return { id: r.id, did: r.did }; });
+            } catch (e) { }
+            try {
+                var frows = query.runSuiteQL({
+                    query: 'SELECT scriptfile AS fid FROM script WHERE id = ?',
+                    params: [sid]
+                }).asMappedResults();
+                if (frows && frows.length && frows[0].fid != null) fileId = frows[0].fid;
+            } catch (e) { }
+            reply('deploys_for', { scriptId: sid, deploys: deploys, fileId: fileId });
+        }, function () {
+            reply('deploys_for', { scriptId: sid, deploys: [], fileId: null });
+        });
+    }
+
     var FROM_CLAUSE = 'FROM scriptNote LEFT JOIN script ON scriptNote.scripttype = script.id';
 
     function lit(v) {
@@ -197,7 +226,7 @@
 
     var DATE_RE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
-    function buildWhere(f, skip, inline) {
+    function buildWhere(f, skip, inline, plegado) {
         skip = skip || {};
         var where = [];
         var params = [];
@@ -227,9 +256,15 @@
         }
 
         if (f.q) {
-            var needle = '%' + String(f.q).toUpperCase() + '%';
-            where.push('(UPPER(scriptNote.title) LIKE ' + val(needle) +
-                ' OR UPPER(scriptNote.detail) LIKE ' + val(needle) + ')');
+            var TS = plegado ? window.NSFT_TextSearch : null;
+            var colTitulo = TS ? TS.sqlFold('scriptNote.title') : 'UPPER(scriptNote.title)';
+            var needle = '%' + (TS ? TS.sqlTerm(f.q) : String(f.q).toUpperCase()) + '%';
+            if (TS) {
+                where.push(colTitulo + ' LIKE ' + val(needle));
+            } else {
+                where.push('(UPPER(scriptNote.title) LIKE ' + val(needle) +
+                    ' OR UPPER(scriptNote.detail) LIKE ' + val(needle) + ')');
+            }
         }
 
         if (f.from && DATE_RE.test(String(f.from))) {
@@ -243,6 +278,28 @@
             where: where.length ? ' WHERE ' + where.join(' AND ') : '',
             params: params
         };
+    }
+
+
+    function puedePlegar(job) {
+        return !job.reintentado && !!(job.f && job.f.q) && !!window.NSFT_TextSearch;
+    }
+
+    function tocaReintento(job, rows, total) {
+        return puedePlegar(job) && !(rows && rows.length) && !total;
+    }
+
+    function pliegaYRepite(job, correr) {
+        job.plegado = true;
+        job.reintentado = true;
+        correr(job);
+    }
+
+    function rebotaSinPliegue(job, correr) {
+        if (!job.plegado) return false;
+        job.plegado = false;
+        correr(job);
+        return true;
     }
 
     function sqlRows(w) {
@@ -307,7 +364,7 @@
     var restAnnouncedOn = false;
 
     function logsViaRest(job) {
-        var w = buildWhere(job.f, null, true);
+        var w = buildWhere(job.f, null, true, job.plegado);
         restQuery(sqlRows(w), job.pageSize, job.pageIndex * job.pageSize).then(function (r) {
             if (!r.ok) {
                 restAnnouncedOn = false;
@@ -325,6 +382,8 @@
                 total = job.pageIndex * job.pageSize + r.rows.length + (r.hasMore ? 1 : 0);
             }
 
+            if (tocaReintento(job, r.rows, total)) { pliegaYRepite(job, logsViaRest); return; }
+
             reply('logs', {
                 reqId: job.reqId,
                 rows: r.rows,
@@ -339,8 +398,8 @@
     }
 
     function restCounts(job) {
-        var wl = buildWhere(job.f, { levels: true }, true);
-        var ws = buildWhere(job.f, { scripts: true, scriptTypes: true }, true);
+        var wl = buildWhere(job.f, { levels: true }, true, job.plegado);
+        var ws = buildWhere(job.f, { scripts: true, scriptTypes: true }, true, job.plegado);
         Promise.all([
             restQuery(sqlLevelCounts(wl), 1000, 0),
             restQuery(sqlScriptCounts(ws), 1000, 0)
@@ -393,11 +452,12 @@
 
     function logsViaQuery(job) {
         if (typeof require !== 'function') {
+            if (rebotaSinPliegue(job, logsViaQuery)) return;
             reply('logs_error', { reqId: job.reqId, errorCode: 'no_require' });
             return;
         }
         require(['N/query'], function (query) {
-            var w = buildWhere(job.f);
+            var w = buildWhere(job.f, null, false, job.plegado);
             pRunPaged(query, sqlRows(w), w.params, job.pageSize).then(function (paged) {
                 var total = paged.count || 0;
                 if (!total || !paged.pageRanges || job.pageIndex >= paged.pageRanges.length) {
@@ -413,6 +473,7 @@
                     });
                 });
             }).then(function (r) {
+                if (tocaReintento(job, r.rows, r.total)) { pliegaYRepite(job, logsViaQuery); return; }
                 reply('logs', {
                     reqId: job.reqId,
                     rows: r.rows,
@@ -424,6 +485,7 @@
                 });
                 if (job.pageIndex === 0) queryCounts(query, job);
             }).catch(function (e) {
+                if (rebotaSinPliegue(job, logsViaQuery)) return;
                 reply('logs_error', {
                     reqId: job.reqId,
                     errorCode: 'query_failed',
@@ -431,13 +493,14 @@
                 });
             });
         }, function () {
+            if (rebotaSinPliegue(job, logsViaQuery)) return;
             reply('logs_error', { reqId: job.reqId, errorCode: 'query_load' });
         });
     }
 
     function queryCounts(query, job) {
-        var wl = buildWhere(job.f, { levels: true });
-        var ws = buildWhere(job.f, { scripts: true, scriptTypes: true });
+        var wl = buildWhere(job.f, { levels: true }, false, job.plegado);
+        var ws = buildWhere(job.f, { scripts: true, scriptTypes: true }, false, job.plegado);
         var counts = { levels: {}, scripts: {} };
         Promise.all([
             pRunSuiteQL(query, sqlLevelCounts(wl), wl.params)
@@ -460,7 +523,9 @@
             t0: Date.now(),
             reqId: f.reqId,
             max: Math.max(1, Math.min(EXPORT_MAX, parseInt(f.max, 10) || EXPORT_MAX)),
-            chunk: EXPORT_CHUNK
+            chunk: EXPORT_CHUNK,
+            plegado: false,
+            reintentado: false
         };
     }
 
@@ -475,7 +540,7 @@
     }
 
     function exportViaRest(job) {
-        var w = buildWhere(job.f, null, true);
+        var w = buildWhere(job.f, null, true, job.plegado);
         var sql = sqlRows(w);
         var rows = [];
         var total = 0;
@@ -508,17 +573,19 @@
                 restAnnouncedOn = true;
                 reply('rest_state', { on: true });
             }
+            if (tocaReintento(job, rows, total)) { pliegaYRepite(job, exportViaRest); return; }
             finishExport(job, rows, total);
         });
     }
 
     function exportViaQuery(job) {
         if (typeof require !== 'function') {
+            if (rebotaSinPliegue(job, exportViaQuery)) return;
             reply('logs_export_error', { reqId: job.reqId, errorCode: 'no_require' });
             return;
         }
         require(['N/query'], function (query) {
-            var w = buildWhere(job.f);
+            var w = buildWhere(job.f, null, false, job.plegado);
             pRunPaged(query, sqlRows(w), w.params, job.chunk).then(function (paged) {
                 var total = paged.count || 0;
                 var ranges = paged.pageRanges || [];
@@ -542,8 +609,12 @@
                     });
                 }
 
-                return step(0).then(function () { finishExport(job, rows, total); });
+                return step(0).then(function () {
+                    if (tocaReintento(job, rows, total)) { pliegaYRepite(job, exportViaQuery); return; }
+                    finishExport(job, rows, total);
+                });
             }).catch(function (e) {
+                if (rebotaSinPliegue(job, exportViaQuery)) return;
                 reply('logs_export_error', {
                     reqId: job.reqId,
                     errorCode: 'query_failed',
@@ -551,6 +622,7 @@
                 });
             });
         }, function () {
+            if (rebotaSinPliegue(job, exportViaQuery)) return;
             reply('logs_export_error', { reqId: job.reqId, errorCode: 'query_load' });
         });
     }
@@ -567,7 +639,9 @@
             t0: Date.now(),
             reqId: f.reqId,
             pageSize: Math.max(10, Math.min(500, parseInt(f.pageSize, 10) || 100)),
-            pageIndex: Math.max(0, parseInt(f.page, 10) || 0)
+            pageIndex: Math.max(0, parseInt(f.page, 10) || 0),
+            plegado: false,
+            reintentado: false
         };
         if (f.restOff || typeof fetch !== 'function') { logsViaQuery(job); return; }
         logsViaRest(job);

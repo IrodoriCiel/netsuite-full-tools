@@ -132,7 +132,9 @@
     function blockClick(e) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        alert(chrome.i18n.getMessage('sfs_blocked_alert') || 'This is a system folder. Delete is disabled for safety.');
+        const texto = chrome.i18n.getMessage('sfs_blocked_alert') || 'This is a system folder. Delete is disabled for safety.';
+        if (window.NSFT_Dialog) window.NSFT_Dialog.alert({ body: texto });
+        else alert(texto);
     }
 
     function escapeHtml(s) {

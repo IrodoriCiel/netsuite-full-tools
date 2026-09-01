@@ -302,6 +302,7 @@
 
     const ICON_COPY = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.8"/><path d="M10.5 3.2A1.7 1.7 0 0 0 8.8 2H3.7A1.7 1.7 0 0 0 2 3.7v5.1c0 .8.6 1.5 1.4 1.7"/></svg>';
     const ICON_DOWNLOAD = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v7.5"/><path d="M5 7.4 8 10.4l3-3"/><path d="M2.8 12.2v.4a1.4 1.4 0 0 0 1.4 1.4h7.6a1.4 1.4 0 0 0 1.4-1.4v-.4"/></svg>';
+    const ICON_RAW = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11"/><path d="M2.5 7.3h7.5"/><path d="M2.5 10.6h9.5"/><path d="M2.5 13.9h5.5"/></svg>';
 
     const makeBarButton = (label, iconSvg) => {
         const btn = document.createElement('button');
@@ -360,15 +361,20 @@
         copyBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (!navigator.clipboard) return;
-            navigator.clipboard.writeText(text).then(() => {
+            const acuse = () => {
                 btnLabelEl(copyBtn).textContent = copiedLabel + '!';
                 copyBtn.classList.add('copied');
                 setTimeout(() => {
                     btnLabelEl(copyBtn).textContent = copyLabel;
                     copyBtn.classList.remove('copied');
                 }, 2000);
-            });
+            };
+
+            if (window.NSFT_Clipboard) {
+                NSFT_Clipboard.copy(text, { toast: { preview: false }, onSuccess: acuse });
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(acuse);
+            }
         });
 
         const downloadBtn = makeBarButton(downloadLabel, ICON_DOWNLOAD);
@@ -400,23 +406,60 @@
         return group;
     };
 
+    const addRawToggle = (wrapper, btnGroup, viewEls, rawText, opts = {}) => {
+        if (!rawText) return null;
+
+        const rawLabel = i18n('log_view_original', 'View original');
+        const backLabel = opts.repaired
+            ? i18n('log_view_repaired', 'View repaired')
+            : i18n('log_view_formatted', 'View formatted');
+
+        const btn = typeof opts.makeBtn === 'function'
+            ? opts.makeBtn(rawLabel)
+            : makeBarButton(rawLabel, ICON_RAW);
+        btnGroup.appendChild(btn);
+
+        const pre = document.createElement('pre');
+        pre.className = opts.preClass || 'nsft-logfmt-raw';
+        const code = document.createElement('code');
+        code.className = 'plaintext hljs';
+        code.textContent = rawText;
+        pre.appendChild(code);
+        pre.style.display = 'none';
+        wrapper.appendChild(pre);
+
+        let viendoRaw = false;
+        let previo = null;
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            viendoRaw = !viendoRaw;
+
+            if (viendoRaw) {
+                previo = viewEls.map((v) => (v ? v.style.display : ''));
+                viewEls.forEach((v) => { if (v) v.style.display = 'none'; });
+            } else {
+                viewEls.forEach((v, i) => { if (v) v.style.display = (previo && previo[i]) || ''; });
+            }
+            pre.style.display = viendoRaw ? '' : 'none';
+
+            (opts.alsoDisable || []).forEach((b) => { if (b) b.disabled = viendoRaw; });
+
+            const next = viendoRaw ? backLabel : rawLabel;
+            btnLabelEl(btn).textContent = next;
+            btn.title = next;
+            btn.classList.toggle('is-on', viendoRaw);
+        });
+
+        return btn;
+    };
+
     const renderCode = (el, text, lang, isRepaired = false, prefix = '', rawOriginal = '', nameParts = null) => {
         const wrapper = document.createElement('div');
         wrapper.className = WRAPPER_CLASS;
 
         const btnGroup = createButtonGroup(text, lang, nameParts);
-
-        let toggleBtn = null;
-        let originalPre = null;
-        if (isRepaired && rawOriginal && rawOriginal !== text) {
-            const viewOriginalLabel = i18n('log_view_original', 'View original');
-            const viewRepairedLabel = i18n('log_view_repaired', 'View repaired');
-            toggleBtn = makeBarButton(viewOriginalLabel, '');
-            toggleBtn.dataset.viewOriginalLabel = viewOriginalLabel;
-            toggleBtn.dataset.viewRepairedLabel = viewRepairedLabel;
-            btnGroup.appendChild(toggleBtn);
-        }
-
         wrapper.appendChild(btnGroup);
 
         const pre = document.createElement('pre');
@@ -426,29 +469,7 @@
         pre.appendChild(code);
         wrapper.appendChild(pre);
 
-        if (toggleBtn) {
-            originalPre = document.createElement('pre');
-            const originalCode = document.createElement('code');
-            originalCode.className = 'plaintext hljs';
-            originalCode.textContent = rawOriginal;
-            originalPre.appendChild(originalCode);
-            originalPre.style.display = 'none';
-            wrapper.appendChild(originalPre);
-
-            let showingOriginal = false;
-            toggleBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showingOriginal = !showingOriginal;
-                pre.style.display = showingOriginal ? 'none' : '';
-                originalPre.style.display = showingOriginal ? '' : 'none';
-                const next = showingOriginal
-                    ? toggleBtn.dataset.viewRepairedLabel
-                    : toggleBtn.dataset.viewOriginalLabel;
-                btnLabelEl(toggleBtn).textContent = next;
-                toggleBtn.title = next;
-            });
-        }
+        addRawToggle(wrapper, btnGroup, [pre], rawOriginal, { repaired: isRepaired });
 
         if (isRepaired) {
             const warning = document.createElement('div');
@@ -518,8 +539,218 @@
             }
         });
 
+        addRawToggle(wrapper, btnGroup, [host, codePre], text, { alsoDisable: [toggleBtn] });
+
         el.innerHTML = '';
         el.appendChild(wrapper);
+    };
+
+
+    const ERR_SRC_COLORS = 4;
+
+    const RX_AT_LINE = /^\s*at\s+(.+?)\s*$/;
+    const RX_FRAME_PARENS = /^(.*?)\s*\(([^()]*)\)$/;
+    const RX_FRAME_POS = /:\d+(?::\d+)?$/;
+    const RX_FRAME_SPLIT_POS = /^(.*?)(:\d+(?::\d+)?)$/;
+
+    const frameOf = (line) => {
+        const m = RX_AT_LINE.exec(line);
+        if (!m) return null;
+
+        let fn = '';
+        let loc = m[1];
+        const parens = RX_FRAME_PARENS.exec(loc);
+        if (parens) {
+            fn = parens[1];
+            loc = parens[2];
+        } else if (!RX_FRAME_POS.test(loc)) {
+            return null;
+        }
+
+        let pos = '';
+        const split = RX_FRAME_SPLIT_POS.exec(loc);
+        if (split) {
+            loc = split[1];
+            pos = split[2];
+        }
+
+        const cut = Math.max(loc.lastIndexOf('/'), loc.lastIndexOf('\\'));
+        let file = cut >= 0 ? loc.slice(cut + 1) : loc;
+        const q = file.indexOf('?');
+        if (q > 0) file = file.slice(0, q);
+        return {
+            fn,
+            dir: cut >= 0 ? loc.slice(0, cut + 1) : '',
+            file,
+            pos
+        };
+    };
+
+    const desdoblaTraza = (text) => {
+        const partes = text.split(/(?:^|\s+)at\s+/);
+        if (partes.length < 3) return null;
+        for (let i = 1; i < partes.length - 1; i++) {
+            const resto = partes.slice(i);
+            if (!resto.every((p) => frameOf('at ' + p))) continue;
+            return [partes.slice(0, i).join(' at ')]
+                .concat(resto.map((p) => '    at ' + p))
+                .join('\n');
+        }
+        return null;
+    };
+
+    const normalizaTraza = (text) => {
+        const t = String(text || '');
+        const lineas = t.split(/\r?\n/);
+        if (lineas.length > 1 && lineas.some((l) => frameOf(l))) return t;
+        const desdoblado = desdoblaTraza(t);
+        if (desdoblado) return desdoblado;
+        return lineas.some((l) => frameOf(l)) ? t : null;
+    };
+
+    const parseStack = (text) => {
+        const normalizado = normalizaTraza(text);
+        if (!normalizado) return null;
+
+        const lines = normalizado.split(/\r?\n/);
+        const marcos = lines.map(frameOf);
+
+        let completos = 0;
+        let sueltos = 0;
+        marcos.forEach((f) => {
+            if (!f) return;
+            sueltos++;
+            if (f.fn && f.pos) completos++;
+        });
+        if (!completos && sueltos < 2) return null;
+
+        let primero = -1;
+        let ultimo = -1;
+        marcos.forEach((f, i) => {
+            if (!f) return;
+            if (primero < 0) primero = i;
+            ultimo = i;
+        });
+        if (primero < 0) return null;
+
+        const filas = [];
+        for (let i = primero; i <= ultimo; i++) {
+            if (marcos[i]) filas.push({ frame: marcos[i] });
+            else if (lines[i].trim()) filas.push({ text: lines[i].trim() });
+        }
+
+        return {
+            head: lines.slice(0, primero).join('\n').replace(/\s+$/, ''),
+            rows: filas,
+            tail: lines.slice(ultimo + 1).join('\n').trim()
+        };
+    };
+
+    const looksLikeStack = (text) => !!parseStack(text);
+
+    const RX_ERR_TOKEN = /'[^'\n]{0,160}'|"[^"\n]{0,160}"|\b[A-Z][A-Z0-9]*(?:[-_][A-Z0-9]+)+\b/g;
+
+    const errSpan = (cls, text) => {
+        const s = document.createElement('span');
+        s.className = cls;
+        s.textContent = text;
+        return s;
+    };
+
+    const paintErrMessage = (host, text) => {
+        RX_ERR_TOKEN.lastIndex = 0;
+        let desde = 0;
+        let m;
+        while ((m = RX_ERR_TOKEN.exec(text)) !== null) {
+            if (m.index > desde) host.appendChild(document.createTextNode(text.slice(desde, m.index)));
+            host.appendChild(errSpan('nsft-logfmt-err-tok', m[0]));
+            desde = m.index + m[0].length;
+        }
+        if (desde < text.length) host.appendChild(document.createTextNode(text.slice(desde)));
+    };
+
+    const renderError = (el, raw, nameParts = null) => {
+        const parsed = parseStack(raw);
+        if (!parsed) return null;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = `${WRAPPER_CLASS} nsft-logfmt-err`;
+        const btnGroup = createButtonGroup(raw, 'stack', nameParts);
+        wrapper.appendChild(btnGroup);
+
+        const body = document.createElement('div');
+        body.className = 'nsft-logfmt-err-body';
+
+        if (parsed.head) {
+            const msg = document.createElement('div');
+            msg.className = 'nsft-logfmt-err-msg';
+            msg.appendChild(errSpan('nsft-logfmt-err-rule', ''));
+            const txt = document.createElement('span');
+            txt.className = 'nsft-logfmt-err-msg-text';
+            paintErrMessage(txt, parsed.head);
+            msg.appendChild(txt);
+            body.appendChild(msg);
+        }
+
+        const frames = document.createElement('div');
+        frames.className = 'nsft-logfmt-err-frames';
+
+        const tonoPorArchivo = new Map();
+        let n = 0;
+
+        parsed.rows.forEach((fila) => {
+            if (fila.text) {
+                const nota = document.createElement('div');
+                nota.className = 'nsft-logfmt-err-note';
+                nota.textContent = fila.text;
+                frames.appendChild(nota);
+                return;
+            }
+
+            const f = fila.frame;
+            n++;
+
+            const clave = f.dir + f.file;
+            if (!tonoPorArchivo.has(clave)) {
+                tonoPorArchivo.set(clave, tonoPorArchivo.size % ERR_SRC_COLORS);
+            }
+
+            const row = document.createElement('div');
+            row.className = 'nsft-logfmt-err-frame';
+            row.dataset.src = String(tonoPorArchivo.get(clave));
+
+            const linea = document.createElement('span');
+            linea.className = 'nsft-logfmt-err-line';
+            linea.appendChild(errSpan('nsft-logfmt-err-at', 'at '));
+            if (f.fn) {
+                linea.appendChild(errSpan('nsft-logfmt-err-fn', f.fn));
+                linea.appendChild(errSpan('nsft-logfmt-err-punct', ' ('));
+            }
+            if (f.dir) linea.appendChild(errSpan('nsft-logfmt-err-dir', f.dir));
+            if (f.file) linea.appendChild(errSpan('nsft-logfmt-err-file', f.file));
+            if (f.pos) linea.appendChild(errSpan('nsft-logfmt-err-pos', f.pos));
+            if (f.fn) linea.appendChild(errSpan('nsft-logfmt-err-punct', ')'));
+
+            row.appendChild(errSpan('nsft-logfmt-err-num', String(n)));
+            row.appendChild(linea);
+            frames.appendChild(row);
+        });
+
+        body.appendChild(frames);
+
+        if (parsed.tail) {
+            const cola = document.createElement('div');
+            cola.className = 'nsft-logfmt-err-tail';
+            cola.textContent = parsed.tail;
+            body.appendChild(cola);
+        }
+
+        wrapper.appendChild(body);
+        addRawToggle(wrapper, btnGroup, [body], raw);
+
+        el.innerHTML = '';
+        el.appendChild(wrapper);
+        return 'stack';
     };
 
     const renderInto = (el, rawText, opts) => {
@@ -537,7 +768,7 @@
                     indent: '    '
                 });
             } catch (e) { }
-            renderCode(el, formatted, 'sql', false, '', '', nameParts);
+            renderCode(el, formatted, 'sql', false, '', raw, nameParts);
             return 'sql';
         }
 
@@ -555,8 +786,11 @@
             return 'json';
         }
 
+        const traza = renderError(el, raw, nameParts);
+        if (traza) return traza;
+
         if (looksLikeXml(raw)) {
-            renderCode(el, formatXml(raw), 'xml', false, '', '', nameParts);
+            renderCode(el, formatXml(raw), 'xml', false, '', raw, nameParts);
             return 'xml';
         }
 
@@ -573,11 +807,13 @@
         ensureTheme,
         makeBarButton,
         btnLabelEl,
-        ICONS: { copy: ICON_COPY, download: ICON_DOWNLOAD },
+        ICONS: { copy: ICON_COPY, download: ICON_DOWNLOAD, raw: ICON_RAW },
+        addRawToggle,
         buildFileName,
         stampPart,
         looksLikeXml,
         looksLikeHtml,
+        looksLikeStack,
         tryJSON
     };
 })();
