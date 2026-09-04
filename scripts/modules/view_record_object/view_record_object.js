@@ -442,6 +442,12 @@
 
     clickHandler('nsft-rec-obj-export', exportRecordAsJson);
 
+    clickHandler('nsft-rec-obj-settings', () => {
+      try {
+        chrome.runtime.sendMessage({ action: 'nsftOpenSettings', highlight: 'enableViewRecordObject' });
+      } catch (e) { }
+    });
+
 
     const header = document.querySelector('.nsft-rec-obj-header');
     if (header) {
@@ -728,6 +734,9 @@
          <div class="nsft-rec-obj-header">
              <span id="nsft-ro-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path></svg>${chrome.i18n.getMessage('ro_title')}</span>
              <span class="nsft-header-actions">
+               <span id="nsft-rec-obj-settings" title="${chrome.i18n.getMessage('nsft_open_settings') || 'Ajustes'}">
+                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+               </span>
                ${PANEL_MODE ? `<span id="nsft-rec-obj-undock" title="${chrome.i18n.getMessage('ro_undock_btn') || 'Desacoplar: volver a la página'}">
                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path><path d="M11 9l-3 3 3 3"></path></svg>
                </span>` : `<span id="nsft-rec-obj-dock" title="${chrome.i18n.getMessage('ro_dock_btn') || 'Acoplar al panel lateral del navegador'}">

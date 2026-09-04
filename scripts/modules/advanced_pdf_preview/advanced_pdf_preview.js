@@ -4,40 +4,59 @@
     const STORAGE_KEY = 'enableAdvancedPdfPreview';
 
     const IDS = {
-        SIDE_TOGGLE: 'nsft-pdf-side-preview',
-        LIVE_TOGGLE: 'nsft-pdf-live-preview',
-        PREVIEW_BUTTON: 'nsft-pdf-side-preview-button',
-        IFRAME: 'nsft-pdf-side-preview-iframe',
-        IFRAME_CONTAINER: 'nsft-pdf-side-preview-container'
+        CONTAINER: 'nsft-pdfp-container',
+        EXPAND: 'nsft-pdfp-expand',
+        COLLAPSE: 'nsft-pdfp-collapse',
+        REFRESH: 'nsft-pdfp-refresh',
+        LIVE: 'nsft-pdfp-live',
+        DRAGBAR: 'nsft-pdfp-dragbar',
+        LOADING: 'nsft-pdfp-loading',
+        IFRAME_NAME: 'nsft-pdfp-iframe'
     };
 
-    let started = false;
-    let discreet = false;
-    let _diag = false;
-    let timer = null;
-    let liveHandler = null;
+    const ICONS = {
+        CHEVRON_UP: '<svg class="nsft-pdfp-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>',
+        CHEVRON_DOWN: '<svg class="nsft-pdfp-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>',
+        REFRESH: '<svg class="nsft-pdfp-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
+        BOLT: '<svg class="nsft-pdfp-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>'
+    };
 
-    function isApplicablePage() {
-        return /\/pdftemplate\.nl/i.test(location.pathname);
+    const MIN_PANEL_HEIGHT = 160;
+    const MIN_PAGE_VISIBLE = 90;
+
+    const state = {
+        built: false,
+        container: null,
+        iframe: null,
+        isFirstExpand: true,
+        liveHandler: null,
+        liveTimer: null,
+        dragging: false,
+        pointerId: null,
+        rafId: 0,
+        lastY: null,
+        lastHeight: 0,
+        resizeRafId: 0,
+        onWindowResize: null
+    };
+
+    if (!/\/pdftemplate\.nl/i.test(location.pathname)) return;
+
+    function shouldRun(settings) {
+        return !!settings[STORAGE_KEY] && !settings.enableDiscreetMode;
     }
-    if (!isApplicablePage()) return;
 
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false, nsftSelectorDiagnostics: false }, (settings) => {
-        discreet = !!settings.enableDiscreetMode;
-        _diag = !!settings.nsftSelectorDiagnostics;
-        if (settings[STORAGE_KEY] && !discreet) onReady(start);
+    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
+        if (shouldRun(settings)) onReady(start);
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
-        if (changes.nsftSelectorDiagnostics) _diag = !!changes.nsftSelectorDiagnostics.newValue;
-        if (changes.enableDiscreetMode) discreet = !!changes.enableDiscreetMode.newValue;
-        if (changes[STORAGE_KEY] || changes.enableDiscreetMode) {
-            chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (s) => {
-                if (s[STORAGE_KEY] && !s.enableDiscreetMode) onReady(start);
-                else teardown();
-            });
-        }
+        if (!changes[STORAGE_KEY] && !changes.enableDiscreetMode) return;
+        chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (s) => {
+            if (shouldRun(s)) onReady(start);
+            else stop();
+        });
     });
 
     function onReady(cb) {
@@ -45,138 +64,257 @@
         else cb();
     }
 
-    function diag(msg) { if (_diag) console.warn('NSFT advanced pdf preview:', msg); }
+    function i18n(k, f) { return chrome.i18n.getMessage(k) || f; }
 
-    function teardown() {
-        if (!started) return;
-        started = false;
-        if (timer) { clearTimeout(timer); timer = null; }
-        if (liveHandler) { window.removeEventListener('keypress', liveHandler); liveHandler = null; }
-        document.body.classList.remove('nsft-pdf-side-preview-on');
-        document.getElementById('preview-btn')?.classList.remove('nsft-pdf-hidden');
-        [IDS.SIDE_TOGGLE, IDS.LIVE_TOGGLE, IDS.PREVIEW_BUTTON, IDS.IFRAME_CONTAINER].forEach(id => {
-            document.getElementById(id)?.remove();
+    function escapeAttr(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+
+    function start() {
+        if (state.built) return;
+        if (!document.getElementById('pdftemplate-form')) return;
+
+        const expandLabel = i18n('ispExpand', 'Expand');
+        const collapseLabel = i18n('ispCollapse', 'Collapse');
+        const refreshLabel = i18n('ispRefresh', 'Refresh');
+        const liveLabel = i18n('apdfPvLive', 'Live Preview');
+        const previewLabel = i18n('apdfPvPreview', 'Preview');
+        const resizeLabel = i18n('ispResize', 'Resize preview');
+
+        const html = `
+            <div id="${IDS.CONTAINER}" data-nsft-ui data-open="false" role="region" aria-label="${escapeAttr(previewLabel)}">
+                <div class="nsft-pdfp-button-container">
+                    <button id="${IDS.EXPAND}" class="nsft-pdfp-button" type="button">${ICONS.CHEVRON_UP}<span>${escapeAttr(expandLabel)}</span></button>
+                    <button id="${IDS.COLLAPSE}" class="nsft-pdfp-button" type="button" style="display: none;">${ICONS.CHEVRON_DOWN}<span>${escapeAttr(collapseLabel)}</span></button>
+                    <button id="${IDS.REFRESH}" class="nsft-pdfp-button" type="button" style="display: none;">${ICONS.REFRESH}<span>${escapeAttr(refreshLabel)}</span></button>
+                    <button id="${IDS.LIVE}" class="nsft-pdfp-button" type="button" style="display: none;" aria-pressed="false">${ICONS.BOLT}<span>${escapeAttr(liveLabel)}</span></button>
+                </div>
+                <div id="${IDS.DRAGBAR}" role="separator" aria-orientation="horizontal" aria-label="${escapeAttr(resizeLabel)}" title="${escapeAttr(resizeLabel)}">&nbsp;</div>
+                <div id="${IDS.LOADING}" style="display: none" aria-live="polite">
+                    <div class="nsft-pdfp-loading-container">
+                        <div class="nsft-pdfp-lds-ring"></div>
+                        <span>${escapeAttr(i18n('apdfPvGenerating', 'Generating preview...'))}</span>
+                    </div>
+                </div>
+            </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', html);
+        state.container = document.getElementById(IDS.CONTAINER);
+        state.built = true;
+        state.isFirstExpand = true;
+        calculateBodyMargin(true);
+
+        document.getElementById(IDS.EXPAND).addEventListener('click', expand);
+        document.getElementById(IDS.COLLAPSE).addEventListener('click', collapse);
+        document.getElementById(IDS.REFRESH).addEventListener('click', updatePreview);
+        document.getElementById(IDS.LIVE).addEventListener('click', toggleLive);
+        document.getElementById(IDS.DRAGBAR).addEventListener('pointerdown', onDragStart);
+        state.container.addEventListener('transitionend', onHeightTransitionEnd);
+
+        state.onWindowResize = onWindowResize;
+        window.addEventListener('resize', state.onWindowResize);
+    }
+
+    function stop() {
+        if (!state.built) return;
+        onDragEnd();
+        setLive(false);
+        if (state.rafId) { cancelAnimationFrame(state.rafId); state.rafId = 0; }
+        if (state.resizeRafId) { cancelAnimationFrame(state.resizeRafId); state.resizeRafId = 0; }
+        if (state.onWindowResize) {
+            window.removeEventListener('resize', state.onWindowResize);
+            state.onWindowResize = null;
+        }
+        if (state.container) state.container.remove();
+        document.body.style.removeProperty('padding-bottom');
+        state.container = null;
+        state.iframe = null;
+        state.dragging = false;
+        state.built = false;
+    }
+
+
+    function ensureIframe() {
+        if (state.iframe) return state.iframe;
+        const iframe = document.createElement('iframe');
+        iframe.width = '100%';
+        iframe.name = IDS.IFRAME_NAME;
+        iframe.frameBorder = '0';
+        iframe.style.display = 'none';
+        iframe.setAttribute('title', i18n('apdfPvPreview', 'Preview'));
+        state.container.insertBefore(iframe, document.getElementById(IDS.LOADING));
+        iframe.addEventListener('load', onPreviewLoaded);
+        state.iframe = iframe;
+        return iframe;
+    }
+
+    function isOpen() {
+        return !!state.container && state.container.dataset.open === 'true';
+    }
+
+    function expand() {
+        const iframe = ensureIframe();
+        state.container.dataset.open = 'true';
+        if (state.lastHeight) setPanelHeight(state.lastHeight);
+        document.getElementById(IDS.EXPAND).style.display = 'none';
+        document.getElementById(IDS.COLLAPSE).style.display = '';
+        document.getElementById(IDS.REFRESH).style.display = '';
+        document.getElementById(IDS.LIVE).style.display = '';
+        iframe.style.display = 'block';
+        calculateBodyMargin();
+        if (state.isFirstExpand) {
+            state.isFirstExpand = false;
+            updatePreview();
+        }
+    }
+
+    function collapse() {
+        state.container.dataset.open = 'false';
+        state.container.style.removeProperty('height');
+        document.getElementById(IDS.EXPAND).style.display = '';
+        document.getElementById(IDS.COLLAPSE).style.display = 'none';
+        document.getElementById(IDS.REFRESH).style.display = 'none';
+        document.getElementById(IDS.LIVE).style.display = 'none';
+        setLive(false);
+        setLoading(false);
+        if (state.iframe) state.iframe.style.display = 'none';
+        calculateBodyMargin(true);
+    }
+
+    function onHeightTransitionEnd(e) {
+        if (e.propertyName !== 'height' || e.target !== state.container) return;
+        calculateBodyMargin();
+    }
+
+
+    function submitPreview() {
+        const action = document.getElementById('pdftemplate-action');
+        const form = document.getElementById('pdftemplate-form');
+        if (!action || !form) return;
+        action.value = 'PREVIEW';
+        form.setAttribute('target', IDS.IFRAME_NAME);
+        form.submit();
+    }
+
+    function updatePreview() {
+        if (state.liveTimer) { clearTimeout(state.liveTimer); state.liveTimer = null; }
+        const run = () => {
+            ensureIframe();
+            setLoading(true);
+            submitPreview();
+        };
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 500 });
+        else run();
+    }
+
+    function onPreviewLoaded() {
+        setLoading(false);
+    }
+
+    function setLoading(on) {
+        const l = document.getElementById(IDS.LOADING);
+        if (l) l.style.display = on ? 'flex' : 'none';
+        if (state.container) state.container.classList.toggle('nsft-pdfp-loading-on', !!on);
+    }
+
+
+    function toggleLive() {
+        setLive(!state.liveHandler);
+    }
+
+    function setLive(on) {
+        const btn = document.getElementById(IDS.LIVE);
+        if (on && !state.liveHandler) {
+            state.liveHandler = () => {
+                if (state.liveTimer) clearTimeout(state.liveTimer);
+                state.liveTimer = setTimeout(updatePreview, 3000);
+            };
+            window.addEventListener('keypress', state.liveHandler);
+            if (btn) { btn.classList.add('is-vivo'); btn.setAttribute('aria-pressed', 'true'); }
+            updatePreview();
+        } else if (!on && state.liveHandler) {
+            window.removeEventListener('keypress', state.liveHandler);
+            state.liveHandler = null;
+            if (state.liveTimer) { clearTimeout(state.liveTimer); state.liveTimer = null; }
+            if (btn) { btn.classList.remove('is-vivo'); btn.setAttribute('aria-pressed', 'false'); }
+        }
+    }
+
+
+    function onDragStart(e) {
+        if (!isOpen()) return;
+        state.dragging = true;
+        state.pointerId = e.pointerId;
+        state.container.classList.add('nsft-pdfp-resizing');
+        const bar = document.getElementById(IDS.DRAGBAR);
+        try { bar.setPointerCapture(e.pointerId); } catch (err) { }
+        bar.addEventListener('pointermove', onDragMove);
+        bar.addEventListener('pointerup', onDragEnd);
+        bar.addEventListener('pointercancel', onDragEnd);
+        e.preventDefault();
+    }
+
+    function onDragMove(e) {
+        if (!state.dragging) return;
+        state.lastY = e.clientY;
+        if (state.rafId) return;
+        state.rafId = requestAnimationFrame(() => {
+            state.rafId = 0;
+            if (!isOpen() || typeof state.lastY !== 'number') return;
+            setPanelHeight(window.innerHeight - state.lastY);
+            calculateBodyMargin();
         });
     }
 
-    function start() {
-        if (started) return;
-
-        const editorTop = document.getElementById('pdfeditor-top');
-        const editorEl = document.getElementById('pdftemplate-editor');
-        if (!editorTop || !editorEl) {
-            diag('editor no encontrado (pdfeditor-top / pdftemplate-editor) — se omite la inyección');
-            return;
+    function onDragEnd() {
+        if (!state.dragging) return;
+        state.dragging = false;
+        const bar = document.getElementById(IDS.DRAGBAR);
+        if (bar) {
+            if (state.pointerId != null) { try { bar.releasePointerCapture(state.pointerId); } catch (e) { } }
+            bar.removeEventListener('pointermove', onDragMove);
+            bar.removeEventListener('pointerup', onDragEnd);
+            bar.removeEventListener('pointercancel', onDragEnd);
         }
-        started = true;
+        state.pointerId = null;
+        if (state.container) state.container.classList.remove('nsft-pdfp-resizing');
+        calculateBodyMargin();
+    }
 
-        const sidePreviewLabel = chrome.i18n.getMessage('apdfPvSide') || 'Side Preview';
-        const livePreviewLabel = chrome.i18n.getMessage('apdfPvLive') || 'Live Preview';
-        const previewLabel = chrome.i18n.getMessage('apdfPvPreview') || 'Preview';
+    function setPanelHeight(height) {
+        state.lastHeight = clampHeight(height);
+        state.container.style.height = `${state.lastHeight}px`;
+    }
 
-        const togglesHtml = `
-            <div id="${IDS.SIDE_TOGGLE}" class="nsft-pdf-preview-toggle-option" data-nsft-ui data-toggle="false">
-                <span>${sidePreviewLabel}</span><div class="nsft-pdf-preview-toggle"></div>
-            </div>
-            <div id="${IDS.LIVE_TOGGLE}" class="nsft-pdf-preview-toggle-option nsft-pdf-hidden" data-nsft-ui data-toggle="false">
-                <span>${livePreviewLabel}</span><div class="nsft-pdf-preview-toggle"></div>
-            </div>`;
+    function clampHeight(height) {
+        const max = Math.max(MIN_PANEL_HEIGHT, window.innerHeight - MIN_PAGE_VISIBLE);
+        return Math.min(Math.max(height, MIN_PANEL_HEIGHT), max);
+    }
 
-        const previewBtnHtml = `
-            <div id="${IDS.PREVIEW_BUTTON}" class="nsft-pdf-preview-toggle-option nsft-pdf-hidden" data-nsft-ui>
-                ${previewLabel}
-            </div>`;
+    function onWindowResize() {
+        if (!isOpen() || state.resizeRafId) return;
+        state.resizeRafId = requestAnimationFrame(() => {
+            state.resizeRafId = 0;
+            if (!isOpen()) return;
+            const clamped = clampHeight(state.container.offsetHeight);
+            if (clamped !== state.container.offsetHeight) setPanelHeight(clamped);
+            calculateBodyMargin();
+        });
+    }
 
-        editorTop.insertAdjacentHTML('beforeend', togglesHtml);
-
-        const nsPreviewBtn = document.getElementById('preview-btn');
-        nsPreviewBtn?.insertAdjacentHTML('afterend', previewBtnHtml);
-
-        const sideToggleEl = document.getElementById(IDS.SIDE_TOGGLE);
-        const liveToggleEl = document.getElementById(IDS.LIVE_TOGGLE);
-        const sidePreviewButton = document.getElementById(IDS.PREVIEW_BUTTON);
-
-        sideToggleEl?.addEventListener('click', handleSideToggle);
-        liveToggleEl?.addEventListener('click', handleLiveToggle);
-        sidePreviewButton?.addEventListener('click', submitPreview);
-
-        const iframeHtml = `
-            <div id="${IDS.IFRAME_CONTAINER}" data-nsft-ui>
-                <iframe id="${IDS.IFRAME}" name="${IDS.IFRAME}"></iframe>
-            </div>`;
-
-        editorEl.insertAdjacentHTML('beforeend', iframeHtml);
-
-        function submitPreview() {
-            const action = document.getElementById('pdftemplate-action');
-            const form = document.getElementById('pdftemplate-form');
-            if (!action || !form) { diag('pdftemplate-action / pdftemplate-form no encontrados'); return; }
-            action.value = 'PREVIEW';
-            form.setAttribute('target', IDS.IFRAME);
-            form.submit();
+    function calculateBodyMargin(collapsed) {
+        const container = state.container;
+        if (!container) return;
+        let reserved;
+        if (collapsed === true || !isOpen()) {
+            const buttons = container.querySelector('.nsft-pdfp-button-container');
+            reserved = ((buttons && buttons.offsetHeight) || 34) + 16;
+        } else {
+            reserved = container.offsetHeight;
         }
-
-        function handleSideToggle(event) {
-            const sidePreviewEnabled = event.currentTarget.dataset.toggle !== 'true';
-            event.currentTarget.dataset.toggle = sidePreviewEnabled;
-            const livePreviewEnabled = liveToggleEl.dataset.toggle === 'true';
-
-            if (!sidePreviewEnabled && livePreviewEnabled) liveToggleEl.click();
-            liveToggleEl.classList.toggle('nsft-pdf-hidden', !sidePreviewEnabled);
-
-            const iframeContainerEl = document.getElementById(IDS.IFRAME_CONTAINER);
-            const nsPreviewButton = document.getElementById('preview-btn');
-
-            if (sidePreviewEnabled) {
-                document.body.classList.add('nsft-pdf-side-preview-on');
-                iframeContainerEl.classList.remove('nsft-pdf-hidden');
-                nsPreviewButton?.classList.add('nsft-pdf-hidden');
-                sidePreviewButton.classList.remove('nsft-pdf-hidden');
-                updatePreview();
-            } else {
-                document.body.classList.remove('nsft-pdf-side-preview-on');
-                iframeContainerEl.classList.add('nsft-pdf-hidden');
-                nsPreviewButton?.classList.remove('nsft-pdf-hidden');
-                sidePreviewButton.classList.add('nsft-pdf-hidden');
-            }
-        }
-
-        function handleLiveToggle(event) {
-            const livePreviewEnabled = event.currentTarget.dataset.toggle !== 'true';
-            event.currentTarget.dataset.toggle = livePreviewEnabled;
-            if (livePreviewEnabled) {
-                updatePreview();
-                liveHandler = timerForUpdate;
-                window.addEventListener('keypress', liveHandler);
-            } else if (liveHandler) {
-                window.removeEventListener('keypress', liveHandler);
-                liveHandler = null;
-            }
-        }
-
-        function timerForUpdate() {
-            if (timer) { clearTimeout(timer); timer = null; }
-            timer = setTimeout(updatePreview, 3000);
-        }
-
-        function updatePreview() {
-            if (timer) { clearTimeout(timer); timer = null; }
-
-            const run = () => {
-                const loadingText = chrome.i18n.getMessage('apdfPvGenerating') || 'Generating Preview...';
-                const loadingHtml = `
-                    <div style="position:fixed; top: 1px; left: 1px; width: 100%; height: 2000px; background-color: #525151db; color: white; font-size: 48px; text-align: center; z-index: 10; padding-top: 100px">
-                        ${loadingText}
-                    </div>`;
-
-                const iframeEl = document.getElementById(IDS.IFRAME);
-                try {
-                    iframeEl.contentWindow.document.body.insertAdjacentHTML('beforeend', loadingHtml);
-                } catch (e) { diag('no se pudo escribir el overlay de carga en el iframe'); }
-                submitPreview();
-            };
-            if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 500 });
-            else run();
-        }
+        document.body.style.setProperty('padding-bottom', `${reserved}px`, 'important');
     }
 })();

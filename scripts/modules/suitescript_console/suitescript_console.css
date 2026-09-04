@@ -5170,3 +5170,74 @@ body[data-nsft-ssc-theme="dark"] .nsft-ssc-ctx-item.is-danger:hover svg { color:
 
 .CodeMirror .CodeMirror-code span.cm-nsft-doc-type { color: var(--nsft-doc-type, inherit); }
 
+
+
+
+.cm-editor .nsft-ssc-ghost {
+    color: #9ca3af;
+    opacity: 0.75;
+    font-style: italic;
+    white-space: pre;
+}
+
+html[data-nsft-theme="dark"] .cm-editor .nsft-ssc-ghost { color: var(--sqlv2-dim, #6E7889); }
+
+.cm-editor .nsft-ssc-ghost-block {
+    margin: 0;
+    padding: 0 0 0 4px;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-style: italic;
+    line-height: inherit;
+    white-space: pre;
+}
+
+.cm-editor.nsft-ssc-con-enlace,
+.cm-editor.nsft-ssc-con-enlace .cm-content,
+.cm-editor.nsft-ssc-con-enlace .cm-cursorLayer {
+    cursor: pointer;
+}
+
+.cm-tooltip-autocomplete > ul > li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    line-height: 1.4;
+}
+
+.cm-tooltip-autocomplete .cm-completionLabel {
+    flex: 0 0 auto;
+    font-weight: 500;
+}
+
+.cm-tooltip-autocomplete .cm-completionMatchedText {
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.cm-tooltip-autocomplete li[aria-selected] .cm-completionMatchedText {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.cm-tooltip-autocomplete .nsft-ssc-hint-sig {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.cm-tooltip-autocomplete .nsft-ssc-hint-type { flex: 0 0 auto; }
+
+.cm-completionInfo {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: min(540px, calc(100vw - 32px));
+}
+
+.cm-completionInfo > .nsft-ssc-doc {
+    position: static;
+    max-width: none;
+    max-height: min(70vh, 560px);
+}

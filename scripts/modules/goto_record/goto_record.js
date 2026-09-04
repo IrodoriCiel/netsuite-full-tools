@@ -341,6 +341,9 @@
     }
 
     const RECORD_TYPES = {
+        'transaction':     'app/accounting/transactions/transaction.nl?id=',
+        'tran':            'app/accounting/transactions/transaction.nl?id=',
+        'txn':             'app/accounting/transactions/transaction.nl?id=',
         'salesorder':      'app/accounting/transactions/salesord.nl?id=',
         'so':              'app/accounting/transactions/salesord.nl?id=',
         'purchaseorder':   'app/accounting/transactions/purchord.nl?id=',
@@ -709,9 +712,12 @@
         _suggestRows.forEach((r, i) => list.appendChild(renderSuggestionRow(r, i)));
         list.querySelectorAll('.nsft-gtr-suggest-item').forEach((el) => {
             el.addEventListener('mousedown', (ev) => {
-                ev.preventDefault();
                 const idx = parseInt(el.getAttribute('data-idx'), 10);
-                if (!isNaN(idx) && _suggestRows[idx]) applySuggestion(_suggestRows[idx]);
+                const row = isNaN(idx) ? null : _suggestRows[idx];
+                if (!row) return;
+                if (urlDeSugerencia(row)) return;
+                ev.preventDefault();
+                applySuggestion(row);
             });
             el.addEventListener('mouseenter', () => {
                 const idx = parseInt(el.getAttribute('data-idx'), 10);
@@ -744,34 +750,48 @@
         return TS ? TS.fold(q) : q.toLowerCase();
     }
 
-    function makeSuggestItem(i, nameText, subText, extraClass) {
+    function urlDeSugerencia(row) {
+        if (!row) return '';
+        if (row.kind === 'definition') return `/app/common/custom/custrecord.nl?id=${row.rectypeId}&e=T`;
+        if (row.kind === 'instance') return `/app/common/custom/custrecordentry.nl?rectype=${row.rectypeId}&id=${row.recordId}`;
+        if (row.kind === 'tranid') return tranidUrl(row.type, row.id);
+        if (row.kind === 'recent' || row.kind === 'bookmark') return row.url || '';
+        return '';
+    }
+
+    function makeSuggestItem(i, nameText, subText, extraClass, href) {
         const li = document.createElement('li');
         li.className = 'nsft-gtr-suggest-item' + (extraClass ? ' ' + extraClass : '');
         li.setAttribute('role', 'option');
         li.setAttribute('data-idx', String(i));
         li.setAttribute('aria-selected', 'false');
+        const caja = document.createElement(href ? 'a' : 'span');
+        caja.className = 'nsft-gtr-suggest-link';
+        if (href) caja.setAttribute('href', href);
         const TS = window.NSFT_TextSearch;
         const q = suggestNeedle();
         const name = document.createElement('span');
         name.className = 'nsft-gtr-suggest-name';
         if (TS && q) TS.mark(name, nameText, q, 'nsft-gtr-hl');
         else name.textContent = nameText;
-        li.appendChild(name);
+        caja.appendChild(name);
         const sub = document.createElement('span');
         sub.className = 'nsft-gtr-suggest-scriptid';
         if (TS && q && subText) TS.mark(sub, subText, q, 'nsft-gtr-hl');
         else sub.textContent = subText || '';
-        li.appendChild(sub);
+        caja.appendChild(sub);
+        li.appendChild(caja);
         return li;
     }
 
     function renderSuggestionRow(r, i) {
+        const href = urlDeSugerencia(r);
         if (r.kind === 'definition') {
             const label = i18n('gtr_open_definition', 'Open custom record');
-            return makeSuggestItem(i, `${label} — ${r.name || ''}`, r.scriptid || '', 'nsft-gtr-suggest-defn');
+            return makeSuggestItem(i, `${label} — ${r.name || ''}`, r.scriptid || '', 'nsft-gtr-suggest-defn', href);
         }
         if (r.kind === 'instance') {
-            return makeSuggestItem(i, r.name || `#${r.recordId}`, `#${r.recordId || ''}`);
+            return makeSuggestItem(i, r.name || `#${r.recordId}`, `#${r.recordId || ''}`, '', href);
         }
         if (r.kind === 'tranid') {
             const dateStr = r.trandate ? String(r.trandate) : `#${r.id}`;
@@ -783,13 +803,13 @@
             const title = byTxnNumber
                 ? `${r.transactionnumber} · ${r.tranid || ('#' + r.id)} · ${r.type}`
                 : `${r.tranid || ('#' + r.id)} · ${r.type}`;
-            return makeSuggestItem(i, title, dateStr);
+            return makeSuggestItem(i, title, dateStr, '', href);
         }
         if (r.kind === 'recent') {
-            return makeSuggestItem(i, r.title || r.url, i18n('gtr_recent_tag', 'Recent'), 'nsft-gtr-suggest-recent');
+            return makeSuggestItem(i, r.title || r.url, i18n('gtr_recent_tag', 'Recent'), 'nsft-gtr-suggest-recent', href);
         }
         if (r.kind === 'bookmark') {
-            return makeSuggestItem(i, `★ ${r.alias}`, r.title || r.url, 'nsft-gtr-suggest-bookmark');
+            return makeSuggestItem(i, `★ ${r.alias}`, r.title || r.url, 'nsft-gtr-suggest-bookmark', href);
         }
         return makeSuggestItem(i, r.name || '', r.scriptid || '');
     }

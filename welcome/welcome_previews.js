@@ -110,6 +110,7 @@
             pvSuiteRep: 'Demo Suite · Reportes', pvSuiteInt: 'Demo Suite · Integraciones',
             pvFileStyles: 'demo_estilos.css', pvFileData: 'demo_datos.csv', pvFileReport: 'demo_reporte.pdf',
             pvFileForm: 'demo_cs_formulario.js', pvFileSync: 'demo_mr_sincronizar.js',
+            pvFolderAdj: 'Adjuntos para enviar', pvFolderTpl: 'Plantillas',
             pvFileResp15: 'demo_respuesta_15.csv', pvFileResp: 'demo_respuesta.csv',
             pvMail: 'demo.usuario@demo-co.mx', pvExpApp: 'Demo · Aprobación de gastos',
             pvWfCreate: 'Demo · Creación', pvWfDesc: 'Demo · Revisa el gasto antes de contabilizarlo.',
@@ -220,6 +221,7 @@
             pvSuiteInt: 'Demo Suite · Integrations', pvFileStyles: 'demo_styles.css', pvFileData: 'demo_data.csv',
             pvFileReport: 'demo_report.pdf', pvFileResp15: 'demo_response_15.csv', pvFileResp: 'demo_response.csv',
             pvFileForm: 'demo_cs_form.js', pvFileSync: 'demo_mr_sync.js',
+            pvFolderAdj: 'Attachments to send', pvFolderTpl: 'Templates',
             pvMail: 'demo.user@demo-co.com', pvExpApp: 'Demo · Expense approval', pvWfCreate: 'Demo · Create',
             pvWfDesc: 'Demo · Review the expense before posting it.', pvWfRelease: 'Demo · Not started',
             pvWfSendMail: 'Send Email', pvWfSetField: 'Set Field Value', pvWfLock: 'Lock Record',
@@ -313,6 +315,9 @@
     const ICONO_LUPA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>`;
     const ICONO_BAJAR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><path d="M12 15V3"/></svg>`;
     const ICONO_CODIGO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-5 6 5 6"/><path d="M15 6l5 6-5 6"/></svg>`;
+    const ICONO_CARPETA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.5h7A1.5 1.5 0 0 1 19 10v7.5A1.5 1.5 0 0 1 17.5 19h-13A1.5 1.5 0 0 1 3 17.5z"/></svg>`;
+    const ICONO_ARCHIVO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13 3v5.5h5.5"/></svg>`;
+    const ICONO_IA = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 5.1 5.1 1.9-5.1 1.9L12 16.5l-1.9-5.1L5 9.5l5.1-1.9z"/><path d="M18.5 15l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>`;
     const ICONO_RAMA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="5.5" r="2.5"/><circle cx="7" cy="18.5" r="2.5"/><circle cx="17" cy="8.5" r="2.5"/><path d="M7 8v8"/><path d="M17 11v1.5a3.5 3.5 0 0 1-3.5 3.5H10"/></svg>`;
     const ICONO_RELOJ = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.6 2.6"/><path d="M9 2.2h6"/></svg>`;
     const ICONO_CANDADO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>`;
@@ -398,8 +403,9 @@
                         </span>
                     </div>
                     <div class="nsft-pv-actions">
-                        <span class="nsft-pv-btn">{{edit}}</span>
-                        <span class="nsft-pv-btn is-ghost">{{back}}</span>
+                        
+                        <span class="nsft-pv-btn">${o.modo === 'edicion' ? '{{save}}' : '{{edit}}'}</span>
+                        <span class="nsft-pv-btn is-ghost">${o.modo === 'edicion' ? '{{cancel}}' : '{{back}}'}</span>
                         ${o.accionesIzq || ''}
                     </div>
                     <div class="nsft-pv-body">
@@ -1326,17 +1332,35 @@
             : `<span class="nsft-pv-lblhit">${ancla}</span>`;
         const suelto = porIcono ? `<span class="nsft-pv-acicon">${ICONO_INFO}</span>` : '';
 
-        const historial = o.historial ? `
-                    <span class="nsft-pv-sfvrow is-sep">
-                        <span class="k">{{@fav_section_title}}</span>
-                        <span class="nsft-pv-favbtn">${ICONO_RELOJ}<span class="nsft-pv-favswap">
-                                <span class="f1">{{@fav_load_btn}}</span><span class="f2">{{@fav_hide_btn}}</span>
-                            </span>
+        const segunda = o.historial ? 'hist' : (o.definicion ? 'def' : '');
+
+        const golpe = `
                             <span class="nsft-pv-tap is-fav" aria-hidden="true"></span>
-                            <span class="nsft-pv-cursor is-fav" aria-hidden="true">${PUNTERO}</span>
-                        </span>
-                    </span>
-                    <span class="nsft-pv-favlist">
+                            <span class="nsft-pv-cursor is-fav" aria-hidden="true">${PUNTERO}</span>`;
+        const marca = (cual) => (segunda === cual ? ' t2' : '');
+        const conGolpe = (cual) => (segunda === cual ? golpe : '');
+
+        const tabs = `
+                    <span class="nsft-pv-sfvtabs">
+                        <span class="nsft-pv-sfvtab t1">{{@sfv_tab_value}}</span>
+                        <span class="nsft-pv-sfvtab${marca('def')}">{{@sfv_tab_definition}}${conGolpe('def')}</span>
+                        <span class="nsft-pv-sfvtab${marca('hist')}">{{@sfv_tab_history}}${conGolpe('hist')}</span>
+                    </span>`;
+
+        const panelValor = `
+                        <span class="nsft-pv-sfvrow"><span class="k">{{@sfv_field_value}}</span><span class="v">Demo Record</span></span>
+                        <span class="nsft-pv-sfvset">
+                            <span class="nsft-pv-input nsft-pv-grow nsft-pv-tiny">{{@sfv_enter_new_value}}</span>
+                            <span class="nsft-pv-btn">{{@sfv_set}}</span>
+                        </span>`;
+
+        const panelDef = `
+                        <span class="nsft-pv-sfvrow"><span class="k">{{@sfv_internal_id}}</span><span class="v nsft-pv-mono">name</span></span>
+                        <span class="nsft-pv-sfvrow"><span class="k">{{@sfv_field_type}}</span><span class="v">{{@sfv_text}}</span></span>
+                        <span class="nsft-pv-sfvrow"><span class="k">{{@sfv_mandatory}}</span><span class="v">{{@sfv_yes}}</span></span>
+                        <span class="nsft-pv-sfvrow is-sep"><span class="k">{{@sfv_edit_field_label}}</span><span class="nsft-pv-btn is-ghost">{{@sfv_edit_field_btn}}</span></span>`;
+
+        const panelHist = `
                         <span class="nsft-pv-favfilters">
                             <span class="nsft-pv-select is-mini">{{@fav_filter_all}}</span>
                             <span class="nsft-pv-select is-mini">{{@fav_filter_from}}</span>
@@ -1353,11 +1377,20 @@
                         <span class="nsft-pv-favrow">
                             <span class="who">Demo Admin<i>28/10/2026 16:05</i></span>
                             <span class="chg"><b>{{@fav_old_value}}</b> Demo S.A. &#8594; <b>{{@fav_new_value}}</b> &#8212;</span>
-                        </span>
-                    </span>` : '';
+                        </span>`;
+
+        const cuerpo = segunda
+            ? `<span class="nsft-pv-sfvpanes">
+                        <span class="nsft-pv-sfvpane p1">${panelValor}</span>
+                        <span class="nsft-pv-sfvpane p2${segunda === 'hist' ? ' nsft-pv-favlist' : ''}">${segunda === 'hist' ? panelHist : panelDef}</span>
+                    </span>`
+            : `<span class="nsft-pv-sfvpanes">
+                        <span class="nsft-pv-sfvpane">${panelValor}</span>
+                    </span>`;
 
         return ventanaNS({
-            clase: 'nsft-pv-sfv' + (porIcono ? ' is-icon' : ' is-label') + (o.historial ? ' nsft-pv-fav' : ''),
+            clase: 'nsft-pv-sfv' + (porIcono ? ' is-icon' : ' is-label') + (segunda ? ' nsft-pv-fav' : ''),
+            modo: 'edicion',
             sublista: true,
             campos: `
                             <span class="nsft-pv-field"><span class="lbl">{{name}}${asidero}</span><span class="val">Demo Record</span></span>
@@ -1371,22 +1404,14 @@
                     <span class="nsft-pv-grow nsft-pv-tiny">{{@enableSetFieldValuesLabel}}</span>
                     <span class="nsft-pv-bar-tail">&#10005;</span>
                 </div>
-                <div class="nsft-pv-modal-body">
-                    <span class="nsft-pv-sfvrow"><span class="k">{{@sfv_internal_id}}</span><span class="v nsft-pv-mono">name</span></span>
-                    <span class="nsft-pv-sfvrow"><span class="k">{{@sfv_field_type}}</span><span class="v">{{@sfv_text}}</span></span>
-                    <span class="nsft-pv-sfvrow"><span class="k">{{@sfv_field_value}}</span><span class="v">Demo Record</span></span>
-                    <span class="nsft-pv-sfvrow"><span class="k">{{@sfv_mandatory}}</span><span class="v">{{@sfv_yes}}</span></span>
-                    <span class="nsft-pv-sfvrow is-sep"><span class="k">{{@sfv_edit_field_label}}</span><span class="nsft-pv-btn is-ghost">{{@sfv_edit_field_btn}}</span></span>
-                    <span class="nsft-pv-sfvset">
-                        <span class="nsft-pv-input nsft-pv-grow nsft-pv-tiny">{{@sfv_enter_new_value}}</span>
-                        <span class="nsft-pv-btn">{{@sfv_set}}</span>
-                    </span>${historial}
+                <div class="nsft-pv-modal-body">${tabs}
+                    ${cuerpo}
                 </div>
             </div>`
         });
     }
 
-    P.enableSetFieldValues = fichaCampo();
+    P.enableSetFieldValues = fichaCampo({ definicion: true });
     P.enableFieldAuditQuickView = fichaCampo({ historial: true });
     P.setFieldValuesModeLabel = fichaCampo({ asidero: 'etiqueta' });
     P.setFieldValuesModeIcon = fichaCampo({ asidero: 'icono' });
@@ -1512,10 +1537,10 @@
         clase: 'nsft-pv-rnl',
         sublista: true,
         campos: `
-                            <span class="nsft-pv-field"><span class="lbl">{{subsid}}</span><span class="val">{{pvCoSa}}<span class="nsft-pv-rnlink">&#8599;</span></span></span>
-                            <span class="nsft-pv-field"><span class="lbl">{{dept}}</span><span class="val">{{pvDeptSales}}<span class="nsft-pv-rnlink">&#8599;</span></span></span>
-                            <span class="nsft-pv-field"><span class="lbl">{{clase}}</span><span class="val">{{pvClaseDir}}<span class="nsft-pv-rnlink">&#8599;</span></span></span>
-                            <span class="nsft-pv-field"><span class="lbl">{{ubic}}</span><span class="val">{{pvUbicCentro}}<span class="nsft-pv-rnlink">&#8599;</span></span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{subsid}}</span><span class="val"><span class="nsft-pv-rnlval">{{pvCoSa}}</span></span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{dept}}</span><span class="val"><span class="nsft-pv-rnlval">{{pvDeptSales}}</span></span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{clase}}</span><span class="val"><span class="nsft-pv-rnlval">{{pvClaseDir}}</span></span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{ubic}}</span><span class="val"><span class="nsft-pv-rnlval">{{pvUbicCentro}}</span></span></span>
                             <span class="nsft-pv-field is-wide"><span class="lbl">{{acct}}</span><span class="val nsft-pv-mono">4000 {{pvAcctInc}}<span class="nsft-pv-rnlink is-text">{{@rnl_account_record_link_text}}</span></span></span>`,
         extra: `
             <div class="nsft-pv-float">
@@ -1616,8 +1641,8 @@
     });
 
 
-    const CODIGO_JS = `
-                <div class="nsft-pv-edcode">
+    const codigoJS = (extra) => `
+                <div class="nsft-pv-edcode${extra ? ' ' + extra : ''}">
                     <span class="g">1</span><span class="l"><i class="c">/** @NApiVersion 2.1 */</i></span>
                     <span class="g">2</span><span class="l"><i class="k">define</i>([<i class="s">'N/record'</i>], (<i class="v">record</i>) =&gt; {</span>
                     <span class="g">3</span><span class="l is-ind"><i class="k">const</i> <i class="v">{{pvConstType}}</i> = <i class="s">'customrecord_demo'</i>;</span>
@@ -1631,6 +1656,8 @@
                     <span class="g">11</span><span class="l is-ind"><i class="k">return</i> { <i class="p">beforeSubmit</i> };</span>
                     <span class="g">12</span><span class="l">});</span>
                 </div>`;
+
+    const CODIGO_JS = codigoJS();
 
     function editorNS(seGuarda, nombre) {
         return `
@@ -1646,7 +1673,7 @@
 ${CODIGO_JS}`;
     }
 
-    function editorAvanzadoNS() {
+    function editorAvanzadoNS(conIA) {
         return `
                     <div class="nsft-pv-advbar">
                         <img class="nsft-pv-logomark" src="{{logo}}" alt="">
@@ -1663,6 +1690,10 @@ ${CODIGO_JS}`;
                             <span>${ICONO_RAMA}</span>
                             <span>${ICONO_CODIGO}</span>
                         </span>
+                        <span class="nsft-pv-advai">${ICONO_IA} {{@enableAiAssistantLabel}}${conIA ? `
+                            <span class="nsft-pv-tap is-advia" aria-hidden="true"></span>
+                            <span class="nsft-pv-cursor is-advia" aria-hidden="true">${PUNTERO}</span>` : ''}
+                        </span>
                         <span class="nsft-pv-btn nsft-pv-edsave">{{save}}</span>
                     </div>
                     <div class="nsft-pv-advfile">
@@ -1670,13 +1701,39 @@ ${CODIGO_JS}`;
                     </div>
                     <div class="nsft-pv-advmain">
                         <div class="nsft-pv-advtree">
+                            
                             <span class="nsft-pv-advtreet">{{@adv_tree_title}}</span>
-                            <span class="nsft-pv-mono">{{pvFileForm}}</span>
-                            <span class="nsft-pv-mono is-on">demo_ue_documentos.js</span>
-                            <span class="nsft-pv-mono">{{pvFileSync}}</span>
-                            <span class="nsft-pv-mono">demo_gateway.js</span>
+                            <span class="nsft-pv-advit"><b>&#8250;</b><i class="d">${ICONO_CARPETA}</i>{{pvFolderAdj}}</span>
+                            <span class="nsft-pv-advit"><b>&#8250;</b><i class="d">${ICONO_CARPETA}</i>{{pvFolderTpl}}</span>
+                            <span class="nsft-pv-advit"><b class="is-open">&#8250;</b><i class="d">${ICONO_CARPETA}</i>SuiteScripts</span>
+                            <span class="nsft-pv-advit is-file is-sub"><i>${ICONO_ARCHIVO}</i>{{pvFileForm}}</span>
+                            <span class="nsft-pv-advit is-file is-sub is-on"><i>${ICONO_ARCHIVO}</i>demo_ue_documentos.js</span>
+                            <span class="nsft-pv-advit is-file is-sub"><i>${ICONO_ARCHIVO}</i>demo_gateway.js</span>
+                            <span class="nsft-pv-advtreet is-sym">{{@adv_tab_symbols}}<b>7</b></span>
+                            <span class="nsft-pv-advit is-sym"><i class="c">&#8801;</i>MR_SCRIPT</span>
+                            <span class="nsft-pv-advit is-sym"><i class="c">&#8801;</i>MR_DEPLOY</span>
+                            <span class="nsft-pv-advit is-sym"><i class="f">{}</i>onRequest<u>(context)</u></span>
+                            <span class="nsft-pv-advit is-sym"><i class="f">{}</i>beforeSubmit<u>(ctx)</u></span>
                         </div>
-                        ${CODIGO_JS}
+                        <div class="nsft-pv-advcode">
+                            
+                            <span class="nsft-pv-advtabs">
+                                <span class="t is-on"><i>JS</i>demo_ue_documentos.js<u>&#10005;</u></span>
+                                <span class="t"><i>JS</i>demo_gateway.js<u>&#10005;</u></span>
+                                <span class="mas">+</span>
+                            </span>
+                            ${codigoJS('is-adv')}
+                            
+                            <span class="nsft-pv-advauto">
+                                <span class="it is-on"><i class="f">getValue</i></span>
+                                <span class="it"><i class="f">getText</i></span>
+                                <span class="it"><i class="f">setValue</i></span>
+                                <span class="it"><i class="f">getSublistValue</i></span>
+                            </span>
+                            <span class="nsft-pv-advsig">
+                                <i class="f">getValue</i>(<i class="v">fieldId</i>: <i class="k">string</i>) &#8594; <i class="k">string</i>
+                            </span>
+                        </div>
                     </div>
                     <div class="nsft-pv-advstatus">
                         <span class="nsft-pv-mono">8:24</span>
@@ -2339,6 +2396,47 @@ ${CODIGO_JS}`;
                         </span>
                     </div>`
         })
+    });
+
+    P.enableSearchFiltersBatch = ventanaNS({
+        clase: 'nsft-pv-sfb',
+        url: '1234567.app.netsuite.com/app/common/search/savedsearchresults.nl?searchid=482',
+        cuerpo: `
+                    <div class="nsft-pv-body nsft-pv-stack">
+                        <div class="nsft-pv-title">{{savedSearch}}: {{pvActRecs}}</div>
+                    </div>
+                    <div class="nsft-pv-sfbfiltros">
+                        <span class="nsft-pv-sfbf">
+                            <span class="lbl">{{ubic}}</span>
+                            <span class="val"><span class="nsft-pv-sfbswap is-f1"><span class="a">- {{anyOne}} -</span><span class="b">{{pvWh1}}</span></span> &#9662;</span>
+                        </span>
+                        <span class="nsft-pv-sfbf">
+                            <span class="lbl">{{estado}}</span>
+                            <span class="val"><span class="nsft-pv-sfbswap is-f2"><span class="a">- {{anyOne}} -</span><span class="b">{{pvActivo}}</span></span> &#9662;</span>
+                        </span>
+                        <span class="nsft-pv-btn nsft-pv-sfbbtn">{{@sfb_apply}}
+                            <span class="nsft-pv-tap is-sfb" aria-hidden="true"></span>
+                            <span class="nsft-pv-cursor is-sfb" aria-hidden="true">${PUNTERO}</span>
+                        </span>
+                    </div>
+                    <div class="nsft-pv-sfbswap is-tabla">
+                        <div class="a">
+                            <span class="nsft-pv-isptotal">{{total}}: 3</span>
+                            <table class="nsft-pv-table nsft-pv-logtable">
+                                <tr><th>{{id}}</th><th>{{name}}</th><th>{{ubic}}</th><th>{{estado}}</th></tr>
+                                <tr><td class="nsft-pv-mono">1042</td><td>Demo Record</td><td>{{pvWh1}}</td><td>{{pvActivo}}</td></tr>
+                                <tr><td class="nsft-pv-mono">1043</td><td>Demo Record B</td><td>{{pvWh2}}</td><td>{{pvInactivo}}</td></tr>
+                                <tr><td class="nsft-pv-mono">1044</td><td>Demo Record C</td><td>{{pvWh2}}</td><td>{{pvActivo}}</td></tr>
+                            </table>
+                        </div>
+                        <div class="b">
+                            <span class="nsft-pv-isptotal">{{total}}: 1</span>
+                            <table class="nsft-pv-table nsft-pv-logtable">
+                                <tr><th>{{id}}</th><th>{{name}}</th><th>{{ubic}}</th><th>{{estado}}</th></tr>
+                                <tr><td class="nsft-pv-mono">1042</td><td>Demo Record</td><td>{{pvWh1}}</td><td>{{pvActivo}}</td></tr>
+                            </table>
+                        </div>
+                    </div>`
     });
 
     P.enableInSearchPreview = ventanaNS({
@@ -3804,8 +3902,6 @@ ${CODIGO_JS}`;
     }
 
 
-    const ICONO_CARPETA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.5h7A1.5 1.5 0 0 1 19 10v7.5A1.5 1.5 0 0 1 17.5 19h-13A1.5 1.5 0 0 1 3 17.5z"/></svg>`;
-    const ICONO_ARCHIVO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V8.5z"/><path d="M13 3v5.5h5.5"/></svg>`;
     const ICONO_ENLACE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10.5 13.5a4 4 0 0 0 6 .5l2.5-2.5a4 4 0 0 0-5.7-5.7l-1.4 1.4"/><path d="M13.5 10.5a4 4 0 0 0-6-.5L5 12.5a4 4 0 0 0 5.7 5.7l1.4-1.4"/></svg>`;
     const ICONO_RUTA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h6l1.5 2H20v8.5A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"/><path d="M8 13h8"/></svg>`;
     const ICONO_ETIQUETA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 11.5V5.5A1.5 1.5 0 0 1 5.5 4h6l8.5 8.5-6 6z"/><circle cx="8.5" cy="8.5" r="1.4" fill="currentColor" stroke="none"/></svg>`;
@@ -4344,7 +4440,6 @@ ${CODIGO_JS}`;
                         ${o.barra || ''}
                         <span class="nsft-pv-grow"></span>
                         <span class="nsft-pv-pdftgl">{{pdfSource}} <i class="is-on"></i></span>
-                        <span class="nsft-pv-pdflink">{{@apdfPvPreview}}</span>
                     </div>
                     <div class="nsft-pv-pdfsplit">
                         <div class="nsft-pv-edcode is-pdf">
@@ -4387,14 +4482,27 @@ ${CODIGO_JS}`;
     P.enableAdvancedPdfPreview = ventanaNS({
         clase: 'nsft-pv-apdf',
         url: '1234567.app.netsuite.com/app/common/custom/pdftemplate.nl?id=482',
-        cuerpo: pdfNS({
-            barra: `<span class="nsft-pv-pdftgl is-hot">{{@apdfPvSide}} <i></i>
+        cuerpo: pdfNS({}),
+        extra: `
+            <div class="nsft-pv-pdfp">
+                <span class="nsft-pv-pdfpcap">
+                    <span class="nsft-pv-pdfpswap">
+                        <span class="nsft-pv-btn is-antes">&#9652; {{@ispExpand}}
                             <span class="nsft-pv-tap is-apdf" aria-hidden="true"></span>
                             <span class="nsft-pv-cursor is-apdf" aria-hidden="true">${PUNTERO}</span>
                         </span>
-                        <span class="nsft-pv-pdftgl">{{@apdfPvLive}} <i></i></span>`,
-            lateral: HOJA_PDF
-        })
+                        <span class="nsft-pv-pdfpfila is-despues">
+                            <span class="nsft-pv-btn is-ghost">&#9662; {{@ispCollapse}}</span>
+                            <span class="nsft-pv-btn">&#8635; {{@ispRefresh}}</span>
+                            <span class="nsft-pv-btn is-ghost">&#9889; {{@apdfPvLive}}</span>
+                        </span>
+                    </span>
+                </span>
+                <div class="nsft-pv-pdfppanel">
+                    <span class="nsft-pv-pdfpgrip"></span>
+                    ${HOJA_PDF}
+                </div>
+            </div>`
     });
 
     P.enableAdvancedPdfAutocomplete = ventanaNS({
@@ -4540,7 +4648,7 @@ ${CODIGO_JS}`;
         clase: 'nsft-pv-advia',
         sinCabecera: true,
         url: '1234567.app.netsuite.com/app/common/record/edittextmediaitem.nl?id=482&e=T',
-        cuerpo: editorAvanzadoNS(),
+        cuerpo: editorAvanzadoNS(true),
         panel: PANEL_IA
     });
 

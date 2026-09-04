@@ -738,10 +738,14 @@ function applyStoredSettings(items) {
                 if (key === 'enableCopyFieldAndSublistIds') {
                     const container = document.getElementById('copy-ids-controls');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
+                    const kids = document.getElementById('copy-ids-children');
+                    if (kids) kids.style.display = element.checked ? 'block' : 'none';
                 }
                 if (key === 'enableSetFieldValues') {
                     const container = document.getElementById('set-field-values-controls');
-                    if (container) container.style.display = element.checked ? 'flex' : 'none';
+                    if (container) container.style.display = element.checked ? 'block' : 'none';
+                    const secs = document.getElementById('set-field-values-sections');
+                    if (secs) secs.style.display = element.checked ? 'block' : 'none';
                 }
                 if (key === 'enableFindFieldById') {
                     const container = document.getElementById('find-field-controls');
@@ -758,6 +762,10 @@ function applyStoredSettings(items) {
                 if (key === 'enableFieldInlinePreview') {
                     const container = document.getElementById('field-inline-preview-container');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
+                }
+                if (key === 'enableRecordOptionsMenu') {
+                    const kids = document.getElementById('record-options-children');
+                    if (kids) kids.style.display = element.checked ? 'block' : 'none';
                 }
                 if (key === 'enableSaveAndEditButton') {
                     const container = document.getElementById('save-and-edit-mode-controls');
@@ -933,6 +941,7 @@ function applyStoredSettings(items) {
     initMainMenuPresets();
 
     wireRecordActionModes(items);
+    if (window.NSFTRecordOptionsDeps) window.NSFTRecordOptionsDeps.revisar();
     wireBooleanRadioGroups(items);
     wireValueRadioGroups(items);
 
@@ -1771,7 +1780,9 @@ function initializeRouter() {
         const input = target && document.getElementById(target);
         const row = input && input.closest('.nsft-settings-row, .option-row');
         if (!row) return;
-        NSFTRouter.go('settings');
+        const panel = row.closest('.nsft-panel[data-panel]');
+        if (panel) NSFTRouter.go('detail', panel.getAttribute('data-panel'));
+        else NSFTRouter.go('settings');
         setTimeout(() => {
             row.scrollIntoView({ block: 'center', behavior: 'smooth' });
             row.classList.add('is-highlight');
@@ -3233,3 +3244,50 @@ function wireTabPreview(panel, caja, tituloEl, replayEl) {
 
     pintarFila(document.querySelector('.nsft-screens .option-row'));
 }
+
+(function () {
+    'use strict';
+
+    const ACCIONES = [
+        { chk: 'enableDeleteRecordButton', modo: 'deleteRecordButtonMode' },
+        { chk: 'enableEditAndSaveButton', modo: 'editAndSaveButtonMode' },
+        { chk: 'enableSaveAndEditButton', modo: 'saveAndEditButtonMode' }
+    ];
+
+    function marcar() {
+        const padre = document.getElementById('enableRecordOptionsMenu');
+        if (!padre) return;
+        const apagado = !padre.checked;
+
+        const item = (id) => {
+            const el = document.getElementById(id);
+            return el ? el.closest('.nsft-subopt-item') : null;
+        };
+
+        const trail = item('enableRecordTrail');
+        if (trail) trail.classList.toggle('is-sin-camino', apagado);
+
+        ACCIONES.forEach((a) => {
+            const caja = item(a.chk);
+            if (!caja) return;
+            const enMenu = !!document.querySelector(
+                'input[type="radio"][name="' + a.modo + '"][value="menu"]:checked');
+            caja.classList.toggle('is-sin-camino', apagado && enMenu);
+        });
+    }
+
+    let _atado = false;
+    function arrancar() {
+        marcar();
+        if (_atado) return;
+        _atado = true;
+        const padre = document.getElementById('enableRecordOptionsMenu');
+        if (padre) padre.addEventListener('change', marcar);
+        ACCIONES.forEach((a) => {
+            document.querySelectorAll('input[type="radio"][name="' + a.modo + '"]')
+                .forEach((r) => r.addEventListener('change', marcar));
+        });
+    }
+
+    window.NSFTRecordOptionsDeps = { revisar: arrancar };
+})();

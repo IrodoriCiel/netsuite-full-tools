@@ -268,8 +268,7 @@
                 copiar(copyBtn.dataset.copy, i18n('cfind_copied_id', 'ID copied: $1', [copyBtn.dataset.copy]));
                 return;
             }
-            const goBtn = e.target.closest('[data-go]');
-            if (goBtn) { window.location.href = goBtn.dataset.go; return; }
+            if (e.target.closest('a[href]')) return;
             const row = e.target.closest('.nsft-cfind-row');
             if (row && row.dataset.url) window.location.href = row.dataset.url;
         });
@@ -485,17 +484,22 @@
                 acciones += '<button type="button" class="nsft-cfind-copy" data-copy="' + escapeHtml(it.sid || it.id) + '" title="'
                     + escapeHtml(i18n('cfind_copy_id', 'Copy ID')) + '">' + svg('M9 9h10v10H9zM5 15V5h10', 1.8) + '</button>';
                 if (it.url) {
-                    acciones += '<button type="button" class="nsft-cfind-rowbtn" data-go="' + escapeHtml(it.url) + '">'
-                        + escapeHtml(i18n('cfind_open', 'Open')) + '</button>';
+                    acciones += '<a class="nsft-cfind-rowbtn" href="' + escapeHtml(it.url) + '">'
+                        + escapeHtml(i18n('cfind_open', 'Open')) + '</a>';
                 }
                 if (it.urlList) {
-                    acciones += '<button type="button" class="nsft-cfind-rowbtn" data-go="' + escapeHtml(it.urlList) + '">'
-                        + escapeHtml(i18n('cfind_open_list', 'List')) + '</button>';
+                    acciones += '<a class="nsft-cfind-rowbtn" href="' + escapeHtml(it.urlList) + '">'
+                        + escapeHtml(i18n('cfind_open_list', 'List')) + '</a>';
                 }
                 acciones += '</span>';
 
+                const nombre = it.url
+                    ? '<a class="nsft-cfind-name" href="' + escapeHtml(it.url) + '">'
+                        + svg(t.icon) + '<span>' + hl(it.label) + '</span></a>'
+                    : '<span class="nsft-cfind-name">' + svg(t.icon) + '<span>' + hl(it.label) + '</span></span>';
+
                 row.innerHTML =
-                    '<span class="nsft-cfind-name">' + svg(t.icon) + '<span>' + hl(it.label) + '</span></span>'
+                    nombre
                     + '<span class="nsft-cfind-kind">' + escapeHtml(it.kindDetail || '') + '</span>'
                     + '<span class="nsft-cfind-sid">' + hl(it.sid || it.id) + '</span>'
                     + badgeHtml(it.status)

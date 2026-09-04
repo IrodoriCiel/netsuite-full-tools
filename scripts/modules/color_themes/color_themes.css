@@ -296,3 +296,37 @@ html.nsft-ct-enabled .dropdownDiv .dropdownNotSelected:hover {
     background: hsla(var(--h), var(--s), var(--l), 0.10) !important;
     color: inherit !important;
 }
+
+
+
+html.nsft-ct-enabled.nsft-ct-base-clara {
+    --hover-l: calc(var(--l) + 7%);
+    --active-l: calc(var(--l) + 12%);
+    --click-l: calc(var(--l) + 16%);
+}
+
+html.nsft-ct-enabled.nsft-ct-base-clara [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"],
+html.nsft-ct-enabled.nsft-ct-base-clara [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"] a,
+html.nsft-ct-enabled.nsft-ct-base-clara [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"] span,
+html.nsft-ct-enabled.nsft-ct-base-clara [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"] div,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .uir-tab-list,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .uir-tab-list a,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .uir-tab-list span,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .bgtabbar,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .bgtabbar a,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .bgon,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .bgon a,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .tabur,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .tabur a,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) div.unrollformtabheaderexpand:not(.uir-page-search__highlight--primary),
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) div.unrollformtabheadercollapse,
+html.nsft-ct-enabled.nsft-ct-base-clara body:not([data-page-theme="redwood"]) .uir-unroll-tabs-button,
+html.nsft-ct-enabled.nsft-ct-base-clara table.totallingtable caption {
+    color: var(--on-base) !important;
+    text-shadow: none !important;
+}
+
+html.nsft-ct-enabled.nsft-ct-base-clara [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"] svg,
+html.nsft-ct-enabled.nsft-ct-base-clara [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"] img {
+    filter: invert(1) hue-rotate(180deg);
+}

@@ -103,6 +103,7 @@
     let _betterTitlesActive = false;
     let _betterTitlesUnsub = null;
     let _betterTitlesOriginalLabel = null;
+    let _betterTitlesOriginalTitle = null;
 
     function resolveTitleSlot(slot) {
         const list = Array.isArray(slot) ? slot : [slot];
@@ -170,6 +171,7 @@
         } catch (e) { }
 
         _betterTitlesActive = true;
+        if (_betterTitlesOriginalTitle == null) _betterTitlesOriginalTitle = String(document.title || '');
         if (_betterTitlesOriginalLabel == null) {
             _betterTitlesOriginalLabel = String(document.title || '')
                 .replace(/\s*-\s*NetSuite\b.*$/i, '').replace(/[\s ]+/g, ' ').trim();
@@ -185,6 +187,10 @@
         _betterTitlesActive = false;
         if (_betterTitlesUnsub) { _betterTitlesUnsub(); _betterTitlesUnsub = null; }
         clearTitleStamps();
+        const titleEl = document.querySelector('head title');
+        if (titleEl && _betterTitlesOriginalTitle != null && titleEl.textContent !== _betterTitlesOriginalTitle) {
+            titleEl.textContent = _betterTitlesOriginalTitle;
+        }
     }
 
     const FSC_CLASS = 'nsft-fsc-on';
@@ -496,6 +502,42 @@
     }
 
     const FIXED_TABS_STYLE_ID = 'nsft-fixed-tabs-style';
+    const FIXED_TABS_ROWS =
+        '#div__body > table.uir-table-block.uir_form_tab_container > tbody > tr:nth-child(1),' +
+        '#results_tab_div > div > table > tbody > tr:nth-child(1),' +
+        '.nltabcontent > .uir-table-block > tbody > tr:nth-child(1)';
+    const FIXED_TABS_BG_MARK = 'nsftFtBg';
+    let _ftUnsub = null;
+
+    const REDWOOD_SUBTAB_BG = 'rgb(251, 249, 248)';
+
+    function subtabBandBackground(row) {
+        if (!document.body || document.body.dataset.pageTheme !== 'redwood') return '';
+        return row.querySelector('.bgsubtabbar') ? REDWOOD_SUBTAB_BG : '';
+    }
+
+    function paintFixedTabsBackground() {
+        document.querySelectorAll(FIXED_TABS_ROWS).forEach((row) => {
+            if (row.dataset[FIXED_TABS_BG_MARK]) return;
+            row.dataset[FIXED_TABS_BG_MARK] = '1';
+
+            const bg = subtabBandBackground(row) || firstOpaqueBackground(row);
+            if (!bg) return;
+            row.querySelectorAll(':scope > td').forEach((td) => {
+                if (!isTransparentColor(getComputedStyle(td).backgroundColor)) return;
+                td.style.backgroundColor = bg;
+            });
+        });
+    }
+
+    function clearFixedTabsBackground() {
+        document.querySelectorAll('[data-nsft-ft-bg]').forEach((row) => {
+            delete row.dataset[FIXED_TABS_BG_MARK];
+            row.querySelectorAll(':scope > td').forEach((td) => {
+                td.style.removeProperty('background-color');
+            });
+        });
+    }
 
     function runFixedTabs() {
         const params = new URLSearchParams(window.location.search);
@@ -505,7 +547,7 @@
             if (window.NSFT_RecordButtons && NSFT_RecordButtons.isHeaderlessPage && NSFT_RecordButtons.isHeaderlessPage()) return;
         } catch (e) { }
 
-        if (document.getElementById(FIXED_TABS_STYLE_ID)) return;
+        if (document.getElementById(FIXED_TABS_STYLE_ID)) { armFixedTabsBackground(); return; }
 
         const style = document.createElement('style');
         style.id = FIXED_TABS_STYLE_ID;
@@ -543,10 +585,20 @@
                 z-index: calc(var(--nsft-fixed-tabs-z, 9) + 1) !important;
             }`;
         (document.head || document.documentElement).appendChild(style);
+        armFixedTabsBackground();
+    }
+
+    function armFixedTabsBackground() {
+        paintFixedTabsBackground();
+        if (window.NSFT_Observer && !_ftUnsub) {
+            _ftUnsub = NSFT_Observer.subscribe(paintFixedTabsBackground, { throttle: 400 });
+        }
     }
 
     function stopFixedTabs() {
         document.getElementById(FIXED_TABS_STYLE_ID)?.remove();
+        if (_ftUnsub) { _ftUnsub(); _ftUnsub = null; }
+        clearFixedTabsBackground();
     }
 
     const SDO_CLASS = 'nsft-sdo-on';

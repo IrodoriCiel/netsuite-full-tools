@@ -157,6 +157,17 @@
         'RegExp.test': { p: [{ n: 'string', t: 'string' }], r: 'js:Boolean' }
     };
 
+    function tipoJsDelRetorno(t) {
+        if (!t || typeof t !== 'string' || t.indexOf('js:') === 0) return t;
+        const limpio = t.trim();
+        if (limpio.indexOf('|') >= 0) return t;
+        if (/^[A-Za-z]+\s*\[\s*\]$/.test(limpio)) return 'js:Array';
+        const nombre = limpio.charAt(0).toUpperCase() + limpio.slice(1).toLowerCase();
+        if (nombre === 'Integer' || nombre === 'Float') return 'js:Number';
+        if (JS_CON_INSTANCIA.indexOf(nombre) >= 0) return 'js:' + nombre;
+        return t;
+    }
+
     function retornoNativo(tipo, metodo) {
         if (!tipo || tipo.indexOf('js:') !== 0) return null;
         const t = tipo.slice(3);
@@ -1136,6 +1147,28 @@
 
     const PALABRAS_CON_PARENTESIS = /^(?:if|for|while|switch|catch|return|typeof|function|class|do|else|try|new|await|in|of)$/;
 
+    function esCodigo(cm, line, ch) {
+        try {
+            const clase = cm.getTokenTypeAt({ line: line, ch: ch }) || '';
+            return !/comment|string/.test(clase);
+        } catch (e) { return true; }
+    }
+
+    function sinComentarioDeLinea(linea) {
+        let cadena = null;
+        for (let i = 0; i < linea.length; i++) {
+            const c = linea.charAt(i);
+            if (cadena) {
+                if (c === '\\') { i++; continue; }
+                if (c === cadena) cadena = null;
+                continue;
+            }
+            if (c === '"' || c === "'" || c === '`') { cadena = c; continue; }
+            if (c === '/' && linea.charAt(i + 1) === '/') return linea.slice(0, i);
+        }
+        return linea;
+    }
+
     function argumentosDeLlamada(cm, line, ch) {
         const out = [];
         const tope = Math.min(cm.lineCount(), line + INLAY_LINEAS_LLAMADA);
@@ -1166,7 +1199,11 @@
                     continue;
                 }
                 if (')]}'.indexOf(c) >= 0) {
-                    if (hondo === 0) { if (ini) out.push(ini); return out; }
+                    if (hondo === 0) {
+                        if (c !== ')') return null;
+                        if (ini) out.push(ini);
+                        return out;
+                    }
                     hondo--;
                     continue;
                 }
@@ -1250,10 +1287,10 @@
             };
 
             const dec = linea.match(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)/);
-            if (dec) {
+            if (dec && esCodigo(cm, n, dec.index)) {
                 const t = tipos[dec[1]];
                 if (t) {
-                    const ch = linea.indexOf(dec[1], dec.index) + dec[1].length;
+                    const ch = dec.index + dec[0].length;
                     const crudo = t.indexOf('js:') === 0 ? t.slice(3) : t;
                     const info = tipoInlay(crudo);
                     const abierto = _inlayAbiertos.has(dec[1]);
@@ -1271,12 +1308,14 @@
                 }
             }
 
+            const codigoDeLinea = sinComentarioDeLinea(linea);
             const lla = /([A-Za-z_$][\w$]*)\s*(?:\.\s*([A-Za-z_$][\w$]*)\s*)?\(/g;
             let m;
-            while ((m = lla.exec(linea))) {
+            while ((m = lla.exec(codigoDeLinea))) {
                 const base = m[2] ? m[1] : null;
                 const nombre = m[2] || m[1];
 
+                if (!esCodigo(cm, n, m.index)) continue;
                 const previo = linea.slice(0, m.index).replace(/\s+$/, '');
                 if (/\b(?:function|class)$/.test(previo)) continue;
                 if (PALABRAS_CON_PARENTESIS.test(nombre)) continue;
@@ -1371,8 +1410,34 @@
         return pila;
     }
 
+    function pareceListaDeArgumentos(dentro) {
+        let prof = 0, cadena = null, enLinea = false, enBloque = false;
+        for (let i = 0; i < dentro.length; i++) {
+            const c = dentro.charAt(i), sig = dentro.charAt(i + 1);
+            if (enLinea) { if (c === '\n') enLinea = false; continue; }
+            if (enBloque) { if (c === '*' && sig === '/') { enBloque = false; i++; } continue; }
+            if (cadena) {
+                if (c === '\\') { i++; continue; }
+                if (c === cadena) cadena = null;
+                continue;
+            }
+            if (c === '/' && sig === '/') { enLinea = true; i++; continue; }
+            if (c === '/' && sig === '*') { enBloque = true; i++; continue; }
+            if (c === '"' || c === "'" || c === '`') { cadena = c; continue; }
+            if ('([{'.indexOf(c) >= 0) { prof++; continue; }
+            if (')]}'.indexOf(c) >= 0) {
+                if (prof === 0) return false;
+                prof--;
+                continue;
+            }
+            if (c === ';' && prof === 0) return false;
+        }
+        return true;
+    }
+
     function llamadaEnCurso(cm) {
         const cur = cm.getCursor();
+        if (!esCodigo(cm, cur.line, Math.max(0, cur.ch - 1))) return null;
         const desde = { line: Math.max(0, cur.line - SIG_LINEAS), ch: 0 };
         const txt = cm.getRange(desde, cur);
         const pila = pilaAbierta(txt);
@@ -1386,10 +1451,19 @@
             || antes.match(/([A-Za-z_$][\w$]*)[ \t]*$/);
         if (!m) return null;
 
+        const dentro = txt.slice(par.i + 1);
+        if (!pareceListaDeArgumentos(dentro)) return null;
+
+        const mal = cm._nsftLintMal;
+        if (mal && typeof mal.line === 'number') {
+            const lineaDelPar = desde.line + (txt.slice(0, par.i).split('\n').length - 1);
+            if (mal.line !== lineaDelPar) return null;
+        }
+
         return {
             base: m.length > 2 ? m[1] : null,
             nombre: m.length > 2 ? m[2] : m[1],
-            dentro: txt.slice(par.i + 1),
+            dentro: dentro,
             llave: pila.some((x) => x.c === '{' && x.i > par.i)
         };
     }
@@ -1724,6 +1798,7 @@
     function nombreEn(cm, pos, soloLlamadas) {
         const linea = cm.getLine(pos.line) || '';
         if (!/[\w$]/.test(linea.charAt(pos.ch))) return null;
+        if (!esCodigo(cm, pos.line, pos.ch)) return null;
 
         let a = pos.ch, b = pos.ch;
         while (a > 0 && /[\w$]/.test(linea.charAt(a - 1))) a--;
@@ -1837,6 +1912,10 @@
                 text: x.it.text,
                 nsftDoc: x.it.doc || null,
                 nsftNombre: x.it.text,
+                nsftKind: x.it.kind || 'prop',
+                nsftIcono: HINT_ICONO[x.it.kind] || '·',
+                nsftSig: x.it.sig || '',
+                nsftTag: x.it.tag || '',
                 render: (el) => hintRow(el, x.it, typedLc)
             }));
         if (!list.length) return null;
@@ -1849,6 +1928,132 @@
         return data;
     }
 
+
+    function saltaNoCodigo(txt, i) {
+        const c = txt[i];
+        if (c === '"' || c === "'" || c === '`') {
+            for (let j = i + 1; j < txt.length; j++) {
+                if (txt[j] === '\\') { j++; continue; }
+                if (txt[j] === c) return j + 1;
+            }
+            return txt.length;
+        }
+        if (c === '/' && txt[i + 1] === '/') {
+            const n = txt.indexOf('\n', i);
+            return n === -1 ? txt.length : n + 1;
+        }
+        if (c === '/' && txt[i + 1] === '*') {
+            const n = txt.indexOf('*/', i + 2);
+            return n === -1 ? txt.length : n + 2;
+        }
+        return i;
+    }
+
+    function cuerpoLiteral(txt, abre) {
+        let prof = 0;
+        for (let i = abre; i < txt.length;) {
+            const salto = saltaNoCodigo(txt, i);
+            if (salto !== i) { i = salto; continue; }
+            const c = txt[i];
+            if (c === '{' || c === '[') prof++;
+            else if (c === '}' || c === ']') {
+                prof--;
+                if (prof === 0) {
+                    if (i - abre > 20000) return null;
+                    return { cuerpo: txt.slice(abre + 1, i), fin: i + 1 };
+                }
+            }
+            i++;
+        }
+        return null;
+    }
+
+    function tipoDeValor(v) {
+        const t = v.replace(/^[\s]+/, '');
+        if (!t) return '';
+        const c = t[0];
+        if (c === '{') return 'js:Object';
+        if (c === '[') return 'js:Array';
+        if (c === '"' || c === "'" || c === '`') return 'js:String';
+        if (/^(?:true|false)\b/.test(t)) return 'js:Boolean';
+        if (/^-?\d/.test(t)) return 'js:Number';
+        if (/^new\s+Date\b/.test(t)) return 'js:Date';
+        return '';
+    }
+
+    function clavesDelCuerpo(cuerpo, hondura) {
+        const out = [];
+        if (hondura > 4) return out;
+        let prof = 0;
+        let ini = 0;
+        const trozos = [];
+        for (let i = 0; i < cuerpo.length;) {
+            const salto = saltaNoCodigo(cuerpo, i);
+            if (salto !== i) { i = salto; continue; }
+            const c = cuerpo[i];
+            if (c === '{' || c === '[' || c === '(') prof++;
+            else if (c === '}' || c === ']' || c === ')') prof--;
+            else if (c === ',' && prof === 0) { trozos.push(cuerpo.slice(ini, i)); ini = i + 1; }
+            i++;
+        }
+        trozos.push(cuerpo.slice(ini));
+
+        trozos.forEach((tr) => {
+            let limpio = tr;
+            for (;;) {
+                const antes = limpio;
+                limpio = limpio.replace(/^\s*\/\*[\s\S]*?\*\//, '').replace(/^\s*\/\/[^\n]*/, '');
+                if (limpio === antes) break;
+            }
+            const m = limpio.match(/^\s*(?:([A-Za-z_$][\w$]*)|['"]([^'"]+)['"])\s*:/);
+            if (!m) return;
+            const nombre = m[1] || m[2];
+            const valor = limpio.slice(m[0].length);
+            const tipo = tipoDeValor(valor);
+            const e = { n: nombre, t: tipo };
+            if (tipo === 'js:Object') {
+                const abre = valor.indexOf('{');
+                const cur = abre >= 0 ? cuerpoLiteral(valor, abre) : null;
+                if (cur) e.hijos = clavesDelCuerpo(cur.cuerpo, hondura + 1);
+            }
+            out.push(e);
+        });
+        return out;
+    }
+
+    function clavesDeLiterales(doc) {
+        const mapa = Object.create(null);
+        const re = /([A-Za-z_$][\w$]*)\s*=\s*\{/g;
+        let m;
+        while ((m = re.exec(doc))) {
+            const abre = m.index + m[0].length - 1;
+            const cur = cuerpoLiteral(doc, abre);
+            if (!cur) continue;
+            const claves = clavesDelCuerpo(cur.cuerpo, 0);
+            if (claves.length) mapa[m[1]] = claves;
+            re.lastIndex = cur.fin;
+        }
+        return mapa;
+    }
+
+    function clavesDeRuta(tipos, previo) {
+        const mapa = tipos && tipos[CLAVES_PROP];
+        if (!mapa) return null;
+        const m = String(previo).match(/([A-Za-z_$][\w$]*(?:\s*\.\s*[A-Za-z_$][\w$]*)*)\s*$/);
+        if (!m) return null;
+        const partes = m[1].split('.').map((x) => x.trim()).filter(Boolean);
+        let nivel = mapa[partes[0]];
+        if (!nivel) return null;
+        for (let i = 1; i < partes.length; i++) {
+            const hit = nivel.find((e) => e.n === partes[i]);
+            if (!hit || !hit.hijos) return null;
+            nivel = hit.hijos;
+        }
+        return nivel.length ? nivel : null;
+    }
+
+    const CLAVES_PROP = '__nsftClaves';
+
     function locales(cm) {
         let gen = -1;
         try { gen = cm.changeGeneration(); } catch (e) { gen = -1; }
@@ -1858,6 +2063,12 @@
         const out = Object.create(null);
         try {
             const doc = cm.getValue();
+
+            try {
+                Object.defineProperty(out, CLAVES_PROP, {
+                    value: clavesDeLiterales(doc), enumerable: false, configurable: true
+                });
+            } catch (e) { }
 
             const reNew = /([A-Za-z_$][\w$]*)\s*=\s*(?:await\s+)?new\s+([A-Za-z_$][\w$]*)\s*\(/g;
             let m;
@@ -1899,6 +2110,8 @@
 
             const reDestruct = /\b(?:const|let|var)\s*\{([^}]*)\}\s*=\s*([A-Za-z_$][\w$]*)/g;
 
+            const reProp = /([A-Za-z_$][\w$]*)\s*=\s*([A-Za-z_$][\w$]*)\s*\.\s*([A-Za-z_$][\w$]*)(?![ \t]*[\w$.(])/g;
+
             for (let vuelta = 0; vuelta < 3; vuelta++) {
                 let nuevos = 0;
 
@@ -1914,6 +2127,18 @@
                         const g = firmaApi(tipoBase, clave, cm);
                         if (g && g.r) { out[local] = g.r; nuevos++; }
                     });
+                }
+
+                reProp.lastIndex = 0;
+                while ((m = reProp.exec(doc))) {
+                    if (out[m[1]]) continue;
+                    if (doc.charAt(m.index - 1) === '.') continue;
+                    const porDoc = out[m[2] + '.' + m[3]];
+                    if (porDoc) { out[m[1]] = porDoc; nuevos++; continue; }
+                    const baseProp = out[m[2]];
+                    if (!baseProp || baseProp.indexOf('js:') === 0) continue;
+                    const gp = firmaApi(baseProp, m[3], cm);
+                    if (gp && gp.r) { out[m[1]] = gp.r; nuevos++; }
                 }
 
                 reArgs.lastIndex = 0;
@@ -1958,7 +2183,7 @@
                         || (firmaApi(base, metodo, cm) || {}).r
                         || ((out[base] && firmaApi(out[base], metodo, cm)) || {}).r
                         || retornoNativo(out[base], metodo);
-                    if (t) { out[destino] = t; nuevos++; }
+                    if (t) { out[destino] = tipoJsDelRetorno(t); nuevos++; }
                 }
                 if (!nuevos) break;
             }
@@ -1967,7 +2192,7 @@
             while ((m = reSuelta.exec(doc))) {
                 if (out[m[1]]) continue;
                 const f = firmaGlobal(m[2], cm) || propias[m[2]];
-                if (f && f.r) out[m[1]] = f.r;
+                if (f && f.r) out[m[1]] = tipoJsDelRetorno(f.r);
             }
         } catch (e) { }
 
@@ -1998,8 +2223,11 @@
 
             const m = antes.match(/([A-Za-z_$][\w$]*)\s*\.\s*([A-Za-z_$][\w$]*)$/);
             if (!m) return null;
-            return _retornos[m[1] + '.' + m[2]] || JS_RETORNOS[m[1] + '.' + m[2]] || null;
+            return tipoJsDelRetorno(_retornos[m[1] + '.' + m[2]] || JS_RETORNOS[m[1] + '.' + m[2]] || null);
         }
+
+        const conPunto = t.match(/([A-Za-z_$][\w$]*)\s*\.\s*([A-Za-z_$][\w$]*)$/);
+        if (conPunto && locs[conPunto[1] + '.' + conPunto[2]]) return locs[conPunto[1] + '.' + conPunto[2]];
 
         const v = t.match(/([A-Za-z_$][\w$]*)$/);
         return v ? (locs[v[1]] || null) : null;
@@ -2007,6 +2235,7 @@
 
     function hint(cm) {
         const cur = cm.getCursor();
+        if (!esCodigo(cm, cur.line, Math.max(0, cur.ch - 1))) return null;
         const lineText = cm.getLine(cur.line).slice(0, cur.ch);
         const soloApi = apiDelEditor(cm);
 
@@ -2059,13 +2288,23 @@
             const to = { line: cur.line, ch: cur.ch };
             const desde = { line: Math.max(0, cur.line - 40), ch: 0 };
             const previo = cm.getRange(desde, { line: cur.line, ch: cur.ch - punto[0].length });
-            const tipo = tipoDeExpresion(previo, locales(cm));
+            const tipo = tipoJsDelRetorno(tipoDeExpresion(previo, locales(cm)));
             const esJs = tipo && tipo.indexOf('js:') === 0;
             const miembros = tipo && (esJs ? jsMiembrosDe(tipo.slice(3))
                 : (_tipos[tipo] && _tipos[tipo].length ? _tipos[tipo] : miembrosDelCatalogo(tipo)));
-            if (miembros && miembros.length) {
-                const etiqueta = esJs ? tipo.slice(3) : tipo;
-                const items = miembros.map(x => {
+            const clavesTuyas = clavesDeRuta(locales(cm), previo) || [];
+            const itemsClaves = clavesTuyas.map((k) => ({
+                text: k.n,
+                kind: 'prop',
+                sig: '',
+                tag: k.t ? (k.t.indexOf('js:') === 0 ? k.t.slice(3) : k.t) : 'clave',
+                doc: null,
+                propio: true
+            }));
+
+            {
+                const etiqueta = esJs && tipo ? tipo.slice(3) : tipo;
+                const items = (miembros || []).map(x => {
                     const f = esJs ? null : firmaApi(tipo, x.n, cm);
                     const etq = x.rama || tipo;
                     return {
@@ -2076,8 +2315,11 @@
                         doc: f
                     };
                 });
-                const got = hintList(items, typed.toLowerCase(), from, to);
-                if (got) return got;
+                const todos = itemsClaves.concat(items);
+                if (todos.length) {
+                    const got = hintList(todos, typed.toLowerCase(), from, to);
+                    if (got) return got;
+                }
             }
         }
         if (chain) return null;
@@ -2715,6 +2957,8 @@
     function attach(textarea, opts) {
         const o = opts || {};
         if (!textarea || typeof CodeMirror === 'undefined') return null;
+
+        const pideCm6 = (o.engine === 'cm6' && !!window.NSFT_CM6_Adapter);
         let propios = null;
 
         const conf = {
@@ -2749,11 +2993,23 @@
             conf.extraKeys['Ctrl-Q'] = (c) => c.foldCode(c.getCursor());
         }
 
-        const cm = CodeMirror.fromTextArea(textarea, conf);
+        let cm = null;
+        if (pideCm6) {
+            cm = window.NSFT_CM6_Adapter.crear(textarea, Object.assign({}, conf, {
+                themeDark: !!o.themeDark,
+                themeName: conf.theme || null,
+                lineWrapping: !!o.lineWrapping,
+                folding: !!o.folding,
+                indentGuides: !!o.indentGuides,
+                highlightWord: !!o.highlightWord
+            }));
+        }
+        if (!cm) cm = CodeMirror.fromTextArea(textarea, conf);
+        const esCm6 = (cm.nsftEngine === 'cm6');
 
         cm._nsftApiAuto = !!o.apiSegunArchivo;
 
-        if (o.activeLine) {
+        if (o.activeLine && !esCm6) {
             let lineaAct = null;
             const marca = () => {
                 const l = cm.getCursor().line;
@@ -2768,8 +3024,8 @@
             marca();
         }
 
-        if (o.indentGuides) montaGuias(cm);
-        if (o.highlightWord) montaResaltePalabra(cm);
+        if (o.indentGuides && !esCm6) montaGuias(cm);
+        if (o.highlightWord && !esCm6) montaResaltePalabra(cm);
 
         const ghost = crearGhost(cm, o);
         watchHintsPopup();
@@ -2780,7 +3036,9 @@
             const codigo = cm.getValue();
             if (!codigo.trim()) { o.onLint(null); return; }
             checkSyntax(codigo, (r) => {
-                o.onLint(r.ok ? null : { msg: r.msg, line: r.line });
+                const mal = r.ok ? null : { msg: r.msg, line: r.line };
+                cm._nsftLintMal = mal;
+                o.onLint(mal);
             });
         };
         const lintPrograma = () => {
@@ -2816,7 +3074,7 @@
             }, 0));
         };
 
-        cm.on('inputRead', (c, change) => {
+        if (!esCm6) cm.on('inputRead', (c, change) => {
             const typedCh = change.text[0];
             if (typedCh === '.') { trasPintar(c); return; }
             if (!/[\w$]/.test(typedCh || '')) return;
@@ -2825,6 +3083,18 @@
             const word = tok && tok.string ? tok.string : '';
             if (word.length < 2 || !/^[a-z_$][\w$]*$/i.test(word)) return;
             trasPintar(c);
+        });
+
+        cm.on('swapDoc', () => {
+            clearTimeout(cm._nsftSigTimer);
+            cierraSig();
+            cierraPanelDoc();
+            quitaEnlace(cm);
+            limpiaInlay(cm);
+            cm._nsftInlayVp = null;
+            cm._nsftInlaySucio = null;
+            cm._nsftInlayTodo = false;
+            programaInlay(cm, true);
         });
 
         if (typeof o.onChange === 'function') cm.on('change', o.onChange);
@@ -2885,6 +3155,13 @@
         appendHighlighted,
         hintRank,
         firmasDelDocumento,
+        fichaDoc: (nombre, f) => {
+            if (!f) return null;
+            const caja = construyeDoc(nombre, f);
+            caja.dataset.nsftOrigen = 'cm6';
+            try { requestAnimationFrame(() => avisaSiNoCabe(caja)); } catch (e) { }
+            return caja;
+        },
         setPerfHook,
         versionApi
     });

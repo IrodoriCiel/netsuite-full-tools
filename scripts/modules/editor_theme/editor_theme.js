@@ -5,7 +5,9 @@
     const ENABLE_THEME_KEY = 'enableEditorTheme';
     const ENABLE_CLOSE_AFTER_SAVE_KEY = 'enableEditorCloseAfterSave';
 
-    const DEFAULT_THEME = 'github-dark';
+    const DEFAULT_THEME = 'auto';
+    const AUTO_DARK = 'github-dark';
+    const AUTO_LIGHT = 'github';
 
     const CURTAIN_ID = 'nsft-editor-theme-loading-curtain';
     const CURTAIN_TEXT_ID = 'nsft-editor-theme-curtain-text';
@@ -37,34 +39,15 @@
         return document.querySelector('div.cm-editor');
     }
 
-    const THEME_PAIRS = {
-        'github': 'github-dark',
-        'github-dark': 'github',
-        'atom-one-light': 'atom-one-dark',
-        'atom-one-dark': 'atom-one-light',
-        'stackoverflow-light': 'stackoverflow-dark',
-        'stackoverflow-dark': 'stackoverflow-light',
-        'vs': 'vs2015',
-        'vs2015': 'vs'
-    };
-    const LIGHT_THEMES = new Set([
-        'github', 'atom-one-light', 'stackoverflow-light', 'vs', 'default'
-    ]);
-
     let _unifiedDark = false;
     function unifiedPrefersDark() {
         return _unifiedDark;
     }
 
-    function resolveThemeForCurrentScheme(themeName, autoSwitch) {
-        if (!autoSwitch) return themeName;
-        const pair = THEME_PAIRS[themeName];
-        if (!pair) return themeName;
-        const wantDark = unifiedPrefersDark();
-        const isLight = LIGHT_THEMES.has(themeName);
-        if (wantDark && !isLight) return themeName;
-        if (!wantDark && isLight) return themeName;
-        return pair;
+    function resolveTheme(themeName) {
+        const name = themeName || DEFAULT_THEME;
+        if (name !== 'auto') return name;
+        return unifiedPrefersDark() ? AUTO_DARK : AUTO_LIGHT;
     }
 
     (function installCurtainASAP() {
@@ -110,15 +93,18 @@
 
     if (!IS_EDITOR_PAGE) return;
 
-    chrome.storage.local.get({
+    const TEMA_DEFECTOS = {
         [ENABLE_THEME_KEY]: true,
         editorTheme: DEFAULT_THEME,
-        editorThemeAutoSwitch: false,
         editorFontFamily: 'JetBrains Mono',
         editorFontSize: 14,
         nsftTheme: 'light',
         [THEME_CACHE_KEY]: null
-    }, (items) => {
+    };
+
+    chrome.storage.local.get(TEMA_DEFECTOS, arrancarTema);
+
+    function arrancarTema(items) {
         _unifiedDark = items.nsftTheme === 'dark';
         const enabled = !!items[ENABLE_THEME_KEY];
         try { sessionStorage.setItem(CURTAIN_FLAG_KEY, enabled ? '1' : '0'); } catch (_) { }
@@ -132,7 +118,7 @@
 
         registerUnifiedThemeListener();
 
-        const resolvedTheme = resolveThemeForCurrentScheme(items.editorTheme, items.editorThemeAutoSwitch);
+        const resolvedTheme = resolveTheme(items.editorTheme);
 
         const fontSizeNum = parseInt(items.editorFontSize, 10) || 14;
         const cache = items[THEME_CACHE_KEY];
@@ -180,6 +166,20 @@
                 }
             }, 7000);
         }
+    }
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes[ENABLE_THEME_KEY]) return;
+        const encendido = changes[ENABLE_THEME_KEY].newValue !== false;
+        try { sessionStorage.setItem(CURTAIN_FLAG_KEY, encendido ? '1' : '0'); } catch (_) { }
+        if (!encendido) {
+            const style = document.getElementById(THEME_STYLE_ID);
+            if (style) style.remove();
+            _themeApplied = false;
+            hideCurtain();
+            return;
+        }
+        chrome.storage.local.get(TEMA_DEFECTOS, arrancarTema);
     });
 
     function injectThemeStyle(css) {
@@ -203,25 +203,13 @@
                 const next = changes.editorTheme.newValue || DEFAULT_THEME;
                 resetCurtainState();
                 showCurtain();
-                chrome.storage.local.get({ editorThemeAutoSwitch: false }, (sub) => {
-                    updateTheme(resolveThemeForCurrentScheme(next, sub.editorThemeAutoSwitch));
-                });
+                updateTheme(resolveTheme(next));
             }
-            if (changes.editorThemeAutoSwitch) {
+            if (changes.editorFontFamily || changes.editorFontSize) {
                 chrome.storage.local.get({ editorTheme: DEFAULT_THEME }, (current) => {
                     resetCurtainState();
                     showCurtain();
-                    updateTheme(resolveThemeForCurrentScheme(current.editorTheme, !!changes.editorThemeAutoSwitch.newValue));
-                });
-            }
-            if (changes.editorFontFamily || changes.editorFontSize) {
-                chrome.storage.local.get({
-                    editorTheme: DEFAULT_THEME,
-                    editorThemeAutoSwitch: false
-                }, (current) => {
-                    resetCurtainState();
-                    showCurtain();
-                    updateTheme(resolveThemeForCurrentScheme(current.editorTheme, current.editorThemeAutoSwitch));
+                    updateTheme(resolveTheme(current.editorTheme));
                 });
             }
             const isCustomFieldChange = Object.keys(changes).some(k => k.indexOf('editorCustom') === 0);
@@ -242,9 +230,9 @@
         chrome.storage.onChanged.addListener((changes, area) => {
             if (area !== 'local' || !changes.nsftTheme) return;
             _unifiedDark = changes.nsftTheme.newValue === 'dark';
-            chrome.storage.local.get({ editorTheme: DEFAULT_THEME, editorThemeAutoSwitch: false }, (items) => {
-                if (!items.editorThemeAutoSwitch) return;
-                const resolved = resolveThemeForCurrentScheme(items.editorTheme, true);
+            chrome.storage.local.get({ editorTheme: DEFAULT_THEME }, (items) => {
+                if ((items.editorTheme || DEFAULT_THEME) !== 'auto') return;
+                const resolved = resolveTheme(items.editorTheme);
                 resetCurtainState();
                 showCurtain();
                 updateTheme(resolved);

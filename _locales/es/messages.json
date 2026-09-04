@@ -1126,6 +1126,9 @@
   "closeModal": {
     "message": "Cerrar"
   },
+  "nsft_open_settings": {
+    "message": "Abrir los ajustes de este módulo"
+  },
   "modalMinimise": {
     "message": "Minimizar"
   },
@@ -1789,6 +1792,10 @@
   "cmdp_hint_close": {
     "message": "Cerrar"
   },
+  "cmdp_hint_newtab": {
+    "message": "Otra pestaña",
+    "description": "Command palette footer hint: Ctrl+Enter opens the entry in a new tab"
+  },
   "cmdp_hint_nav": {
     "message": "Navegar"
   },
@@ -1919,6 +1926,36 @@
   },
   "colorThemePresetMagenta": {
     "message": "Magenta"
+  },
+  "colorThemePresetBlack": {
+    "message": "Negro"
+  },
+  "colorThemePresetGraphite": {
+    "message": "Grafito"
+  },
+  "colorThemePresetForest": {
+    "message": "Bosque"
+  },
+  "colorThemePresetNavy": {
+    "message": "Azul marino"
+  },
+  "colorThemePresetDeepTeal": {
+    "message": "Petróleo"
+  },
+  "colorThemePresetCoffee": {
+    "message": "Café"
+  },
+  "colorThemePresetWine": {
+    "message": "Vino"
+  },
+  "colorThemePresetGray": {
+    "message": "Gris"
+  },
+  "colorThemePresetLightGray": {
+    "message": "Gris claro"
+  },
+  "colorThemePresetLavender": {
+    "message": "Lavanda"
   },
   "colorThemePresetNetSuiteBlue": {
     "message": "Azul NetSuite"
@@ -2333,6 +2370,9 @@
   },
   "welcomeCatSqlItem10": {
     "message": "Tipo de resumen en bloque en las columnas de una búsqueda guardada"
+  },
+  "welcomeCatSqlItem11": {
+    "message": "Filtros en bloque en los resultados de búsquedas guardadas (aplicar de una vez)"
   },
   "welcomeCatRecordItem5": {
     "message": "Ver Scripts del Registro"
@@ -3236,15 +3276,6 @@
   "enableFieldAuditQuickViewDesc": {
     "message": "Agrega una sección \"Historial del campo\" al popup de información de campo que carga (vía SuiteQL sobre systemnote) quién cambió el campo, cuándo, valor anterior y nuevo."
   },
-  "fav_section_title": {
-    "message": "Historial del campo"
-  },
-  "fav_load_btn": {
-    "message": "Ver historial"
-  },
-  "fav_hide_btn": {
-    "message": "Ocultar historial"
-  },
   "fav_loading": {
     "message": "Cargando historial…"
   },
@@ -3483,7 +3514,7 @@
     "message": "Abrir registro personalizado"
   },
   "gtr_unknown_type": {
-    "message": "Tipo de registro desconocido. Prueba invoice / customer / salesorder / po / item / vendor / employee / script / workflow …"
+    "message": "Tipo de registro desconocido. Si no sabes de qué tipo es, prueba «transaction» y el id. También valen invoice / customer / salesorder / po / item / vendor / employee / script / workflow …"
   },
   "gtr_bad_id": {
     "message": "El id debe ser un número."
@@ -3652,9 +3683,6 @@
   "enableEditorThemeLabel": {
     "message": "Tema del Editor de código."
   },
-  "editorThemeAutoSwitchLabel": {
-    "message": "Cambiar a la variante opuesta según el modo claro/oscuro del sistema"
-  },
   "editorFontFamilyLabel": {
     "message": "Fuente:"
   },
@@ -3787,6 +3815,10 @@
   "setFieldValuesNoIconLabel": {
     "message": "Sin iconos de info (clic en la etiqueta del campo)"
   },
+  "sfvModeTitle": {
+    "message": "Cómo abrir el panel",
+    "description": "Sub-option group title: how the field info panel is opened"
+  },
   "setFieldValuesWithIconLabel": {
     "message": "Con iconos de info"
   },
@@ -3842,7 +3874,7 @@
     "message": "Hora"
   },
   "fip_ftype_select": {
-    "message": "Lista"
+    "message": "Lista/Registro"
   },
   "fip_ftype_multiselect": {
     "message": "Lista múltiple"
@@ -4017,6 +4049,9 @@
   },
   "enableRecordOptionsMenuDesc": {
     "message": "Agrega un menú desplegable con accesos directos según el tipo de registro (agregar campo, ver XML, etc.)."
+  },
+  "romChildrenTitle": {
+    "message": "Qué ofrece el menú"
   },
   "enableRefreshSublistLabel": {
     "message": "Botón Actualizar Sublista"
@@ -4488,6 +4523,18 @@
   "enableSearchSummaryBulkDesc": {
     "message": "En la pestaña Resultados de una búsqueda guardada, agrega una franja para poner o quitar el tipo de resumen —agrupar, sumar, contar…— en todas las columnas de una vez, en lugar de ir una por una."
   },
+  "enableSearchFiltersBatchLabel": {
+    "message": "Filtros en Bloque"
+  },
+  "enableSearchFiltersBatchDesc": {
+    "message": "En los resultados de una búsqueda guardada, cambiar un filtro deja de recargar la página: ponlos todos con calma y aplícalos de una vez con un botón."
+  },
+  "sfb_apply": {
+    "message": "Aplicar filtros"
+  },
+  "sfb_apply_title": {
+    "message": "Los filtros ya no recargan al cambiar: ponlos todos y aplícalos aquí de una vez"
+  },
   "ssb_title": {
     "message": "Tipo de resumen en todas:"
   },
@@ -4529,6 +4576,51 @@
   },
   "enableSetFieldValuesDesc": {
     "message": "Habilita utilidades avanzadas en la ayuda de campo: editar valor, copiar ID, ver info técnica."
+  },
+  "sfvSectionsTitle": {
+    "message": "Qué información mostrar"
+  },
+  "sfv_open_settings": {
+    "message": "Configurar qué información se muestra"
+  },
+  "sfvShowHelpLabel": {
+    "message": "Ayuda del campo"
+  },
+  "sfvShowIdLabel": {
+    "message": "ID interno"
+  },
+  "sfvShowHistoryLabel": {
+    "message": "Historial del campo"
+  },
+  "sfvShowValueLabel": {
+    "message": "Valor"
+  },
+  "sfvShowTextLabel": {
+    "message": "Texto del valor"
+  },
+  "sfvShowTypeLabel": {
+    "message": "Tipo y visualización"
+  },
+  "sfvShowFlagsLabel": {
+    "message": "Obligatorio y deshabilitado"
+  },
+  "sfvShowSetterLabel": {
+    "message": "Cambiar el valor"
+  },
+  "sfvShowOptionsLabel": {
+    "message": "Tabla de valores"
+  },
+  "sfvShowEditLabel": {
+    "message": "Editar el campo"
+  },
+  "sfvCoachTitle": {
+    "message": "Ahora eliges qué ves"
+  },
+  "sfvCoachBody": {
+    "message": "El panel del campo enseña sólo las secciones que dejes marcadas: enciende lo que te sirve y apaga lo que no necesites. El historial del campo pasó a ser una sección más de aquí."
+  },
+  "sfvCoachDismiss": {
+    "message": "No volver a mostrar"
   },
   "enableSetFieldValuesLabel": {
     "message": "Mostrar Información de Campos"
@@ -5387,7 +5479,7 @@
     "message": "Abrir en otro entorno"
   },
   "recordOptionRunSuiteQL": {
-    "message": "Ejecutar SuiteQL en este registro"
+    "message": "Consultar este registro con SuiteQL"
   },
   "recordOptionAddField": {
     "message": "Agregar Campo"
@@ -5412,9 +5504,6 @@
   },
   "recordActionModeMenu": {
     "message": "Menú"
-  },
-  "recordActionModeNote": {
-    "message": "El modo Menú requiere que el Menú de Opciones de Registro esté activo."
   },
   "editAndSaveConfirmInPrdLabel": {
     "message": "Confirmar antes de ejecutar en Producción"
@@ -6022,6 +6111,30 @@
   "sfv_field_type": {
     "message": "Tipo de Campo"
   },
+  "sfv_tab_value": {
+    "message": "Valor"
+  },
+  "sfv_tab_definition": {
+    "message": "Definición"
+  },
+  "sfv_tab_history": {
+    "message": "Historial"
+  },
+  "sfv_display_type": {
+    "message": "Visualización"
+  },
+  "sfv_display_normal": {
+    "message": "Normal (editable)"
+  },
+  "sfv_display_inline": {
+    "message": "Sólo lectura (inline)"
+  },
+  "sfv_display_disabled": {
+    "message": "Deshabilitado"
+  },
+  "sfv_display_hidden": {
+    "message": "Oculto"
+  },
   "sfv_field_value": {
     "message": "Valor del Campo"
   },
@@ -6034,11 +6147,26 @@
   "sfv_formula": {
     "message": "Fórmula"
   },
+  "sfv_source_list": {
+    "message": "Lista fuente",
+    "description": "Etiqueta: la lista o registro del que salen los valores del campo"
+  },
   "sfv_go_to_source_list": {
     "message": "Ir a Lista de Origen"
   },
   "sfv_help_label": {
     "message": "Ayuda del campo"
+  },
+  "sfv_help_show": {
+    "message": "Mostrar ayuda",
+    "description": "Field help button label when the help text is collapsed"
+  },
+  "sfv_help_hide": {
+    "message": "Ocultar ayuda",
+    "description": "Field help button label when the help text is visible"
+  },
+  "sfv_help_topic": {
+    "message": "Abrir el tema de ayuda de esta página"
   },
   "sfv_help_open_tooltip": {
     "message": "Abrir la ayuda de NetSuite para este campo"
@@ -6051,6 +6179,52 @@
   },
   "sfv_list": {
     "message": "Lista"
+  },
+  "sfv_list_search": {
+    "message": "Buscar en la lista y pulsar Enter…"
+  },
+  "sfv_list_loading": {
+    "message": "Buscando opciones…"
+  },
+  "sfv_list_count": {
+    "message": "{n} opciones"
+  },
+  "sfv_open_record": {
+    "message": "Abrir el registro en otra pestaña",
+    "description": "Tooltip on the option row link that opens the target record"
+  },
+  "sfv_list_more": {
+    "message": "Primeras {n} · escribe para afinar"
+  },
+  "sfv_list_none": {
+    "message": "Sin coincidencias"
+  },
+  "sfv_list_empty": {
+    "message": "Esta lista no tiene opciones"
+  },
+  "sfv_list_error": {
+    "message": "No se pudieron traer las opciones"
+  },
+  "sfv_view_confirm_title": {
+    "message": "Cambiar el valor en el registro"
+  },
+  "sfv_view_confirm_body": {
+    "message": "Estás en modo Vista, así que esto escribe en el registro ahora mismo, sin pasar por Guardar y sin poder cancelarlo.\n\nCampo: {campo}\nNuevo valor: {valor}"
+  },
+  "sfv_view_confirm_ok": {
+    "message": "Cambiar"
+  },
+  "sfv_view_confirm_cancel": {
+    "message": "Cancelar"
+  },
+  "sfv_view_saving": {
+    "message": "Guardando en el registro… la página se queda quieta hasta que termine."
+  },
+  "sfv_view_done": {
+    "message": "Valor cambiado en el registro"
+  },
+  "sfv_view_failed": {
+    "message": "No se pudo cambiar el valor:"
   },
   "sfv_loading": {
     "message": "Cargando..."
@@ -8999,16 +9173,13 @@
     "message": "Autocompleta variables y funciones al editar plantillas PDF."
   },
   "enableAdvancedPdfPreviewLabel": {
-    "message": "Preview lateral en Plantillas PDF/HTML"
+    "message": "Vista previa en Plantillas PDF/HTML"
   },
   "enableAdvancedPdfPreviewDesc": {
-    "message": "Panel lateral con preview en vivo al editar la plantilla PDF."
-  },
-  "apdfPvSide": {
-    "message": "Preview Lateral"
+    "message": "Panel inferior plegable y ajustable con la vista previa en vivo mientras editas la plantilla."
   },
   "apdfPvLive": {
-    "message": "Preview en Vivo"
+    "message": "En vivo"
   },
   "apdfPvPreview": {
     "message": "Previsualizar"
@@ -11452,25 +11623,22 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "* Editor Avanzado: abre cualquier archivo del File Cabinet en un editor completo."
+    "message": "El panel de información del campo se rehízo: tres pestañas, la ayuda de NetSuite y las opciones de cada lista."
   },
   "un_hl_2": {
-    "message": "* Consola de SuiteScript: escribe SuiteScript y ejecútalo al momento, sin salir de la cuenta."
+    "message": "*Los filtros de una búsqueda guardada se aplican todos de una vez, sin recargas."
   },
   "un_hl_3": {
-    "message": "* Buscador de personalizaciones: encuentra scripts, workflows, campos o búsquedas por su nombre."
+    "message": "La vista previa de plantillas PDF/HTML es ahora un panel plegable y en vivo."
   },
   "un_hl_4": {
-    "message": "El Asistente de IA conoce las tablas de tu cuenta, responde en muchos menos pasos y guarda tus conversaciones."
+    "message": "El Menú de Opciones del Registro recoge lo que cuelga de él, y eliges qué ofrece."
   },
   "un_hl_5": {
-    "message": "El SuiteQL Runner sugiere cómo seguir la consulta mientras escribes: Tab la escribe."
+    "message": "En Ir al registro basta con escribir «transaction» y el id: NetSuite averigua el tipo."
   },
   "un_hl_6": {
-    "message": "Colores nuevos, atajos de edición y varios cursores a la vez en todos los editores de código."
-  },
-  "un_hl_7": {
-    "message": "Los buscadores encuentran escribas o no los acentos, y resaltan igual en todas partes."
+    "message": "Además: los resultados se abren en otra pestaña con el botón derecho, diez tonos nuevos en Temas de Color y varios fallos corregidos. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -11776,6 +11944,205 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
+  },
+  "cl_ver_7_1_1": {
+    "message": "v7.1.1"
+  },
+  "cl_date_7_1_1": {
+    "message": "2026-09-04"
+  },
+  "cl_7_1_1_gtr_generic_title": {
+    "message": "Ir al registro entiende «transaction» y el id"
+  },
+  "cl_7_1_1_gtr_generic_desc": {
+    "message": "Se agregó el tipo «transaction» en Ir al registro, que lleva a la transacción por su id sin tener que saber de qué tipo es."
+  },
+  "cl_7_1_1_links_title": {
+    "message": "Los resultados se abren también en otra pestaña"
+  },
+  "cl_7_1_1_links_desc": {
+    "message": "Se cambiaron a enlaces los resultados de Ir al registro y del Buscador de personalizaciones, así que ya se pueden abrir en otra pestaña o ventana."
+  },
+  "cl_7_1_1_sfb_pages_title": {
+    "message": "El botón de aplicar filtros llega a la vista previa"
+  },
+  "cl_7_1_1_sfb_pages_desc": {
+    "message": "Se arregló que el botón para aplicar los filtros de una búsqueda no apareciera al previsualizarla, sólo al ejecutarla."
+  },
+  "cl_ver_7_1_0": {
+    "message": "v7.1.0"
+  },
+  "cl_date_7_1_0": {
+    "message": "2026-09-04"
+  },
+  "cl_7_1_0_ftabs_bg_title": {
+    "message": "La barra de pestañas fija ya no se transparenta"
+  },
+  "cl_7_1_0_ftabs_bg_desc": {
+    "message": "Se arregló que la navegación de las subpestañas se leyera a través de la barra de pestañas fija al desplazarse."
+  },
+  "copyIdsChildrenTitle": {
+    "message": "Qué más añade"
+  },
+  "cl_7_1_0_copyids_children_title": {
+    "message": "El botón de sublista se ve de quién depende"
+  },
+  "cl_7_1_0_copyids_children_desc": {
+    "message": "Se cambió Abrir Registro Personalizado desde Sublista para que sea una opción de Copiar IDs Internos, de la que depende para salir."
+  },
+  "cl_7_1_0_editortheme_auto_title": {
+    "message": "El tema del editor sigue al de la extensión"
+  },
+  "cl_7_1_0_editortheme_auto_desc": {
+    "message": "Se agregó un tema Automático, ya de fábrica, que acompaña al modo claro u oscuro de la extensión, y se retiró la casilla de la variante opuesta."
+  },
+  "cl_7_1_0_cfind_cat_title": {
+    "message": "El Buscador de personalizaciones cambia de pestaña"
+  },
+  "cl_7_1_0_cfind_cat_desc": {
+    "message": "Se movió el Buscador de personalizaciones de Destacados a Productividad en el popup."
+  },
+  "cl_7_1_0_adved_claves_title": {
+    "message": "El editor conoce las claves de tus objetos"
+  },
+  "cl_7_1_0_adved_claves_desc": {
+    "message": "Se agregó que al escribir un punto tras un objeto propio se ofrezcan sus claves, también las de los objetos anidados."
+  },
+  "cl_7_1_0_adved_comentarios_title": {
+    "message": "El editor deja en paz los comentarios"
+  },
+  "cl_7_1_0_adved_comentarios_desc": {
+    "message": "Se arregló que dentro de un comentario salieran el autocompletado, la ayuda de firma, las pistas y el salto a la definición."
+  },
+  "cl_7_1_0_adved_pistas_title": {
+    "message": "Un paréntesis sin cerrar ya no ensucia el resto"
+  },
+  "cl_7_1_0_adved_pistas_desc": {
+    "message": "Se arregló que un paréntesis sin cerrar dejara nombres de parámetros y la ayuda de firma sobre líneas ajenas a esa llamada."
+  },
+  "cl_7_1_0_adved_prop_title": {
+    "message": "El editor reconoce el registro del evento"
+  },
+  "cl_7_1_0_adved_prop_desc": {
+    "message": "Se agregó deducir el tipo de una variable que recibe una propiedad, como el registro de un User Event, para ofrecer su autocompletado."
+  },
+  "cl_7_1_0_adved_retorno_title": {
+    "message": "El editor completa lo que devuelve la API"
+  },
+  "cl_7_1_0_adved_retorno_desc": {
+    "message": "Se arregló que una variable con el texto o el número que devuelve una llamada a la API no ofreciera sus métodos al escribir el punto."
+  },
+  "cl_7_1_0_ct_presets_title": {
+    "message": "Más colores de tema para elegir"
+  },
+  "cl_7_1_0_ct_presets_desc": {
+    "message": "Se agregaron preajustes al Tema de Color: negro, grises y variantes con más cuerpo de cada matiz."
+  },
+  "cl_7_1_0_ct_claro_title": {
+    "message": "Los temas claros se leen"
+  },
+  "cl_7_1_0_ct_claro_desc": {
+    "message": "Se arregló que al elegir un color de tema claro los menús y las pestañas conservaran el texto y los iconos en blanco, que no se veían."
+  },
+  "cl_7_1_0_sfb_title": {
+    "message": "Los filtros de una búsqueda, de una sola vez"
+  },
+  "cl_7_1_0_sfb_desc": {
+    "message": "Se agregó que los filtros de una búsqueda guardada no recarguen la página a cada cambio: se ponen todos y un botón los aplica de una vez."
+  },
+  "cl_7_1_0_pdfprev_title": {
+    "message": "La vista previa de plantillas, en panel plegable"
+  },
+  "cl_7_1_0_pdfprev_desc": {
+    "message": "Se cambió la vista previa de las plantillas PDF/HTML: ahora es un panel inferior plegable y ajustable, como el de las búsquedas."
+  },
+  "cl_7_1_0_gear_title": {
+    "message": "Los ajustes de cada módulo, desde su ventana"
+  },
+  "cl_7_1_0_gear_desc": {
+    "message": "Se agregó un engrane en la cabecera de las ventanas grandes que abre los ajustes de ese módulo en la extensión."
+  },
+  "cl_7_1_0_adved_perf_title": {
+    "message": "El Editor Avanzado no se frena al escribir"
+  },
+  "cl_7_1_0_adved_perf_desc": {
+    "message": "Se arregló que escribir, desplazarse o cambiar de pestaña en el Editor Avanzado se fuera frenando en archivos largos."
+  },
+  "cl_7_1_0_sfv_slow_title": {
+    "message": "La ayuda de los campos personalizados ya no se hace esperar"
+  },
+  "cl_7_1_0_sfv_slow_desc": {
+    "message": "Se arregló que la ayuda de un campo personalizado tardara varios segundos en aparecer en su panel."
+  },
+  "cl_7_1_0_sfv_notopic_title": {
+    "message": "El panel enseña lo mismo que la ayuda de NetSuite"
+  },
+  "cl_7_1_0_sfv_notopic_desc": {
+    "message": "Se agregó que el panel del campo enseñe el mismo texto que la ventana de ayuda de NetSuite, diga lo que diga."
+  },
+  "cl_7_1_0_sfv_help_title": {
+    "message": "La ayuda del campo llega también donde faltaba"
+  },
+  "cl_7_1_0_sfv_help_desc": {
+    "message": "Se arregló que la ayuda del campo no apareciera en su panel en algunas pantallas, o saliera en su lugar un mensaje de error."
+  },
+  "cl_7_1_0_sfv_biglist_title": {
+    "message": "Las opciones salen también en las listas largas"
+  },
+  "cl_7_1_0_sfv_biglist_desc": {
+    "message": "Se agregó la tabla de opciones, con su buscador, en los campos de lista larga, donde el panel no mostraba ninguna."
+  },
+  "cl_7_1_0_sfv_view_title": {
+    "message": "El panel del campo también sirve en modo Vista"
+  },
+  "cl_7_1_0_sfv_view_desc": {
+    "message": "Se agregó que el panel del campo muestre el valor y las opciones también en modo Vista, y permita cambiarlo previa confirmación."
+  },
+  "cl_7_1_0_sfv_groups_title": {
+    "message": "El panel del campo, en pestañas"
+  },
+  "cl_7_1_0_sfv_groups_desc": {
+    "message": "Se cambió el panel del campo a tres pestañas —Valor, Definición e Historial— para que su alto deje de saltar."
+  },
+  "cl_7_1_0_sfv_sections_title": {
+    "message": "Eliges qué información del campo ves"
+  },
+  "cl_7_1_0_sfv_sections_desc": {
+    "message": "Se agregó poder encender y apagar cada sección del panel del campo, y el Historial del campo pasó a ser una de ellas."
+  },
+  "cl_7_1_0_sfv_source_title": {
+    "message": "El panel dice de qué lista sale el campo",
+    "description": "Changelog 7.0.1: title"
+  },
+  "cl_7_1_0_sfv_source_desc": {
+    "message": "Se agregó a la definición del campo la lista o registro del que salen sus valores.",
+    "description": "Changelog 7.0.1: description"
+  },
+  "cl_7_1_0_rom_children_title": {
+    "message": "El Menú de Opciones recoge lo que cuelga de él"
+  },
+  "cl_7_1_0_rom_children_desc": {
+    "message": "Se cambió el Menú de Opciones del Registro para que Record Trail y los tres botones de acción sean opciones suyas, y avisa cuando una se queda sin acceso."
+  },
+  "cl_7_1_0_rom_items_title": {
+    "message": "Eliges qué opciones ofrece el menú"
+  },
+  "cl_7_1_0_rom_items_desc": {
+    "message": "Se agregó poder encender y apagar cada opción del Menú de Opciones del Registro por separado."
+  },
+  "cl_7_1_0_menus_live_title": {
+    "message": "Los menús se actualizan sin recargar"
+  },
+  "cl_7_1_0_menus_live_desc": {
+    "message": "Se arregló que apagar un módulo dejara su opción en los menús de Herramientas y de Opciones del Registro hasta recargar la página."
+  },
+  "cl_7_1_0_cmdp_newtab_title": {
+    "message": "Abres en otra pestaña lo que elijas en la Paleta",
+    "description": "Changelog 7.0.1: title"
+  },
+  "cl_7_1_0_cmdp_newtab_desc": {
+    "message": "Se agregó abrir en una pestaña nueva la entrada elegida en la Paleta de Comandos, con Ctrl+Enter o Ctrl+clic.",
+    "description": "Changelog 7.0.1: description"
   },
   "cl_ver_7_0_0": {
     "message": "v7.0.0"
@@ -13108,20 +13475,5 @@
   },
   "devPromptNoAnswer": {
     "message": "ninguna pestaña de NetSuite respondió — refréscala y vuelve a intentarlo"
-  },
-  "un_hl_8": {
-    "message": "Los ID de campo pueden verse siempre bajo su etiqueta, y se copian con un clic."
-  },
-  "un_hl_9": {
-    "message": "Pon o quita el tipo de resumen en todas las columnas de una búsqueda de una vez."
-  },
-  "un_hl_10": {
-    "message": "Un color distinto por entorno o por cuenta, para saber de un vistazo dónde estás."
-  },
-  "un_hl_11": {
-    "message": "Al arrastrar archivos al Archivador se avisa si vas a sustituir alguno, y puedes ver en qué cambian."
-  },
-  "un_hl_12": {
-    "message": "Se corrigieron detalles del Asistente de IA, del auto-refresco del dashboard, del Runner y del Archivador, y los avisos del navegador pasaron a ser ventanas propias. Más detalles en el changelog."
   }
 }

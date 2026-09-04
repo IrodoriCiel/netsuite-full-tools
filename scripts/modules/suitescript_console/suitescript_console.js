@@ -2588,6 +2588,12 @@
                 ? 'sql_fullscreen_exit' : 'sql_fullscreen_enter') || '';
         };
 
+        clickHandler('nsft-ssc-settings', () => {
+            try {
+                chrome.runtime.sendMessage({ action: 'nsftOpenSettings', highlight: 'enableSuiteScriptConsole' });
+            } catch (e) { }
+        });
+
         clickHandler('nsft-ssc-minimise', () => {
             modal.dataset.state = 'minimised';
             updateTitleState();
@@ -5231,6 +5237,7 @@
             <div class="suitescript-console-header">
                 <span id="nsft-ssc-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><rect x="3" y="4" width="18" height="16" rx="2"></rect><polyline points="7 9 10 12 7 15"></polyline><line x1="13" y1="15" x2="17" y2="15"></line></svg>${chrome.i18n.getMessage('ssc_title') || 'SuiteScript Console'}</span>
                 <span class="nsft-header-actions">
+                    <span id="nsft-ssc-settings" title="${chrome.i18n.getMessage('nsft_open_settings') || 'Ajustes'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;pointer-events:none;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
                     <span id="nsft-ssc-minimise"></span>
                     <span id="nsft-ssc-fullscreen" title="${chrome.i18n.getMessage('sql_fullscreen_enter') || 'Full screen'}"></span>
                     <span id="nsft-ssc-maximise"></span>

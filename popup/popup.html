@@ -345,6 +345,16 @@
                   <option value="indigo" data-h="250" data-s="23" data-l="49" data-i18n="colorThemePresetIndigo"></option>
                   <option value="purple" data-h="280" data-s="23" data-l="49" data-i18n="colorThemePresetPurple"></option>
                   <option value="magenta" data-h="315" data-s="23" data-l="49" data-i18n="colorThemePresetMagenta"></option>
+                  <option value="black" data-h="220" data-s="10" data-l="12" data-i18n="colorThemePresetBlack"></option>
+                  <option value="graphite" data-h="220" data-s="8" data-l="25" data-i18n="colorThemePresetGraphite"></option>
+                  <option value="forest" data-h="150" data-s="35" data-l="28" data-i18n="colorThemePresetForest"></option>
+                  <option value="navy" data-h="216" data-s="40" data-l="30" data-i18n="colorThemePresetNavy"></option>
+                  <option value="deep_teal" data-h="190" data-s="40" data-l="30" data-i18n="colorThemePresetDeepTeal"></option>
+                  <option value="coffee" data-h="25" data-s="35" data-l="32" data-i18n="colorThemePresetCoffee"></option>
+                  <option value="wine" data-h="345" data-s="38" data-l="32" data-i18n="colorThemePresetWine"></option>
+                  <option value="gray" data-h="220" data-s="6" data-l="45" data-i18n="colorThemePresetGray"></option>
+                  <option value="light_gray" data-h="220" data-s="8" data-l="62" data-i18n="colorThemePresetLightGray"></option>
+                  <option value="lavender" data-h="250" data-s="30" data-l="60" data-i18n="colorThemePresetLavender"></option>
                 </select>
               </div>
 
@@ -520,17 +530,6 @@
 
           <div class="option-row">
             <div>
-              <span id="label_enableCustomizationFinder" data-i18n="enableCustomizationFinderLabel"></span>
-              <div id="desc_enableCustomizationFinder" class="description" data-i18n="enableCustomizationFinderDesc"></div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableCustomizationFinder">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="option-row">
-            <div>
               <span id="label_enableShortcutsCheatsheet" data-i18n="enableShortcutsCheatsheetLabel"></span>
               <div id="desc_enableShortcutsCheatsheet" class="description" data-i18n="enableShortcutsCheatsheetDesc"></div>
             </div>
@@ -664,17 +663,7 @@
             </label>
           </div>
 
-          <div class="option-row">
-            <div>
-              <span id="label_enableRecordTrail" data-i18n="enableRecordTrailLabel"></span>
-              <div id="desc_enableRecordTrail" class="description" data-i18n="enableRecordTrailDesc"></div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableRecordTrail">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
+          
           <div class="option-row">
             <div>
               <span id="label_enableLoadRecordConsole" data-i18n="enableLoadRecordConsoleLabel"></span>
@@ -690,6 +679,58 @@
             <div>
               <span id="label_enableRecordOptionsMenu" data-i18n="enableRecordOptionsMenuLabel"></span>
               <div id="desc_enableRecordOptionsMenu" class="description" data-i18n="enableRecordOptionsMenuDesc"></div>
+              <div id="record-options-children" class="nsft-subopts" style="display: none;">
+                <div class="nsft-subopts-title" data-i18n="romChildrenTitle"></div>
+                <div class="nsft-subopts-grid">
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowOpenCustom"><span data-i18n="recordOptionOpenCustomRecord"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowAddField"><span data-i18n="recordOptionAddField"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowAddColumn"><span data-i18n="recordOptionAddColumn"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="enableSaveAndEditButton"><span data-i18n="enableSaveAndEditButtonLabel"></span></label>
+                    <div id="save-and-edit-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <label><input type="radio" id="saveAndEditModeButton" name="saveAndEditButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
+                    <label><input type="radio" id="saveAndEditModeMenu" name="saveAndEditButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
+                    </div>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="enableEditAndSaveButton"><span data-i18n="enableEditAndSaveButtonLabel"></span></label>
+                    <div id="edit-and-save-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <label><input type="radio" id="editAndSaveModeButton" name="editAndSaveButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
+                    <label><input type="radio" id="editAndSaveModeMenu" name="editAndSaveButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
+                    <label class="nsft-subpref" style="flex-basis: 100%; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" id="editAndSaveConfirmInPrd"><span data-i18n="editAndSaveConfirmInPrdLabel"></span></label>
+                    </div>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="enableDeleteRecordButton"><span data-i18n="enableDeleteRecordButtonLabel"></span></label>
+                    <div id="delete-record-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <label><input type="radio" id="deleteRecordModeButton" name="deleteRecordButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
+                    <label><input type="radio" id="deleteRecordModeMenu" name="deleteRecordButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
+                    <label class="nsft-subpref" style="flex-basis: 100%; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" id="deleteRecordRequireTypeConfirm"><span data-i18n="deleteRecordRequireTypeConfirmLabel"></span></label>
+                    </div>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowDependents"><span data-i18n="recordOptionViewDependentRecords"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="enableRecordTrail"><span data-i18n="enableRecordTrailLabel"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowCopyUrl"><span data-i18n="recordOptionCopyCleanUrl"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowOpenInEnv"><span data-i18n="recordOptionOpenInEnv"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowXml"><span data-i18n="recordOptionViewXml"></span></label>
+                  </div>
+                </div>
+              </div>
             </div>
             <label class="switch">
               <input type="checkbox" id="enableRecordOptionsMenu">
@@ -755,6 +796,14 @@
                 <label><input type="radio" id="copyIdsModeShift" name="copyIdsMode" value="shift"><span data-i18n="copyIdsNoButtonLabel"></span></label>
                 <label><input type="radio" id="copyIdsModeAlways" name="copyIdsMode" value="always"><span data-i18n="copyIdsAlwaysLabel"></span></label>
               </div>
+              <div id="copy-ids-children" class="nsft-subopts" style="display: none;">
+                <div class="nsft-subopts-title" data-i18n="copyIdsChildrenTitle"></div>
+                <div class="nsft-subopts-grid">
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="enableOpenCustomRecordBtn"><span data-i18n="enableOpenCustomRecordBtnLabel"></span></label>
+                  </div>
+                </div>
+              </div>
             </div>
             <label class="switch">
               <input type="checkbox" id="enableCopyFieldAndSublistIds">
@@ -766,9 +815,39 @@
             <div>
               <span id="label_enableSetFieldValues" data-i18n="enableSetFieldValuesLabel"></span>
               <div id="desc_enableSetFieldValues" class="description" data-i18n="enableSetFieldValuesDesc"></div>
-              <div id="set-field-values-controls" class="nsft-radio-group" style="margin-top: 5px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" id="setFieldValuesModeIcon" name="setFieldValuesNoIcon" value="false"><span data-i18n="setFieldValuesWithIconLabel"></span></label>
-                <label><input type="radio" id="setFieldValuesModeLabel" name="setFieldValuesNoIcon" value="true"><span data-i18n="setFieldValuesNoIconLabel"></span></label>
+              <div id="set-field-values-controls" class="nsft-subopts" style="display: none;">
+                <div class="nsft-subopts-title" data-i18n="sfvModeTitle"></div>
+                <div class="nsft-radio-group" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                  <label><input type="radio" id="setFieldValuesModeIcon" name="setFieldValuesNoIcon" value="false"><span data-i18n="setFieldValuesWithIconLabel"></span></label>
+                  <label><input type="radio" id="setFieldValuesModeLabel" name="setFieldValuesNoIcon" value="true"><span data-i18n="setFieldValuesNoIconLabel"></span></label>
+                </div>
+              </div>
+              <div id="set-field-values-sections" class="nsft-subopts" style="display: none;">
+                <div class="nsft-subopts-title" data-i18n="sfvSectionsTitle"></div>
+                <div class="nsft-subopts-grid">
+                  <label><input type="checkbox" id="setFieldValuesShowHelp"><span data-i18n="sfvShowHelpLabel"></span></label>
+                </div>
+
+                <div class="nsft-subopts-sub" data-i18n="sfv_tab_value"></div>
+                <div class="nsft-subopts-grid is-child">
+                  <label><input type="checkbox" id="setFieldValuesShowText"><span data-i18n="sfvShowTextLabel"></span></label>
+                  <label><input type="checkbox" id="setFieldValuesShowValue"><span data-i18n="sfvShowValueLabel"></span></label>
+                  <label><input type="checkbox" id="setFieldValuesShowSetter"><span data-i18n="sfvShowSetterLabel"></span></label>
+                  <label><input type="checkbox" id="setFieldValuesShowOptions"><span data-i18n="sfvShowOptionsLabel"></span></label>
+                </div>
+
+                <div class="nsft-subopts-sub" data-i18n="sfv_tab_definition"></div>
+                <div class="nsft-subopts-grid is-child">
+                  <label><input type="checkbox" id="setFieldValuesShowId"><span data-i18n="sfvShowIdLabel"></span></label>
+                  <label><input type="checkbox" id="setFieldValuesShowType"><span data-i18n="sfvShowTypeLabel"></span></label>
+                  <label><input type="checkbox" id="setFieldValuesShowFlags"><span data-i18n="sfvShowFlagsLabel"></span></label>
+                  <label><input type="checkbox" id="setFieldValuesShowEdit"><span data-i18n="sfvShowEditLabel"></span></label>
+                </div>
+
+                <div class="nsft-subopts-sub" data-i18n="sfv_tab_history"></div>
+                <div class="nsft-subopts-grid is-child">
+                  <label><input type="checkbox" id="enableFieldAuditQuickView"><span data-i18n="sfvShowHistoryLabel"></span></label>
+                </div>
               </div>
             </div>
             <label class="switch">
@@ -777,16 +856,6 @@
             </label>
           </div>
 
-          <div class="option-row">
-            <div>
-              <span id="label_enableFieldAuditQuickView" data-i18n="enableFieldAuditQuickViewLabel"></span>
-              <div id="desc_enableFieldAuditQuickView" class="description" data-i18n="enableFieldAuditQuickViewDesc"></div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableFieldAuditQuickView">
-              <span class="slider round"></span>
-            </label>
-          </div>
 
           <div class="option-row">
             <div>
@@ -814,17 +883,6 @@
             </label>
           </div>
 
-          <div class="option-row">
-            <div>
-              <span id="label_enableOpenCustomRecordBtn" data-i18n="enableOpenCustomRecordBtnLabel"></span>
-              <div id="desc_enableOpenCustomRecordBtn" class="description" data-i18n="enableOpenCustomRecordBtnDesc">
-              </div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableOpenCustomRecordBtn">
-              <span class="slider round"></span>
-            </label>
-          </div>
 
           <div class="option-row">
             <div>
@@ -857,56 +915,9 @@
             </label>
           </div>
 
-          <div class="option-row">
-            <div>
-              <span id="label_enableSaveAndEditButton" data-i18n="enableSaveAndEditButtonLabel"></span>
-              <div id="desc_enableSaveAndEditButton" class="description" data-i18n="enableSaveAndEditButtonDesc"></div>
-              <div id="save-and-edit-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" id="saveAndEditModeButton" name="saveAndEditButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
-                <label><input type="radio" id="saveAndEditModeMenu" name="saveAndEditButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
-                <div class="description" style="flex-basis: 100%; font-size: 10px;" data-i18n="recordActionModeNote"></div>
-              </div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableSaveAndEditButton">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="option-row">
-            <div>
-              <span id="label_enableEditAndSaveButton" data-i18n="enableEditAndSaveButtonLabel"></span>
-              <div id="desc_enableEditAndSaveButton" class="description" data-i18n="enableEditAndSaveButtonDesc"></div>
-              <div id="edit-and-save-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                 <label><input type="radio" id="editAndSaveModeButton" name="editAndSaveButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
-                <label><input type="radio" id="editAndSaveModeMenu" name="editAndSaveButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
-                <label class="nsft-subpref" style="flex-basis: 100%; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" id="editAndSaveConfirmInPrd"><span data-i18n="editAndSaveConfirmInPrdLabel"></span></label>
-                <div class="description" style="flex-basis: 100%; font-size: 10px;" data-i18n="recordActionModeNote"></div>
-              </div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableEditAndSaveButton">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="option-row">
-            <div>
-              <span id="label_enableDeleteRecordButton" data-i18n="enableDeleteRecordButtonLabel"></span>
-              <div id="desc_enableDeleteRecordButton" class="description" data-i18n="enableDeleteRecordButtonDesc"></div>
-              <div id="delete-record-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <label><input type="radio" id="deleteRecordModeButton" name="deleteRecordButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
-                <label><input type="radio" id="deleteRecordModeMenu" name="deleteRecordButtonMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
-                <label class="nsft-subpref" style="flex-basis: 100%; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" id="deleteRecordRequireTypeConfirm"><span data-i18n="deleteRecordRequireTypeConfirmLabel"></span></label>
-                <div class="description" style="flex-basis: 100%; font-size: 10px;" data-i18n="recordActionModeNote"></div>
-              </div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableDeleteRecordButton">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
+          
+          
+          
           <div class="option-row">
             <div>
               <span id="label_enableCancelOverride" data-i18n="enableCancelOverrideLabel"></span>
@@ -950,6 +961,7 @@
             <div>
               <span id="label_enableAdvancedEditor" data-i18n="enableAdvancedEditorLabel"></span>
               <div id="desc_enableAdvancedEditor" class="description" data-i18n="enableAdvancedEditorDesc"></div>
+
 
               <div id="theme-container-adv" style="margin-top: 5px; display: none;">
                 <label for="advancedEditorTheme" style="font-size: 12px; margin-right: 5px;" data-i18n="themeLabel"></label>
@@ -1051,6 +1063,7 @@
                 <label for="editorTheme" style="font-size: 12px; margin-right: 5px;" data-i18n="themeLabel"></label>
                 <select id="editorTheme"
                   style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="auto" data-i18n="jfThemeAuto"></option>
                   <option value="atom-one-dark">Atom One Dark</option>
                   <option value="atom-one-light">Atom One Light</option>
                   <option value="default">Default</option>
@@ -1071,10 +1084,6 @@
   <span class="ͼm">// greet someone</span>
   <span class="ͼb">return</span> <span class="ͼd">42</span>;
 }</code></pre>
-                <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px;">
-                  <input type="checkbox" id="editorThemeAutoSwitch" style="margin: 0;">
-                  <label for="editorThemeAutoSwitch" data-i18n="editorThemeAutoSwitchLabel" style="cursor: pointer;"></label>
-                </div>
 
                 <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px;">
                   <label for="editorFontFamily" data-i18n="editorFontFamilyLabel" style="cursor: pointer;"></label>
@@ -1519,6 +1528,18 @@
 
           <div class="option-row">
             <div>
+              <span id="label_enableSearchFiltersBatch" data-i18n="enableSearchFiltersBatchLabel"></span>
+              <div id="desc_enableSearchFiltersBatch" class="description" data-i18n="enableSearchFiltersBatchDesc">
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableSearchFiltersBatch">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
               <span id="label_enableSearchFormulaAutocomplete" data-i18n="enableSearchFormulaAutocompleteLabel"></span>
               <div id="desc_enableSearchFormulaAutocomplete" class="description" data-i18n="enableSearchFormulaAutocompleteDesc"></div>
             </div>
@@ -1954,6 +1975,17 @@
               </button>
             </span>
           </h3>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableCustomizationFinder" data-i18n="enableCustomizationFinderLabel"></span>
+              <div id="desc_enableCustomizationFinder" class="description" data-i18n="enableCustomizationFinderDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableCustomizationFinder">
+              <span class="slider round"></span>
+            </label>
+          </div>
 
           <div class="option-row" style="flex-wrap: wrap;">
             <div style="flex: 1; min-width: 200px;">

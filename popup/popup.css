@@ -2529,3 +2529,100 @@ mark.nsft-search-hl {
     flex: none;
     margin: 0;
 }
+
+.nsft-subopts {
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid var(--nsft-border, #e5e7eb);
+    border-radius: 6px;
+    background: var(--nsft-surface-1, #f9fafb);
+}
+
+.nsft-subopts-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--nsft-text-3, #6b7280);
+    margin-bottom: 6px;
+}
+
+#set-field-values-sections > .nsft-subopts-grid,
+#record-options-children > .nsft-subopts-grid,
+#aiAssistantScope:not(.is-off) {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    gap: 5px !important;
+}
+
+#aiAssistantScope.is-off {
+    display: none !important;
+}
+
+#set-field-values-sections > .nsft-subopts-grid > label,
+#record-options-children > .nsft-subopts-grid > label,
+#record-options-children > .nsft-subopts-grid > .nsft-subopt-item > label,
+#aiAssistantScope > label {
+    display: flex !important;
+    width: 100% !important;
+    white-space: normal !important;
+    flex: 0 0 auto !important;
+}
+
+.nsft-subopts-grid label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.nsft-subopts-grid label span {
+    white-space: normal;
+}
+
+#record-options-children .nsft-subopt-item > .record-action-mode {
+    margin-left: 22px !important;
+    margin-top: 4px !important;
+}
+
+#record-options-children .nsft-subopt-item.is-sin-camino > label {
+    opacity: 0.45;
+}
+
+#record-options-children .nsft-subopt-item.is-sin-camino > label::after {
+    content: " ⚠";
+    font-size: 10px;
+}
+
+#record-options-children > .nsft-subopts-grid > .nsft-subopt-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 0 !important;
+}
+
+#set-field-values-sections > .nsft-subopts-sub {
+    display: block !important;
+    width: 100% !important;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--nsft-text-2, #4b5563);
+}
+
+#set-field-values-sections > .nsft-subopts-grid.is-child {
+    padding-left: 12px;
+    border-left: 2px solid var(--nsft-border, #e5e7eb);
+}
+
+#set-field-values-sections {
+    display: block !important;
+}

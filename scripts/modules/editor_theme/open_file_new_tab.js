@@ -12,6 +12,7 @@
     let advEnabled = false;
     let observerRef = null;
     let unsubscribeShared = null;
+    let _arrancado = false;
 
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
@@ -30,6 +31,19 @@
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes[STORAGE_KEY]) return;
+        if (changes[STORAGE_KEY].newValue === false) {
+            document.querySelectorAll('.' + LINK_CLASS + ', .' + ADV_CLASS)
+                .forEach((el) => el.remove());
+            if (unsubscribeShared) { unsubscribeShared(); unsubscribeShared = null; }
+            if (observerRef) { observerRef.disconnect(); observerRef = null; }
+            _arrancado = false;
+            return;
+        }
+        if (!_arrancado) init(); else addButtons();
+    });
+
+    chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local' || !changes[ADV_KEY]) return;
         advEnabled = !!changes[ADV_KEY].newValue;
         if (!advEnabled) {
@@ -40,6 +54,7 @@
     });
 
     function init() {
+        _arrancado = true;
         try {
             cachedLinkText = chrome.i18n.getMessage('openInNewTab') || cachedLinkText;
             cachedAdvText = chrome.i18n.getMessage('adv_open_link') || cachedAdvText;
@@ -64,6 +79,7 @@
     }
 
     function addButtons() {
+        if (!_arrancado) return;
         if (!isExtensionContextValid()) {
             if (observerRef) {
                 observerRef.disconnect();

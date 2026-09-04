@@ -2,6 +2,8 @@
     'use strict';
 
     const STORAGE_KEY = 'enableJsonFormatter';
+    let _rawOriginal = null;
+    let _arrancado = false;
     const THEME_KEY = 'jsonFormatterTheme';
     const DEFAULT_THEME = 'auto';
     let maxAutoExpandDepth = 2;
@@ -63,19 +65,26 @@
         } catch (e) { }
     }
 
-    chrome.storage.local.get({
+    const AJUSTES_DEFECTOS = {
         [STORAGE_KEY]: true,
         [THEME_KEY]: DEFAULT_THEME,
         nsftTheme: 'light',
         jsonFormatterMaxAutoExpandDepth: 2,
         jsonFormatterMaxChildrenPreview: 60
-    }, (settings) => {
-        if (!settings[STORAGE_KEY]) return;
+    };
+
+    function aplicarAjustes(settings) {
+        _arrancado = true;
         stampUnifiedTheme(settings.nsftTheme);
         activeTheme = settings[THEME_KEY] || DEFAULT_THEME;
         maxAutoExpandDepth = clampInt(settings.jsonFormatterMaxAutoExpandDepth, 0, 20, 2);
         maxChildrenPreview = clampInt(settings.jsonFormatterMaxChildrenPreview, 1, 100000, 60);
         scheduleFormat();
+    }
+
+    chrome.storage.local.get(AJUSTES_DEFECTOS, (settings) => {
+        if (!settings[STORAGE_KEY]) return;
+        aplicarAjustes(settings);
     });
 
     function clampInt(v, min, max, fallback) {
@@ -86,6 +95,13 @@
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
+        if (changes[STORAGE_KEY]) {
+            if (changes[STORAGE_KEY].newValue === false) {
+                if (formatted && _rawOriginal !== null) restaurarCrudo();
+                return;
+            }
+            chrome.storage.local.get(AJUSTES_DEFECTOS, aplicarAjustes);
+        }
         if (changes.nsftTheme) stampUnifiedTheme(changes.nsftTheme.newValue);
         if (changes[THEME_KEY]) {
             activeTheme = changes[THEME_KEY].newValue || DEFAULT_THEME;
@@ -131,6 +147,7 @@
         if (!found) return;
 
         formatted = true;
+        _rawOriginal = found.text;
         renderFormatted(found.data, found.text);
     }
 
@@ -213,6 +230,16 @@
     function isApiUrl(pathname) {
         return /\/app\/site\/hosting\/(?:scriptlet|restlet)\.nl/i.test(pathname)
             || /\/services\/rest\//i.test(pathname);
+    }
+
+    function restaurarCrudo() {
+        const pre = document.createElement('pre');
+        pre.textContent = _rawOriginal;
+        document.body.innerHTML = '';
+        document.body.appendChild(pre);
+        document.documentElement.classList.remove('nsft-jf-html');
+        document.body.classList.remove('nsft-jf-body');
+        formatted = false;
     }
 
     function renderFormatted(data, rawText) {

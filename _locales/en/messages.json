@@ -1126,6 +1126,9 @@
   "closeModal": {
     "message": "Close"
   },
+  "nsft_open_settings": {
+    "message": "Open this module's settings"
+  },
   "modalMinimise": {
     "message": "Minimise"
   },
@@ -1789,6 +1792,10 @@
   "cmdp_hint_close": {
     "message": "Close"
   },
+  "cmdp_hint_newtab": {
+    "message": "New tab",
+    "description": "Command palette footer hint: Ctrl+Enter opens the entry in a new tab"
+  },
   "cmdp_hint_nav": {
     "message": "Navigate"
   },
@@ -1919,6 +1926,36 @@
   },
   "colorThemePresetMagenta": {
     "message": "Magenta"
+  },
+  "colorThemePresetBlack": {
+    "message": "Black"
+  },
+  "colorThemePresetGraphite": {
+    "message": "Graphite"
+  },
+  "colorThemePresetForest": {
+    "message": "Forest"
+  },
+  "colorThemePresetNavy": {
+    "message": "Navy"
+  },
+  "colorThemePresetDeepTeal": {
+    "message": "Deep teal"
+  },
+  "colorThemePresetCoffee": {
+    "message": "Coffee"
+  },
+  "colorThemePresetWine": {
+    "message": "Wine"
+  },
+  "colorThemePresetGray": {
+    "message": "Gray"
+  },
+  "colorThemePresetLightGray": {
+    "message": "Light gray"
+  },
+  "colorThemePresetLavender": {
+    "message": "Lavender"
   },
   "colorThemePresetNetSuiteBlue": {
     "message": "NetSuite Blue"
@@ -2333,6 +2370,9 @@
   },
   "welcomeCatSqlItem10": {
     "message": "Bulk summary type on saved search columns"
+  },
+  "welcomeCatSqlItem11": {
+    "message": "Batch filters on saved search results (apply once)"
   },
   "welcomeCatRecordItem5": {
     "message": "View Record Scripts"
@@ -3236,15 +3276,6 @@
   "enableFieldAuditQuickViewDesc": {
     "message": "Adds a \"Field history\" section to the field info popup that lazy-loads (via SuiteQL on systemnote) who changed the field, when, the previous value and the new one."
   },
-  "fav_section_title": {
-    "message": "Field history"
-  },
-  "fav_load_btn": {
-    "message": "Load history"
-  },
-  "fav_hide_btn": {
-    "message": "Hide history"
-  },
   "fav_loading": {
     "message": "Loading history…"
   },
@@ -3483,7 +3514,7 @@
     "message": "Open custom record"
   },
   "gtr_unknown_type": {
-    "message": "Unknown record type. Try invoice / customer / salesorder / po / item / vendor / employee / script / workflow …"
+    "message": "Unknown record type. If you do not know which type it is, try \"transaction\" and the id. Also invoice / customer / salesorder / po / item / vendor / employee / script / workflow …"
   },
   "gtr_bad_id": {
     "message": "The id must be a number."
@@ -3652,9 +3683,6 @@
   "enableEditorThemeLabel": {
     "message": "Code Editor Theme"
   },
-  "editorThemeAutoSwitchLabel": {
-    "message": "Switch to the opposite variant based on the system light/dark mode"
-  },
   "editorFontFamilyLabel": {
     "message": "Font:"
   },
@@ -3786,6 +3814,10 @@
   },
   "setFieldValuesNoIconLabel": {
     "message": "No info icons (click the field label)"
+  },
+  "sfvModeTitle": {
+    "message": "How to open it",
+    "description": "Sub-option group title: how the field info panel is opened"
   },
   "setFieldValuesWithIconLabel": {
     "message": "Show info icons"
@@ -4017,6 +4049,9 @@
   },
   "enableRecordOptionsMenuDesc": {
     "message": "Adds a dropdown menu with shortcuts based on the record type (add field, view XML, etc.)."
+  },
+  "romChildrenTitle": {
+    "message": "What the menu offers"
   },
   "enableRefreshSublistLabel": {
     "message": "Refresh Sublist Button"
@@ -4488,6 +4523,18 @@
   "enableSearchSummaryBulkDesc": {
     "message": "On a saved search's Results tab, adds a strip to set or clear the summary type — group, sum, count… — on every column at once, instead of going one by one."
   },
+  "enableSearchFiltersBatchLabel": {
+    "message": "Batch Search Filters"
+  },
+  "enableSearchFiltersBatchDesc": {
+    "message": "On a saved search's results, changing a filter no longer reloads the page: set them all calmly and apply them once with a button."
+  },
+  "sfb_apply": {
+    "message": "Apply filters"
+  },
+  "sfb_apply_title": {
+    "message": "Filters no longer reload on change: set them all and apply them here at once"
+  },
   "ssb_title": {
     "message": "Summary type on all:"
   },
@@ -4529,6 +4576,51 @@
   },
   "enableSetFieldValuesDesc": {
     "message": "Enables advanced utilities in field help: edit value, copy ID, view technical info."
+  },
+  "sfvSectionsTitle": {
+    "message": "What to show"
+  },
+  "sfv_open_settings": {
+    "message": "Configure what information is shown"
+  },
+  "sfvShowHelpLabel": {
+    "message": "Field help"
+  },
+  "sfvShowIdLabel": {
+    "message": "Internal ID"
+  },
+  "sfvShowHistoryLabel": {
+    "message": "Field history"
+  },
+  "sfvShowValueLabel": {
+    "message": "Value"
+  },
+  "sfvShowTextLabel": {
+    "message": "Value text"
+  },
+  "sfvShowTypeLabel": {
+    "message": "Type and display"
+  },
+  "sfvShowFlagsLabel": {
+    "message": "Mandatory and disabled"
+  },
+  "sfvShowSetterLabel": {
+    "message": "Change the value"
+  },
+  "sfvShowOptionsLabel": {
+    "message": "Values table"
+  },
+  "sfvShowEditLabel": {
+    "message": "Edit the field"
+  },
+  "sfvCoachTitle": {
+    "message": "You now choose what you see"
+  },
+  "sfvCoachBody": {
+    "message": "The field panel shows only the sections you leave ticked: switch on what helps you and switch off what you do not need. Field history is now one more section in here."
+  },
+  "sfvCoachDismiss": {
+    "message": "Do not show again"
   },
   "enableSetFieldValuesLabel": {
     "message": "Show Field Information"
@@ -5387,7 +5479,7 @@
     "message": "Open in another environment"
   },
   "recordOptionRunSuiteQL": {
-    "message": "Run SuiteQL on this record"
+    "message": "Query this record with SuiteQL"
   },
   "recordOptionAddField": {
     "message": "Add Field"
@@ -5412,9 +5504,6 @@
   },
   "recordActionModeMenu": {
     "message": "Menu"
-  },
-  "recordActionModeNote": {
-    "message": "Menu mode requires the Record Options Menu to be enabled."
   },
   "editAndSaveConfirmInPrdLabel": {
     "message": "Confirm before running in Production"
@@ -6022,6 +6111,30 @@
   "sfv_field_type": {
     "message": "Field Type"
   },
+  "sfv_tab_value": {
+    "message": "Value"
+  },
+  "sfv_tab_definition": {
+    "message": "Definition"
+  },
+  "sfv_tab_history": {
+    "message": "History"
+  },
+  "sfv_display_type": {
+    "message": "Display"
+  },
+  "sfv_display_normal": {
+    "message": "Normal (editable)"
+  },
+  "sfv_display_inline": {
+    "message": "Read-only (inline)"
+  },
+  "sfv_display_disabled": {
+    "message": "Disabled"
+  },
+  "sfv_display_hidden": {
+    "message": "Hidden"
+  },
   "sfv_field_value": {
     "message": "Field Value"
   },
@@ -6034,11 +6147,26 @@
   "sfv_formula": {
     "message": "Formula"
   },
+  "sfv_source_list": {
+    "message": "Source list",
+    "description": "Label: the list or record the field takes its values from"
+  },
   "sfv_go_to_source_list": {
     "message": "Go to Source List"
   },
   "sfv_help_label": {
     "message": "Field help"
+  },
+  "sfv_help_show": {
+    "message": "Show help",
+    "description": "Field help button label when the help text is collapsed"
+  },
+  "sfv_help_hide": {
+    "message": "Hide help",
+    "description": "Field help button label when the help text is visible"
+  },
+  "sfv_help_topic": {
+    "message": "Open this page’s help topic"
   },
   "sfv_help_open_tooltip": {
     "message": "Open NetSuite's help for this field"
@@ -6051,6 +6179,52 @@
   },
   "sfv_list": {
     "message": "List"
+  },
+  "sfv_list_search": {
+    "message": "Search the list and press Enter…"
+  },
+  "sfv_list_loading": {
+    "message": "Looking up options…"
+  },
+  "sfv_list_count": {
+    "message": "{n} options"
+  },
+  "sfv_open_record": {
+    "message": "Open the record in a new tab",
+    "description": "Tooltip on the option row link that opens the target record"
+  },
+  "sfv_list_more": {
+    "message": "First {n} · type to narrow down"
+  },
+  "sfv_list_none": {
+    "message": "No matches"
+  },
+  "sfv_list_empty": {
+    "message": "This list has no options"
+  },
+  "sfv_list_error": {
+    "message": "Could not fetch the options"
+  },
+  "sfv_view_confirm_title": {
+    "message": "Change the value on the record"
+  },
+  "sfv_view_confirm_body": {
+    "message": "You are in View mode, so this writes to the record right now, without going through Save and with no way to cancel it.\n\nField: {campo}\nNew value: {valor}"
+  },
+  "sfv_view_confirm_ok": {
+    "message": "Change"
+  },
+  "sfv_view_confirm_cancel": {
+    "message": "Cancel"
+  },
+  "sfv_view_saving": {
+    "message": "Saving to the record… the page stays still until it finishes."
+  },
+  "sfv_view_done": {
+    "message": "Value changed on the record"
+  },
+  "sfv_view_failed": {
+    "message": "Could not change the value:"
   },
   "sfv_loading": {
     "message": "Loading..."
@@ -8999,16 +9173,13 @@
     "message": "Autocompletes variables and functions while editing PDF templates."
   },
   "enableAdvancedPdfPreviewLabel": {
-    "message": "Side preview on PDF/HTML Templates"
+    "message": "Preview on PDF/HTML Templates"
   },
   "enableAdvancedPdfPreviewDesc": {
-    "message": "Side panel with live preview while editing the PDF template."
-  },
-  "apdfPvSide": {
-    "message": "Side Preview"
+    "message": "A collapsible, resizable bottom panel with a live preview while you edit the template."
   },
   "apdfPvLive": {
-    "message": "Live Preview"
+    "message": "Live"
   },
   "apdfPvPreview": {
     "message": "Preview"
@@ -11452,25 +11623,22 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "* Advanced Editor: open any File Cabinet file in a full editor."
+    "message": "The field info panel was rebuilt: three tabs, NetSuite's help, and the options of each list."
   },
   "un_hl_2": {
-    "message": "* SuiteScript Console: write SuiteScript and run it right away, without leaving the account."
+    "message": "*A saved search’s filters are applied all at once, with no reloads."
   },
   "un_hl_3": {
-    "message": "* Customization finder: find scripts, workflows, fields or saved searches by name."
+    "message": "The PDF/HTML template preview is now a collapsible, live panel."
   },
   "un_hl_4": {
-    "message": "The AI Assistant knows your account’s tables, answers in far fewer steps and keeps your conversations."
+    "message": "The Record Options Menu gathers what hangs from it, and you choose what it offers."
   },
   "un_hl_5": {
-    "message": "The SuiteQL Runner suggests how to continue your query as you type: Tab writes it."
+    "message": "In Go to record just type \"transaction\" and the id: NetSuite works out the type."
   },
   "un_hl_6": {
-    "message": "New colours, editing shortcuts and multiple cursors in every code editor."
-  },
-  "un_hl_7": {
-    "message": "Searches find your text with or without accents, and highlight it the same everywhere."
+    "message": "Also: results open in another tab with a right click, ten new tones in Colour Themes, and several bugs were fixed. More details in the changelog."
   },
   "un_thanks": {
     "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
@@ -11779,6 +11947,205 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Fixed the labels in the field info panel always coming out in Spanish."
+  },
+  "cl_ver_7_1_1": {
+    "message": "v7.1.1"
+  },
+  "cl_date_7_1_1": {
+    "message": "2026-09-04"
+  },
+  "cl_7_1_1_gtr_generic_title": {
+    "message": "Go to record understands \"transaction\" and the id"
+  },
+  "cl_7_1_1_gtr_generic_desc": {
+    "message": "Added the \"transaction\" type in Go to record, which reaches the transaction by its id without having to know which type it is."
+  },
+  "cl_7_1_1_links_title": {
+    "message": "Results open in another tab too"
+  },
+  "cl_7_1_1_links_desc": {
+    "message": "Changed the results in Go to record and the Customization Finder into links, so they can now be opened in another tab or window."
+  },
+  "cl_7_1_1_sfb_pages_title": {
+    "message": "The apply-filters button reaches the preview"
+  },
+  "cl_7_1_1_sfb_pages_desc": {
+    "message": "Fixed the button that applies a search's filters not showing up when previewing it, only when running it."
+  },
+  "cl_ver_7_1_0": {
+    "message": "v7.1.0"
+  },
+  "cl_date_7_1_0": {
+    "message": "2026-09-04"
+  },
+  "cl_7_1_0_ftabs_bg_title": {
+    "message": "The sticky tab bar is no longer see-through"
+  },
+  "cl_7_1_0_ftabs_bg_desc": {
+    "message": "Fixed subtab navigation showing through the sticky tab bar while scrolling."
+  },
+  "copyIdsChildrenTitle": {
+    "message": "What else it adds"
+  },
+  "cl_7_1_0_copyids_children_title": {
+    "message": "The sublist button shows what it depends on"
+  },
+  "cl_7_1_0_copyids_children_desc": {
+    "message": "Changed Open Custom Record from Sublist so it is an option of Copy Internal IDs, which it depends on to show up."
+  },
+  "cl_7_1_0_editortheme_auto_title": {
+    "message": "The editor theme follows the extension theme"
+  },
+  "cl_7_1_0_editortheme_auto_desc": {
+    "message": "Added an Auto theme, now the default, that follows the light or dark mode of the extension, and removed the opposite-variant checkbox."
+  },
+  "cl_7_1_0_cfind_cat_title": {
+    "message": "The Customization Finder changes tab"
+  },
+  "cl_7_1_0_cfind_cat_desc": {
+    "message": "Moved the Customization Finder from Featured to Productivity in the popup."
+  },
+  "cl_7_1_0_adved_claves_title": {
+    "message": "The editor knows your objects' keys"
+  },
+  "cl_7_1_0_adved_claves_desc": {
+    "message": "Added offering an object own keys when typing a dot after it, including those of nested objects."
+  },
+  "cl_7_1_0_adved_comentarios_title": {
+    "message": "The editor leaves comments alone"
+  },
+  "cl_7_1_0_adved_comentarios_desc": {
+    "message": "Fixed autocomplete, signature help, inline hints and go-to-definition showing up inside comments."
+  },
+  "cl_7_1_0_adved_pistas_title": {
+    "message": "An unclosed bracket no longer spills over"
+  },
+  "cl_7_1_0_adved_pistas_desc": {
+    "message": "Fixed an unclosed bracket leaving parameter names and signature help over lines unrelated to that call."
+  },
+  "cl_7_1_0_adved_prop_title": {
+    "message": "The editor recognises the event record"
+  },
+  "cl_7_1_0_adved_prop_desc": {
+    "message": "Added working out the type of a variable that takes a property, such as a User Event record, to offer its autocomplete."
+  },
+  "cl_7_1_0_adved_retorno_title": {
+    "message": "The editor completes what the API returns"
+  },
+  "cl_7_1_0_adved_retorno_desc": {
+    "message": "Fixed a variable holding the string or number an API call returns not offering its methods when typing a dot."
+  },
+  "cl_7_1_0_ct_presets_title": {
+    "message": "More theme colours to pick from"
+  },
+  "cl_7_1_0_ct_presets_desc": {
+    "message": "Added Colour Theme presets: black, grays and fuller variants of every hue."
+  },
+  "cl_7_1_0_ct_claro_title": {
+    "message": "Light themes are readable"
+  },
+  "cl_7_1_0_ct_claro_desc": {
+    "message": "Fixed menus and tabs keeping their white text and icons when a light theme colour was picked, which made them unreadable."
+  },
+  "cl_7_1_0_sfb_title": {
+    "message": "A saved search’s filters, all at once"
+  },
+  "cl_7_1_0_sfb_desc": {
+    "message": "Added saved search filters no longer reloading the page on every change: set them all and one button applies them at once."
+  },
+  "cl_7_1_0_pdfprev_title": {
+    "message": "The template preview, as a collapsible panel"
+  },
+  "cl_7_1_0_pdfprev_desc": {
+    "message": "Changed the PDF/HTML template preview: it is now a collapsible, resizable bottom panel, like the one on searches."
+  },
+  "cl_7_1_0_gear_title": {
+    "message": "Each module's settings, from its window"
+  },
+  "cl_7_1_0_gear_desc": {
+    "message": "Added a gear to the header of the large windows that opens that module's settings in the extension."
+  },
+  "cl_7_1_0_adved_perf_title": {
+    "message": "The Advanced Editor no longer stalls while typing"
+  },
+  "cl_7_1_0_adved_perf_desc": {
+    "message": "Fixed the Advanced Editor slowing down while typing, scrolling or switching tabs in long files."
+  },
+  "cl_7_1_0_sfv_slow_title": {
+    "message": "Help on custom fields no longer keeps you waiting"
+  },
+  "cl_7_1_0_sfv_slow_desc": {
+    "message": "Fixed field help on a custom field taking several seconds to appear in its panel."
+  },
+  "cl_7_1_0_sfv_notopic_title": {
+    "message": "The panel shows the same as NetSuite help"
+  },
+  "cl_7_1_0_sfv_notopic_desc": {
+    "message": "Added showing in the field panel the same text as the NetSuite help window, whatever it says."
+  },
+  "cl_7_1_0_sfv_help_title": {
+    "message": "Field help now reaches the pages it was missing on"
+  },
+  "cl_7_1_0_sfv_help_desc": {
+    "message": "Fixed field help not appearing in its panel on some pages, or an error message showing up in its place."
+  },
+  "cl_7_1_0_sfv_biglist_title": {
+    "message": "Options also show on long lists"
+  },
+  "cl_7_1_0_sfv_biglist_desc": {
+    "message": "Added the options table, with its own search box, on long list fields, where the panel used to show none."
+  },
+  "cl_7_1_0_sfv_view_title": {
+    "message": "The field panel also works in View mode"
+  },
+  "cl_7_1_0_sfv_view_desc": {
+    "message": "Added showing the field value and its options in View mode too, and changing it after a confirmation."
+  },
+  "cl_7_1_0_sfv_groups_title": {
+    "message": "The field panel, in tabs"
+  },
+  "cl_7_1_0_sfv_groups_desc": {
+    "message": "Changed the field panel into three tabs — Value, Definition and History — so its height no longer jumps."
+  },
+  "cl_7_1_0_sfv_sections_title": {
+    "message": "You choose what field information you see"
+  },
+  "cl_7_1_0_sfv_sections_desc": {
+    "message": "Added switching each section of the field panel on and off, and Field History became one of them."
+  },
+  "cl_7_1_0_sfv_source_title": {
+    "message": "The panel names the field source list",
+    "description": "Changelog 7.0.1: title"
+  },
+  "cl_7_1_0_sfv_source_desc": {
+    "message": "Added the list or record a field takes its values from to its definition.",
+    "description": "Changelog 7.0.1: description"
+  },
+  "cl_7_1_0_rom_children_title": {
+    "message": "The Options Menu gathers what hangs from it"
+  },
+  "cl_7_1_0_rom_children_desc": {
+    "message": "Changed the Record Options Menu so Record Trail and the three action buttons are options of its own, warning when one is left with no way in."
+  },
+  "cl_7_1_0_rom_items_title": {
+    "message": "You choose which options the menu offers"
+  },
+  "cl_7_1_0_rom_items_desc": {
+    "message": "Added switching each option of the Record Options Menu on and off separately."
+  },
+  "cl_7_1_0_menus_live_title": {
+    "message": "The menus update without reloading"
+  },
+  "cl_7_1_0_menus_live_desc": {
+    "message": "Fixed switching a module off leaving its option in the Tools and Record Options menus until the page was reloaded."
+  },
+  "cl_7_1_0_cmdp_newtab_title": {
+    "message": "Open Palette entries in a new tab",
+    "description": "Changelog 7.0.1: title"
+  },
+  "cl_7_1_0_cmdp_newtab_desc": {
+    "message": "Added opening the entry picked in the Command Palette in a new tab, with Ctrl+Enter or Ctrl+click.",
+    "description": "Changelog 7.0.1: description"
   },
   "cl_ver_7_0_0": {
     "message": "v7.0.0"
@@ -13108,20 +13475,5 @@
   },
   "devPromptNoAnswer": {
     "message": "no NetSuite tab answered — refresh it and try again"
-  },
-  "un_hl_8": {
-    "message": "Field IDs can stay visible under their label, and copy with one click."
-  },
-  "un_hl_9": {
-    "message": "Set or clear the summary type on every column of a saved search at once."
-  },
-  "un_hl_10": {
-    "message": "A different colour per environment or per account, to see at a glance where you are."
-  },
-  "un_hl_11": {
-    "message": "Dragging files into the File Cabinet warns you before replacing one, and shows what changed."
-  },
-  "un_hl_12": {
-    "message": "Fixed details in the AI Assistant, the dashboard auto-refresh, the Runner and the File Cabinet, and the browser's alerts are now the extension's own windows. More in the changelog."
   }
 }

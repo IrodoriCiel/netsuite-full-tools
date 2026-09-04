@@ -31,6 +31,7 @@
         hintNav: i18nMsg('cmdp_hint_nav', '↑↓ Navigate'),
         hintRun: i18nMsg('cmdp_hint_run', '↵ Run'),
         hintClose: i18nMsg('cmdp_hint_close', 'Esc Close'),
+        hintNewTab: i18nMsg('cmdp_hint_newtab', 'New tab'),
         catNav: i18nMsg('cmdp_cat_navigation', 'Navigation'),
         catCustom: i18nMsg('cmdp_cat_customization', 'Customization'),
         catPage: i18nMsg('cmdp_cat_page', 'Current Page'),
@@ -157,6 +158,7 @@
             category: T.catNav,
             iconKey: 'nav',
             keywords: keywords || '',
+            destino: path,
             run: () => { window.location.href = path; }
         });
 
@@ -166,6 +168,7 @@
             category: T.catCustom,
             iconKey: 'custom',
             keywords: keywords || '',
+            destino: path,
             run: () => { window.location.href = path; }
         });
 
@@ -308,6 +311,11 @@
                 category: T.catPage,
                 iconKey: 'page',
                 keywords: 'edit modify',
+                destino: () => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('e', 'T');
+                    return url.toString();
+                },
                 run: () => {
                     const url = new URL(window.location.href);
                     url.searchParams.set('e', 'T');
@@ -321,6 +329,11 @@
                 category: T.catPage,
                 iconKey: 'page',
                 keywords: 'view readonly',
+                destino: () => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('e');
+                    return url.toString();
+                },
                 run: () => {
                     const url = new URL(window.location.href);
                     url.searchParams.delete('e');
@@ -506,6 +519,7 @@
                 category: i18nMsg('cmdp_cat_user', 'Custom'),
                 iconKey: 'nav',
                 keywords: (u.keywords || '') + ' custom user',
+                destino: u.path,
                 run: () => { window.location.href = u.path; }
             }));
     }
@@ -573,6 +587,7 @@
                 <div class="nsft-cmdp-footer">
                     <span class="nsft-cmdp-hint"><kbd>↑</kbd><kbd>↓</kbd> ${escapeHtml(T.hintNav)}</span>
                     <span class="nsft-cmdp-hint"><kbd>↵</kbd> ${escapeHtml(T.hintRun)}</span>
+                    <span class="nsft-cmdp-hint"><kbd>Ctrl</kbd><kbd>↵</kbd> ${escapeHtml(T.hintNewTab)}</span>
                     <span class="nsft-cmdp-hint"><kbd>Esc</kbd> ${escapeHtml(T.hintClose)}</span>
                 </div>
             </div>
@@ -625,7 +640,9 @@
             moveSelection(-1);
         } else if (e.key === 'Enter') {
             e.preventDefault();
-            if (filteredActions[selectedIndex]) executeAction(filteredActions[selectedIndex]);
+            if (filteredActions[selectedIndex]) {
+                executeAction(filteredActions[selectedIndex], undefined, e.ctrlKey || e.metaKey);
+            }
         }
     }
 
@@ -929,7 +946,16 @@
             const item = e.target.closest('.nsft-cmdp-item');
             if (!item) return;
             const idx = parseInt(item.dataset.idx, 10);
-            if (filteredActions[idx]) executeAction(filteredActions[idx]);
+            if (filteredActions[idx]) executeAction(filteredActions[idx], undefined, e.ctrlKey || e.metaKey);
+        });
+
+        listEl.addEventListener('auxclick', (e) => {
+            if (e.button !== 1) return;
+            const item = e.target.closest('.nsft-cmdp-item');
+            if (!item) return;
+            e.preventDefault();
+            const idx = parseInt(item.dataset.idx, 10);
+            if (filteredActions[idx]) executeAction(filteredActions[idx], undefined, true);
         });
         listEl.addEventListener('mouseover', (e) => {
             const item = e.target.closest('.nsft-cmdp-item');
@@ -1011,7 +1037,26 @@
         return qi === query.length ? score : 0;
     }
 
-    function executeAction(action, prefilledValue) {
+    function destinoDeAccion(action) {
+        if (!action || !action.destino) return '';
+        try {
+            return typeof action.destino === 'function'
+                ? String(action.destino() || '')
+                : String(action.destino);
+        } catch (e) { return ''; }
+    }
+
+    function executeAction(action, prefilledValue, enOtraPestana) {
+        if (enOtraPestana) {
+            const url = destinoDeAccion(action);
+            if (url) {
+                if (!String(action.id).startsWith('virtual:')) pushRecent(action.id);
+                closePalette();
+                window.open(url, '_blank', 'noopener');
+                return;
+            }
+        }
+
         const isVirtual = String(action.id).startsWith('virtual:');
 
         if (action.prompt && prefilledValue == null) {

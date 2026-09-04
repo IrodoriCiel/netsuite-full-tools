@@ -97,14 +97,20 @@
     display: none;
 }
 .nsft-gtr-suggest-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
     padding: 8px 10px;
     border-radius: 7px;
     cursor: pointer;
     transition: background 0.08s ease;
+}
+
+.nsft-gtr-suggest-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
 }
 .nsft-gtr-suggest-name {
     font-size: 13.5px;

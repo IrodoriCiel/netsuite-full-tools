@@ -19,6 +19,7 @@
     function sinPantallaCompleta() {
         cierraVelo();
         sueltaTema();
+        if (_sueltaMudo) { try { _sueltaMudo(); } catch (e) { } _sueltaMudo = null; }
         document.documentElement.classList.remove('nsft-adv-full');
         document.documentElement.classList.remove('nsft-adv-listo');
         if (_marcaEditor) {
@@ -101,6 +102,7 @@
     let _handle = null;
     let _cm = null;
     let _caja = null;
+    let _sueltaMudo = null;
     let _prefs = { advancedEditorWrap: false, advancedEditorTree: true, advancedEditorMinimap: false };
     let _genLimpia = 0;
     let _saliendoAGuardar = false;
@@ -108,6 +110,7 @@
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
         advancedEditorWrap: false,
+        advancedEditorEngine: 'cm5',
         advancedEditorTree: true,
         advancedEditorMinimap: false,
         advancedEditorTheme: 'atom-one-light',
@@ -286,15 +289,15 @@
         _mapaClave = '';
         programaMapa();
         const est = _caja.style;
-        pintaJsdoc(_caja.querySelector('.CodeMirror'), est);
+        pintaJsdoc(_caja.querySelector('.CodeMirror, .cm-editor'), est);
         MARCO_OSCURO.concat(MARCO_CLARO).concat([MARCO_GUIA]).forEach((v) => est.removeProperty(v));
 
-        const editor = _caja.querySelector('.CodeMirror');
+        const editor = _caja.querySelector('.CodeMirror, .cm-editor');
         const fondo = rgbDe(editor, 'backgroundColor');
         if (!fondo) return;
 
         if (esTemaOscuro(nombre)) {
-            const canaleta = rgbDe(_caja.querySelector('.CodeMirror-gutters'), 'backgroundColor');
+            const canaleta = rgbDe(_caja.querySelector('.CodeMirror-gutters, .cm-gutters'), 'backgroundColor');
             const propio = canaleta && canaleta.join() !== fondo.join();
             est.setProperty('--nsft-dk-surface', mezcla(fondo, 0, 0));
             est.setProperty('--nsft-dk-panel', propio ? mezcla(canaleta, 0, 0) : oscurece(fondo, 0.18));
@@ -422,6 +425,8 @@
         let lintLinea = null;
 
         _handle = window.NSFT_CodeEditor.attach(ta, {
+            engine: _prefs.advancedEditorEngine === 'cm6' ? 'cm6' : 'cm5',
+            themeDark: oscuro,
             mode: modoDe(nombre),
             theme: tema,
             folding: true,
@@ -483,7 +488,19 @@
 
         const cm = _handle.cm;
         _cm = cm;
+        if (cm.nsftEngine === 'cm6') {
+            const chapa = caja.querySelector('#nsft-adv-engine');
+            if (chapa) chapa.hidden = false;
+            cm.on('nsftTemaMedido', () => {
+                try { pintaMarco(temaGuardado(_prefs)); } catch (e) { }
+            });
+        }
         cm.setSize('100%', '100%');
+
+        _sueltaMudo = (window.NSFT_Observer && window.NSFT_Observer.mute)
+            ? window.NSFT_Observer.mute(caja)
+            : null;
+
         cm.on('cursorActivity', pintarEstado);
         cm.on('cursorActivity', programaMigas);
 
@@ -1059,6 +1076,7 @@
                 + '<span id="nsft-adv-lang"></span>'
                 + '<span class="nsft-adv-api" id="nsft-adv-api" hidden></span>'
                 + '<span class="nsft-adv-dirty" id="nsft-adv-dirty"></span>'
+                + '<span class="nsft-adv-status-num" id="nsft-adv-engine" hidden>CM6</span>'
             + '</div>';
     }
 
@@ -1156,18 +1174,20 @@
 
         const elCur = _caja.querySelector('#nsft-adv-cursor');
         if (elCur) {
-            elCur.textContent = sel
+            const txt = sel
                 ? fmt('adv_cursor_sel', 'Ln $1, Col $2 ($3 sel.)', [cur.line + 1, cur.ch + 1, sel.length])
                 : fmt('adv_cursor', 'Ln $1, Col $2', [cur.line + 1, cur.ch + 1]);
+            if (elCur.textContent !== txt) elCur.textContent = txt;
         }
 
         const elDirty = _caja.querySelector('#nsft-adv-dirty');
         if (elDirty) {
             const limpio = cm.isClean(_genLimpia);
             elDirty.classList.toggle('is-clean', limpio);
-            elDirty.textContent = limpio
+            const txt = limpio
                 ? i18n('adv_saved', 'Saved')
                 : i18n('adv_dirty', 'Unsaved changes');
+            if (elDirty.textContent !== txt) elDirty.textContent = txt;
         }
     }
 
@@ -2588,6 +2608,17 @@
         abreArchivoYa(id, nombre, false);
     }
 
+    let _ultimaApertura = null;
+
+    function apuntaApertura(bytes, red, parseo, montaje) {
+        _ultimaApertura = {
+            'KB de la página': Math.round(bytes / 1024),
+            'red': Math.round(red) + ' ms',
+            'parseo del HTML': Math.round(parseo) + ' ms',
+            'montaje del editor': Math.round(montaje) + ' ms'
+        };
+    }
+
     function abreArchivoYa(id, nombre, recarga) {
         if (_cambiando) return;
         _cambiando = true;
@@ -2604,15 +2635,21 @@
             abrePorMarco(id, nombre, recarga);
         };
 
+        const tPide = performance.now();
         fetch(urlEdicion(id), { credentials: 'same-origin', signal: corta ? corta.signal : undefined })
             .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
             .then((html) => {
                 if (cayo) return;
+                const tRed = performance.now() - tPide;
+                const tParse = performance.now();
                 const d = new DOMParser().parseFromString(html, 'text/html');
                 const ta = d.getElementById('mCharData');
+                const msParse = performance.now() - tParse;
                 if (!ta || !String(ta.value == null ? '' : ta.value)) { alMarco(); return; }
                 clearTimeout(reloj);
+                const tMonta = performance.now();
                 adopta(null, id, ta, recarga, d);
+                apuntaApertura(html.length, tRed, msParse, performance.now() - tMonta);
                 _cambiando = false;
             })
             .catch(alMarco);
@@ -2850,6 +2887,12 @@
     function temaMapa() {
         const ahora = Date.now();
         if (_mapaHuella && ahora - _mapaHuellaT < 500) return _mapaHuella;
+        const pal = _cm && _cm.nsftPaleta;
+        if (pal) {
+            _mapaHuella = (pal.fondo || '') + '/' + (pal.keyword || '');
+            _mapaHuellaT = ahora;
+            return _mapaHuella;
+        }
         const editor = _caja && _caja.querySelector('.CodeMirror');
         if (!editor) return '';
         let fondo = '';
@@ -2864,6 +2907,23 @@
         if (_mapaCols && _mapaTema === tema) return _mapaCols;
         const cs = window.getComputedStyle(_caja);
         const v = (n, d) => (cs.getPropertyValue(n) || '').trim() || d;
+
+        const pal = _cm && _cm.nsftPaleta;
+        if (pal) {
+            _mapaTema = tema;
+            const dePal = (c, respaldo) => (c && !/^rgba\([^)]*,\s*0\)$/.test(c)) ? c : respaldo;
+            _mapaCols = {
+                fondo: dePal(pal.fondo, v('--nsft-adv-map-fondo', '#f5f6f8')),
+                kw: dePal(pal.keyword, v('--nsft-adv-map-kw', '#8b5cf6')),
+                num: dePal(pal.number, v('--nsft-adv-map-num', '#d97706')),
+                str: dePal(pal.string, v('--nsft-adv-map-str', '#059669')),
+                tipo: dePal(pal.def, v('--nsft-adv-map-tipo', '#b45309')),
+                txt: dePal(pal.variable || pal.texto, v('--nsft-adv-map-txt', '#64748b')),
+                com: dePal(pal.comment, v('--nsft-adv-map-com', '#a8b0bd'))
+            };
+            return _mapaCols;
+        }
+
         const editor = _caja.querySelector('.CodeMirror');
         const fondo = rgbDe(editor, 'backgroundColor');
         const pluma = (clase, respaldo) => {
@@ -3496,16 +3556,26 @@
 
     let _simPlegado = false;
     let _simTimer = null;
-    let _simUltimo = '';
+    let _simDoc = null;
+    let _simGen = null;
     let _simLista = null;
     let _migTimer = null;
+    let _migHuella = null;
+
+    function simbolosAlDia() {
+        const cm = _cm;
+        if (!cm || !_simLista || _simGen == null) return false;
+        try { return cm.getDoc() === _simDoc && cm.changeGeneration() === _simGen; }
+        catch (e) { return false; }
+    }
 
     function simbolosDelDoc() {
-        const texto = _cm ? _cm.getValue() : '';
-        if (texto !== _simUltimo || !_simLista) {
-            _simUltimo = texto;
-            _simLista = extraeSimbolos(texto);
-        }
+        const cm = _cm;
+        if (!cm) return _simLista || [];
+        if (simbolosAlDia()) return _simLista;
+        _simDoc = cm.getDoc();
+        try { _simGen = cm.changeGeneration(); } catch (e) { _simGen = null; }
+        _simLista = extraeSimbolos(cm.getValue());
         return _simLista;
     }
 
@@ -3656,7 +3726,7 @@
     function programaSimbolos() {
         clearTimeout(_simTimer);
         _simTimer = setTimeout(() => {
-            if (!_cm || _cm.getValue() === _simUltimo) return;
+            if (!_cm || simbolosAlDia()) return;
             if (_simPlegado) simbolosDelDoc();
             else pintaSimbolos();
             pintaMigasSimbolo();
@@ -3748,7 +3818,7 @@
                     distintos ? '(' + Object.keys(vistos).length + ' colores)' : '← EL LIENZO ESTA VACIO');
                 console.log('  colores ...........', Object.keys(vistos).slice(0, 8).join('  '));
             }
-            const cmw = _caja && _caja.querySelector('.nsft-adv-host .CodeMirror');
+            const cmw = _caja && _caja.querySelector('.nsft-adv-host .CodeMirror, .nsft-adv-host .cm-editor');
             if (cmw && mapa) {
                 const a = cmw.getBoundingClientRect();
                 const b = mapa.getBoundingClientRect();
@@ -3922,7 +3992,7 @@
 
     function midePulsacion() {
         const cm = _cm;
-        const host = _caja && _caja.querySelector('.CodeMirror');
+        const host = _caja && _caja.querySelector('.CodeMirror, .cm-editor');
         if (!cm || !host) { console.log('NSFT: no hay editor montado'); return; }
 
         let masLarga = 0;
@@ -3943,6 +4013,17 @@
             'marcas en el texto': cm.getAllMarks ? cm.getAllMarks().length : '?',
             'pestañas abiertas': _tabs.length
         };
+
+        try {
+            const OB = window.NSFT_Observer;
+            const st = OB && OB.getStats ? OB.getStats() : null;
+            if (st) {
+                ficha['suscriptores del observador'] = st.subscribers;
+                ficha['zonas mudas'] = st.mutedRoots;
+                ficha['mutaciones entregadas'] = st.delivered;
+                ficha['mutaciones calladas'] = st.dropped;
+            }
+        } catch (e) { }
 
         const H = cm._handlers || {};
         const enganches = {};
@@ -4032,6 +4113,12 @@
             'font-weight:bold;font-size:13px');
         console.table(ficha);
         console.log('manejadores enganchados:', JSON.stringify(enganches));
+        if (_ultimaApertura) {
+            console.log('%cel último archivo que abriste:', 'font-weight:bold');
+            console.table(_ultimaApertura);
+        } else {
+            console.log('(abre un archivo desde el árbol y repite: así se mide lo que cuesta abrirlo)');
+        }
         console.log('%cTAL CUAL: ' + base.toFixed(1) + ' ms por tecla · '
             + baseRaf.toFixed(0) + ' ms una rafaga de 10', 'font-weight:bold;font-size:13px');
         console.table(filas);
@@ -4143,8 +4230,10 @@
         pintarLenguaje(nombre);
         pintarEstado();
         actualizaBotonesArchivo();
-        _simUltimo = '';
         _simLista = null;
+        _simDoc = null;
+        _simGen = null;
+        _migHuella = null;
         if (_csvAbierto) cierraTabla();
         pintaTabs();
         try { _cm.focus(); } catch (e) { }
@@ -5109,7 +5198,7 @@
 
 
     function pintaRegla() {
-        const host = _caja && _caja.querySelector('.CodeMirror');
+        const host = _caja && _caja.querySelector('.CodeMirror, .cm-editor');
         if (!host || !_cm) return;
         const cols = Number(_prefs.advancedEditorRuler) || 0;
         if (!cols) { host.style.removeProperty('--nsft-regla-x'); return; }
@@ -5181,13 +5270,23 @@
         })));
     }
 
+    function vaciaMigas(cont) {
+        _migHuella = null;
+        if (cont && cont.firstChild) cont.textContent = '';
+    }
+
     function pintaMigasSimbolo() {
         const cont = _caja && _caja.querySelector('#nsft-adv-crumbs');
         if (!cont) return;
-        cont.textContent = '';
-        if (!_cm || !_esJs) return;
+        if (!_cm || !_esJs) { vaciaMigas(cont); return; }
 
         const cadena = cadenaSimbolo(simbolosDelDoc(), _cm.getCursor().line);
+
+        const huella = cadena.map((s) => s.nombre + '@' + s.linea).join('>');
+        if (huella === _migHuella) return;
+
+        vaciaMigas(cont);
+        _migHuella = huella;
         if (!cadena.length) return;
 
         cadena.forEach((s, idx) => {

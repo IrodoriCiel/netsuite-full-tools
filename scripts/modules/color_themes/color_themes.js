@@ -20,6 +20,8 @@
     const COOKIE_KEY = 'nsftThemeCache';
 
     const BODY_CLASS = 'nsft-ct-enabled';
+    const CLARA_CLASS = 'nsft-ct-base-clara';
+    const CLARA_UMBRAL = 55;
     const STYLE_ID = 'nsft-color-theme-vars';
 
     const DEFAULT_HUE = 216;
@@ -113,6 +115,7 @@
 
     function injectStyle(hue, sat, rawLig) {
         const lig = effectiveLig(rawLig);
+        document.documentElement.classList.toggle(CLARA_CLASS, lig >= CLARA_UMBRAL);
         let style = document.getElementById(STYLE_ID);
         if (!style) {
             style = document.createElement('style');
@@ -190,9 +193,10 @@
         const sat = Math.min(hsl.s, DEFAULT_SAT);
 
         const esElDeSiempre = Math.abs(hsl.h - DEFAULT_HUE) <= 8 && Math.abs(hsl.s - DEFAULT_SAT) <= 8;
+        const luzBtn = Math.max(30, Math.min(45, hsl.l + 3));
         const primario = esElDeSiempre ? '' :
-            ' --nsft-ns-primary: hsl(' + hsl.h + ', ' + hsl.s + '%, 42%);'
-            + ' --nsft-ns-primary-hover: hsl(' + hsl.h + ', ' + hsl.s + '%, 35%);';
+            ' --nsft-ns-primary: hsl(' + hsl.h + ', ' + hsl.s + '%, ' + luzBtn + '%);'
+            + ' --nsft-ns-primary-hover: hsl(' + hsl.h + ', ' + hsl.s + '%, ' + (luzBtn - 7) + '%);';
 
         const txt = ':root { --h: ' + hsl.h + '; --s-val: ' + sat + ';' + primario + ' }';
         if (st.textContent !== txt) st.textContent = txt;
@@ -246,6 +250,7 @@
             injectStyle(hue, sat, lig);
         } else {
             document.documentElement.classList.remove(BODY_CLASS);
+            document.documentElement.classList.remove(CLARA_CLASS);
         }
         _applied = next;
         arrancaAcentoNativo();

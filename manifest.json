@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "NetSuite Full Tools",
-    "version": "7.0.0",
+    "version": "7.1.1",
     "description": "__MSG_extDescription__",
     "default_locale": "en",
     "icons": {
@@ -813,6 +813,30 @@
                 "scripts/modules/quick_search_creation/quick_search_creation.css"
             ],
             "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/search/savedsearchresults.nl*",
+                "https://*.app.netsuite.com/app/common/search/adhocsearchresults.nl*"
+            ],
+            "js": [
+                "scripts/modules/search_filters_batch/search_filters_batch_page.js"
+            ],
+            "run_at": "document_start",
+            "world": "MAIN"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/search/savedsearchresults.nl*",
+                "https://*.app.netsuite.com/app/common/search/adhocsearchresults.nl*"
+            ],
+            "js": [
+                "scripts/modules/search_filters_batch/search_filters_batch.js"
+            ],
+            "css": [
+                "scripts/modules/search_filters_batch/search_filters_batch.css"
+            ],
+            "run_at": "document_start"
         },
         {
             "matches": [

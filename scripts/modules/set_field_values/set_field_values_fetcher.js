@@ -26,6 +26,7 @@
     let translations = {};
     let auditEnabled = true;
     let noIconMode = true;
+    let moduleEnabled = true;
 
     function escapeHtml(v) {
         if (v === null || v === undefined) return '';
@@ -45,19 +46,47 @@
         CONTENT: "nsft-sfv-content",
         CLOSE_BTN: "nsft-sfv-close",
         MAX_BTN: "nsft-sfv-maximise",
+        CFG_BTN: "nsft-sfv-settings",
         GLOBAL_STYLES: "nsft-global-styles",
         EDIT_ROW: "nsft-edit-custom-field-row",
         EDIT_BTN: "nsft-edit-custom-field-btn",
         CUSTOM_FIELDS_CONTAINER: "nsft-div-custom-fields",
-        AUDIT_ROW: "nsft-field-audit-row",
-        AUDIT_BTN: "nsft-field-audit-btn",
         AUDIT_LIST: "nsft-field-audit-list",
-        HELP_SLOT: "nsft-sfv-help-slot"
+        HELP_SLOT: "nsft-sfv-help-slot",
+        TABS: "nsft-sfv-tabs",
+        LIST_SLOT: "nsft-sfv-list-slot",
+        LIST_SEARCH: "nsft-sfv-list-search",
+        LIST_BODY: "nsft-sfv-list-body",
+        LIST_FOOT: "nsft-sfv-list-foot",
+        LIST_COUNT: "nsft-sfv-list-count",
+        LIST_BAR: "nsft-sfv-list-bar",
+        LIST_CLEAR: "nsft-sfv-list-clear",
+        LIST_GO: "nsft-sfv-list-go",
+        VALUE_SLOT: "nsft-sfv-value-slot",
+        TEXT_ROW: "nsft-sfv-text-row",
+        TEXT_SLOT: "nsft-sfv-text-slot",
+        TYPE_SLOT: "nsft-sfv-type-slot",
+        SOURCE_ROW: "nsft-sfv-source-row",
+        SOURCE_SLOT: "nsft-sfv-source-slot",
+        DISPLAY_SLOT: "nsft-sfv-display-slot"
     };
 
     let NSFT_THEME = 'light';
 
     let helpCollapsed = false;
+
+    let metaCollapsed = true;
+
+    let activeTab = 'valor';
+
+    let histAutoPedido = null;
+
+    let altoDeValor = 0;
+
+    const ALTO_MINIMO = 540;
+
+    let secciones = {};
+    function ver(clave) { return secciones[clave] !== false; }
 
     let bypassLabelClick = false;
 
@@ -71,6 +100,8 @@
             if (typeof event.data.auditEnabled === 'boolean') auditEnabled = event.data.auditEnabled;
             if (typeof event.data.noIcon === 'boolean') noIconMode = event.data.noIcon;
             if (typeof event.data.helpCollapsed === 'boolean') helpCollapsed = event.data.helpCollapsed;
+            if (typeof event.data.metaCollapsed === 'boolean') metaCollapsed = event.data.metaCollapsed;
+            if (event.data.secciones) secciones = event.data.secciones;
             if (event.data.helpTemplates && typeof event.data.helpTemplates === 'object') {
                 Object.assign(helpTemplates, event.data.helpTemplates);
             }
@@ -79,12 +110,23 @@
         } else if (event.data.type === 'nsft-set-field-values-theme') {
             NSFT_THEME = event.data.theme || 'light';
             applyThemeToOpenModal();
+        } else if (event.data.type === 'nsft-set-field-values-enabled') {
+            applyEnabledChange(event.data.enabled !== false);
         } else if (event.data.type === 'nsft-set-field-values-noicon') {
             applyNoIconChange(event.data.noIcon !== false);
         } else if (event.data.type === 'nsft-set-field-values-helpcollapsed') {
             helpCollapsed = event.data.collapsed === true;
             const box = document.querySelector('.nsft-sfv-help');
             if (box) box.dataset.collapsed = helpCollapsed ? '1' : '0';
+        } else if (event.data.type === 'nsft-set-field-values-sections') {
+            secciones = event.data.secciones || {};
+            if (window.NSFT_SetFieldValues && window.NSFT_SetFieldValues.refreshAfterAuditToggle) {
+                window.NSFT_SetFieldValues.refreshAfterAuditToggle();
+            }
+        } else if (event.data.type === 'nsft-set-field-values-metacollapsed') {
+            metaCollapsed = event.data.collapsed !== false;
+            const meta = document.querySelector('.nsft-sfv-meta');
+            if (meta) meta.dataset.collapsed = metaCollapsed ? '1' : '0';
         } else if (event.data.type === 'nsft-set-field-values-audit') {
             auditEnabled = event.data.auditEnabled !== false;
             if (window.NSFT_SetFieldValues && window.NSFT_SetFieldValues.refreshAfterAuditToggle) {
@@ -124,6 +166,7 @@
     }
 
     function runAll() {
+        if (!moduleEnabled) return;
         document.querySelectorAll('.uir-field-wrapper').forEach(wrapper => {
             if (wrapper.dataset.nsftInfoAdded) return;
 
@@ -404,7 +447,7 @@
         if (label.dataset.nsftLabelClickBound !== '1') {
             label.dataset.nsftLabelClickBound = '1';
             label.addEventListener('click', function (e) {
-                if (!noIconMode || bypassLabelClick) return;
+                if (!moduleEnabled || !noIconMode || bypassLabelClick) return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.NSFT_SetFieldValues.showInfoPopup(fieldName, label, null);
@@ -580,6 +623,22 @@
         } finally {
             bypassLabelClick = false;
         }
+    }
+
+    function applyEnabledChange(newVal) {
+        if (newVal === moduleEnabled) return;
+        moduleEnabled = newVal;
+        if (!moduleEnabled) {
+            const modal = document.getElementById('nsft-sfv-modal');
+            if (modal) modal.remove();
+            document.querySelectorAll('.nsft-info-icon, .nsft-info-icon-line').forEach(el => el.remove());
+            document.querySelectorAll('.uir-field-wrapper[data-nsft-info-added="true"], .uir-label-span[data-nsft-info-added="true"]')
+                .forEach(el => el.removeAttribute('data-nsft-info-added'));
+            document.querySelectorAll('.uir-label-span[data-nsft-label-click-bound="1"]')
+                .forEach(l => { l.style.cursor = ''; });
+            return;
+        }
+        runAll();
     }
 
     function applyNoIconChange(newVal) {
@@ -834,6 +893,9 @@
                             <span id="${NSFT.TITLE}">${translations.sfv_title}</span>
                         </span>
                         <div class="nsft-header-actions">
+                            <span id="${NSFT.CFG_BTN}" class="nsft-header-btn" title="${escapeHtml(translations.sfv_open_settings || "")}" role="button">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;vertical-align:-2px;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            </span>
                             <span id="${NSFT.MAX_BTN}" class="nsft-header-btn" title="${translations.maximizeModal || 'Maximize'}">▢</span>
                             <span id="${NSFT.CLOSE_BTN}" class="nsft-header-btn nsft-btn-close" title="${translations.closeModal || 'Close'}">✕</span>
                         </div>
@@ -845,6 +907,7 @@
             `;
             document.body.insertAdjacentHTML("beforeend", html);
             addModalListeners();
+            try { window.postMessage({ dest: 'extension_sfv', type: 'coach' }, '*'); } catch (e) { }
             watchModalSize(document.getElementById(NSFT.MODAL));
         }
 
@@ -853,6 +916,12 @@
             const header = modal.querySelector(`.${NSFT.HEADER}`);
 
             document.getElementById(NSFT.CLOSE_BTN).onclick = closeHelpWindow;
+            const cfgBtn = document.getElementById(NSFT.CFG_BTN);
+            if (cfgBtn) cfgBtn.onclick = function () {
+                try {
+                    window.postMessage({ dest: 'extension_sfv', type: 'openSettings' }, '*');
+                } catch (e) { }
+            };
 
             document.getElementById(NSFT.MAX_BTN).onclick = () => {
                 modal.dataset.state = "maximised";
@@ -878,25 +947,33 @@
                 modal.style.top = `${rect.top}px`;
             });
 
+            let dragPend = null;
+            let dragRaf = 0;
+
+            const dragApply = () => {
+                dragRaf = 0;
+                if (!dragPend) return;
+                modal.style.left = `${dragPend.x}px`;
+                modal.style.top = `${dragPend.y}px`;
+                if (modal.dataset.state === 'maximised') {
+                    lastMaximizedLeft = `${dragPend.x}px`;
+                    lastMaximizedTop = `${dragPend.y}px`;
+                }
+                dragPend = null;
+            };
+
             window.addEventListener("mousemove", (e) => {
                 if (!mouseIsDown) return;
                 e.preventDefault();
-
-                let newLeft = e.clientX - startX;
-                let newTop = e.clientY - startY;
-
-                modal.style.left = `${newLeft}px`;
-                modal.style.top = `${newTop}px`;
-
-                if (modal.dataset.state === 'maximised') {
-                    lastMaximizedLeft = `${newLeft}px`;
-                    lastMaximizedTop = `${newTop}px`;
-                }
+                dragPend = { x: e.clientX - startX, y: e.clientY - startY };
+                if (!dragRaf) dragRaf = requestAnimationFrame(dragApply);
             });
 
             window.addEventListener("mouseup", () => {
                 if (mouseIsDown) {
                     mouseIsDown = false;
+                    if (dragRaf) { cancelAnimationFrame(dragRaf); dragRaf = 0; }
+                    dragApply();
                     modal.classList.remove("nsft-dragging");
                     if (modal.dataset.state === "minimised") {
                         snapToEdge(modal);
@@ -995,7 +1072,22 @@
 
         function renderFieldData(fieldName, isUpdate = false, sublistId = null, linenum = null) {
             _lastRenderCtx = { fieldName, sublistId, linenum };
-            let optionsJson, linkUrl, html = "";
+            histAutoPedido = null;
+
+            if (!isUpdate) activeTab = 'valor';
+
+            if (!isUpdate) {
+                altoDeValor = 0;
+                const caja = document.querySelector("#" + NSFT.MODAL + " .nsft-sfv-content");
+                if (caja) caja.style.maxHeight = "";
+            }
+            let optionsJson, linkUrl, domOpts = null, html = "";
+            let tabValor = "";
+            let tabDef = "";
+            let tabDefFin = "";
+            let tabDefBoton = "";
+            let tabHist = "";
+            let metaHtml = "";
 
             const api = sublistId ? {
                 getValue: () => (typeof nlapiGetCurrentLineItemValue === 'function')
@@ -1039,8 +1131,9 @@
                 }
             } catch (e) { }
 
-            if (optionsJson) {
-                linkUrl = extractLinkFromSync(fieldName);
+            const listKind = readListKind(fieldName);
+            if (optionsJson || listKind) {
+                linkUrl = extractLinkFromSync(fieldName) || viewLinkUrl(fieldName);
                 if (!linkUrl) {
                     try {
                         const popup = window.document.getElementById(fieldName + '_popup_link');
@@ -1052,6 +1145,9 @@
                             }
                         }
                     } catch (e) { }
+                }
+                if (!linkUrl && listKind === "file") {
+                    linkUrl = "/app/common/media/mediaitem.nl?";
                 }
                 if (!linkUrl) {
                     const fallbackMap = {
@@ -1084,29 +1180,36 @@
             const typeText = isCustomInfo
                 ? (translations.sfv_custom_field || "Custom Field")
                 : (translations.sfv_standard_field || "Standard Field");
-            const typeBg = isCustomInfo ? "#fffbe6" : "var(--nsft-sfv-accent-soft)";
-            const typeBorder = isCustomInfo ? "#ffeebb" : "var(--nsft-sfv-accent-border)";
-            const typeColor = isCustomInfo ? "#d97706" : "var(--nsft-sfv-accent)";
+            const botonAyuda = !ver("setFieldValuesShowHelp") ? '' : `<button type="button" class="nsft-sfv-helpbtn"
+                         aria-expanded="${helpCollapsed ? "false" : "true"}"
+                         title="${escapeHtml(translations.sfv_help_toggle || '')}"
+                         onclick="window.parent.NSFT_SetFieldValues.toggleFieldHelp('${escapeJsString(fieldName)}')">
+                       <span class="nsft-sfv-helpbtn-caret" aria-hidden="true">▾</span>
+                       <span class="nsft-sfv-helpbtn-lbl">${escapeHtml(helpCollapsed ? (translations.sfv_help_show || "") : (translations.sfv_help_hide || ""))}</span>
+                   </button>`;
 
-            const nativeHelpBadge = findHelpAnchor(fieldName)
-                ? `<span class="nsft-badge nsft-sfv-help-badge" role="button"
-                         title="${escapeHtml(translations.sfv_help_open_tooltip || '')}"
-                         aria-label="${escapeHtml(translations.sfv_help_open_tooltip || '')}"
-                         onclick="window.parent.NSFT_SetFieldValues.openNativeHelp('${escapeJsString(fieldName)}')">
-                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
-                   </span>`
+            const botonNativa = findHelpAnchor(fieldName)
+                ? `<button type="button" class="nsft-sfv-nativebtn"
+                           title="${escapeHtml(translations.sfv_help_open_tooltip || '')}"
+                           aria-label="${escapeHtml(translations.sfv_help_open_tooltip || '')}"
+                           onclick="window.parent.NSFT_SetFieldValues.openNativeHelp('${escapeJsString(fieldName)}')">
+                       <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+                   </button>`
                 : '';
 
-            html += `<div id="${NSFT.CUSTOM_FIELDS_CONTAINER}" style="border:1px solid ${typeBorder}; background:${typeBg}; padding:6px 10px; border-radius:4px; margin-bottom:8px; display:flex; flex-direction:column; justify-content:center;">
-                        <div class="nsft-sfv-type-line">
-                            <span class="nsft-sfv-type-text" style="font-weight:bold; color:${typeColor}; font-size:13px;">${typeText}</span>
-                            ${nativeHelpBadge}
+            html += `<div id="${NSFT.CUSTOM_FIELDS_CONTAINER}" class="nsft-sfv-origin">
+                        <div class="nsft-sfv-ribbon">
+                            <span class="nsft-sfv-chip${isCustomInfo ? "" : " is-native"}">${escapeHtml(typeText)}</span>
+                            <span class="nsft-sfv-ribbon-spacer"></span>
+                            ${botonAyuda}
+                            ${botonNativa}
                         </div>
                         <div id="nsft-custom-field-details"></div>
                      </div>`;
 
-            const helpText = readFieldHelpText(fieldName, sublistId);
-            if (helpText) {
+            const helpText = ver("setFieldValuesShowHelp") ? readFieldHelpText(fieldName, sublistId) : "";
+            if (!ver("setFieldValuesShowHelp")) {
+            } else if (helpText) {
                 html += helpBlockHtml(helpText);
             } else if (findHelpAnchor(fieldName)) {
                 html += helpBlockHtml('', { id: NSFT.HELP_SLOT, loading: true });
@@ -1114,52 +1217,25 @@
                 sfvDiag(`[NSFT SFV] ayuda "${fieldName}": no se encontró la ayuda nativa de la etiqueta`);
             }
 
-            html += `<div class="nsft-sfv-row">
+            if (ver("setFieldValuesShowId")) metaHtml = `<div class="nsft-sfv-row">
                         <span class="nsft-sfv-label">${translations.sfv_internal_id}:</span>
-                        <div class="nsft-sfv-value">
-                            <span class="nsft-badge" title="${translations.sfv_copy_tooltip}"
-                                  onclick="
-                                    const el = this;
-                                    const originalHtml = el.innerHTML;
-                                    const textToCopy = el.innerText.trim();
-                                    navigator.clipboard.writeText(textToCopy);
-                                    el.style.backgroundColor='var(--nsft-sfv-accent-flash)';
-                                    el.innerHTML = '${translations.sfv_copied}';
-                                    setTimeout(() => {
-                                        el.style.backgroundColor='';
-                                        el.innerHTML = originalHtml;
-                                    }, 1000);
-                                  ">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px;margin-right:2px;vertical-align:text-top;"><path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" /><path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" /></svg>
-                                ${fieldName}
-                            </span>
-                        </div>
+                        <span class="nsft-sfv-value nsft-sfv-value-id">${escapeHtml(fieldName)}</span>
+                        ${makeCopyBadge(fieldName)}
                      </div>`;
 
-            html += `<div id="${NSFT.EDIT_ROW}" class="nsft-sfv-row" style="display:none;">
-                        <span class="nsft-sfv-label">${translations.sfv_edit_field_label}</span>
-                        <div class="nsft-sfv-value">
-                            <span id="${NSFT.EDIT_BTN}" class="nsft-badge" style="cursor:pointer;" title="${translations.sfv_edit_tooltip}">
+            if (ver("setFieldValuesShowEdit")) tabDefBoton += `<div id="${NSFT.EDIT_ROW}" class="nsft-sfv-editrow" style="display:none;">
+                            <span id="${NSFT.EDIT_BTN}" class="nsft-sfv-ghostbtn" style="cursor:pointer;" title="${translations.sfv_edit_tooltip}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px;margin-right:2px;vertical-align:text-top;"><path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" /><path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" /></svg>
                                 ${translations.sfv_edit_field_btn}
+                                <span aria-hidden="true">↗</span>
                             </span>
-                        </div>
                      </div>`;
 
             if (auditEnabled && !sublistId && typeof nlapiGetRecordId === 'function') {
                 try {
                     const rId = nlapiGetRecordId();
                     if (rId) {
-                        html += `<div id="${NSFT.AUDIT_ROW}" class="nsft-sfv-row" style="margin-top:4px;">
-                                    <span class="nsft-sfv-label">${translations.fav_section_title || 'Historial del campo'}</span>
-                                    <div class="nsft-sfv-value">
-                                        <span id="${NSFT.AUDIT_BTN}" class="nsft-badge" style="cursor:pointer;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px;margin-right:2px;vertical-align:text-top;"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .2.08.39.22.53l3 3a.75.75 0 0 0 1.06-1.06l-2.78-2.78V5Z" clip-rule="evenodd"/></svg>
-                                            ${translations.fav_load_btn || 'Ver historial'}
-                                        </span>
-                                    </div>
-                                 </div>
-                                 <div id="${NSFT.AUDIT_LIST}" class="nsft-fav-list" style="display:none;"></div>`;
+                        tabHist += `<div id="${NSFT.AUDIT_LIST}" class="nsft-fav-list"></div>`;
                     }
                 } catch (_) { }
             }
@@ -1172,7 +1248,9 @@
 
             const isEditMode = (hasE || !hasId);
 
-            if (isEditMode && fldObj) {
+            const vc = (!isEditMode && !sublistId) ? viewCtx(fieldName) : null;
+
+            if ((isEditMode && fldObj) || vc) {
                 const TRUNCATE_AT = 280;
                 let valDisplay;
                 if (!fieldValue) {
@@ -1190,49 +1268,63 @@
                 } else {
                     valDisplay = escapeHtml(fieldValue);
                 }
-                const makeCopyBadge = (raw) => raw
-                    ? `<span class="nsft-badge" title="${translations.sfv_copy_tooltip}" data-nsft-copy-value="${escapeHtml(raw)}" style="cursor:pointer; margin-left:6px;"
-                            onclick="
-                                const el = this;
-                                const originalHtml = el.innerHTML;
-                                navigator.clipboard.writeText(el.getAttribute('data-nsft-copy-value') || '');
-                                el.style.backgroundColor='var(--nsft-sfv-accent-flash)';
-                                el.innerHTML = '${translations.sfv_copied}';
-                                setTimeout(() => {
-                                    el.style.backgroundColor='';
-                                    el.innerHTML = originalHtml;
-                                }, 1000);
-                              "><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px;vertical-align:text-top;"><path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" /><path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" /></svg></span>`
-                    : '';
                 const copyValueBadge = makeCopyBadge(fieldValue);
                 const valScrollCls = (fieldValue && fieldValue.length > TRUNCATE_AT) ? ' nsft-sfv-value-scroll' : '';
-                html += `<div class="nsft-sfv-row">
+                const abreFichaValor = ver("setFieldValuesShowValue") || ver("setFieldValuesShowText");
+                if (abreFichaValor) tabValor += `<div class="nsft-sfv-cardwrap"><div class="nsft-sfv-card">`;
+                const textScrollCls = (fieldText && fieldText.length > TRUNCATE_AT) ? ' nsft-sfv-value-scroll' : '';
+                if (ver("setFieldValuesShowText")) tabValor += `<div id="${NSFT.TEXT_ROW}" class="nsft-sfv-row"${fieldText ? '' : ' hidden'}>
+                        <span class="nsft-sfv-label">${translations.sfv_field_text}:</span>
+                        <span id="${NSFT.TEXT_SLOT}" class="nsft-sfv-value nsft-sfv-value-long${textScrollCls}">${fieldText ? escapeHtml(fieldText) : ''}</span>
+                        ${fieldText ? makeCopyBadge(fieldText) : ''}
+                     </div>`;
+                if (ver("setFieldValuesShowValue")) tabValor += `<div class="nsft-sfv-row">
                         <span class="nsft-sfv-label">${translations.sfv_field_value}:</span>
-                        <span class="nsft-sfv-value nsft-sfv-value-long${valScrollCls}"><b>${valDisplay}</b>${copyValueBadge}</span>
+                        <span id="${NSFT.VALUE_SLOT}" class="nsft-sfv-value nsft-sfv-value-long${valScrollCls}">${valDisplay}</span>
+                        ${copyValueBadge}
                      </div>`;
 
-                if (fieldText) {
-                    const textScrollCls = (fieldText.length > TRUNCATE_AT) ? ' nsft-sfv-value-scroll' : '';
-                    html += `<div class="nsft-sfv-row">
-                            <span class="nsft-sfv-label">${translations.sfv_field_text}:</span>
-                            <span class="nsft-sfv-value nsft-sfv-value-long${textScrollCls}">${escapeHtml(fieldText)}${makeCopyBadge(fieldText)}</span>
+                if (abreFichaValor) tabValor += `</div></div>`;
+
+                const tipoCampo = ver("setFieldValuesShowType") ? nombreDelTipo(readFieldType(fieldName)) : "";
+                if (tipoCampo) {
+                    metaHtml += `<div class="nsft-sfv-row">
+                            <span class="nsft-sfv-label">${translations.sfv_field_type}:</span>
+                            <span id="${NSFT.TYPE_SLOT}" class="nsft-sfv-value">${escapeHtml(tipoCampo)}</span>
+                         </div>`;
+                }
+                if (ver("setFieldValuesShowType") && readListKind(fieldName)) {
+                    metaHtml += `<div id="${NSFT.SOURCE_ROW}" class="nsft-sfv-row" style="display:none;">
+                            <span class="nsft-sfv-label">${translations.sfv_source_list}:</span>
+                            <span id="${NSFT.SOURCE_SLOT}" class="nsft-sfv-value"></span>
+                            ${listOpenIconHtml(linkUrl)}
+                         </div>`;
+                }
+                const visual = ver("setFieldValuesShowType") ? readDisplayType(fieldName) : "";
+                if (visual) {
+                    const rotulo = translations["sfv_display_" + visual] || visual;
+                    metaHtml += `<div class="nsft-sfv-row">
+                            <span class="nsft-sfv-label">${translations.sfv_display_type}:</span>
+                            <span id="${NSFT.DISPLAY_SLOT}" class="nsft-sfv-value">${escapeHtml(rotulo)}</span>
                          </div>`;
                 }
 
                 if (sublistId) {
-                    html += getLineItemAttributesHtml(fieldName, sublistId, linenum);
+                    if (ver("setFieldValuesShowFlags")) tabDefFin += getLineItemAttributesHtml(fieldName, sublistId, linenum);
                 } else {
-                    html += getFieldAttributesHtml(fieldName);
+                    if (ver("setFieldValuesShowFlags")) tabDefFin += getFieldAttributesHtml(fieldName);
                 }
 
 
 
                 const sidArg = sublistId ? `'${escapeJsString(sublistId)}'` : 'null';
                 const lineArg = (linenum != null) ? String(linenum) : 'null';
-                html += `<div class="nsft-sfv-row" style="margin-top:5px; border-top:1px dashed #eee; padding-top:5px;">
-                        <span class="nsft-sfv-label">${translations.sfv_enter_new_value}:</span>
+                if (ver("setFieldValuesShowSetter")) tabValor += `<div class="nsft-sfv-setter">
+                        <label class="nsft-sfv-setter-label" for="nsft-txt-new-value-${escapeHtml(fieldName)}">${translations.sfv_enter_new_value}:</label>
                         <div class="nsft-sfv-input-group" style="margin-top:0;">
-                            <input type="text" id="nsft-txt-new-value-${escapeHtml(fieldName)}" class="nsft-sfv-input" placeholder="${translations.sfv_enter_new_value}...">
+                            <div class="nsft-sfv-bar">
+                                <input type="text" id="nsft-txt-new-value-${escapeHtml(fieldName)}" class="nsft-sfv-field nsft-sfv-input" placeholder="${translations.sfv_enter_new_value}..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            </div>
                             <button class="nsft-sfv-btn" onclick="javascript:window.parent.NSFT_SetFieldValues.setNewValue('${escapeJsString(fieldName)}', window.document.getElementById('nsft-txt-new-value-${escapeJsString(fieldName)}').value, ${sidArg}, ${lineArg});">
                                 ${translations.sfv_set}
                             </button>
@@ -1260,91 +1352,43 @@
                     }
 
                     if (opts.length > 0) {
-                        let listLinkHtml = "";
-                        if (linkUrl) {
-                            const urlParts = linkUrl.split('?');
-                            let listBase = urlParts[0].replace(/\.nl$/, "list.nl");
-                            const NATIVE_TYPELIST_RE = /(department|class|location|subsidiary)typelist\.nl$/;
-                            const isNativeTypelist = NATIVE_TYPELIST_RE.test(listBase);
-                            if (isNativeTypelist) {
-                                listBase = listBase.replace(NATIVE_TYPELIST_RE, '$1list.nl');
-                            }
-
-                            let listResolvedUrl;
-                            if (isNativeTypelist) {
-                                listResolvedUrl = listBase;
-                            } else {
-                                listResolvedUrl = listBase + "?";
-                                if (urlParts.length > 1) {
-                                    const cleanedParams = urlParts[1].split('&').filter(p => !p.startsWith('id=')).join('&');
-                                    if (cleanedParams) {
-                                        listResolvedUrl += cleanedParams;
-                                    }
-                                }
-                            }
-
-                            listLinkHtml = `<a href="${listResolvedUrl}" target="_blank" title="Abrir Lista" style="float:right; color:var(--nsft-sfv-accent); text-decoration:none; font-weight:normal; font-size:12px; display:inline-flex; align-items:center;">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px; margin-right:4px;">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                </svg>
-                                Abrir Lista
-                            </a>`;
-                        }
-
-                        html += `<div style="margin-top:5px; border-top:1px solid #eee; padding-top:4px; margin-bottom:4px; font-weight:600; color:#666; display:flex; justify-content:space-between; align-items:center;">
-                                    <span>${translations.sfv_list}:</span>
-                                    ${listLinkHtml}
-                                 </div>
-                             <div style="max-height: 200px; overflow-y: auto;">
-                                <table class="nsft-sfv-table">
-                                    <thead>
-                                        <tr>
-                                            <th>${translations.sfv_internal_id}</th>
-                                            <th>${translations.sfv_text}</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>`;
-
-                        for (let i = 0; i < opts.length; i++) {
-                            const isSelected = (opts[i].value == fieldValue);
-                            const rowStyle = isSelected ? 'background-color: var(--nsft-sfv-accent-selected); font-weight:bold;' : '';
-
-                            if (opts[i].value) {
-                                let recordLinkHtml = "";
-                                if (linkUrl) {
-                                    const sep = linkUrl.includes('?') ? '&' : '?';
-                                    let hrefVal = `${linkUrl}${sep}id=${opts[i].value}`;
-
-                                    if (linkUrl.includes('id=')) {
-                                        hrefVal = linkUrl.replace(/id=\d*/, `id=${opts[i].value}`);
-                                    }
-
-                                    recordLinkHtml = `<a href="${hrefVal}" target="_blank" title="Abrir Registro" style="color:#666; margin-right:6px; display:inline-block; vertical-align:middle;">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:14px;height:14px;">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                        </svg>
-                                    </a>`;
-                                }
-
-                                html += `<tr style="${rowStyle}">
-                                        <td>${opts[i].value}</td>
-                                        <td>${opts[i].text}</td>
-                                        <td style="text-align:right; white-space:nowrap;">
-                                            ${recordLinkHtml}
-                                            <a href="javascript:void(0)" style="color:var(--nsft-sfv-accent); text-decoration:none; vertical-align:middle;"
-                                               onclick="javascript:window.parent.NSFT_SetFieldValues.setNewValue('${escapeJsString(fieldName)}', '${escapeJsString(opts[i].value)}', ${sidArg}, ${lineArg})">
-                                               ${translations.sfv_set}
-                                            </a>
-                                        </td>
-                                     </tr>`;
-                            }
-                        }
-                        html += `</tbody></table></div>`;
+                        domOpts = opts;
+                        if (ver("setFieldValuesShowOptions")) tabValor += listSlotHtml(linkUrl);
+                        else domOpts = null;
                     }
+                } else if (listKind && resolveListTarget(linkUrl)) {
+                    if (ver("setFieldValuesShowOptions")) tabValor += listSlotHtml(linkUrl);
                 }
             } else if (isEditMode && !fldObj) {
 
+            }
+
+            if (metaHtml) tabDef += `<div class="nsft-sfv-card">${metaHtml}</div>`;
+            tabDef += tabDefFin + tabDefBoton;
+
+            const panes = [
+                { id: "valor", label: translations.sfv_tab_value, body: tabValor },
+                { id: "def", label: translations.sfv_tab_definition, body: tabDef },
+                { id: "hist", label: translations.sfv_tab_history, body: tabHist }
+            ].filter(function (p) { return p.body && p.body.trim(); });
+
+            if (panes.length > 1) {
+                const activa = panes.some(function (p) { return p.id === activeTab; })
+                    ? activeTab : panes[0].id;
+                html += `<div id="${NSFT.TABS}" class="nsft-sfv-tabs" role="tablist">` +
+                    panes.map(function (p) {
+                        return `<button type="button" role="tab" class="nsft-sfv-tab"
+                                        aria-selected="${p.id === activa}"
+                                        data-tab="${p.id}"
+                                        onclick="window.parent.NSFT_SetFieldValues.showTab('${p.id}')">` +
+                               escapeHtml(p.label || p.id) + `</button>`;
+                    }).join("") + `</div>`;
+                html += panes.map(function (p) {
+                    return `<div class="nsft-sfv-pane" data-tab="${p.id}"
+                                 ${p.id === activa ? "" : "hidden"}>${p.body}</div>`;
+                }).join("");
+            } else if (panes.length === 1) {
+                html += panes[0].body;
             }
 
             html += `</div>`;
@@ -1359,12 +1403,47 @@
                     console.warn(e);
                 }
 
-                wireFieldAuditButton(fieldName);
+                if (activeTab === "hist") pedirHistorialSiHaceFalta();
+                else setTimeout(pedirHistorialSiHaceFalta, 250);
+
+                fillSourceSlot(fieldName);
 
                 fillHelpSlot(fieldName);
+                pintarBotonAyuda();
+
+                fillListSlot(fieldName, fieldValue, linkUrl, sublistId, linenum, domOpts);
+
+                if (vc) fillViewValue(vc, fieldName);
 
                 requestAnimationFrame(fitModalInViewport);
             }
+        }
+
+        function helpBodyHtml(text, topic) {
+            let html = escapeHtml(text);
+            if (topic) {
+                html += `<a class="nsft-sfv-help-topic" href="${escapeHtml(topic)}"
+                            target="_blank" rel="noopener noreferrer"
+                         >${escapeHtml(translations.sfv_help_topic || 'Open this page\'s help topic')} →</a>`;
+            }
+            return html;
+        }
+
+        function makeCopyBadge(raw) {
+            return raw
+                ? `<span class="nsft-badge" title="${translations.sfv_copy_tooltip}" data-nsft-copy-value="${escapeHtml(raw)}" style="cursor:pointer; margin-left:6px;"
+                        onclick="
+                        const el = this;
+                        const originalHtml = el.innerHTML;
+                        navigator.clipboard.writeText(el.getAttribute('data-nsft-copy-value') || '');
+                        el.style.backgroundColor='var(--nsft-sfv-ok-soft)'; el.style.color='var(--nsft-sfv-ok)';
+                        el.innerHTML = '${translations.sfv_copied}';
+                        setTimeout(() => {
+                            el.style.backgroundColor=''; el.style.color='';
+                            el.innerHTML = originalHtml;
+                        }, 1000);
+                          "><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px;vertical-align:text-top;"><path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" /><path d="M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h7a1.5 1.5 0 001.5-1.5v-5.879a1.5 1.5 0 00-.44-1.06L9.44 6.439A1.5 1.5 0 008.378 6H4.5z" /></svg></span>`
+                : '';
         }
 
         function helpBlockHtml(text, opts) {
@@ -1372,33 +1451,68 @@
             const idAttr = o.id ? ` id="${o.id}"` : '';
             const body = o.loading
                 ? '<span class="nsft-sfv-help-skeleton"></span>'
-                : escapeHtml(text);
+                : helpBodyHtml(text, o.topic);
             return `<div${idAttr} class="nsft-sfv-help" data-collapsed="${helpCollapsed ? '1' : '0'}">
-                        <div class="nsft-sfv-help-head" title="${escapeHtml(translations.sfv_help_toggle || '')}"
-                             onclick="window.parent.NSFT_SetFieldValues.toggleHelp(this)">
-                            <span class="nsft-sfv-help-title">${escapeHtml(translations.sfv_help_label || 'Field help')}</span>
-                            <span class="nsft-sfv-help-caret" aria-hidden="true">▾</span>
-                        </div>
                         <div class="nsft-sfv-help-text">${body}</div>
                     </div>`;
+        }
+
+        const _listaFuente = {};
+
+        function fillSourceSlot(fieldName) {
+            const fila = document.getElementById(NSFT.SOURCE_ROW);
+            if (!fila) return;
+
+            if (!/^cust/i.test(String(fieldName || ""))) return;
+
+            const clave = String(fieldName).toUpperCase();
+            if (Object.prototype.hasOwnProperty.call(_listaFuente, clave)) {
+                pintarListaFuente(fieldName, _listaFuente[clave]);
+                return;
+            }
+
+            const T = window.NSFT_SQL;
+            if (!T) return;
+
+            const where = `FROM customfield WHERE UPPER(scriptid) = UPPER(${T.lit(fieldName)})`;
+            const rica = `SELECT fieldvaluetyperecord, BUILTIN.DF(fieldvaluetyperecord) AS nombre ${where}`;
+            const simple = `SELECT fieldvaluetyperecord ${where}`;
+
+            T.run({
+                rest: rica, sql: rica, limit: 5,
+                fallback: { rest: simple, sql: simple, limit: 5 }
+            }, function (err, rows) {
+                if (err) return;
+                const r = (rows && rows[0]) || null;
+                const valor = r ? (r.nombre || r.fieldvaluetyperecord || null) : null;
+                _listaFuente[clave] = valor;
+                pintarListaFuente(fieldName, valor);
+            });
+        }
+
+        function pintarListaFuente(fieldName, valor) {
+            if (!_lastRenderCtx || _lastRenderCtx.fieldName !== fieldName) return;
+            const fila = document.getElementById(NSFT.SOURCE_ROW);
+            const hueco = document.getElementById(NSFT.SOURCE_SLOT);
+            if (!fila || !hueco || !valor) return;
+            hueco.textContent = String(valor);
+            fila.style.display = "";
+            try { requestAnimationFrame(fitModalInViewport); } catch (e) { }
         }
 
         function fillHelpSlot(fieldName) {
             if (!document.getElementById(NSFT.HELP_SLOT)) return;
 
-            fetchCustomFieldHelp(fieldName, function (fromQuery) {
-                if (fromQuery) { paintHelp(fieldName, fromQuery, 'suiteql'); return; }
-                fetchFieldHelpPage(fieldName, function (fromPage, url, generic) {
-                    let how = 'sin ayuda';
-                    if (fromPage) how = 'fieldhelp.nl';
-                    else if (generic) how = 'sin ayuda (respuesta genérica)';
-                    else if (!url) how = 'sin ayuda (no se pudo armar la URL)';
-                    paintHelp(fieldName, fromPage, how + (url ? ` → ${url}` : ''));
-                });
+            fetchFieldHelpPage(fieldName, function (fromPage, url, generic, topic) {
+                let how = 'sin ayuda';
+                if (fromPage) how = topic ? 'fieldhelp.nl (invitación al tema)' : 'fieldhelp.nl';
+                else if (generic) how = 'sin ayuda (respuesta genérica)';
+                else if (!url) how = 'sin ayuda (no se pudo armar la URL)';
+                paintHelp(fieldName, fromPage, how + (url ? ` → ${url}` : ''), topic);
             });
         }
 
-        function paintHelp(fieldName, text, source) {
+        function paintHelp(fieldName, text, source, topic) {
             const el = document.getElementById(NSFT.HELP_SLOT);
             if (!el || !_lastRenderCtx || _lastRenderCtx.fieldName !== fieldName) return;
 
@@ -1411,16 +1525,16 @@
                 return;
             }
 
-            if (!body) { el.outerHTML = helpBlockHtml(text); return; }
-            swapHelpText(body, text);
+            if (!body) { el.outerHTML = helpBlockHtml(text, { topic: topic }); return; }
+            swapHelpText(body, text, topic);
         }
 
         const HELP_ANIM_MS = 220;
 
-        function swapHelpText(body, text) {
+        function swapHelpText(body, text, topic) {
             const from = body.getBoundingClientRect().height;
 
-            body.textContent = text;
+            body.innerHTML = helpBodyHtml(text, topic);
             const to = body.getBoundingClientRect().height;
 
             if (!from || Math.abs(to - from) < 2) return;
@@ -1450,6 +1564,7 @@
             const from = box.getBoundingClientRect().height;
             const remove = function () {
                 if (box.parentNode) box.parentNode.removeChild(box);
+                pintarBotonAyuda();
             };
             if (!from) { remove(); return; }
 
@@ -1468,8 +1583,6 @@
             box.addEventListener('transitionend', remove);
             setTimeout(remove, HELP_ANIM_MS + 180);
         }
-
-        const _customHelpCache = {};
 
         function stripTags(v) {
             if (typeof v !== 'string') return '';
@@ -1563,9 +1676,50 @@
             return m ? m[1] : '';
         }
 
-        function buildFieldHelpUrls(fieldName) {
+        function bareFieldHelpUrl(fieldName) {
+            if (!fieldName) return '';
+            const ver = nsVerParam();
+            let qs = 'f=' + helpParam(fieldName);
+            if (ver) qs += '&NS_VER=' + helpParam(ver);
+            return '/core/help/fieldhelp.nl?' + qs + '&ifrmcntnr=T';
+        }
+
+        const HELP_ARG_PARAMS = ['', 'f', 'p', 'l', 'v', 'flhtp', 'topic', 'c', 'pt', 'tr', 'ftk', 'ft', 'flk', 'fl'];
+
+        function nativeFieldHelpUrl(fieldName) {
+            if (!fieldName) return '';
             const anchor = findHelpAnchor(fieldName);
-            if (!anchor) return [];
+            if (!anchor) return '';
+
+            const args = helpAnchorArgs(anchor);
+            if (args.length < 2) return '';
+            if (String(args[1]).toLowerCase() !== String(fieldName).toLowerCase()) return '';
+
+            const partes = [];
+            for (let i = 1; i < args.length && i < HELP_ARG_PARAMS.length; i++) {
+                const clave = HELP_ARG_PARAMS[i];
+                const valor = args[i];
+                if (!clave || valor === '' || valor == null) continue;
+                partes.push(clave + '=' + (/[\s&#?]/.test(valor) ? helpParam(valor) : valor));
+            }
+            if (!partes.length) return '';
+
+            const ver = nsVerParam();
+            if (ver) partes.push('NS_VER=' + helpParam(ver));
+            partes.push('ifrmcntnr=T');
+            return '/core/help/fieldhelp.nl?' + partes.join('&');
+        }
+
+        function buildFieldHelpUrls(fieldName) {
+            if (!fieldName) return [];
+
+            const urls = [];
+            const nativa = nativeFieldHelpUrl(fieldName);
+            if (nativa) urls.push(nativa);
+            urls.push(bareFieldHelpUrl(fieldName));
+
+            const anchor = findHelpAnchor(fieldName);
+            if (!anchor) return urls;
 
             const args = helpAnchorArgs(anchor);
 
@@ -1577,8 +1731,8 @@
 
             const fl = flk ? '' : fieldLabelParam(anchor);
             if (!flk && !fl) {
-                sfvDiag(`[NSFT SFV] "${fieldName}": ni clave ni etiqueta para pedir la ayuda`, args);
-                return [];
+                sfvDiag(`[NSFT SFV] "${fieldName}": ni clave ni etiqueta; queda la url desnuda`, args);
+                return urls;
             }
 
             const params = {
@@ -1613,8 +1767,6 @@
             const pages = pageNameCandidates();
             if (!pages.length) pages.push('');
 
-            const urls = [];
-
             const learned = helpTemplates[helpTemplateKey()];
             if (learned) {
                 const t = Object.assign({}, learned);
@@ -1637,13 +1789,100 @@
             return urls.filter((u, i) => urls.indexOf(u) === i);
         }
 
+        function parseHelpDoc(html) {
+            try { return new DOMParser().parseFromString(String(html), 'text/html'); }
+            catch (e) { return null; }
+        }
+
+        const HELP_CONTAINERS = ['.field-help-popup-text', 'td.text', '.fieldhelp'];
+
+        function lineaDelId(fieldName) {
+            const id = String(fieldName || '').toLowerCase();
+            return function (line) {
+                if (!id) return false;
+                const s = String(line || '');
+                const at = s.toLowerCase().indexOf(id);
+                if (at === -1) return false;
+                const resto = (s.slice(0, at) + s.slice(at + id.length)).replace(/[\s:·|–—-]+/g, '');
+                return resto.length <= 20;
+            };
+        }
+
+        function helpTextFromContainers(doc, fieldName) {
+            if (!doc) return '';
+            const esDelId = lineaDelId(fieldName);
+            for (let i = 0; i < HELP_CONTAINERS.length; i++) {
+                const nodes = doc.querySelectorAll(HELP_CONTAINERS[i]);
+                for (let j = 0; j < nodes.length; j++) {
+                    if (nodes[j].querySelector('[href*="helpcenter.nl"], [onclick*="helpcenter.nl"]')) continue;
+                    const t = (nodes[j].textContent || '').replace(/\s+/g, ' ').trim();
+                    if (esDelId(t)) continue;
+                    if (looksLikeHelp(t, 15)) return t;
+                }
+            }
+            return '';
+        }
+
+        function helpInviteFromDoc(doc) {
+            if (!doc) return null;
+            for (let i = 0; i < HELP_CONTAINERS.length; i++) {
+                const nodes = doc.querySelectorAll(HELP_CONTAINERS[i]);
+                for (let j = 0; j < nodes.length; j++) {
+                    const a = nodes[j].querySelector('[href*="helpcenter.nl"]');
+                    if (!a) continue;
+                    const t = (nodes[j].textContent || '').replace(/\s+/g, ' ').trim();
+                    if (!looksLikeHelp(t, 15)) continue;
+                    return { text: t, url: helpTopicUrl(a.getAttribute('href')) };
+                }
+            }
+            return null;
+        }
+
+        function helpTopicUrl(href) {
+            const h = String(href || '').trim();
+            return /^\/app\/help\/helpcenter\.nl(\?|$)/i.test(h) ? h : '';
+        }
+
+        function respuestaMenciona(html, fieldName, hints) {
+            const lower = String(html || '').toLowerCase();
+            const senas = [String(fieldName)].concat(hints || [])
+                .filter(s => s && String(s).trim().length > 3);
+            return senas.some(s => lower.indexOf(String(s).toLowerCase()) !== -1);
+        }
+
+        function normalizaAyuda(t) {
+            return String(t || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        }
+
+        const _fillerCache = {};
+        const _fillerPending = {};
+
+        function helpFillerFor(fieldName, cb) {
+            const fam = /^cust/i.test(String(fieldName)) ? 'cust' : 'std';
+            if (Object.prototype.hasOwnProperty.call(_fillerCache, fam)) { cb(_fillerCache[fam]); return; }
+            if (_fillerPending[fam]) { _fillerPending[fam].push(cb); return; }
+            _fillerPending[fam] = [cb];
+
+            const resolver = function (valor) {
+                _fillerCache[fam] = valor;
+                const cbs = _fillerPending[fam] || [];
+                delete _fillerPending[fam];
+                cbs.forEach(function (f) { try { f(valor); } catch (e) { } });
+            };
+
+            const sonda = fam === 'cust' ? 'custrecord_nsft_sonda_0' : 'nsftsonda0';
+            const url = bareFieldHelpUrl(sonda);
+            if (!url || typeof fetch !== 'function') { resolver(null); return; }
+            fetch(url, { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.text() : ''; })
+                .then(function (html) { resolver(helpTextFromContainers(parseHelpDoc(html), sonda) || null); })
+                .catch(function () { resolver(null); });
+        }
+
         function extractHelpFromHtml(html, fieldName, hints) {
             if (!html) return '';
 
-            const lower = String(html).toLowerCase();
-            const senas = [String(fieldName)].concat(hints || []).filter(Boolean);
-            const reconocida = senas.some(s => lower.indexOf(String(s).toLowerCase()) !== -1);
-            if (!reconocida) return '';
+            if (!respuestaMenciona(html, fieldName, hints)) return '';
 
             let plain = '';
             try {
@@ -1665,13 +1904,7 @@
                     .replace(/<br\s*\/?>/gi, '\n'));
             }
 
-            const id = String(fieldName).toLowerCase();
-            const esLineaDelId = function (line) {
-                const at = line.toLowerCase().indexOf(id);
-                if (at === -1) return false;
-                const resto = (line.slice(0, at) + line.slice(at + id.length)).replace(/[\s:·|–—-]+/g, '');
-                return resto.length <= 20;
-            };
+            const esLineaDelId = lineaDelId(fieldName);
 
             return plain
                 .split('\n')
@@ -1692,17 +1925,31 @@
         function fetchFieldHelpPage(fieldName, cb) {
             if (Object.prototype.hasOwnProperty.call(_fieldHelpCache, fieldName)) {
                 const c = _fieldHelpCache[fieldName];
-                cb(c.text, c.url, c.generic);
+                cb(c.text, c.url, c.generic, c.topic);
                 return;
             }
 
             const urls = buildFieldHelpUrls(fieldName);
-            if (!urls.length || typeof fetch !== 'function') { cb('', '', false); return; }
+            if (!urls.length || typeof fetch !== 'function') { cb('', '', false, ''); return; }
 
-            const done = function (text, url, generic) {
-                _fieldHelpCache[fieldName] = { text: text || '', url: url || '', generic: !!generic };
+            const done = function (text, url, generic, topic) {
+                _fieldHelpCache[fieldName] = {
+                    text: text || '', url: url || '', generic: !!generic, topic: topic || ''
+                };
                 const c = _fieldHelpCache[fieldName];
-                cb(c.text, c.url, c.generic);
+                cb(c.text, c.url, c.generic, c.topic);
+            };
+
+            const nativa = nativeFieldHelpUrl(fieldName);
+            const esLaNativa = (i) => i === 0 && !!nativa && urls[0] === nativa;
+
+            const siguiente = function (i, url) {
+                if (esLaNativa(i)) {
+                    sfvDiag(`[NSFT SFV] ayuda "${fieldName}": la url de NetSuite no trae texto; el campo no tiene ayuda`, url);
+                    done('', url, false);
+                    return;
+                }
+                attempt(i + 1, url);
             };
 
             const attempt = function (i, lastUrl) {
@@ -1714,11 +1961,48 @@
                 const url = urls[i];
 
                 fetch(url, { credentials: 'same-origin' })
-                    .then(function (r) { return r.ok ? r.text() : ''; })
+                    .then(function (r) { return r.ok ? r.text() : null; })
                     .then(function (html) {
-                        const text = extractHelpFromHtml(html, fieldName, helpHints(fieldName));
-                        if (text) { done(text, url, false); return; }
-                        attempt(i + 1, url);
+                        if (html === null) { attempt(i + 1, url); return; }
+
+                        const hints = helpHints(fieldName);
+                        const doc = parseHelpDoc(html);
+                        const directo = helpTextFromContainers(doc, fieldName);
+                        const invita = helpInviteFromDoc(doc);
+
+                        if (esLaNativa(i)) {
+                            if (directo) { done(directo, url, false); return; }
+                            if (invita) { done(invita.text, url, false, invita.url); return; }
+                            done(extractHelpFromHtml(html, fieldName, hints) || '', url, false);
+                            return;
+                        }
+
+                        if (directo && respuestaMenciona(html, fieldName, hints)) {
+                            done(directo, url, false);
+                            return;
+                        }
+
+                        const heuristica = function () {
+                            const text = extractHelpFromHtml(html, fieldName, hints);
+                            if (text) { done(text, url, false); return; }
+                            siguiente(i, url);
+                        };
+
+                        if (!directo) {
+                            if (invita) { done(invita.text, url, false, invita.url); return; }
+                            heuristica();
+                            return;
+                        }
+
+                        helpFillerFor(fieldName, function (relleno) {
+                            if (relleno === null) { heuristica(); return; }
+                            if (normalizaAyuda(relleno) === normalizaAyuda(directo)) {
+                                sfvDiag(`[NSFT SFV] ayuda "${fieldName}": la respuesta es el relleno de «sin ayuda»`, url);
+                                siguiente(i, url);
+                                return;
+                            }
+                            done(directo, url, false);
+                        });
                     })
                     .catch(function (e) {
                         sfvDiagWarn('[NSFT SFV] fieldhelp.nl falló', e);
@@ -1729,109 +2013,11 @@
             attempt(0, '');
         }
 
-        function customFieldTables(fieldName) {
-            const f = String(fieldName).toLowerCase();
-            if (f.indexOf('custbody') === 0) return ['transactionBodyCustomField'];
-            if (f.indexOf('custcol') === 0) return ['transactionColumnCustomField', 'itemOptionCustomField'];
-            if (f.indexOf('custentity') === 0) return ['entityCustomField'];
-            if (f.indexOf('custitem') === 0) return ['itemCustomField'];
-            if (f.indexOf('custevent') === 0) return ['crmCustomField'];
-            if (f.indexOf('custrecord') === 0) return ['customRecordCustomField', 'otherCustomField'];
-            return [];
-        }
-
-        function pickHelpColumn(row) {
-            if (!row) return '';
-            const candidates = [row.h, row.help, row.d, row.description];
-            for (let i = 0; i < candidates.length; i++) {
-                const t = stripTags(candidates[i]);
-                if (t) return t;
-            }
-            return '';
-        }
-
-        function fetchCustomFieldHelp(fieldName, cb) {
-            if (!fieldName || !/^cust/i.test(fieldName) || typeof require !== 'function') { cb('', false); return; }
-            if (Object.prototype.hasOwnProperty.call(_customHelpCache, fieldName)) {
-                const c = _customHelpCache[fieldName];
-                cb(c.text, c.answered);
-                return;
-            }
-
-            const scriptId = String(fieldName).toUpperCase().replace(/'/g, "''");
-
-            const tables = ['CustomField'].concat(customFieldTables(fieldName));
-            const attempts = [];
-            for (let c = 0; c < 2; c++) {
-                const col = c === 0 ? 'cf.description AS d' : 'cf.help AS h';
-                for (let t = 0; t < tables.length; t++) {
-                    attempts.push(`SELECT ${col} FROM ${tables[t]} cf WHERE UPPER(cf.scriptid) = '${scriptId}'`);
-                }
-            }
-
-            const finish = function (text, answered) {
-                _customHelpCache[fieldName] = { text: text || '', answered: !!answered };
-                cb(_customHelpCache[fieldName].text, _customHelpCache[fieldName].answered);
-            };
-
-            let answered = false;
-
-            const T = window.NSFT_SQL;
-            if (!T) { finish('', false); return; }
-
-            const run = function (idx) {
-                if (idx >= attempts.length) { finish('', answered); return; }
-                T.run({ rest: attempts[idx], sql: attempts[idx], limit: 1 }, function (err, rows) {
-                    if (err) { run(idx + 1); return; }
-                    answered = true;
-                    const text = pickHelpColumn(rows && rows[0]);
-                    if (text) finish(text, true);
-                    else run(idx + 1);
-                });
-            };
-            run(0);
-        }
-
-        function wireFieldAuditButton(fieldName) {
-            const btn = document.getElementById(NSFT.AUDIT_BTN);
-            if (!btn) return;
-            btn.addEventListener('click', () => {
-                const list = document.getElementById(NSFT.AUDIT_LIST);
-                if (!list) return;
-                if (btn.dataset.loaded === '1') {
-                    if (list.style.display === 'none') {
-                        list.style.display = 'block';
-                        setAuditButtonState(btn, 'visible');
-                    } else {
-                        list.style.display = 'none';
-                        setAuditButtonState(btn, 'hidden');
-                    }
-                    return;
-                }
-                loadFieldHistory(fieldName);
-            });
-        }
-
-        function setAuditButtonState(btn, state) {
-            const baseIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px;margin-right:2px;vertical-align:text-top;"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .2.08.39.22.53l3 3a.75.75 0 0 0 1.06-1.06l-2.78-2.78V5Z" clip-rule="evenodd"/></svg>';
-            const hideIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:12px;height:12px;margin-right:2px;vertical-align:text-top;"><path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" /></svg>';
-            const showLbl = translations.fav_load_btn || 'Ver historial';
-            const hideLbl = translations.fav_hide_btn || 'Ocultar historial';
-            if (state === 'visible') {
-                btn.innerHTML = hideIcon + ' ' + escapeHtml(hideLbl);
-            } else {
-                btn.innerHTML = baseIcon + ' ' + escapeHtml(showLbl);
-            }
-        }
-
         function loadFieldHistory(fieldName) {
             const list = document.getElementById(NSFT.AUDIT_LIST);
-            const btn = document.getElementById(NSFT.AUDIT_BTN);
             if (!list) return;
 
-            list.style.display = 'block';
             list.innerHTML = `<div class="nsft-fav-loading">${escapeHtml(translations.fav_loading || 'Cargando historial…')}</div>`;
-            if (btn) { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; }
 
             let recordType = '';
             let recordId = '';
@@ -1856,15 +2042,7 @@
                 return;
             }
 
-            let fieldLabel = '';
-            try {
-                if (typeof nlapiGetField === 'function') {
-                    const fld = nlapiGetField(fieldName);
-                    if (fld && typeof fld.getLabel === 'function') {
-                        fieldLabel = String(fld.getLabel() || '');
-                    }
-                }
-            } catch (_) { }
+            const fieldLabel = readFieldLabel(fieldName);
 
             const T = window.NSFT_SQL;
             if (!T) {
@@ -1966,13 +2144,6 @@
         function renderFieldHistory(rows) {
             const list = document.getElementById(NSFT.AUDIT_LIST);
             if (!list) return;
-            const btn = document.getElementById(NSFT.AUDIT_BTN);
-            if (btn) {
-                btn.dataset.loaded = '1';
-                btn.style.opacity = '1';
-                btn.style.pointerEvents = 'auto';
-                setAuditButtonState(btn, 'visible');
-            }
             rows = rows || [];
             if (!rows.length) {
                 list.innerHTML = `<div class="nsft-fav-empty">${escapeHtml(translations.fav_no_history || 'Sin cambios registrados')}</div>`;
@@ -1983,16 +2154,19 @@
             const allLbl = translations.fav_filter_all || 'Todos';
             const userOpts = `<option value="">${escapeHtml(allLbl)}</option>` +
                 users.map(u => `<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`).join('');
-            const filtersHtml = rows.length > 1 ? `
+            const filtersHtml = rows.length ? `
                 <div class="nsft-fav-filters">
                     <select class="nsft-fav-filter-user" title="${escapeHtml(translations.fav_filter_user || 'Usuario')}">${userOpts}</select>
                     <input type="date" class="nsft-fav-filter-from" title="${escapeHtml(translations.fav_filter_from || 'Desde')}">
                     <input type="date" class="nsft-fav-filter-to" title="${escapeHtml(translations.fav_filter_to || 'Hasta')}">
                 </div>` : '';
 
-            list.innerHTML = filtersHtml + `<div class="nsft-fav-rows"></div>`;
-            const rowsBox = list.querySelector('.nsft-fav-rows');
-            renderAuditRows(rowsBox, rows);
+            let rowsBox = null;
+            animarAlto(function () {
+                list.innerHTML = filtersHtml + `<div class="nsft-fav-rows"></div>`;
+                rowsBox = list.querySelector('.nsft-fav-rows');
+                renderAuditRows(rowsBox, rows);
+            });
 
             const userSel = list.querySelector('.nsft-fav-filter-user');
             const fromInp = list.querySelector('.nsft-fav-filter-from');
@@ -2098,6 +2272,726 @@
                 }
             } catch (e) { }
             return "";
+        }
+
+
+        const LIST_PAGE = 200;
+
+        const LIST_TARGETS = {
+            item: { table: "item" },
+            custjob: { table: "customer" },
+            customer: { table: "customer" },
+            vendor: { table: "vendor" },
+            contact: { table: "contact" },
+            partner: { table: "partner" },
+            entity: { table: "entity" },
+            employee: { table: "employee", text: "entityid" },
+            task: { table: "task", text: "title" },
+            event: { table: "calendarevent", text: "title" },
+            calendarevent: { table: "calendarevent", text: "title" },
+            call: { table: "phonecall", text: "title" },
+            phonecall: { table: "phonecall", text: "title" },
+            campaign: { table: "campaign", text: "title" },
+            account: { table: "account" },
+            currency: { table: "currency", text: "name" },
+            subsidiary: { table: "subsidiary" },
+            subsidiarytype: { table: "subsidiary" },
+            department: { table: "department" },
+            departmenttype: { table: "department" },
+            location: { table: "location" },
+            locationtype: { table: "location" },
+            class: { table: "classification" },
+            classtype: { table: "classification" },
+            transaction: { table: "transaction", text: "trandisplayname", heavy: true, noFold: true },
+            mediaitem: { table: "file", text: "name", heavy: true, noFold: false },
+            media: { table: "file", text: "name", heavy: true, noFold: false },
+            mediaitemfolder: { table: "mediaitemfolder", text: "name" }
+        };
+
+        const TRANSACTION_PATH_RE = /\/accounting\/transactions\//i;
+
+        const LENTA_MS = 2500;
+        const _pesadas = Object.create(null);
+
+        const LIST_TEXT_COLS = ["fullname", "name", "entityid", "title", "trandisplayname"];
+
+        const IDENT_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+        const FAMILIA_TIPO = {
+            checkbox: "checkbox",
+            date: "date",
+            datetime: "datetime", datetimetz: "datetime",
+            timeofday: "timeofday", time: "timeofday",
+            select: "select", list: "select",
+            multiselect: "multiselect",
+            text: "text", freeformtext: "text",
+            textarea: "textarea",
+            longtext: "longtext", clobtext: "longtext",
+            richtext: "richtext",
+            inlinehtml: "html", html: "html",
+            percent: "percent",
+            currency: "currency",
+            float: "float", decimalnumber: "float", decimal: "float",
+            integer: "integer", integernumber: "integer",
+            email: "email", emailaddress: "email",
+            phone: "phone", phonenumber: "phone",
+            url: "url", hyperlink: "url",
+            image: "image",
+            file: "file", document: "file",
+            password: "password",
+            radio: "radio"
+        };
+
+        function nombreDelTipo(bruto) {
+            const crudo = String(bruto == null ? "" : bruto);
+            if (!crudo) return "";
+            const norm = crudo.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const familia = FAMILIA_TIPO[norm];
+            const textos = translations.sfv_ftypes || {};
+            return (familia && textos[familia]) || crudo;
+        }
+
+        function readFieldType(fieldName) {
+            const enVista = esVista(fieldName);
+            if (enVista) {
+                try {
+                    const w = window.document.querySelector(
+                        '[data-field-name="' + fieldName + '"][data-field-type]');
+                    const tp = w && w.getAttribute("data-field-type");
+                    if (tp) return String(tp);
+                } catch (e) { }
+            }
+            try {
+                if (typeof nlapiGetField === "function") {
+                    const fld = nlapiGetField(fieldName);
+                    const tp = fld && (fld.type || (typeof fld.getType === "function" ? fld.getType() : ""));
+                    if (tp) return String(tp);
+                }
+            } catch (e) { }
+            try {
+                const w = window.document.querySelector(
+                    '[data-field-name="' + fieldName + '"][data-field-type]');
+                const tp = w && w.getAttribute("data-field-type");
+                if (tp) return String(tp);
+            } catch (e) { }
+            return "";
+        }
+
+        function readDisplayType(fieldName) {
+            try {
+                if (esVista(fieldName)) return "";
+                const w = window.document.querySelector(
+                    '[data-field-name="' + fieldName + '"]');
+                if (!w) return "hidden";
+                if (typeof nlapiGetField === "function") {
+                    const fld = nlapiGetField(fieldName);
+                    if (fld && fld.disabled) return "disabled";
+                }
+                const fs_ = window.document.getElementById(fieldName + "_fs");
+                if (!fs_) return "inline";
+                const campo = w.querySelector(".uir-field");
+                if (campo && /(^|\s)inputreadonly(\s|$)/.test(campo.className || "")) return "inline";
+                return "normal";
+            } catch (e) { }
+            return "";
+        }
+
+        function readFieldLabel(fieldName) {
+            try {
+                if (typeof nlapiGetField === "function") {
+                    const fld = nlapiGetField(fieldName);
+                    if (fld && typeof fld.getLabel === "function") {
+                        const l = String(fld.getLabel() || "");
+                        if (l) return l;
+                    }
+                }
+            } catch (e) { }
+            try {
+                const w = window.document.querySelector(
+                    '[data-field-name="' + fieldName + '"][data-nsps-label]');
+                const l = w && w.getAttribute("data-nsps-label");
+                if (l) return String(l);
+            } catch (e) { }
+            try {
+                const lbl = window.document.getElementById(fieldName + "_fs_lbl");
+                if (lbl) return String(lbl.textContent || "").trim();
+            } catch (e) { }
+            return "";
+        }
+
+        function readListKind(fieldName) {
+            const vale = function (k) {
+                return (k === "select" || k === "popupselect" || k === "multiselect" || k === "file") ? k : "";
+            };
+            try {
+                const fs_ = window.document.getElementById(fieldName + "_fs");
+                const k = vale(fs_ && fs_.getAttribute("data-fieldtype"));
+                if (k) return k;
+                const w = window.document.querySelector(
+                    '[data-field-name="' + fieldName + '"][data-field-type]');
+                return vale(w && w.getAttribute("data-field-type"));
+            } catch (e) { }
+            return "";
+        }
+
+        function desescaparUrl(s) {
+            return String(s || "")
+                .replace(/\\x([0-9a-fA-F]{2})/g, function (_, hex) {
+                    return String.fromCharCode(parseInt(hex, 16));
+                })
+                .replace(/\\(.)/g, "$1");
+        }
+
+        function urlDentroDeJavascript(h) {
+            const m = String(h || "").match(/['"]([^'"]*\.nl[^'"]*)['"]/i);
+            return m ? desescaparUrl(m[1]) : "";
+        }
+
+        function viewLinkUrl(fieldName) {
+            try {
+                const w = window.document.querySelector(
+                    '[data-field-name="' + fieldName + '"]');
+                if (!w) return "";
+                const enlaces = w.querySelectorAll("a[href]");
+                for (let i = 0; i < enlaces.length; i++) {
+                    let h = enlaces[i].getAttribute("href") || "";
+                    if (/^javascript:/i.test(h)) {
+                        h = urlDentroDeJavascript(h);
+                        if (!h) continue;
+                    }
+                    if (/[.]nl/i.test(h) && /[?&]id=/i.test(h)) {
+                        let base = h.split("?")[0];
+                        base = base.replace(/\/core\/media\/media[.]nl$/i,
+                                            "/app/common/media/mediaitem.nl");
+
+                        const rt = h.match(/[?&](rectype=[0-9]+)/i);
+                        return base + "?" + (rt ? rt[1] : "");
+                    }
+                }
+            } catch (e) { }
+            return "";
+        }
+
+        function resolveListTarget(linkUrl) {
+            const u = String(linkUrl || "");
+            if (!u) return null;
+            if (TRANSACTION_PATH_RE.test(u)) {
+                const tr = LIST_TARGETS.transaction;
+                return { table: tr.table, text: tr.text, heavy: true, noFold: true };
+            }
+            const m = u.match(/([A-Za-z0-9_]+)[.]nl/);
+            if (!m) return null;
+            const page = m[1].toLowerCase();
+            if (page === "custrecordentry") {
+                const r = u.match(/rectype=([0-9]+)/);
+                return r ? { rectype: r[1] } : null;
+            }
+            const hit = LIST_TARGETS[page];
+            const tabla = hit ? hit.table : page;
+            if (!IDENT_RE.test(tabla)) return null;
+            const pesada = !!(hit && hit.heavy) || !!_pesadas[tabla];
+            const noFold = (hit && hit.noFold != null) ? !!hit.noFold : pesada;
+            return { table: tabla, text: (hit && hit.text) || LIST_TEXT_COLS[0], heavy: pesada, noFold: noFold };
+        }
+
+        function optionTextHtml(text, term) {
+            const s = String(text == null ? "" : text);
+            const TS = window.NSFT_TextSearch;
+            if (term && TS && TS.markHtml) {
+                try { return TS.markHtml(s, term, "nsft-sfv-list-hl"); } catch (e) { }
+            }
+            return escapeHtml(s);
+        }
+
+        function optionRowsHtml(opts, fieldValue, linkUrl, fieldName, sidArg, lineArg, term) {
+            let html = "";
+            for (let i = 0; i < opts.length; i++) {
+                if (!opts[i] || !opts[i].value) continue;
+                const isSelected = (opts[i].value == fieldValue);
+
+                const partes = String(opts[i].text == null ? "" : opts[i].text).split(" : ");
+                const hoja = partes[partes.length - 1];
+                const camino = partes.length > 1 ? partes.slice(0, -1).join(" › ") : "";
+
+                let recordLinkHtml = "";
+                if (linkUrl) {
+                    const sep = linkUrl.includes("?") ? "&" : "?";
+                    let hrefVal = linkUrl + sep + "id=" + opts[i].value;
+                    if (linkUrl.includes("id=")) {
+                        hrefVal = linkUrl.replace(/id=[0-9]*/, "id=" + opts[i].value);
+                    }
+                    recordLinkHtml = `<a class="nsft-sfv-opt-ext" href="${escapeHtml(hrefVal)}" target="_blank"
+                                         title="${escapeHtml(translations.sfv_open_record || "")}"
+                                         aria-label="${escapeHtml(translations.sfv_open_record || "")}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                        </svg>
+                                    </a>`;
+                }
+
+                html += `<div class="nsft-sfv-opt" role="option" aria-selected="${isSelected}">
+                            <span class="nsft-sfv-opt-id">${escapeHtml(String(opts[i].value))}</span>
+                            <span class="nsft-sfv-opt-txt">${camino ? `<span class="nsft-sfv-opt-path">${optionTextHtml(camino, term)}</span>` : ""}<span class="nsft-sfv-opt-leaf">${optionTextHtml(hoja, term)}</span>
+                            </span>
+                            <span class="nsft-sfv-opt-act">
+                                ${recordLinkHtml}
+                                <a class="nsft-sfv-opt-set" href="javascript:void(0)"
+                                   onclick="javascript:window.parent.NSFT_SetFieldValues.setValueFromList('${escapeJsString(fieldName)}', '${escapeJsString(String(opts[i].value))}', '${escapeJsString(String(opts[i].text == null ? "" : opts[i].text))}', ${sidArg}, ${lineArg})">
+                                   ${translations.sfv_set}
+                                </a>
+                            </span>
+                         </div>`;
+            }
+            return html;
+        }
+        function listSlotHtml(linkUrl) {
+            return `<div id="${NSFT.LIST_SLOT}" class="nsft-sfv-list-slot">
+                        <div class="nsft-sfv-list-head">
+                            <span class="nsft-sfv-list-title">${escapeHtml(translations.sfv_list || "List")}:</span>
+                            <span id="${NSFT.LIST_COUNT}" class="nsft-sfv-list-count"></span>
+                            <span class="nsft-sfv-list-spacer"></span>
+                            ${listOpenLinkHtml(linkUrl)}
+                        </div>
+                        <div class="nsft-sfv-list-barwrap">
+                        <div id="${NSFT.LIST_BAR}" class="nsft-sfv-bar nsft-sfv-list-bar">
+                            <input type="text" id="${NSFT.LIST_SEARCH}" class="nsft-sfv-field nsft-sfv-list-search"
+                                   placeholder="${escapeHtml(translations.sfv_list_search || "")}" autocomplete="off">
+                            <button type="button" id="${NSFT.LIST_CLEAR}" class="nsft-sfv-list-clear"
+                                    title="${escapeHtml(translations.sfv_find_clear || "")}"
+                                    aria-label="${escapeHtml(translations.sfv_find_clear || "")}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                            </button>
+                            <button type="button" id="${NSFT.LIST_GO}" class="nsft-sfv-list-go"
+                                    title="${escapeHtml(translations.sfv_list_search || "")}"
+                                    aria-label="${escapeHtml(translations.sfv_list_search || "")}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                            </button>
+                        </div>
+                        </div>
+                        
+                        <div class="nsft-sfv-list-scroll">
+                            <div id="${NSFT.LIST_BODY}" class="nsft-sfv-optlist" role="listbox"></div>
+                        </div>
+                        <div id="${NSFT.LIST_FOOT}" class="nsft-sfv-list-foot">${escapeHtml(translations.sfv_list_loading || "")}</div>
+                     </div>`;
+        }
+
+        function listOpenUrl(linkUrl) {
+            if (!linkUrl) return "";
+            const urlParts = String(linkUrl).split("?");
+            let listBase = urlParts[0].replace(/[.]nl$/, "list.nl");
+            const NATIVE_TYPELIST_RE = /(department|class|location|subsidiary)typelist[.]nl$/;
+            const isNativeTypelist = NATIVE_TYPELIST_RE.test(listBase);
+            if (isNativeTypelist) listBase = listBase.replace(NATIVE_TYPELIST_RE, "$1list.nl");
+            if (isNativeTypelist) return listBase;
+            let resolved = listBase + "?";
+            if (urlParts.length > 1) {
+                const cleaned = urlParts[1].split("&").filter(p => !p.startsWith("id=")).join("&");
+                if (cleaned) resolved += cleaned;
+            }
+            return resolved;
+        }
+
+        function listOpenIconHtml(linkUrl) {
+            const url = listOpenUrl(linkUrl);
+            if (!url) return "";
+            return `<a href="${escapeHtml(url)}" target="_blank" class="nsft-badge nsft-sfv-goto"
+                       title="${escapeHtml(translations.sfv_go_to_source_list || "")}"
+                       aria-label="${escapeHtml(translations.sfv_go_to_source_list || "")}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </a>`;
+        }
+
+        function listOpenLinkHtml(linkUrl) {
+            const resolved = listOpenUrl(linkUrl);
+            if (!resolved) return "";
+            return `<a href="${escapeHtml(resolved)}" target="_blank" class="nsft-sfv-list-open"
+                       title="${escapeHtml(translations.sfv_go_to_source_list || "")}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        ${escapeHtml(translations.sfv_go_to_source_list || "")}
+                    </a>`;
+        }
+
+        let _listCtx = null;
+
+        let _listMemo = null;
+
+        function fillListSlot(fieldName, fieldValue, linkUrl, sublistId, linenum, domOpts) {
+            const slot = document.getElementById(NSFT.LIST_SLOT);
+            if (!slot) { _listCtx = null; return; }
+            const target = domOpts ? null : resolveListTarget(linkUrl);
+            if (!domOpts && !target) { _listCtx = null; return; }
+
+            _listCtx = {
+                fieldName: fieldName,
+                fieldValue: fieldValue,
+                linkUrl: linkUrl,
+                sidArg: sublistId ? ("'" + escapeJsString(sublistId) + "'") : "null",
+                lineArg: (linenum != null) ? String(linenum) : "null",
+                target: target,
+                domOpts: domOpts || null,
+                seq: 0
+            };
+
+            const box = document.getElementById(NSFT.LIST_SEARCH);
+            const bar = document.getElementById(NSFT.LIST_BAR);
+            const marcarBar = function () {
+                if (bar) bar.classList.toggle("has-query", !!(box && box.value));
+            };
+            if (box) {
+                const buscar = function () { runListQuery(box.value); };
+                const limpiar = function () {
+                    box.value = "";
+                    marcarBar();
+                    box.focus();
+                    runListQuery("");
+                };
+                box.addEventListener("input", marcarBar);
+                box.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter") { e.preventDefault(); buscar(); }
+                    if (e.key === "Escape" && box.value) { e.preventDefault(); e.stopPropagation(); limpiar(); }
+                });
+                const clr = document.getElementById(NSFT.LIST_CLEAR);
+                if (clr) clr.addEventListener("click", limpiar);
+                const go = document.getElementById(NSFT.LIST_GO);
+                if (go) go.addEventListener("click", buscar);
+            }
+
+            if (domOpts) { runListQuery(box ? box.value : ""); return; }
+
+            if (_listMemo && _listMemo.fieldName === fieldName) {
+                if (box) { box.value = _listMemo.term || ""; marcarBar(); }
+                _listCtx.target = _listMemo.target || _listCtx.target;
+                paintListRows(_listMemo.rows || [], _listMemo.term || "");
+                return;
+            }
+            _listMemo = null;
+
+            if (target.rectype) {
+                const T = window.NSFT_SQL;
+                if (!T) { setListFoot(translations.sfv_list_error, true); return; }
+                const q = "SELECT scriptid FROM customrecordtype WHERE internalid = " + T.lit(String(target.rectype));
+                T.run({ rest: q, sql: q + " FETCH FIRST 2 ROWS ONLY", limit: 2 }, function (err, res) {
+                    if (err || !res || !res.length || !res[0].scriptid) {
+                        setListFoot(translations.sfv_list_error, true);
+                        return;
+                    }
+                    target.table = String(res[0].scriptid).toLowerCase();
+                    target.text = LIST_TEXT_COLS[0];
+                    delete target.rectype;
+                    runListQuery("");
+                });
+                return;
+            }
+            runListQuery("");
+        }
+
+        function refreshValueInPlace(fieldName, value, text) {
+            const ctx = _listCtx;
+
+            const vs = document.getElementById(NSFT.VALUE_SLOT);
+            if (vs) {
+                const link = ctx && ctx.linkUrl;
+                const val = String(value == null ? "" : value);
+                vs.innerHTML = "<b>" + (val
+                    ? (link
+                        ? '<a href="' + escapeHtml(link) + "&id=" + encodeURIComponent(val) + '" target="_blank">' + escapeHtml(val) + "</a>"
+                        : escapeHtml(val))
+                    : "<em>(null)</em>") + "</b>";
+            }
+
+            const tr = document.getElementById(NSFT.TEXT_ROW);
+            const ts = document.getElementById(NSFT.TEXT_SLOT);
+            if (tr && ts) {
+                const txt = String(text == null ? "" : text);
+                if (txt) { ts.innerHTML = escapeHtml(txt); tr.hidden = false; }
+                else { ts.innerHTML = ""; tr.hidden = true; }
+            }
+
+            const body = document.getElementById(NSFT.LIST_BODY);
+            if (body && ctx) {
+                ctx.fieldValue = value;
+                const marca = "background-color: var(--nsft-sfv-accent-selected); font-weight:bold;";
+                const filas = body.getElementsByTagName("tr");
+                for (let i = 0; i < filas.length; i++) {
+                    const celda = filas[i].cells && filas[i].cells[0];
+                    const esta = celda && String(celda.textContent).trim() == String(value);
+                    filas[i].setAttribute("style", esta ? marca : "");
+                }
+            }
+        }
+
+        function marcarGuardando(on) {
+            try {
+                const body = document.getElementById(NSFT.CONTENT);
+                if (body) body.style.opacity = on ? "0.55" : "";
+                const foot = document.getElementById(NSFT.LIST_FOOT);
+                if (foot && on) foot.textContent = translations.sfv_view_saving || "";
+            } catch (e) { }
+        }
+
+        function fillViewValue(vc, fieldName) {
+            requestAnimationFrame(function () {
+                setTimeout(function () {
+                    if (!_lastRenderCtx || _lastRenderCtx.fieldName !== fieldName) return;
+                    const v = lookupViewValue(vc, fieldName);
+                    if (!v) return;
+                    const txt = lookupViewText(vc, fieldName);
+                    if (!_lastRenderCtx || _lastRenderCtx.fieldName !== fieldName) return;
+                    try { refreshValueInPlace(fieldName, v, txt); }
+                    catch (e) { }
+                }, 0);
+            });
+        }
+
+        let animAlto = null;
+
+        function animarAltoModal(modal, cambiar) {
+            if (!modal || modal.dataset.state === "minimised") { cambiar(); return; }
+
+            if (animAlto) animAlto();
+
+            let antes = 0;
+            try { antes = modal.getBoundingClientRect().height; } catch (e) { }
+            cambiar();
+            if (!antes) return;
+
+            let despues = 0;
+            try { despues = modal.getBoundingClientRect().height; } catch (e) { }
+            if (!despues || Math.abs(despues - antes) < 2) return;
+
+            modal.style.height = antes + "px";
+            void modal.offsetHeight;
+            modal.classList.add("nsft-sfv-h-anim");
+            modal.style.height = despues + "px";
+
+            let hecho = false;
+            let reloj = 0;
+            const fin = function () {
+                if (hecho) return;
+                hecho = true;
+                if (reloj) clearTimeout(reloj);
+                if (animAlto === fin) animAlto = null;
+                modal.classList.remove("nsft-sfv-h-anim");
+                modal.style.height = "";
+                modal.removeEventListener("transitionend", alTerminar);
+                try { fitModalInViewport(); } catch (e) { }
+            };
+            const alTerminar = function (e) {
+                if (!e || e.propertyName === "height") fin();
+            };
+            modal.addEventListener("transitionend", alTerminar);
+            reloj = setTimeout(fin, 400);
+            animAlto = fin;
+        }
+
+        function animarAlto(cambiar) {
+            animarAltoModal(document.getElementById(NSFT.MODAL), cambiar);
+        }
+
+        function refrescarVisualizacion(fieldName) {
+            const slot = document.getElementById(NSFT.DISPLAY_SLOT);
+            if (!slot) return;
+            const visual = readDisplayType(fieldName);
+            slot.textContent = visual ? (translations["sfv_display_" + visual] || visual) : "";
+        }
+
+        function pintarBotonAyuda() {
+            const btn = document.querySelector("#" + NSFT.MODAL + " .nsft-sfv-helpbtn");
+            if (!btn) return;
+            const hay = !!document.querySelector("#" + NSFT.MODAL + " .nsft-sfv-help");
+            btn.hidden = !hay;
+            if (!hay) return;
+            btn.setAttribute("aria-expanded", String(!helpCollapsed));
+            const lbl = btn.querySelector(".nsft-sfv-helpbtn-lbl");
+            if (lbl) lbl.textContent = helpCollapsed
+                ? (translations.sfv_help_show || "")
+                : (translations.sfv_help_hide || "");
+        }
+
+        function recordarAltoDeValor() {
+            if (activeTab !== "valor") return;
+            const caja = document.querySelector("#" + NSFT.MODAL + " .nsft-sfv-content");
+            if (!caja) return;
+            let alto = 0;
+            try { alto = caja.getBoundingClientRect().height; } catch (e) { }
+            if (alto) altoDeValor = alto;
+        }
+
+        function aplicarTopeDeAlto() {
+            const caja = document.querySelector("#" + NSFT.MODAL + " .nsft-sfv-content");
+            if (!caja) return;
+            if (activeTab !== "hist" || !altoDeValor) {
+                caja.style.maxHeight = "";
+                return;
+            }
+            caja.style.maxHeight = Math.max(altoDeValor, ALTO_MINIMO) + "px";
+        }
+
+        function pedirHistorialSiHaceFalta() {
+            try {
+                if (!document.getElementById(NSFT.AUDIT_LIST)) return;
+                const campo = _lastRenderCtx && _lastRenderCtx.fieldName;
+                if (!campo || histAutoPedido === campo) return;
+                histAutoPedido = campo;
+                loadFieldHistory(campo);
+            } catch (e) { }
+        }
+
+        function setListFoot(text, isError) {
+            const foot = document.getElementById(NSFT.LIST_FOOT);
+            if (!foot) return;
+            foot.textContent = text || "";
+            foot.classList.toggle("is-error", !!isError);
+        }
+
+        function runListQuery(term) {
+            const ctx = _listCtx;
+            if (!ctx) return;
+
+            if (ctx.domOpts) {
+                const q = String(term || "").trim();
+                const TS = window.NSFT_TextSearch;
+                const filas = ctx.domOpts.filter(function (o) {
+                    if (!o || !o.value) return false;
+                    if (!q) return true;
+                    const txt = String(o.text == null ? "" : o.text);
+                    if (TS && TS.match) return TS.match(txt, q) || TS.match(String(o.value), q);
+                    return (txt + " " + o.value).toUpperCase().indexOf(q.toUpperCase()) >= 0;
+                }).map(function (o) { return { id: o.value, txt: o.text }; });
+                paintListRows(filas, q);
+                return;
+            }
+
+            const T = window.NSFT_SQL;
+            if (!T) { setListFoot(translations.sfv_list_error, true); return; }
+
+            const seq = ++ctx.seq;
+            setListFoot(translations.sfv_list_loading, false);
+
+            const q = String(term || "").trim();
+            const cols = LIST_TEXT_COLS.slice(LIST_TEXT_COLS.indexOf(ctx.target.text));
+            const usable = cols.length ? cols : LIST_TEXT_COLS;
+
+            const intentar = function (i) {
+                if (i >= usable.length) { setListFoot(translations.sfv_list_error, true); return; }
+                const col = usable[i];
+                if (!IDENT_RE.test(ctx.target.table) || !IDENT_RE.test(col)) {
+                    setListFoot(translations.sfv_list_error, true);
+                    return;
+                }
+                let where = "";
+                if (q) {
+                    const TS = window.NSFT_TextSearch;
+                    if (!ctx.target.noFold && TS && TS.sqlFold && TS.sqlTerm) {
+                        where = " WHERE " + TS.sqlFold(col) + " LIKE " + T.lit("%" + TS.sqlTerm(q) + "%");
+                    } else {
+                        where = " WHERE UPPER(" + col + ") LIKE " + T.lit("%" + q.toUpperCase() + "%");
+                    }
+                }
+                const orden = ctx.target.heavy ? " ORDER BY id DESC" : (" ORDER BY " + col);
+                const base = "SELECT id, " + col + " AS txt FROM " + ctx.target.table + where + orden;
+                const t0 = Date.now();
+                T.run({
+                    rest: base,
+                    sql: base + " FETCH FIRST " + LIST_PAGE + " ROWS ONLY",
+                    limit: LIST_PAGE
+                }, function (err, res) {
+                    if (!err && (Date.now() - t0) > LENTA_MS && !ctx.target.heavy) {
+                        _pesadas[ctx.target.table] = true;
+                        ctx.target.heavy = true;
+                        ctx.target.noFold = true;
+                    }
+                    if (seq !== ctx.seq) return;
+                    if (err) {
+                        intentar(i + 1);
+                        return;
+                    }
+                    const rows = res || [];
+                    ctx.target.text = col;
+                    paintListRows(rows, q);
+                });
+            };
+            intentar(0);
+        }
+
+        function paintListRows(rows, term) {
+            const ctx = _listCtx;
+            const body = document.getElementById(NSFT.LIST_BODY);
+            if (!ctx || !body) return;
+            const opts = rows.map(function (r) { return { value: r.id, text: r.txt }; });
+            if (!ctx.domOpts) {
+                _listMemo = { fieldName: ctx.fieldName, term: term || "", rows: rows, target: ctx.target };
+            }
+            animarAlto(function () {
+                body.innerHTML = optionRowsHtml(opts, ctx.fieldValue, ctx.linkUrl, ctx.fieldName, ctx.sidArg, ctx.lineArg, term);
+                pintarPieDeLista(opts, ctx, term);
+            });
+            recordarAltoDeValor();
+        }
+
+        function pintarPieDeLista(opts, ctx, term) {
+            setListCount(opts.length);
+            if (!opts.length) {
+                setListFoot(term ? translations.sfv_list_none : translations.sfv_list_empty, false);
+                return;
+            }
+            setListFoot((opts.length >= LIST_PAGE && !ctx.domOpts)
+                ? String(translations.sfv_list_more || "").replace("{n}", String(LIST_PAGE))
+                : "",
+                false);
+        }
+
+        function setListCount(n) {
+            const el = document.getElementById(NSFT.LIST_COUNT);
+            if (!el) return;
+            el.textContent = String(translations.sfv_list_count || "").replace("{n}", String(n));
+        }
+
+        function esVista(fieldName) {
+            try {
+                const w = window.document.querySelector(
+                    '[data-field-name="' + fieldName + '"][data-mode]');
+                const modo = w && w.getAttribute("data-mode");
+                if (modo) return modo === "view";
+                if (window.document.getElementById(fieldName + "_fs")) return false;
+                const p = new URLSearchParams(window.location.search);
+                return !(p.get("e") === "T" || !p.has("id"));
+            } catch (e) { return false; }
+        }
+
+        function viewCtx(fieldName) {
+            try {
+                const p = new URLSearchParams(window.location.search);
+                if (p.get("e") === "T" || !p.has("id")) return null;
+                if (!esVista(fieldName)) return null;
+                if (typeof nlapiSubmitField !== "function") return null;
+                if (typeof nlapiGetRecordType !== "function") return null;
+                if (typeof nlapiGetRecordId !== "function") return null;
+                const tipo = String(nlapiGetRecordType() || "");
+                const id = String(nlapiGetRecordId() || "");
+                return (tipo && id) ? { tipo: tipo, id: id } : null;
+            } catch (e) { return null; }
+        }
+
+        function lookupViewValue(vc, fieldName) {
+            try {
+                if (!vc || typeof nlapiLookupField !== "function") return "";
+                const v = nlapiLookupField(vc.tipo, vc.id, fieldName);
+                return (v == null) ? "" : String(v);
+            } catch (e) { return ""; }
+        }
+
+        function lookupViewText(vc, fieldName) {
+            try {
+                if (!vc || typeof nlapiLookupField !== "function") return "";
+                const v = nlapiLookupField(vc.tipo, vc.id, fieldName, true);
+                return (v == null) ? "" : String(v);
+            } catch (e) { return ""; }
         }
 
         function getFieldAttributesHtml(fieldName) {
@@ -2457,6 +3351,39 @@
                     };
                 }
             }
+
+            enlazarChapa(display !== "none" ? url : null, title);
+        }
+
+        function enlazarChapa(url, title) {
+            const chip = document.querySelector("#" + NSFT.MODAL + " .nsft-sfv-chip");
+            if (!chip) return;
+
+            const vale = !!url && ver("setFieldValuesShowEdit");
+            chip.classList.toggle("is-link", vale);
+
+            if (!vale) {
+                chip.removeAttribute("role");
+                chip.removeAttribute("tabindex");
+                chip.removeAttribute("title");
+                chip.onclick = null;
+                chip.onkeydown = null;
+                return;
+            }
+
+            const abrir = function (e) {
+                if (e) e.stopPropagation();
+                window.open(url, "_blank");
+            };
+            chip.setAttribute("role", "link");
+            chip.setAttribute("tabindex", "0");
+            chip.title = title || translations.sfv_edit_tooltip || "";
+            chip.onclick = abrir;
+            chip.onkeydown = function (e) {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                abrir(e);
+            };
         }
 
         function extractParams(response, d) {
@@ -2478,6 +3405,8 @@
             if (!detailsSlot) return;
 
             if (params.type) {
+                const slot = document.getElementById(NSFT.TYPE_SLOT);
+                if (slot) { slot.textContent = params.type; return; }
                 detailsSlot.innerHTML = `<div class="nsft-sfv-row" style="margin-top:4px; border-top:1px solid rgba(0,0,0,0.05); padding-top:4px;">
                             <span class="nsft-sfv-label">${translations.sfv_field_type}:</span>
                             <span class="nsft-sfv-value">${params.type}</span>
@@ -2509,13 +3438,71 @@
             },
             setFieldRequired: function (name, required) {
                 nlapiSetFieldMandatory(name, required);
-                renderFieldData(name, true);
+                refrescarVisualizacion(name);
             },
             setFieldDisabled: function (name, disabled) {
                 nlapiSetFieldDisabled(name, disabled);
-                renderFieldData(name, true);
+                refrescarVisualizacion(name);
+            },
+            _submitInView: function (vc, name, value, text) {
+                const cuerpo = String(translations.sfv_view_confirm_body || "")
+                    .replace("{campo}", name)
+                    .replace("{valor}", (text ? (value + " — " + text) : String(value)));
+
+                const preguntar = function (texto) {
+                    const dlg = window.NSFT_Dialog;
+                    if (dlg && dlg.confirm) {
+                        return dlg.confirm({
+                            title: translations.sfv_view_confirm_title,
+                            body: texto,
+                            danger: true,
+                            ok: translations.sfv_view_confirm_ok,
+                            cancel: translations.sfv_view_confirm_cancel
+                        });
+                    }
+                    return Promise.resolve(window.confirm(texto));
+                };
+
+                const D = window.NSFT_Dialog;
+                const seguir = preguntar(cuerpo);
+                return Promise.resolve(seguir).then(function (ok) {
+                    if (!ok) return false;
+                    marcarGuardando(true);
+                    return new Promise(function (resolver) {
+                        requestAnimationFrame(function () {
+                            setTimeout(function () { resolver(escribirYa()); }, 0);
+                        });
+                    });
+                }).then(function (r) { return r; });
+
+                function escribirYa() {
+                    try {
+                        nlapiSubmitField(vc.tipo, vc.id, name, value);
+                        window.location.reload();
+                        return true;
+                    } catch (e) {
+                        marcarGuardando(false);
+                        console.error("[NSFT SFV] nlapiSubmitField", e);
+                        if (D && D.alert) {
+                            D.alert({
+                                title: translations.sfv_view_confirm_title,
+                                body: String(translations.sfv_view_failed || "")
+                                    + " " + String((e && e.message) || e || "")
+                            });
+                        }
+                        return false;
+                    }
+                }
             },
             setNewValue: function (name, value, sublistId, linenum) {
+                const vc = (!sublistId) ? viewCtx(name) : null;
+                if (vc) {
+                    const api = window.NSFT_SetFieldValues;
+                    api._submitInView(vc, name, value, "").then(function (ok) {
+                        if (ok) renderFieldData(name, true, null, null);
+                    });
+                    return;
+                }
                 _auditCache.clear();
                 try {
                     if (sublistId) {
@@ -2532,6 +3519,32 @@
                     console.error('[NSFT SFV] setNewValue error', e);
                 }
                 renderFieldData(name, true, sublistId || null, linenum || null);
+            },
+            setValueFromList: function (name, value, text, sublistId, linenum) {
+                const vc = (!sublistId) ? viewCtx(name) : null;
+                if (vc) {
+                    const api = window.NSFT_SetFieldValues;
+                    api._submitInView(vc, name, value, text).then(function (ok) {
+                        if (ok) { try { refreshValueInPlace(name, value, text); } catch (e) { } }
+                    });
+                    return;
+                }
+                try {
+                    if (sublistId) {
+                        if (linenum && typeof nlapiSelectLineItem === "function") {
+                            try { nlapiSelectLineItem(sublistId, linenum); } catch (e) { }
+                        }
+                        if (typeof nlapiSetCurrentLineItemValue === "function") {
+                            nlapiSetCurrentLineItemValue(sublistId, name, value);
+                        }
+                    } else {
+                        nlapiSetFieldValue(name, value);
+                    }
+                } catch (e) {
+                    console.error("[NSFT SFV] setValueFromList error", e);
+                }
+                try { refreshValueInPlace(name, value, text); }
+                catch (e) { }
             },
             setLineItemDisabled: function (sublistId, name, disabled, linenum) {
                 try {
@@ -2567,15 +3580,80 @@
             openNativeHelp: function (fieldName) {
                 openNativeFieldHelp(fieldName);
             },
-            toggleHelp: function (headEl) {
-                const box = headEl && headEl.closest('.nsft-sfv-help');
+            showTab: function (id) {
+                const modal = document.getElementById(NSFT.MODAL);
+                if (!modal) return;
+                recordarAltoDeValor();
+                activeTab = id;
+                animarAltoModal(modal, function () {
+                    modal.querySelectorAll(".nsft-sfv-pane").forEach(function (p) {
+                        p.hidden = p.getAttribute("data-tab") !== id;
+                    });
+                    modal.querySelectorAll(".nsft-sfv-tab").forEach(function (b) {
+                        b.setAttribute("aria-selected", String(b.getAttribute("data-tab") === id));
+                    });
+                    aplicarTopeDeAlto();
+                });
+                if (id === "hist") pedirHistorialSiHaceFalta();
+                try { requestAnimationFrame(fitModalInViewport); } catch (e) { }
+            },
+            toggleMeta: function (headEl) {
+                const box = headEl && headEl.closest(".nsft-sfv-meta");
                 if (!box) return;
-                helpCollapsed = box.dataset.collapsed !== '1';
-                box.dataset.collapsed = helpCollapsed ? '1' : '0';
+                metaCollapsed = box.dataset.collapsed !== "1";
+                box.dataset.collapsed = metaCollapsed ? "1" : "0";
                 try {
-                    window.postMessage({ type: 'nsft-sfv-help-collapsed', collapsed: helpCollapsed }, '*');
+                    window.postMessage({ type: "nsft-sfv-meta-collapsed", collapsed: metaCollapsed }, "*");
                 } catch (e) { }
             },
+            toggleFieldHelp: function (fieldName) {
+                const box = document.querySelector("#" + NSFT.MODAL + " .nsft-sfv-help");
+                if (!box) {
+                    try { this.openNativeHelp(fieldName); } catch (e) { }
+                    return;
+                }
+                helpCollapsed = box.dataset.collapsed !== "1";
+                box.dataset.collapsed = helpCollapsed ? "1" : "0";
+                pintarBotonAyuda();
+                try {
+                    window.postMessage({ type: "nsft-sfv-help-collapsed", collapsed: helpCollapsed }, "*");
+                } catch (e) { }
+                try { requestAnimationFrame(fitModalInViewport); } catch (e) { }
+            },
+            diagnoseList: function (fieldName) {
+                if (!fieldName) fieldName = (_lastRenderCtx && _lastRenderCtx.fieldName) || "";
+                if (!fieldName) {
+                    console.log("NSFT: abre el panel de un campo y vuelve a ejecutarlo, o pasa su id: diagnoseList('custrecord_...')");
+                    return null;
+                }
+                const w = window.document.querySelector(
+                    '[data-field-name="' + fieldName + '"]');
+                const fs_ = window.document.getElementById(fieldName + "_fs");
+                const kind = readListKind(fieldName);
+                const sync = extractLinkFromSync(fieldName);
+                const vista = viewLinkUrl(fieldName);
+                const url = sync || vista;
+                const info = {
+                    campo: fieldName,
+                    esVista: esVista(fieldName),
+                    'data-mode': w ? w.getAttribute("data-mode") : '(sin contenedor)',
+                    'wrapper data-field-type': w ? w.getAttribute("data-field-type") : '(sin contenedor)',
+                    '_fs data-fieldtype': fs_ ? fs_.getAttribute("data-fieldtype") : '(no hay _fs)',
+                    'readListKind': kind || '(no lo reconoce como lista)',
+                    'enlace desde Sync': sync || '(nada)',
+                    'enlace del valor (vista)': vista || '(nada)',
+                    'destino resuelto': JSON.stringify(resolveListTarget(url)) 
+                };
+                let hrefs = [];
+                try {
+                    hrefs = Array.prototype.slice.call(w ? w.querySelectorAll("a[href]") : [])
+                        .map(function (a) { return a.getAttribute("href"); });
+                } catch (e) { }
+                info['enlaces dentro del campo'] = hrefs.length ? hrefs : '(ninguno)';
+                console.table ? console.table(info) : console.log(info);
+                return info;
+            },
+
             diagnoseHelp: function (fieldName) {
                 const anchor = findHelpAnchor(fieldName);
                 console.log('%c[NSFT SFV] diagnóstico de ayuda: ' + fieldName, 'font-weight:bold');
@@ -2586,6 +3664,12 @@
                 }
                 console.log('  lectura directa:', readFieldHelpText(fieldName, null) || '(nada)');
                 console.log('  plantilla aprendida:', helpTemplates[helpTemplateKey()] || '(ninguna)');
+                console.log('  url transcrita de la etiqueta:', nativeFieldHelpUrl(fieldName) || '(no se pudo transcribir)');
+                console.log('  url desnuda:', bareFieldHelpUrl(fieldName));
+                helpFillerFor(fieldName, function (relleno) {
+                    console.log('  relleno de «sin ayuda» de esta cuenta:',
+                        relleno ? '"' + relleno.slice(0, 160) + '"' : '(no se pudo sondear)');
+                });
 
                 const urls = buildFieldHelpUrls(fieldName);
                 console.log('  urls a probar:', urls);
@@ -2593,8 +3677,11 @@
                     fetch(url, { credentials: 'same-origin' })
                         .then(function (r) { return r.text().then(function (t) { return { s: r.status, t: t }; }); })
                         .then(function (res) {
+                            const directo = helpTextFromContainers(parseHelpDoc(res.t), fieldName);
                             const text = extractHelpFromHtml(res.t, fieldName, helpHints(fieldName));
-                            console.log(`  [${i + 1}/${urls.length}] status=${res.s} bytes=${res.t.length} texto=${text ? '"' + text.slice(0, 200) + '"' : '(vacío)'}`);
+                            console.log(`  [${i + 1}/${urls.length}] status=${res.s} bytes=${res.t.length}`
+                                + ` contenedor=${directo ? '"' + directo.slice(0, 160) + '"' : '(vacío)'}`
+                                + ` filtro=${text ? '"' + text.slice(0, 160) + '"' : '(vacío)'}`);
                             if (i === 0) console.log('  html de la 1ª (600 primeros):', res.t.slice(0, 600));
                         })
                         .catch(function (e) { console.log(`  [${i + 1}/${urls.length}] ERROR`, e); });

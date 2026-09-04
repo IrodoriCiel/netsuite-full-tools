@@ -1,0 +1,50 @@
+
+.nsft-sfb-fila {
+    display: inline-flex;
+    align-items: flex-end;
+    vertical-align: bottom;
+    padding: 0 6px 2px 14px;
+}
+
+.nsft-sfb-boton {
+    padding: 4px 16px 5px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--on-vibrant, #ffffff);
+    background: var(--btn-bg, #2563eb);
+    border: 1px solid var(--btn-border, #1d4ed8);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+}
+
+.nsft-sfb-boton.is-sin-traje {
+    visibility: hidden;
+}
+
+.nsft-sfb-boton:hover {
+    filter: brightness(0.92);
+}
+
+.nsft-sfb-boton:active {
+    filter: brightness(0.85);
+}
+
+.nsft-sfb-boton.is-pendiente::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+
+
+html[data-nsft-theme="dark"] .nsft-sfb-boton.is-pendiente::after {
+    box-shadow: 0 0 0 2px var(--nsft-dk-surface, #141519);
+}

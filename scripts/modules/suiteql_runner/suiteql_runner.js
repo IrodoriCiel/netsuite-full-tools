@@ -2513,9 +2513,15 @@
             const scriptid = (p.scriptid && /^[a-z0-9_]+$/i.test(p.scriptid)) ? p.scriptid : null;
             const recordId = (p.recordId != null && /^\d+$/.test(String(p.recordId))) ? String(p.recordId) : null;
             if (scriptid && recordId) {
+                let q = `SELECT * FROM ${scriptid} WHERE id = ${recordId}`;
+                try {
+                    if (window.sqlFormatter && typeof window.sqlFormatter.format === 'function') {
+                        q = window.sqlFormatter.format(q, { language: 'sql', keywordCase: 'upper', indent: '  ' });
+                    }
+                } catch (e) { }
                 createTab({
                     title: chrome.i18n.getMessage('sql_tab_record_title') || 'Record',
-                    query: `SELECT * FROM ${scriptid} WHERE id = ${recordId}`
+                    query: q
                 });
             } else {
                 logToToolbar(chrome.i18n.getMessage('sql_resolve_scriptid_fail') || 'Could not resolve the record type scriptid', 'error');
@@ -6266,6 +6272,12 @@
             btn.title = chrome.i18n.getMessage(modal.dataset.state === 'fullscreen'
                 ? 'sql_fullscreen_exit' : 'sql_fullscreen_enter') || '';
         };
+
+        clickHandler('nsft-sql-settings', () => {
+            try {
+                chrome.runtime.sendMessage({ action: 'nsftOpenSettings', highlight: 'enableSuiteQLRunner' });
+            } catch (e) { }
+        });
 
         clickHandler('nsft-sql-minimise', () => {
             modal.dataset.state = 'minimised';
@@ -10493,6 +10505,7 @@
             <div class="suiteql-runner-header">
                 <span id="nsft-sql-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>${chrome.i18n.getMessage('sql_title') || 'SuiteQL Runner'}</span>
                 <span class="nsft-header-actions">
+                    <span id="nsft-sql-settings" title="${chrome.i18n.getMessage('nsft_open_settings') || 'Ajustes'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;pointer-events:none;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
                     <span id="nsft-sql-minimise"></span>
                     <span id="nsft-sql-fullscreen" title="${chrome.i18n.getMessage('sql_fullscreen_enter') || 'Full screen'}"></span>
                     <span id="nsft-sql-maximise"></span>

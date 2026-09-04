@@ -28,6 +28,10 @@
     let _saeEnabled = false, _saeMode = 'button';
     let _rtrailEnabled = false;
 
+    const ITEM_KEYS = ['recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'];
+    const _items = {};
+    function ver(k) { return _items[k] !== false; }
+
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
         enableOpenInOtherEnv: true,
@@ -37,6 +41,13 @@
         enableEditAndSaveButton: true,
         enableSaveAndEditButton: true,
         enableRecordTrail: true,
+        recordOptionsMenuShowOpenCustom: true,
+        recordOptionsMenuShowAddField: true,
+        recordOptionsMenuShowAddColumn: true,
+        recordOptionsMenuShowDependents: true,
+        recordOptionsMenuShowCopyUrl: true,
+        recordOptionsMenuShowOpenInEnv: true,
+        recordOptionsMenuShowXml: true,
         deleteRecordButtonMode: 'menu',
         editAndSaveButtonMode: 'menu',
         saveAndEditButtonMode: 'menu'
@@ -49,6 +60,7 @@
         _easEnabled = !!setting.enableEditAndSaveButton;
         _saeEnabled = !!setting.enableSaveAndEditButton;
         _rtrailEnabled = !!setting.enableRecordTrail;
+        ITEM_KEYS.forEach((k) => { _items[k] = setting[k] !== false; });
         _delMode = setting.deleteRecordButtonMode;
         _easMode = setting.editAndSaveButtonMode;
         _saeMode = setting.saveAndEditButtonMode;
@@ -58,7 +70,9 @@
     const ACTION_KEYS = [
         'enableDeleteRecordButton', 'enableEditAndSaveButton', 'enableSaveAndEditButton',
         'deleteRecordButtonMode', 'editAndSaveButtonMode', 'saveAndEditButtonMode',
-        'enableRecordTrail'
+        'enableRecordTrail',
+        'enableSuiteQLRunner', 'enableSuiteScriptConsole', 'enableOpenInOtherEnv',
+        'recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'
     ];
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -79,6 +93,10 @@
             if (changes.editAndSaveButtonMode) _easMode = changes.editAndSaveButtonMode.newValue;
             if (changes.saveAndEditButtonMode) _saeMode = changes.saveAndEditButtonMode.newValue;
             if (changes.enableRecordTrail) _rtrailEnabled = !!changes.enableRecordTrail.newValue;
+            if (changes.enableSuiteQLRunner) _sqlEnabled = !!changes.enableSuiteQLRunner.newValue;
+            if (changes.enableSuiteScriptConsole) _sscEnabled = !!changes.enableSuiteScriptConsole.newValue;
+            if (changes.enableOpenInOtherEnv) _envEnabled = !!changes.enableOpenInOtherEnv.newValue;
+            ITEM_KEYS.forEach((k) => { if (changes[k]) _items[k] = changes[k].newValue !== false; });
             if (_enabled) rerenderMenu();
         }
     });
@@ -315,9 +333,9 @@
 
         if (context.isCustomRecord) {
             if (context.rectype) {
-                items.push(createMenuItem(chrome.i18n.getMessage('recordOptionOpenCustomRecord'),
+                if (ver("recordOptionsMenuShowOpenCustom")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionOpenCustomRecord'),
                     `/app/common/custom/custrecord.nl?id=${context.rectype}&e=T`, 'settings'));
-                items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
+                if (ver("recordOptionsMenuShowAddField")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
                     `/app/common/custom/custreccustfield.nl?rectype=${context.rectype}`, 'plus_circle'));
                 if (context.id && _sqlEnabled) {
                     insertActions();
@@ -326,7 +344,7 @@
                 }
             }
             if (context.id && context.rectype) {
-                items.push(createMenuItem(chrome.i18n.getMessage('recordOptionViewDependentRecords'),
+                if (ver("recordOptionsMenuShowDependents")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionViewDependentRecords'),
                     `/core/pages/childrecords.nl?id=${context.id}&t=CustomRecordEntry&rectype=${context.rectype}`, 'dependents'));
             }
         }
@@ -334,31 +352,31 @@
         if (context.isCustomTransaction) {
             const cType = context.customtype;
             if (cType) {
-                items.push(createMenuItem(chrome.i18n.getMessage('recordOptionOpenCustomTransaction'),
+                if (ver("recordOptionsMenuShowOpenCustom")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionOpenCustomTransaction'),
                     `/app/common/custom/customtransaction.nl?id=${cType}&e=T`, 'settings'));
-                items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
+                if (ver("recordOptionsMenuShowAddField")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
                     `/app/common/custom/bodycustfield.nl?customtype=${cType}`, 'plus_circle'));
                 insertActions();
-                items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddColumn'),
+                if (ver("recordOptionsMenuShowAddColumn")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddColumn'),
                     `/app/common/custom/columncustfield.nl?customtype=${cType}`, 'columns'));
             }
         }
 
         if (context.isStandardTransaction) {
-            items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
+            if (ver("recordOptionsMenuShowAddField")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
                 `/app/common/custom/bodycustfield.nl`, 'plus_circle'));
             insertActions();
-            items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddColumn'),
+            if (ver("recordOptionsMenuShowAddColumn")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddColumn'),
                 `/app/common/custom/columncustfield.nl`, 'columns'));
         }
 
         if (context.isEntity) {
-            items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
+            if (ver("recordOptionsMenuShowAddField")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
                 `/app/common/custom/entitycustfield.nl`, 'plus_circle'));
         }
 
         if (context.isItem) {
-            items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
+            if (ver("recordOptionsMenuShowAddField")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
                 `/app/common/custom/itemcustfield.nl`, 'plus_circle'));
         }
 
@@ -367,16 +385,16 @@
                 `window.dispatchEvent(new CustomEvent('nsft-show-record-trail')); return false;`));
         }
 
-        items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionCopyCleanUrl'), 'link',
+        if (ver("recordOptionsMenuShowCopyUrl")) items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionCopyCleanUrl'), 'link',
             `window.dispatchEvent(new CustomEvent('nsft-roptions-copy-url')); return false;`));
 
         if (_envEnabled) {
-            items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionOpenInEnv'), 'open_in_env',
+            if (ver("recordOptionsMenuShowOpenInEnv")) items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionOpenInEnv'), 'open_in_env',
                 `window.dispatchEvent(new CustomEvent('nsft-show-env-picker', { detail: { x: event.clientX, y: event.clientY } })); return false;`));
         }
 
         const xmlUrl = window.location.href + (window.location.search ? '&' : '?') + 'xml=t';
-        items.push(createMenuItem(chrome.i18n.getMessage('recordOptionViewXml'), xmlUrl, 'xml'));
+        if (ver("recordOptionsMenuShowXml")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionViewXml'), xmlUrl, 'xml'));
 
         if (!_actionsInserted && recordActions.length) {
             items.unshift(...recordActions);

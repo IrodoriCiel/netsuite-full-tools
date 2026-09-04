@@ -12,7 +12,7 @@
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Valoración" src="https://img.shields.io/chrome-web-store/rating/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&color=F59E0B&label=Rating"></a>
 </p>
 <p align="center">
-  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v7.0.0-555555?style=for-the-badge"></a>
+  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v7.1.1-555555?style=for-the-badge"></a>
   <a href="https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3"><img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-2C6E4E?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
   <a href="#ficha-técnica--technical-details"><img alt="JavaScript sin frameworks" src="https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"></a>
   <a href="#ficha-técnica--technical-details"><img alt="Sin telemetría ni servidores propios" src="https://img.shields.io/badge/Privacidad-100%25%20local-2C6E4E?style=for-the-badge"></a>
@@ -24,7 +24,7 @@
 
 ---
 
-**111 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
+**106 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
 
 ## Qué es este repositorio · About this repository
 
@@ -48,7 +48,6 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Modo oscuro global** | un tema oscuro para toda la interfaz, más cómodo para la vista. |
 | **Agrupar pestañas** | agrupa automáticamente tus pestañas por cuenta y entorno (ej. 123_SB1). |
 | **Paleta de comandos** | navega y ejecuta cualquier herramienta con Ctrl+Shift+Espacio. |
-| **Buscador de personalizaciones** | una ventana para encontrar scripts, workflows, campos, búsquedas guardadas, plantillas y archivos de la cuenta por su nombre. |
 | **Hoja de atajos de teclado** | todos los atajos de NSFT con Ctrl+Shift+?, incluidos los de Alt+Shift para abrir cada herramienta (personalizables). |
 | **Distintivo de entorno (PRD/SB/RP)** | el icono te dice siempre en qué entorno estás. |
 
@@ -59,23 +58,17 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Ver objeto del registro** | inspecciona el objeto completo del registro actual en un visor limpio, con vista amigable en forma de ficha. |
 | **Ver scripts del registro** | todos los scripts y workflows asociados, de un vistazo. |
 | **Ver logs del registro** | los logs de ejecución sin salir de la página, con los scripts del registro preseleccionados y filtros por nivel, tipo, texto y fechas; también puedes cambiar a otro tipo de registro desde la cabecera. |
-| **Record Trail** | documentos de origen y destino enlazados de una transacción, con salto rápido y copia de IDs. |
 | **Cargar registro a consola** | carga el registro actual en la consola (SS1.0 y SS2.x). |
-| **Menú Opciones de Registro** | accesos directos según el tipo de registro (agregar campo, ver XML, dependientes…). |
+| **Menú Opciones de Registro** | accesos directos según el tipo de registro (agregar campo, ver XML, dependientes…), más Record Trail y los botones Guardar y Editar, Editar y Guardar y Eliminar registro; eliges cuáles ofrece. |
 | **Ir al record** | salta a cualquier registro con Alt+Shift+G por número, tipo o nombre. |
 | **Registros recientes ampliados** | historial completo con buscador y fecha de acceso. |
 | **Abrir en otro entorno** | abre la misma URL en producción, sandbox o release preview conservando ruta y parámetros. |
 | **Número de sandbox en el logo** | distingue entre varios sandboxes de la misma cuenta. |
-| **Copiar IDs internos** | copia con un clic IDs de campos, sublistas y registros. |
-| **Mostrar información de campos** | en la ayuda de campo: editar valor, copiar ID, ver info técnica. |
-| **Historial del campo** | quién cambió un campo, cuándo, y sus valores anterior y nuevo. |
+| **Copiar IDs internos** | copia con un clic IDs de campos, sublistas y registros, y abre desde la sublista la definición del Custom Record dueño. |
+| **Mostrar información de campos** | en la ayuda de campo: valor y su lista, ID interno, tipo, ayuda e historial de cambios; eliges qué secciones ver. |
 | **Buscar campo por ID/etiqueta** | encuentra cualquier campo con Ctrl+Shift+F. |
-| **Abrir registro personalizado desde sublista** | abre la definición del Custom Record dueño con un clic. |
 | **Vista previa de custom fields al pasar el cursor** | ID, tipo y valores sin abrir su definición. |
 | **Enlaces nativos relacionados** | enlaces directos al registro de los campos nativos. |
-| **Botón Guardar y Editar** | guarda y vuelve a edición automáticamente. |
-| **Botón Editar y Guardar** | recarga y reguarda el registro (útil para forzar user event scripts). |
-| **Botón Eliminar registro** | botón Eliminar en la barra de acciones. |
 | **Botón Cancelar sin History.Back** | vuelve a la vista del registro actual, no a la página anterior. |
 | **Botón Actualizar sublista** | recarga una sublista sin refrescar toda la página. |
 
@@ -109,6 +102,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Creación rápida de búsquedas** | selector con buscador y enlaces favoritos. |
 | **Buscador de campos en búsquedas** | filtros y búsqueda rápida en los selectores de campos. |
 | **Tipo de resumen en bloque** | pone o quita el tipo de resumen (agrupar, sumar, contar…) en todas las columnas de una búsqueda guardada a la vez. |
+| **Filtros en bloque** | en los resultados de una búsqueda guardada, cambiar un filtro deja de recargar la página: se ponen todos y un botón los aplica de una vez. |
 | **Autocompletar fórmula de búsqueda** | sugiere IDs de campo dentro de { } en el editor de fórmulas. |
 | **Visor de respuesta CSV** | en el estado de importaciones CSV, añade un botón Ver junto al archivo de respuesta y lo abre como tabla editable, para revisar los errores, corregirlos y descargarlo sin salir de la página. |
 | **Preview inline de búsquedas** | panel inferior con la vista previa sin salir de la página. |
@@ -150,6 +144,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Función | Qué hace |
 |---|---|
+| **Buscador de personalizaciones** | una ventana para encontrar scripts, workflows, campos, búsquedas guardadas, plantillas y archivos de la cuenta por su nombre. |
 | **Autogenerar IDs de campos y registros** | ID automático a partir del nombre, con prefijo configurable. |
 | **Copiar ID de cuenta en roles** | muestra y copia el ID de la cuenta desde el menú de roles. |
 | **Buscador de roles** | filtra roles y cuentas al escribir. |
@@ -184,7 +179,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Función | Qué hace |
 |---|---|
-| **Preview lateral** | panel con vista previa en vivo mientras editas la plantilla. |
+| **Vista previa en Plantillas PDF/HTML** | panel inferior plegable y ajustable con la vista previa en vivo mientras editas la plantilla. |
 | **Autocompletado** | sugiere variables y funciones nsformat_* al editar plantillas FreeMarker. |
 | **Historial de versiones** | navega entre versiones anteriores de la plantilla. |
 
@@ -209,7 +204,6 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Global Dark Mode** | a dark theme for the whole interface, easier on the eyes. |
 | **Grouped Tabs** | automatically group your tabs by account and environment (e.g. 123_SB1). |
 | **Command Palette** | navigate and run any tool with Ctrl+Shift+Space. |
-| **Customization Finder** | one window to find the account’s scripts, workflows, fields, saved searches, templates and files by name. |
 | **Keyboard Shortcuts Cheat Sheet** | every NSFT shortcut with Ctrl+Shift+?, including the Alt+Shift ones that open each tool (rebindable). |
 | **Environment Badge (PRD/SB/RP)** | the icon always tells you which environment you're in. |
 
@@ -220,23 +214,17 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **View Record Object** | inspect the full record object in a clean, searchable viewer, with a friendly card-style view. |
 | **View Record Scripts** | every script and workflow tied to the record, at a glance. |
 | **View Record Logs** | execution logs without leaving the page, with the record's scripts preselected and filters by level, type, text and dates; you can also switch to another record type from the header. |
-| **Record Trail** | linked source and target documents of a transaction, with quick open and ID copy. |
 | **Load Record to Console** | load the current record into the console (SS1.0 and SS2.x). |
-| **Record Options Menu** | shortcuts based on record type (add field, view XML, dependencies…). |
+| **Record Options Menu** | shortcuts based on record type (add field, view XML, dependencies…), plus Record Trail and the Save and Edit, Edit and Save and Delete Record buttons; you choose which ones it offers. |
 | **Go to Record** | jump to any record with Alt+Shift+G by number, type or name. |
 | **Expanded Recent Records** | full history with inline search and access date. |
 | **Open in Another Environment** | open the same URL in production, sandbox or release preview, keeping path and params. |
 | **Sandbox Number on Header Logo** | tell multiple sandboxes of the same account apart. |
-| **Copy Internal IDs** | one-click copy of field, sublist and record IDs. |
-| **Show Field Information** | in field help: edit value, copy ID, view technical info. |
-| **Field History** | who changed a field, when, and its previous and new values. |
+| **Copy Internal IDs** | one-click copy of field, sublist and record IDs, and opens the owning Custom Record definition from a sublist. |
+| **Show Field Information** | in field help: value and its list, internal ID, type, help and change history; you choose which sections to see. |
 | **Find Field by ID/Label** | find any field with Ctrl+Shift+F. |
-| **Open Custom Record from Sublist** | open the owning Custom Record definition with one click. |
 | **Hover Preview for Custom Fields** | ID, type and values without opening the definition. |
 | **Related Native Links** | direct links to native field records. |
-| **Save and Edit Button** | save and return to edit mode automatically. |
-| **Edit and Save Button** | reload and re-save the record (great for forcing user event scripts). |
-| **Delete Record Button** | a Delete button in the action bar. |
 | **Cancel Without History.Back** | returns to the current record's view, not the previous page. |
 | **Refresh Sublist Button** | reload a sublist without refreshing the whole page. |
 
@@ -270,6 +258,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Quick Search Creation** | record-type selector with search and favorite links. |
 | **Search Fields Finder** | filters and quick search in field selectors. |
 | **Bulk Summary Type** | sets or clears the summary type (group, sum, count…) on every column of a saved search at once. |
+| **Batch Search Filters** | on saved search results, changing a filter no longer reloads the page: set them all and apply them once with a button. |
 | **Search Formula Autocomplete** | suggests field IDs inside { } in the formula editor. |
 | **CSV Response Viewer** | on the CSV import status page, adds a View button next to the response file and opens it as an editable table, so you can review errors, fix them and download it without leaving the page. |
 | **Inline Search Preview** | bottom panel with the preview without leaving the page. |
@@ -311,6 +300,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Feature | What it does |
 |---|---|
+| **Customization Finder** | one window to find the account’s scripts, workflows, fields, saved searches, templates and files by name. |
 | **Autogenerate Field/Record IDs** | automatic ID from the name, with a configurable prefix. |
 | **Copy Account ID in Roles** | shows and copies the account ID from the roles menu. |
 | **Role Finder** | filter roles and accounts as you type. |
@@ -345,7 +335,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Feature | What it does |
 |---|---|
-| **Side Preview** | a live-preview panel while you edit the template. |
+| **Preview on PDF/HTML Templates** | a collapsible, resizable bottom panel with a live preview while you edit the template. |
 | **Autocomplete** | suggests nsformat_* variables and functions while editing FreeMarker templates. |
 | **Version History** | browse previous versions of the template. |
 

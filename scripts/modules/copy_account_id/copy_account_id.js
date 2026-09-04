@@ -17,14 +17,39 @@
 
     let envLetters = '3';
 
-    chrome.storage.local.get({
-        [STORAGE_KEY]: true,
-        envBadgeLetters: '3'
-    }, (items) => {
-        if (!items[STORAGE_KEY] || !isApplicablePage()) return;
+    const AJUSTES_DEFECTOS = { [STORAGE_KEY]: true, envBadgeLetters: '3' };
+    let _arrancado = false;
+
+    function arrancar(items) {
+        if (_arrancado || !isApplicablePage()) return;
+        _arrancado = true;
         envLetters = items.envBadgeLetters || '3';
         init(items);
+    }
+
+    chrome.storage.local.get(AJUSTES_DEFECTOS, (items) => {
+        if (!items[STORAGE_KEY]) return;
+        arrancar(items);
     });
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes[STORAGE_KEY]) return;
+        if (changes[STORAGE_KEY].newValue === false) { desmontar(); return; }
+        chrome.storage.local.get(AJUSTES_DEFECTOS, arrancar);
+    });
+
+    function desmontar() {
+        if (!_arrancado) return;
+        _arrancado = false;
+        cleanup();
+        const accountElement = document.querySelector(NAVBAR_ACCOUNT_SELECTOR);
+        if (accountElement) {
+            accountElement.removeEventListener('click', startActivePolling);
+            accountElement.removeEventListener('mouseenter', startActivePolling);
+        }
+        document.querySelectorAll('[data-nsft-env-num]').forEach(removeEnvNumber);
+        document.querySelectorAll('.nsft-account-id-wrapper').forEach((el) => el.remove());
+    }
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local' || !changes.envBadgeLetters) return;

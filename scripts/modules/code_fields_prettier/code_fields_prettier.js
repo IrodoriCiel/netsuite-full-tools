@@ -66,6 +66,17 @@
         if (_unsub) { _unsub(); _unsub = null; }
         const themeStyle = document.getElementById(THEME_LINK_ID);
         if (themeStyle) themeStyle.remove();
+        restaurarOriginales();
+    }
+
+    function restaurarOriginales() {
+        document.querySelectorAll('.' + WRAPPER_OWN_CLASS).forEach((wrapper) => {
+            const original = wrapper._nsftOriginal;
+            if (!original) return;
+            wrapper._nsftOriginal = null;
+            if (original.dataset) delete original.dataset.nsftPrettierDone;
+            wrapper.replaceWith(original);
+        });
     }
 
     function resolveTheme(themeName) {
@@ -387,6 +398,7 @@
             try { window.hljs.highlightElement(code); } catch (err) { console.warn('[NSFT] Highlight error:', err); }
         }
 
+        wrapper._nsftOriginal = span;
         span.replaceWith(wrapper);
     }
 
@@ -443,6 +455,7 @@
 
         addRawToggle(wrapper, btnGroup, [host, codePre], content, { alsoDisable: [toggleBtn] });
 
+        wrapper._nsftOriginal = span;
         span.replaceWith(wrapper);
     }
 

@@ -271,17 +271,41 @@
         if (aiTop) aiTop.remove();
     }
 
+    const ITEM_POR_CLAVE = {
+        enableViewRecordObject: [VIEW_RECORD_ITEM_ID],
+        enableViewScriptedRecord: [VIEW_SCRIPTED_RECORD_ITEM_ID],
+        enableRecordLogsViewer: [RECORD_LOGS_ITEM_ID],
+        enableSuiteQLRunner: [SUITEQL_RUNNER_ITEM_ID],
+        enableExportSearch: [EXPORT_SEARCH_ITEM_ID],
+        enableLoadRecordConsole: [LOAD_RECORD_SS1_ITEM_ID, LOAD_RECORD_SS2_ITEM_ID],
+        enableLoadNModule: [LOAD_N_MODULE_ITEM_ID],
+        enableGoToRecord: [GOTO_RECORD_ITEM_ID],
+        enableCommandPalette: [COMMAND_PALETTE_ITEM_ID],
+        enableCustomizationFinder: [CFIND_ITEM_ID],
+        enableSuiteScriptConsole: [SSC_ITEM_ID],
+        enableAdvancedEditor: [ADV_ITEM_ID],
+        enableShortcutsCheatsheet: [CHEATSHEET_ITEM_ID],
+        enableFindFieldById: [FIND_FIELD_ITEM_ID],
+        enableGithubBackup: [GITHUB_BACKUP_ITEM_ID],
+        enablePagePerformance: [PAGE_PERF_ITEM_ID],
+        enableOpenInOtherEnv: ['link_OpenInEnv_group'],
+        enableAiAssistant: [AI_TOP_ITEM_ID],
+        aiAssistantPage: [AI_TOP_ITEM_ID]
+    };
+
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
         if (changes.enableAdvancedEditor) {
             window.__nsftAdvActivo = changes.enableAdvancedEditor.newValue !== false;
         }
-        if (!changes.enableAiAssistant && !changes.aiAssistantPage) return;
+
+        const tocadas = Object.keys(changes).filter(
+            (k) => ITEM_POR_CLAVE[k] || k === 'openInOtherEnvSandboxes');
+        if (!tocadas.length) return;
+
         chrome.storage.local.get(STORAGE_KEY, (items) => {
-            const on = items.enableAiAssistant && items.aiAssistantPage !== false;
-            const el = document.getElementById(AI_TOP_ITEM_ID);
-            if (!on && el) el.remove();
-            else if (on && !el) addToolsMenu(items);
+            removeToolsMenu();
+            addToolsMenu(items);
         });
     });
 
