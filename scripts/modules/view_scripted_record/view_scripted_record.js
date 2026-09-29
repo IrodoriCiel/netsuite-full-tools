@@ -1237,7 +1237,9 @@
                     let rSt = (w.releasestatus || '').toUpperCase();
                     let rC = (rSt === 'RELEASED') ? 'nsft-scripted-rec-badge-released' : (rSt === 'TESTING' ? 'nsft-scripted-rec-badge-yellow' : 'nsft-scripted-rec-badge-gray');
                     const wfInactive = (rSt === 'SUSPENDED' || rSt === 'NOTINITIATING') ? 'nsft-scripted-rec-row-inactive' : '';
-                    return `<tr class="${wfInactive}" data-sr-wf-release="${escapeHtml(rSt || 'UNKNOWN')}"><td><div style="margin-bottom: 2px;"><a href="${escapeHtml(w.url)}" target="_blank" style="color:#0070f3; text-decoration:none; font-weight:600;">${escapeHtml(w.name)}</a></div><div class="nsft-scripted-rec-owner-inline">${chrome.i18n.getMessage('sr_propietario')}: ${escapeHtml(w.owner || '-')}</div>${w.currentState ? `<div style="font-size:9px; color:#4b5563; margin-top:2px;">${chrome.i18n.getMessage('sr_current_state')}: <span style="font-weight:600;">${escapeHtml(w.currentState)}</span></div>` : ''}</td><td><span class="nsft-scripted-rec-badge ${rC}">${escapeHtml(tStatus(w.releasestatus))}</span></td></tr>`;
+                    const wfSearch = srFold([w.name, w.owner, w.currentState, tStatus(w.releasestatus)]
+                        .filter(Boolean).join(' '));
+                    return `<tr class="${wfInactive}" data-sr-wf-release="${escapeHtml(rSt || 'UNKNOWN')}" data-sr-search="${escapeHtml(wfSearch)}"><td><div style="margin-bottom: 2px;"><a href="${escapeHtml(w.url)}" target="_blank" style="color:#0070f3; text-decoration:none; font-weight:600;">${escapeHtml(w.name)}</a></div><div class="nsft-scripted-rec-owner-inline">${chrome.i18n.getMessage('sr_propietario')}: ${escapeHtml(w.owner || '-')}</div>${w.currentState ? `<div style="font-size:9px; color:#4b5563; margin-top:2px;">${chrome.i18n.getMessage('sr_current_state')}: <span style="font-weight:600;">${escapeHtml(w.currentState)}</span></div>` : ''}</td><td><span class="nsft-scripted-rec-badge ${rC}">${escapeHtml(tStatus(w.releasestatus))}</span></td></tr>`;
                 }).join('')}</tbody></table>`;
                 contentWorkflow.innerHTML = createCard(table);
             } else {

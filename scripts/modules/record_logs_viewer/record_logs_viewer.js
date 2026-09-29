@@ -868,8 +868,8 @@
                 <span id="nsft-rlv-title">${TITLE_ICON}<span>${T.title}</span>${CTX_HTML}</span>
                 <span class="nsft-header-actions">
                     ${PANEL_MODE
-        ? `<span id="nsft-rlv-undock" class="nsft-rlv-dock" title="${T.undock}">${UNDOCK_ICON}</span>`
-        : `<span id="nsft-rlv-dock" class="nsft-rlv-dock" title="${T.dock}">${DOCK_ICON}</span>`}
+        ? `<span id="nsft-rlv-undock" class="nsft-rlv-dock nsft-modal-hide-min" title="${T.undock}">${UNDOCK_ICON}</span>`
+        : `<span id="nsft-rlv-dock" class="nsft-rlv-dock nsft-modal-hide-min" title="${T.dock}">${DOCK_ICON}</span>`}
                     <span id="nsft-rlv-minimise" class="nsft-modal-btn-minimise"></span>
                     <span id="nsft-rlv-fullscreen" class="nsft-modal-btn-fullscreen" title="${i18n('sql_fullscreen_enter', 'Pantalla completa')}"></span>
                     <span id="nsft-rlv-maximise" class="nsft-modal-btn-maximise"></span>

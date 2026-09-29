@@ -59,6 +59,11 @@
     list-style: disc outside;
 }
 
+#nsft-update-notice .nsft-un-list li strong {
+    font-weight: 700;
+    color: #111827;
+}
+
 #nsft-update-notice .nsft-un-list li.is-new {
     color: #1f2937;
 }
@@ -120,6 +125,10 @@ html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-body {
 
 html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-list {
     color: #C6CEDB;
+}
+
+html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-list li strong {
+    color: #E6EBF2;
 }
 
 html[data-nsft-theme="dark"] #nsft-update-notice .nsft-un-list li.is-new {

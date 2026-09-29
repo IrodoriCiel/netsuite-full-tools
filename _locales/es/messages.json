@@ -1276,6 +1276,12 @@
   "cmdp_act_nsft_ghbackup_desc": {
     "message": "Sube los SuiteScripts de la cuenta a un repositorio de GitHub"
   },
+  "cmdp_act_sx": {
+    "message": "Ejecutar un script Map/Reduce o Scheduled…"
+  },
+  "cmdp_act_sx_desc": {
+    "message": "Elige el despliegue y ejecútalo sin abrir su ficha"
+  },
   "ghb_title": {
     "message": "Respaldar SuiteScripts a GitHub"
   },
@@ -2008,9 +2014,6 @@
   "welcomeWizProfileAllDesc": {
     "message": "Todas las funciones de NSFT activadas, la extensión completa."
   },
-  "colorThemesScopeNote": {
-    "message": "Se aplica en todas tus cuentas de NetSuite y con cualquier rol, y siempre por encima de los temas nativos."
-  },
   "previewPanelTitle": {
     "message": "Vista previa"
   },
@@ -2019,6 +2022,9 @@
   },
   "welcomeWizRequires": {
     "message": "Requiere $1"
+  },
+  "welcomeWizVariesByRecord": {
+    "message": "Las opciones del menú cambian según el registro y según si lo estás viendo o editando: aquí se muestran a modo de ejemplo y no salen todas siempre."
   },
   "welcomeWizProfileCustom": {
     "message": "Personalizado"
@@ -2408,13 +2414,13 @@
     "message": "Enlaces nativos relacionados"
   },
   "welcomeCatRecordItem16": {
-    "message": "Botón Guardar y Editar"
+    "message": "Guardar y Editar"
   },
   "welcomeCatRecordItem17": {
-    "message": "Botón Editar y Guardar"
+    "message": "Editar y Guardar"
   },
   "welcomeCatRecordItem18": {
-    "message": "Botón Eliminar Registro"
+    "message": "Eliminar Registro"
   },
   "welcomeCatRecordItem19": {
     "message": "Cancelar sin History.Back"
@@ -2514,6 +2520,9 @@
   },
   "welcomeCatLoginItem6": {
     "message": "Versión de NetSuite en el header"
+  },
+  "welcomeCatLoginItem7": {
+    "message": "Volver a tu página tras iniciar sesión en otra pestaña"
   },
   "welcomeCatPowerItem5": {
     "message": "Aviso de nueva versión"
@@ -2927,13 +2936,181 @@
     "message": "Temas de Color para NetSuite"
   },
   "enableCommandPaletteDesc": {
-    "message": "Paleta de comandos rápida para navegar y ejecutar herramientas con Ctrl+Shift+Espacio."
+    "message": "Paleta de comandos rápida para navegar y ejecutar herramientas."
   },
   "enableCustomizationFinderLabel": {
     "message": "Buscador de personalizaciones"
   },
   "enableCustomizationFinderDesc": {
     "message": "Una sola ventana para encontrar scripts, workflows, campos, búsquedas guardadas, plantillas, archivos, despliegues y listas de la cuenta."
+  },
+  "enableScriptExecuteLabel": {
+    "message": "Ejecutar Map/Reduce y Scheduled"
+  },
+  "enableScriptExecuteDesc": {
+    "message": "Ejecuta un script Map/Reduce o Scheduled desde su ficha, la Paleta de Comandos o el menú Herramientas, eligiendo el despliegue y siguiendo su avance hasta que termina."
+  },
+  "scriptExecuteConfirmSandboxLabel": {
+    "message": "Confirmar también fuera de producción"
+  },
+  "sx_btn_run": {
+    "message": "Ejecutar"
+  },
+  "sx_btn_run_title": {
+    "message": "Ejecutar este script ahora sin salir de la página"
+  },
+  "sx_checking_short": {
+    "message": "Comprobando…"
+  },
+  "sx_title": {
+    "message": "Ejecutar script"
+  },
+  "sx_ph": {
+    "message": "Busca por nombre o ID del script o del despliegue…"
+  },
+  "sx_scope": {
+    "message": "Despliegues de $1"
+  },
+  "sx_hints": {
+    "message": "↑↓ · ↵ ejecutar · Esc cerrar"
+  },
+  "sx_loading": {
+    "message": "Cargando los scripts de la cuenta…"
+  },
+  "sx_none": {
+    "message": "Ningún despliegue coincide con la búsqueda."
+  },
+  "sx_empty": {
+    "message": "Esta cuenta no tiene scripts Map/Reduce ni Scheduled desplegados."
+  },
+  "sx_count": {
+    "message": "$1 despliegues"
+  },
+  "sx_checking": {
+    "message": "Comprobando el despliegue…"
+  },
+  "sx_type_mr": {
+    "message": "Map/Reduce"
+  },
+  "sx_type_sch": {
+    "message": "Programado"
+  },
+  "sx_env_prd": {
+    "message": "PRODUCCIÓN"
+  },
+  "sx_busy_pending": {
+    "message": "en cola"
+  },
+  "sx_busy_processing": {
+    "message": "en curso"
+  },
+  "sx_busy_title": {
+    "message": "Despliegue ocupado"
+  },
+  "sx_busy_alt": {
+    "message": "¿Ejecutar en su lugar el despliegue libre «$1» ($2)?"
+  },
+  "sx_busy_alt_ok": {
+    "message": "Ejecutar ese"
+  },
+  "sx_err_stale": {
+    "message": "Recarga la pestaña y vuelve a intentarlo."
+  },
+  "sx_err_session": {
+    "message": "Tu sesión de NetSuite caducó. Inicia sesión y vuelve a intentarlo."
+  },
+  "sx_err_timeout": {
+    "message": "NetSuite no respondió a tiempo."
+  },
+  "sx_err_notfound": {
+    "message": "Ese despliegue ya no existe."
+  },
+  "sx_err_nobutton": {
+    "message": "NetSuite no ofrece «Guardar y ejecutar» en este despliegue: puede que tu rol no tenga permiso para ejecutarlo o que su estado no lo permita."
+  },
+  "sx_err_netsuite": {
+    "message": "NetSuite respondió: $1"
+  },
+  "sx_err_generic": {
+    "message": "No se pudo ejecutar el script."
+  },
+  "sx_err_nodeploy": {
+    "message": "Este script no tiene despliegues."
+  },
+  "sx_err_inactive": {
+    "message": "El script está inactivo, así que NetSuite no lo ejecutará."
+  },
+  "sx_err_undeployed": {
+    "message": "Este despliegue no está desplegado."
+  },
+  "sx_err_undeployed_all": {
+    "message": "Ninguno de los despliegues de este script está desplegado."
+  },
+  "sx_err_busy": {
+    "message": "Este despliegue ya tiene una ejecución $1 desde $2."
+  },
+  "sx_confirm_title": {
+    "message": "¿Ejecutar ahora?"
+  },
+  "sx_confirm_title_prd": {
+    "message": "¿Ejecutar en PRODUCCIÓN?"
+  },
+  "sx_confirm_dep": {
+    "message": "Despliegue: $1 ($2)"
+  },
+  "sx_confirm_env": {
+    "message": "Cuenta: $1"
+  },
+  "sx_confirm_ok": {
+    "message": "Ejecutar"
+  },
+  "sx_card_sending": {
+    "message": "Enviando a la cola…"
+  },
+  "sx_card_pending": {
+    "message": "En cola"
+  },
+  "sx_card_processing": {
+    "message": "En curso"
+  },
+  "sx_card_stage": {
+    "message": "Etapa: $1"
+  },
+  "sx_card_done": {
+    "message": "Terminado"
+  },
+  "sx_card_failed": {
+    "message": "Falló"
+  },
+  "sx_card_failed_desc": {
+    "message": "Revisa los logs de ejecución."
+  },
+  "sx_card_canceled": {
+    "message": "Cancelado"
+  },
+  "sx_card_sent": {
+    "message": "Enviado a la cola"
+  },
+  "sx_card_sent_desc": {
+    "message": "NetSuite todavía no lo muestra en la cola; sigue su estado en la página de estado."
+  },
+  "sx_card_sent_nosearch": {
+    "message": "Desde esta página no se puede seguir su avance; míralo en la página de estado."
+  },
+  "sx_card_lost": {
+    "message": "Ya no se puede seguir su avance desde aquí; míralo en la página de estado."
+  },
+  "sx_card_unsure": {
+    "message": "NetSuite no lo confirmó a tiempo; revisa la página de estado antes de volver a ejecutarlo."
+  },
+  "sx_card_error": {
+    "message": "No se ejecutó"
+  },
+  "sx_card_status_link": {
+    "message": "Página de estado"
+  },
+  "sx_card_logs_link": {
+    "message": "Logs de ejecución"
   },
   "enableSuiteScriptConsoleLabel": {
     "message": "Consola de SuiteScript"
@@ -3006,15 +3183,6 @@
   },
   "ssc_ghost_btn_title": {
     "message": "Sugerencias de código con IA — Tab acepta · clic: encender/apagar · clic derecho: elegir modelo"
-  },
-  "sscAiCompleteLabel": {
-    "message": "Sugerencias de código con IA (Tab acepta)"
-  },
-  "sscAiCompleteDesc": {
-    "message": "Al dejar de teclear, la IA sugiere cómo seguir y Tab lo escribe. Cada sugerencia consulta a tu proveedor de IA con tu clave."
-  },
-  "sqlAiCompleteLabel": {
-    "message": "Sugerencias de SQL con IA (Tab acepta)"
   },
   "sql_ghost_btn_title": {
     "message": "Sugerencias de SQL con IA — Tab acepta · clic: encender/apagar · clic derecho: elegir modelo"
@@ -3259,13 +3427,13 @@
     "message": "Límite alcanzado"
   },
   "enableShortcutsCheatsheetDesc": {
-    "message": "Muestra todos los atajos de teclado de NSFT con Ctrl+Shift+?."
+    "message": "Muestra todos los atajos de teclado de NSFT."
   },
   "enableShortcutsCheatsheetLabel": {
     "message": "Hoja de atajos de teclado"
   },
   "enableGoToRecordDesc": {
-    "message": "Salta directo a cualquier registro con Alt+Shift+G usando su número, tipo o nombre."
+    "message": "Salta directo a cualquier registro usando su número, tipo o nombre."
   },
   "enableGoToRecordLabel": {
     "message": "Ir al record"
@@ -3281,6 +3449,9 @@
   },
   "fav_no_history": {
     "message": "Sin cambios registrados para este campo."
+  },
+  "fav_no_history_std": {
+    "message": "Sin cambios que enseñar. NetSuite no guarda todos los campos en las Notas del sistema, así que puede que de éste no haya registro."
   },
   "fav_error": {
     "message": "No se pudo cargar el historial."
@@ -3678,16 +3849,34 @@
     "message": "Copiar ID de Cuenta en Roles"
   },
   "enableEditorThemeDesc": {
-    "message": "Aplica un tema al editor de código."
+    "message": "Aplica un tema al editor de código. Está en retirada: su relevo es el Editor Avanzado, que trae su propio editor con temas y mucho más."
+  },
+  "deprecatedBadge": {
+    "message": "Obsoleto"
+  },
+  "deprecatedBadgeTitle": {
+    "message": "Esta función está en retirada: sigue funcionando, pero ya no se le añade nada y desaparecerá en una versión futura."
   },
   "enableEditorThemeLabel": {
-    "message": "Tema del Editor de código."
+    "message": "Tema del Editor de código"
   },
   "editorFontFamilyLabel": {
     "message": "Fuente:"
   },
   "editorFontSizeLabel": {
     "message": "Tamaño:"
+  },
+  "editorFontFamilyDefaultOption": {
+    "message": "Predeterminada (la de NetSuite)"
+  },
+  "editorFontSizeDefaultOption": {
+    "message": "Predeterminado (el de NetSuite)"
+  },
+  "cl_7_2_0_edtheme_title": {
+    "message": "El tema del editor respeta la fuente de NetSuite"
+  },
+  "cl_7_2_0_edtheme_desc": {
+    "message": "Se agregó la opción de dejar la fuente y el tamaño del editor de código tal y como los trae NetSuite, que pasa además a ser la de fábrica."
   },
   "editorThemeCustomOption": {
     "message": "Personalizado…"
@@ -3815,6 +4004,21 @@
   "setFieldValuesNoIconLabel": {
     "message": "Sin iconos de info (clic en la etiqueta del campo)"
   },
+  "sfvLineModeTitle": {
+    "message": "En una línea de sublista"
+  },
+  "sfvLineModeDirectLabel": {
+    "message": "Clic derecho"
+  },
+  "sfvLineModeMenuLabel": {
+    "message": "Menú contextual"
+  },
+  "sfvLineModeDesc": {
+    "message": "Con «Clic derecho» el panel se abre al instante, pero sobre esos campos no sale el menú del navegador. Con «Menú contextual» sale el menú de siempre y dentro aparece la entrada de NetSuite Full Tools. En ninguno de los dos se añade nada a la línea."
+  },
+  "sfv_ctx_line_title": {
+    "message": "Información del campo de sublista"
+  },
   "sfvModeTitle": {
     "message": "Cómo abrir el panel",
     "description": "Sub-option group title: how the field info panel is opened"
@@ -3823,10 +4027,10 @@
     "message": "Con iconos de info"
   },
   "enableOpenCustomRecordBtnDesc": {
-    "message": "Abre la definición del Registro Personalizado dueño de la sublista con un clic."
+    "message": "Añade un menú «Opciones» a las sublistas de registros hijos: abre su Registro Personalizado o le agrega un campo."
   },
   "enableOpenCustomRecordBtnLabel": {
-    "message": "Abrir Registro Personalizado desde Sublista"
+    "message": "Menú Opciones de Sublista"
   },
   "enableFileCabinetUtilsDesc": {
     "message": "Agrega una columna con enlaces permanentes y IDs de carpetas/archivos en el Gabinete de Archivos."
@@ -3835,7 +4039,7 @@
     "message": "Agregar Utilidades de Archivador"
   },
   "enableFindFieldByIdDesc": {
-    "message": "Permite buscar campos por ID o Etiqueta usando Ctrl+Shift+F."
+    "message": "Permite buscar campos por ID o Etiqueta."
   },
   "enableFindFieldByIdLabel": {
     "message": "Buscar Campo por ID/Etiqueta"
@@ -4021,19 +4225,19 @@
     "message": "Editar perfil"
   },
   "enableSaveAndEditButtonLabel": {
-    "message": "Botón Guardar y Editar"
+    "message": "Guardar y Editar"
   },
   "enableSaveAndEditButtonDesc": {
     "message": "Agrega un botón para guardar el registro y volver a edición automáticamente."
   },
   "enableEditAndSaveButtonLabel": {
-    "message": "Botón Editar y Guardar"
+    "message": "Editar y Guardar"
   },
   "enableEditAndSaveButtonDesc": {
     "message": "Agrega un botón para recargar y volver a guardar el registro actual."
   },
   "enableDeleteRecordButtonLabel": {
-    "message": "Botón Eliminar Registro"
+    "message": "Eliminar Registro"
   },
   "enableDeleteRecordButtonDesc": {
     "message": "Agrega un botón Eliminar en la barra de acciones del registro."
@@ -4075,7 +4279,7 @@
     "message": "Ver Objeto del Registro"
   },
   "enableRelatedNativeLinksDesc": {
-    "message": "Agrega enlaces directos al registro de los campos nativos."
+    "message": "Agrega enlaces directos al registro de los campos nativos: en una transacción NetSuite los deja como texto plano, sin llevar a ninguna parte."
   },
   "enableRelatedNativeLinksLabel": {
     "message": "Enlaces Nativos Relacionados"
@@ -4609,6 +4813,9 @@
   },
   "sfvShowOptionsLabel": {
     "message": "Tabla de valores"
+  },
+  "sfvEditOnlyCustom": {
+    "message": "Sólo aparece en campos personalizados: un campo nativo no tiene definición que abrir."
   },
   "sfvShowEditLabel": {
     "message": "Editar el campo"
@@ -8028,7 +8235,7 @@
     "message": "Contador en multi-select"
   },
   "enableMultiselectCounterBetaDesc": {
-    "message": "Muestra «N / N» seleccionados al lado del label de cada multi-select."
+    "message": "Muestra «N / N» seleccionados al lado del label de cada multi-select, también en las listas grandes que NetSuite trae bajo demanda."
   },
   "enableFloatingFieldGroupsBetaLabel": {
     "message": "Field groups flotantes"
@@ -8200,6 +8407,27 @@
   },
   "enableLoggedoutRedirectBetaDesc": {
     "message": "Te devuelve automáticamente a tu account si caes en la landing pública."
+  },
+  "enableSessionReturnLabel": {
+    "message": "Volver a tu Página tras Iniciar Sesión"
+  },
+  "enableSessionReturnDesc": {
+    "message": "Cuando la sesión caduca en varias pestañas, basta con iniciarla en una: las demás vuelven solas a la página que tenías abierta."
+  },
+  "sret_go": {
+    "message": "Volver a mi página"
+  },
+  "sret_body_wait": {
+    "message": "Si ya iniciaste sesión en otra pestaña, vuelve aquí."
+  },
+  "sret_body_ready": {
+    "message": "Ya hay sesión. Vuelve cuando quieras."
+  },
+  "sret_body_going": {
+    "message": "Volviendo a tu página…"
+  },
+  "sret_body_blocked": {
+    "message": "No se pudo volver: inicia sesión aquí."
   },
   "enableFileCabinetDragDropBetaLabel": {
     "message": "Subida por drag & drop"
@@ -8939,7 +9167,7 @@
     "message": "Vista dividida de búsquedas"
   },
   "enableSavedSearchSplitDesc": {
-    "message": "Abre una búsqueda guardada en un panel lateral junto a la página actual, para verla sin salir. Ábrela desde la Paleta de Comandos."
+    "message": "Abre una búsqueda guardada en un panel lateral junto a la página actual, para verla sin salir. Ábrela desde la Paleta de Comandos. Está en retirada: su relevo es Preview inline de búsquedas."
   },
   "enableInSearchPreviewDesc": {
     "message": "Muestra un panel inferior con la vista previa de la búsqueda sin salir de la página."
@@ -11623,22 +11851,7 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "El panel de información del campo se rehízo: tres pestañas, la ayuda de NetSuite y las opciones de cada lista."
-  },
-  "un_hl_2": {
-    "message": "*Los filtros de una búsqueda guardada se aplican todos de una vez, sin recargas."
-  },
-  "un_hl_3": {
-    "message": "La vista previa de plantillas PDF/HTML es ahora un panel plegable y en vivo."
-  },
-  "un_hl_4": {
-    "message": "El Menú de Opciones del Registro recoge lo que cuelga de él, y eliges qué ofrece."
-  },
-  "un_hl_5": {
-    "message": "En Ir al registro basta con escribir «transaction» y el id: NetSuite averigua el tipo."
-  },
-  "un_hl_6": {
-    "message": "Además: los resultados se abren en otra pestaña con el botón derecho, diez tonos nuevos en Temas de Color y varios fallos corregidos. Más detalles en el changelog."
+    "message": "Se arregló que al editar un script el título de la pestaña enseñara el contador de caracteres en vez de su nombre. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -11945,6 +12158,156 @@
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
   },
+  "cl_ver_7_2_1": {
+    "message": "v7.2.1"
+  },
+  "cl_date_7_2_1": {
+    "message": "2026-09-29"
+  },
+  "cl_7_2_1_bpt_counter_title": {
+    "message": "Al editar un script, la pestaña conserva su nombre"
+  },
+  "cl_7_2_1_bpt_counter_desc": {
+    "message": "Se arregló que al editar un script el título de la pestaña mostrara el contador de caracteres en vez de su nombre."
+  },
+  "cl_ver_7_2_0": {
+    "message": "v7.2.0"
+  },
+  "cl_date_7_2_0": {
+    "message": "2026-09-28"
+  },
+  "cl_7_2_0_sx_title": {
+    "message": "Ejecuta un Map/Reduce o un Scheduled desde cualquier página"
+  },
+  "cl_7_2_0_sx_desc": {
+    "message": "Se agregó la opción de ejecutar scripts Map/Reduce y Scheduled desde su ficha o desde la Paleta de Comandos, y seguirlos hasta que terminan."
+  },
+  "cl_7_2_0_cfind_deploy_title": {
+    "message": "Los despliegues del Buscador abren su propia ficha"
+  },
+  "cl_7_2_0_cfind_deploy_desc": {
+    "message": "Se arregló que en el Buscador de Personalizaciones los resultados de «Despliegues» abrieran la ficha de otro despliegue."
+  },
+  "cl_7_2_0_cmdp_search_title": {
+    "message": "La búsqueda global de la Paleta lleva a los resultados"
+  },
+  "cl_7_2_0_cmdp_search_desc": {
+    "message": "Se arregló que «Buscar en NetSuite (Global Search)» en la Paleta de Comandos acabara siempre en una página inexistente."
+  },
+  "cl_7_2_0_sfb_inline_title": {
+    "message": "La edición en línea vuelve a encenderse con Filtros en Bloque"
+  },
+  "cl_7_2_0_sfb_inline_desc": {
+    "message": "Se arregló que Filtros en Bloque tratara como un filtro el interruptor de edición en línea de los resultados y no dejara activarla."
+  },
+  "cl_ver_7_1_3": {
+    "message": "v7.1.3"
+  },
+  "cl_date_7_1_3": {
+    "message": "2026-09-18"
+  },
+  "cl_7_1_3_fcddel_title": {
+    "message": "Se pueden borrar carpetas del Archivador"
+  },
+  "cl_7_1_3_fcddel_desc": {
+    "message": "Se arregló que «Eliminar» en una carpeta del Archivador de Archivos diera un error en vez de borrarla; en los archivos ya funcionaba."
+  },
+  "cl_7_1_3_srwffilter_title": {
+    "message": "El filtro del visor alcanza también a los workflows"
+  },
+  "cl_7_1_3_srwffilter_desc": {
+    "message": "Se arregló que la caja de filtro del visor de scripts del registro no escondiera ni resaltara nada en la pestaña de workflows."
+  },
+  "cl_7_1_3_sfvctxopt_title": {
+    "message": "Elige cómo abrir el panel del campo en una línea"
+  },
+  "cl_7_1_3_sfvctxopt_desc": {
+    "message": "Se agregó la opción de abrir el panel de una línea de sublista desde el menú contextual del navegador, además del clic derecho directo."
+  },
+  "cl_7_1_3_sfvline_title": {
+    "message": "El panel del campo en una línea se abre con clic derecho"
+  },
+  "cl_7_1_3_sfvline_desc": {
+    "message": "Se retiró el botón ⓘ de las líneas de sublista, que estrechaba los campos, costaba pulsar y en algunas listas no llegaba a verse."
+  },
+  "cl_7_1_3_cfindsid_title": {
+    "message": "El Buscador de Personalizaciones encuentra por ID de script"
+  },
+  "cl_7_1_3_cfindsid_desc": {
+    "message": "Se arregló que el Buscador de Personalizaciones no encontrara nada al buscar por el ID de script, sólo por el nombre."
+  },
+  "cl_ver_7_1_2": {
+    "message": "v7.1.2"
+  },
+  "cl_date_7_1_2": {
+    "message": "2026-09-10"
+  },
+  "cl_7_1_2_sfvmargin_title": {
+    "message": "El panel del campo conserva su margen"
+  },
+  "cl_7_1_2_sfvmargin_desc": {
+    "message": "Se arregló que al apagar «Cambiar el valor» el contenido del panel del campo quedara pegado al borde de abajo."
+  },
+  "cl_7_1_2_fcpath_title": {
+    "message": "Copiar ruta aparece siempre en el Archivador"
+  },
+  "cl_7_1_2_fcpath_desc": {
+    "message": "Se arregló que el botón de copiar la ruta no saliera al entrar al Archivador desde el menú, al cambiar de carpeta en el árbol ni en el listado sin carpeta abierta."
+  },
+  "cl_7_1_2_fcppath2_title": {
+    "message": "La ruta copiada se pega tal cual"
+  },
+  "cl_7_1_2_fcppath2_desc": {
+    "message": "Se arregló que la ruta copiada en el Archivador llegara con la jerarquía separada por dos puntos y sin la barra inicial."
+  },
+  "cl_7_1_2_fcdlneg_title": {
+    "message": "Descargar ZIP en las carpetas de NetSuite"
+  },
+  "cl_7_1_2_fcdlneg_desc": {
+    "message": "Se arregló que el botón de descargar la carpeta como ZIP no apareciera dentro de las carpetas estándar de NetSuite."
+  },
+  "cl_7_1_2_uipv_title": {
+    "message": "Los dibujos de los ajustes y su interfaz, al día"
+  },
+  "cl_7_1_2_uipv_desc": {
+    "message": "Se arreglaron los dibujos de la ventana de ajustes que no cuadraban con su módulo o se habían quedado viejos, y se repasó su interfaz: opciones nuevas, mandos que no aplicaban y ajustes que se mudaron a su propia ventana."
+  },
+  "cl_7_1_2_favstd_title": {
+    "message": "El historial de un campo estándar deja de salir vacío"
+  },
+  "cl_7_1_2_favstd_desc": {
+    "message": "Se arregló que el Historial del panel del campo no encontrara los cambios de un campo estándar, que NetSuite anota con otro nombre."
+  },
+  "cl_7_1_2_coachgap_title": {
+    "message": "Los enlaces del aviso, separados"
+  },
+  "cl_7_1_2_coachgap_desc": {
+    "message": "Se arregló que «Abrir configuración» y «No volver a mostrar» salieran pegados en el aviso del panel del campo."
+  },
+  "cl_7_1_2_sfvactivos_title": {
+    "message": "La lista de opciones deja fuera los inactivos"
+  },
+  "cl_7_1_2_sfvactivos_desc": {
+    "message": "Se arregló que la lista de opciones del panel del campo ofreciera registros inactivos, que NetSuite rechaza al guardar."
+  },
+  "cl_7_1_2_favbusq_title": {
+    "message": "El Historial reconoce más campos nativos"
+  },
+  "cl_7_1_2_favbusq_desc": {
+    "message": "Se agregó al Historial del campo el nombre de búsqueda del campo, con el que NetSuite anota los cambios de varios campos nativos."
+  },
+  "cl_7_1_2_sublistdup_title": {
+    "message": "El botón de copiar sale sólo donde hay sublista"
+  },
+  "cl_7_1_2_sublistdup_desc": {
+    "message": "Se arregló que el botón de copiar el id de la sublista saliera repetido en unas subpestañas y en otras que no listan nada, como Audiencia o Contextos."
+  },
+  "cl_7_1_2_sfvancho_title": {
+    "message": "Los campos de la línea no se estrechan"
+  },
+  "cl_7_1_2_sfvancho_desc": {
+    "message": "Se arregló que el panel del campo encogiera los campos de la línea que editas, lo que cortaba el texto de los desplegables."
+  },
   "cl_ver_7_1_1": {
     "message": "v7.1.1"
   },
@@ -11980,9 +12343,6 @@
   },
   "cl_7_1_0_ftabs_bg_desc": {
     "message": "Se arregló que la navegación de las subpestañas se leyera a través de la barra de pestañas fija al desplazarse."
-  },
-  "copyIdsChildrenTitle": {
-    "message": "Qué más añade"
   },
   "cl_7_1_0_copyids_children_title": {
     "message": "El botón de sublista se ve de quién depende"
@@ -12915,6 +13275,9 @@
   "welcomeCatScriptItem13": {
     "message": "Editor Avanzado para los archivos del File Cabinet"
   },
+  "welcomeCatScriptItem14": {
+    "message": "Ejecutar Map/Reduce y Scheduled desde la ficha o la paleta"
+  },
   "adv_save": {
     "message": "Guardar"
   },
@@ -13475,5 +13838,170 @@
   },
   "devPromptNoAnswer": {
     "message": "ninguna pestaña de NetSuite respondió — refréscala y vuelve a intentarlo"
+  },
+  "cl_7_1_2_mscfiltro_title": {
+    "message": "El contador se entera de que la lista cambió"
+  },
+  "cl_7_1_2_mscfiltro_desc": {
+    "message": "Se arregló que el contador de multiselección siguiera mostrando el total de antes cuando otro campo filtraba las opciones."
+  },
+  "cl_7_1_2_mscdemanda_title": {
+    "message": "El contador llega a las listas grandes"
+  },
+  "cl_7_1_2_mscdemanda_desc": {
+    "message": "Se agregó el número de seleccionados en las listas que NetSuite trae bajo demanda, donde antes no salía contador."
+  },
+  "sfv_add": {
+    "message": "Agregar"
+  },
+  "sfv_remove": {
+    "message": "Quitar"
+  },
+  "cl_7_1_2_sfvmulti_title": {
+    "message": "La lista de opciones también en los campos de varios valores"
+  },
+  "cl_7_1_2_sfvmulti_desc": {
+    "message": "Se arregló que el panel de información no mostrara la lista de opciones en los campos que admiten varios valores."
+  },
+  "cl_7_1_2_sfvmultigrande_title": {
+    "message": "La lista de opciones en los campos de lista grande y varios valores"
+  },
+  "cl_7_1_2_sfvmultigrande_desc": {
+    "message": "Se arregló que el panel de información no reconociera los campos de varios valores cuya lista NetSuite trae bajo demanda."
+  },
+  "msc_counting": {
+    "message": "Contando las opciones de la lista…"
+  },
+  "msc_counted_title": {
+    "message": "Opciones activas en la lista de origen. Puede no coincidir con las que ofrece el buscador de NetSuite, que aplica sus propios filtros."
+  },
+  "msc_count_failed": {
+    "message": "No se pudo contar las opciones. Pulsa para reintentar."
+  },
+  "cl_7_1_2_msctotal_title": {
+    "message": "El total también en las listas grandes"
+  },
+  "cl_7_1_2_msctotal_desc": {
+    "message": "Se agregó al contador de multiselección el total de las listas que NetSuite trae bajo demanda, donde antes sólo salía una raya."
+  },
+  "cl_7_1_2_aiask_title": {
+    "message": "Responder al asistente con tus palabras"
+  },
+  "cl_7_1_2_aiask_desc": {
+    "message": "Se agregó poder contestar con texto propio a cada pregunta del asistente, y no sólo elegir entre las opciones que ofrece."
+  },
+  "sqlai_ph_running": {
+    "message": "Añade contexto al turno en curso…"
+  },
+  "sqlai_queued": {
+    "message": "Se lo digo en el siguiente paso"
+  },
+  "cl_7_1_2_aiextra_title": {
+    "message": "Añadir contexto sin parar al asistente"
+  },
+  "cl_7_1_2_aiextra_desc": {
+    "message": "Se agregó poder escribirle al asistente mientras trabaja, para darle un dato que faltaba sin detener ni repetir el turno."
+  },
+  "sqlai_stopped": {
+    "message": "Detenido"
+  },
+  "sqlai_stopped_kept": {
+    "message": "Lo trabajado se conserva: puedes seguir preguntando"
+  },
+  "cl_7_1_2_aistop_title": {
+    "message": "Detener al asistente lo detiene de verdad"
+  },
+  "cl_7_1_2_aistop_desc": {
+    "message": "Se arregló que al detener al asistente siguiera diciendo que trabajaba, y ahora lo averiguado se conserva para seguir preguntando."
+  },
+  "cl_7_1_2_sret_title": {
+    "message": "Iniciar sesión en una pestaña vale para todas"
+  },
+  "cl_7_1_2_sret_desc": {
+    "message": "Se agregó que, al caducar la sesión con varias pestañas abiertas, iniciarla en una devuelva a las demás a la página que tenían."
+  },
+  "cl_7_1_2_sfb_nav_title": {
+    "message": "Paginar y ordenar vuelven a funcionar"
+  },
+  "cl_7_1_2_sfb_nav_desc": {
+    "message": "Se arregló que Filtros en Bloque impidiera cambiar de página y ordenar por las cabeceras en los resultados de una búsqueda guardada."
+  },
+  "cl_7_1_2_isp_flot_title": {
+    "message": "Las vistas previas contraídas dejan de comerse los botones"
+  },
+  "cl_7_1_2_isp_flot_desc": {
+    "message": "Se arregló que la Vista previa en búsquedas y la de plantillas PDF reservaran sitio al pie de la página estando contraídas, lo que recortaba la barra de botones."
+  },
+  "sqlai_ask_own_ph": {
+    "message": "Otra: escríbelo tú…"
+  },
+  "cl_7_1_2_sfvctx_title": {
+    "message": "Abrir el panel de la línea con clic derecho"
+  },
+  "cl_7_1_2_sfvctx_desc": {
+    "message": "Se agregó la opción de abrir el panel de información con clic derecho, sin añadir ningún botón a las líneas de la sublista."
+  },
+  "cl_7_1_2_sfvmarca_title": {
+    "message": "La opción elegida se marca al momento"
+  },
+  "cl_7_1_2_sfvmarca_desc": {
+    "message": "Se arregló que la opción elegida en la lista del panel de información no quedara marcada hasta cerrar y volver a abrir el panel."
+  },
+  "cl_7_1_2_sfvquitar_title": {
+    "message": "Quitar un valor desde la lista de opciones"
+  },
+  "cl_7_1_2_sfvquitar_desc": {
+    "message": "Se agregó que el botón de una opción ya puesta ofrezca quitarla, en vez de volver a establecer lo que ya estaba."
+  },
+  "cl_7_1_2_sfvorden_title": {
+    "message": "Lo que ya está puesto, al principio"
+  },
+  "cl_7_1_2_sfvorden_desc": {
+    "message": "Se agregó que las opciones que el campo ya tiene puestas aparezcan al principio de la lista."
+  },
+  "cl_7_1_2_sfvurl_title": {
+    "message": "Los enlaces de la lista de origen apuntan bien"
+  },
+  "cl_7_1_2_sfvurl_desc": {
+    "message": "Se arregló que en los campos de varios valores el enlace al registro y a su lista de origen llevara a una dirección inexistente."
+  },
+  "cl_7_1_2_sfvspin_title": {
+    "message": "Se ve cuándo se está buscando en la lista"
+  },
+  "cl_7_1_2_sfvspin_desc": {
+    "message": "Se agregó un indicador de carga en la caja de búsqueda de la lista de opciones, que vuelve a ser el botón de limpiar al llegar los resultados."
+  },
+  "cl_7_1_2_sfvcopia_title": {
+    "message": "El botón de copiar deja de copiar el valor de antes"
+  },
+  "cl_7_1_2_sfvcopia_desc": {
+    "message": "Se arregló que el botón de copiar del panel de información siguiera copiando el valor anterior después de elegir una opción."
+  },
+  "cl_7_1_2_sfvtextos_title": {
+    "message": "Los textos de un campo de varios valores se separan"
+  },
+  "cl_7_1_2_sfvtextos_desc": {
+    "message": "Se arregló que los textos de un campo de varios valores se mostraran pegados unos a otros, sin nada que los separara."
+  },
+  "cl_7_1_2_capcfg_title": {
+    "message": "La cápsula minimizada deja de ofrecer lo que no aplica"
+  },
+  "cl_7_1_2_capcfg_desc": {
+    "message": "Se arregló que las ventanas minimizadas siguieran mostrando los botones de ajustes y de acoplar, pegados al de restaurar."
+  },
+  "cl_7_1_2_cte_title": {
+    "message": "Los WITH ya no se confunden con tablas"
+  },
+  "cl_7_1_2_cte_desc": {
+    "message": "Se arregló que una consulta con WITH hiciera buscar el esquema de los nombres declarados, con su aviso de tabla no encontrada."
+  },
+  "cl_7_1_2_sfvhistrans_title": {
+    "message": "El Historial del campo ya no se queda pensando"
+  },
+  "cl_7_1_2_sfvhistrans_desc": {
+    "message": "Se arregló que el Historial del campo tardara medio minuto o se quedara cargando en las transacciones, y que repitiera el mismo cambio una vez por línea."
+  },
+  "sfvHistoryNativeWarn": {
+    "message": "En campos nativos puede quedarse corto: NetSuite los anota con el nombre de su columna interna, no con el del formulario."
   }
 }

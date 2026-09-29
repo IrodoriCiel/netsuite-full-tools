@@ -64,6 +64,21 @@
         body.textContent = chrome.i18n.getMessage('un_toast_body');
         const list = document.createElement('ul');
         list.className = 'nsft-un-list';
+        function pintaConNegritas(li, texto) {
+            const trozos = String(texto).split(/\*\*/);
+            if (trozos.length < 3) { li.textContent = texto; return; }
+            trozos.forEach((trozo, n) => {
+                if (!trozo) return;
+                if (n % 2 === 1) {
+                    const b = document.createElement('strong');
+                    b.textContent = trozo;
+                    li.appendChild(b);
+                } else {
+                    li.appendChild(document.createTextNode(trozo));
+                }
+            });
+        }
+
         for (let i = 1; i <= UN_MAX_HIGHLIGHTS; i++) {
             let msg = chrome.i18n.getMessage('un_hl_' + i);
             if (!msg) continue;
@@ -72,7 +87,7 @@
                 li.className = 'is-new';
                 msg = msg.slice(1).replace(/^\s+/, '');
             }
-            li.textContent = msg;
+            pintaConNegritas(li, msg);
             list.appendChild(li);
         }
         const thanksMsg = chrome.i18n.getMessage('un_thanks');

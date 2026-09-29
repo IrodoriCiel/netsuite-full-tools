@@ -339,14 +339,11 @@
     function calculateBodyMargin(collapsed) {
         const container = state.container || document.getElementById(IDS.CONTAINER);
         if (!container) return;
-        let reserved;
         if (collapsed === true || !isOpen()) {
-            const buttons = container.querySelector('.nsft-isp-button-container');
-            reserved = ((buttons && buttons.offsetHeight) || 34) + 16;
-        } else {
-            reserved = container.offsetHeight;
+            document.body.style.removeProperty('padding-bottom');
+            return;
         }
-        document.body.style.setProperty('padding-bottom', `${reserved}px`, 'important');
+        document.body.style.setProperty('padding-bottom', `${container.offsetHeight}px`, 'important');
     }
 
     function stop() {

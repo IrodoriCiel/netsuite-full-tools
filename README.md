@@ -12,7 +12,7 @@
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Valoración" src="https://img.shields.io/chrome-web-store/rating/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&color=F59E0B&label=Rating"></a>
 </p>
 <p align="center">
-  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v7.1.1-555555?style=for-the-badge"></a>
+  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v7.2.1-555555?style=for-the-badge"></a>
   <a href="https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3"><img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-2C6E4E?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
   <a href="#ficha-técnica--technical-details"><img alt="JavaScript sin frameworks" src="https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"></a>
   <a href="#ficha-técnica--technical-details"><img alt="Sin telemetría ni servidores propios" src="https://img.shields.io/badge/Privacidad-100%25%20local-2C6E4E?style=for-the-badge"></a>
@@ -24,7 +24,7 @@
 
 ---
 
-**106 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
+**108 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
 
 ## Qué es este repositorio · About this repository
 
@@ -59,7 +59,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Ver scripts del registro** | todos los scripts y workflows asociados, de un vistazo. |
 | **Ver logs del registro** | los logs de ejecución sin salir de la página, con los scripts del registro preseleccionados y filtros por nivel, tipo, texto y fechas; también puedes cambiar a otro tipo de registro desde la cabecera. |
 | **Cargar registro a consola** | carga el registro actual en la consola (SS1.0 y SS2.x). |
-| **Menú Opciones de Registro** | accesos directos según el tipo de registro (agregar campo, ver XML, dependientes…), más Record Trail y los botones Guardar y Editar, Editar y Guardar y Eliminar registro; eliges cuáles ofrece. |
+| **Menú Opciones de Registro** | accesos directos según el tipo de registro (agregar campo, ver XML, dependientes…), más Record Trail y las acciones Guardar y Editar, Editar y Guardar y Eliminar registro; eliges cuáles ofrece y si cada una va en el menú o como botón. |
 | **Ir al record** | salta a cualquier registro con Alt+Shift+G por número, tipo o nombre. |
 | **Registros recientes ampliados** | historial completo con buscador y fecha de acceso. |
 | **Abrir en otro entorno** | abre la misma URL en producción, sandbox o release preview conservando ruta y parámetros. |
@@ -78,6 +78,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 |---|---|
 | **Editor Avanzado** | abre un archivo, o el editor entero desde el menú de Herramientas, con el editor de la extensión: el autocompletado te dice qué recibe y qué devuelve cada función de SuiteScript y cuánto governance gasta, con su documentación al lado y al pasar el ratón; Ctrl+clic salta a la declaración; un panel de símbolos recorre el archivo; y además aviso de sintaxis, sugerencias con IA, abrir cualquier archivo por su nombre, buscar en todos los de la carpeta, plegado, formateo y el File Cabinet entero al lado. |
 | **Consola de SuiteScript** | escribe SuiteScript y ejecútalo al momento, con los módulos N/* de tu cuenta, la ayuda de la API mientras escribes —tipos, qué devuelve cada función y su governance— y confirmación antes de escribir. |
+| **Ejecutar Map/Reduce y Scheduled** | lanza un script desde su ficha, la Paleta de Comandos o el menú Herramientas: eliges el despliegue, pide confirmación en producción y sigue la ejecución hasta que termina. |
 | **Tema del editor de código** | aplica un tema al editor. |
 | **Cerrar editor al guardar** | cierra la pestaña del editor en cuanto guardas. |
 | **Abrir archivo en nueva pestaña** | enlace directo junto a cada archivo de una página de scripting. |
@@ -132,7 +133,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Paginado rápido en sublists** | botones y atajos para navegar páginas. |
 | **Páginas de error más legibles** | mejor diseño en las pantallas de error. |
 | **Multi-select jerárquico** | indenta las opciones según su jerarquía Padre : Hijo. |
-| **Contador en multi-select** | muestra "N / N" seleccionados junto al label. |
+| **Contador en multi-select** | muestra "N / N" seleccionados junto al label, también en las listas grandes que NetSuite trae bajo demanda. |
 | **Contador de caracteres** | usados vs. máximo; amarillo cerca del tope, rojo al alcanzarlo. |
 | **Formato de fecha a la vista** | escribe el formato de tu usuario dentro de los campos de fecha vacíos. |
 | **Selección por rango con Shift** | marca de golpe todas las casillas entre la anterior y la pulsada. |
@@ -152,6 +153,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Indicador de sandbox en login** | banner que marca las cuentas sandbox. |
 | **Bloqueador de cierre de sesión** | quita la cortina que tapa la página al caducar la sesión, para seguir viendo y copiando lo que tenías (para guardar, hay que volver a entrar). |
 | **Regresar al account desde netsuite.com** | te devuelve a tu cuenta si caes en la landing pública. |
+| **Volver a tu página tras iniciar sesión** | si la sesión caduca en varias pestañas, basta con iniciarla en una: las demás vuelven solas a la página que tenías abierta. |
 | **Auto refresco en bundles** | interruptor de auto refresco en la lista de bundles. |
 | **Auto-refresh de portlets** | refresca los portlets del dashboard automáticamente. |
 | **Embellecer campos de código** | formatea y resalta JSON/SQL en registros al verlos. |
@@ -215,7 +217,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **View Record Scripts** | every script and workflow tied to the record, at a glance. |
 | **View Record Logs** | execution logs without leaving the page, with the record's scripts preselected and filters by level, type, text and dates; you can also switch to another record type from the header. |
 | **Load Record to Console** | load the current record into the console (SS1.0 and SS2.x). |
-| **Record Options Menu** | shortcuts based on record type (add field, view XML, dependencies…), plus Record Trail and the Save and Edit, Edit and Save and Delete Record buttons; you choose which ones it offers. |
+| **Record Options Menu** | shortcuts based on record type (add field, view XML, dependencies…), plus Record Trail and the Save and Edit, Edit and Save and Delete Record actions; you choose which ones it offers and whether each one lives in the menu or as a button. |
 | **Go to Record** | jump to any record with Alt+Shift+G by number, type or name. |
 | **Expanded Recent Records** | full history with inline search and access date. |
 | **Open in Another Environment** | open the same URL in production, sandbox or release preview, keeping path and params. |
@@ -234,6 +236,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 |---|---|
 | **Advanced Editor** | opens a file, or the whole editor from the Tools menu, with the extension’s own editor: autocomplete tells you what each SuiteScript function takes and returns and how much governance it costs, with its documentation alongside and on hover; Ctrl+click jumps to the declaration; a symbols panel walks the file; plus syntax warnings, AI suggestions, open any file by name, search across every file in the folder, code folding, formatting and the whole File Cabinet alongside. |
 | **SuiteScript Console** | write SuiteScript and run it right away, with your account’s N/* modules, API help as you type —types, what each function returns and its governance— and a confirmation before it writes. |
+| **Run Map/Reduce and Scheduled Scripts** | launch a script from its record, the Command Palette or the Tools menu: pick the deployment, confirm in production and follow the run until it finishes. |
 | **Code Editor Theme** | apply a theme to the editor. |
 | **Close Editor on Save** | closes the editor tab the moment you save. |
 | **Open File in New Tab** | direct link next to each file on a scripting page. |
@@ -288,7 +291,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Quick Sublist Paging** | buttons and shortcuts to navigate pages. |
 | **Cleaner Error Pages** | better design on error screens. |
 | **Hierarchical Multi-select** | indents options by their Parent : Child hierarchy. |
-| **Multi-select Counter** | shows "N / N" selected next to the label. |
+| **Multi-select Counter** | shows "N / N" selected next to the label, also on the large lists NetSuite loads on demand. |
 | **Character Counter** | used vs. max; amber near the limit, red when reached. |
 | **Date Format in Sight** | writes your user’s date format inside empty date fields. |
 | **Shift Range Selection** | ticks every checkbox between the previous one and the one clicked. |
@@ -308,6 +311,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Sandbox Indicator on Login** | a banner marking sandbox accounts. |
 | **Logout Blocker** | removes the curtain that covers the page when the session expires, so you can still read and copy what you had (saving means logging back in). |
 | **Return to Account from netsuite.com** | sends you back to your account if you hit the public page. |
+| **Back to Your Page After Signing In** | if the session expires across several tabs, signing in on one is enough: the rest return by themselves to the page you had open. |
 | **Auto Refresh on Bundles** | an auto-refresh toggle on the Bundle List. |
 | **Portlet Auto-refresh** | auto-refreshes dashboard portlets. |
 | **Prettify Code Fields** | formats and highlights JSON/SQL in records when viewing. |

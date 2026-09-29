@@ -1276,6 +1276,12 @@
   "cmdp_act_nsft_ghbackup_desc": {
     "message": "Push the account's SuiteScripts to a GitHub repository"
   },
+  "cmdp_act_sx": {
+    "message": "Run a Map/Reduce or Scheduled script…"
+  },
+  "cmdp_act_sx_desc": {
+    "message": "Pick the deployment and run it without opening its record"
+  },
   "ghb_title": {
     "message": "Backup SuiteScripts to GitHub"
   },
@@ -2008,9 +2014,6 @@
   "welcomeWizProfileAllDesc": {
     "message": "Every NSFT feature enabled, the whole extension."
   },
-  "colorThemesScopeNote": {
-    "message": "Applies to every NetSuite account and any role, and always on top of the native themes."
-  },
   "previewPanelTitle": {
     "message": "Preview"
   },
@@ -2019,6 +2022,9 @@
   },
   "welcomeWizRequires": {
     "message": "Requires $1"
+  },
+  "welcomeWizVariesByRecord": {
+    "message": "The menu options change depending on the record and on whether you are viewing or editing it: these are shown as an example and not all of them always appear."
   },
   "welcomeWizProfileCustom": {
     "message": "Custom"
@@ -2408,13 +2414,13 @@
     "message": "Related native links"
   },
   "welcomeCatRecordItem16": {
-    "message": "Save and Edit button"
+    "message": "Save and Edit"
   },
   "welcomeCatRecordItem17": {
-    "message": "Edit and Save button"
+    "message": "Edit and Save"
   },
   "welcomeCatRecordItem18": {
-    "message": "Delete Record button"
+    "message": "Delete Record"
   },
   "welcomeCatRecordItem19": {
     "message": "Cancel without History.Back"
@@ -2514,6 +2520,9 @@
   },
   "welcomeCatLoginItem6": {
     "message": "NetSuite version in header"
+  },
+  "welcomeCatLoginItem7": {
+    "message": "Back to your page after signing in on another tab"
   },
   "welcomeCatPowerItem5": {
     "message": "New version notice"
@@ -2927,13 +2936,181 @@
     "message": "Color Themes for NetSuite"
   },
   "enableCommandPaletteDesc": {
-    "message": "Quick command palette to navigate and run tools with Ctrl+Shift+Space."
+    "message": "Quick command palette to navigate and run tools."
   },
   "enableCustomizationFinderLabel": {
     "message": "Customization Finder"
   },
   "enableCustomizationFinderDesc": {
     "message": "One window to find the account’s scripts, workflows, fields, saved searches, templates, files, deployments and lists."
+  },
+  "enableScriptExecuteLabel": {
+    "message": "Run Map/Reduce and Scheduled scripts"
+  },
+  "enableScriptExecuteDesc": {
+    "message": "Run a Map/Reduce or Scheduled script from its record, the Command Palette or the Tools menu, picking the deployment and following its progress until it finishes."
+  },
+  "scriptExecuteConfirmSandboxLabel": {
+    "message": "Also confirm outside production"
+  },
+  "sx_btn_run": {
+    "message": "Execute"
+  },
+  "sx_btn_run_title": {
+    "message": "Run this script now without leaving the page"
+  },
+  "sx_checking_short": {
+    "message": "Checking…"
+  },
+  "sx_title": {
+    "message": "Run script"
+  },
+  "sx_ph": {
+    "message": "Search by script or deployment name or ID…"
+  },
+  "sx_scope": {
+    "message": "Deployments of $1"
+  },
+  "sx_hints": {
+    "message": "↑↓ · ↵ run · Esc close"
+  },
+  "sx_loading": {
+    "message": "Loading the account’s scripts…"
+  },
+  "sx_none": {
+    "message": "No deployment matches the search."
+  },
+  "sx_empty": {
+    "message": "This account has no deployed Map/Reduce or Scheduled scripts."
+  },
+  "sx_count": {
+    "message": "$1 deployments"
+  },
+  "sx_checking": {
+    "message": "Checking the deployment…"
+  },
+  "sx_type_mr": {
+    "message": "Map/Reduce"
+  },
+  "sx_type_sch": {
+    "message": "Scheduled"
+  },
+  "sx_env_prd": {
+    "message": "PRODUCTION"
+  },
+  "sx_busy_pending": {
+    "message": "queued"
+  },
+  "sx_busy_processing": {
+    "message": "running"
+  },
+  "sx_busy_title": {
+    "message": "Deployment busy"
+  },
+  "sx_busy_alt": {
+    "message": "Run the free deployment “$1” ($2) instead?"
+  },
+  "sx_busy_alt_ok": {
+    "message": "Run that one"
+  },
+  "sx_err_stale": {
+    "message": "Reload the tab and try again."
+  },
+  "sx_err_session": {
+    "message": "Your NetSuite session expired. Log in again and retry."
+  },
+  "sx_err_timeout": {
+    "message": "NetSuite did not answer in time."
+  },
+  "sx_err_notfound": {
+    "message": "That deployment no longer exists."
+  },
+  "sx_err_nobutton": {
+    "message": "NetSuite does not offer “Save & Execute” for this deployment: your role may not be allowed to run it, or its status does not allow it."
+  },
+  "sx_err_netsuite": {
+    "message": "NetSuite answered: $1"
+  },
+  "sx_err_generic": {
+    "message": "The script could not be run."
+  },
+  "sx_err_nodeploy": {
+    "message": "This script has no deployments."
+  },
+  "sx_err_inactive": {
+    "message": "This script is inactive, so NetSuite will not run it."
+  },
+  "sx_err_undeployed": {
+    "message": "This deployment is not deployed."
+  },
+  "sx_err_undeployed_all": {
+    "message": "None of this script’s deployments is deployed."
+  },
+  "sx_err_busy": {
+    "message": "This deployment already has a run $1 since $2."
+  },
+  "sx_confirm_title": {
+    "message": "Run it now?"
+  },
+  "sx_confirm_title_prd": {
+    "message": "Run it in PRODUCTION?"
+  },
+  "sx_confirm_dep": {
+    "message": "Deployment: $1 ($2)"
+  },
+  "sx_confirm_env": {
+    "message": "Account: $1"
+  },
+  "sx_confirm_ok": {
+    "message": "Run"
+  },
+  "sx_card_sending": {
+    "message": "Sending to the queue…"
+  },
+  "sx_card_pending": {
+    "message": "Queued"
+  },
+  "sx_card_processing": {
+    "message": "Running"
+  },
+  "sx_card_stage": {
+    "message": "Stage: $1"
+  },
+  "sx_card_done": {
+    "message": "Finished"
+  },
+  "sx_card_failed": {
+    "message": "Failed"
+  },
+  "sx_card_failed_desc": {
+    "message": "Check the execution logs."
+  },
+  "sx_card_canceled": {
+    "message": "Canceled"
+  },
+  "sx_card_sent": {
+    "message": "Sent to the queue"
+  },
+  "sx_card_sent_desc": {
+    "message": "NetSuite does not show it in the queue yet; check the status page."
+  },
+  "sx_card_sent_nosearch": {
+    "message": "Its progress cannot be followed from this page; check the status page."
+  },
+  "sx_card_lost": {
+    "message": "Its progress can no longer be followed from here; check the status page."
+  },
+  "sx_card_unsure": {
+    "message": "NetSuite did not confirm it in time; check the status page before running it again."
+  },
+  "sx_card_error": {
+    "message": "Not run"
+  },
+  "sx_card_status_link": {
+    "message": "Status page"
+  },
+  "sx_card_logs_link": {
+    "message": "Execution logs"
   },
   "enableSuiteScriptConsoleLabel": {
     "message": "SuiteScript Console"
@@ -3006,15 +3183,6 @@
   },
   "ssc_ghost_btn_title": {
     "message": "AI code suggestions — Tab accepts · click: on/off · right-click: pick model"
-  },
-  "sscAiCompleteLabel": {
-    "message": "AI code suggestions (Tab accepts)"
-  },
-  "sscAiCompleteDesc": {
-    "message": "When you stop typing, the AI suggests how to continue and Tab writes it. Each suggestion queries your AI provider with your key."
-  },
-  "sqlAiCompleteLabel": {
-    "message": "AI SQL suggestions (Tab accepts)"
   },
   "sql_ghost_btn_title": {
     "message": "AI SQL suggestions — Tab accepts · click: on/off · right-click: pick model"
@@ -3259,13 +3427,13 @@
     "message": "Limit reached"
   },
   "enableShortcutsCheatsheetDesc": {
-    "message": "Shows every NSFT keyboard shortcut with Ctrl+Shift+?."
+    "message": "Shows every NSFT keyboard shortcut."
   },
   "enableShortcutsCheatsheetLabel": {
     "message": "Keyboard shortcuts cheat sheet"
   },
   "enableGoToRecordDesc": {
-    "message": "Jump straight to any record with Alt+Shift+G using its number, type or name."
+    "message": "Jump straight to any record using its number, type or name."
   },
   "enableGoToRecordLabel": {
     "message": "Go to record"
@@ -3281,6 +3449,9 @@
   },
   "fav_no_history": {
     "message": "No recorded changes for this field."
+  },
+  "fav_no_history_std": {
+    "message": "Nothing to show. NetSuite does not record every field in System Notes, so this one may have none."
   },
   "fav_error": {
     "message": "Could not load the history."
@@ -3678,7 +3849,13 @@
     "message": "Copy Account ID in Roles"
   },
   "enableEditorThemeDesc": {
-    "message": "Applies a theme to the code editor."
+    "message": "Applies a theme to the code editor. It is on its way out: its replacement is the Advanced Editor, which brings its own editor with themes and much more."
+  },
+  "deprecatedBadge": {
+    "message": "Deprecated"
+  },
+  "deprecatedBadgeTitle": {
+    "message": "This feature is on its way out: it still works, but nothing more is being added to it and it will go away in a future version."
   },
   "enableEditorThemeLabel": {
     "message": "Code Editor Theme"
@@ -3688,6 +3865,18 @@
   },
   "editorFontSizeLabel": {
     "message": "Size:"
+  },
+  "editorFontFamilyDefaultOption": {
+    "message": "Default (NetSuite’s)"
+  },
+  "editorFontSizeDefaultOption": {
+    "message": "Default (NetSuite’s)"
+  },
+  "cl_7_2_0_edtheme_title": {
+    "message": "The editor theme leaves NetSuite’s font alone"
+  },
+  "cl_7_2_0_edtheme_desc": {
+    "message": "Added the option to leave the code editor’s font and size exactly as NetSuite ships them, which also becomes the out-of-the-box setting."
   },
   "editorThemeCustomOption": {
     "message": "Custom…"
@@ -3815,6 +4004,21 @@
   "setFieldValuesNoIconLabel": {
     "message": "No info icons (click the field label)"
   },
+  "sfvLineModeTitle": {
+    "message": "On a sublist line"
+  },
+  "sfvLineModeDirectLabel": {
+    "message": "Right-click"
+  },
+  "sfvLineModeMenuLabel": {
+    "message": "Context menu"
+  },
+  "sfvLineModeDesc": {
+    "message": "With \"Right-click\" the panel opens at once, but on those fields you lose the browser menu. With \"Context menu\" the usual menu shows and the NetSuite Full Tools entry appears inside it. Neither one adds anything to the line."
+  },
+  "sfv_ctx_line_title": {
+    "message": "Sublist field information"
+  },
   "sfvModeTitle": {
     "message": "How to open it",
     "description": "Sub-option group title: how the field info panel is opened"
@@ -3823,10 +4027,10 @@
     "message": "Show info icons"
   },
   "enableOpenCustomRecordBtnDesc": {
-    "message": "Open the owning Custom Record's definition from a sublist with one click."
+    "message": "Adds an Options menu to child-record sublists: open their Custom Record or add a field to it."
   },
   "enableOpenCustomRecordBtnLabel": {
-    "message": "Open Custom Record from Sublist"
+    "message": "Sublist Options Menu"
   },
   "enableFileCabinetUtilsDesc": {
     "message": "Available perma-links and IDs for folders/files in File Cabinet."
@@ -3835,7 +4039,7 @@
     "message": "Add File Cabinet Utilities"
   },
   "enableFindFieldByIdDesc": {
-    "message": "Allows searching fields by ID or Label using Ctrl+Shift+F."
+    "message": "Allows searching fields by ID or Label."
   },
   "enableFindFieldByIdLabel": {
     "message": "Find Field by ID/Label"
@@ -4021,19 +4225,19 @@
     "message": "Edit profile"
   },
   "enableSaveAndEditButtonLabel": {
-    "message": "Save and Edit Button"
+    "message": "Save and Edit"
   },
   "enableSaveAndEditButtonDesc": {
     "message": "Adds a button to save the record and return to edit mode automatically."
   },
   "enableEditAndSaveButtonLabel": {
-    "message": "Edit and Save Button"
+    "message": "Edit and Save"
   },
   "enableEditAndSaveButtonDesc": {
     "message": "Adds a button to reload and re-save the current record."
   },
   "enableDeleteRecordButtonLabel": {
-    "message": "Delete Record Button"
+    "message": "Delete Record"
   },
   "enableDeleteRecordButtonDesc": {
     "message": "Adds a Delete button to the record action bar."
@@ -4075,7 +4279,7 @@
     "message": "View Record Object"
   },
   "enableRelatedNativeLinksDesc": {
-    "message": "Adds direct links to native field records."
+    "message": "Adds direct links to native field records: on a transaction NetSuite leaves them as plain text, going nowhere."
   },
   "enableRelatedNativeLinksLabel": {
     "message": "Related Native Links"
@@ -4609,6 +4813,9 @@
   },
   "sfvShowOptionsLabel": {
     "message": "Values table"
+  },
+  "sfvEditOnlyCustom": {
+    "message": "Only shows on custom fields: a native field has no definition to open."
   },
   "sfvShowEditLabel": {
     "message": "Edit the field"
@@ -8028,7 +8235,7 @@
     "message": "Multi-select counter"
   },
   "enableMultiselectCounterBetaDesc": {
-    "message": "Shows «N / N» selected next to each multi-select label."
+    "message": "Shows «N / N» selected next to each multi-select label, also on the large lists NetSuite loads on demand."
   },
   "enableFloatingFieldGroupsBetaLabel": {
     "message": "Floating field groups"
@@ -8200,6 +8407,27 @@
   },
   "enableLoggedoutRedirectBetaDesc": {
     "message": "Redirects you back to your account if you land on the public page."
+  },
+  "enableSessionReturnLabel": {
+    "message": "Back to Your Page After Signing In"
+  },
+  "enableSessionReturnDesc": {
+    "message": "When the session expires across several tabs, signing in on one is enough: the rest return by themselves to the page you had open."
+  },
+  "sret_go": {
+    "message": "Back to my page"
+  },
+  "sret_body_wait": {
+    "message": "If you already signed in on another tab, head back here."
+  },
+  "sret_body_ready": {
+    "message": "You are signed in. Head back whenever you like."
+  },
+  "sret_body_going": {
+    "message": "Going back to your page…"
+  },
+  "sret_body_blocked": {
+    "message": "Could not go back: sign in here."
   },
   "enableFileCabinetDragDropBetaLabel": {
     "message": "Drag & drop upload"
@@ -8939,7 +9167,7 @@
     "message": "Saved search split view"
   },
   "enableSavedSearchSplitDesc": {
-    "message": "Opens a saved search in a side panel next to the current page, so you can view it without leaving. Open it from the Command Palette."
+    "message": "Opens a saved search in a side panel next to the current page, so you can view it without leaving. Open it from the Command Palette. It is on its way out: its replacement is Inline search preview."
   },
   "enableInSearchPreviewDesc": {
     "message": "Docked bottom panel with search preview without leaving the page."
@@ -11623,22 +11851,7 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "The field info panel was rebuilt: three tabs, NetSuite's help, and the options of each list."
-  },
-  "un_hl_2": {
-    "message": "*A saved search’s filters are applied all at once, with no reloads."
-  },
-  "un_hl_3": {
-    "message": "The PDF/HTML template preview is now a collapsible, live panel."
-  },
-  "un_hl_4": {
-    "message": "The Record Options Menu gathers what hangs from it, and you choose what it offers."
-  },
-  "un_hl_5": {
-    "message": "In Go to record just type \"transaction\" and the id: NetSuite works out the type."
-  },
-  "un_hl_6": {
-    "message": "Also: results open in another tab with a right click, ten new tones in Colour Themes, and several bugs were fixed. More details in the changelog."
+    "message": "Fixed the tab title showing the character count instead of the script name when editing a script. More details in the changelog."
   },
   "un_thanks": {
     "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
@@ -11948,6 +12161,156 @@
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Fixed the labels in the field info panel always coming out in Spanish."
   },
+  "cl_ver_7_2_1": {
+    "message": "v7.2.1"
+  },
+  "cl_date_7_2_1": {
+    "message": "2026-09-29"
+  },
+  "cl_7_2_1_bpt_counter_title": {
+    "message": "Editing a script keeps its name in the tab"
+  },
+  "cl_7_2_1_bpt_counter_desc": {
+    "message": "Fixed the tab title showing the character count instead of the script name when editing a script."
+  },
+  "cl_ver_7_2_0": {
+    "message": "v7.2.0"
+  },
+  "cl_date_7_2_0": {
+    "message": "2026-09-28"
+  },
+  "cl_7_2_0_sx_title": {
+    "message": "Run a Map/Reduce or Scheduled script from any page"
+  },
+  "cl_7_2_0_sx_desc": {
+    "message": "Added the option to run Map/Reduce and Scheduled scripts from their record or from the Command Palette, and follow them until they finish."
+  },
+  "cl_7_2_0_cfind_deploy_title": {
+    "message": "Customization Finder deployments open their own record"
+  },
+  "cl_7_2_0_cfind_deploy_desc": {
+    "message": "Fixed Customization Finder results under Deployments opening a different deployment’s record."
+  },
+  "cl_7_2_0_cmdp_search_title": {
+    "message": "Global search from the Command Palette reaches the results"
+  },
+  "cl_7_2_0_cmdp_search_desc": {
+    "message": "Fixed “Search NetSuite (Global Search)” in the Command Palette always ending on a page that does not exist."
+  },
+  "cl_7_2_0_sfb_inline_title": {
+    "message": "Inline editing turns on again with Batch Search Filters"
+  },
+  "cl_7_2_0_sfb_inline_desc": {
+    "message": "Fixed Batch Search Filters treating the results’ inline editing switch as a filter and not letting you turn it on."
+  },
+  "cl_ver_7_1_3": {
+    "message": "v7.1.3"
+  },
+  "cl_date_7_1_3": {
+    "message": "2026-09-18"
+  },
+  "cl_7_1_3_fcddel_title": {
+    "message": "File Cabinet folders can be deleted"
+  },
+  "cl_7_1_3_fcddel_desc": {
+    "message": "Fixed Delete on a File Cabinet folder returning an error instead of deleting it; files already worked."
+  },
+  "cl_7_1_3_srwffilter_title": {
+    "message": "The viewer's filter now reaches workflows too"
+  },
+  "cl_7_1_3_srwffilter_desc": {
+    "message": "Fixed the filter box in the record scripts viewer hiding and highlighting nothing on the workflows tab."
+  },
+  "cl_7_1_3_sfvctxopt_title": {
+    "message": "Choose how to open the field panel on a line"
+  },
+  "cl_7_1_3_sfvctxopt_desc": {
+    "message": "Added the option to open a sublist line's panel from the browser context menu, alongside the direct right-click."
+  },
+  "cl_7_1_3_sfvline_title": {
+    "message": "The field panel on a line opens with a right-click"
+  },
+  "cl_7_1_3_sfvline_desc": {
+    "message": "Removed the ⓘ button from sublist lines, which narrowed the fields, was hard to click and on some lists did not show at all."
+  },
+  "cl_7_1_3_cfindsid_title": {
+    "message": "Customization Finder finds by script ID"
+  },
+  "cl_7_1_3_cfindsid_desc": {
+    "message": "Fixed Customization Finder finding nothing when searching by script ID, only by name."
+  },
+  "cl_ver_7_1_2": {
+    "message": "v7.1.2"
+  },
+  "cl_date_7_1_2": {
+    "message": "2026-09-10"
+  },
+  "cl_7_1_2_sfvmargin_title": {
+    "message": "The field panel keeps its margin"
+  },
+  "cl_7_1_2_sfvmargin_desc": {
+    "message": "Fixed the field panel content sitting flush against the bottom edge when “Change the value” was switched off."
+  },
+  "cl_7_1_2_fcpath_title": {
+    "message": "Copy path always shows in the File Cabinet"
+  },
+  "cl_7_1_2_fcpath_desc": {
+    "message": "Fixed the copy path button not showing when opening the File Cabinet from the menu, when switching folders in the tree, nor in the listing with no folder open."
+  },
+  "cl_7_1_2_fcppath2_title": {
+    "message": "The copied path pastes as is"
+  },
+  "cl_7_1_2_fcppath2_desc": {
+    "message": "Fixed the path copied in the File Cabinet arriving with its hierarchy split by colons and without the leading slash."
+  },
+  "cl_7_1_2_fcdlneg_title": {
+    "message": "Download ZIP in NetSuite folders"
+  },
+  "cl_7_1_2_fcdlneg_desc": {
+    "message": "Fixed the download folder as ZIP button not showing inside NetSuite standard folders."
+  },
+  "cl_7_1_2_uipv_title": {
+    "message": "The settings previews and interface, up to date"
+  },
+  "cl_7_1_2_uipv_desc": {
+    "message": "Fixed the settings window previews that no longer matched their module or had gone stale, and reworked its interface: new options, controls that did not apply, and settings that moved to their own window."
+  },
+  "cl_7_1_2_favstd_title": {
+    "message": "Field history no longer comes up empty on standard fields"
+  },
+  "cl_7_1_2_favstd_desc": {
+    "message": "Fixed the field panel History not finding the changes of a standard field, which NetSuite records under a different name."
+  },
+  "cl_7_1_2_coachgap_title": {
+    "message": "The notice links, set apart"
+  },
+  "cl_7_1_2_coachgap_desc": {
+    "message": "Fixed “Open settings” and “Don’t show again” running together in the field panel notice."
+  },
+  "cl_7_1_2_sfvactivos_title": {
+    "message": "The options list leaves inactive records out"
+  },
+  "cl_7_1_2_sfvactivos_desc": {
+    "message": "Fixed the field panel options list offering inactive records, which NetSuite rejects on save."
+  },
+  "cl_7_1_2_favbusq_title": {
+    "message": "Field history recognises more native fields"
+  },
+  "cl_7_1_2_favbusq_desc": {
+    "message": "Added the field search name to the field History, which is the name NetSuite records the changes of several native fields under."
+  },
+  "cl_7_1_2_sublistdup_title": {
+    "message": "The copy button only where there is a sublist"
+  },
+  "cl_7_1_2_sublistdup_desc": {
+    "message": "Fixed the copy sublist id button showing twice on some subtabs and showing at all on others that list nothing, such as Audience or Contexts."
+  },
+  "cl_7_1_2_sfvancho_title": {
+    "message": "Line fields no longer get narrower"
+  },
+  "cl_7_1_2_sfvancho_desc": {
+    "message": "Fixed the field panel shrinking the fields of the line you are editing, which cut off the text of dropdowns."
+  },
   "cl_ver_7_1_1": {
     "message": "v7.1.1"
   },
@@ -11983,9 +12346,6 @@
   },
   "cl_7_1_0_ftabs_bg_desc": {
     "message": "Fixed subtab navigation showing through the sticky tab bar while scrolling."
-  },
-  "copyIdsChildrenTitle": {
-    "message": "What else it adds"
   },
   "cl_7_1_0_copyids_children_title": {
     "message": "The sublist button shows what it depends on"
@@ -12915,6 +13275,9 @@
   "welcomeCatScriptItem13": {
     "message": "Advanced Editor for File Cabinet files"
   },
+  "welcomeCatScriptItem14": {
+    "message": "Run Map/Reduce & Scheduled scripts from the record or the palette"
+  },
   "adv_save": {
     "message": "Save"
   },
@@ -13475,5 +13838,170 @@
   },
   "devPromptNoAnswer": {
     "message": "no NetSuite tab answered — refresh it and try again"
+  },
+  "cl_7_1_2_mscfiltro_title": {
+    "message": "The counter notices the list changed"
+  },
+  "cl_7_1_2_mscfiltro_desc": {
+    "message": "Fixed the multi-select counter still showing the previous total when another field filtered the options."
+  },
+  "cl_7_1_2_mscdemanda_title": {
+    "message": "The counter reaches large lists"
+  },
+  "cl_7_1_2_mscdemanda_desc": {
+    "message": "Added the number of selected items on lists NetSuite loads on demand, where no counter used to show."
+  },
+  "sfv_add": {
+    "message": "Add"
+  },
+  "sfv_remove": {
+    "message": "Remove"
+  },
+  "cl_7_1_2_sfvmulti_title": {
+    "message": "The options list also on multi-value fields"
+  },
+  "cl_7_1_2_sfvmulti_desc": {
+    "message": "Fixed the field information panel not showing the options list on fields that accept several values."
+  },
+  "cl_7_1_2_sfvmultigrande_title": {
+    "message": "The options list on large multi-value fields"
+  },
+  "cl_7_1_2_sfvmultigrande_desc": {
+    "message": "Fixed the field information panel not recognising multi-value fields whose list NetSuite loads on demand."
+  },
+  "msc_counting": {
+    "message": "Counting the list options…"
+  },
+  "msc_counted_title": {
+    "message": "Active options in the source list. It may not match what the NetSuite search offers, which applies its own filters."
+  },
+  "msc_count_failed": {
+    "message": "Could not count the options. Click to retry."
+  },
+  "cl_7_1_2_msctotal_title": {
+    "message": "The total on large lists too"
+  },
+  "cl_7_1_2_msctotal_desc": {
+    "message": "Added to the multi-select counter the total of lists NetSuite loads on demand, where only a dash used to show."
+  },
+  "cl_7_1_2_aiask_title": {
+    "message": "Answer the assistant in your own words"
+  },
+  "cl_7_1_2_aiask_desc": {
+    "message": "Added the ability to answer each assistant question with your own text, not only to pick from the options it offers."
+  },
+  "sqlai_ph_running": {
+    "message": "Add context to the running turn…"
+  },
+  "sqlai_queued": {
+    "message": "I will tell it on the next step"
+  },
+  "cl_7_1_2_aiextra_title": {
+    "message": "Add context without stopping the assistant"
+  },
+  "cl_7_1_2_aiextra_desc": {
+    "message": "Added the ability to write to the assistant while it works, to give it a missing detail without stopping or repeating the turn."
+  },
+  "sqlai_stopped": {
+    "message": "Stopped"
+  },
+  "sqlai_stopped_kept": {
+    "message": "What was done is kept: you can keep asking"
+  },
+  "cl_7_1_2_aistop_title": {
+    "message": "Stopping the assistant really stops it"
+  },
+  "cl_7_1_2_aistop_desc": {
+    "message": "Fixed the assistant still saying it was working after being stopped, and what it found is now kept so you can keep asking."
+  },
+  "cl_7_1_2_sret_title": {
+    "message": "Signing in on one tab covers them all"
+  },
+  "cl_7_1_2_sret_desc": {
+    "message": "Added that, when the session expires with several tabs open, signing in on one sends the rest back to the page they had."
+  },
+  "cl_7_1_2_sfb_nav_title": {
+    "message": "Paging and sorting work again"
+  },
+  "cl_7_1_2_sfb_nav_desc": {
+    "message": "Fixed Batch Filters preventing you from changing page or sorting by a column header on saved search results."
+  },
+  "cl_7_1_2_isp_flot_title": {
+    "message": "Collapsed previews stop eating the buttons"
+  },
+  "cl_7_1_2_isp_flot_desc": {
+    "message": "Fixed the Inline Search Preview and the PDF template preview reserving space at the foot of the page while collapsed, which cut off the button bar."
+  },
+  "sqlai_ask_own_ph": {
+    "message": "Other — type it yourself…"
+  },
+  "cl_7_1_2_sfvctx_title": {
+    "message": "Open the line panel with right-click"
+  },
+  "cl_7_1_2_sfvctx_desc": {
+    "message": "Added the option to open the information panel with a right-click, without adding any button to the sublist lines."
+  },
+  "cl_7_1_2_sfvmarca_title": {
+    "message": "The chosen option is marked right away"
+  },
+  "cl_7_1_2_sfvmarca_desc": {
+    "message": "Fixed the option chosen in the information panel list not being marked until the panel was closed and opened again."
+  },
+  "cl_7_1_2_sfvquitar_title": {
+    "message": "Remove a value from the options list"
+  },
+  "cl_7_1_2_sfvquitar_desc": {
+    "message": "Added that the button of an option already set offers to remove it, instead of setting again what was already there."
+  },
+  "cl_7_1_2_sfvorden_title": {
+    "message": "What is already set comes first"
+  },
+  "cl_7_1_2_sfvorden_desc": {
+    "message": "Added that the options the field already has set appear at the beginning of the list."
+  },
+  "cl_7_1_2_sfvurl_title": {
+    "message": "Source list links point to the right place"
+  },
+  "cl_7_1_2_sfvurl_desc": {
+    "message": "Fixed the link to the record and to its source list leading to a nonexistent address on multi-value fields."
+  },
+  "cl_7_1_2_sfvspin_title": {
+    "message": "You can see when the list is searching"
+  },
+  "cl_7_1_2_sfvspin_desc": {
+    "message": "Added a loading indicator in the options list search box, which turns back into the clear button once the results arrive."
+  },
+  "cl_7_1_2_sfvcopia_title": {
+    "message": "The copy button no longer copies the previous value"
+  },
+  "cl_7_1_2_sfvcopia_desc": {
+    "message": "Fixed the information panel copy button still copying the previous value after choosing an option."
+  },
+  "cl_7_1_2_sfvtextos_title": {
+    "message": "Multi-value field texts are separated"
+  },
+  "cl_7_1_2_sfvtextos_desc": {
+    "message": "Fixed the texts of a multi-value field being shown stuck together, with nothing separating them."
+  },
+  "cl_7_1_2_capcfg_title": {
+    "message": "The minimised capsule no longer offers what does not apply"
+  },
+  "cl_7_1_2_capcfg_desc": {
+    "message": "Fixed minimised windows still showing the settings and dock buttons, right next to the restore one."
+  },
+  "cl_7_1_2_cte_title": {
+    "message": "WITH clauses are no longer taken for tables"
+  },
+  "cl_7_1_2_cte_desc": {
+    "message": "Fixed a query with WITH triggering schema lookups for the names it declares, with their table-not-found warning."
+  },
+  "cl_7_1_2_sfvhistrans_title": {
+    "message": "Field History no longer hangs"
+  },
+  "cl_7_1_2_sfvhistrans_desc": {
+    "message": "Fixed Field History taking half a minute or hanging on transactions, and repeating the same change once per line."
+  },
+  "sfvHistoryNativeWarn": {
+    "message": "On native fields it may fall short: NetSuite records them under their internal column name, not the one on the form."
   }
 }

@@ -84,11 +84,11 @@
 
     function getCurrentFolderId() {
         const input = document.getElementById('folder');
-        if (input && input.value != null && /^\d+$/.test(String(input.value))) return String(input.value);
+        if (input && input.value != null && /^-?\d+$/.test(String(input.value))) return String(input.value);
         try {
             const q = new URLSearchParams(location.search);
             const f = q.get('folder');
-            if (f && /^\d+$/.test(f)) return f;
+            if (f && /^-?\d+$/.test(f)) return f;
         } catch (e) { }
         return '';
     }
@@ -316,7 +316,7 @@
                     || (folderEdit && folderEdit.u.searchParams.get('id'))
                     || cellText(idIdx)
                     || ((tr.querySelector('td[data-list-cell-type="numerickey"]') || {}).textContent || '').trim();
-                if (/^\d+$/.test(idCandidate || '')) {
+                if (/^-?\d+$/.test(idCandidate || '')) {
                     out.folders.push({
                         id: String(idCandidate),
                         name: cellName || (folderNav ? (folderNav.a.textContent || '').trim() : '') || String(idCandidate)

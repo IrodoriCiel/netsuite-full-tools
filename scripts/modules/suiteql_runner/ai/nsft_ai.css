@@ -631,6 +631,14 @@ body[data-nsft-ssc-theme="light"] .nsft-ai-hint-badge.nsft-ai-hint-warn {
 
 .nsft-ai-msg { display: flex !important; flex-direction: column !important; gap: 7px !important; }
 .nsft-ai-user { align-items: flex-end !important; }
+
+.nsft-ai-queued {
+    margin-top: 3px;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--ai-muted);
+    opacity: 0.85;
+}
 .nsft-ai-bot { align-items: stretch !important; }
 
 .nsft-ai-bubble {
@@ -677,6 +685,8 @@ body[data-nsft-ssc-theme="light"] .nsft-ai-hint-badge.nsft-ai-hint-warn {
 .nsft-ai-statustext { min-width: 0 !important; }
 .nsft-ai-turnstatus.nsft-ai-working { color: var(--ai-working) !important; }
 .nsft-ai-turnstatus.nsft-ai-done { color: var(--ai-ok) !important; }
+
+.nsft-ai-turnstatus.nsft-ai-stopped { color: var(--ai-muted) !important; }
 .nsft-ai-turnstatus.nsft-ai-err { color: var(--ai-err) !important; }
 .nsft-ai-tokens {
     font-weight: 500 !important;
@@ -945,6 +955,8 @@ body[data-nsft-ssc-theme="light"] .nsft-ai-hint-badge.nsft-ai-hint-warn {
 }
 .nsft-ai-modal {
     width: 760px !important; max-width: 94vw !important;
+    max-height: min(92vh, 940px) !important;
+    overflow: hidden !important;
     margin: auto !important;
     background: var(--ai-bg) !important; color: var(--ai-text) !important;
     border: 1px solid var(--ai-border) !important;
@@ -955,13 +967,13 @@ body[data-nsft-ssc-theme="light"] .nsft-ai-hint-badge.nsft-ai-hint-warn {
 }
 .nsft-ai-mhead {
     flex: none !important;
-    display: flex !important; align-items: center !important; justify-content: space-between !important;
+    display: flex !important; align-items: flex-start !important; justify-content: space-between !important;
     gap: 12px !important;
     padding: 20px 24px 16px !important;
     border-bottom: 1px solid var(--ai-border) !important;
 }
 .nsft-ai-mheadtext { display: flex !important; flex-direction: column !important; gap: 2px !important; min-width: 0 !important; }
-.nsft-ai-title { font-size: 16px !important; font-weight: 600 !important; letter-spacing: -0.01em !important; color: var(--ai-text) !important; }
+.nsft-ai-title { font-size: clamp(14.5px, 0.9vw + 12px, 16px) !important; font-weight: 600 !important; letter-spacing: -0.01em !important; color: var(--ai-text) !important; }
 .nsft-ai-msub { font-size: 12.5px !important; color: var(--ai-muted) !important; }
 .nsft-ai-mclose {
     flex: none !important;
@@ -981,9 +993,14 @@ body[data-nsft-ssc-theme="light"] .nsft-ai-hint-badge.nsft-ai-hint-warn {
     display: flex !important; gap: 24px !important;
     padding: 12px 24px 0 !important;
     border-bottom: 1px solid var(--ai-border) !important;
+    overflow-x: auto !important; overflow-y: hidden !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none !important;
 }
+.nsft-ai-tabs::-webkit-scrollbar { height: 0 !important; }
 .nsft-ai-tab {
     position: relative !important;
+    flex: 0 0 auto !important; white-space: nowrap !important;
     padding: 8px 2px 12px !important;
     border: none !important; background: transparent !important;
     color: var(--ai-muted) !important;
@@ -999,12 +1016,22 @@ body[data-nsft-ssc-theme="light"] .nsft-ai-hint-badge.nsft-ai-hint-warn {
     background: var(--ai-accent-hover) !important;
 }
 
-.nsft-ai-mbody { flex: 1 1 auto !important; overflow: visible !important; padding: 22px 24px 20px !important; }
+.nsft-ai-mbody {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important; overflow-x: hidden !important;
+    padding: 22px 24px 20px !important;
+}
 .nsft-ai-pane { display: flex !important; flex-direction: column !important; gap: 8px !important; }
 .nsft-ai-modal .nsft-ai-hidden { display: none !important; }
-.nsft-ai-cols { flex-direction: row !important; align-items: flex-start !important; gap: 24px !important; }
-.nsft-ai-col { flex: 1 1 0 !important; min-width: 0 !important; display: flex !important; flex-direction: column !important; gap: 6px !important; }
-.nsft-ai-coldiv { flex: none !important; width: 1px !important; align-self: stretch !important; background: var(--ai-border) !important; }
+.nsft-ai-cols {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+    align-items: start !important;
+    gap: 24px !important;
+}
+.nsft-ai-col { min-width: 0 !important; display: flex !important; flex-direction: column !important; gap: 6px !important; }
+.nsft-ai-coldiv { display: none !important; }
 
 .nsft-ai-form { display: flex !important; flex-direction: column !important; gap: 6px !important; }
 .nsft-ai-flabel { font-size: 13px !important; font-weight: 600 !important; color: var(--ai-text) !important; margin-top: 6px !important; }
@@ -1867,6 +1894,43 @@ body[data-nsft-ssc-theme="light"] #nsft-sql-tool-ai:hover {
     flex-direction: column;
     gap: 7px;
 }
+
+.nsft-ai-askown {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid var(--ai-border);
+    border-radius: 11px;
+    background: var(--ai-panel);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nsft-ai-askown:focus-within {
+    border-color: var(--ai-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ai-accent) 12%, transparent);
+}
+
+.nsft-ai-asktext-plain {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    resize: none;
+    min-height: 19px;
+    font-size: 13.5px;
+    line-height: 1.3;
+}
+
+.nsft-ai-asktext-plain:focus { outline: none; box-shadow: none; }
+
+.nsft-ai-asktext-plain::placeholder {
+    color: var(--ai-muted);
+    font-weight: 600;
+}
+
+.nsft-ai-askacts-own { margin-top: 9px; }
 
 .nsft-ai-askopt {
     display: flex;

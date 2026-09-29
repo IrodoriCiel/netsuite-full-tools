@@ -50,6 +50,7 @@
         'id do script', 'identificação'
     ]);
 
+    let copyIdsEnabled = true;
     let openCustomRecordEnabled = true;
     let _modo = 'shift';
     let _enabled = false;
@@ -66,27 +67,32 @@
         [NO_BUTTON_KEY]: true,
         [MODE_KEY]: null
     }, (items) => {
-        if (!items[STORAGE_KEY]) return;
-        if (RB && RB.isExcludedPage && RB.isExcludedPage()) return;
+        copyIdsEnabled = items[STORAGE_KEY] !== false;
         openCustomRecordEnabled = items[OPEN_REC_KEY] !== false;
+        if (!copyIdsEnabled && !openCustomRecordEnabled) return;
+        if (RB && RB.isExcludedPage && RB.isExcludedPage()) return;
         _modo = resolveMode(items);
         init();
     });
 
+    function aplicarInterruptores() {
+        const debeCorrer = copyIdsEnabled || openCustomRecordEnabled;
+        if (debeCorrer && !_enabled) {
+            if (!(RB && RB.isExcludedPage && RB.isExcludedPage())) init();
+        } else if (!debeCorrer && _enabled) {
+            teardown();
+        } else if (_enabled) {
+            removeAllButtons();
+            runAll();
+        }
+    }
+
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
-        if (changes[STORAGE_KEY]) {
-            const next = changes[STORAGE_KEY].newValue !== false;
-            if (next && !_enabled) {
-                if (!(RB && RB.isExcludedPage && RB.isExcludedPage())) init();
-            } else if (!next && _enabled) {
-                teardown();
-            }
-        }
-        if (changes[OPEN_REC_KEY]) {
-            openCustomRecordEnabled = changes[OPEN_REC_KEY].newValue !== false;
-            document.querySelectorAll('.' + MENU_CLASS).forEach(el => el.remove());
-            if (_enabled && openCustomRecordEnabled) runAll();
+        if (changes[STORAGE_KEY] || changes[OPEN_REC_KEY]) {
+            if (changes[STORAGE_KEY]) copyIdsEnabled = changes[STORAGE_KEY].newValue !== false;
+            if (changes[OPEN_REC_KEY]) openCustomRecordEnabled = changes[OPEN_REC_KEY].newValue !== false;
+            aplicarInterruptores();
         }
         if (changes[MODE_KEY] || changes[NO_BUTTON_KEY]) {
             chrome.storage.local.get({ [NO_BUTTON_KEY]: true, [MODE_KEY]: null }, (it) => {
@@ -183,10 +189,12 @@
 
     function runAll() {
         _labelMap = null;
-        addFieldButtons();
+        if (copyIdsEnabled) {
+            addFieldButtons();
+            addRecordTypeButton();
+            addRowIdButtons();
+        }
         addSublistButtons();
-        addRecordTypeButton();
-        addRowIdButtons();
     }
 
     function getLabelMap() {
@@ -345,12 +353,24 @@
         return comun > a.height / 2;
     }
 
+    const CAPA_SEL = 'div[id$="_layer"][data-nsps-layer]';
+    const TABLA_SUBLISTA_SEL = 'table[id$="_splits"], table.uir-machine-table, table[id$="_list"], table.uir-list-table, table.uir-list';
+
     function addSublistButtons() {
-        document.querySelectorAll('div[id$="_layer"][data-nsps-layer]').forEach(div => {
+        document.querySelectorAll(CAPA_SEL).forEach(div => {
             const layer = div.dataset.nspsLayer;
             if (!layer) return;
 
-            if (!div.querySelector(`.${SUBLIST_BTN_CLASS}[data-layer="${layer}"]`)) {
+            const anidadas = [...div.querySelectorAll(CAPA_SEL)];
+            const tablasPropias = [...div.querySelectorAll(TABLA_SUBLISTA_SEL)]
+                .filter((t) => !anidadas.some((n) => n.contains(t)));
+            if (!tablasPropias.length) {
+                div.querySelectorAll(`:scope > .${SUBLIST_BTN_CLASS}, :scope > .${MENU_CLASS}`)
+                    .forEach((b) => b.remove());
+                return;
+            }
+
+            if (copyIdsEnabled && !div.querySelector(`.${SUBLIST_BTN_CLASS}[data-layer="${layer}"]`)) {
                 const baseText = chrome.i18n.getMessage("copySublistId");
                 const baseHtml = COPY_ICON_SVG + '<span>' + baseText + '</span>';
                 const copiedHtml = CHECK_ICON_SVG + '<span>' + chrome.i18n.getMessage("copiedSublist") + '</span>';

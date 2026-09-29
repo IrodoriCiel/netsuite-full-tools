@@ -123,6 +123,10 @@
         return fold(s).toUpperCase();
     }
 
+    function sqlLike(s) {
+        return String(s == null ? '' : s).replace(/([%_\\])/g, '\\$1');
+    }
+
     window.NSFT_TextSearch = {
         fold: fold,
         foldAligned: foldAligned,
@@ -131,6 +135,7 @@
         mark: mark,
         markHtml: markHtml,
         sqlFold: sqlFold,
-        sqlTerm: sqlTerm
+        sqlTerm: sqlTerm,
+        sqlLike: sqlLike
     };
 })();

@@ -692,6 +692,12 @@
                     <label><input type="checkbox" id="recordOptionsMenuShowAddColumn"><span data-i18n="recordOptionAddColumn"></span></label>
                   </div>
                   <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowRunSuiteQL"><span data-i18n="recordOptionRunSuiteQL"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowLoadConsole"><span data-i18n="recordOptionLoadInConsole"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
                     <label><input type="checkbox" id="enableSaveAndEditButton"><span data-i18n="enableSaveAndEditButtonLabel"></span></label>
                     <div id="save-and-edit-mode-controls" class="record-action-mode nsft-radio-group" style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
                     <label><input type="radio" id="saveAndEditModeButton" name="saveAndEditButtonMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
@@ -796,17 +802,21 @@
                 <label><input type="radio" id="copyIdsModeShift" name="copyIdsMode" value="shift"><span data-i18n="copyIdsNoButtonLabel"></span></label>
                 <label><input type="radio" id="copyIdsModeAlways" name="copyIdsMode" value="always"><span data-i18n="copyIdsAlwaysLabel"></span></label>
               </div>
-              <div id="copy-ids-children" class="nsft-subopts" style="display: none;">
-                <div class="nsft-subopts-title" data-i18n="copyIdsChildrenTitle"></div>
-                <div class="nsft-subopts-grid">
-                  <div class="nsft-subopt-item">
-                    <label><input type="checkbox" id="enableOpenCustomRecordBtn"><span data-i18n="enableOpenCustomRecordBtnLabel"></span></label>
-                  </div>
-                </div>
-              </div>
             </div>
             <label class="switch">
               <input type="checkbox" id="enableCopyFieldAndSublistIds">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableOpenCustomRecordBtn" data-i18n="enableOpenCustomRecordBtnLabel"></span>
+              <div id="desc_enableOpenCustomRecordBtn" class="description" data-i18n="enableOpenCustomRecordBtnDesc">
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableOpenCustomRecordBtn">
               <span class="slider round"></span>
             </label>
           </div>
@@ -821,6 +831,12 @@
                   <label><input type="radio" id="setFieldValuesModeIcon" name="setFieldValuesNoIcon" value="false"><span data-i18n="setFieldValuesWithIconLabel"></span></label>
                   <label><input type="radio" id="setFieldValuesModeLabel" name="setFieldValuesNoIcon" value="true"><span data-i18n="setFieldValuesNoIconLabel"></span></label>
                 </div>
+                <div class="nsft-subopts-title" data-i18n="sfvLineModeTitle" style="margin-top: 10px;"></div>
+                <div class="nsft-radio-group" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                  <label><input type="radio" id="setFieldValuesLineModeDirect" name="setFieldValuesLineMode" value="direct"><span data-i18n="sfvLineModeDirectLabel"></span></label>
+                  <label><input type="radio" id="setFieldValuesLineModeMenu" name="setFieldValuesLineMode" value="menu"><span data-i18n="sfvLineModeMenuLabel"></span></label>
+                </div>
+                <div class="description" data-i18n="sfvLineModeDesc"></div>
               </div>
               <div id="set-field-values-sections" class="nsft-subopts" style="display: none;">
                 <div class="nsft-subopts-title" data-i18n="sfvSectionsTitle"></div>
@@ -1034,18 +1050,6 @@
                   <label for="suitescriptConsoleHistoryMax" style="font-size: 12px; margin-right: 5px;" data-i18n="suiteqlHistoryMaxLabel"></label>
                   <input type="number" id="suitescriptConsoleHistoryMax" min="1" max="1000" step="1" style="width: 64px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
                 </div>
-                <div style="margin-top: 6px;">
-                  <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer;"
-                    data-i18n-title="sscAiCompleteDesc">
-                    <input type="checkbox" id="suitescriptConsoleAiComplete" style="margin: 0;">
-                    <span data-i18n="sscAiCompleteLabel"></span>
-                  </label>
-                </div>
-                <div style="margin-top: 6px;">
-                  <label for="suitescriptConsoleAiModel" style="font-size: 12px; margin-right: 5px;" data-i18n="sscAiModelLabel"></label>
-                  <select id="suitescriptConsoleAiModel"
-                    style="max-width: 180px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;"></select>
-                </div>
               </div>
             </div>
             <label class="switch">
@@ -1056,7 +1060,25 @@
 
           <div class="option-row">
             <div>
-              <span id="label_enableEditorTheme" data-i18n="enableEditorThemeLabel"></span>
+              <span id="label_enableScriptExecute" data-i18n="enableScriptExecuteLabel"></span>
+              <div id="desc_enableScriptExecute" class="description" data-i18n="enableScriptExecuteDesc"></div>
+
+              <div id="script-execute-container" class="record-action-mode nsft-radio-group"
+                style="margin-top: 8px; display: none; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <label><input type="radio" id="scriptExecuteModeButton" name="scriptExecuteMode" value="button"><span data-i18n="recordActionModeButton"></span></label>
+                <label><input type="radio" id="scriptExecuteModeMenu" name="scriptExecuteMode" value="menu"><span data-i18n="recordActionModeMenu"></span></label>
+                <label class="nsft-subpref" style="flex-basis: 100%; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;"><input type="checkbox" id="scriptExecuteConfirmSandbox"><span data-i18n="scriptExecuteConfirmSandboxLabel"></span></label>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableScriptExecute">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableEditorTheme" data-i18n="enableEditorThemeLabel"></span><span class="nsft-deprecated" data-i18n="deprecatedBadge" data-i18n-title="deprecatedBadgeTitle"></span>
               <div id="desc_enableEditorTheme" class="description" data-i18n="enableEditorThemeDesc"></div>
 
               <div id="theme-container-editor" style="margin-top: 5px; display: none;">
@@ -1093,11 +1115,25 @@
 
                 <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px;">
                   <label for="editorFontSize" data-i18n="editorFontSizeLabel" style="cursor: pointer;"></label>
-                  <input type="range" id="editorFontSize" min="11" max="22" step="1" value="14" style="flex: 1; max-width: 140px;">
-                  <span id="editorFontSizeVal" style="min-width: 30px; text-align: right;">14 px</span>
+                  <select id="editorFontSize"
+                    style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                    <option value="0" data-i18n="editorFontSizeDefaultOption"></option>
+                    <option value="11">11 px</option>
+                    <option value="12">12 px</option>
+                    <option value="13">13 px</option>
+                    <option value="14">14 px</option>
+                    <option value="15">15 px</option>
+                    <option value="16">16 px</option>
+                    <option value="17">17 px</option>
+                    <option value="18">18 px</option>
+                    <option value="19">19 px</option>
+                    <option value="20">20 px</option>
+                    <option value="21">21 px</option>
+                    <option value="22">22 px</option>
+                  </select>
                 </div>
 
-                <div style="display: flex; gap: 6px; margin-top: 6px; font-size: 11px;">
+                <div id="editor-theme-io" style="display: flex; gap: 6px; margin-top: 6px; font-size: 11px;">
                   <button type="button" id="editorThemeExport" data-i18n="editorThemeExportLabel"
                     style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: inherit; cursor: pointer;"></button>
                   <button type="button" id="editorThemeImport" data-i18n="editorThemeImportLabel"
@@ -1391,18 +1427,6 @@
                   <label for="suiteqlHistoryMax" style="font-size: 12px; margin-right: 5px;" data-i18n="suiteqlHistoryMaxLabel"></label>
                   <input type="number" id="suiteqlHistoryMax" min="1" max="1000" step="1" style="width: 64px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
                 </div>
-                <div style="margin-top: 6px;">
-                  <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer;"
-                    data-i18n-title="sscAiCompleteDesc">
-                    <input type="checkbox" id="suiteqlAiComplete" style="margin: 0;">
-                    <span data-i18n="sqlAiCompleteLabel"></span>
-                  </label>
-                </div>
-                <div style="margin-top: 6px;">
-                  <label for="suiteqlAiModel" style="font-size: 12px; margin-right: 5px;" data-i18n="sscAiModelLabel"></label>
-                  <select id="suiteqlAiModel"
-                    style="max-width: 180px; padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;"></select>
-                </div>
 
                 <section class="nsft-sqlset-group">
                   <label class="nsft-sqlset-check" data-i18n-title="suiteqlFetchAllRowsDesc">
@@ -1573,7 +1597,7 @@
 
           <div class="option-row">
             <div>
-              <span id="label_enableSavedSearchSplit" data-i18n="enableSavedSearchSplitLabel"></span>
+              <span id="label_enableSavedSearchSplit" data-i18n="enableSavedSearchSplitLabel"></span><span class="nsft-deprecated" data-i18n="deprecatedBadge" data-i18n-title="deprecatedBadgeTitle"></span>
               <div id="desc_enableSavedSearchSplit" class="description" data-i18n="enableSavedSearchSplitDesc"></div>
             </div>
             <label class="switch">
@@ -1682,11 +1706,6 @@
                   <button type="button" class="nsft-nav-preset" data-h="30" data-i18n="navPresetDefault"></button>
                   <button type="button" class="nsft-nav-preset" data-h="38" data-i18n="navPresetComfortable"></button>
                   <button type="button" class="nsft-nav-preset" data-h="46" data-i18n="navPresetSpacious"></button>
-                </div>
-                <div id="navigation-preview" class="nsft-nav-preview" style="margin-left: 5px;" aria-hidden="true">
-                  <div class="nsft-nav-preview-row"><span class="nsft-nav-prev-bar"></span></div>
-                  <div class="nsft-nav-preview-row"><span class="nsft-nav-prev-bar"></span></div>
-                  <div class="nsft-nav-preview-row"><span class="nsft-nav-prev-bar"></span></div>
                 </div>
               </div>
             </div>
@@ -2077,6 +2096,17 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableLoggedoutRedirectBeta">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableSessionReturn" data-i18n="enableSessionReturnLabel"></span>
+              <div id="desc_enableSessionReturn" class="description" data-i18n="enableSessionReturnDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableSessionReturn">
               <span class="slider round"></span>
             </label>
           </div>

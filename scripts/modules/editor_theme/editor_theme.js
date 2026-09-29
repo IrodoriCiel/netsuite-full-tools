@@ -20,6 +20,7 @@
     const CURTAIN_MAX_MS = 7000;
 
     const CURTAIN_FLAG_KEY = 'nsftEditorThemeEnabled';
+    const FONT_FLAG_KEY = 'nsftEditorThemeFont';
 
     let _themeApplied = false;
     let _editorMounted = false;
@@ -52,7 +53,9 @@
 
     (function installCurtainASAP() {
         if (!IS_EDITOR_PAGE) return;
-        injectEditorFonts();
+        let fuenteElegida = null;
+        try { fuenteElegida = sessionStorage.getItem(FONT_FLAG_KEY); } catch (_) { fuenteElegida = null; }
+        if (fuenteElegida !== 'default') injectEditorFonts();
         if (sessionStorage.getItem(CURTAIN_FLAG_KEY) === '0') return;
         showCurtainNow();
         watchForEditor();
@@ -96,8 +99,8 @@
     const TEMA_DEFECTOS = {
         [ENABLE_THEME_KEY]: true,
         editorTheme: DEFAULT_THEME,
-        editorFontFamily: 'JetBrains Mono',
-        editorFontSize: 14,
+        editorFontFamily: 'default',
+        editorFontSize: 0,
         nsftTheme: 'light',
         [THEME_CACHE_KEY]: null
     };
@@ -108,6 +111,7 @@
         _unifiedDark = items.nsftTheme === 'dark';
         const enabled = !!items[ENABLE_THEME_KEY];
         try { sessionStorage.setItem(CURTAIN_FLAG_KEY, enabled ? '1' : '0'); } catch (_) { }
+        try { sessionStorage.setItem(FONT_FLAG_KEY, String(items.editorFontFamily || 'default')); } catch (_) { }
 
         if (!enabled) {
             hideCurtain();
@@ -500,8 +504,8 @@
     function getEditorSubPrefs() {
         return new Promise((resolve) => {
             chrome.storage.local.get({
-                editorFontFamily: 'JetBrains Mono',
-                editorFontSize: 14
+                editorFontFamily: 'default',
+                editorFontSize: 0
             }, (items) => resolve({
                 fontFamily: items.editorFontFamily,
                 fontSize: parseInt(items.editorFontSize, 10) || 14

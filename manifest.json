@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "NetSuite Full Tools",
-    "version": "7.1.1",
+    "version": "7.2.1",
     "description": "__MSG_extDescription__",
     "default_locale": "en",
     "icons": {
@@ -11,6 +11,7 @@
     },
     "permissions": [
         "clipboardWrite",
+        "contextMenus",
         "storage",
         "unlimitedStorage",
         "tabGroups",
@@ -365,6 +366,18 @@
             ],
             "css": [
                 "scripts/modules/customization_finder/customization_finder.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/script_execute/script_execute.js"
+            ],
+            "css": [
+                "scripts/modules/script_execute/script_execute.css"
             ],
             "run_at": "document_end"
         },
@@ -1066,6 +1079,18 @@
         },
         {
             "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/session_return/session_return.js"
+            ],
+            "css": [
+                "scripts/modules/session_return/session_return.css"
+            ],
+            "run_at": "document_start"
+        },
+        {
+            "matches": [
                 "https://*.app.netsuite.com/app/common/media/mediaitemfolders.nl*",
                 "https://*.app.netsuite.com/app/common/media/mediaitemfolder.nl*",
                 "https://*.app.netsuite.com/media/mediaitemfolders.nl*"
@@ -1266,6 +1291,7 @@
                 "scripts/modules/suiteql_runner/chart/chart_view.html",
                 "scripts/modules/export_search/export_search_fetcher.js",
                 "scripts/modules/set_field_values/set_field_values_fetcher.js",
+                "scripts/modules/multiselect_counter/multiselect_counter_fetcher.js",
                 "scripts/modules/sublist_line_ids/sublist_line_ids_fetcher.js",
                 "scripts/modules/find_field_by_id/find_field_by_id_fetcher.js",
                 "scripts/modules/search_summary_bulk/search_summary_bulk_fetcher.js",
@@ -1277,6 +1303,8 @@
                 "scripts/modules/recent_records/recent_records_fetcher.js",
                 "scripts/modules/date_format_hint/date_format_hint_fetcher.js",
                 "scripts/modules/customization_finder/customization_finder_fetcher.js",
+                "scripts/modules/script_execute/script_execute_fetcher.js",
+                "scripts/modules/script_execute/script_execute_hook.js",
                 "scripts/modules/suitescript_console/suitescript_console_fetcher.js",
                 "scripts/modules/advanced_editor/advanced_editor_fetcher.js",
                 "scripts/modules/record_logs_viewer/record_logs_viewer_fetcher.js",

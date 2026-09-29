@@ -23,12 +23,13 @@
     let _sqlEnabled = false;
     let _copyHandler = null;
     let _sscEnabled = false;
+    let _sxEnabled = false, _sxMode = 'menu';
     let _delEnabled = false, _delMode = 'button';
     let _easEnabled = false, _easMode = 'button';
     let _saeEnabled = false, _saeMode = 'button';
     let _rtrailEnabled = false;
 
-    const ITEM_KEYS = ['recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'];
+    const ITEM_KEYS = ['recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'];
     const _items = {};
     function ver(k) { return _items[k] !== false; }
 
@@ -48,11 +49,17 @@
         recordOptionsMenuShowCopyUrl: true,
         recordOptionsMenuShowOpenInEnv: true,
         recordOptionsMenuShowXml: true,
+        recordOptionsMenuShowRunSuiteQL: true,
+        recordOptionsMenuShowLoadConsole: true,
+        enableScriptExecute: true,
         deleteRecordButtonMode: 'menu',
         editAndSaveButtonMode: 'menu',
-        saveAndEditButtonMode: 'menu'
+        saveAndEditButtonMode: 'menu',
+        scriptExecuteMode: 'menu'
     }, (setting) => {
         if (!setting[STORAGE_KEY]) return;
+        _sxEnabled = !!setting.enableScriptExecute;
+        _sxMode = setting.scriptExecuteMode;
         _envEnabled = !!setting.enableOpenInOtherEnv;
         _sqlEnabled = !!setting.enableSuiteQLRunner;
         _sscEnabled = !!setting.enableSuiteScriptConsole;
@@ -70,9 +77,10 @@
     const ACTION_KEYS = [
         'enableDeleteRecordButton', 'enableEditAndSaveButton', 'enableSaveAndEditButton',
         'deleteRecordButtonMode', 'editAndSaveButtonMode', 'saveAndEditButtonMode',
+        'enableScriptExecute', 'scriptExecuteMode',
         'enableRecordTrail',
         'enableSuiteQLRunner', 'enableSuiteScriptConsole', 'enableOpenInOtherEnv',
-        'recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'
+        'recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'
     ];
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -92,6 +100,8 @@
             if (changes.deleteRecordButtonMode) _delMode = changes.deleteRecordButtonMode.newValue;
             if (changes.editAndSaveButtonMode) _easMode = changes.editAndSaveButtonMode.newValue;
             if (changes.saveAndEditButtonMode) _saeMode = changes.saveAndEditButtonMode.newValue;
+            if (changes.enableScriptExecute) _sxEnabled = !!changes.enableScriptExecute.newValue;
+            if (changes.scriptExecuteMode) _sxMode = changes.scriptExecuteMode.newValue;
             if (changes.enableRecordTrail) _rtrailEnabled = !!changes.enableRecordTrail.newValue;
             if (changes.enableSuiteQLRunner) _sqlEnabled = !!changes.enableSuiteQLRunner.newValue;
             if (changes.enableSuiteScriptConsole) _sscEnabled = !!changes.enableSuiteScriptConsole.newValue;
@@ -200,6 +210,7 @@
         const context = getPageContext();
         _menuCell = createMenuElement(context);
         _cachedUrl = window.location.href;
+        if (!_menuCell) return;
         buttonsRow.appendChild(_menuCell);
     }
 
@@ -237,6 +248,7 @@
 
         const label = esc(chrome.i18n.getMessage('recordOptionsTitle'));
         const innerOptions = generateOptionsHtml(context);
+        if (!innerOptions) return null;
 
         td.innerHTML = `
             <ul class="ns-menu">
@@ -268,7 +280,8 @@
         link: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
         save: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
         edit: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
-        trash: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`
+        trash: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
+        run: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`
     };
 
     function buildRecordActions() {
@@ -289,8 +302,13 @@
             actions.push(createActionMenuItem(chrome.i18n.getMessage('btn_delete'), 'trash',
                 `if(typeof nsft_deleteRecord=='function'){nsft_deleteRecord();}return false;`));
         }
+        const SX = window.NSFT_ScriptExecute;
+        if (_sxEnabled && _sxMode === 'menu' && SX && SX.esFichaEjecutable && SX.esFichaEjecutable()) {
+            actions.push(createActionMenuItem(chrome.i18n.getMessage('sx_title'), 'run',
+                `if(typeof nsft_runScript=='function'){nsft_runScript();}return false;`));
+        }
 
-        if (_sscEnabled) {
+        if (_sscEnabled && ver("recordOptionsMenuShowLoadConsole")) {
             const codigo = [
                 '// ' + (chrome.i18n.getMessage('ssc_load_tpl_1') || 'The record open on this page'),
                 'const cr = currentRecord.get();',
@@ -339,8 +357,9 @@
                     `/app/common/custom/custreccustfield.nl?rectype=${context.rectype}`, 'plus_circle'));
                 if (context.id && _sqlEnabled) {
                     insertActions();
-                    const onclick = `window.dispatchEvent(new CustomEvent('nsft-show-suiteql-runner', { detail: { prefillRecord: { rectype: '${jsEsc(context.rectype)}', id: '${jsEsc(context.id)}' } } })); return false;`;
-                    items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionRunSuiteQL'), 'suiteql', onclick));
+                    if (ver("recordOptionsMenuShowRunSuiteQL")) {
+                        items.push(createSuiteQLItem({ rectype: context.rectype, id: context.id }));
+                    }
                 }
             }
             if (context.id && context.rectype) {
@@ -356,18 +375,23 @@
                     `/app/common/custom/customtransaction.nl?id=${cType}&e=T`, 'settings'));
                 if (ver("recordOptionsMenuShowAddField")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
                     `/app/common/custom/bodycustfield.nl?customtype=${cType}`, 'plus_circle'));
-                insertActions();
                 if (ver("recordOptionsMenuShowAddColumn")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddColumn'),
                     `/app/common/custom/columncustfield.nl?customtype=${cType}`, 'columns'));
+                insertActions();
             }
         }
 
         if (context.isStandardTransaction) {
             if (ver("recordOptionsMenuShowAddField")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddField'),
                 `/app/common/custom/bodycustfield.nl`, 'plus_circle'));
-            insertActions();
             if (ver("recordOptionsMenuShowAddColumn")) items.push(createMenuItem(chrome.i18n.getMessage('recordOptionAddColumn'),
                 `/app/common/custom/columncustfield.nl`, 'columns'));
+            insertActions();
+        }
+
+        if ((context.isCustomTransaction || context.isStandardTransaction)
+            && context.id && _sqlEnabled && ver("recordOptionsMenuShowRunSuiteQL")) {
+            items.push(createSuiteQLItem({ table: 'transaction', id: context.id }));
         }
 
         if (context.isEntity) {
@@ -424,6 +448,14 @@
                 </a>
             </li>
         `;
+    }
+
+    function createSuiteQLItem(prefill) {
+        const detalle = Object.keys(prefill)
+            .map((k) => `${k}: '${jsEsc(prefill[k])}'`)
+            .join(', ');
+        const onclick = `window.dispatchEvent(new CustomEvent('nsft-show-suiteql-runner', { detail: { prefillRecord: { ${detalle} } } })); return false;`;
+        return createActionMenuItem(chrome.i18n.getMessage('recordOptionRunSuiteQL'), 'suiteql', onclick);
     }
 
     function createActionMenuItem(label, iconKey, onclickJs) {

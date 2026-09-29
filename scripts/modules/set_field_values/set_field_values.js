@@ -39,11 +39,13 @@
         'setFieldValuesShowEdit'];
     const _secciones = {};
     const NO_ICON_KEY = 'setFieldValuesNoIcon';
+    const LINE_MODE_KEY = 'setFieldValuesLineMode';
     const NSFT_THEME_KEY = 'nsftTheme';
     const HELP_COLLAPSED_KEY = 'nsftSfvHelpCollapsed';
     const META_COLLAPSED_KEY = 'nsftSfvMetaCollapsed';
     const HELP_TEMPLATES_KEY = 'nsftSfvHelpTemplates';
     const HELP_TEMPLATES_MAX = 40;
+    const RECTYPES_KEY = 'nsftSfvRecTypes';
     const DIAG_KEY = 'nsftSelectorDiagnostics';
     const DIAG_FLAG = 'nsftSfvDiag';
 
@@ -56,9 +58,11 @@
     let _nsftTheme = 'light';
     let _auditEnabled = true;
     let _noIcon = true;
+    let _lineMode = 'direct';
     let _helpCollapsed = false;
     let _metaCollapsed = true;
     let _helpTemplates = {};
+    let _rectypes = {};
 
     function _resolveTheme() {
         return _nsftTheme === 'dark' ? 'dark' : 'light';
@@ -71,7 +75,9 @@
         [HELP_COLLAPSED_KEY]: false,
         ...Object.fromEntries(SECCIONES.map((k) => [k, true])),
         [META_COLLAPSED_KEY]: true,
+        [LINE_MODE_KEY]: 'direct',
         [HELP_TEMPLATES_KEY]: {},
+        [RECTYPES_KEY]: {},
         [NSFT_THEME_KEY]: 'light',
         [DIAG_KEY]: false
     };
@@ -88,11 +94,13 @@
         _nsftTheme = items[NSFT_THEME_KEY] || 'light';
         _auditEnabled = items[AUDIT_KEY] !== false;
         _noIcon = items[NO_ICON_KEY] !== false;
+        _lineMode = items[LINE_MODE_KEY] === 'menu' ? 'menu' : 'direct';
         _helpCollapsed = items[HELP_COLLAPSED_KEY] === true;
         SECCIONES.forEach((k) => { _secciones[k] = items[k] !== false; });
         _metaCollapsed = items[META_COLLAPSED_KEY] !== false;
         _helpTemplates = (items[HELP_TEMPLATES_KEY] && typeof items[HELP_TEMPLATES_KEY] === 'object')
             ? items[HELP_TEMPLATES_KEY] : {};
+        _rectypes = (items[RECTYPES_KEY] && typeof items[RECTYPES_KEY] === 'object') ? items[RECTYPES_KEY] : {};
         init(items);
     }
 
@@ -123,6 +131,15 @@
             }
             chrome.storage.local.set({ [HELP_TEMPLATES_KEY]: _helpTemplates });
         }
+
+        if (event.data.type === 'nsft-sfv-rectype') {
+            const tipo = String(event.data.tipo || '');
+            const id = Number(event.data.id);
+            if (!tipo || isNaN(id)) return;
+            if (_rectypes[tipo] === id) return;
+            _rectypes[tipo] = id;
+            chrome.storage.local.set({ [RECTYPES_KEY]: _rectypes });
+        }
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -147,6 +164,10 @@
         if (changes[NO_ICON_KEY]) {
             _noIcon = changes[NO_ICON_KEY].newValue !== false;
             window.postMessage({ type: 'nsft-set-field-values-noicon', noIcon: _noIcon }, '*');
+        }
+        if (changes[LINE_MODE_KEY]) {
+            _lineMode = changes[LINE_MODE_KEY].newValue === 'menu' ? 'menu' : 'direct';
+            window.postMessage({ type: 'nsft-set-field-values-linemode', lineMode: _lineMode }, '*');
         }
         if (changes[AUDIT_KEY]) {
             _auditEnabled = changes[AUDIT_KEY].newValue !== false;
@@ -197,6 +218,8 @@
                 sfv_field_text: chrome.i18n.getMessage("sfv_field_text"),
                 sfv_enter_new_value: chrome.i18n.getMessage("sfv_enter_new_value"),
                 sfv_set: chrome.i18n.getMessage("sfv_set"),
+                sfv_add: chrome.i18n.getMessage("sfv_add"),
+                sfv_remove: chrome.i18n.getMessage("sfv_remove"),
                 sfv_internal_id: chrome.i18n.getMessage("sfv_internal_id"),
                 sfv_text: chrome.i18n.getMessage("sfv_text"),
                 sfv_copy_field_id: chrome.i18n.getMessage("sfv_copy_field_id"),
@@ -265,6 +288,7 @@
                 closeModal: chrome.i18n.getMessage("closeModal"),
                 fav_loading: chrome.i18n.getMessage("fav_loading"),
                 fav_no_history: chrome.i18n.getMessage("fav_no_history"),
+                fav_no_history_std: chrome.i18n.getMessage("fav_no_history_std"),
                 fav_error: chrome.i18n.getMessage("fav_error"),
                 fav_old_value: chrome.i18n.getMessage("fav_old_value"),
                 fav_new_value: chrome.i18n.getMessage("fav_new_value"),
@@ -282,10 +306,12 @@
                 theme: _resolveTheme(),
                 auditEnabled: _auditEnabled,
                 noIcon: _noIcon,
+                lineMode: _lineMode,
                 helpCollapsed: _helpCollapsed,
                 secciones: _secciones,
                 metaCollapsed: _metaCollapsed,
-                helpTemplates: _helpTemplates
+                helpTemplates: _helpTemplates,
+                rectypes: _rectypes
             }, '*');
         };
         (document.head || document.documentElement).appendChild(script);
@@ -304,6 +330,19 @@
         if (!d || d.dest !== 'extension_sfv') return;
         if (d.type === 'openSettings') abrirAjustes();
         else if (d.type === 'coach') quizaCoach();
+        else if (d.type === 'ctx-applies') avisaSiAplica(d.applies === true);
+    });
+
+    function avisaSiAplica(aplica) {
+        try {
+            chrome.runtime.sendMessage({ nsftSfvCtx: 'applies', applies: aplica },
+                () => { void chrome.runtime.lastError; });
+        } catch (e) { }
+    }
+
+    chrome.runtime.onMessage.addListener((message) => {
+        if (!message || message.nsftSfvCtx !== 'open') return;
+        window.postMessage({ type: 'nsft-set-field-values-open-last' }, '*');
     });
 
     function abrirAjustes() {

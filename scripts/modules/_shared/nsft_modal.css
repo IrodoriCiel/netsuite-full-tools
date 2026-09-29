@@ -178,6 +178,8 @@
 .nsft-modal[data-state="minimised"] .nsft-modal-btn-fullscreen,
 .nsft-modal[data-state="fullscreen"] .nsft-modal-btn-maximise { display: none; }
 
+[data-state="minimised"] .nsft-modal-hide-min { display: none !important; }
+
 .nsft-modal[data-theme="dark"] {
     background: var(--nsft-dk-hover, #1E2025);
     border-color: var(--nsft-dk-border, #282A30);

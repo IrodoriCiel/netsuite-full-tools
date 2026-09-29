@@ -173,6 +173,49 @@
         }
     }
 
+    function buscaCasilla(doc, info) {
+        const id = String(info.id);
+        const numerico = /^-?\d+$/.test(id);
+
+        const cadena = [`#sa${id}fld${info.isFolder ? 'T' : 'F'}`];
+        if (numerico) cadena.push(`input[type="checkbox"][id^="sa${id}fld"]`);
+
+        if (window.NSFT_DOM && typeof window.NSFT_DOM.q === 'function') {
+            const el = window.NSFT_DOM.q(cadena, {
+                root: doc,
+                module: 'file_cabinet_delete',
+                purpose: 'casilla del elemento en el formulario de borrado'
+            });
+            if (el) return el;
+        } else {
+            for (const sel of cadena) {
+                let el = null;
+                try { el = doc.querySelector(sel); } catch (e) { continue; }
+                if (el) return el;
+            }
+        }
+
+        if (/^\d+$/.test(id)) {
+            const limite = new RegExp('(^|\\D)' + id + '(\\D|$)');
+            const casillas = doc.querySelectorAll('input[type="checkbox"][id]');
+            for (const c of casillas) {
+                if (limite.test(c.id)) return c;
+            }
+        }
+        return null;
+    }
+
+    function pistaDeCasillas(doc, info) {
+        const ids = [];
+        doc.querySelectorAll('input[type="checkbox"][id]').forEach(c => {
+            if (ids.length < 6) ids.push(c.id);
+        });
+        const total = doc.querySelectorAll('input[type="checkbox"][id]').length;
+        const tipo = info.isFolder ? 'folder' : 'file';
+        if (!total) return `(id ${info.id}, ${tipo}) — 0 checkboxes`;
+        return `(id ${info.id}, ${tipo}) — ${total} checkboxes: ${ids.join(', ')}${total > ids.length ? '…' : ''}`;
+    }
+
     async function borrar(info, row, btn) {
         const typeLabel = info.isFolder
             ? (chrome.i18n.getMessage('fcd_type_folder') || 'folder')
@@ -192,11 +235,12 @@
             return;
         }
 
-        const letter = info.isFolder ? 'D' : 'F';
-        const checkboxId = `sa${info.id}fld${letter}`;
-        const checkbox = doc.getElementById(checkboxId);
+        const checkbox = buscaCasilla(doc, info);
         if (!checkbox) {
-            await avisar(chrome.i18n.getMessage('fcd_error_not_found') || 'Item not found in delete form');
+            await avisar(
+                (chrome.i18n.getMessage('fcd_error_not_found') || 'Item not found in delete form') +
+                '\n\n' + pistaDeCasillas(doc, info)
+            );
             return;
         }
         checkbox.checked = true;

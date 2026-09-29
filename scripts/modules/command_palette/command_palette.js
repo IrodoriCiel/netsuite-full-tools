@@ -58,6 +58,7 @@
 
     let hasAiAssistant = true;
     let hasGithubBackup = false;
+    let hasScriptExecute = true;
     let hasAdvEditor = false;
 
     chrome.storage.local.get({
@@ -69,11 +70,13 @@
         [THEME_KEY]: 'light',
         enableAiAssistant: true,
         enableGithubBackup: false,
+        enableScriptExecute: true,
         enableAdvancedEditor: true
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
         hasAiAssistant = items.enableAiAssistant !== false;
         hasGithubBackup = items.enableGithubBackup === true;
+        hasScriptExecute = items.enableScriptExecute !== false;
         hasAdvEditor = items.enableAdvancedEditor !== false && enPaginaDelEditor();
 
         if (items[SHORTCUT_KEY]) shortcut = items[SHORTCUT_KEY];
@@ -483,6 +486,15 @@
                 keywords: 'github backup respaldo scripts suitescript git repo',
                 run: () => window.dispatchEvent(new CustomEvent('nsft-show-github-backup'))
             }] : []),
+            ...(hasScriptExecute ? [{
+                id: 'nsft:script-execute',
+                label: i18n('cmdp_act_sx', 'Run a Map/Reduce or Scheduled script...'),
+                description: i18n('cmdp_act_sx_desc', 'Pick the deployment and run it without opening its record'),
+                category: T.catNsft,
+                iconKey: 'nsft',
+                keywords: 'ejecutar run execute map reduce mapreduce mr scheduled programado script despliegue deployment cola queue',
+                run: () => window.dispatchEvent(new CustomEvent('nsft-show-script-execute'))
+            }] : []),
             {
                 id: 'nsft:findfield',
                 label: i18n('cmdp_act_nsft_findfield', 'Find Field by ID'),
@@ -527,7 +539,8 @@
     function runGlobalSearch(term) {
         const q = String(term || '').trim();
         if (!q) return;
-        window.location.href = '/app/common/search/globalsearch.nl?Search.queryString=' + encodeURIComponent(q);
+        window.location.href = '/app/common/search/ubersearchresults.nl?quicksearch=T'
+            + '&searchtype=Uber&frame=be&Uber_NAMEtype=KEYWORDSTARTSWITH&Uber_NAME=' + encodeURIComponent(q);
     }
 
     function registerShortcut() {

@@ -64,14 +64,30 @@
         'System Monospace': "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
     };
 
+    const DEFECTO = 'default';
+
     function resolveFontStack(name) {
-        return FONT_STACKS[name] || FONT_STACKS['JetBrains Mono'];
+        if (!name || name === DEFECTO) return null;
+        return FONT_STACKS[name] || null;
     }
 
     function clampFontSize(px) {
+        if (px === DEFECTO || px == null || px === '') return null;
         const n = parseInt(px, 10);
-        if (isNaN(n)) return 14;
+        if (isNaN(n) || n <= 0) return null;
         return Math.max(11, Math.min(22, n));
+    }
+
+    function bloqueFuente(fontFamily, fontSize) {
+        if (!fontFamily && !fontSize) return '';
+        const decl = [
+            fontFamily ? `font-family: ${fontFamily} !important;` : '',
+            fontSize ? `font-size: ${fontSize}px !important;` : ''
+        ].filter(Boolean).join('\n                ');
+        return `
+            .cm-scroller, .cm-content, .cm-line, .cm-line *, .cm-gutterElement, .cm-gutterElement * {
+                ${decl}
+            }`;
     }
 
     function buildOverrides(palette, themeName, opts) {
@@ -87,16 +103,7 @@
                 background-color: ${sbBg} !important;
                 color: ${fgColor} !important;
             }
-            .cm-content { background-color: transparent !important; color: inherit !important; }
-            /* La fuente/tamaño debe ganar tambien sobre las lineas de codigo Y
-               sobre los spans de resaltado de sintaxis (.cm-line *): CM6/NetSuite
-               fijan tamaño en esos spans, asi que heredar desde .cm-content/.cm-line
-               no basta (antes solo crecian el gutter y el texto plano, no los
-               tokens coloreados como comentarios/strings/keywords). */
-            .cm-scroller, .cm-content, .cm-line, .cm-line *, .cm-gutterElement, .cm-gutterElement * {
-                font-family: ${fontFamily} !important;
-                font-size: ${fontSize}px !important;
-            }
+            .cm-content { background-color: transparent !important; color: inherit !important; }${bloqueFuente(fontFamily, fontSize)}
             .cm-line { color: inherit !important; }
             .cm-gutters {
                 display: flex !important;

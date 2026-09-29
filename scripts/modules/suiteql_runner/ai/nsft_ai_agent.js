@@ -1881,8 +1881,29 @@
         let curModel = cfg.model;
         const triedModels = [cfg.model];
 
+        const cerrarPorParada = (pendientes, hechos) => {
+            const yaHechos = (hechos || []).map((r) => r.tool_use_id);
+            const cierre = (hechos || []).slice();
+            for (const tc of (pendientes || [])) {
+                if (yaHechos.indexOf(tc.id) !== -1) continue;
+                cierre.push({
+                    type: 'tool_result', tool_use_id: tc.id, is_error: true,
+                    content: 'CANCELLED: the user stopped the turn before this ran.'
+                });
+            }
+            if (cierre.length) messages.push({ role: 'user', content: cierre });
+            if (Array.isArray(history)) { history.length = 0; for (const m of messages) history.push(m); }
+            if (typeof cb.stopped === 'function') cb.stopped();
+        };
+
         for (let iter = 0; iter < maxIters; iter++) {
-            if (cb.aborted()) return;
+            if (cb.aborted()) { cerrarPorParada(); return; }
+
+            if (typeof cb.takeExtraContext === 'function') {
+                const extra = String(cb.takeExtraContext() || '').trim();
+                if (extra) messages.push({ role: 'user', content: [{ type: 'text', text: extra }] });
+            }
+
             if (cfg.budget > 0 && session.totals.total >= cfg.budget) {
                 cb.error(chrome.i18n.getMessage('sqlai_budget_hit', [fmtNum(cfg.budget)]));
                 return;
@@ -1905,7 +1926,7 @@
                     previousInteractionId: session.interactionId || null
                 });
             }
-            if (cb.aborted()) return;
+            if (cb.aborted()) { cerrarPorParada(); return; }
             if (!resp.ok) { cb.error(resp.error || 'Error del proveedor de IA.'); return; }
             if (resp.interactionId) session.interactionId = resp.interactionId;
             if (resp.usage) {
@@ -1952,7 +1973,7 @@
 
             const toolResults = [];
             for (const tc of resp.toolCalls) {
-                if (cb.aborted()) return;
+                if (cb.aborted()) { cerrarPorParada(resp.toolCalls, toolResults); return; }
                 if (tc.name === 'record_catalog') {
                     const action = (tc.input && tc.input.action) || 'types';
                     const scriptId = tc.input && tc.input.scriptId;
@@ -2003,7 +2024,7 @@
                         continue;
                     }
                     const dado = await cb.askUser({ questions: preguntas });
-                    if (cb.aborted()) return;
+                    if (cb.aborted()) { cerrarPorParada(resp.toolCalls, toolResults); return; }
                     const dichas = ((dado && dado.answers) || []).map((r, i) => ({ q: preguntas[i].question, a: String(r || '').trim() }))
                         .filter((x) => x.a);
                     const matiz = String((dado && dado.note) || '').trim();
@@ -2032,7 +2053,7 @@
                         continue;
                     }
                     const decision = await cb.confirmWrite({ recordType: rt, recordId: rid, values: vals, reason: String((tc.input && tc.input.reason) || '') });
-                    if (cb.aborted()) return;
+                    if (cb.aborted()) { cerrarPorParada(resp.toolCalls, toolResults); return; }
                     if (!decision || !decision.approved) {
                         cb.queryResult(false, chrome.i18n.getMessage('sqlai_write_denied_note'));
                         toolResults.push({ type: 'tool_result', tool_use_id: tc.id, content: 'ERROR: the user DECLINED this write. Do not retry it; ask the user what they want instead.', is_error: true });
@@ -2059,7 +2080,7 @@
                         continue;
                     }
                     const out = await runScriptViaConsole(code);
-                    if (cb.aborted()) return;
+                    if (cb.aborted()) { cerrarPorParada(resp.toolCalls, toolResults); return; }
                     if (out && out.cancelled) {
                         cb.queryResult(false, chrome.i18n.getMessage('sqlai_write_denied_note'));
                         toolResults.push({ type: 'tool_result', tool_use_id: tc.id, content: 'CANCELLED: the user declined to run this snippet (it writes to the account). Do not retry it; ask the user what they want instead.', is_error: true });
@@ -2115,6 +2136,7 @@
 
     const NS = 'nsft-ai';
     let dock = null, dockResizer = null, refreshProviderBar = function () {}, aborted = false, running = false;
+    let pararUI = null;
 
     function fmtNum(n) {
         try { return Number(n || 0).toLocaleString(); } catch (e) { return String(n || 0); }
@@ -2590,10 +2612,12 @@
         function applyProviderState() {
             const hint = conv.querySelector('.' + NS + '-hint');
             if (hint) paintHint(hint);
-            ta.disabled = running || !hasProvider;
-            ta.placeholder = hasProvider
-                ? chrome.i18n.getMessage(isPageChat ? 'sqlai_ph_chat' : 'sqlai_ph')
-                : chrome.i18n.getMessage('sqlai_ph_disabled');
+            ta.disabled = !hasProvider;
+            ta.placeholder = !hasProvider
+                ? chrome.i18n.getMessage('sqlai_ph_disabled')
+                : running
+                    ? chrome.i18n.getMessage('sqlai_ph_running')
+                    : chrome.i18n.getMessage(isPageChat ? 'sqlai_ph_chat' : 'sqlai_ph');
             send.disabled = !hasProvider;
         }
         function resetConv() {
@@ -3006,17 +3030,34 @@
         function scrollDown() { conv.scrollTop = conv.scrollHeight; }
         function autoGrow() { ta.style.height = 'auto'; ta.style.height = Math.min(120, ta.scrollHeight) + 'px'; }
 
+        const extraCola = [];
+
         function setRunning(on) {
             running = on;
-            ta.disabled = on || !hasProvider;
+            ta.disabled = !hasProvider;
+            ta.placeholder = !hasProvider
+                ? chrome.i18n.getMessage('sqlai_ph_disabled')
+                : on
+                    ? chrome.i18n.getMessage('sqlai_ph_running')
+                    : chrome.i18n.getMessage(isPageChat ? 'sqlai_ph_chat' : 'sqlai_ph');
             send.classList.toggle(NS + '-stop', on);
             send.innerHTML = on ? STOP_SVG : ARROW_SVG;
             send.title = on ? chrome.i18n.getMessage('sqlai_stop') : chrome.i18n.getMessage('sqlai_send');
+            if (!on) extraCola.length = 0;
         }
 
-        function addUserBubble(text) {
+        function encolarExtra() {
+            const txt = ta.value.trim();
+            if (!txt) return;
+            extraCola.push(txt);
+            ta.value = ''; autoGrow();
+            addUserBubble(txt, true);
+        }
+
+        function addUserBubble(text, enCola) {
             const m = el('div', NS + '-msg ' + NS + '-user');
             m.appendChild(el('div', NS + '-bubble', text));
+            if (enCola) m.appendChild(el('div', NS + '-queued', chrome.i18n.getMessage('sqlai_queued')));
             conv.appendChild(m); scrollDown();
         }
 
@@ -3060,6 +3101,7 @@
             };
             let pending = null;
 
+            let yaParado = false;
             const STATUS_MIN_MS = 450;
             let lastPaint = 0, statusTimer = 0;
 
@@ -3285,17 +3327,31 @@
                         pintar();
                     };
 
-                    const editorLibre = (i) => {
-                        const caja = document.createDocumentFragment();
-                        const ta = el('textarea', NS + '-asktext');
-                        ta.rows = 2;
-                        ta.value = st.dadas[i] || '';
-                        ta.placeholder = chrome.i18n.getMessage('sqlai_ask_placeholder');
-                        const acts = el('div', NS + '-askacts');
+                    const editorLibre = (i, opciones) => {
+                        const comoOpcion = Array.isArray(opciones) && opciones.length > 0;
+                        const caja = comoOpcion
+                            ? el('div', NS + '-askown')
+                            : document.createDocumentFragment();
+                        const previo = String(st.dadas[i] || '');
+                        const esDeLasOpciones = comoOpcion
+                            && opciones.some((o) => o.label === previo);
+                        const ta = el('textarea', NS + '-asktext'
+                            + (comoOpcion ? ' ' + NS + '-asktext-plain' : ''));
+                        ta.rows = comoOpcion ? 1 : 2;
+                        ta.value = esDeLasOpciones ? '' : previo;
+                        ta.placeholder = chrome.i18n.getMessage(
+                            comoOpcion ? 'sqlai_ask_own_ph' : 'sqlai_ask_placeholder');
+                        const acts = el('div', NS + '-askacts'
+                            + (comoOpcion ? ' ' + NS + '-askacts-own' : ''));
                         const enviar = el('button', NS + '-asksave', chrome.i18n.getMessage('sqlai_ask_send'));
                         enviar.type = 'button';
-                        enviar.disabled = !ta.value.trim();
-                        ta.addEventListener('input', () => { enviar.disabled = !ta.value.trim(); });
+                        const refrescar = () => {
+                            const hay = !!ta.value.trim();
+                            enviar.disabled = !hay;
+                            if (comoOpcion) acts.hidden = !hay;
+                        };
+                        refrescar();
+                        ta.addEventListener('input', refrescar);
                         ta.addEventListener('keydown', (ev) => {
                             if (ev.key === 'Enter' && !ev.shiftKey && !enviar.disabled) {
                                 ev.preventDefault();
@@ -3359,6 +3415,7 @@
                                     b.addEventListener('click', () => responder(o.label));
                                     lista.appendChild(b);
                                 });
+                                lista.appendChild(editorLibre(i, opciones));
                                 paso.appendChild(lista);
                             } else {
                                 paso.appendChild(editorLibre(i));
@@ -3401,8 +3458,8 @@
                         try {
                             const objetivo = st.matizAbierto
                                 ? matizBox.querySelector('textarea')
-                                : (paso.querySelector('textarea')
-                                    || paso.querySelector('.' + NS + '-askopt')
+                                : (paso.querySelector('.' + NS + '-askopt')
+                                    || paso.querySelector('textarea')
                                     || zona.querySelector('.' + NS + '-askgo'));
                             if (objetivo) objetivo.focus();
                         } catch (e) { }
@@ -3474,6 +3531,7 @@
                     noBtn.addEventListener('click', () => pick(false));
                 }),
                 aborted: () => aborted,
+                takeExtraContext: () => (extraCola.length ? extraCola.splice(0).join('\n') : ''),
                 done: (text, usage, pasos) => {
                     stopStatus();
                     setRunning(false);
@@ -3490,6 +3548,18 @@
                     }
                     paintTokChip();
                     renderAnswer(refs.answer, text, isPageChat, askFirst, esSuite, isAdv); scrollDown();
+                    persistChat();
+                },
+                stopped: () => {
+                    if (yaParado) return;
+                    yaParado = true;
+                    stopStatus();
+                    setRunning(false);
+                    paintTokChip();
+                    refs.statusEl.className = NS + '-turnstatus ' + NS + '-stopped';
+                    refs.statusEl.textContent = '■ ' + chrome.i18n.getMessage('sqlai_stopped');
+                    refs.statusEl.appendChild(el('span', NS + '-turncost',
+                        chrome.i18n.getMessage('sqlai_stopped_kept')));
                     persistChat();
                 },
                 error: (msg) => { stopStatus(); setRunning(false); paintTokChip(); showError(refs, msg); persistChat(); },
@@ -3568,14 +3638,21 @@
             _advTurn = isAdv;
             setRunning(true);
             const refs = startBotTurn();
-            runAgent(prompt, makeCb(refs), history, session, editorSql).catch((e) => {
+            const cbTurno = makeCb(refs);
+            pararUI = cbTurno.stopped;
+            runAgent(prompt, cbTurno, history, session, editorSql).catch((e) => {
+                pararUI = null;
                 setRunning(false);
                 showError(refs, (e && e.message) || e);
-            });
+            }).then(() => { pararUI = null; }, () => {});
         }
 
         async function start() {
-            if (running) { aborted = true; setRunning(false); return; }
+            if (running) {
+                aborted = true;
+                if (pararUI) pararUI(); else setRunning(false);
+                return;
+            }
             if (!hasProvider) { openSettings(); return; }
             const prompt = ta.value.trim();
             if (!prompt) return;
@@ -3602,7 +3679,10 @@
         send.addEventListener('click', start);
         ta.addEventListener('input', autoGrow);
         ta.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); start(); }
+            if (e.key !== 'Enter' || e.shiftKey) return;
+            e.preventDefault();
+            if (running) { encolarExtra(); return; }
+            start();
         });
 
         return d;

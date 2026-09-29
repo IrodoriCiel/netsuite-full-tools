@@ -155,6 +155,43 @@ chrome.runtime.onStartup.addListener(() => {
     try { consolidateDuplicateGroups(); } catch (e) { }
 });
 
+const NSFT_SFV_CTX_ID = 'nsft-sfv-line-field';
+
+function nsftCrearMenuCampoSublista() {
+    if (!chrome.contextMenus) return;
+    try {
+        chrome.contextMenus.removeAll(() => {
+            void chrome.runtime.lastError;
+            try {
+                chrome.contextMenus.create({
+                    id: NSFT_SFV_CTX_ID,
+                    title: chrome.i18n.getMessage('sfv_ctx_line_title') || 'Sublist field information',
+                    contexts: ['all'],
+                    documentUrlPatterns: ['https://*.app.netsuite.com/*'],
+                    visible: false
+                }, () => { void chrome.runtime.lastError; });
+            } catch (e) { }
+        });
+    } catch (e) { }
+}
+
+chrome.runtime.onInstalled.addListener(nsftCrearMenuCampoSublista);
+chrome.runtime.onStartup.addListener(nsftCrearMenuCampoSublista);
+nsftCrearMenuCampoSublista();
+
+if (chrome.contextMenus) {
+    chrome.contextMenus.onClicked.addListener((info, tab) => {
+        if (!info || info.menuItemId !== NSFT_SFV_CTX_ID) return;
+        if (!tab || typeof tab.id !== 'number') return;
+        const opts = (typeof info.frameId === 'number') ? { frameId: info.frameId } : undefined;
+        try {
+            chrome.tabs.sendMessage(tab.id, { nsftSfvCtx: 'open' }, opts, () => {
+                void chrome.runtime.lastError;
+            });
+        } catch (e) { }
+    });
+}
+
 const UNINSTALL_SURVEY_URL =
     'https://docs.google.com/forms/d/e/1FAIpQLSe0HBYwBy9fyGplAFjaeRenSwX_m-vCb3mu8Uwef4Wr3h5nNg/viewform?usp=sf_link';
 
@@ -436,6 +473,16 @@ function safeTabsUngroup(tabIds) {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!message) return;
+
+    if (message.nsftSfvCtx === 'applies') {
+        if (chrome.contextMenus) {
+            try {
+                chrome.contextMenus.update(NSFT_SFV_CTX_ID, { visible: message.applies === true },
+                    () => { void chrome.runtime.lastError; });
+            } catch (e) { }
+        }
+        return;
+    }
 
     if (message.nsftRlv === 'openPanel') {
         const tabId = sender && sender.tab ? sender.tab.id : null;

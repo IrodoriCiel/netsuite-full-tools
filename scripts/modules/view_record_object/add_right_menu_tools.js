@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    const STORAGE_KEY = ['enableViewRecordObject', 'enableViewScriptedRecord', 'enableRecordLogsViewer', 'enableSuiteQLRunner', 'enableExportSearch', 'enableLoadRecordConsole', 'enableLoadNModule', 'enableGoToRecord', 'enableCommandPalette', 'enableCustomizationFinder', 'enableSuiteScriptConsole', 'enableAdvancedEditor', 'enableShortcutsCheatsheet', 'enableFindFieldById', 'enableOpenInOtherEnv', 'openInOtherEnvSandboxes', 'enableAiAssistant', 'aiAssistantPage', 'enableGithubBackup', 'enablePagePerformance'];
+    const STORAGE_KEY = ['enableViewRecordObject', 'enableViewScriptedRecord', 'enableRecordLogsViewer', 'enableSuiteQLRunner', 'enableExportSearch', 'enableLoadRecordConsole', 'enableLoadNModule', 'enableGoToRecord', 'enableCommandPalette', 'enableCustomizationFinder', 'enableScriptExecute', 'enableSuiteScriptConsole', 'enableAdvancedEditor', 'enableShortcutsCheatsheet', 'enableFindFieldById', 'enableOpenInOtherEnv', 'openInOtherEnvSandboxes', 'enableAiAssistant', 'aiAssistantPage', 'enableGithubBackup', 'enablePagePerformance'];
 
     const TOOLS_MENU_ID = 'nsft-tools-menu';
     const VIEW_RECORD_ITEM_ID = 'link_VerObjectRecord';
@@ -14,6 +14,7 @@
     const GOTO_RECORD_ITEM_ID = 'link_GoToRecord';
     const COMMAND_PALETTE_ITEM_ID = 'link_CommandPalette';
     const CFIND_ITEM_ID = 'link_CustomizationFinder';
+    const SX_ITEM_ID = 'link_ScriptExecute';
     const SSC_ITEM_ID = 'link_SuiteScriptConsole';
     const ADV_ITEM_ID = 'link_AdvancedEditor';
     const ADV_NUEVO_URL = '/app/common/record/edittextmediaitem.nl?nsft-advanced-editor=T';
@@ -193,6 +194,10 @@
             menuItemsToAppend.push(createCustomizationFinderItem());
         }
 
+        if (!document.getElementById(SX_ITEM_ID) && items.enableScriptExecute) {
+            menuItemsToAppend.push(createScriptExecuteItem());
+        }
+
         if (!document.getElementById(COMMAND_PALETTE_ITEM_ID) && items.enableCommandPalette) {
             menuItemsToAppend.push(createCommandPaletteItem());
         }
@@ -282,6 +287,7 @@
         enableGoToRecord: [GOTO_RECORD_ITEM_ID],
         enableCommandPalette: [COMMAND_PALETTE_ITEM_ID],
         enableCustomizationFinder: [CFIND_ITEM_ID],
+        enableScriptExecute: [SX_ITEM_ID],
         enableSuiteScriptConsole: [SSC_ITEM_ID],
         enableAdvancedEditor: [ADV_ITEM_ID],
         enableShortcutsCheatsheet: [CHEATSHEET_ITEM_ID],
@@ -314,6 +320,7 @@
     const TOOL_ICONS = {
         suitescript_console: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><rect x="3" y="4" width="18" height="16" rx="2"/><polyline points="7 9 10 12 7 15"/><line x1="13" y1="15" x2="17" y2="15"/></svg>`,
         customization_finder: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="11" cy="11" r="6"/><line x1="15.5" y1="15.5" x2="20" y2="20"/><line x1="9" y1="9" x2="13" y2="9"/><line x1="9" y1="12" x2="13" y2="12"/></svg>`,
+        script_execute: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`,
         advanced_editor: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="10 12 8 14.5 10 17"/><polyline points="14 12 16 14.5 14 17"/></svg>`,
         view_record: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>`,
         scripted: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
@@ -510,6 +517,17 @@
         return li;
     }
 
+    function createScriptExecuteItem() {
+        const label = chrome.i18n.getMessage('enableScriptExecuteLabel') || 'Run Map/Reduce and Scheduled';
+        const li = document.createElement('li');
+        li.id = SX_ITEM_ID;
+        li.className = 'ns-menuitem';
+        li.setAttribute('data-nsps-type', 'menu_item');
+        li.setAttribute('data-nsps-label', label);
+        li.innerHTML = buildMenuLinkHtml(label, 'script_execute', 'nsft-show-script-execute');
+        return li;
+    }
+
     function createSuiteScriptConsoleItem() {
         const label = chrome.i18n.getMessage('enableSuiteScriptConsoleLabel');
         const li = document.createElement('li');
@@ -665,6 +683,7 @@
         set('enableGoToRecordLabel', 'goto_record');
         set('enableCommandPaletteLabel', 'command_palette');
         set('enableCustomizationFinderLabel', 'customization_finder');
+        set('enableScriptExecuteLabel', 'script_execute', 'Ejecutar Map/Reduce y Scheduled');
         set('enableSuiteScriptConsoleLabel', 'suitescript_console');
         set('adv_menu_open', 'advanced_editor');
         set('enableAiAssistantLabel', 'ai_assistant', 'Asistente de IA');
@@ -679,6 +698,7 @@
         set('recordOptionAddColumn', 'columns');
         set('recordOptionViewDependentRecords', 'dependents');
         set('recordOptionViewXml', 'xml', 'Ver XML');
+        set('sx_title', 'script_execute', 'Ejecutar script');
         set('recordOptionRunSuiteQL', 'suiteql');
         set('recordOptionLoadInConsole', 'suitescript_console');
         set('recordOptionCopyCleanUrl', 'link');
@@ -701,6 +721,34 @@
         });
         _ambiguousCache = set;
         return set;
+    }
+
+    const RECORD_OPTIONS_MENU_ID = 'nsft-record-options-menu';
+
+    function popoverVieneDeNuestroMenu(popover) {
+        const td = document.getElementById(RECORD_OPTIONS_MENU_ID);
+        if (!td) return false;
+
+        const celda = td.getBoundingClientRect();
+        const suya = popover.getBoundingClientRect();
+        if (!celda.width || !suya.width) return false;
+        if (suya.left < celda.left - 8 || suya.left > celda.right + 8) return false;
+
+        const propias = [...td.querySelectorAll('.ns-menu .ns-menu .ns-menuitem-link')]
+            .map((a) => {
+                const span = a.querySelector('span:last-child');
+                return ((span ? span.textContent : a.textContent) || '').trim();
+            })
+            .filter(Boolean);
+        if (!propias.length) return false;
+
+        const suyas = [...popover.querySelectorAll(
+            '[data-widget="MenuItemButton"][aria-label], [data-widget="Link"][aria-label]'
+        )].map((b) => (b.getAttribute('aria-label') || '').trim()).filter(Boolean);
+        if (suyas.length !== propias.length) return false;
+
+        const clave = (lista) => lista.slice().sort().join('');
+        return clave(propias) === clave(suyas);
     }
 
     function observeRedwoodMenuPopover() {
@@ -737,10 +785,13 @@
             const label = btn.getAttribute('aria-label') || '';
             const iconKey = labelMap[label];
             if (!iconKey) return;
-            if (!ambiguous.has(label)) hasUniqueAnchor = true;
+            const esPropio = !!(btn.getAttribute('onclick') || '').includes('nsft')
+                || !!item.querySelector('[onclick*="nsft"]');
+            if (!ambiguous.has(label) || esPropio) hasUniqueAnchor = true;
             matches.push({ item, iconKey });
         });
-        if (!hasUniqueAnchor || !matches.length) return;
+        if (!matches.length) return;
+        if (!hasUniqueAnchor && !popoverVieneDeNuestroMenu(popover)) return;
 
         let touched = 0;
         matches.forEach(({ item, iconKey }) => {

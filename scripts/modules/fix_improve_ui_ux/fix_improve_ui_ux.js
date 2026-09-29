@@ -118,6 +118,21 @@
         return null;
     }
 
+    function ownText(el) {
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    return /(^|\s)nsft-/.test(node.getAttribute('class') || '')
+                        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
+                }
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        });
+        let text = '';
+        while (walker.nextNode()) text += walker.currentNode.nodeValue;
+        return text.trim();
+    }
+
     function runBetterPageTitles() {
         for (const titleDef of PAGE_TITLE_DEFINITIONS) {
             if (titleDef.when && !titleDef.when()) continue;
@@ -134,7 +149,7 @@
                 if (el.tagName === 'INPUT') {
                     if (el.value) titleData.push(el.value);
                 } else {
-                    const text = el.textContent ? el.textContent.trim() : '';
+                    const text = ownText(el);
                     if (text) titleData.push(text);
                 }
             }

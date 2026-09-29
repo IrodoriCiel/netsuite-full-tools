@@ -66,10 +66,10 @@
             sub: function (r) { return r.filetype || ''; }
         },
         deploy: {
-            tabla: 'scriptdeployment', id: 'id', nombre: 'title',
-            cols: 'id, title, scriptid, status',
+            tabla: 'scriptdeployment', id: 'primarykey', nombre: 'title',
+            cols: 'primarykey, title, scriptid, status',
             busca: ['title', 'scriptid'], orden: 'title',
-            url: function (r) { return '/app/common/scripting/scriptrecord.nl?id=' + enc(r.id); },
+            url: function (r) { return '/app/common/scripting/scriptrecord.nl?id=' + enc(r.primarykey); },
             sub: function (r) { return [r.status, r.scriptid].filter(Boolean).join(' · '); }
         },
         list: {
@@ -123,7 +123,13 @@
     }
 
     function limpiaTermino(t) {
-        return String(t || '').replace(/[%_]/g, '').trim();
+        return String(t || '').trim();
+    }
+
+    function escapaComodin(s) {
+        var TS = window.NSFT_TextSearch;
+        if (TS && typeof TS.sqlLike === 'function') return TS.sqlLike(s);
+        return String(s == null ? '' : s).replace(/([%_\\])/g, '\\$1');
     }
 
     window.addEventListener('message', function (event) {
@@ -149,15 +155,15 @@
         function pasada(plegado, cb) {
             var TS = window.NSFT_TextSearch;
             var termino = (plegado && TS) ? TS.sqlTerm(t) : t.toUpperCase();
-            var like = '%' + termino + '%';
+            var like = '%' + escapaComodin(termino) + '%';
             var condRest = [];
             var condSql = [];
             var params = [];
             if (t) {
                 f.busca.forEach(function (c) {
                     var col = (plegado && TS) ? TS.sqlFold(c) : 'UPPER(' + c + ')';
-                    condRest.push(col + ' LIKE ' + lit(like));
-                    condSql.push(col + ' LIKE ?');
+                    condRest.push(col + " LIKE " + lit(like) + " ESCAPE '\\'");
+                    condSql.push(col + " LIKE ? ESCAPE '\\'");
                     params.push(like);
                 });
             }

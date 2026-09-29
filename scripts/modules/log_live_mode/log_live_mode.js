@@ -61,6 +61,12 @@
         start(items[AUTOSTART_KEY]);
     });
 
+    window.addEventListener('nsft-live-mode-start', () => {
+        if (!chkEl || chkEl.checked) return;
+        chkEl.checked = true;
+        onToggleChange();
+    });
+
     function start(autoStart) {
         attachStorageListener();
 

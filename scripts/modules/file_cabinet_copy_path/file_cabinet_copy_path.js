@@ -9,10 +9,14 @@
     let enabled = false;
     let folderPath = null;
     let folderId = null;
-    let fetchAttempted = false;
+    const _rutas = new Map();
+    const _enVuelo = new Set();
+    const RAIZ = '@raiz';
     let _unsub = null;
     let _diag = false;
     let _applied = new WeakSet();
+
+    const ID_CARPETA = /^-?[0-9]+$/;
 
     function isApplicablePage() {
         try {
@@ -42,20 +46,14 @@
     function teardown() {
         if (_unsub) { _unsub(); _unsub = null; }
         _applied = new WeakSet();
-        fetchAttempted = false;
+        folderId = null;
+        folderPath = null;
+        _rutas.clear();
+        _enVuelo.clear();
         document.querySelectorAll('.' + BTN_CLASS).forEach(b => b.remove());
     }
 
-    async function init() {
-        folderId = getFolderIdFromUrl();
-        if (folderId == null) return;
-
-        if (!folderPath && !fetchAttempted) {
-            fetchAttempted = true;
-            folderPath = await fetchFolderAppfolder(folderId);
-        }
-        if (!folderPath) return;
-
+    function init() {
         runOnce();
         if (window.NSFT_Observer && typeof window.NSFT_Observer.subscribe === 'function') {
             _unsub = window.NSFT_Observer.subscribe(runOnce, { throttle: 300 });
@@ -66,18 +64,42 @@
         }
     }
 
-    function getFolderIdFromUrl() {
+    function getCurrentFolderId() {
+        const input = document.getElementById('folder');
+        const v = input && input.value != null ? String(input.value) : '';
+        if (v !== '' && ID_CARPETA.test(v)) return v;
         try {
             const q = new URLSearchParams(location.search);
             const f = q.get('folder');
-            if (f && /^-?\d+$/.test(f)) return f;
+            if (f && ID_CARPETA.test(f)) return f;
         } catch (e) { }
         return null;
     }
 
-    async function fetchFolderAppfolder(id) {
+    function pedirRutas(ids) {
+        const faltan = ids.filter((id) => !_rutas.has(id) && !_enVuelo.has(id));
+        if (!faltan.length) return;
+        faltan.forEach((id) => _enVuelo.add(id));
+        fetchAppfolders(faltan).then((mapa) => {
+            faltan.forEach((id) => {
+                _enVuelo.delete(id);
+                _rutas.set(id, mapa[id] || null);
+            });
+            if (folderId && folderId !== RAIZ) folderPath = _rutas.get(folderId) || null;
+            runOnce();
+        });
+    }
+
+    function rutaDeAppfolder(appfolder) {
+        const partes = String(appfolder || '').split(':').map((t) => t.trim()).filter(Boolean);
+        return partes.length ? '/' + partes.join('/') : '';
+    }
+
+    async function fetchAppfolders(ids) {
+        const enteros = ids.map((i) => parseInt(i, 10)).filter((n) => !isNaN(n));
+        if (!enteros.length) return {};
         try {
-            const query = `SELECT appfolder FROM mediaitemfolder WHERE id = ${parseInt(id, 10)}`;
+            const query = `SELECT id, appfolder FROM mediaitemfolder WHERE id IN (${enteros.join(', ')})`;
             const innerParams = JSON.stringify([query, "[]", "SUITE_QL", ""]);
             const body = {
                 method: 'remoteObject.bridgeCall',
@@ -95,35 +117,80 @@
                 },
                 body: JSON.stringify(body)
             });
-            if (!res.ok) return null;
+            if (!res.ok) return {};
             const data = await res.json();
-            if (data && data.result === 'error') return null;
+            if (data && data.result === 'error') return {};
             const r = data && data.result && data.result.result;
-            if (!r || !r.count || !r.aliases) return null;
-            const row = r.v0;
-            if (!Array.isArray(row) || row.length === 0) return null;
-            return String(row[0] || '').trim();
+            if (!r || !r.count || !r.aliases) return {};
+            const mapa = {};
+            for (let i = 0; i < r.count; i++) {
+                const fila = r['v' + i];
+                if (!Array.isArray(fila) || fila.length < 2) continue;
+                const ruta = rutaDeAppfolder(fila[1]);
+                if (ruta) mapa[String(fila[0])] = ruta;
+            }
+            return mapa;
         } catch (e) {
             if (_diag) console.warn('NSFT file cabinet copy path:', e);
-            return null;
+            return {};
         }
     }
 
     function runOnce() {
-        if (!enabled || !folderPath) return;
+        if (!enabled) return;
 
-        document.querySelectorAll('tr.uir-list-row-tr').forEach(row => {
-            if (_applied.has(row)) return;
+        const actual = getCurrentFolderId() || RAIZ;
+        if (actual !== folderId) {
+            folderId = actual;
+            folderPath = actual === RAIZ ? null : (_rutas.get(actual) || null);
+            _applied = new WeakSet();
+            document.querySelectorAll('.' + BTN_CLASS).forEach(b => b.remove());
+        }
+
+        if (actual === RAIZ) { pintarRaiz(); return; }
+
+        if (!folderPath) { pedirRutas([actual]); return; }
+        pintarFilas((row) => {
             const nameLink = findNameLink(row);
-            if (!nameLink) return;
+            if (!nameLink) return null;
             const name = extractNameFromLink(nameLink);
-            if (!name) return;
+            if (!name) return null;
+            return { ancla: nameLink, ruta: () => joinPath(folderPath, name) };
+        });
+    }
+
+    function pintarRaiz() {
+        const pendientes = [];
+        pintarFilas((row) => {
+            const nameLink = findNameLink(row);
+            if (!nameLink) return null;
+            const propio = idDeEnlace(nameLink);
+            if (!propio) return null;
+            if (!_rutas.has(propio)) { pendientes.push(propio); return null; }
+            const ruta = _rutas.get(propio);
+            if (!ruta) return null;
+            return { ancla: nameLink, ruta: () => ruta };
+        });
+        if (pendientes.length) pedirRutas(pendientes);
+    }
+
+    function pintarFilas(resolver) {
+        document.querySelectorAll('tr.uir-list-row-tr').forEach((row) => {
+            if (_applied.has(row)) return;
+            const dato = resolver(row);
+            if (!dato) return;
 
             _applied.add(row);
-            const btn = createButton(name);
-            const cell = nameLink.closest('td') || nameLink.parentElement;
+            const btn = createButton(dato.ruta);
+            const cell = dato.ancla.closest('td') || dato.ancla.parentElement;
             if (cell) cell.insertBefore(btn, cell.firstChild);
         });
+    }
+
+    function idDeEnlace(a) {
+        const href = a.getAttribute('href') || '';
+        const m = href.match(/[?&]folder=(-?\d+)/);
+        return m ? m[1] : null;
     }
 
     function findNameLink(row) {
@@ -148,7 +215,7 @@
         return (a.textContent || '').trim();
     }
 
-    function createButton(name) {
+    function createButton(ruta) {
         const btn = document.createElement('span');
         btn.className = BTN_CLASS;
         btn.title = chrome.i18n.getMessage('fcp_copy_tooltip') || 'Copy path';
@@ -157,7 +224,7 @@
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const fullPath = joinPath(folderPath, name);
+            const fullPath = typeof ruta === 'function' ? ruta() : String(ruta);
             if (window.NSFT_Clipboard) {
                 window.NSFT_Clipboard.copy(fullPath, {
                     toast: { preview: fullPath },

@@ -433,7 +433,7 @@ function nsftHexToHsl(raw) {
 
 
 function wireRecordActionModes(items) {
-    const modeKeys = ['saveAndEditButtonMode', 'editAndSaveButtonMode', 'deleteRecordButtonMode'];
+    const modeKeys = ['saveAndEditButtonMode', 'editAndSaveButtonMode', 'deleteRecordButtonMode', 'scriptExecuteMode'];
     modeKeys.forEach((key) => {
         const radios = document.querySelectorAll(`input[type="radio"][name="${key}"]`);
         if (!radios.length) return;
@@ -456,7 +456,8 @@ function wireValueRadioGroups(items) {
             const m = it.copyIdsMode;
             if (m === 'icons' || m === 'shift' || m === 'always') return m;
             return it.copyIdsNoButton === false ? 'icons' : 'shift';
-        }
+        },
+        setFieldValuesLineMode: (it) => (it.setFieldValuesLineMode === 'menu' ? 'menu' : 'direct')
     };
     Object.entries(grupos).forEach(([key, deduce]) => {
         const radios = document.querySelectorAll(`input[type="radio"][name="${key}"]`);
@@ -498,6 +499,10 @@ function populateEditorFontSelect() {
     const sel = document.getElementById('editorFontFamily');
     if (!sel || sel.dataset.nsftPopulated === '1') return;
     sel.dataset.nsftPopulated = '1';
+    const porDefecto = document.createElement('option');
+    porDefecto.value = 'default';
+    porDefecto.textContent = chrome.i18n.getMessage('editorFontFamilyDefaultOption') || 'Default (NetSuite’s)';
+    sel.appendChild(porDefecto);
     const stacks = (globalThis.NSFT_EditorThemeTransform && globalThis.NSFT_EditorThemeTransform.FONT_STACKS)
         || { 'JetBrains Mono': '', 'Consolas': '' };
     Object.keys(stacks).forEach((name) => {
@@ -512,6 +517,11 @@ function applyEditorFontToPreview(fontFamily) {
     const pre = document.getElementById('editor-theme-preview');
     if (!pre) return;
     const stacks = (globalThis.NSFT_EditorThemeTransform && globalThis.NSFT_EditorThemeTransform.FONT_STACKS) || {};
+    if (!fontFamily || fontFamily === 'default') {
+        pre.style.removeProperty('font-family');
+        pre.querySelectorAll('code, span').forEach((el) => el.style.removeProperty('font-family'));
+        return;
+    }
     const stack = stacks[fontFamily] || stacks['JetBrains Mono'] || 'monospace';
     pre.style.setProperty('font-family', stack, 'important');
     pre.querySelectorAll('code, span').forEach((el) => {
@@ -522,6 +532,11 @@ function applyEditorFontToPreview(fontFamily) {
 function applyEditorFontSizeToPreview(fontSize) {
     const pre = document.getElementById('editor-theme-preview');
     if (!pre) return;
+    if (!fontSize || parseInt(fontSize, 10) <= 0) {
+        pre.style.removeProperty('font-size');
+        pre.querySelectorAll('code, span').forEach((el) => el.style.removeProperty('font-size'));
+        return;
+    }
     const n = Math.max(11, Math.min(22, parseInt(fontSize, 10) || 14));
     const px = `${n}px`;
     pre.style.setProperty('font-size', px, 'important');
@@ -559,52 +574,9 @@ function ensurePopupEditorFonts() {
     }).catch(() => { });
 }
 
-function populateGhostModelSelect(items) {
-    const selects = [
-        { sel: document.getElementById('suitescriptConsoleAiModel'), key: 'suitescriptConsoleAiModel' },
-        { sel: document.getElementById('suiteqlAiModel'), key: 'suiteqlAiModel' }
-    ].filter((s) => s.sel);
-    if (!selects.length) return;
-    const FAST = globalThis.NSFT_AI_FAST || { nombres: {}, rapidos: {} };
-    const NOMBRES = FAST.nombres;
-    const RAPIDOS = {};
-    Object.keys(FAST.rapidos).forEach((k) => { RAPIDOS[k] = new RegExp(FAST.rapidos[k], 'i'); });
-    chrome.storage.local.get({ nsft_ai_configs: {} }, (st) => {
-        const configs = st.nsft_ai_configs || {};
-        selects.forEach(({ sel, key }) => {
-            sel.innerHTML = '';
-            const opt0 = document.createElement('option');
-            opt0.value = '';
-            opt0.textContent = chrome.i18n.getMessage('sscAiModelSameChat') || 'El mismo del chat';
-            sel.appendChild(opt0);
-            Object.keys(configs).forEach((pk) => {
-                const c = configs[pk];
-                if (!c || c.disabled) return;
-                const visibles = (c.models || []).filter((m) => (c.hidden || []).indexOf(m) === -1);
-                if (!visibles.length) return;
-                const re = RAPIDOS[pk] || new RegExp(FAST.generico || 'haiku|flash|nano|mini|lite|fast', 'i');
-                const lista = visibles.filter((m) => re.test(String(m)));
-                if (!lista.length) return;
-                const grupo = document.createElement('optgroup');
-                grupo.label = NOMBRES[pk] || pk;
-                lista.forEach((m) => {
-                    const o = document.createElement('option');
-                    o.value = pk + '::' + m;
-                    o.textContent = m;
-                    grupo.appendChild(o);
-                });
-                sel.appendChild(grupo);
-            });
-            const guardado = (items && items[key]) || '';
-            sel.value = guardado;
-            if (sel.value !== guardado) sel.value = '';
-        });
-    });
-}
 
 function applyStoredSettings(items) {
     populateEditorFontSelect();
-    populateGhostModelSelect(items);
     Object.keys(DEFAULTS).forEach(key => {
         const element = document.getElementById(key);
         if (element) {
@@ -649,6 +621,10 @@ function applyStoredSettings(items) {
                 }
                 if (key === 'enableFullLogsButton') {
                     const container = document.getElementById('full-logs-button-container');
+                    if (container) container.style.display = element.checked ? 'flex' : 'none';
+                }
+                if (key === 'enableScriptExecute') {
+                    const container = document.getElementById('script-execute-container');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
                 }
                 if (key === 'enableEditorTheme') {
@@ -738,8 +714,6 @@ function applyStoredSettings(items) {
                 if (key === 'enableCopyFieldAndSublistIds') {
                     const container = document.getElementById('copy-ids-controls');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
-                    const kids = document.getElementById('copy-ids-children');
-                    if (kids) kids.style.display = element.checked ? 'block' : 'none';
                 }
                 if (key === 'enableSetFieldValues') {
                     const container = document.getElementById('set-field-values-controls');
@@ -850,22 +824,25 @@ function applyStoredSettings(items) {
             }
 
             if (key === 'editorFontSize') {
-                const updateLabel = () => {
-                    const out = document.getElementById('editorFontSizeVal');
-                    if (out) out.textContent = `${element.value} px`;
-                    applyEditorFontSizeToPreview(element.value);
-                };
+                const updateLabel = () => applyEditorFontSizeToPreview(element.value);
                 element.addEventListener('input', updateLabel);
+                element.addEventListener('change', updateLabel);
                 updateLabel();
             }
 
             if (key === 'editorTheme') {
-                const updateCustomGrid = () => {
-                    const grid = document.getElementById('custom-theme-editor');
-                    if (grid) grid.style.display = element.value === 'custom' ? 'block' : 'none';
+                const soloPersonalizado = () => {
+                    const esCustom = element.value === 'custom';
+                    ['custom-theme-editor', 'editor-theme-preview', 'editor-theme-io'].forEach((id) => {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        el.hidden = !esCustom;
+                        if (esCustom && el.style.display === 'none') el.style.removeProperty('display');
+                    });
                 };
-                element.addEventListener('change', updateCustomGrid);
-                updateCustomGrid();
+                element.addEventListener('change', soloPersonalizado);
+                setTimeout(soloPersonalizado, 0);
+                soloPersonalizado();
             }
 
             if (key === 'colorThemeHue' || key === 'colorThemeSat' || key === 'colorThemeLig') {
@@ -1221,11 +1198,8 @@ function applyStoredSettings(items) {
     if (items && items.editorTheme) updateEditorThemePreview(items.editorTheme);
 
     ensurePopupEditorFonts();
-    if (items && items.editorFontFamily) applyEditorFontToPreview(items.editorFontFamily);
-    const fsOut = document.getElementById('editorFontSizeVal');
-    const fsInput = document.getElementById('editorFontSize');
-    if (fsOut && fsInput) fsOut.textContent = (fsInput.value || 14) + ' px';
-    if (items && items.editorFontSize) applyEditorFontSizeToPreview(items.editorFontSize);
+    applyEditorFontToPreview(items && items.editorFontFamily);
+    applyEditorFontSizeToPreview(items && items.editorFontSize);
 
     wireEditorThemeExportImport();
 }
@@ -1314,17 +1288,13 @@ function resetEditorThemeToDefaults() {
     applyImportedTheme(obj);
 
     const fs = document.getElementById('editorFontSize');
-    if (fs) {
-        const out = document.getElementById('editorFontSizeVal');
-        if (out) out.textContent = `${fs.value} px`;
-        applyEditorFontSizeToPreview(fs.value);
-    }
+    if (fs) applyEditorFontSizeToPreview(fs.value);
     const ff = document.getElementById('editorFontFamily');
     if (ff) applyEditorFontToPreview(ff.value);
 }
 
 function isValidThemeValue(key, val) {
-    if (key === 'editorFontSize') return Number.isFinite(+val) && +val >= 11 && +val <= 22;
+    if (key === 'editorFontSize') return Number.isFinite(+val) && (+val === 0 || (+val >= 11 && +val <= 22));
     if (key === 'editorTheme' || key === 'editorFontFamily') return typeof val === 'string' && val.length < 64;
     if (key.indexOf('editorCustom') === 0) return typeof val === 'string' && /^#[0-9a-f]{3,8}$/i.test(val);
     return false;
@@ -1627,7 +1597,6 @@ function initNavigationPresets() {
     const input = document.getElementById('navigationPixelHeight');
     if (!input) return;
     const presetWrap = document.getElementById('navigation-presets');
-    const preview = document.getElementById('navigation-preview');
 
     function syncActivePreset(h) {
         if (!presetWrap) return;
@@ -1638,7 +1607,6 @@ function initNavigationPresets() {
 
     function refresh() {
         const h = Number(input.value) || 30;
-        if (preview) preview.style.setProperty('--h', `${h}px`);
         syncActivePreset(h);
     }
 
@@ -3160,55 +3128,27 @@ function wireTabPreview(panel, caja, tituloEl, replayEl) {
         };
     };
 
-    const dondeDe = (row, moduloKey) => {
-        const cajas = Array.from(row.querySelectorAll('input[type="checkbox"]'))
-            .filter((el) => el.id && el.id !== moduloKey);
-        if (cajas.length < 2) return null;
-        const cont = cajas[0].closest('div');
-        const head = cont && cont.querySelector(':scope > span[data-i18n]');
-        return {
-            titulo: head ? (head.textContent || '').trim() : '',
-            items: cajas.map((el) => {
-                const lab = el.closest('label');
-                return { texto: ((lab && lab.textContent) || el.id).trim(), on: el.checked };
-            })
-        };
-    };
 
-    const pintarDonde = (row, moduloKey) => {
-        const datos = dondeDe(row, moduloKey);
-        if (!datos) return;
-        const bloque = document.createElement('div');
-        bloque.className = 'nsft-tabpreview-where';
-        if (datos.titulo) {
-            const tit = document.createElement('span');
-            tit.className = 'nsft-tabpreview-where-title';
-            tit.textContent = datos.titulo;
-            bloque.appendChild(tit);
-        }
-        const tira = document.createElement('div');
-        tira.className = 'nsft-tabpreview-chips';
-        datos.items.forEach((it) => {
-            const chip = document.createElement('span');
-            chip.className = 'nsft-tabpreview-chip' + (it.on ? ' is-on' : '');
-            chip.textContent = it.texto;
-            tira.appendChild(chip);
-        });
-        bloque.appendChild(tira);
-        caja.appendChild(bloque);
+    const estadoDe = (row) => {
+        const st = {};
+        row.querySelectorAll('input[type="checkbox"][id]').forEach((el) => { st[el.id] = el.checked; });
+        row.querySelectorAll('input[type="radio"]:checked').forEach((el) => { if (el.name) st[el.name] = el.value; });
+        return st;
     };
 
     let ultima = null;
+    let filaActual = null;
     const pintarFila = (row) => {
         if (!row) return false;
         const modulo = datosDeFila(row);
         if (!modulo) return false;
         ultima = modulo.key;
+        filaActual = row;
         panel.classList.add('is-on');
         pv.pintar(caja, modulo, {
-            respaldo: modulo.key, rotulos: rotulos, titulo: tituloEl, descAbajo: true
+            respaldo: modulo.key, rotulos: rotulos, titulo: tituloEl, descAbajo: true,
+            estado: estadoDe(row)
         });
-        pintarDonde(row, modulo.key);
         return true;
     };
 
@@ -3222,12 +3162,21 @@ function wireTabPreview(panel, caja, tituloEl, replayEl) {
         const item = sub || modulo;
         if (ultima === item.key) return;
         ultima = item.key;
+        filaActual = row;
         panel.classList.add('is-on');
         pv.pintar(caja, item, {
-            respaldo: modulo.key, rotulos: rotulos, titulo: tituloEl, descAbajo: true
+            respaldo: modulo.key, rotulos: rotulos, titulo: tituloEl, descAbajo: true,
+            estado: estadoDe(row)
         });
-        pintarDonde(row, modulo.key);
     };
+
+    if (pv.aplicarEstado) {
+        document.addEventListener('change', (e) => {
+            const row = e.target && e.target.closest && e.target.closest('.option-row');
+            if (!row || row !== filaActual) return;
+            pv.aplicarEstado(caja, estadoDe(row));
+        });
+    }
 
     if (replayEl) {
         replayEl.addEventListener('click', () => {
@@ -3251,7 +3200,8 @@ function wireTabPreview(panel, caja, tituloEl, replayEl) {
     const ACCIONES = [
         { chk: 'enableDeleteRecordButton', modo: 'deleteRecordButtonMode' },
         { chk: 'enableEditAndSaveButton', modo: 'editAndSaveButtonMode' },
-        { chk: 'enableSaveAndEditButton', modo: 'saveAndEditButtonMode' }
+        { chk: 'enableSaveAndEditButton', modo: 'saveAndEditButtonMode' },
+        { chk: 'enableScriptExecute', modo: 'scriptExecuteMode' }
     ];
 
     function marcar() {

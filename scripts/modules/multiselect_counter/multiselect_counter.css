@@ -29,18 +29,36 @@
     box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
 }
 
-html[data-theme="dark"] .nsft-msc-counter,
-html.nsft-dark .nsft-msc-counter,
-body.nsft-dark .nsft-msc-counter {
+.nsft-msc-counter.is-askable {
+    cursor: pointer;
+    border-style: dashed;
+    border-color: #9ca3af;
+}
+
+.nsft-msc-counter.is-askable:hover {
+    color: #111827;
+    border-color: #6b7280;
+    background: #f9fafb;
+}
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-msc-counter {
     color: #C6CEDB;
     background: var(--nsft-dk-surface);
     border-color: var(--nsft-dk-border);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-html[data-theme="dark"] .nsft-msc-counter.has-selection,
-html.nsft-dark .nsft-msc-counter.has-selection,
-body.nsft-dark .nsft-msc-counter.has-selection {
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-msc-counter.has-selection {
     color: #E6EBF2;
+    border-color: #5A6475;
+}
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-msc-counter.is-askable {
+    border-color: #5A6475;
+}
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-msc-counter.is-askable:hover {
+    color: #E6EBF2;
+    background: var(--nsft-dk-hover);
     border-color: #5A6475;
 }
