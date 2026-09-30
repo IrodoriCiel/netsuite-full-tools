@@ -939,6 +939,14 @@ html[data-view="tab"] .nsft-tabside-head .nsft-theme-toggle {
 
 html[data-view="tab"] .nsft-tabside-head .nsft-theme-toggle svg { width: 17px; height: 17px; }
 
+html[data-view="tab"] .nsft-tabside-head .nsft-meeting-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+html[data-view="tab"] .nsft-tabside-head .nsft-meeting-toggle svg { width: 17px; height: 17px; }
+
 html[data-view="tab"] .nsft-topbar { display: none; }
 
 html[data-view="tab"] .nsft-tabside .nsft-screen[data-screen-el="home"] {
@@ -1077,6 +1085,8 @@ html[data-view="tab"] .nsft-tabside-actions svg {
 }
 
 html[data-view="tab"] .nsft-tabside-actions > * > span { display: none; }    
+
+html[data-view="tab"] .nsft-tabside-actions > * > .nsft-rich-ico { display: contents; }
 
 html[data-view="tab"] .nsft-tabside-bug {
   background: rgba(198, 70, 70, 0.14);

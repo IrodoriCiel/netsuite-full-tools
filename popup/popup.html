@@ -48,28 +48,73 @@
           </div>
         </div>
         <div class="nsft-topbar-actions">
-          <a href="https://buymeacoffee.com/miguelgarcia93" target="_blank" rel="noopener"
-            class="nsft-topbar-btn coffee-btn" id="bmcLink"
-            data-i18n-title="bmcText" title="Invítame un café">
-            <svg class="coffee-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-              <line x1="6" y1="1" x2="6" y2="4"></line>
-              <line x1="10" y1="1" x2="10" y2="4"></line>
-              <line x1="14" y1="1" x2="14" y2="4"></line>
-            </svg>
-          </a>
-          <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc/reviews"
-            target="_blank" rel="noopener"
-            class="nsft-topbar-btn nsft-rate-btn" id="rateLink"
-            data-i18n-title="rateStoreTitle" title="Valorar en la Chrome Web Store">
-            <svg class="nsft-rate-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-            </svg>
-          </a>
+          <div class="nsft-overflow-wrap">
+            <button type="button" class="nsft-topbar-btn coffee-btn nsft-support-btn" id="nsftSupportBtn"
+              aria-haspopup="true" aria-expanded="false" aria-controls="nsftSupportMenu"
+              data-i18n-title="supportMenuTitle" title="Apoyar el proyecto">
+              <svg class="coffee-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                <line x1="6" y1="1" x2="6" y2="4"></line>
+                <line x1="10" y1="1" x2="10" y2="4"></line>
+                <line x1="14" y1="1" x2="14" y2="4"></line>
+              </svg>
+              <span class="nsft-support-star" aria-hidden="true">
+                <svg class="nsft-rate-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+              </span>
+            </button>
+            <div class="nsft-overflow-menu nsft-rich-menu" id="nsftSupportMenu" role="menu" hidden>
+              <a href="https://buymeacoffee.com/miguelgarcia93" target="_blank" rel="noopener"
+                class="nsft-overflow-item nsft-rich-item is-coffee" id="bmcLink" role="menuitem">
+                <span class="nsft-rich-ico">
+                  <svg class="coffee-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                  </svg>
+                </span>
+                <span class="nsft-rich-text">
+                  <strong data-i18n="bmcText">Invítame un café</strong>
+                  <small data-i18n="bmcSub">Apoya el desarrollo</small>
+                </span>
+              </a>
+              <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc/reviews"
+                target="_blank" rel="noopener"
+                class="nsft-overflow-item nsft-rich-item is-rate" id="rateLink" role="menuitem"
+                data-i18n-title="rateStoreTitle" title="Valorar en la Chrome Web Store">
+                <span class="nsft-rich-ico">
+                  <svg class="nsft-rate-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </span>
+                <span class="nsft-rich-text">
+                  <strong data-i18n="rateMenuLabel">Valorar extensión</strong>
+                  <small data-i18n="rateSub">Deja tu reseña</small>
+                </span>
+              </a>
+            </div>
+          </div>
           <span class="nsft-topbar-sep" aria-hidden="true"></span>
+          <button type="button" id="nsftMeetingToggle" class="nsft-topbar-btn nsft-meeting-toggle"
+            aria-pressed="false" data-i18n-title="meetingModeTurnOn" title="Modo reunión">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <g class="nsft-meeting-board">
+                <path d="M2 3h20"></path>
+                <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"></path>
+              </g>
+              <path d="m7 21 5-5 5 5"></path>
+            </svg>
+            <span class="nsft-meeting-dot" aria-hidden="true"></span>
+          </button>
           <button type="button" id="nsftThemeToggle" class="nsft-topbar-btn nsft-theme-toggle" data-mode="light"
             title="Cambiar a modo oscuro">
             <svg class="nsft-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -100,38 +145,53 @@
                 <path class="nsft-mail-flap" d="m2 7 10 6 10-6"></path>
               </svg>
             </button>
-            <div class="nsft-overflow-menu" id="nsftFeedbackMenu" role="menu" hidden>
+            <div class="nsft-overflow-menu nsft-rich-menu" id="nsftFeedbackMenu" role="menu" hidden>
               <a href="https://forms.gle/6FPaQNjs6pUJu9WV8" target="_blank" rel="noopener"
-                class="nsft-overflow-item" role="menuitem">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="8" y="6" width="8" height="14" rx="4"></rect>
-                  <path d="M19 7l-3 2"></path><path d="M5 7l3 2"></path>
-                  <path d="M19 13h2"></path><path d="M3 13h2"></path>
-                  <path d="M19 19l-3-2"></path><path d="M5 19l3-2"></path>
-                  <path d="M9 6a3 3 0 0 1 6 0"></path>
-                </svg>
-                <span data-i18n="reportBugLink">Reportar un error</span>
+                class="nsft-overflow-item nsft-rich-item is-bug" role="menuitem">
+                <span class="nsft-rich-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="8" y="6" width="8" height="14" rx="4"></rect>
+                    <path d="M19 7l-3 2"></path><path d="M5 7l3 2"></path>
+                    <path d="M19 13h2"></path><path d="M3 13h2"></path>
+                    <path d="M19 19l-3-2"></path><path d="M5 19l3-2"></path>
+                    <path d="M9 6a3 3 0 0 1 6 0"></path>
+                  </svg>
+                </span>
+                <span class="nsft-rich-text">
+                  <strong data-i18n="reportBugLink">Reportar un error</strong>
+                  <small data-i18n="reportBugSub">Algo no funciona como debería</small>
+                </span>
               </a>
               <a href="https://forms.gle/ZTdVMEu3CZYTxhWf7" target="_blank" rel="noopener"
-                class="nsft-overflow-item" role="menuitem">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 18h6"></path>
-                  <path d="M10 22h4"></path>
-                  <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"></path>
-                </svg>
-                <span data-i18n="featureRequestLink">Sugerir una función</span>
+                class="nsft-overflow-item nsft-rich-item is-idea" role="menuitem">
+                <span class="nsft-rich-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18h6"></path>
+                    <path d="M10 22h4"></path>
+                    <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"></path>
+                  </svg>
+                </span>
+                <span class="nsft-rich-text">
+                  <strong data-i18n="featureRequestLink">Pedir nueva función</strong>
+                  <small data-i18n="featureRequestSub">Cuéntame qué te falta</small>
+                </span>
               </a>
               <a href="https://irodoriciel.github.io/nsft-tablero/" target="_blank" rel="noopener"
-                class="nsft-overflow-item" role="menuitem">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="5" height="12" rx="1"></rect>
-                  <rect x="10" y="3" width="5" height="18" rx="1"></rect>
-                  <rect x="17" y="3" width="5" height="8" rx="1"></rect>
-                </svg>
-                <span data-i18n="trackBoardLink">Seguir el avance de los reportes</span>
+                class="nsft-overflow-item nsft-rich-item is-board" role="menuitem">
+                <span class="nsft-rich-ico">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="5" height="12" rx="1"></rect>
+                    <rect x="10" y="3" width="5" height="18" rx="1"></rect>
+                    <rect x="17" y="3" width="5" height="8" rx="1"></rect>
+                  </svg>
+                </span>
+                <span class="nsft-rich-text">
+                  <strong data-i18n="trackBoardLink">Seguir el avance de los reportes</strong>
+                  <small data-i18n="trackBoardSub">Mira en qué anda lo tuyo</small>
+                </span>
               </a>
             </div>
           </div>

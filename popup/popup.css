@@ -185,6 +185,7 @@ textarea:focus-visible {
 .nsft-app {
     display: grid;
     grid-template-rows: 58px 1fr 45px;
+    grid-template-columns: minmax(0, 1fr);
     height: 600px;
     width: 440px;
     background: var(--surface-0);
@@ -343,6 +344,56 @@ a.nsft-brand-version:hover {
     color: #F2C868;
     box-shadow: 0 2px 10px rgba(232, 180, 76, 0.30);
 }
+.nsft-meeting-toggle {
+    position: relative;
+    background: var(--info-soft);
+    color: var(--info);
+    border-color: color-mix(in srgb, var(--info) 35%, transparent);
+}
+
+.nsft-meeting-toggle:hover {
+    background: color-mix(in srgb, var(--info) 22%, transparent);
+    color: var(--info-strong);
+    border-color: var(--info);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--info) 25%, transparent);
+}
+
+.nsft-meeting-toggle.is-on,
+.nsft-meeting-toggle.is-on:hover {
+    background: var(--info);
+    color: var(--surface-1);
+    border-color: var(--info-strong);
+}
+
+.nsft-meeting-toggle.is-on:hover {
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--info) 40%, transparent);
+}
+
+.nsft-meeting-dot {
+    display: none;
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--surface-1);
+}
+
+.nsft-meeting-toggle.is-on .nsft-meeting-dot {
+    display: block;
+    animation: nsft-meeting-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes nsft-meeting-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nsft-meeting-toggle.is-on .nsft-meeting-dot { animation: none; }
+}
+
 #nsftSettingsBtn {
     background: rgba(47, 106, 184, 0.14);
     color: #2663A8;
@@ -2172,29 +2223,33 @@ mark.nsft-search-hl {
     animation: nsft-setting-pulse 1.3s ease-out 2;
 }
 
-.nsft-rate-btn {
+.nsft-support-btn { position: relative; }
+
+.nsft-support-star {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 14px;
+    height: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
     background: #FFF4D6;
     color: #B7791F;
     border: 1px solid #F2D98B;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
-    transition: background-color 0.15s ease, box-shadow 0.2s ease,
-                transform 0.12s var(--spring), border-color 0.15s ease;
+    pointer-events: none;
 }
 
-.nsft-rate-btn .nsft-rate-icon {
-    fill: currentColor;
-    transition: transform 0.35s var(--spring);
+.nsft-topbar-btn .nsft-support-star svg { width: 8px; height: 8px; }
+
+:root[data-theme="dark"] .nsft-support-star {
+    background: #2A2113;
+    color: #E8B979;
+    border-color: rgba(217, 162, 95, 0.55);
 }
 
-.nsft-rate-btn:hover {
-    background: #FFE9AE;
-    border-color: #E0BC5A;
-    color: #8C5A16;
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(224, 188, 90, 0.45), 0 0 0 3px rgba(255, 221, 128, 0.28);
-}
-
-.nsft-rate-btn:hover .nsft-rate-icon {
+.nsft-support-btn:hover .nsft-support-star svg {
     animation: nsft-rate-sparkle 0.6s var(--spring);
 }
 
@@ -2204,27 +2259,142 @@ mark.nsft-search-hl {
     100% { transform: rotate(0) scale(1); }
 }
 
-.nsft-rate-btn:active {
-    transform: translateY(0) scale(0.96);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+.nsft-rich-menu { min-width: 260px; }
+
+.nsft-rich-item {
+    gap: 10px;
+    padding: 7px 10px 7px 7px;
 }
 
-:root[data-theme="dark"] .nsft-rate-btn {
+.nsft-rich-ico {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.nsft-rich-item.is-coffee .nsft-rich-ico {
+    background: #FFDD00;
+    color: #000;
+    border-color: #E6C400;
+}
+
+.nsft-rich-item.is-rate .nsft-rich-ico {
+    background: #FFF4D6;
+    color: #B7791F;
+    border-color: #F2D98B;
+}
+
+:root[data-theme="dark"] .nsft-rich-item.is-coffee .nsft-rich-ico {
+    color: #141A17;
+    border-color: #D4B800;
+}
+
+:root[data-theme="dark"] .nsft-rich-item.is-rate .nsft-rich-ico {
     background: rgba(217, 162, 95, 0.16);
     color: #E8B979;
     border-color: rgba(217, 162, 95, 0.45);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-:root[data-theme="dark"] .nsft-rate-btn:hover {
-    background: rgba(217, 162, 95, 0.26);
-    border-color: #D9A25F;
-    color: #F5D3A0;
-    box-shadow: 0 3px 12px rgba(217, 162, 95, 0.35), 0 0 0 3px rgba(217, 162, 95, 0.20);
+.nsft-rich-item.is-bug .nsft-rich-ico {
+    background: rgba(198, 70, 70, 0.14);
+    color: #C64646;
+    border-color: rgba(198, 70, 70, 0.32);
+}
+
+.nsft-rich-item.is-idea .nsft-rich-ico {
+    background: rgba(128, 88, 201, 0.14);
+    color: #8058C9;
+    border-color: rgba(128, 88, 201, 0.32);
+}
+
+.nsft-rich-item.is-board .nsft-rich-ico {
+    background: rgba(23, 104, 77, 0.13);
+    color: #17684D;
+    border-color: rgba(23, 104, 77, 0.30);
+}
+
+:root[data-theme="dark"] .nsft-rich-item.is-bug .nsft-rich-ico {
+    background: rgba(224, 123, 106, 0.18);
+    color: #E07B6A;
+    border-color: rgba(224, 123, 106, 0.45);
+}
+
+:root[data-theme="dark"] .nsft-rich-item.is-idea .nsft-rich-ico {
+    background: rgba(168, 138, 235, 0.18);
+    color: #A88AEB;
+    border-color: rgba(168, 138, 235, 0.45);
+}
+
+:root[data-theme="dark"] .nsft-rich-item.is-board .nsft-rich-ico {
+    background: rgba(95, 184, 138, 0.18);
+    color: #5FB88A;
+    border-color: rgba(95, 184, 138, 0.45);
+}
+
+.nsft-rich-item.is-bug:hover svg {
+    animation: nsft-tabside-bug-wiggle 0.5s var(--spring);
+}
+
+.nsft-rich-item.is-idea:hover svg {
+    animation: nsft-tabside-idea-glow 1.4s ease-in-out infinite;
+}
+
+.nsft-rich-item.is-board svg rect {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.nsft-rich-item.is-board:hover svg rect {
+    animation: nsft-tabside-board-rise 0.9s var(--spring) infinite;
+}
+.nsft-rich-item.is-board:hover svg rect:nth-child(2) { animation-delay: 0.12s; }
+.nsft-rich-item.is-board:hover svg rect:nth-child(3) { animation-delay: 0.24s; }
+
+.nsft-overflow-item.nsft-rich-item svg,
+.nsft-overflow-item.nsft-rich-item:hover svg {
+    width: 15px;
+    height: 15px;
+    color: inherit;
+    transform-origin: center;
+}
+
+.nsft-rich-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.nsft-rich-text strong {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-1);
+}
+
+.nsft-rich-text small {
+    font-size: 10.5px;
+    font-weight: 400;
+    color: var(--text-3);
+}
+
+.nsft-rich-item:hover .nsft-rich-text strong { color: var(--accent); }
+
+.nsft-rich-item.is-coffee:hover .coffee-icon {
+    animation: nsft-coffee-sip 0.55s var(--spring);
+}
+
+.nsft-rich-item.is-rate:hover .nsft-rate-icon {
+    animation: nsft-rate-sparkle 0.6s var(--spring);
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .nsft-rate-btn:hover .nsft-rate-icon { animation: none; }
+    .nsft-rich-item .nsft-rich-ico svg,
+    .nsft-rich-item .nsft-rich-ico svg rect { animation: none !important; }
 }
 
 
@@ -2251,12 +2421,23 @@ mark.nsft-search-hl {
     transform: rotate(-25deg) scale(1.1);
 }
 
+.nsft-meeting-toggle:hover .nsft-meeting-board {
+    animation: nsft-meeting-present 0.55s var(--spring);
+}
+
+@keyframes nsft-meeting-present {
+    0%   { transform: translateY(0); }
+    40%  { transform: translateY(-2.5px); }
+    100% { transform: translateY(0); }
+}
+
 .nsft-tb-back:hover svg {
     transform: translateX(-2px);
 }
 
 @media (prefers-reduced-motion: reduce) {
     .nsft-topbar-btn svg,
+    .nsft-meeting-toggle .nsft-meeting-board,
     .nsft-tb-back svg {
         transition: none;
         animation: none !important;

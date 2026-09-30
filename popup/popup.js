@@ -1673,28 +1673,34 @@ function initializeRouter() {
         }
     });
 
-    const feedbackBtn = document.getElementById('nsftFeedbackBtn');
-    const feedbackMenu = document.getElementById('nsftFeedbackMenu');
-    if (feedbackBtn && feedbackMenu) {
-        const closeFeedbackMenu = () => {
-            feedbackMenu.hidden = true;
-            feedbackBtn.setAttribute('aria-expanded', 'false');
-        };
-        feedbackBtn.addEventListener('click', (e) => {
+    const barMenus = [
+        ['nsftFeedbackBtn', 'nsftFeedbackMenu'],
+        ['nsftSupportBtn', 'nsftSupportMenu']
+    ].map(([b, m]) => ({ btn: document.getElementById(b), menu: document.getElementById(m) }))
+        .filter((x) => x.btn && x.menu);
+    const closeBarMenu = (x) => {
+        x.menu.hidden = true;
+        x.btn.setAttribute('aria-expanded', 'false');
+    };
+    barMenus.forEach((x) => {
+        x.btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const willOpen = feedbackMenu.hidden;
-            feedbackMenu.hidden = !willOpen;
-            feedbackBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            const willOpen = x.menu.hidden;
+            barMenus.forEach((o) => { if (o !== x) closeBarMenu(o); });
+            x.menu.hidden = !willOpen;
+            x.btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
         });
-        document.addEventListener('click', (e) => {
-            if (feedbackMenu.hidden) return;
-            if (!feedbackMenu.contains(e.target)) closeFeedbackMenu();
+        x.menu.addEventListener('click', () => closeBarMenu(x));
+    });
+    document.addEventListener('click', (e) => {
+        barMenus.forEach((x) => {
+            if (!x.menu.hidden && !x.menu.contains(e.target)) closeBarMenu(x);
         });
-        feedbackMenu.addEventListener('click', closeFeedbackMenu);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !feedbackMenu.hidden) closeFeedbackMenu();
-        });
-    }
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        barMenus.forEach((x) => { if (!x.menu.hidden) closeBarMenu(x); });
+    });
 
     const settingsBtn = document.getElementById('nsftSettingsBtn');
     if (settingsBtn) settingsBtn.addEventListener('click', () => NSFTRouter.go('settings'));
@@ -1809,7 +1815,9 @@ function applyTabLayout() {
     head.className = 'nsft-tabside-head';
     const brand = document.querySelector('.nsft-brand');
     const themeBtn = document.getElementById('nsftThemeToggle');
+    const meetingBtn = document.getElementById('nsftMeetingToggle');
     if (brand) head.appendChild(brand);
+    if (meetingBtn) head.appendChild(meetingBtn);
     if (themeBtn) head.appendChild(themeBtn);
     side.appendChild(head);
 
@@ -1819,7 +1827,7 @@ function applyTabLayout() {
     const acts = document.createElement('div');
     acts.className = 'nsft-tabside-actions';
     document.querySelectorAll('#nsftFeedbackMenu .nsft-overflow-item').forEach((item) => {
-        const label = item.querySelector('span');
+        const label = item.querySelector('[data-i18n]');
         if (label && !item.title) item.title = label.textContent.trim();
         const key = label && label.getAttribute('data-i18n');
         if (key === 'reportBugLink') item.classList.add('nsft-tabside-bug');
@@ -1905,8 +1913,7 @@ function applyTabLayout() {
         span.textContent = chrome.i18n.getMessage(key) || fallback;
         el.appendChild(span);
     };
-    label(document.getElementById('bmcLink'), 'bmcText', 'Invítame un café');
-    label(document.getElementById('rateLink'), 'rateShort', 'Valorar');
+    label(document.getElementById('nsftSupportBtn'), 'supportShort', 'Apoyar');
 
     const master = (id, key, fallback) => {
         const btn = document.getElementById(id);
@@ -2398,6 +2405,80 @@ function applySmartEnableAll(opts) {
                     || (changed + ' preferencias activadas')
             });
         });
+    });
+}
+
+const NSFT_MEETING_KEY = 'nsftMeetingMode';
+
+function readMeetingState(raw) {
+    return raw && raw.on === true && Array.isArray(raw.ids) ? raw : null;
+}
+
+function paintMeetingToggle(state) {
+    const btn = document.getElementById('nsftMeetingToggle');
+    if (!btn) return;
+    const on = !!state;
+    btn.classList.toggle('is-on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    const label = on
+        ? chrome.i18n.getMessage('meetingModeTurnOff', [String(state.ids.length)])
+        : chrome.i18n.getMessage('meetingModeTurnOn');
+    btn.title = label || '';
+    btn.setAttribute('aria-label', label || '');
+}
+
+function writeMeetingMode(updates, state, toast) {
+    Object.keys(updates).forEach((id) => {
+        const cb = document.getElementById(id);
+        if (cb && cb.type === 'checkbox') cb.checked = updates[id];
+    });
+    chrome.storage.local.set({ ...updates, [NSFT_MEETING_KEY]: state }, () => {
+        if (typeof updateTileCounts === 'function') updateTileCounts();
+        if (typeof refreshDetailCount === 'function') refreshDetailCount();
+        paintMeetingToggle(readMeetingState(state));
+        if (toast) showToast(toast, { type: state ? 'info' : 'success' });
+    });
+}
+
+function toggleMeetingMode() {
+    const ids = Array.from(nsftToggleCheckboxes()).map((cb) => cb.id).filter(Boolean);
+    const query = { [NSFT_MEETING_KEY]: null };
+    ids.forEach((id) => { query[id] = DEFAULTS[id] === true; });
+
+    chrome.storage.local.get(query, (items) => {
+        const state = readMeetingState(items[NSFT_MEETING_KEY]);
+        const updates = {};
+
+        if (state) {
+            state.ids.forEach((id) => {
+                if (ids.includes(id) && items[id] !== true) updates[id] = true;
+            });
+            writeMeetingMode(updates, null,
+                chrome.i18n.getMessage('meetingModeOffToast', [String(Object.keys(updates).length)]));
+            return;
+        }
+
+        const on = ids.filter((id) => items[id] === true);
+        if (!on.length) {
+            showToast(chrome.i18n.getMessage('meetingModeNothing'), { type: 'info' });
+            return;
+        }
+        on.forEach((id) => { updates[id] = false; });
+        writeMeetingMode(updates, { on: true, ids: on, at: Date.now() },
+            chrome.i18n.getMessage('meetingModeOnToast', [String(on.length)]));
+    });
+}
+
+function initializeMeetingMode() {
+    const btn = document.getElementById('nsftMeetingToggle');
+    if (!btn) return;
+    btn.addEventListener('click', toggleMeetingMode);
+    chrome.storage.local.get({ [NSFT_MEETING_KEY]: null }, (items) => {
+        paintMeetingToggle(readMeetingState(items[NSFT_MEETING_KEY]));
+    });
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes[NSFT_MEETING_KEY]) return;
+        paintMeetingToggle(readMeetingState(changes[NSFT_MEETING_KEY].newValue));
     });
 }
 
@@ -3039,6 +3120,7 @@ initializeGlobalStats();
 initializeMasterSwitches();
 initializeSettingsExportImport();
 initializeSettingsScreen();
+initializeMeetingMode();
 refreshRestoreButtonState();
 
 (() => {

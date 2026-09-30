@@ -679,6 +679,21 @@
   "rateStoreTitle": {
     "message": "Valorar en la Chrome Web Store"
   },
+  "supportMenuTitle": {
+    "message": "Apoyar el proyecto: invítame un café o valora la extensión"
+  },
+  "supportShort": {
+    "message": "Apoyar"
+  },
+  "bmcSub": {
+    "message": "Apoya el desarrollo"
+  },
+  "rateMenuLabel": {
+    "message": "Valorar extensión"
+  },
+  "rateSub": {
+    "message": "Deja tu reseña"
+  },
   "bmcText": {
     "message": "Invítame un café"
   },
@@ -2538,6 +2553,9 @@
   },
   "welcomeCatPowerItem9": {
     "message": "Auto-refresh de portlets"
+  },
+  "welcomeCatPowerItem13": {
+    "message": "Modo reunión: la extensión fuera de en medio en un clic"
   },
   "welcomeCatPowerItem10": {
     "message": "Embellecer campos de código"
@@ -5215,6 +5233,15 @@
   },
   "feedbackMenuTitle": {
     "message": "Contacto: reportar un error o sugerir una función"
+  },
+  "reportBugSub": {
+    "message": "Algo no funciona como debería"
+  },
+  "featureRequestSub": {
+    "message": "Cuéntame qué te falta"
+  },
+  "trackBoardSub": {
+    "message": "Mira en qué anda lo tuyo"
   },
   "reportBugLink": {
     "message": "Reportar un error"
@@ -10765,6 +10792,39 @@
       }
     }
   },
+  "meetingModeTurnOn": {
+    "message": "Modo reunión: apaga de golpe las funciones encendidas y las devuelve al quitarlo"
+  },
+  "meetingModeTurnOff": {
+    "message": "Quitar el modo reunión: vuelve a encender las $1 funciones que apagó",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  },
+  "meetingModeOnToast": {
+    "message": "Modo reunión: $1 funciones apagadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  },
+  "meetingModeOffToast": {
+    "message": "Modo reunión quitado: $1 funciones encendidas de nuevo",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  },
+  "meetingModeNothing": {
+    "message": "No hay ninguna función encendida que apagar"
+  },
   "toastDisabledCount": {
     "message": "Se desactivaron $1 preferencias",
     "placeholders": {
@@ -11851,7 +11911,7 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "Se arregló que al editar un script el título de la pestaña enseñara el contador de caracteres en vez de su nombre. Más detalles en el changelog."
+    "message": "Nuevo Modo Reunión: con el botón junto al del modo oscuro apagas de golpe las funciones que tengas encendidas, y al quitarlo vuelven exactamente esas. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -12157,6 +12217,24 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
+  },
+  "cl_ver_7_2_2": {
+    "message": "v7.2.2"
+  },
+  "cl_date_7_2_2": {
+    "message": "2026-09-30"
+  },
+  "cl_7_2_2_meeting_title": {
+    "message": "Modo Reunión en un clic"
+  },
+  "cl_7_2_2_meeting_desc": {
+    "message": "Se agregó un botón junto al del modo oscuro que apaga de golpe las funciones encendidas y las devuelve al quitarlo."
+  },
+  "cl_7_2_2_support_title": {
+    "message": "Café y valorar, en un solo botón"
+  },
+  "cl_7_2_2_support_desc": {
+    "message": "Se agregó un menú en la barra del popup que reúne en un solo botón invitar un café y valorar la extensión."
   },
   "cl_ver_7_2_1": {
     "message": "v7.2.1"
@@ -13070,9 +13148,6 @@
   },
   "detailDisableAllLong": {
     "message": "Desactivar todo"
-  },
-  "rateShort": {
-    "message": "Valorar"
   },
   "sql_rows_capped_unknown": {
     "message": "Se trajeron $FETCHED$ filas y quedan más sin traer.",
