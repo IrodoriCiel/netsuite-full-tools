@@ -2555,7 +2555,7 @@
     "message": "Portlet auto-refresh"
   },
   "welcomeCatPowerItem13": {
-    "message": "Meeting mode: the extension out of the way in one click"
+    "message": "Meeting mode: the extension out of the way and the other accounts hidden, in one click"
   },
   "welcomeCatPowerItem10": {
     "message": "Prettify code fields"
@@ -10822,6 +10822,21 @@
       }
     }
   },
+  "meetingModeOnToastHidden": {
+    "message": "Meeting mode: $1 features switched off and the other accounts hidden",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  },
+  "meetingModeHideAccountsLabel": {
+    "message": "Meeting Mode: hide the other accounts"
+  },
+  "meetingModeHideAccountsDesc": {
+    "message": "Turning Meeting Mode on also turns Discreet Mode on; turning it off leaves it as it was."
+  },
   "meetingModeNothing": {
     "message": "There are no enabled features to switch off"
   },
@@ -11911,7 +11926,10 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "New Meeting Mode: the button next to the dark mode one switches off every feature you have on, and turning it off brings back exactly those. More details in the changelog."
+    "message": "Turning Meeting Mode on now also hides the other accounts in the role menu; if you don't want that, switch it off in Settings."
+  },
+  "un_hl_2": {
+    "message": "Fixed: with Grouped Tabs on, editing a script no longer closes Brave entirely, and Discreet Mode applies without reloading. More details in the changelog."
   },
   "un_thanks": {
     "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
@@ -12220,6 +12238,36 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Fixed the labels in the field info panel always coming out in Spanish."
+  },
+  "cl_ver_7_2_3": {
+    "message": "v7.2.3"
+  },
+  "cl_date_7_2_3": {
+    "message": "2026-10-08"
+  },
+  "cl_7_2_3_grouped_popup_title": {
+    "message": "Editing a script no longer closes Brave"
+  },
+  "cl_7_2_3_grouped_popup_desc": {
+    "message": "Fixed Brave closing entirely when editing a script from its record with Grouped Tabs turned on."
+  },
+  "cl_7_2_3_meeting_discreet_title": {
+    "message": "Meeting Mode also hides the other accounts"
+  },
+  "cl_7_2_3_meeting_discreet_desc": {
+    "message": "Added an option, on by default, for Meeting Mode to also turn Discreet Mode on."
+  },
+  "cl_7_2_3_discreet_live_title": {
+    "message": "Discreet Mode applies without reloading"
+  },
+  "cl_7_2_3_discreet_live_desc": {
+    "message": "Fixed turning Discreet Mode on or off having no effect until the page was reloaded."
+  },
+  "cl_7_2_3_sx_preview_title": {
+    "message": "Run Map/Reduce and Scheduled, with its animation"
+  },
+  "cl_7_2_3_sx_preview_desc": {
+    "message": "Added the Run Map/Reduce and Scheduled animation to the welcome wizard and the popup."
   },
   "cl_ver_7_2_2": {
     "message": "v7.2.2"

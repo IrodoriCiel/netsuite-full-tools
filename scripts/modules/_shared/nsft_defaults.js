@@ -222,6 +222,7 @@ globalThis.NSFT_DEFAULTS = {
     jsonFormatterMaxAutoExpandDepth: 2,
     jsonFormatterMaxChildrenPreview: 60,
     enableDiscreetMode: false,
+    meetingModeHideAccounts: true,
     enablePortletRefresher: true,
     portletRefresherInterval: 600,
     portletRefresherAutoStart: false,

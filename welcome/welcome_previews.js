@@ -370,7 +370,8 @@
         link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
         save: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
         edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
-        trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`
+        trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
+        run: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`,
     };
     const ICONO_CODIGO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-5 6 5 6"/><path d="M15 6l5 6-5 6"/></svg>`;
     const ICONO_CARPETA = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.5h7A1.5 1.5 0 0 1 19 10v7.5A1.5 1.5 0 0 1 17.5 19h-13A1.5 1.5 0 0 1 3 17.5z"/></svg>`;
@@ -2167,7 +2168,8 @@ ${CODIGO_JS}`;
                     </div>`;
     }
 
-    function scriptNS(conEnlace, zona, autoId) {
+    function scriptNS(conEnlace, zona, autoId, o) {
+        o = o || {};
         return `
                     <div class="nsft-pv-body nsft-pv-stack">
                         <div class="nsft-pv-title">{{script}}</div>
@@ -2175,12 +2177,13 @@ ${CODIGO_JS}`;
                     <div class="nsft-pv-actions">
                         <span class="nsft-pv-btn">{{edit}}</span>
                         <span class="nsft-pv-btn is-ghost">{{back}}</span>
+                        ${o.accionesIzq || ''}
                     </div>
                     <div class="nsft-pv-body">
                         <div class="nsft-pv-fields">
-                            <span class="nsft-pv-field"><span class="lbl">{{tipo}}</span><span class="val">User Event</span></span>
-                            <span class="nsft-pv-field"><span class="lbl">{{name}}</span><span class="val${autoId ? ' nsft-pv-sanval' : ''}">{{pvScrUeDoc}}</span></span>
-                            <span class="nsft-pv-field"><span class="lbl">{{id}}</span><span class="val nsft-pv-mono${autoId ? ' nsft-pv-sanval' : ''}">customscript_demo_ue</span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{tipo}}</span><span class="val">${o.mr ? 'Map/Reduce' : 'User Event'}</span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{name}}</span><span class="val${autoId ? ' nsft-pv-sanval' : ''}">${o.mr ? '{{pvScrMrSync}}' : '{{pvScrUeDoc}}'}</span></span>
+                            <span class="nsft-pv-field"><span class="lbl">{{id}}</span><span class="val nsft-pv-mono${autoId ? ' nsft-pv-sanval' : ''}">${o.mr ? 'customscript_demo_mr' : 'customscript_demo_ue'}</span></span>
                             <span class="nsft-pv-field"><span class="lbl">{{apiVer}}</span><span class="val nsft-pv-mono">2.1</span></span>
                         </div>
                     </div>
@@ -2193,7 +2196,7 @@ ${CODIGO_JS}`;
                         <span class="nsft-pv-flabel">{{scriptFile}}</span>
                         <span class="nsft-pv-filerow">
                             <span class="lk">{{preview}}</span>
-                            <span class="nsft-pv-mono">demo_ue_documentos.js</span>
+                            <span class="nsft-pv-mono">${o.mr ? 'demo_mr.js' : 'demo_ue_documentos.js'}</span>
                             <span class="lk">{{download}}</span>
                             <span class="lk">{{edit}}</span>${conEnlace ? `
                             <span class="lk nsft-pv-onlink nsft-pv-destello">{{@openInNewTab}}</span>` : ''}
@@ -2255,6 +2258,70 @@ ${CODIGO_JS}`;
                 ${editorNS(true)}
             </div>`
     });
+
+    const FICHA_SX = `
+            <div class="nsft-pv-modal is-sx">
+                <div class="nsft-pv-bar">
+                    <span class="nsft-pv-sxicon">${ICONOS_MENU.run}</span>
+                    <span class="nsft-pv-grow nsft-pv-tiny">{{@sx_confirm_title_prd}}</span>
+                </div>
+                <div class="nsft-pv-modal-body">
+                    <span class="nsft-pv-sxline is-name">{{pvScrMrSync}}</span>
+                    <span class="nsft-pv-sxline">{{@sx_confirm_dep|{{pvScrMrSync}}|customdeploy_demo_mr}}</span>
+                    <span class="nsft-pv-sxline">{{@sx_confirm_env|@sx_env_prd}}</span>
+                </div>
+                <div class="nsft-pv-modal-foot">
+                    <span class="nsft-pv-btn is-ghost">{{@dlg_cancel}}</span>
+                    <span class="nsft-pv-btn is-danger nsft-pv-sxok">{{@sx_confirm_ok}}
+                        <span class="nsft-pv-tap is-sxok" aria-hidden="true"></span>
+                        <span class="nsft-pv-cursor is-sxok" aria-hidden="true">${PUNTERO}</span>
+                    </span>
+                </div>
+            </div>`;
+
+    const TARJETA_SX = `
+            <div class="nsft-pv-sxcard">
+                <div class="nsft-pv-sxcard-head">
+                    <span class="nsft-pv-sxdot"></span>
+                    <span class="nsft-pv-sxstate">
+                        <span class="s1">{{@sx_card_processing}}</span><span class="s2">{{@sx_card_done}}</span>
+                    </span>
+                    <svg class="nsft-pv-sxx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </div>
+                <span class="nsft-pv-sxcard-name">{{pvScrMrSync}}</span>
+                <span class="nsft-pv-sxcard-sub">{{pvScrMrSync}} · <span class="nsft-pv-mono">customdeploy_demo_mr</span></span>
+                <span class="nsft-pv-sxprog">
+                    <span class="nsft-pv-sxcard-sub">{{@sx_card_stage|map}}</span>
+                    <span class="nsft-pv-sxbar"><i></i></span>
+                </span>
+                <span class="nsft-pv-sxcard-links"><span class="lk">{{@sx_card_status_link}}</span><span class="lk">{{@sx_card_logs_link}}</span></span>
+            </div>`;
+
+    function ejecutarScript(modo) {
+        const enMenu = modo === 'menu';
+        return ventanaNS({
+            clase: 'nsft-pv-sx is-' + modo + (enMenu ? ' nsft-pv-menuflow' : ''),
+            url: '1234567.app.netsuite.com/app/common/scripting/script.nl?id=481001',
+            cuerpo: scriptNS(false, null, false, {
+                mr: true,
+                accionesIzq: enMenu
+                    ? menuOpciones(`<span class="nsft-pv-menu-item">${ICONOS_MENU.run} {{@sx_title}}</span>`)
+                    : `
+            <span class="nsft-pv-btn nsft-pv-rabtn">
+                <span class="nsft-pv-raswap">
+                    <span class="s1">{{@sx_btn_run}}</span><span class="s2">{{@sx_checking_short}}</span>
+                </span>
+                <span class="nsft-pv-tap is-ra" aria-hidden="true"></span>
+                <span class="nsft-pv-cursor is-ra" aria-hidden="true">${PUNTERO}</span>
+            </span>`
+            }),
+            extra: FICHA_SX + TARJETA_SX
+        });
+    }
+
+    P.enableScriptExecute = ejecutarScript('menu');
+    P.scriptExecuteModeMenu = ejecutarScript('menu');
+    P.scriptExecuteModeButton = ejecutarScript('button');
 
     P.enableEditorOpenInNewTab = ventanaNS({
         clase: 'nsft-pv-onl',

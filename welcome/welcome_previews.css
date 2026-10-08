@@ -8432,3 +8432,134 @@ html[data-theme="dark"] .nsft-pv-pdfpcap { background: var(--nsft-dk-hover, #333
 @media (prefers-reduced-motion: reduce) {
     .nsft-pv-cursor.is-advia, .nsft-pv-tap.is-advia { display: none; }
 }
+
+.nsft-pv-sx .nsft-pv-raswap > span { text-align: center; }
+.nsft-pv-sx .nsft-pv-menu-item svg { display: block; width: 9px; height: 9px; flex: 0 0 9px; }
+
+.nsft-pv-sx .nsft-pv-raswap > .s1 { animation: nsftPvSxS1 3.5s steps(1, end) 1 forwards; }
+.nsft-pv-sx .nsft-pv-raswap > .s2 { opacity: 0; animation: nsftPvSxS2 3.5s steps(1, end) 1 forwards; }
+
+@keyframes nsftPvSxS1 { 0%, 37% { opacity: 1; } 38%, 57% { opacity: 0; } 58%, 100% { opacity: 1; } }
+@keyframes nsftPvSxS2 { 0%, 37% { opacity: 0; } 38%, 57% { opacity: 1; } 58%, 100% { opacity: 0; } }
+
+.nsft-pv-sx .nsft-pv-cursor.is-cp {
+    animation: nsftPvCpCursor 3.5s ease-in-out 1 forwards, nsftPvSxHide 3.5s steps(1, end) 1 forwards;
+}
+.nsft-pv-sx .nsft-pv-cursor.is-ra {
+    animation: nsftPvRaCursor 3.5s ease-in-out 1 forwards, nsftPvSxHide 3.5s steps(1, end) 1 forwards;
+}
+
+@keyframes nsftPvSxHide { 0%, 57% { opacity: 1; } 58%, 100% { opacity: 0; } }
+
+.nsft-pv-sx .nsft-pv-modal.is-sx {
+    width: 236px;
+    overflow: visible;
+    opacity: 0;
+    animation: nsftPvSxModal 3.5s steps(1, end) 1 forwards;
+}
+.nsft-pv-modal.is-sx .nsft-pv-bar { color: var(--nsft-pv-red); border-radius: 12px 12px 0 0; }
+.nsft-pv-modal.is-sx .nsft-pv-modal-body { gap: 4px; }
+.nsft-pv-modal.is-sx .nsft-pv-btn { font-size: 8px; padding: 3px 8px; }
+.nsft-pv-sxicon { display: block; width: 11px; height: 11px; color: var(--nsft-pv-red); }
+.nsft-pv-sxicon svg { display: block; width: 11px; height: 11px; }
+.nsft-pv-sxline { font-size: 8.5px; line-height: 1.35; color: var(--nsft-pv-ink2); overflow-wrap: anywhere; }
+.nsft-pv-sxline.is-name { font-size: 9.5px; font-weight: 700; color: var(--nsft-pv-ink); }
+.nsft-pv-sxok { position: relative; }
+
+@keyframes nsftPvSxModal { 0%, 57% { opacity: 0; } 58%, 71% { opacity: 1; } 72%, 100% { opacity: 0; } }
+
+.nsft-pv-cursor.is-sxok { opacity: 0; animation: nsftPvSxOkCursor 3.5s ease-in-out 1 forwards; }
+.nsft-pv-tap.is-sxok { animation: nsftPvSxOkTap 3.5s ease-in-out 1 forwards; }
+
+@keyframes nsftPvSxOkCursor {
+    0%, 57%   { opacity: 0; transform: translate(30px, 26px) scale(1); }
+    58%       { opacity: 1; transform: translate(30px, 26px) scale(1); }
+    64%       { opacity: 1; transform: translate(0, 0) scale(1); }
+    66%       { opacity: 1; transform: translate(0, 0) scale(.78); }
+    69%, 71%  { opacity: 1; transform: translate(0, 0) scale(1); }
+    72%, 100% { opacity: 0; transform: translate(0, 0) scale(1); }
+}
+
+@keyframes nsftPvSxOkTap {
+    0%, 64%   { opacity: 0; transform: scale(.3); }
+    66%       { opacity: .9; transform: scale(.4); }
+    71%, 100% { opacity: 0; transform: scale(1.6); }
+}
+
+.nsft-pv-sxcard {
+    position: absolute;
+    right: 3%;
+    bottom: 5%;
+    z-index: 6;
+    display: grid;
+    gap: 2px;
+    width: 38%;
+    min-width: 150px;
+    box-sizing: border-box;
+    padding: 6px 8px 7px 8px;
+    border: 1px solid var(--nsft-pv-line);
+    border-left: 3px solid var(--nsft-pv-blue);
+    border-radius: 8px;
+    background: var(--nsft-pv-paper);
+    color: var(--nsft-pv-ink);
+    box-shadow: 0 14px 30px -16px rgba(6, 16, 11, .55);
+    opacity: 0;
+    animation: nsftPvSxCard 3.5s steps(1, end) 1 forwards, nsftPvSxTone 3.5s steps(1, end) 1 forwards;
+}
+.nsft-pv-sxcard-head { display: flex; align-items: center; gap: 5px; }
+.nsft-pv-sxdot {
+    flex: 0 0 6px;
+    width: 6px;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--nsft-pv-blue);
+    animation: nsftPvSxDot 3.5s steps(1, end) 1 forwards;
+}
+.nsft-pv-sxstate { display: inline-grid; flex: 1; min-width: 0; font-size: 9.5px; font-weight: 700; }
+.nsft-pv-sxstate > span { grid-area: 1 / 1; white-space: nowrap; }
+.nsft-pv-sxstate > .s1 { animation: nsftPvSxDone1 3.5s steps(1, end) 1 forwards; }
+.nsft-pv-sxstate > .s2 { opacity: 0; animation: nsftPvSxDone2 3.5s steps(1, end) 1 forwards; }
+.nsft-pv-sxx { display: block; width: 8px; height: 8px; color: var(--nsft-pv-ink2); }
+.nsft-pv-sxcard-name { font-size: 9px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nsft-pv-sxcard-sub { font-size: 8px; color: var(--nsft-pv-ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.nsft-pv-sxprog {
+    display: grid;
+    gap: 3px;
+    max-height: 30px;
+    overflow: hidden;
+    animation: nsftPvSxProg 3.5s steps(1, end) 1 forwards;
+}
+.nsft-pv-sxbar { display: block; height: 3px; border-radius: 99px; background: var(--nsft-pv-line); overflow: hidden; }
+.nsft-pv-sxbar > i {
+    display: block;
+    height: 100%;
+    width: 4%;
+    border-radius: 99px;
+    background: var(--nsft-pv-blue);
+    animation: nsftPvSxBar 3.5s linear 1 forwards;
+}
+.nsft-pv-sxcard-links { display: flex; gap: 8px; margin-top: 2px; font-size: 8px; }
+.nsft-pv-sxcard-links .lk { color: var(--nsft-ns-accent, #2C7E52); font-weight: 600; }
+
+@keyframes nsftPvSxCard { 0%, 71% { opacity: 0; } 72%, 100% { opacity: 1; } }
+@keyframes nsftPvSxTone { 0%, 90% { border-left-color: var(--nsft-pv-blue); } 91%, 100% { border-left-color: var(--nsft-pv-green); } }
+@keyframes nsftPvSxDot { 0%, 90% { background: var(--nsft-pv-blue); } 91%, 100% { background: var(--nsft-pv-green); } }
+@keyframes nsftPvSxDone1 { 0%, 90% { opacity: 1; } 91%, 100% { opacity: 0; } }
+@keyframes nsftPvSxDone2 { 0%, 90% { opacity: 0; } 91%, 100% { opacity: 1; } }
+@keyframes nsftPvSxProg { 0%, 90% { max-height: 30px; } 91%, 100% { max-height: 0; } }
+@keyframes nsftPvSxBar { 0%, 72% { width: 4%; } 90%, 100% { width: 100%; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .nsft-pv-sx .nsft-pv-raswap > .s1 { animation: none; opacity: 1; }
+    .nsft-pv-sx .nsft-pv-raswap > .s2 { animation: none; opacity: 0; }
+    .nsft-pv-sx .nsft-pv-modal.is-sx { animation: none; opacity: 0; }
+    .nsft-pv-sx .nsft-pv-cursor.is-cp,
+    .nsft-pv-sx .nsft-pv-cursor.is-ra,
+    .nsft-pv-cursor.is-sxok, .nsft-pv-tap.is-sxok { display: none; }
+    .nsft-pv-sxcard { animation: none; opacity: 1; border-left-color: var(--nsft-pv-green); }
+    .nsft-pv-sxdot { animation: none; background: var(--nsft-pv-green); }
+    .nsft-pv-sxstate > .s1 { animation: none; opacity: 0; }
+    .nsft-pv-sxstate > .s2 { animation: none; opacity: 1; }
+    .nsft-pv-sxprog { animation: none; max-height: 0; }
+}

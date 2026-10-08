@@ -2440,9 +2440,15 @@ function writeMeetingMode(updates, state, toast) {
     });
 }
 
+const NSFT_MEETING_DISCREET_KEY = 'enableDiscreetMode';
+
 function toggleMeetingMode() {
     const ids = Array.from(nsftToggleCheckboxes()).map((cb) => cb.id).filter(Boolean);
-    const query = { [NSFT_MEETING_KEY]: null };
+    const query = {
+        [NSFT_MEETING_KEY]: null,
+        [NSFT_MEETING_DISCREET_KEY]: DEFAULTS[NSFT_MEETING_DISCREET_KEY] === true,
+        meetingModeHideAccounts: DEFAULTS.meetingModeHideAccounts !== false
+    };
     ids.forEach((id) => { query[id] = DEFAULTS[id] === true; });
 
     chrome.storage.local.get(query, (items) => {
@@ -2453,19 +2459,27 @@ function toggleMeetingMode() {
             state.ids.forEach((id) => {
                 if (ids.includes(id) && items[id] !== true) updates[id] = true;
             });
+            const restored = Object.keys(updates).length;
+            if (state.discreet && items[NSFT_MEETING_DISCREET_KEY] === true) {
+                updates[NSFT_MEETING_DISCREET_KEY] = false;
+            }
             writeMeetingMode(updates, null,
-                chrome.i18n.getMessage('meetingModeOffToast', [String(Object.keys(updates).length)]));
+                chrome.i18n.getMessage('meetingModeOffToast', [String(restored)]));
             return;
         }
 
         const on = ids.filter((id) => items[id] === true);
-        if (!on.length) {
+        const hideAccounts = items.meetingModeHideAccounts === true
+            && items[NSFT_MEETING_DISCREET_KEY] !== true;
+        if (!on.length && !hideAccounts) {
             showToast(chrome.i18n.getMessage('meetingModeNothing'), { type: 'info' });
             return;
         }
         on.forEach((id) => { updates[id] = false; });
-        writeMeetingMode(updates, { on: true, ids: on, at: Date.now() },
-            chrome.i18n.getMessage('meetingModeOnToast', [String(on.length)]));
+        if (hideAccounts) updates[NSFT_MEETING_DISCREET_KEY] = true;
+        writeMeetingMode(updates, { on: true, ids: on, at: Date.now(), discreet: hideAccounts },
+            chrome.i18n.getMessage(hideAccounts ? 'meetingModeOnToastHidden' : 'meetingModeOnToast',
+                [String(on.length)]));
     });
 }
 

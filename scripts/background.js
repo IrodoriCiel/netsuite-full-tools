@@ -764,6 +764,10 @@ function pTabsGet(tabId) {
     return new Promise((r) => chrome.tabs.get(tabId, (t) =>
         r(chrome.runtime.lastError ? null : t)));
 }
+function pWindowsGet(windowId) {
+    return new Promise((r) => chrome.windows.get(windowId, (w) =>
+        r(chrome.runtime.lastError ? null : w)));
+}
 function pTabGroupsQueryByTitle(title) {
     return new Promise((r) => chrome.tabGroups.query({ title }, (g) =>
         r(chrome.runtime.lastError ? [] : (g || []))));
@@ -783,11 +787,14 @@ async function placeTabAndDedupe(tabId, groupTitle, color) {
     const fresh = await pTabsGet(tabId);
     if (!fresh) return;
 
+    const win = await pWindowsGet(fresh.windowId);
+    if (!win || win.type !== 'normal') return;
+
     const allWithTitle = await pTabGroupsQueryByTitle(groupTitle);
     const sameWindow = allWithTitle.filter(g => g.windowId === fresh.windowId);
 
     if (sameWindow.length === 0) {
-        const groupId = await safeTabsGroup({ tabIds: tabId });
+        const groupId = await safeTabsGroup({ tabIds: tabId, createProperties: { windowId: fresh.windowId } });
         if (groupId == null) return;
         await safeTabGroupsUpdate(groupId, { title: groupTitle, color });
         _nsftCreatedGroups.add(groupId);

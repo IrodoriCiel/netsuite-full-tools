@@ -29,18 +29,52 @@
         }
     };
 
+    let active = false;
+    let findInterval = null;
+    let observer = null;
+    const probeIntervals = [];
+
     chrome.storage.local.get({ [STORAGE_KEY]: false }, (settings) => {
-        if (!settings[STORAGE_KEY]) return;
-        init();
+        if (settings[STORAGE_KEY]) enable();
     });
 
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local' || !changes[STORAGE_KEY]) return;
+        if (changes[STORAGE_KEY].newValue) enable();
+        else disable();
+    });
+
+    function enable() {
+        if (active) return;
+        active = true;
+        init();
+    }
+
+    function disable() {
+        if (!active) return;
+        active = false;
+        if (findInterval) { clearInterval(findInterval); findInterval = null; }
+        probeIntervals.forEach(i => clearInterval(i));
+        probeIntervals.length = 0;
+        if (observer) { observer.disconnect(); observer = null; }
+        document.querySelectorAll('[data-nsft-discreet-init]').forEach((el) => {
+            delete el.dataset.nsftDiscreetInit;
+        });
+        document.querySelectorAll('a[data-nsft-discreet-hidden]').forEach((link) => {
+            link.style.display = '';
+            delete link.dataset.nsftDiscreetHidden;
+        });
+    }
+
     function init() {
+        if (!document.body) return;
         const theme = document.body.dataset.header;
         let count = 0;
 
-        const interval = setInterval(() => {
+        findInterval = setInterval(() => {
             if (count > MAX_TICKS) {
-                clearInterval(interval);
+                clearInterval(findInterval);
+                findInterval = null;
                 return;
             }
             count++;
@@ -53,16 +87,15 @@
     }
 
     function observeAccountMenu(theme, accountEl) {
-        const intervals = [];
         const accountNumbers = buildAccountNumbers();
         if (!accountNumbers.length) return;
 
-        const observer = new MutationObserver((mutations) => {
+        observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type !== 'attributes') return;
-                if (intervals.length) return;
+                if (probeIntervals.length) return;
 
-                intervals.push(setInterval(() => {
+                probeIntervals.push(setInterval(() => {
                     const accountLinks = findAllElements(theme, 'accountLinks');
                     if (!accountLinks?.length) return;
 
@@ -70,11 +103,12 @@
                         const optionAccountNumber = link.href.split('company=')[1];
                         if (!accountNumbers.includes(optionAccountNumber)) {
                             link.style.display = 'none';
+                            link.dataset.nsftDiscreetHidden = '1';
                         }
                     }
 
-                    intervals.forEach(i => clearInterval(i));
-                    intervals.length = 0;
+                    probeIntervals.forEach(i => clearInterval(i));
+                    probeIntervals.length = 0;
                 }, PROBE_MS));
             });
         });

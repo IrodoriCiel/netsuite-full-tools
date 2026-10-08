@@ -2555,7 +2555,7 @@
     "message": "Auto-refresh de portlets"
   },
   "welcomeCatPowerItem13": {
-    "message": "Modo reunión: la extensión fuera de en medio en un clic"
+    "message": "Modo reunión: la extensión fuera de en medio y las otras cuentas ocultas, en un clic"
   },
   "welcomeCatPowerItem10": {
     "message": "Embellecer campos de código"
@@ -10822,6 +10822,21 @@
       }
     }
   },
+  "meetingModeOnToastHidden": {
+    "message": "Modo reunión: $1 funciones apagadas y las otras cuentas ocultas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "42"
+      }
+    }
+  },
+  "meetingModeHideAccountsLabel": {
+    "message": "Modo Reunión: ocultar las otras cuentas"
+  },
+  "meetingModeHideAccountsDesc": {
+    "message": "Al poner el Modo Reunión, enciende también el Modo Discreto; al quitarlo, lo deja como estaba."
+  },
   "meetingModeNothing": {
     "message": "No hay ninguna función encendida que apagar"
   },
@@ -11911,7 +11926,10 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "Nuevo Modo Reunión: con el botón junto al del modo oscuro apagas de golpe las funciones que tengas encendidas, y al quitarlo vuelven exactamente esas. Más detalles en el changelog."
+    "message": "Al poner el Modo Reunión, ahora también se ocultan las otras cuentas del menú de rol; si no lo quieres, se quita en Configuración."
+  },
+  "un_hl_2": {
+    "message": "Arreglados: con Agrupar Pestañas encendido, editar un script ya no cierra Brave entero, y el Modo Discreto se aplica sin recargar. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -12217,6 +12235,36 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
+  },
+  "cl_ver_7_2_3": {
+    "message": "v7.2.3"
+  },
+  "cl_date_7_2_3": {
+    "message": "2026-10-08"
+  },
+  "cl_7_2_3_grouped_popup_title": {
+    "message": "Editar un script ya no cierra Brave"
+  },
+  "cl_7_2_3_grouped_popup_desc": {
+    "message": "Se arregló que Brave se cerrara entero al editar un script desde su ficha con Agrupar Pestañas encendido."
+  },
+  "cl_7_2_3_meeting_discreet_title": {
+    "message": "El Modo Reunión oculta también las otras cuentas"
+  },
+  "cl_7_2_3_meeting_discreet_desc": {
+    "message": "Se agregó una opción, encendida de fábrica, para que el Modo Reunión encienda también el Modo Discreto."
+  },
+  "cl_7_2_3_discreet_live_title": {
+    "message": "El Modo Discreto se aplica sin recargar"
+  },
+  "cl_7_2_3_discreet_live_desc": {
+    "message": "Se arregló que encender o apagar el Modo Discreto no se notara hasta recargar la página."
+  },
+  "cl_7_2_3_sx_preview_title": {
+    "message": "Ejecutar Map/Reduce y Scheduled, con su animación"
+  },
+  "cl_7_2_3_sx_preview_desc": {
+    "message": "Se agregó la animación de Ejecutar Map/Reduce y Scheduled al asistente de bienvenida y al popup."
   },
   "cl_ver_7_2_2": {
     "message": "v7.2.2"
