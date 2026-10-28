@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "NetSuite Full Tools",
-    "version": "7.3.0",
+    "version": "7.3.1",
     "description": "__MSG_extDescription__",
     "default_locale": "en",
     "icons": {

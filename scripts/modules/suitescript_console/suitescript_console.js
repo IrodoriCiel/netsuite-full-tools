@@ -731,7 +731,8 @@
         const theme = _nsftResolveTheme();
         const m = document.getElementById('nsft-ssc-modal');
         if (m) m.setAttribute('data-theme', theme);
-        if (document.body) document.body.setAttribute('data-nsft-ssc-theme', theme);
+        const advLado = document.documentElement.getAttribute('data-nsft-adv-code-theme');
+        if (document.body) document.body.setAttribute('data-nsft-ssc-theme', advLado || theme);
     }
     chrome.storage.local.get({ [NSFT_THEME_KEY]: 'light' }, (items) => {
         _nsftTheme = items[NSFT_THEME_KEY] || 'light';

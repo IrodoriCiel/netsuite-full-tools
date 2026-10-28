@@ -188,7 +188,8 @@ html.nsft-adv-full .nsft-adv-editor {
     pointer-events: none;
 }
 
-.nsft-adv-btn:hover {
+.nsft-adv-btn:hover,
+.nsft-adv-btn.is-open {
     background: var(--nsft-surface-0, #ffffff);
     border-color: var(--nsft-border, #e5e7eb);
     color: var(--nsft-text-1, #111827);
@@ -1229,6 +1230,7 @@ html.nsft-adv-oscuro.nsft-adv-full::before {
 .nsft-adv-editor[data-theme="dark"] .nsft-adv-path-file,
 
 .nsft-adv-editor[data-theme="dark"] .nsft-adv-btn:hover,
+.nsft-adv-editor[data-theme="dark"] .nsft-adv-btn.is-open,
 .nsft-adv-editor[data-theme="dark"] .nsft-adv-node:hover,
 .nsft-adv-editor[data-theme="dark"] .nsft-adv-crumb:hover,
 .nsft-adv-editor[data-theme="dark"] .nsft-adv-find-btn:hover,
@@ -1361,17 +1363,17 @@ html.nsft-adv-oscuro.nsft-adv-full::before {
     color: #E6EBF2;
 }
 
-.nsft-adv-editor[data-theme="dark"] .nsft-adv-host .CodeMirror {
+:where(.nsft-adv-editor[data-theme="dark"]) .nsft-adv-host .CodeMirror {
     color: #E6EBF2;
     background: var(--nsft-dk-surface, #141519);
 }
 
-.nsft-adv-editor[data-theme="dark"] .nsft-adv-host .CodeMirror-gutters {
+:where(.nsft-adv-editor[data-theme="dark"]) .nsft-adv-host .CodeMirror-gutters {
     background: var(--nsft-dk-panel, #111215);
     border-right-color: var(--nsft-dk-border, #282A30);
 }
 
-.nsft-adv-editor[data-theme="dark"] .nsft-adv-host .CodeMirror-linenumber { color: #6E7889; }
+:where(.nsft-adv-editor[data-theme="dark"]) .nsft-adv-host .CodeMirror-linenumber { color: #6E7889; }
 
 .nsft-adv-editor[data-theme="dark"] .nsft-adv-line-error {
     background: rgba(240, 112, 138, 0.16);
@@ -1951,6 +1953,24 @@ html.nsft-adv-full .nsft-ai-overlay,
 html.nsft-adv-full .nsft-ai-floatwrap,
 html.nsft-adv-full .CodeMirror-hints {
     z-index: 2147483006 !important;
+}
+
+html.nsft-adv-full.nsft-adv-pistas .CodeMirror-hints {
+    background: var(--nsft-adv-hint-bg) !important;
+    border-color: var(--nsft-adv-hint-border) !important;
+}
+
+html.nsft-adv-full.nsft-adv-pistas .CodeMirror-hint:not(.CodeMirror-hint-active):hover {
+    background: var(--nsft-adv-hint-hover) !important;
+}
+
+html.nsft-adv-full.nsft-adv-pistas .CodeMirror-hint:not(.CodeMirror-hint-active) .nsft-ssc-hint-id {
+    color: var(--nsft-adv-hint-fg, inherit) !important;
+}
+
+html.nsft-adv-full.nsft-adv-pistas .CodeMirror-hints {
+    scrollbar-width: thin;
+    scrollbar-color: var(--nsft-adv-hint-thumb) var(--nsft-adv-hint-bg);
 }
 
 

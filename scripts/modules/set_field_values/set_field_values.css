@@ -1764,6 +1764,21 @@ mark.nsft-sfv-list-hl {
     cursor: pointer;
 }
 
+.nsft-sfv-chip-ext {
+    display: inline-flex;
+    margin-left: 4px;
+    vertical-align: -1px;
+}
+
+.nsft-sfv-chip-ext svg {
+    width: 10px;
+    height: 10px;
+}
+
+.nsft-sfv-chip.is-link:hover .nsft-sfv-chip-ext {
+    text-decoration: none;
+}
+
 .nsft-sfv-chip.is-link:hover {
     background: var(--nsft-sfv-accent);
     border-color: var(--nsft-sfv-accent);

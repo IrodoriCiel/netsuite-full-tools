@@ -146,6 +146,7 @@
     }
 
     function oscuroAhora() {
+        if (_temaPrevio !== null) return _temaPrevio === 'dark';
         return document.documentElement.getAttribute('data-nsft-theme') === 'dark';
     }
 
@@ -177,14 +178,40 @@
 
 
     let _temaPrevio = null;
+    let _pistasPrevio = null;
+
+    function sellaPistas(lado) {
+        try {
+            const raiz = document.documentElement;
+            raiz.setAttribute('data-nsft-adv-code-theme', lado);
+            const cuerpo = document.body;
+            if (!cuerpo) return;
+            if (_pistasPrevio === null) _pistasPrevio = cuerpo.getAttribute('data-nsft-ssc-theme') || '';
+            cuerpo.setAttribute('data-nsft-ssc-theme', lado);
+        } catch (e) { }
+    }
+
+    function sueltaPistas() {
+        try {
+            document.documentElement.removeAttribute('data-nsft-adv-code-theme');
+            if (_pistasPrevio !== null && document.body) {
+                if (_pistasPrevio) document.body.setAttribute('data-nsft-ssc-theme', _pistasPrevio);
+                else document.body.removeAttribute('data-nsft-ssc-theme');
+            }
+            _pistasPrevio = null;
+            sueltaTinte();
+        } catch (e) { }
+    }
 
     function sellaTema(nombre) {
         try {
             const raiz = document.documentElement;
+            const lado = esTemaOscuro(nombre) ? 'dark' : 'light';
             if (_temaPrevio === null) _temaPrevio = raiz.getAttribute('data-nsft-theme') || '';
-            raiz.setAttribute('data-nsft-theme', esTemaOscuro(nombre) ? 'dark' : 'light');
+            raiz.setAttribute('data-nsft-theme', lado);
             raiz.classList.add('nsft-editor-themed');
             _marcaEditor = true;
+            sellaPistas(lado);
         } catch (e) { }
     }
 
@@ -196,6 +223,7 @@
                 else raiz.removeAttribute('data-nsft-theme');
                 _temaPrevio = null;
             }
+            sueltaPistas();
         } catch (e) { }
     }
 
@@ -227,6 +255,7 @@
     const MARCO_MAX = 4;
 
     function recuerdaMarco(nombre, vals) {
+        if (_previa !== null) return;
         try {
             chrome.storage.local.get({ [MARCO_KEY]: {} }, (it) => {
                 const m = (it && it[MARCO_KEY]) || {};
@@ -294,6 +323,7 @@
 
         const editor = _caja.querySelector('.CodeMirror, .cm-editor');
         const fondo = rgbDe(editor, 'backgroundColor');
+        tintaPistas(fondo, rgbDe(editor, 'color'), esTemaOscuro(nombre));
         if (!fondo) return;
 
         if (esTemaOscuro(nombre)) {
@@ -316,6 +346,28 @@
         est.setProperty('--nsft-border', oscurece(fondo, 0.14));
         est.setProperty(MARCO_GUIA, GUIA_CLARO);
         recuerdaMarco(nombre, leeVars(est, MARCO_CLARO.concat([MARCO_GUIA])));
+    }
+
+    const PISTAS_VARS = ['--nsft-adv-hint-bg', '--nsft-adv-hint-border', '--nsft-adv-hint-hover',
+        '--nsft-adv-hint-thumb', '--nsft-adv-hint-fg'];
+
+    function tintaPistas(fondo, texto, oscuro) {
+        const raiz = document.documentElement;
+        if (!fondo) { sueltaTinte(); return; }
+        const est = raiz.style;
+        est.setProperty('--nsft-adv-hint-bg', mezcla(fondo, 0, 0));
+        est.setProperty('--nsft-adv-hint-border', oscuro ? aclara(fondo, 0.17) : oscurece(fondo, 0.14));
+        est.setProperty('--nsft-adv-hint-hover', oscuro ? aclara(fondo, 0.10) : oscurece(fondo, 0.07));
+        est.setProperty('--nsft-adv-hint-thumb', oscuro ? aclara(fondo, 0.27) : oscurece(fondo, 0.22));
+        if (texto) est.setProperty('--nsft-adv-hint-fg', mezcla(texto, 0, 0));
+        else est.removeProperty('--nsft-adv-hint-fg');
+        raiz.classList.add('nsft-adv-pistas');
+    }
+
+    function sueltaTinte() {
+        const raiz = document.documentElement;
+        raiz.classList.remove('nsft-adv-pistas');
+        PISTAS_VARS.forEach((v) => raiz.style.removeProperty(v));
     }
 
     function leeVars(est, nombres) {
@@ -378,7 +430,15 @@
         mas: 'M12 5v14M5 12h14',
         ajusta: 'M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5',
         ficha: 'M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5zM7 9.5h4M7 13h10M7 16h6',
-        tree: 'M4 5h6l2 2h8v12H4zM4 10h16'
+        tree: 'M4 5h6l2 2h8v12H4zM4 10h16',
+        ajustes: 'M15 12a3 3 0 1 1-6 0 3 3 0 1 1 6 0'
+            + 'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33'
+            + ' 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33'
+            + 'l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4'
+            + 'h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6'
+            + 'a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06'
+            + 'a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4'
+            + 'h-.09a1.65 1.65 0 0 0-1.51 1z'
     };
 
     function toast(msg) {
@@ -549,6 +609,7 @@
         cablearBuscar(caja);
         cablearRapido(caja);
         cablearMenus(caja);
+        cablearAjustes(caja);
         pintaColorEntorno();
         cablearArbol(caja);
         pintaCabeceraArbol();
@@ -593,7 +654,11 @@
                 chrome.storage.local.get({
                     advancedEditorTheme: 'atom-one-light',
                     advancedEditorThemeOverridden: false
-                }, (it) => aplicaTema(temaGuardado(it)));
+                }, (it) => {
+                    _prefs.advancedEditorTheme = it.advancedEditorTheme;
+                    _prefs.advancedEditorThemeOverridden = it.advancedEditorThemeOverridden;
+                    aplicaTema(temaGuardado(it));
+                });
                 return;
             }
             if (ch.advancedEditorRuler) {
@@ -602,8 +667,12 @@
                 return;
             }
             if (!ch.nsftTheme) return;
-            chrome.storage.local.get({ advancedEditorThemeOverridden: false }, (it) => {
-                if (it.advancedEditorThemeOverridden) return;
+            if (_temaPrevio !== null) _temaPrevio = ch.nsftTheme.newValue === 'dark' ? 'dark' : 'light';
+            chrome.storage.local.get({
+                advancedEditorTheme: 'atom-one-light',
+                advancedEditorThemeOverridden: false
+            }, (it) => {
+                if (it.advancedEditorThemeOverridden) { sellaTema(temaGuardado(it)); return; }
                 aplicaTema(ch.nsftTheme.newValue === 'dark' ? 'atom-one-dark' : 'atom-one-light');
             });
         });
@@ -715,6 +784,58 @@
     }
 
 
+    const TEMAS = [
+        ['atom-one-light', 'Atom One Light'], ['atom-one-dark', 'Atom One Dark'],
+        ['material-darker', 'Material Darker'], ['dracula', 'Dracula'], ['monokai', 'Monokai'],
+        ['nord', 'Nord'], ['darcula', 'Darcula'], ['cobalt', 'Cobalt'], ['night', 'Night'],
+        ['synthwave-84', 'Synthwave ’84'], ['eclipse', 'Eclipse'], ['idea', 'IDEA'], ['neo', 'Neo'],
+        ['solarized dark', 'Solarized Dark'], ['solarized light', 'Solarized Light']
+    ];
+
+    let _previa = null;
+
+    function previaTema(nombre) {
+        if (!nombre || nombre === _previa) return;
+        _previa = nombre;
+        aplicaTema(nombre);
+    }
+
+    function quitaPrevia() {
+        if (_previa === null) return;
+        _previa = null;
+        aplicaTema(temaGuardado(_prefs));
+    }
+
+    function menuAjustes() {
+        const manual = () => !!_prefs.advancedEditorThemeOverridden;
+        const auto = () => (oscuroAhora() ? 'atom-one-dark' : 'atom-one-light');
+        return { id: 'ajustes', items: [
+            { titulo: i18n('adv_tema_titulo', 'Editor theme') },
+            { et: i18n('themeAuto', 'Automatic (follows dark mode)'),
+              marca: () => !manual(), previa: () => previaTema(auto()), fn: () => eligeTema(null) },
+            { sep: true }
+        ].concat(TEMAS.map(([v, et]) => ({
+            et, marca: () => manual() && _prefs.advancedEditorTheme === v,
+            previa: () => previaTema(v), fn: () => eligeTema(v)
+        }))) };
+    }
+
+    function eligeTema(nombre) {
+        try {
+            if (nombre) {
+                chrome.storage.local.set({ advancedEditorTheme: nombre, advancedEditorThemeOverridden: true });
+                return;
+            }
+            chrome.storage.local.get({ nsftTheme: 'light' }, (it) => {
+                chrome.storage.local.set({
+                    advancedEditorTheme: it.nsftTheme === 'dark' ? 'atom-one-dark' : 'atom-one-light',
+                    advancedEditorThemeOverridden: false
+                });
+            });
+        } catch (e) { }
+    }
+
+
     const PREF_COLOR_ENV = { PRD: 'envBadgeColorPrd', SB: 'envBadgeColorSb', RP: 'envBadgeColorRp' };
 
     function entornoActual() {
@@ -785,9 +906,10 @@
     function cierraMenu() {
         if (!_menuAbierto || !_caja) return;
         _menuAbierto = null;
+        quitaPrevia();
         const v = _caja.querySelector('.nsft-adv-menu-pop');
         if (v) v.remove();
-        _caja.querySelectorAll('.nsft-adv-menu-t').forEach((b) => {
+        _caja.querySelectorAll('.nsft-adv-menu-t, #nsft-adv-ajustes').forEach((b) => {
             b.classList.remove('is-open');
             b.setAttribute('aria-expanded', 'false');
         });
@@ -846,17 +968,38 @@
                 k.textContent = tecla;
                 b.appendChild(k);
             }
+            if (typeof it.previa === 'function') {
+                b.addEventListener('mouseenter', () => it.previa());
+                b.addEventListener('focus', () => it.previa());
+            }
             b.addEventListener('click', (ev) => {
                 ev.stopPropagation();
+                if (typeof it.previa === 'function') _previa = null;
                 cierraMenu();
                 try { it.fn(); } catch (e) { }
             });
             pop.appendChild(b);
         });
 
+        pop.addEventListener('mouseleave', () => quitaPrevia());
         pop.style.left = (boton.offsetLeft) + 'px';
         pop.style.top = (boton.offsetTop + boton.offsetHeight) + 'px';
         _caja.appendChild(pop);
+        if (pop.offsetLeft + pop.offsetWidth > _caja.clientWidth - 8) {
+            pop.style.left = Math.max(8, boton.offsetLeft + boton.offsetWidth - pop.offsetWidth) + 'px';
+        }
+    }
+
+    function cablearAjustes(caja) {
+        const b = caja.querySelector('#nsft-adv-ajustes');
+        if (!b) return;
+        b.setAttribute('aria-haspopup', 'true');
+        b.setAttribute('aria-expanded', 'false');
+        b.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            if (_menuAbierto === 'ajustes') { cierraMenu(); return; }
+            abreMenu(b, menuAjustes());
+        });
     }
 
     function plantilla(nombre) {
@@ -878,6 +1021,8 @@
                 + chapaEntorno()
                 + menuBarra()
                 + '<span class="nsft-adv-spacer"></span>'
+                + btn('nsft-adv-ajustes', ICO.ajustes, i18n('adv_ajustes_title', 'Editor settings'))
+                + '<span class="nsft-adv-sep"></span>'
                 + '<button type="button" class="nsft-adv-pastilla" id="nsft-adv-diff-btn" title="'
                     + escapeHtml(i18n('adv_diff_title', 'Compare with the saved version')) + '">'
                     + svg(ICO.comparar)

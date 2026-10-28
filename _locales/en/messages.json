@@ -4202,6 +4202,12 @@
   "adv_open_link": {
     "message": "Open in Advanced Editor"
   },
+  "adv_ajustes_title": {
+    "message": "Editor settings"
+  },
+  "adv_tema_titulo": {
+    "message": "Editor theme"
+  },
   "adv_ghost_title": {
     "message": "AI suggestions while you type"
   },
@@ -12415,25 +12421,10 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "* **Deleted Records**, in Tools: who deleted a record, when and from where."
+    "message": "The **Advanced Editor** has a gear in its bar to change the theme, and you see it before you pick it."
   },
   "un_hl_2": {
-    "message": "**Live Mode** keeps lists and sublists up to date on their own, without reloading the page."
-  },
-  "un_hl_3": {
-    "message": "Sublist filters and the Execution Log search now look through **every page**, and the whole log gets exported."
-  },
-  "un_hl_4": {
-    "message": "Scripted Records tells you whether each script **runs for you**, and if not, why."
-  },
-  "un_hl_5": {
-    "message": "Uninstalling a bundle asks you to type the confirmation word, as deleting a record does."
-  },
-  "un_hl_6": {
-    "message": "Also: clear a column sort, a page’s generic URL, saved searches from Recent Records and controls that match Redwood."
-  },
-  "un_hl_7": {
-    "message": "Fixes in Delete, Scripted Records, Discreet Mode and the new login. More details in the changelog."
+    "message": "Fixes in the Advanced Editor’s background and suggestions, and in the type of Document fields in Field Info. More details in the changelog."
   },
   "un_thanks": {
     "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
@@ -12742,6 +12733,42 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Fixed the labels in the field info panel always coming out in Spanish."
+  },
+  "cl_ver_7_3_1": {
+    "message": "v7.3.1"
+  },
+  "cl_date_7_3_1": {
+    "message": "2026-10-28"
+  },
+  "cl_7_3_1_adv_theme_title": {
+    "message": "Advanced Editor theme from the editor itself"
+  },
+  "cl_7_3_1_adv_theme_desc": {
+    "message": "Added a button to the Advanced Editor bar to change the code theme, previewing each one as you hover it."
+  },
+  "cl_7_3_1_adv_bg_title": {
+    "message": "Advanced Editor background follows the theme"
+  },
+  "cl_7_3_1_adv_bg_desc": {
+    "message": "Fixed several dark Advanced Editor themes changing the text colour but not the background."
+  },
+  "cl_7_3_1_adv_hints_title": {
+    "message": "Advanced Editor suggestions follow its theme"
+  },
+  "cl_7_3_1_adv_hints_desc": {
+    "message": "Fixed the Advanced Editor’s suggestion list not taking the colours of the theme chosen for the editor."
+  },
+  "cl_7_3_1_sfv_doc_title": {
+    "message": "Document fields show their type"
+  },
+  "cl_7_3_1_sfv_doc_desc": {
+    "message": "Fixed Field Info calling custom Document fields List/Record."
+  },
+  "cl_7_3_1_sfv_chip_title": {
+    "message": "Field chip shows it opens another tab"
+  },
+  "cl_7_3_1_sfv_chip_desc": {
+    "message": "Added an arrow to the custom field chip to show that its setup opens in another tab."
   },
   "cl_ver_7_3_0": {
     "message": "v7.3.0"

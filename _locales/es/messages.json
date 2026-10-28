@@ -4202,6 +4202,12 @@
   "adv_open_link": {
     "message": "Abrir en Editor Avanzado"
   },
+  "adv_ajustes_title": {
+    "message": "Ajustes del editor"
+  },
+  "adv_tema_titulo": {
+    "message": "Tema del editor"
+  },
   "adv_ghost_title": {
     "message": "Sugerencias con IA mientras escribes"
   },
@@ -12415,25 +12421,10 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "* **Registros Eliminados**, en Herramientas: quién borró un registro, cuándo y desde dónde."
+    "message": "El **Editor Avanzado** trae un engrane en su barra para cambiar el tema, y lo ves antes de elegirlo."
   },
   "un_hl_2": {
-    "message": "El **Modo en Vivo** pone al día solas las listas y las sublistas, sin recargar la página."
-  },
-  "un_hl_3": {
-    "message": "Los filtros de sublista y el buscador del Execution Log buscan en **todas las páginas**, y el log se exporta entero."
-  },
-  "un_hl_4": {
-    "message": "Scripts del Registro te dice si cada script **se ejecuta para ti**, y si no, por qué."
-  },
-  "un_hl_5": {
-    "message": "Desinstalar un bundle te pide escribir la palabra de confirmación, como al eliminar un registro."
-  },
-  "un_hl_6": {
-    "message": "Además: quitar el orden de una columna, la URL genérica de una página, búsquedas desde Recientes y los controles a tono con Redwood."
-  },
-  "un_hl_7": {
-    "message": "Arreglados fallos de Eliminar, Scripts del Registro, el Modo Discreto y el nuevo login. Más detalles en el changelog."
+    "message": "Arreglados el fondo y las sugerencias del Editor Avanzado, y el tipo de los campos Documento en Información de Campos. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -12739,6 +12730,42 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
+  },
+  "cl_ver_7_3_1": {
+    "message": "v7.3.1"
+  },
+  "cl_date_7_3_1": {
+    "message": "2026-10-28"
+  },
+  "cl_7_3_1_adv_theme_title": {
+    "message": "Tema del Editor Avanzado desde el propio editor"
+  },
+  "cl_7_3_1_adv_theme_desc": {
+    "message": "Se agregó un botón en la barra del Editor Avanzado para cambiar el tema del código, con vista previa al pasar el ratón."
+  },
+  "cl_7_3_1_adv_bg_title": {
+    "message": "El fondo del Editor Avanzado sigue el tema"
+  },
+  "cl_7_3_1_adv_bg_desc": {
+    "message": "Se arregló que varios temas oscuros del Editor Avanzado cambiaran el color del texto pero no el del fondo."
+  },
+  "cl_7_3_1_adv_hints_title": {
+    "message": "Las sugerencias del Editor Avanzado siguen su tema"
+  },
+  "cl_7_3_1_adv_hints_desc": {
+    "message": "Se arregló que la lista de sugerencias del Editor Avanzado no tomara los colores del tema elegido para el editor."
+  },
+  "cl_7_3_1_sfv_doc_title": {
+    "message": "Los campos Documento, con su tipo"
+  },
+  "cl_7_3_1_sfv_doc_desc": {
+    "message": "Se arregló que Información de Campos llamara Lista/Registro a los campos personalizados de tipo Documento."
+  },
+  "cl_7_3_1_sfv_chip_title": {
+    "message": "La chapa del campo avisa de que abre otra pestaña"
+  },
+  "cl_7_3_1_sfv_chip_desc": {
+    "message": "Se agregó una flecha a la chapa de campo personalizado para indicar que su configuración se abre en otra pestaña."
   },
   "cl_ver_7_3_0": {
     "message": "v7.3.0"

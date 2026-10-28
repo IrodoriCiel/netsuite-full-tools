@@ -1376,13 +1376,13 @@
 
         function fillSourceSlot(fieldName) {
             const fila = document.getElementById(NSFT.SOURCE_ROW);
-            if (!fila) return;
+            if (!fila && !document.getElementById(NSFT.TYPE_SLOT)) return;
 
             if (!/^cust/i.test(String(fieldName || ""))) return;
 
             const clave = String(fieldName).toUpperCase();
             if (Object.prototype.hasOwnProperty.call(_listaFuente, clave)) {
-                pintarListaFuente(fieldName, _listaFuente[clave]);
+                pintarDefinicion(fieldName, _listaFuente[clave]);
                 return;
             }
 
@@ -1390,8 +1390,8 @@
             if (!T) return;
 
             const where = `FROM customfield WHERE UPPER(scriptid) = UPPER(${T.lit(fieldName)})`;
-            const rica = `SELECT fieldvaluetyperecord, BUILTIN.DF(fieldvaluetyperecord) AS nombre ${where}`;
-            const simple = `SELECT fieldvaluetyperecord ${where}`;
+            const rica = `SELECT fieldvaluetype, fieldvaluetyperecord, BUILTIN.DF(fieldvaluetyperecord) AS nombre ${where}`;
+            const simple = `SELECT fieldvaluetype, fieldvaluetyperecord ${where}`;
 
             T.run({
                 rest: rica, sql: rica, limit: 5,
@@ -1399,10 +1399,36 @@
             }, function (err, rows) {
                 if (err) return;
                 const r = (rows && rows[0]) || null;
-                const valor = r ? (r.nombre || r.fieldvaluetyperecord || null) : null;
-                _listaFuente[clave] = valor;
-                pintarListaFuente(fieldName, valor);
+                const def = {
+                    lista: r ? (r.nombre || r.fieldvaluetyperecord || null) : null,
+                    tipo: r ? (r.fieldvaluetype || null) : null
+                };
+                _listaFuente[clave] = def;
+                pintarDefinicion(fieldName, def);
             });
+        }
+
+        function pintarDefinicion(fieldName, def) {
+            if (!def) return;
+            pintarTipoDefinido(fieldName, def);
+            if (document.getElementById(NSFT.SOURCE_ROW)) pintarListaFuente(fieldName, def.lista);
+        }
+
+        function pintarTipoDefinido(fieldName, def) {
+            if (!_lastRenderCtx || _lastRenderCtx.fieldName !== fieldName) return;
+            const hueco = document.getElementById(NSFT.TYPE_SLOT);
+            const bruto = def && def.tipo;
+            if (!hueco || !bruto) return;
+            const fam = (v) => FAMILIA_TIPO[String(v || "").toLowerCase().replace(/[^a-z0-9]/g, "")] || "";
+
+            let nombre = "";
+            if (fam(bruto)) {
+                nombre = nombreDelTipo(bruto);
+            } else {
+                const local = fam(readFieldType(fieldName));
+                if ((local === "select" || local === "multiselect") && !def.lista) nombre = String(bruto);
+            }
+            if (nombre && hueco.textContent !== nombre) hueco.textContent = nombre;
         }
 
         function pintarListaFuente(fieldName, valor) {
@@ -2393,8 +2419,8 @@
             date: "date",
             datetime: "datetime", datetimetz: "datetime",
             timeofday: "timeofday", time: "timeofday",
-            select: "select", list: "select",
-            multiselect: "multiselect",
+            select: "select", list: "select", listrecord: "select",
+            multiselect: "multiselect", multipleselect: "multiselect",
             text: "text", freeformtext: "text",
             textarea: "textarea",
             longtext: "longtext", clobtext: "longtext",
@@ -3770,6 +3796,19 @@
 
             const vale = !!url && ver("setFieldValuesShowEdit");
             chip.classList.toggle("is-link", vale);
+
+            let flecha = chip.querySelector(".nsft-sfv-chip-ext");
+            if (vale && !flecha) {
+                flecha = document.createElement("span");
+                flecha.className = "nsft-sfv-chip-ext";
+                flecha.setAttribute("aria-hidden", "true");
+                flecha.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"'
+                    + ' stroke-linecap="round" stroke-linejoin="round">'
+                    + '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>';
+                chip.appendChild(flecha);
+            } else if (!vale && flecha) {
+                flecha.remove();
+            }
 
             if (!vale) {
                 chip.removeAttribute("role");
