@@ -10,7 +10,6 @@
     };
 
     let started = false;
-    let discreet = false;
     let _diag = false;
     let _unsub = null;
     let renderedFor = null;
@@ -21,21 +20,17 @@
     }
     if (!isApplicablePage()) return;
 
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false, nsftSelectorDiagnostics: false }, (settings) => {
-        discreet = !!settings.enableDiscreetMode;
+    chrome.storage.local.get({ [STORAGE_KEY]: true, nsftSelectorDiagnostics: false }, (settings) => {
         _diag = !!settings.nsftSelectorDiagnostics;
-        if (settings[STORAGE_KEY] && !discreet) onReady(start);
+        if (settings[STORAGE_KEY]) onReady(start);
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
         if (changes.nsftSelectorDiagnostics) _diag = !!changes.nsftSelectorDiagnostics.newValue;
-        if (changes.enableDiscreetMode) discreet = !!changes.enableDiscreetMode.newValue;
-        if (changes[STORAGE_KEY] || changes.enableDiscreetMode) {
-            chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (s) => {
-                if (s[STORAGE_KEY] && !s.enableDiscreetMode) onReady(start);
-                else teardown();
-            });
+        if (changes[STORAGE_KEY]) {
+            if (changes[STORAGE_KEY].newValue !== false) onReady(start);
+            else teardown();
         }
     });
 

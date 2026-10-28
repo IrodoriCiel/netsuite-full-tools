@@ -25,6 +25,19 @@ html[data-nsft-theme="dark"] .nsft-codecard {
     --cc-warn-bg: rgba(180, 35, 24, 0.14);
 }
 
+html[data-nsft-redwood]:not([data-nsft-theme="dark"]) #div__body .nsft-codecard {
+    --cc-card-bg: #FFFFFF;
+    --cc-card-bd: rgba(22, 21, 19, 0.12);
+    --cc-bar-bg: #FBF9F8;
+    --cc-bar-bd: rgba(22, 21, 19, 0.12);
+    --cc-btn-fg: rgba(22, 21, 19, 0.7);
+    --cc-btn-hover-bg: rgba(22, 21, 19, 0.06);
+    --cc-btn-hover-fg: #161513;
+    font-family: inherit;
+    border-radius: 4px;
+    box-shadow: none;
+}
+
 .nsft-codecard {
     position: relative;
     background: var(--cc-card-bg);

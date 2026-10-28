@@ -3,22 +3,6 @@
     font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
 }
 
-.nsft-sf-bar.nsft-sf-strip {
-    display: flex !important;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 10px;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    max-width: 100%;
-    margin: 6px 0 0 !important;
-    padding: 8px 12px !important;
-    background: color-mix(in srgb, var(--nsft-ns-accent, #607799) 16%, white) !important;
-    border: 1px solid color-mix(in srgb, var(--nsft-ns-accent, #607799) 26%, white) !important;
-    border-radius: 8px 8px 0 0 !important;
-    box-shadow: none !important;
-}
-
 .nsft-sf-cell {
     vertical-align: middle !important;
     padding: 0 0 0 6px !important;
@@ -131,11 +115,6 @@
 
 .nsft-sf-total { color: #8792a3 !important; }
 
-.nsft-sf-spacer {
-    flex: 1 1 auto;
-    min-width: 8px;
-}
-
 tr.nsft-sf-hidden {
     display: none !important;
 }
@@ -146,3 +125,25 @@ mark.nsft-sf-hl {
     padding: 0 !important;
     border-radius: 2px;
 }
+
+html[data-nsft-redwood] .nsft-sf-bar { font-family: inherit !important; }
+html[data-nsft-redwood] .nsft-sf-input { color: #161513 !important; }
+html[data-nsft-redwood] .nsft-sf-input::placeholder { color: rgba(22, 21, 19, 0.5) !important; }
+
+html[data-nsft-redwood] .nsft-sf-clear {
+    background: rgba(22, 21, 19, 0.06) !important;
+    color: rgba(22, 21, 19, 0.7) !important;
+}
+
+html[data-nsft-redwood] .nsft-sf-clear:hover {
+    background: rgba(22, 21, 19, 0.12) !important;
+    color: #161513 !important;
+}
+
+html[data-nsft-redwood] .nsft-sf-count {
+    font-family: inherit !important;
+    font-variant-numeric: tabular-nums;
+    color: #161513 !important;
+}
+
+html[data-nsft-redwood] .nsft-sf-total { color: rgba(22, 21, 19, 0.7) !important; }

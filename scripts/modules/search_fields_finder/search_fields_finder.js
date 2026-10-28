@@ -1,20 +1,16 @@
 (function () {
     'use strict';
     const STORAGE_KEY = 'enableSearchFieldsFinder';
-    const DISCREET_KEY = 'enableDiscreetMode';
     const SETTINGS_INPUT_ID = 'nsft-field-finder-settings';
 
 
     let _enabled = false;
-    let _discreet = false;
     let _started = false;
 
     chrome.storage.local.get({
-        [STORAGE_KEY]: true,
-        [DISCREET_KEY]: false
+        [STORAGE_KEY]: true
     }, (items) => {
         _enabled = items[STORAGE_KEY] !== false;
-        _discreet = !!items[DISCREET_KEY];
         attachStorageListener();
         evaluate();
     });
@@ -24,10 +20,6 @@
             if (area !== 'local') return;
             if (changes[STORAGE_KEY]) {
                 _enabled = changes[STORAGE_KEY].newValue !== false;
-                evaluate();
-            }
-            if (changes[DISCREET_KEY]) {
-                _discreet = !!changes[DISCREET_KEY].newValue;
                 evaluate();
             }
         });
@@ -56,7 +48,7 @@
     }
 
     function evaluate() {
-        const shouldRun = _enabled && !_discreet;
+        const shouldRun = _enabled;
         if (shouldRun && !_started) start();
         else if (!shouldRun && _started) teardown();
     }

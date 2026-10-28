@@ -29,7 +29,7 @@
     let _saeEnabled = false, _saeMode = 'button';
     let _rtrailEnabled = false;
 
-    const ITEM_KEYS = ['recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'];
+    const ITEM_KEYS = ['recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowGenericUrl', 'recordOptionsMenuShowMenuPath', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'];
     const _items = {};
     function ver(k) { return _items[k] !== false; }
 
@@ -47,6 +47,8 @@
         recordOptionsMenuShowAddColumn: true,
         recordOptionsMenuShowDependents: true,
         recordOptionsMenuShowCopyUrl: true,
+        recordOptionsMenuShowGenericUrl: true,
+        recordOptionsMenuShowMenuPath: true,
         recordOptionsMenuShowOpenInEnv: true,
         recordOptionsMenuShowXml: true,
         recordOptionsMenuShowRunSuiteQL: true,
@@ -80,7 +82,7 @@
         'enableScriptExecute', 'scriptExecuteMode',
         'enableRecordTrail',
         'enableSuiteQLRunner', 'enableSuiteScriptConsole', 'enableOpenInOtherEnv',
-        'recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'
+        'recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowGenericUrl', 'recordOptionsMenuShowMenuPath', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'
     ];
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -143,6 +145,8 @@
             };
             window.addEventListener('nsft-roptions-copy-url', _copyHandler);
         }
+        window.addEventListener('nsft-roptions-copy-generic', copiaGenerica);
+        window.addEventListener('nsft-roptions-copy-menupath', copiaRutaMenu);
 
         addMenu();
         observeDomChanges();
@@ -152,6 +156,8 @@
         _enabled = false;
         if (_unsubscribe) { try { _unsubscribe(); } catch (e) { } _unsubscribe = null; }
         if (_copyHandler) { window.removeEventListener('nsft-roptions-copy-url', _copyHandler); _copyHandler = null; }
+        window.removeEventListener('nsft-roptions-copy-generic', copiaGenerica);
+        window.removeEventListener('nsft-roptions-copy-menupath', copiaRutaMenu);
         const existing = document.getElementById(MENU_ID);
         if (existing) existing.remove();
         _menuCell = null;
@@ -278,6 +284,8 @@
         suitescript_console: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><rect x="3" y="4" width="18" height="16" rx="2"/><polyline points="7 9 10 12 7 15"/><line x1="13" y1="15" x2="17" y2="15"/></svg>`,
         open_in_env: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
         link: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+        globe: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+        menu_path: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 5 4.5 6 3 7"/><polyline points="3 11 4.5 12 3 13"/><polyline points="3 17 4.5 18 3 19"/></svg>`,
         save: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
         edit: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
         trash: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
@@ -411,6 +419,10 @@
 
         if (ver("recordOptionsMenuShowCopyUrl")) items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionCopyCleanUrl'), 'link',
             `window.dispatchEvent(new CustomEvent('nsft-roptions-copy-url')); return false;`));
+        if (ver("recordOptionsMenuShowGenericUrl")) items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionCopyGenericUrl'), 'globe',
+            `window.dispatchEvent(new CustomEvent('nsft-roptions-copy-generic')); return false;`));
+        if (ver("recordOptionsMenuShowMenuPath")) items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionCopyMenuPath'), 'menu_path',
+            `window.dispatchEvent(new CustomEvent('nsft-roptions-copy-menupath')); return false;`));
 
         if (_envEnabled) {
             if (ver("recordOptionsMenuShowOpenInEnv")) items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionOpenInEnv'), 'open_in_env',
@@ -425,6 +437,28 @@
         }
 
         return items.join('');
+    }
+
+    function copiar(texto, aviso) {
+        if (window.NSFT_Clipboard && window.NSFT_Clipboard.copy) {
+            window.NSFT_Clipboard.copy(texto, { toast: { message: aviso } });
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(texto);
+        }
+    }
+
+    function copiaGenerica() {
+        const PL = window.NSFT_PageLocation;
+        const url = PL ? PL.genericUrl() : buildCleanUrl().replace(window.location.host, 'system.netsuite.com');
+        copiar(url, chrome.i18n.getMessage('recordOptionCopyGenericUrl'));
+    }
+
+    async function copiaRutaMenu() {
+        const PL = window.NSFT_PageLocation;
+        const ruta = PL ? await PL.menuPath() : null;
+        if (ruta) { copiar(ruta, chrome.i18n.getMessage('recordOptionCopyMenuPath')); return; }
+        const msg = chrome.i18n.getMessage('ro_menu_path_none') || 'This page is not in the NetSuite menu';
+        if (window.NSFT_Clipboard && window.NSFT_Clipboard.showToast) window.NSFT_Clipboard.showToast(msg, { type: 'error' });
     }
 
     function buildCleanUrl() {

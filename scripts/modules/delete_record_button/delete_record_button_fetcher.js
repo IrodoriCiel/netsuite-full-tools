@@ -184,21 +184,26 @@
     }
 
     function lookupRecordType(setScriptable) {
-        const cacheKey = 'nsftRecType:' + location.pathname;
+        let recType = null;
+        try {
+            if (typeof nlapiGetRecordType === 'function') recType = nlapiGetRecordType();
+        } catch (e) { recType = null; }
+        if (recType) return recType;
+
+        let rectypeParam = '';
+        try { rectypeParam = new URLSearchParams(location.search).get('rectype') || ''; } catch (e) { }
+        const cacheKey = 'nsftRecType:' + location.pathname + '|' + rectypeParam;
         try {
             const cached = sessionStorage.getItem(cacheKey);
             if (cached) return cached;
         } catch (e) { }
 
-        let recType = nlapiGetRecordType();
-        if (!recType) {
-            if (typeof nsapiInitRecords === 'function') nsapiInitRecords();
-            if (typeof nsRecordTypes !== 'undefined') {
-                for (const key in nsRecordTypes) {
-                    if (nsRecordTypes[key].url == location.pathname) {
-                        recType = nsRecordTypes[key].id;
-                        if (setScriptable) nsRecordTypes[key].scriptable = true;
-                    }
+        if (typeof nsapiInitRecords === 'function') nsapiInitRecords();
+        if (typeof nsRecordTypes !== 'undefined') {
+            for (const key in nsRecordTypes) {
+                if (nsRecordTypes[key].url == location.pathname) {
+                    recType = nsRecordTypes[key].id;
+                    if (setScriptable) nsRecordTypes[key].scriptable = true;
                 }
             }
         }

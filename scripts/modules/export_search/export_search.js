@@ -11,7 +11,6 @@
     let fetcherState = 'none';
     let pendingInit = null;
     let _nsftTheme = 'light';
-    let _discreet = false;
     const WITH_LABELS_KEY = 'nsftExportSearchWithLabels';
     let _withLabels = false;
     const WITH_LOOP_KEY = 'nsftExportSearchWithLoop';
@@ -39,7 +38,6 @@
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
         exportSearchTheme: "atom-one-dark",
-        enableDiscreetMode: false,
         [WITH_LABELS_KEY]: false,
         [WITH_LOOP_KEY]: false
     }, (items) => {
@@ -47,7 +45,6 @@
 
         _withLabels = items[WITH_LABELS_KEY] === true;
         _withLoop = items[WITH_LOOP_KEY] === true;
-        _discreet = !!items.enableDiscreetMode;
         init(items);
     });
 
@@ -58,13 +55,6 @@
             if (area !== 'local') return;
             if (changes.exportSearchTheme) {
                 updateTheme(changes.exportSearchTheme.newValue || 'auto');
-            }
-            if (changes.enableDiscreetMode) {
-                _discreet = !!changes.enableDiscreetMode.newValue;
-                if (_discreet) {
-                    const modal = document.getElementById('nsft-export-search-modal');
-                    if (modal) modal.style.display = 'none';
-                }
             }
         });
 
@@ -84,7 +74,6 @@
         }
 
         window.addEventListener('nsft-show-export-search', () => {
-            if (_discreet) return;
             if (window.NSFT_ShortcutCoach) window.NSFT_ShortcutCoach.hint('export_search');
             const modal = document.getElementById('nsft-export-search-modal');
             if (!modal) {

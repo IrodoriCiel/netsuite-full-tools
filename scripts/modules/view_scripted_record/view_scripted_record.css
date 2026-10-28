@@ -618,6 +618,23 @@
     font-weight: 600;
 }
 
+.nsft-scripted-rec-table th,
+.nsft-scripted-rec-table td {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+.nsft-scripted-rec-table th { white-space: nowrap; }
+.nsft-scripted-rec-function-item { overflow-wrap: anywhere; }
+.nsft-sr-runs { width: 1%; }
+.nsft-sr-runs .nsft-scripted-rec-badge {
+    white-space: nowrap;
+    text-transform: none;
+}
+.nsft-sr-runs .nsft-scripted-rec-owner-inline {
+    min-width: 90px;
+    margin: 3px 0 0;
+}
+
 .nsft-scripted-rec-modal[data-theme="dark"] {
     background: var(--nsft-dk-panel);
     border-color: var(--nsft-dk-border);

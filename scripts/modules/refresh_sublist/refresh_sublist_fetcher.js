@@ -1,6 +1,9 @@
 (function () {
     'use strict';
 
+    if (window.__nsftRefreshSublistFetcher) return;
+    window.__nsftRefreshSublistFetcher = true;
+
     const PAGE_DEST = 'fetcher_refreshsublist';
     const REPLY_DEST = 'extension_refreshsublist';
     const STUB_TTL = 5000;

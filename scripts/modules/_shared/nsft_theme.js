@@ -56,9 +56,20 @@
         return true;
     }
 
+    function markRedwood() {
+        let doc = document;
+        try { if (window.top && window.top.document) doc = window.top.document; } catch (e) { }
+        const es = !!doc.querySelector('link[rel="stylesheet"][href*="/redwood/"]');
+        const root = document.documentElement;
+        if (es) root.setAttribute('data-nsft-redwood', '');
+        else root.removeAttribute('data-nsft-redwood');
+        return es;
+    }
+
     function scheduleSample() {
         let tries = 0;
         const tick = () => {
+            markRedwood();
             if (sampleAccent()) return;
             if (++tries >= 6) return;
             setTimeout(tick, 300 * tries);

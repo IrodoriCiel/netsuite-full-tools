@@ -59,6 +59,7 @@
     let hasAiAssistant = true;
     let hasGithubBackup = false;
     let hasScriptExecute = true;
+    let hasDeletedRecords = true;
     let hasAdvEditor = false;
 
     chrome.storage.local.get({
@@ -71,12 +72,14 @@
         enableAiAssistant: true,
         enableGithubBackup: false,
         enableScriptExecute: true,
+        enableDeletedRecords: true,
         enableAdvancedEditor: true
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
         hasAiAssistant = items.enableAiAssistant !== false;
         hasGithubBackup = items.enableGithubBackup === true;
         hasScriptExecute = items.enableScriptExecute !== false;
+        hasDeletedRecords = items.enableDeletedRecords !== false;
         hasAdvEditor = items.enableAdvancedEditor !== false && enPaginaDelEditor();
 
         if (items[SHORTCUT_KEY]) shortcut = items[SHORTCUT_KEY];
@@ -300,6 +303,32 @@
                 }
             },
             {
+                id: 'page:copygenericurl',
+                label: i18n('cmdp_act_page_copy_generic_url', 'Copy generic URL'),
+                description: i18n('cmdp_act_page_copy_generic_url_desc', 'No account number: opens this page in whichever account is signed in'),
+                category: T.catPage,
+                iconKey: 'page',
+                keywords: 'copy link generic system generica cualquier cuenta account compartir share documentar',
+                run: () => {
+                    const PL = window.NSFT_PageLocation;
+                    copyToClipboard(PL ? PL.genericUrl() : window.location.href.replace(window.location.host, 'system.netsuite.com'));
+                }
+            },
+            {
+                id: 'page:copymenupath',
+                label: i18n('cmdp_act_page_copy_menu_path', 'Copy menu path'),
+                description: i18n('cmdp_act_page_copy_menu_path_desc', 'How to reach this page from the NetSuite menu'),
+                category: T.catPage,
+                iconKey: 'page',
+                keywords: 'copy menu path ruta menu navegacion breadcrumb donde esta documentar',
+                run: async () => {
+                    const PL = window.NSFT_PageLocation;
+                    const ruta = PL ? await PL.menuPath() : null;
+                    if (ruta) copyToClipboard(ruta);
+                    else toast(i18n('ro_menu_path_none', 'This page is not in the NetSuite menu'), 'error');
+                }
+            },
+            {
                 id: 'page:reload',
                 label: i18n('cmdp_act_page_reload', 'Reload page'),
                 category: T.catPage,
@@ -494,6 +523,15 @@
                 iconKey: 'nsft',
                 keywords: 'ejecutar run execute map reduce mapreduce mr scheduled programado script despliegue deployment cola queue',
                 run: () => window.dispatchEvent(new CustomEvent('nsft-show-script-execute'))
+            }] : []),
+            ...(hasDeletedRecords ? [{
+                id: 'nsft:deleted-records',
+                label: i18n('cmdp_act_delrec', 'Who deleted this record?...'),
+                description: i18n('cmdp_act_delrec_desc', 'Search the NetSuite deleted records log by document, type or ID'),
+                category: T.catNsft,
+                iconKey: 'nsft',
+                keywords: 'eliminado eliminados borrado borrados borro quien deleted delete who audit papelera trash log registro',
+                run: () => window.dispatchEvent(new CustomEvent('nsft-show-deleted-records'))
             }] : []),
             {
                 id: 'nsft:findfield',

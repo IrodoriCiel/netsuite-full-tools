@@ -16,34 +16,52 @@ html.nsft-lsi-on.nsft-lsi-rp.nsft-lsi-has-env #environment::before {
 }
 
 html.nsft-lsi-on:is(.nsft-lsi-sandbox, .nsft-lsi-rp) .login-page-box #nsft-lsi-badge {
+    --nsft-lsi-pill-tint: rgba(245, 166, 92, 0.16);
+    --nsft-lsi-pill-line: rgba(245, 166, 92, 0.45);
+    --nsft-lsi-pill-text: #ffd2a1;
+    --nsft-lsi-pill-dot: #f5a65c;
+
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     box-sizing: border-box;
     width: 100%;
-    margin: 4px 0 18px 0;
-    padding: 8px 14px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0 0 20px 0;
+    padding: 9px 12px;
+    font-family: inherit;
     font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    line-height: 1.2;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #7c2d12;
-    background: #fed7aa;
-    border: 1px solid #fdba74;
-    border-left: 3px solid #c2410c;
-    border-radius: 6px;
+    color: var(--nsft-lsi-pill-text);
+    background: var(--nsft-lsi-pill-tint);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--nsft-lsi-pill-line);
+    border-radius: 999px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
     user-select: none;
     text-align: center;
     white-space: nowrap;
 }
 
+html.nsft-lsi-on:is(.nsft-lsi-sandbox, .nsft-lsi-rp) .login-page-box #nsft-lsi-badge::before {
+    content: "";
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--nsft-lsi-pill-dot);
+    box-shadow: 0 0 8px var(--nsft-lsi-pill-dot);
+}
+
 html.nsft-lsi-on.nsft-lsi-rp .login-page-box #nsft-lsi-badge {
-    color: #1e3a8a;
-    background: #dbeafe;
-    border-color: #93c5fd;
-    border-left: 3px solid #2563eb;
+    --nsft-lsi-pill-tint: rgba(96, 165, 250, 0.16);
+    --nsft-lsi-pill-line: rgba(96, 165, 250, 0.45);
+    --nsft-lsi-pill-text: #cfe3ff;
+    --nsft-lsi-pill-dot: #60a5fa;
 }
 
 html.nsft-lsi-on:is(.nsft-lsi-sandbox, .nsft-lsi-rp) body > #nsft-lsi-badge {

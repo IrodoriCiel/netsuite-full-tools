@@ -1,0 +1,14 @@
+.nsft-csort-item { vertical-align: middle; }
+
+.nsft-csort.nsft-tb-group { padding: 0 4px !important; }
+
+.nsft-csort-col {
+    font-weight: 400 !important;
+    color: var(--tb-text-3) !important;
+}
+
+.nsft-csort-td {
+    padding-left: 8px !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}

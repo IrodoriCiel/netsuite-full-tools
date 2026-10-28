@@ -5,7 +5,6 @@
     const QUICK_LINKS_KEY = 'quickSearchCreationLinks';
     const RECENT_KEY = 'nsftQscRecent';
     const TIMEOUT_KEY = 'quickSearchCreationTimeoutMs';
-    const DISCREET_KEY = 'enableDiscreetMode';
     const NSFT_THEME_KEY = 'nsftTheme';
     const DEFAULT_QUICK_LINKS = ['Customer', 'Item', 'Time', 'Transaction'];
     const RECENT_STORE_MAX = 12;
@@ -50,7 +49,6 @@
 
     let quickLinks = null;
     let enabled = false;
-    let discreet = false;
     let timeoutMs = DEFAULT_TIMEOUT_MS;
     let unsubscribeObserver = null;
     let observerTimeoutHandle = null;
@@ -63,7 +61,6 @@
     chrome.storage.local.get(
         {
             [STORAGE_KEY]: true,
-            [DISCREET_KEY]: false,
             [QUICK_LINKS_KEY]: null,
             [RECENT_KEY]: null,
             [TIMEOUT_KEY]: DEFAULT_TIMEOUT_MS,
@@ -71,7 +68,6 @@
         },
         (settings) => {
             enabled = settings[STORAGE_KEY] !== false;
-            discreet = !!settings[DISCREET_KEY];
             timeoutMs = clampTimeout(settings[TIMEOUT_KEY]);
             _theme = settings[NSFT_THEME_KEY] || 'light';
             quickLinks = (Array.isArray(settings[QUICK_LINKS_KEY]) && settings[QUICK_LINKS_KEY].length)
@@ -95,7 +91,7 @@
     }
 
     function evaluate() {
-        const shouldShow = enabled && !discreet && isInitialCreationScreen();
+        const shouldShow = enabled && isInitialCreationScreen();
         if (shouldShow) {
             if (!document.getElementById(IDS.PANEL)) waitForTabs();
         } else {
@@ -112,10 +108,6 @@
 
             if (changes[STORAGE_KEY]) {
                 enabled = changes[STORAGE_KEY].newValue !== false;
-                needsEval = true;
-            }
-            if (changes[DISCREET_KEY]) {
-                discreet = !!changes[DISCREET_KEY].newValue;
                 needsEval = true;
             }
             if (changes[TIMEOUT_KEY]) {

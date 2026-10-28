@@ -99,6 +99,7 @@
             if (!modal) {
                 initModal(false);
             } else {
+                if (!_srLoaded) loadRecordData();
                 updateInterface();
                 modal.style.display = 'flex';
                 modal.dataset.state = 'maximised';
@@ -157,7 +158,7 @@
         addModalListeners();
         constrainModalToWindow(modal);
 
-        loadRecordData();
+        if (!isPreload) loadRecordData();
         if (!isPreload) {
             modal.style.display = 'flex';
             bringToFront();
@@ -1019,7 +1020,11 @@
         constrainModalToWindow(el);
     }
 
+    let _srLoaded = false;
+
     function loadRecordData() {
+        _srLoaded = true;
+        _srRunsMap = undefined;
         injectFetcher();
     }
 
@@ -1068,6 +1073,50 @@
         (document.head || document.documentElement).appendChild(script);
     }
 
+    let _srRunsMap;
+
+    function renderRunsForMe(map) {
+        _srRunsMap = map;
+        const cells = document.querySelectorAll('#nsft-scripted-rec-modal td.nsft-sr-runs');
+        const t = (k, fb, subs) => chrome.i18n.getMessage(k, subs) || fb;
+        let clientesQueCorren = 0;
+        cells.forEach((td) => {
+            let code = map ? (map[td.dataset.srRunsFor] || '') : '';
+            if (code === 'RUNS' && td.dataset.srRunsType === 'CLIENT') {
+                clientesQueCorren++;
+                if (clientesQueCorren > 10) code = 'MAXED';
+            }
+            let badge, label, why;
+            if (!map || !code) {
+                badge = 'nsft-scripted-rec-badge-gray';
+                label = '—';
+                why = t('sr_runs_unknown', 'Could not be checked');
+            } else if (code === 'RUNS') {
+                badge = 'nsft-scripted-rec-badge-released';
+                label = '✓ ' + t('sr_runs_yes', 'Runs');
+                why = '';
+            } else if (code === 'GROUP') {
+                badge = 'nsft-scripted-rec-badge-yellow';
+                label = '? ' + t('sr_runs_maybe', 'Depends');
+                why = t('sr_runs_r_group', 'Only through a group: could not be checked');
+            } else {
+                badge = 'nsft-scripted-rec-badge-red';
+                label = '✗ ' + t('sr_runs_no', 'No');
+                why = code === 'INACTIVE' ? t('sr_runs_r_inactive', 'The script is inactive')
+                    : code === 'UNDEPLOYED' ? t('sr_runs_r_undeployed', 'Not deployed')
+                    : code === 'TESTING' ? t('sr_runs_r_testing', 'In testing: only runs for its owner ($1)', [td.dataset.srOwner || '—'])
+                    : code === 'MAXED' ? t('sr_runs_r_maxed', 'Over the limit of 10 client scripts per record type')
+                    : t('sr_runs_r_audience', 'You are not in its audience');
+            }
+            td.dataset.srRuns = code || 'UNKNOWN';
+            td.innerHTML = '<span class="nsft-scripted-rec-badge ' + badge + '">' + escapeHtml(label) + '</span>'
+                + (why ? '<div class="nsft-scripted-rec-owner-inline">' + escapeHtml(why) + '</div>' : '');
+            td.title = code === 'RUNS'
+                ? t('sr_runs_yes_tip', 'Meets everything to run for you: deployed, released (or you own it) and you are in its audience.')
+                : why;
+        });
+    }
+
     function handleExtensionMessage(message) {
         const globalLoading = document.getElementById('nsft-scripted-rec-global-loading');
 
@@ -1085,6 +1134,14 @@
         }
         if (message.type === 'bulk_error') {
             renderBulkResult(message.requestId, null, message.text || 'unknown');
+            return;
+        }
+        if (message.type === 'runs_success') {
+            renderRunsForMe(message.data || {});
+            return;
+        }
+        if (message.type === 'runs_error') {
+            renderRunsForMe(null);
             return;
         }
 
@@ -1164,6 +1221,7 @@
                         <th>${chrome.i18n.getMessage('sr_deployed')}</th>
                         <th>${chrome.i18n.getMessage('sr_status')}</th>
                         <th>${chrome.i18n.getMessage('sr_api')}</th>
+                        <th>${escapeHtml(chrome.i18n.getMessage('sr_runs_col') || 'For you?')}</th>
                         <th style="text-align:center;">${chrome.i18n.getMessage('sr_logs_short') || 'Logs'}</th>
                         <th style="text-align:center;">&lt;/&gt;</th>
                     </tr>
@@ -1200,6 +1258,7 @@
                           <td><span class="nsft-scripted-rec-badge ${s.isDeployed === 'T' ? 'nsft-scripted-rec-badge-blue' : 'nsft-scripted-rec-badge-red'}">${escapeHtml(tStatus(s.isDeployed))}</span></td>
                           <td><span class="nsft-scripted-rec-badge ${stC}">${escapeHtml(tStatus(s.status))}</span></td>
                           <td><span class="nsft-scripted-rec-badge ${apiC}" style="font-family:monospace;">${escapeHtml(s.apiVersion || '-')}</span></td>
+                          <td class="nsft-sr-runs" data-sr-runs-for="${escapeHtml(s.deploymentId || '')}" data-sr-runs-type="${escapeHtml(String(type || '').toUpperCase())}" data-sr-owner="${escapeHtml(s.owner || '')}"><span class="nsft-scripted-rec-owner-inline">…</span></td>
                           <td style="text-align:center;">
                             <button type="button" class="nsft-sr-logs-btn nsft-scripted-rec-info-container" data-sr-action="view-logs" data-sr-script-id="${escapeHtml(s.scriptId || '')}" data-sr-script-name="${escapeHtml(s.name || '')}" data-sr-script-url="${escapeHtml(s.url || '')}" data-sr-script-file="${escapeHtml(s.scriptFile || '')}" data-tooltip="${escapeHtml(chrome.i18n.getMessage('sr_logs_view_tooltip') || 'Ver últimas 100 entradas de log')}" style="background:none; border:0; padding:2px; cursor:pointer; color:#6b7280; display:inline-flex;">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -1256,6 +1315,7 @@
             activeIndex = parseInt(activeTab.dataset.index, 10);
         }
         animateTabContent(activeIndex);
+        if (_srRunsMap !== undefined) renderRunsForMe(_srRunsMap);
     }
 
     function srFold(s) {

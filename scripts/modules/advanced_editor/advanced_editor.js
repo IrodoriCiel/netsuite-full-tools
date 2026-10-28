@@ -1029,14 +1029,31 @@
                     + '<div class="nsft-adv-diff-lista" id="nsft-adv-diff-lista"></div>'
                 + '</div>'
                 + '<div class="nsft-adv-buscar" id="nsft-adv-buscar" hidden>'
-                    + '<div class="nsft-adv-bus-bar">'
-                        + '<input type="text" id="nsft-adv-bus-input" spellcheck="false" placeholder="'
-                            + escapeHtml(i18n('adv_bus_ph', 'Search in this folder and its subfolders')) + '">'
+                    + '<div class="nsft-adv-bus-bar" id="nsft-adv-bus-bar">'
+                        + '<span class="nsft-adv-bus-campo">'
+                            + '<input type="text" id="nsft-adv-bus-input" spellcheck="false" placeholder="'
+                                + escapeHtml(i18n('adv_bus_ph', 'Search the account code')) + '">'
+                            + '<button type="button" class="nsft-adv-bus-limpia" id="nsft-adv-bus-limpia" title="'
+                                + escapeHtml(i18n('sql_find_clear', 'Clear search')) + '" aria-label="'
+                                + escapeHtml(i18n('sql_find_clear', 'Clear search')) + '">&times;</button>'
+                        + '</span>'
+                        + '<button type="button" class="nsft-adv-find-btn" id="nsft-adv-bus-re" aria-pressed="false" title="'
+                            + escapeHtml(i18n('sfv_code_regex', 'Regular expression')) + '">.*</button>'
                         + '<button type="button" class="nsft-adv-action is-primary" id="nsft-adv-bus-btn">'
                             + escapeHtml(i18n('adv_bus_ir', 'Search')) + '</button>'
                         + btn('nsft-adv-bus-cerrar', ICO.cerrar, i18n('adv_visor_close', 'Back to the editor'))
                     + '</div>'
+                    + '<div class="nsft-adv-bus-op">'
+                        + '<button type="button" class="nsft-adv-find-btn is-on" id="nsft-adv-bus-todo" aria-pressed="true">'
+                            + escapeHtml(i18n('adv_bus_todo', 'All code')) + '</button>'
+                        + '<button type="button" class="nsft-adv-find-btn" id="nsft-adv-bus-carpeta" aria-pressed="false">'
+                            + escapeHtml(i18n('adv_bus_carpeta', 'This folder')) + '</button>'
+                        + '<label class="nsft-adv-bus-bundles"><input type="checkbox" id="nsft-adv-bus-bundles"> '
+                            + escapeHtml(i18n('sfv_code_all', 'Include SuiteBundles and SuiteApps')) + '</label>'
+                    + '</div>'
                     + '<div class="nsft-adv-bus-estado" id="nsft-adv-bus-estado"></div>'
+                    + '<div class="nsft-adv-bus-barra" id="nsft-adv-bus-barra" role="progressbar"'
+                        + ' aria-valuemin="0" aria-valuemax="100" hidden><span></span></div>'
                     + '<div class="nsft-adv-bus-lista" id="nsft-adv-bus-lista"></div>'
                 + '</div>'
                 + '</div>'
@@ -1104,11 +1121,7 @@
         cablearVecinas(caja);
         cablearMenuModelo(caja);
         caja.querySelector('#nsft-adv-bus-cerrar').addEventListener('click', cierraBuscador);
-        caja.querySelector('#nsft-adv-bus-btn').addEventListener('click', lanzaBusqueda);
-        caja.querySelector('#nsft-adv-bus-input').addEventListener('keydown', (ev) => {
-            if (ev.key === 'Enter') { ev.preventDefault(); lanzaBusqueda(); }
-            if (ev.key === 'Escape') { ev.preventDefault(); cierraBuscador(); }
-        });
+        cablearBuscador(caja);
 
         caja.querySelector('#nsft-adv-reload').addEventListener('click', () => {
             if (previaDelante()) return;
@@ -1919,6 +1932,13 @@
 
     const RAIZ = '';
 
+    const SUITESCRIPTS = { id: '-15', name: 'SuiteScripts' };
+
+    function raizElegida() {
+        const r = _cache && _cache.raiz;
+        return r === undefined ? SUITESCRIPTS : r;
+    }
+
     function acotaArbol(id, nombre) {
         _cache.raiz = (id == null || id === '') ? null : { id: String(id), name: String(nombre || '') };
         guardaCache();
@@ -1935,7 +1955,7 @@
         const cab = _caja && _caja.querySelector('#nsft-adv-files-head');
         if (!cab) return;
         const et = cab.querySelector('.nsft-adv-sec-t');
-        const r = _cache && _cache.raiz;
+        const r = raizElegida();
         if (et) et.textContent = (r && r.name) ? r.name : i18n('adv_tree_title', 'Files in this folder');
         let x = cab.parentNode.querySelector('.nsft-adv-sec-quita');
         if (!r) { if (x) x.remove(); return; }
@@ -1951,7 +1971,7 @@
     }
 
     function raizPanel() {
-        const r = _cache && _cache.raiz;
+        const r = raizElegida();
         return (r && r.id) ? String(r.id) : RAIZ;
     }
     const _nodos = new Map();
@@ -1986,7 +2006,11 @@
             recientes: Array.isArray(mio.recientes) ? mio.recientes : [],
             abiertas: Array.isArray(mio.abiertas) ? mio.abiertas : [],
             rutas: (mio.rutas && typeof mio.rutas === 'object') ? mio.rutas : {},
-            carpetas: (mio.carpetas && typeof mio.carpetas === 'object') ? mio.carpetas : {}
+            carpetas: (mio.carpetas && typeof mio.carpetas === 'object') ? mio.carpetas : {},
+            raiz: mio.raiz === null ? null
+                : (mio.raiz && typeof mio.raiz === 'object' && mio.raiz.id)
+                    ? { id: String(mio.raiz.id), name: String(mio.raiz.name || '') }
+                    : undefined
         };
     }
 
@@ -2091,6 +2115,7 @@
             if (d.type === 'nombres') { recibeNombres(d.payload || {}); return; }
             if (d.type === 'carpetas') { recibeNombres(d.payload || {}); return; }
             if (d.type === 'cambiado') { recibeCambiado(d.payload || {}); return; }
+            if (d.type === 'codigo') { recibeCodigo(d.payload || {}); return; }
         });
 
         if (_prefs.advancedEditorTree) {
@@ -2173,9 +2198,6 @@
     }
 
     function recibeHijos(p) {
-        const espera = _busCb.get(p.token);
-        if (espera) { espera(p.error ? null : (p.data || null)); return; }
-
         const id = _tokens.get(p.token);
         if (id === undefined) return;
         _tokens.delete(p.token);
@@ -2233,6 +2255,13 @@
         try {
             if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
                 window.NSFT_SuiteQLRest.ensureTransport();
+            }
+            if (!document.getElementById('nsft-code-search-mw')) {
+                const cs = document.createElement('script');
+                cs.id = 'nsft-code-search-mw';
+                cs.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_code_search.js');
+                cs.async = false;
+                (document.head || document.documentElement).appendChild(cs);
             }
             const sc = document.createElement('script');
             sc.src = chrome.runtime.getURL('scripts/modules/advanced_editor/advanced_editor_fetcher.js');
@@ -5414,21 +5443,18 @@
     }
 
 
-    const BUS_TOPE_CARPETAS = 60;
-    const BUS_TOPE_ARCHIVOS = 300;
-    const BUS_A_LA_VEZ = 6;
-    const BUS_POR_ARCHIVO = 20;
-    const BUS_TEXTO = /\.(js|mjs|ts|json|html?|xml|xsl|css|txt|csv|md|sql|ftl|properties|log)$/i;
-
-    let _busSeq = 0;
-    const _busCb = new Map();
     let _busCorriendo = false;
     let _busCortar = false;
+    let _busSeq = 0;
+    const _busCb = new Map();
     let _busIrALinea = null;
+    let _busAlcance = 'todo';
+    let _busBundles = false;
+    let _busRegex = false;
 
-    function pideHijosDirecto(id) {
+    function pideCodigo(carpeta) {
         return new Promise((resolver) => {
-            const token = 'b' + (++_busSeq);
+            const token = 'k' + (++_busSeq);
             let hecho = false;
             const una = (v) => {
                 if (hecho) return;
@@ -5437,77 +5463,14 @@
                 resolver(v);
             };
             _busCb.set(token, una);
-            setTimeout(() => una(null), 15000);
-            manda('children', { folder: (id === RAIZ ? null : String(id)), token: token });
+            setTimeout(() => una({ error: { code: 'timeout' } }), 60000);
+            manda('codigo', { todo: _busBundles, carpeta: carpeta, token: token });
         });
     }
 
-    async function reuneArchivos(raiz, alPaso) {
-        const vistas = new Set();
-        const cola = [String(raiz)];
-        const archivos = [];
-
-        while (cola.length && vistas.size < BUS_TOPE_CARPETAS && archivos.length < BUS_TOPE_ARCHIVOS) {
-            if (_busCortar) break;
-            const id = cola.shift();
-            if (vistas.has(id)) continue;
-            vistas.add(id);
-
-            const n = _nodos.get(id);
-            let datos = (n && n.cargado) ? { subs: n.subs, files: n.files } : null;
-            if (!datos) datos = await pideHijosDirecto(id);
-            if (!datos) continue;
-
-            (datos.files || []).forEach((f) => {
-                if (archivos.length >= BUS_TOPE_ARCHIVOS) return;
-                if (!BUS_TEXTO.test(f.name || '')) return;
-                const u = enlaceSeguro(f.url);
-                if (u) archivos.push({ id: f.id, name: f.name, url: u, folder: id });
-            });
-            (datos.subs || []).forEach((s) => cola.push(String(s.id)));
-            if (alPaso) alPaso(vistas.size, archivos.length);
-        }
-        return archivos;
-    }
-
-    function coincidencias(texto, termino) {
-        const out = [];
-        const lineas = String(texto).split('\n');
-        const fold = (s) => (TS && TS.fold ? TS.fold(s) : String(s).toLowerCase());
-        const t = fold(termino);
-        if (!t) return out;
-        for (let i = 0; i < lineas.length && out.length < BUS_POR_ARCHIVO; i++) {
-            if (fold(lineas[i]).indexOf(t) < 0) continue;
-            out.push({ linea: i, texto: lineas[i].replace(/^\s+/, '').slice(0, 200) });
-        }
-        return out;
-    }
-
-    async function bajaYBusca(archivos, termino, alPaso) {
-        const hallazgos = [];
-        let siguiente = 0;
-        let hechos = 0;
-
-        async function obrero() {
-            while (siguiente < archivos.length && !_busCortar) {
-                const f = archivos[siguiente++];
-                try {
-                    const res = await fetch(f.url, { credentials: 'same-origin' });
-                    if (res.ok) {
-                        const cs = coincidencias(await res.text(), termino);
-                        if (cs.length) hallazgos.push({ archivo: f, lineas: cs });
-                    }
-                } catch (e) { }
-                hechos++;
-                if (alPaso) alPaso(hechos, archivos.length, hallazgos.length);
-            }
-        }
-
-        const obreros = [];
-        for (let i = 0; i < Math.min(BUS_A_LA_VEZ, archivos.length); i++) obreros.push(obrero());
-        await Promise.all(obreros);
-        hallazgos.sort((a, b) => String(a.archivo.name).localeCompare(String(b.archivo.name)));
-        return hallazgos;
+    function recibeCodigo(p) {
+        const espera = _busCb.get(p.token);
+        if (espera) espera(p);
     }
 
 
@@ -5524,6 +5487,7 @@
         _caja.querySelector('#nsft-adv-visor').hidden = true;
         _caja.querySelector('#nsft-adv-buscar').hidden = false;
         _caja.classList.add('is-buscando');
+        pintaOpciones();
         const caja = _caja.querySelector('#nsft-adv-bus-input');
         if (caja) { caja.focus(); caja.select(); }
     }
@@ -5544,6 +5508,19 @@
         if (el) el.textContent = msg || '';
     }
 
+    function busBarra(pct) {
+        const b = _caja && _caja.querySelector('#nsft-adv-bus-barra');
+        if (!b) return;
+        b.hidden = (pct == null);
+        const v = pct == null ? 0 : Math.max(0, Math.min(100, Math.round(pct)));
+        b.setAttribute('aria-valuenow', String(v));
+        b.firstChild.style.width = v + '%';
+    }
+
+    function conN(k, f, n) {
+        return i18n(k, f).split('{n}').join(miles(n));
+    }
+
     async function lanzaBusqueda() {
         if (_busCorriendo) { _busCortar = true; return; }
         const caja = _caja.querySelector('#nsft-adv-bus-input');
@@ -5554,8 +5531,15 @@
             busEstado(i18n('adv_bus_corto', 'Type at least two characters'));
             return;
         }
-        const carpeta = carpetaDelArchivo();
-        if (carpeta == null || carpeta === '') {
+        const CS = window.NSFT_CodeSearch;
+        if (!CS) { busEstado(i18n('sfv_code_error', 'The script files could not be listed.')); return; }
+        const regla = CS.regla(termino, _busRegex);
+        if (regla.error) {
+            busEstado(i18n('sfv_code_bad_regex', 'The regular expression is not valid') + ': ' + regla.error);
+            return;
+        }
+        const carpeta = _busAlcance === 'carpeta' ? carpetaDelArchivo() : null;
+        if (_busAlcance === 'carpeta' && (carpeta == null || carpeta === '')) {
             busEstado(i18n('adv_bus_sin_carpeta', 'No folder to search in'));
             return;
         }
@@ -5564,43 +5548,66 @@
         _busCortar = false;
         const boton = _caja.querySelector('#nsft-adv-bus-btn');
         if (boton) boton.textContent = i18n('adv_bus_parar', 'Stop');
+        const barra = _caja.querySelector('#nsft-adv-bus-bar');
+        if (barra) barra.classList.add('is-loading');
 
         try {
             busEstado(i18n('adv_bus_listando', 'Listing files…'));
-            const archivos = await reuneArchivos(carpeta, (carpetas, n) => {
-                busEstado(fmt('adv_bus_listando_n', '$1 folders · $2 files', [miles(carpetas), miles(n)]));
-            });
-
+            const r = await pideCodigo(carpeta);
+            if (_busCortar) { busEstado(''); return; }
+            if (!r || r.error || !r.data) {
+                busEstado(r && r.error && r.error.code === 'folder'
+                    ? i18n('adv_bus_sin_carpeta', 'No folder to search in')
+                    : i18n('sfv_code_error', 'The script files could not be listed.'));
+                return;
+            }
+            let archivos = (r.data.files || []).filter((f) => enlaceSeguro(f.url));
+            let tope = false;
+            if (archivos.length > CS.TOPE) { archivos = archivos.slice(0, CS.TOPE); tope = true; }
             if (!archivos.length) {
-                busEstado(i18n('adv_bus_nada_que_mirar', 'No text files in this folder'));
+                busEstado(i18n('adv_bus_nada_que_mirar', 'No code files to search here'));
                 return;
             }
 
             let ultimo = 0;
-            const hallazgos = await bajaYBusca(archivos, termino, (hechos, total, cuantos) => {
-                const ahora = Date.now();
-                if (ahora - ultimo < 100 && hechos < total) return;
-                ultimo = ahora;
-                busEstado(fmt('adv_bus_yendo', '$1 of $2 · $3 with matches',
-                    [miles(hechos), miles(total), miles(cuantos)]));
+            busBarra(0);
+            const fin = await CS.buscar({
+                archivos: archivos,
+                regla: regla,
+                debeParar: () => _busCortar,
+                alPaso: (c) => {
+                    const ahora = Date.now();
+                    if (ahora - ultimo < 100 && c.hechos < c.total) return;
+                    ultimo = ahora;
+                    busEstado(fmt('adv_bus_yendo', '$1 of $2 · $3 with matches',
+                        [miles(c.hechos), miles(c.total), miles(c.hallados)]));
+                    busBarra(c.total ? c.hechos * 100 / c.total : 0);
+                }
             });
-
-            pintaHallazgos(hallazgos, termino, archivos.length);
+            pintaHallazgos(CS.ordenar(fin.hallados), regla, fin, tope);
         } finally {
             _busCorriendo = false;
+            busBarra(null);
             if (boton) boton.textContent = i18n('adv_bus_ir', 'Search');
+            if (barra) barra.classList.remove('is-loading');
         }
     }
 
-    function pintaHallazgos(hallazgos, termino, mirados) {
+    function pintaHallazgos(hallazgos, regla, fin, tope) {
         const lista = _caja.querySelector('#nsft-adv-bus-lista');
         lista.textContent = '';
+        const CS = window.NSFT_CodeSearch;
 
         const total = hallazgos.reduce((n, h) => n + h.lineas.length, 0);
-        busEstado(_busCortar
+        const extras = [];
+        if (fin.saltados) extras.push(conN('sfv_code_skipped', '{n} too large', fin.saltados));
+        if (fin.ilegibles) extras.push(conN('sfv_code_unreadable', '{n} unreadable', fin.ilegibles));
+        if (tope) extras.push(conN('sfv_code_capped', 'limit of {n} files reached', CS.TOPE));
+        busEstado((_busCortar
             ? fmt('adv_bus_parado', 'Stopped · $1 matches in $2 files', [miles(total), miles(hallazgos.length)])
             : fmt('adv_bus_hecho', '$1 matches in $2 files · $3 searched',
-                [miles(total), miles(hallazgos.length), miles(mirados)]));
+                [miles(total), miles(hallazgos.length), miles(fin.hechos)]))
+            + (extras.length ? ' · ' + extras.join(' · ') : ''));
 
         if (!hallazgos.length) return;
 
@@ -5610,15 +5617,20 @@
 
             const cab = document.createElement('div');
             cab.className = 'nsft-adv-bus-arch';
-            const fam = iconoArchivo(h.archivo.name);
+            const fam = iconoArchivo(h.f.name);
             const ico = document.createElement('span');
             ico.className = 'nsft-adv-node-ico ' + (fam.clase || '');
             ico.innerHTML = fam.ico;
             cab.appendChild(ico);
             const nom = document.createElement('span');
             nom.className = 'nsft-adv-bus-arch-n';
-            nom.textContent = h.archivo.name;
+            nom.textContent = h.f.name;
             cab.appendChild(nom);
+            const ruta = document.createElement('span');
+            ruta.className = 'nsft-adv-bus-arch-r';
+            ruta.textContent = h.f.ruta || '';
+            ruta.title = h.f.ruta || '';
+            cab.appendChild(ruta);
             const n = document.createElement('span');
             n.className = 'nsft-adv-bus-arch-c';
             n.textContent = String(h.lineas.length);
@@ -5626,42 +5638,112 @@
             grupo.appendChild(cab);
 
             h.lineas.forEach((l) => {
+                const linea = l.n - 1;
                 const fila = document.createElement('button');
                 fila.type = 'button';
                 fila.className = 'nsft-adv-bus-linea';
                 const ln = document.createElement('span');
                 ln.className = 'nsft-adv-bus-ln';
-                ln.textContent = String(l.linea + 1);
+                ln.textContent = String(l.n);
                 fila.appendChild(ln);
 
                 const txt = document.createElement('span');
                 txt.className = 'nsft-adv-bus-txt';
-                if (TS && TS.markHtml) txt.innerHTML = TS.markHtml(l.texto, termino, 'nsft-adv-bus-hl');
-                else txt.textContent = l.texto;
+                txt.innerHTML = CS.trozoHtml(l.l, regla, 'nsft-adv-bus-hl');
                 fila.appendChild(txt);
 
-                fila.title = h.archivo.name + ':' + (l.linea + 1);
+                fila.title = h.f.name + ':' + l.n;
                 fila.addEventListener('click', () => {
                     const irA = () => {
                         if (!_cm) return;
-                        _cm.setCursor({ line: l.linea, ch: 0 });
-                        _cm.scrollIntoView({ line: l.linea, ch: 0 }, _cm.getScrollInfo().clientHeight / 2);
+                        _cm.setCursor({ line: linea, ch: 0 });
+                        _cm.scrollIntoView({ line: linea, ch: 0 }, _cm.getScrollInfo().clientHeight / 2);
                         _cm.focus();
                     };
-                    if (String(h.archivo.id) === String(idDelArchivo())) {
+                    if (String(h.f.id) === String(idDelArchivo())) {
                         cierraBuscador();
                         irA();
                         return;
                     }
-                    _busIrALinea = l.linea;
+                    _busIrALinea = linea;
                     cierraBuscador();
-                    abreArchivo(h.archivo.id, h.archivo.name);
+                    abreArchivo(h.f.id, h.f.name);
                 });
                 grupo.appendChild(fila);
             });
 
             lista.appendChild(grupo);
         });
+    }
+
+    function cablearBuscador(caja) {
+        const input = caja.querySelector('#nsft-adv-bus-input');
+        const bar = caja.querySelector('#nsft-adv-bus-bar');
+        const marca = () => bar.classList.toggle('has-query', !!input.value);
+        const limpia = () => {
+            input.value = '';
+            marca();
+            if (_busCorriendo) _busCortar = true;
+            caja.querySelector('#nsft-adv-bus-lista').textContent = '';
+            busEstado('');
+            input.focus();
+        };
+        input.addEventListener('input', marca);
+        input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') { ev.preventDefault(); lanzaBusqueda(); }
+            if (ev.key === 'Escape') {
+                ev.preventDefault();
+                if (input.value) limpia(); else cierraBuscador();
+            }
+        });
+        caja.querySelector('#nsft-adv-bus-limpia').addEventListener('click', limpia);
+        caja.querySelector('#nsft-adv-bus-btn').addEventListener('click', lanzaBusqueda);
+
+        caja.querySelector('#nsft-adv-bus-re').addEventListener('click', () => {
+            _busRegex = !_busRegex;
+            pintaOpciones();
+            if (input.value.trim() && !_busCorriendo) lanzaBusqueda();
+        });
+        const alcance = (a) => {
+            if (_busAlcance === a) return;
+            _busAlcance = a;
+            pintaOpciones();
+            if (input.value.trim() && !_busCorriendo) lanzaBusqueda();
+        };
+        caja.querySelector('#nsft-adv-bus-todo').addEventListener('click', () => alcance('todo'));
+        caja.querySelector('#nsft-adv-bus-carpeta').addEventListener('click', () => alcance('carpeta'));
+        caja.querySelector('#nsft-adv-bus-bundles').addEventListener('change', (ev) => {
+            _busBundles = !!ev.target.checked;
+            if (input.value.trim() && !_busCorriendo && _busAlcance === 'todo') lanzaBusqueda();
+        });
+    }
+
+    function pintaOpciones() {
+        if (!_caja) return;
+        const c = _sinArchivo ? null : carpetaDelArchivo();
+        const hayCarpeta = c != null && c !== '';
+        if (!hayCarpeta && _busAlcance === 'carpeta') _busAlcance = 'todo';
+        const pon = (id, on) => {
+            const b = _caja.querySelector(id);
+            if (!b) return;
+            b.classList.toggle('is-on', on);
+            b.setAttribute('aria-pressed', String(on));
+        };
+        pon('#nsft-adv-bus-todo', _busAlcance === 'todo');
+        pon('#nsft-adv-bus-carpeta', _busAlcance === 'carpeta');
+        pon('#nsft-adv-bus-re', _busRegex);
+        const bc = _caja.querySelector('#nsft-adv-bus-carpeta');
+        if (bc) {
+            bc.disabled = !hayCarpeta;
+            bc.title = hayCarpeta
+                ? i18n('adv_bus_carpeta_tip', 'The open file’s folder and its subfolders')
+                : i18n('adv_bus_carpeta_no', 'Open a file to search its folder');
+        }
+        const bun = _caja.querySelector('#nsft-adv-bus-bundles');
+        if (bun) {
+            bun.checked = _busBundles;
+            bun.disabled = _busAlcance !== 'todo';
+        }
     }
 
 

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "NetSuite Full Tools",
-    "version": "7.2.3",
+    "version": "7.3.0",
     "description": "__MSG_extDescription__",
     "default_locale": "en",
     "icons": {
@@ -70,7 +70,8 @@
                 "scripts/modules/_shared/nsft_field_nav.js",
                 "scripts/modules/_shared/nsft_notices.js",
                 "scripts/modules/_shared/nsft_text_search.js",
-                "scripts/modules/_shared/nsft_dialog.js"
+                "scripts/modules/_shared/nsft_dialog.js",
+                "scripts/modules/_shared/nsft_page_location.js"
             ],
             "css": [
                 "scripts/modules/_shared/design_tokens.css",
@@ -143,16 +144,16 @@
             ],
             "js": [
                 "scripts/modules/_shared/nsft_script_page.js",
+                "scripts/modules/_shared/nsft_sublist_pages.js",
                 "scripts/modules/log_prettier/log_prettier.js",
-                "scripts/modules/log_live_mode/log_live_mode.js",
                 "scripts/modules/log_viewer/log_viewer.js",
                 "scripts/modules/full_logs_button/full_logs_button.js",
                 "scripts/modules/script_auto_name/script_auto_name.js",
                 "scripts/modules/editor_theme/open_file_new_tab.js"
             ],
             "css": [
+                "scripts/modules/_shared/nsft_sublist_pages.css",
                 "scripts/modules/log_prettier/log_prettier.css",
-                "scripts/modules/log_live_mode/log_live_mode.css",
                 "scripts/modules/log_viewer/log_viewer.css",
                 "scripts/modules/full_logs_button/full_logs_button.css",
                 "scripts/modules/script_auto_name/script_auto_name.css",
@@ -165,6 +166,7 @@
                 "https://*.app.netsuite.com/app/common/record/edittextmediaitem*"
             ],
             "js": [
+                "scripts/modules/_shared/nsft_code_search.js",
                 "scripts/modules/advanced_editor/advanced_editor.js"
             ],
             "css": [
@@ -366,6 +368,18 @@
             ],
             "css": [
                 "scripts/modules/customization_finder/customization_finder.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/*"
+            ],
+            "js": [
+                "scripts/modules/deleted_records/deleted_records.js"
+            ],
+            "css": [
+                "scripts/modules/deleted_records/deleted_records.css"
             ],
             "run_at": "document_end"
         },
@@ -578,13 +592,34 @@
         },
         {
             "matches": [
-                "https://*.app.netsuite.com/app/bundler/bundlelist.nl?*"
+                "https://*.app.netsuite.com/app/*"
             ],
             "js": [
-                "scripts/modules/auto_refresh/auto_refresh.js"
+                "scripts/modules/live_mode/live_mode.js"
             ],
             "css": [
-                "scripts/modules/auto_refresh/auto_refresh.css"
+                "scripts/modules/live_mode/live_mode.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/bundler/bundlelist.nl*"
+            ],
+            "js": [
+                "scripts/modules/bundle_uninstall_guard/bundle_uninstall_guard.js"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/*"
+            ],
+            "js": [
+                "scripts/modules/clear_sort/clear_sort.js"
+            ],
+            "css": [
+                "scripts/modules/clear_sort/clear_sort.css"
             ],
             "run_at": "document_end"
         },
@@ -975,9 +1010,11 @@
                 "https://*.app.netsuite.com/*"
             ],
             "js": [
+                "scripts/modules/_shared/nsft_sublist_pages.js",
                 "scripts/modules/sublist_filter/sublist_filter.js"
             ],
             "css": [
+                "scripts/modules/_shared/nsft_sublist_pages.css",
                 "scripts/modules/sublist_filter/sublist_filter.css"
             ],
             "run_at": "document_end"
@@ -1068,10 +1105,13 @@
                 "https://*.app.netsuite.com/app/login/*"
             ],
             "js": [
+                "scripts/modules/_shared/nsft_login_identity.js",
                 "scripts/modules/login_sandbox_indicator/login_sandbox_indicator.js",
+                "scripts/modules/login_trust_device/login_trust_device.js",
                 "scripts/modules/login_company_branding/login_company_branding.js"
             ],
             "css": [
+                "scripts/modules/_shared/nsft_login_identity.css",
                 "scripts/modules/login_sandbox_indicator/login_sandbox_indicator.css",
                 "scripts/modules/login_company_branding/login_company_branding.css"
             ],
@@ -1281,6 +1321,10 @@
                 "scripts/libs/**/*.css",
                 "scripts/libs/**/*.woff2",
                 "scripts/modules/_shared/nsft_text_search.js",
+                "scripts/modules/_shared/nsft_code_search.js",
+                "scripts/modules/_shared/nsft_sublist_pages_fetcher.js",
+                "scripts/modules/bundle_uninstall_guard/bundle_uninstall_guard_fetcher.js",
+                "scripts/modules/clear_sort/clear_sort_fetcher.js",
                 "scripts/modules/view_scripted_record/scripted_record_fetcher.js",
                 "scripts/modules/suiteql_runner/suiteql_fetcher.js",
                 "scripts/modules/file_cabinet_drag_drop/file_cabinet_drag_drop_fetcher.js",
@@ -1303,6 +1347,7 @@
                 "scripts/modules/recent_records/recent_records_fetcher.js",
                 "scripts/modules/date_format_hint/date_format_hint_fetcher.js",
                 "scripts/modules/customization_finder/customization_finder_fetcher.js",
+                "scripts/modules/deleted_records/deleted_records_fetcher.js",
                 "scripts/modules/script_execute/script_execute_fetcher.js",
                 "scripts/modules/script_execute/script_execute_hook.js",
                 "scripts/modules/suitescript_console/suitescript_console_fetcher.js",

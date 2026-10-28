@@ -98,7 +98,7 @@
 
         const bar = document.createElement('div');
         bar.id = BAR_ID;
-        bar.className = 'nsft-ssb-bar';
+        bar.className = 'nsft-tb-bar nsft-ssb-bar';
         bar.innerHTML =
             '<span class="nsft-ssb-lbl">' + esc(i18n('ssb_title', 'Tipo de resumen en todas')) + '</span>' +
             '<div class="nsft-ssb-drop">' +
@@ -118,7 +118,7 @@
         bar.querySelector('.nsft-ssb-clear').addEventListener('click', () => aplicar(''));
 
         const prev = cont.previousElementSibling;
-        const antes = (prev && prev.classList && prev.classList.contains('nsft-sf-bar')) ? prev : cont;
+        const antes = (prev && prev.classList && prev.classList.contains('nsft-sf-strip')) ? prev : cont;
         cont.parentNode.insertBefore(bar, antes);
     }
 

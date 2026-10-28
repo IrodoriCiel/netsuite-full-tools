@@ -230,7 +230,8 @@ html.nsft-rr-arm div[data-widget="Popover"]:has(.nsft-rr-panel) {
 }
 
 .nsft-rr-row:has(.nsft-rr-action-pin.is-pinned):not(:hover) .nsft-rr-action-view,
-.nsft-rr-row:has(.nsft-rr-action-pin.is-pinned):not(:hover) .nsft-rr-action-edit {
+.nsft-rr-row:has(.nsft-rr-action-pin.is-pinned):not(:hover) .nsft-rr-action-edit,
+.nsft-rr-row:has(.nsft-rr-action-pin.is-pinned):not(:hover) .nsft-rr-action-run {
     display: none;
 }
 

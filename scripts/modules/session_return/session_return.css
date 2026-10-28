@@ -71,6 +71,66 @@
     background: var(--nsft-surface-2, #eef1f6);
 }
 
+#nsft-sret-card.nsft-sret-inline {
+    display: inline-flex;
+    width: auto;
+    min-width: 0;
+    margin: 0;
+}
+
+#nsft-sret-card.nsft-sret-inline .nsft-sret-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--nsft-lid-link, rgb(240, 204, 114));
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    cursor: pointer;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+#nsft-sret-card.nsft-sret-inline .nsft-sret-go:hover {
+    color: var(--nsft-lid-link-hover, rgb(255, 224, 143));
+    background: none;
+    text-decoration: underline;
+}
+
+#nsft-sret-card.nsft-sret-inline .nsft-sret-go:focus-visible {
+    outline: 2px solid var(--nsft-lid-link, rgb(240, 204, 114));
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+#nsft-sret-card.nsft-sret-inline .nsft-sret-go svg {
+    width: 12px;
+    height: 12px;
+}
+
+#nsft-sret-card.nsft-sret-inline[data-state="ready"] .nsft-sret-go {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    border: 0;
+    box-shadow: none;
+    text-decoration-color: var(--nsft-lid-online, #5fd3a0);
+}
+
+#nsft-sret-card.nsft-sret-inline[data-state="blocked"] .nsft-sret-go {
+    color: var(--nsft-lid-muted, rgba(229, 241, 245, 0.72));
+    background: none;
+    border: 0;
+}
+
+#nsft-sret-card.nsft-sret-inline[data-state="blocked"] .nsft-sret-go:hover {
+    background: none;
+}
+
 #nsft-sret-card.nsft-sret-floating {
     width: auto;
     max-width: calc(100vw - 36px);

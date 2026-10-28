@@ -22,13 +22,12 @@
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
         codeFieldPrettierTheme: 'auto',
-        enableDiscreetMode: false,
         nsftSelectorDiagnostics: false,
         nsftTheme: 'light'
     }, (items) => {
         _diag = !!items.nsftSelectorDiagnostics;
         _nsftDark = items.nsftTheme === 'dark';
-        if (!items[STORAGE_KEY] || items.enableDiscreetMode) return;
+        if (!items[STORAGE_KEY]) return;
         startPrettier(items.codeFieldPrettierTheme);
     });
 
@@ -44,8 +43,8 @@
         }
         if (changes[STORAGE_KEY]) {
             if (changes[STORAGE_KEY].newValue) {
-                chrome.storage.local.get({ codeFieldPrettierTheme: 'auto', enableDiscreetMode: false }, (s) => {
-                    if (!s.enableDiscreetMode) startPrettier(s.codeFieldPrettierTheme);
+                chrome.storage.local.get({ codeFieldPrettierTheme: 'auto' }, (s) => {
+                    startPrettier(s.codeFieldPrettierTheme);
                 });
             } else {
                 teardown();

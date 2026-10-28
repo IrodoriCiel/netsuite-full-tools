@@ -646,9 +646,6 @@
   "autogenerateIdsPrefixLabel": {
     "message": "Prefix:"
   },
-  "autoRefresh": {
-    "message": "Auto Refresh"
-  },
   "portletRefresherCtrl": {
     "message": "Auto-refresh"
   },
@@ -669,9 +666,6 @@
   },
   "portletRefresherAutoStartLabel": {
     "message": "Start active"
-  },
-  "autoRefreshAutoStartLabel": {
-    "message": "Start Active"
   },
   "badJson": {
     "message": "Invalid JSON"
@@ -765,6 +759,54 @@
   },
   "cl_cat_ui": {
     "message": "UI / UX Tools"
+  },
+  "cl_tipo_new": {
+    "message": "New"
+  },
+  "cl_tipo_improvement": {
+    "message": "Improvement"
+  },
+  "cl_tipo_fix": {
+    "message": "Fix"
+  },
+  "cl_ui_all": {
+    "message": "All"
+  },
+  "cl_ui_new": {
+    "message": "New"
+  },
+  "cl_ui_improvement": {
+    "message": "Improvements"
+  },
+  "cl_ui_fix": {
+    "message": "Fixes"
+  },
+  "cl_ui_filter": {
+    "message": "Filter by type of change"
+  },
+  "cl_ui_latest": {
+    "message": "Latest"
+  },
+  "cl_ui_empty": {
+    "message": "No changes of this type."
+  },
+  "cl_sum_new_one": {
+    "message": "$1 new"
+  },
+  "cl_sum_new_other": {
+    "message": "$1 new"
+  },
+  "cl_sum_improvement_one": {
+    "message": "$1 improvement"
+  },
+  "cl_sum_improvement_other": {
+    "message": "$1 improvements"
+  },
+  "cl_sum_fix_one": {
+    "message": "$1 fix"
+  },
+  "cl_sum_fix_other": {
+    "message": "$1 fixes"
   },
   "cl_date_1_0_0": {
     "message": "2026-01-21"
@@ -1576,6 +1618,18 @@
   "cmdp_act_other_fields": {
     "message": "Other Custom Fields"
   },
+  "cmdp_act_page_copy_generic_url": {
+    "message": "Copy generic URL"
+  },
+  "cmdp_act_page_copy_generic_url_desc": {
+    "message": "No account number: opens this page in whichever account is signed in"
+  },
+  "cmdp_act_page_copy_menu_path": {
+    "message": "Copy menu path"
+  },
+  "cmdp_act_page_copy_menu_path_desc": {
+    "message": "How to reach this page from the NetSuite menu"
+  },
   "cmdp_act_page_copy_rec_url": {
     "message": "Copy record direct URL"
   },
@@ -2369,7 +2423,7 @@
     "message": "Keyboard shortcuts cheat sheet (Ctrl+Shift+?)"
   },
   "welcomeCatPowerItem3": {
-    "message": "JSON formatter, role finder, auto-refresh"
+    "message": "JSON formatter and role finder"
   },
   "welcomeCatPowerItem4": {
     "message": "Auto-generate field & record IDs"
@@ -2394,6 +2448,9 @@
   },
   "welcomeCatSqlItem11": {
     "message": "Batch filters on saved search results (apply once)"
+  },
+  "welcomeCatSqlItem12": {
+    "message": "Clear a column sort, on lists and sublists, and go back to the original order"
   },
   "welcomeCatRecordItem5": {
     "message": "View Record Scripts"
@@ -2448,6 +2505,9 @@
   },
   "welcomeCatRecordItem22": {
     "message": "Date format shown inside empty date fields"
+  },
+  "welcomeCatRecordItem24": {
+    "message": "Where a field is used in the script code"
   },
   "welcomeCatRecordItem23": {
     "message": "Shift to tick a whole range of checkboxes"
@@ -2536,6 +2596,9 @@
   "welcomeCatLoginItem6": {
     "message": "NetSuite version in header"
   },
+  "welcomeCatLoginItem8": {
+    "message": "«Trust this device» already ticked on two-step verification"
+  },
   "welcomeCatLoginItem7": {
     "message": "Back to your page after signing in on another tab"
   },
@@ -2553,6 +2616,15 @@
   },
   "welcomeCatPowerItem9": {
     "message": "Portlet auto-refresh"
+  },
+  "welcomeCatPowerItem15": {
+    "message": "Live mode on lists and sublists too: they update on their own, without reloading the page"
+  },
+  "welcomeCatPowerItem16": {
+    "message": "Bundle uninstall guard: type the word before uninstalling, so you don't do it while meaning to update"
+  },
+  "welcomeCatPowerItem14": {
+    "message": "Deleted records: who deleted a record, when and from where"
   },
   "welcomeCatPowerItem13": {
     "message": "Meeting mode: the extension out of the way and the other accounts hidden, in one click"
@@ -2591,7 +2663,7 @@
     "message": "Copy SQL"
   },
   "copySublistId": {
-    "message": "COPY SUBLIST ID"
+    "message": "Copy sublist ID"
   },
   "copyFreeMarker": {
     "message": "Copy FreeMarker"
@@ -2655,6 +2727,69 @@
   },
   "enableAutoRefreshLabel": {
     "message": "Auto Refresh on Bundles"
+  },
+  "enableBundleUninstallGuardLabel": {
+    "message": "Bundle Uninstall Guard"
+  },
+  "enableBundleUninstallGuardDesc": {
+    "message": "Asks you to type the confirmation word before uninstalling a bundle, so it isn't done by mistake when you meant to update it."
+  },
+  "bundleGuardTitle": {
+    "message": "Uninstall bundle"
+  },
+  "bundleGuardName": {
+    "message": "Bundle: $1"
+  },
+  "bundleGuardBody": {
+    "message": "Uninstalling it deletes the bundle and all its objects (custom records, forms, scripts…) from the account. It cannot be undone."
+  },
+  "bundleGuardPrompt": {
+    "message": "Type $1 to uninstall it."
+  },
+  "bundleGuardOk": {
+    "message": "Uninstall"
+  },
+  "enableClearSortLabel": {
+    "message": "Clear Column Sort"
+  },
+  "enableClearSortDesc": {
+    "message": "On lists, search results and record sublists sorted by a column, adds a button to clear that sort and go back to the original order."
+  },
+  "clearSortBtn": {
+    "message": "Clear sort"
+  },
+  "clearSortTitle": {
+    "message": "Back to the original order: removes the sort by “$1”"
+  },
+  "liveModeStatusAutoStartLabel": {
+    "message": "Turn on by itself on status pages"
+  },
+  "liveModeSublistsLabel": {
+    "message": "Also on record sublists"
+  },
+  "llm_title": {
+    "message": "Updates the list every $1 s without reloading the page"
+  },
+  "llm_error": {
+    "message": "The list could not be updated; live mode has stopped."
+  },
+  "llm_paused_hidden": {
+    "message": "Paused: the tab is hidden"
+  },
+  "llm_paused_typing": {
+    "message": "Paused while you type the seconds"
+  },
+  "llm_paused_checks": {
+    "message": "Paused: you have ticked boxes in the list"
+  },
+  "llm_paused_editing": {
+    "message": "Paused while you edit in the list"
+  },
+  "llm_paused_selection": {
+    "message": "Paused: there is text selected in the list"
+  },
+  "llm_paused_window": {
+    "message": "Paused: an extension window is open"
   },
   "enableBetterPageTitlesDesc": {
     "message": "Adds the record name and ID to the page title."
@@ -2961,6 +3096,111 @@
   },
   "enableCustomizationFinderDesc": {
     "message": "One window to find the account’s scripts, workflows, fields, saved searches, templates, files, deployments and lists."
+  },
+  "enableDeletedRecordsLabel": {
+    "message": "Deleted Records"
+  },
+  "enableDeletedRecordsDesc": {
+    "message": "Find out who deleted a record, when and from where, without leaving the page. Opens from the Tools menu."
+  },
+  "cmdp_act_delrec": {
+    "message": "Who deleted this record?..."
+  },
+  "cmdp_act_delrec_desc": {
+    "message": "Search the NetSuite deleted records log by document, type or ID"
+  },
+  "delrec_search": {
+    "message": "Search"
+  },
+  "delrec_ph": {
+    "message": "Document, type or ID…"
+  },
+  "delrec_period_label": {
+    "message": "Period"
+  },
+  "delrec_period_all": {
+    "message": "All time"
+  },
+  "delrec_period_today": {
+    "message": "Today"
+  },
+  "delrec_period_d7": {
+    "message": "Last 7 days"
+  },
+  "delrec_period_d30": {
+    "message": "Last 30 days"
+  },
+  "delrec_period_d90": {
+    "message": "Last 90 days"
+  },
+  "delrec_period_y1": {
+    "message": "Last year"
+  },
+  "delrec_col_when": {
+    "message": "When"
+  },
+  "delrec_col_name": {
+    "message": "Document"
+  },
+  "delrec_col_type": {
+    "message": "Type"
+  },
+  "delrec_col_id": {
+    "message": "ID"
+  },
+  "delrec_col_user": {
+    "message": "Deleted by"
+  },
+  "delrec_col_from": {
+    "message": "From"
+  },
+  "delrec_user_filter": {
+    "message": "Deleted by: $1"
+  },
+  "delrec_user_filter_clear": {
+    "message": "Remove this filter"
+  },
+  "delrec_user_title": {
+    "message": "Show only what $1 deleted"
+  },
+  "delrec_loading": {
+    "message": "Reading the deleted records log…"
+  },
+  "delrec_none": {
+    "message": "No deleted records match these filters."
+  },
+  "delrec_results_n": {
+    "message": "$1 deleted records"
+  },
+  "delrec_capped": {
+    "message": "showing the $1 most recent: narrow the search to see the rest"
+  },
+  "delrec_error": {
+    "message": "The deleted records could not be read."
+  },
+  "delrec_error_perm": {
+    "message": "The deleted records could not be read. It is usually the permission: your role needs Deleted Records (under Lists)."
+  },
+  "delrec_stale": {
+    "message": "Reload the tab and try again."
+  },
+  "delrec_copy_id": {
+    "message": "Copy ID"
+  },
+  "delrec_copied_id": {
+    "message": "ID copied: $1"
+  },
+  "delrec_export": {
+    "message": "Export"
+  },
+  "delrec_export_csv": {
+    "message": "Export to CSV"
+  },
+  "delrec_exported": {
+    "message": "$1 rows exported"
+  },
+  "delrec_hints": {
+    "message": "↑↓ · Ctrl+C copy ID · Esc clear/close"
   },
   "enableScriptExecuteLabel": {
     "message": "Run Map/Reduce and Scheduled scripts"
@@ -3629,6 +3869,9 @@
   },
   "rr_action_open": {
     "message": "Open in new tab"
+  },
+  "rr_action_run": {
+    "message": "Run search"
   },
   "rr_action_edit": {
     "message": "Edit"
@@ -4324,7 +4567,7 @@
     "message": "Prettify Logs"
   },
   "enableScriptLiveModeDesc": {
-    "message": "Shows logs in real-time."
+    "message": "Keeps the script execution log, NetSuite list views and record sublists up to date every few seconds without reloading the page."
   },
   "enableScriptLiveModeLabel": {
     "message": "Enable Live Mode"
@@ -4345,10 +4588,19 @@
     "message": "Clear search"
   },
   "lv_export_csv_title": {
-    "message": "Export the filtered rows to CSV"
+    "message": "Export every log row to CSV; with text in the search, only the matches"
   },
   "lv_export_json_title": {
-    "message": "Export the filtered rows to JSON"
+    "message": "Export every log row to JSON; with text in the search, only the matches"
+  },
+  "lv_export_loading": {
+    "message": "Fetching the other pages… $1/$2"
+  },
+  "lv_export_partial": {
+    "message": "The other pages could not be fetched: only the one you see was exported."
+  },
+  "lv_export_capped": {
+    "message": "Exported the first $1 of $2 pages of the log."
   },
   "enableRecordTrailLabel": {
     "message": "Record Trail (related records)"
@@ -5706,6 +5958,15 @@
   "recordOptionAddColumn": {
     "message": "Add Column"
   },
+  "recordOptionCopyGenericUrl": {
+    "message": "Copy generic URL"
+  },
+  "recordOptionCopyMenuPath": {
+    "message": "Copy menu path"
+  },
+  "ro_menu_path_none": {
+    "message": "This page is not in the NetSuite menu"
+  },
   "recordOptionCopyCleanUrl": {
     "message": "Copy clean URL"
   },
@@ -6350,6 +6611,75 @@
   },
   "sfv_tab_definition": {
     "message": "Definition"
+  },
+  "sfv_tab_code": {
+    "message": "In scripts"
+  },
+  "sfvShowCodeLabel": {
+    "message": "Find the field in the script code"
+  },
+  "sfv_code_placeholder": {
+    "message": "Field id or any text"
+  },
+  "sfv_code_searching": {
+    "message": "Searching the code…"
+  },
+  "sfv_code_regex": {
+    "message": "Regular expression"
+  },
+  "sfv_code_search": {
+    "message": "Search the code"
+  },
+  "sfv_code_all": {
+    "message": "Include SuiteBundles and SuiteApps"
+  },
+  "sfv_code_bad_regex": {
+    "message": "The regular expression is not valid"
+  },
+  "sfv_code_error": {
+    "message": "The script files could not be listed."
+  },
+  "sfv_code_hint": {
+    "message": "Type a field id or any text to find it in the script code."
+  },
+  "sfv_code_listing": {
+    "message": "Listing the script files…"
+  },
+  "sfv_code_skipped": {
+    "message": "{n} too large"
+  },
+  "sfv_code_unreadable": {
+    "message": "{n} unreadable"
+  },
+  "sfv_code_capped": {
+    "message": "limit of {n} files reached"
+  },
+  "sfv_code_progress": {
+    "message": "Searching… {done} of {total} files"
+  },
+  "sfv_code_stop": {
+    "message": "Stop"
+  },
+  "sfv_code_found": {
+    "message": "In {n} of {total} files"
+  },
+  "sfv_code_none": {
+    "message": "Not found in {total} files"
+  },
+  "sfv_code_stopped": {
+    "message": "stopped"
+  },
+  "sfv_code_write": {
+    "message": "writes"
+  },
+  "sfv_code_read": {
+    "message": "reads"
+  },
+  "sfv_code_library": {
+    "message": "Library"
+  },
+  "sfv_code_more": {
+    "message": "Only the first {n} lines"
   },
   "sfv_tab_history": {
     "message": "History"
@@ -7936,6 +8266,42 @@
   "sr_search_placeholder": {
     "message": "Filter..."
   },
+  "sr_runs_col": {
+    "message": "For you?"
+  },
+  "sr_runs_yes": {
+    "message": "Runs"
+  },
+  "sr_runs_no": {
+    "message": "No"
+  },
+  "sr_runs_maybe": {
+    "message": "Depends"
+  },
+  "sr_runs_unknown": {
+    "message": "Could not be checked"
+  },
+  "sr_runs_yes_tip": {
+    "message": "Meets everything to run for you: deployed, released (or you own it) and you are in its audience."
+  },
+  "sr_runs_r_inactive": {
+    "message": "The script is inactive"
+  },
+  "sr_runs_r_undeployed": {
+    "message": "Not deployed"
+  },
+  "sr_runs_r_testing": {
+    "message": "In testing: only runs for its owner ($1)"
+  },
+  "sr_runs_r_maxed": {
+    "message": "Over the limit of 10 client scripts per record type"
+  },
+  "sr_runs_r_audience": {
+    "message": "You are not in its audience"
+  },
+  "sr_runs_r_group": {
+    "message": "Only reaches you through a group: could not be checked"
+  },
   "sr_status": {
     "message": "Status"
   },
@@ -8300,6 +8666,21 @@
   "sublistFilterCountTitle": {
     "message": "Visible / total rows"
   },
+  "sublistPagesLoading": {
+    "message": "Searching the other pages… $1/$2"
+  },
+  "sublistPagesError": {
+    "message": "The other pages could not be searched"
+  },
+  "sublistPagesPage": {
+    "message": "Page $1 · $2"
+  },
+  "sublistPagesNone": {
+    "message": "No matches on the other pages"
+  },
+  "sublistPagesCapped": {
+    "message": "Only the first $1 of $2 pages were searched"
+  },
   "enableSublistLineIdsLabel": {
     "message": "Sublist line IDs"
   },
@@ -8386,6 +8767,12 @@
   },
   "enableBundleFilterLabelsBetaDesc": {
     "message": "Shows the bundle name beside the ID on the From Bundle search filter."
+  },
+  "enableLoginTrustDeviceLabel": {
+    "message": "Trust This Device"
+  },
+  "enableLoginTrustDeviceDesc": {
+    "message": "On two-step verification, keeps the «Trust this device» box ticked so this computer does not ask for the code again for a while. Do not turn it on for a shared computer."
   },
   "enableLoginSandboxIndicatorBetaLabel": {
     "message": "Sandbox indicator on login"
@@ -9166,8 +9553,8 @@
   "csvRvView": {
     "message": "View"
   },
-  "csvRvReset": {
-    "message": "Reset"
+  "csvRvRefresh": {
+    "message": "Refresh"
   },
   "csvRvLoading": {
     "message": "Loading..."
@@ -9175,8 +9562,8 @@
   "csvRvSuccess": {
     "message": "All records imported successfully."
   },
-  "csvRvConfirmReset": {
-    "message": "Reset the CSV data?"
+  "csvRvConfirmRefresh": {
+    "message": "Your corrections will be lost. Refresh anyway?"
   },
   "csvRvDownloadError": {
     "message": "There was a problem downloading the CSV."
@@ -9186,6 +9573,99 @@
   },
   "csvRvUnavailable": {
     "message": "CSV viewer unavailable (library not loaded)."
+  },
+  "csvRvMetaRecordType": {
+    "message": "Record type"
+  },
+  "csvRvMetaFile": {
+    "message": "File"
+  },
+  "csvRvMetaUser": {
+    "message": "User"
+  },
+  "csvRvMetaDate": {
+    "message": "Date"
+  },
+  "csvRvMetaProgress": {
+    "message": "Progress"
+  },
+  "csvRvMetaColumns": {
+    "message": "Columns"
+  },
+  "csvRvBannerOk": {
+    "message": "Import complete: $1 of $2 records imported"
+  },
+  "csvRvBannerPartial": {
+    "message": "Partial import: $1 of $2 records imported"
+  },
+  "csvRvBannerFail": {
+    "message": "The import did not complete: 0 of $1 records imported"
+  },
+  "csvRvStatImported": {
+    "message": "Imported"
+  },
+  "csvRvStatErrors": {
+    "message": "With errors"
+  },
+  "csvRvStatTotal": {
+    "message": "Total"
+  },
+  "csvRvTabAll": {
+    "message": "All"
+  },
+  "csvRvSearchPh": {
+    "message": "Search all fields"
+  },
+  "csvRvUpload": {
+    "message": "Load CSV"
+  },
+  "csvRvUploadTitle": {
+    "message": "Open a CSV from your computer in this viewer"
+  },
+  "csvRvColRow": {
+    "message": "Row"
+  },
+  "csvRvColStatus": {
+    "message": "Status"
+  },
+  "csvRvRowOk": {
+    "message": "Imported"
+  },
+  "csvRvRowOkTitle": {
+    "message": "Imported successfully"
+  },
+  "csvRvYes": {
+    "message": "Yes"
+  },
+  "csvRvNo": {
+    "message": "No"
+  },
+  "csvRvEmptyFile": {
+    "message": "The file has no records."
+  },
+  "csvRvNoMatches": {
+    "message": "No records match."
+  },
+  "csvRvNote": {
+    "message": "$1 columns · Row = record number in the file (row 1 is the header) · Double-click a cell to fix it."
+  },
+  "csvRvDlAll": {
+    "message": "Download full CSV"
+  },
+  "csvRvDlErrorsOne": {
+    "message": "Download 1 row with errors"
+  },
+  "csvRvDlErrorsMany": {
+    "message": "Download $1 rows with errors"
+  },
+  "csvRvFileErrors": {
+    "message": "Rows with errors"
+  },
+  "csvRvEditedTitle": {
+    "message": "Edited"
+  },
+  "csvRvLoadError": {
+    "message": "The file could not be read."
   },
   "enableInSearchPreviewLabel": {
     "message": "Inline search preview"
@@ -11081,6 +11561,15 @@
   "sqlai_maxrows_hint": {
     "message": "NetSuite rows sent to the model."
   },
+  "sqlai_err_refusal": {
+    "message": "The model declined the request (reason: $1). Try rephrasing it or pick another model.",
+    "placeholders": {
+      "reason": {
+        "content": "$1",
+        "example": "cyber"
+      }
+    }
+  },
   "sqlai_err_ollama_cors": {
     "message": "Ollama refused the connection (403). For security it only accepts local calls: restart it with OLLAMA_ORIGINS=chrome-extension://* so the extension can reach it."
   },
@@ -11926,10 +12415,25 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "Turning Meeting Mode on now also hides the other accounts in the role menu; if you don't want that, switch it off in Settings."
+    "message": "* **Deleted Records**, in Tools: who deleted a record, when and from where."
   },
   "un_hl_2": {
-    "message": "Fixed: with Grouped Tabs on, editing a script no longer closes Brave entirely, and Discreet Mode applies without reloading. More details in the changelog."
+    "message": "**Live Mode** keeps lists and sublists up to date on their own, without reloading the page."
+  },
+  "un_hl_3": {
+    "message": "Sublist filters and the Execution Log search now look through **every page**, and the whole log gets exported."
+  },
+  "un_hl_4": {
+    "message": "Scripted Records tells you whether each script **runs for you**, and if not, why."
+  },
+  "un_hl_5": {
+    "message": "Uninstalling a bundle asks you to type the confirmation word, as deleting a record does."
+  },
+  "un_hl_6": {
+    "message": "Also: clear a column sort, a page’s generic URL, saved searches from Recent Records and controls that match Redwood."
+  },
+  "un_hl_7": {
+    "message": "Fixes in Delete, Scripted Records, Discreet Mode and the new login. More details in the changelog."
   },
   "un_thanks": {
     "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
@@ -12238,6 +12742,156 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Fixed the labels in the field info panel always coming out in Spanish."
+  },
+  "cl_ver_7_3_0": {
+    "message": "v7.3.0"
+  },
+  "cl_date_7_3_0": {
+    "message": "2026-10-27"
+  },
+  "cl_7_3_0_rr_run_title": {
+    "message": "Run saved searches from Recent Records"
+  },
+  "cl_7_3_0_rr_run_desc": {
+    "message": "Added a button to run a saved search from Recent Records without going through its form."
+  },
+  "cl_7_3_0_trust_device_title": {
+    "message": "Trust this device"
+  },
+  "cl_7_3_0_trust_device_desc": {
+    "message": "Added an option to keep «Trust this device» ticked on two-step verification."
+  },
+  "cl_7_3_0_autorefresh_live_title": {
+    "message": "Bundles and CSV imports, live"
+  },
+  "cl_7_3_0_autorefresh_live_desc": {
+    "message": "Changed Auto Refresh to Live Mode, which updates the Bundle List and CSV imports without reloading the page."
+  },
+  "cl_7_3_0_list_live_title": {
+    "message": "Live Mode on lists and sublists"
+  },
+  "cl_7_3_0_list_live_desc": {
+    "message": "Added Live Mode to NetSuite list views and record sublists; its option moves to Productivity."
+  },
+  "cl_7_3_0_sf_all_pages_title": {
+    "message": "Filters search every page"
+  },
+  "cl_7_3_0_sf_all_pages_desc": {
+    "message": "Added searching the other pages to the sublist filter and the Execution Log search, and exporting the whole log."
+  },
+  "cl_7_3_0_bundle_guard_title": {
+    "message": "Bundle uninstall guard"
+  },
+  "cl_7_3_0_bundle_guard_desc": {
+    "message": "Added a guard that asks you to type the confirmation word before uninstalling a bundle."
+  },
+  "cl_7_3_0_clear_sort_title": {
+    "message": "Clear a column sort"
+  },
+  "cl_7_3_0_clear_sort_desc": {
+    "message": "Added a button to clear a column sort on a list or a sublist and go back to the original order."
+  },
+  "cl_7_3_0_sf_native_bar_title": {
+    "message": "The sublist filter sits in its bar"
+  },
+  "cl_7_3_0_sf_native_bar_desc": {
+    "message": "Changed the filter of editable sublists to sit in their control bar, looking like NetSuite’s own."
+  },
+  "cl_7_3_0_redwood_title": {
+    "message": "Controls that match Redwood"
+  },
+  "cl_7_3_0_redwood_desc": {
+    "message": "Changed the look of the extension’s bars, buttons and viewers inside NetSuite pages to match the Redwood theme."
+  },
+  "cl_7_3_0_csvrv_redesign_title": {
+    "message": "The CSV response at a glance"
+  },
+  "cl_7_3_0_csvrv_redesign_desc": {
+    "message": "Added an import summary, status filters and a download of just the rows with errors to the CSV response viewer."
+  },
+  "cl_7_3_0_delrec_title": {
+    "message": "Deleted Records"
+  },
+  "cl_7_3_0_delrec_desc": {
+    "message": "Added a window in the Tools menu to see who deleted a record, when and from where."
+  },
+  "cl_7_3_0_ai_models_title": {
+    "message": "AI models up to date"
+  },
+  "cl_7_3_0_ai_models_desc": {
+    "message": "Added the latest models to the AI Assistant, such as Claude Sonnet 5.5, and replaced the retired ones."
+  },
+  "cl_7_3_0_ai_refusal_title": {
+    "message": "The AI Assistant says when the model declines"
+  },
+  "cl_7_3_0_ai_refusal_desc": {
+    "message": "Fixed the AI Assistant going blank when the model declined a request."
+  },
+  "cl_7_3_0_sfv_code_title": {
+    "message": "Where a field is used in code"
+  },
+  "cl_7_3_0_sfv_code_desc": {
+    "message": "Added a tab to the field information that finds the field in the account’s script code."
+  },
+  "cl_7_3_0_copy_location_title": {
+    "message": "Copy generic URL and menu path"
+  },
+  "cl_7_3_0_copy_location_desc": {
+    "message": "Added copying a page’s generic URL and its menu path, from Record Options and the command palette."
+  },
+  "cl_7_3_0_sr_runs_title": {
+    "message": "Does it run for you?"
+  },
+  "cl_7_3_0_sr_runs_desc": {
+    "message": "Added a column to Scripted Records that says whether each script runs for you and, if not, why."
+  },
+  "cl_7_3_0_sr_owner_title": {
+    "message": "Scripted Records shows them all"
+  },
+  "cl_7_3_0_sr_owner_desc": {
+    "message": "Fixed Scripted Records not showing scripts with no owner or those deployed on all records."
+  },
+  "cl_7_3_0_sr_lazy_title": {
+    "message": "Scripted Records queries when opened"
+  },
+  "cl_7_3_0_sr_lazy_desc": {
+    "message": "Fixed Scripted Records querying the account on every record opened, even when unused."
+  },
+  "cl_7_3_0_rectype_title": {
+    "message": "Delete acts on the record you are looking at"
+  },
+  "cl_7_3_0_rectype_desc": {
+    "message": "Fixed Delete and Edit & Save possibly acting on a different custom record with the same number."
+  },
+  "cl_7_3_0_adv_suitescripts_title": {
+    "message": "The Advanced Editor opens in SuiteScripts"
+  },
+  "cl_7_3_0_adv_suitescripts_desc": {
+    "message": "Changed the Advanced Editor tree to open in the SuiteScripts folder instead of the File Cabinet root."
+  },
+  "cl_7_3_0_adv_root_keep_title": {
+    "message": "The Advanced Editor remembers its folder"
+  },
+  "cl_7_3_0_adv_root_keep_desc": {
+    "message": "Fixed the Advanced Editor tree forgetting the chosen folder when opening another file."
+  },
+  "cl_7_3_0_adv_search_all_title": {
+    "message": "The Advanced Editor searches all your code"
+  },
+  "cl_7_3_0_adv_search_all_desc": {
+    "message": "Fixed “Search in every file” in the Advanced Editor not searching without an open file; it now searches all the account’s code."
+  },
+  "cl_7_3_0_discreet_scope_title": {
+    "message": "Discreet Mode only hides the accounts"
+  },
+  "cl_7_3_0_discreet_scope_desc": {
+    "message": "Fixed Discreet Mode switching off the Search Fields Finder and other features instead of only hiding the other accounts."
+  },
+  "cl_7_3_0_login_identity_title": {
+    "message": "Adapted to the new NetSuite login"
+  },
+  "cl_7_3_0_login_identity_desc": {
+    "message": "Fixed company branding, “Back to my page” and the sandbox notice clashing with the new NetSuite login."
   },
   "cl_ver_7_2_3": {
     "message": "v7.2.3"
@@ -13669,7 +14323,7 @@
     "message": "Search in files (Ctrl+Shift+F)"
   },
   "adv_bus_ph": {
-    "message": "Search this folder and its subfolders"
+    "message": "Search the account’s code"
   },
   "adv_quick_ph": {
     "message": "Type a file name"
@@ -13709,22 +14363,26 @@
   "adv_bus_sin_carpeta": {
     "message": "No folder to search in"
   },
+  "adv_bus_todo": {
+    "message": "All code"
+  },
+  "adv_bus_carpeta": {
+    "message": "This folder"
+  },
+  "adv_bus_carpeta_tip": {
+    "message": "The open file’s folder and its subfolders"
+  },
+  "adv_bus_carpeta_no": {
+    "message": "Open a file to search its folder"
+  },
+  "sfv_code_quotes": {
+    "message": "Only inside quotes, the way an id is written in code"
+  },
   "adv_bus_listando": {
     "message": "Listing files…"
   },
-  "adv_bus_listando_n": {
-    "message": "$1 folders · $2 files",
-    "placeholders": {
-      "1": {
-        "content": "$1"
-      },
-      "2": {
-        "content": "$2"
-      }
-    }
-  },
   "adv_bus_nada_que_mirar": {
-    "message": "No text files in this folder"
+    "message": "No code files to search here"
   },
   "adv_bus_yendo": {
     "message": "$1 of $2 · $3 with matches",

@@ -62,8 +62,8 @@
         return true;
     }
 
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
-        if (!settings[STORAGE_KEY] || settings.enableDiscreetMode || !isApplicablePage()) return;
+    chrome.storage.local.get({ [STORAGE_KEY]: true }, (settings) => {
+        if (!settings[STORAGE_KEY] || !isApplicablePage()) return;
         init();
     });
 
@@ -288,6 +288,10 @@
             const q = input.value ? input.value.trim() : '';
             visible = [];
             for (const e of entries) {
+                if (e.link && e.link.dataset && e.link.dataset.nsftDiscreetHidden === '1') {
+                    applyHighlight(e, '');
+                    continue;
+                }
                 const match = !q || fuzzyIndices(e.key, q) !== null;
                 if (e.container) e.container.style.display = match ? '' : 'none';
                 applyHighlight(e, q);

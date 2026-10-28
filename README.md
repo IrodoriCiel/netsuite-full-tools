@@ -12,7 +12,7 @@
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Valoración" src="https://img.shields.io/chrome-web-store/rating/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&color=F59E0B&label=Rating"></a>
 </p>
 <p align="center">
-  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v7.2.3-555555?style=for-the-badge"></a>
+  <a href="#relación-con-el-paquete-de-la-store--relation-to-the-store-package"><img alt="Versión de este espejo" src="https://img.shields.io/badge/Espejo%20·%20Mirror-v7.3.0-555555?style=for-the-badge"></a>
   <a href="https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3"><img alt="Manifest V3" src="https://img.shields.io/badge/Manifest-V3-2C6E4E?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
   <a href="#ficha-técnica--technical-details"><img alt="JavaScript sin frameworks" src="https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"></a>
   <a href="#ficha-técnica--technical-details"><img alt="Sin telemetría ni servidores propios" src="https://img.shields.io/badge/Privacidad-100%25%20local-2C6E4E?style=for-the-badge"></a>
@@ -24,7 +24,7 @@
 
 ---
 
-**108 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
+**111 funciones** en 9 categorías · Español + English · Manifest V3 · todo local, sin servidores propios.
 
 ## Qué es este repositorio · About this repository
 
@@ -59,13 +59,13 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Ver scripts del registro** | todos los scripts y workflows asociados, de un vistazo. |
 | **Ver logs del registro** | los logs de ejecución sin salir de la página, con los scripts del registro preseleccionados y filtros por nivel, tipo, texto y fechas; también puedes cambiar a otro tipo de registro desde la cabecera. |
 | **Cargar registro a consola** | carga el registro actual en la consola (SS1.0 y SS2.x). |
-| **Menú Opciones de Registro** | accesos directos según el tipo de registro (agregar campo, ver XML, dependientes…), más Record Trail y las acciones Guardar y Editar, Editar y Guardar y Eliminar registro; eliges cuáles ofrece y si cada una va en el menú o como botón. |
+| **Menú Opciones de Registro** | accesos directos según el tipo de registro (agregar campo, ver XML, dependientes, copiar la URL genérica o la ruta del menú…), más Record Trail y las acciones Guardar y Editar, Editar y Guardar y Eliminar registro; eliges cuáles ofrece y si cada una va en el menú o como botón. |
 | **Ir al record** | salta a cualquier registro con Alt+Shift+G por número, tipo o nombre. |
 | **Registros recientes ampliados** | historial completo con buscador y fecha de acceso. |
 | **Abrir en otro entorno** | abre la misma URL en producción, sandbox o release preview conservando ruta y parámetros. |
 | **Número de sandbox en el logo** | distingue entre varios sandboxes de la misma cuenta. |
 | **Copiar IDs internos** | copia con un clic IDs de campos, sublistas y registros, y abre desde la sublista la definición del Custom Record dueño. |
-| **Mostrar información de campos** | en la ayuda de campo: valor y su lista, ID interno, tipo, ayuda e historial de cambios; eliges qué secciones ver. |
+| **Mostrar información de campos** | en la ayuda de campo: valor y su lista, ID interno, tipo, ayuda, historial de cambios y en qué scripts se usa el campo; eliges qué secciones ver. |
 | **Buscar campo por ID/etiqueta** | encuentra cualquier campo con Ctrl+Shift+F. |
 | **Vista previa de custom fields al pasar el cursor** | ID, tipo y valores sin abrir su definición. |
 | **Enlaces nativos relacionados** | enlaces directos al registro de los campos nativos. |
@@ -76,13 +76,12 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Función | Qué hace |
 |---|---|
-| **Editor Avanzado** | abre un archivo, o el editor entero desde el menú de Herramientas, con el editor de la extensión: el autocompletado te dice qué recibe y qué devuelve cada función de SuiteScript y cuánto governance gasta, con su documentación al lado y al pasar el ratón; Ctrl+clic salta a la declaración; un panel de símbolos recorre el archivo; y además aviso de sintaxis, sugerencias con IA, abrir cualquier archivo por su nombre, buscar en todos los de la carpeta, plegado, formateo y el File Cabinet entero al lado. |
+| **Editor Avanzado** | abre un archivo, o el editor entero desde el menú de Herramientas, con el editor de la extensión: el autocompletado te dice qué recibe y qué devuelve cada función de SuiteScript y cuánto governance gasta, con su documentación al lado y al pasar el ratón; Ctrl+clic salta a la declaración; un panel de símbolos recorre el archivo; y además aviso de sintaxis, sugerencias con IA, abrir cualquier archivo por su nombre, buscar en todo el código de la cuenta, plegado, formateo y el File Cabinet entero al lado. |
 | **Consola de SuiteScript** | escribe SuiteScript y ejecútalo al momento, con los módulos N/* de tu cuenta, la ayuda de la API mientras escribes —tipos, qué devuelve cada función y su governance— y confirmación antes de escribir. |
 | **Ejecutar Map/Reduce y Scheduled** | lanza un script desde su ficha, la Paleta de Comandos o el menú Herramientas: eliges el despliegue, pide confirmación en producción y sigue la ejecución hasta que termina. |
 | **Tema del editor de código** | aplica un tema al editor. |
 | **Cerrar editor al guardar** | cierra la pestaña del editor en cuanto guardas. |
 | **Abrir archivo en nueva pestaña** | enlace directo junto a cada archivo de una página de scripting. |
-| **Modo en vivo** | logs en tiempo real, con autoinicio configurable. |
 | **Embellecer logs** | formatea y resalta JSON/SQL en las listas de ejecución. |
 | **Botón Full Logs** | salta al archivo completo de logs desde un script. |
 | **Execution Log buscable** | busca dentro del log del script y encuentra al instante lo que necesitas. |
@@ -104,6 +103,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Buscador de campos en búsquedas** | filtros y búsqueda rápida en los selectores de campos. |
 | **Tipo de resumen en bloque** | pone o quita el tipo de resumen (agrupar, sumar, contar…) en todas las columnas de una búsqueda guardada a la vez. |
 | **Filtros en bloque** | en los resultados de una búsqueda guardada, cambiar un filtro deja de recargar la página: se ponen todos y un botón los aplica de una vez. |
+| **Quitar orden de columnas** | en las listas, los resultados de búsqueda y las sublistas de los registros ordenados por una columna, un botón quita ese orden y vuelve al de partida. |
 | **Autocompletar fórmula de búsqueda** | sugiere IDs de campo dentro de { } en el editor de fórmulas. |
 | **Visor de respuesta CSV** | en el estado de importaciones CSV, añade un botón Ver junto al archivo de respuesta y lo abre como tabla editable, para revisar los errores, corregirlos y descargarlo sin salir de la página. |
 | **Preview inline de búsquedas** | panel inferior con la vista previa sin salir de la página. |
@@ -146,15 +146,18 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | Función | Qué hace |
 |---|---|
 | **Buscador de personalizaciones** | una ventana para encontrar scripts, workflows, campos, búsquedas guardadas, plantillas y archivos de la cuenta por su nombre. |
+| **Registros eliminados** | quién borró un registro, cuándo y desde dónde, buscando por documento, tipo o ID. |
 | **Autogenerar IDs de campos y registros** | ID automático a partir del nombre, con prefijo configurable. |
 | **Copiar ID de cuenta en roles** | muestra y copia el ID de la cuenta desde el menú de roles. |
 | **Buscador de roles** | filtra roles y cuentas al escribir. |
 | **Logo de compañía en login** | muestra logo y nombre de la compañía en la página de login. |
 | **Indicador de sandbox en login** | banner que marca las cuentas sandbox. |
+| **Confiar en este dispositivo** | deja marcada esa casilla en la verificación en dos pasos (apagado de fábrica; no lo actives en un equipo compartido). |
 | **Bloqueador de cierre de sesión** | quita la cortina que tapa la página al caducar la sesión, para seguir viendo y copiando lo que tenías (para guardar, hay que volver a entrar). |
 | **Regresar al account desde netsuite.com** | te devuelve a tu cuenta si caes en la landing pública. |
 | **Volver a tu página tras iniciar sesión** | si la sesión caduca en varias pestañas, basta con iniciarla en una: las demás vuelven solas a la página que tenías abierta. |
-| **Auto refresco en bundles** | interruptor de auto refresco en la lista de bundles. |
+| **Modo en vivo** | pone al día cada pocos segundos, sin recargar la página, el registro de ejecución de los scripts, las listas de NetSuite (también la de bundles y el estado de las importaciones CSV) y las sublistas de los registros, con autoinicio configurable. |
+| **Freno al desinstalar bundles** | pide escribir la palabra de confirmación antes de desinstalar un bundle, para no hacerlo por error al querer actualizarlo. |
 | **Auto-refresh de portlets** | refresca los portlets del dashboard automáticamente. |
 | **Embellecer campos de código** | formatea y resalta JSON/SQL en registros al verlos. |
 | **Formatear SQL/JSON** | botón para formatear SQL/JSON en áreas de texto. |
@@ -217,13 +220,13 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **View Record Scripts** | every script and workflow tied to the record, at a glance. |
 | **View Record Logs** | execution logs without leaving the page, with the record's scripts preselected and filters by level, type, text and dates; you can also switch to another record type from the header. |
 | **Load Record to Console** | load the current record into the console (SS1.0 and SS2.x). |
-| **Record Options Menu** | shortcuts based on record type (add field, view XML, dependencies…), plus Record Trail and the Save and Edit, Edit and Save and Delete Record actions; you choose which ones it offers and whether each one lives in the menu or as a button. |
+| **Record Options Menu** | shortcuts based on record type (add field, view XML, dependencies, copy the generic URL or the menu path…), plus Record Trail and the Save and Edit, Edit and Save and Delete Record actions; you choose which ones it offers and whether each one lives in the menu or as a button. |
 | **Go to Record** | jump to any record with Alt+Shift+G by number, type or name. |
 | **Expanded Recent Records** | full history with inline search and access date. |
 | **Open in Another Environment** | open the same URL in production, sandbox or release preview, keeping path and params. |
 | **Sandbox Number on Header Logo** | tell multiple sandboxes of the same account apart. |
 | **Copy Internal IDs** | one-click copy of field, sublist and record IDs, and opens the owning Custom Record definition from a sublist. |
-| **Show Field Information** | in field help: value and its list, internal ID, type, help and change history; you choose which sections to see. |
+| **Show Field Information** | in field help: value and its list, internal ID, type, help, change history and which scripts use the field; you choose which sections to see. |
 | **Find Field by ID/Label** | find any field with Ctrl+Shift+F. |
 | **Hover Preview for Custom Fields** | ID, type and values without opening the definition. |
 | **Related Native Links** | direct links to native field records. |
@@ -234,13 +237,12 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 
 | Feature | What it does |
 |---|---|
-| **Advanced Editor** | opens a file, or the whole editor from the Tools menu, with the extension’s own editor: autocomplete tells you what each SuiteScript function takes and returns and how much governance it costs, with its documentation alongside and on hover; Ctrl+click jumps to the declaration; a symbols panel walks the file; plus syntax warnings, AI suggestions, open any file by name, search across every file in the folder, code folding, formatting and the whole File Cabinet alongside. |
+| **Advanced Editor** | opens a file, or the whole editor from the Tools menu, with the extension’s own editor: autocomplete tells you what each SuiteScript function takes and returns and how much governance it costs, with its documentation alongside and on hover; Ctrl+click jumps to the declaration; a symbols panel walks the file; plus syntax warnings, AI suggestions, open any file by name, search across all the account’s code, code folding, formatting and the whole File Cabinet alongside. |
 | **SuiteScript Console** | write SuiteScript and run it right away, with your account’s N/* modules, API help as you type —types, what each function returns and its governance— and a confirmation before it writes. |
 | **Run Map/Reduce and Scheduled Scripts** | launch a script from its record, the Command Palette or the Tools menu: pick the deployment, confirm in production and follow the run until it finishes. |
 | **Code Editor Theme** | apply a theme to the editor. |
 | **Close Editor on Save** | closes the editor tab the moment you save. |
 | **Open File in New Tab** | direct link next to each file on a scripting page. |
-| **Live Mode** | real-time logs, with configurable auto-start. |
 | **Prettify Logs** | formats and highlights JSON/SQL in execution lists. |
 | **Full Logs Button** | jump to the full logs archive from a script. |
 | **Searchable Execution Log** | search inside the script log and find what you need instantly. |
@@ -262,6 +264,7 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | **Search Fields Finder** | filters and quick search in field selectors. |
 | **Bulk Summary Type** | sets or clears the summary type (group, sum, count…) on every column of a saved search at once. |
 | **Batch Search Filters** | on saved search results, changing a filter no longer reloads the page: set them all and apply them once with a button. |
+| **Clear Column Sort** | on lists, search results and record sublists sorted by a column, a button clears that sort and goes back to the original order. |
 | **Search Formula Autocomplete** | suggests field IDs inside { } in the formula editor. |
 | **CSV Response Viewer** | on the CSV import status page, adds a View button next to the response file and opens it as an editable table, so you can review errors, fix them and download it without leaving the page. |
 | **Inline Search Preview** | bottom panel with the preview without leaving the page. |
@@ -304,15 +307,18 @@ NetSuite Full Tools (NSFT) convierte NetSuite en una plataforma que da gusto usa
 | Feature | What it does |
 |---|---|
 | **Customization Finder** | one window to find the account’s scripts, workflows, fields, saved searches, templates and files by name. |
+| **Deleted Records** | who deleted a record, when and from where, searching by document, type or ID. |
 | **Autogenerate Field/Record IDs** | automatic ID from the name, with a configurable prefix. |
 | **Copy Account ID in Roles** | shows and copies the account ID from the roles menu. |
 | **Role Finder** | filter roles and accounts as you type. |
 | **Company Logo on Login** | shows the company logo and name on the login page. |
 | **Sandbox Indicator on Login** | a banner marking sandbox accounts. |
+| **Trust This Device** | keeps that box ticked on two-step verification (off by default; do not turn it on for a shared computer). |
 | **Logout Blocker** | removes the curtain that covers the page when the session expires, so you can still read and copy what you had (saving means logging back in). |
 | **Return to Account from netsuite.com** | sends you back to your account if you hit the public page. |
 | **Back to Your Page After Signing In** | if the session expires across several tabs, signing in on one is enough: the rest return by themselves to the page you had open. |
-| **Auto Refresh on Bundles** | an auto-refresh toggle on the Bundle List. |
+| **Live Mode** | keeps the script execution log, NetSuite list views (the Bundle List and the CSV import status page included) and record sublists up to date every few seconds without reloading the page, with configurable auto-start. |
+| **Bundle Uninstall Guard** | asks you to type the confirmation word before uninstalling a bundle, so it isn't done by mistake when you meant to update it. |
 | **Portlet Auto-refresh** | auto-refreshes dashboard portlets. |
 | **Prettify Code Fields** | formats and highlights JSON/SQL in records when viewing. |
 | **Format SQL/JSON** | a button to format SQL/JSON in text areas. |

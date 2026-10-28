@@ -96,6 +96,13 @@
     border-color: #b91c1c;
 }
 
+.nsft-dlg .nsft-dlg-btn:disabled,
+.nsft-dlg .nsft-dlg-btn:disabled:hover {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.6);
+}
+
 .nsft-dlg[data-theme="dark"] .nsft-dlg-body {
     color: #C6CEDB;
 }

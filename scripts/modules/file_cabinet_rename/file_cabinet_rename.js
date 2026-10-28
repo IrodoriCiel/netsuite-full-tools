@@ -7,7 +7,6 @@
     const FOLDER_URL = '/app/common/media/mediaitemfolder.nl';
 
     let enabled = false;
-    let discreet = false;
     let _unsub = null;
     let _applied = new WeakSet();
 
@@ -18,15 +17,13 @@
         return /mediaitemfolders|media|filecabinet/i.test(location.pathname);
     }
 
-    chrome.storage.local.get({ [STORAGE_KEY]: false, enableDiscreetMode: false }, (items) => {
+    chrome.storage.local.get({ [STORAGE_KEY]: false }, (items) => {
         enabled = !!items[STORAGE_KEY];
-        discreet = !!items.enableDiscreetMode;
         if (enabled && isApplicablePage()) init();
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
-        if (changes.enableDiscreetMode) discreet = !!changes.enableDiscreetMode.newValue;
         if (!changes[STORAGE_KEY]) return;
         enabled = !!changes[STORAGE_KEY].newValue;
         if (enabled) {
@@ -134,7 +131,7 @@
         btn.className = BTN_CLASS;
         btn.href = '#';
         btn.title = label;
-        btn.innerHTML = svgRename() + (discreet ? '' : '<span class="nsft-fcr-label">' + label + '</span>');
+        btn.innerHTML = svgRename() + '<span class="nsft-fcr-label">' + label + '</span>';
         btn.addEventListener('click', (ev) => {
             ev.preventDefault();
             ev.stopPropagation();

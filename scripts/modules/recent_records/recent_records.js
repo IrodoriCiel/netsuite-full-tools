@@ -474,6 +474,16 @@
         return /[?&]nsft-advanced-editor=T(?:&|$)/i.test(u);
     }
 
+    function savedSearchRunUrl(u) {
+        try {
+            const id = new URL(u, location.origin).searchParams.get('id');
+            if (!id || !/^\d+$/.test(id)) return '';
+            return '/app/common/search/savedsearchresults.nl?searchid=' + id + '&saverun=T&whence=';
+        } catch (e) {
+            return '';
+        }
+    }
+
     function isSavedSearchUrl(u) {
         if (!u || u === '#') return false;
         try {
@@ -722,9 +732,11 @@
             url = editUrl;
             viewUrl = editUrl;
         }
+        const runUrl = isSaved ? savedSearchRunUrl(url) : '';
         const date = isPinned ? '' : (item.date || '');
         const viewTitle = i18n('rr_action_open', 'Abrir');
         const editTitle = i18n('rr_action_edit', 'Editar');
+        const runTitle = i18n('rr_action_run', 'Ejecutar búsqueda');
         const pinTitle = isPinned ? i18n('rr_unpin', 'Quitar de fijados') : i18n('rr_pin', 'Fijar');
         return `
             <div class="nsft-rr-row" role="listitem"
@@ -757,6 +769,12 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M12 20h9"></path>
                             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                    </a>` : ''}
+                    ${runUrl ? `
+                    <a class="nsft-rr-action nsft-rr-action-run" href="${escapeHtml(runUrl)}" title="${escapeHtml(runTitle)}" aria-label="${escapeHtml(runTitle)}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polygon points="6 4 20 12 6 20 6 4"></polygon>
                         </svg>
                     </a>` : ''}
                     <button type="button" class="nsft-rr-action nsft-rr-action-pin${isPinned ? ' is-pinned' : ''}" title="${escapeHtml(pinTitle)}" aria-label="${escapeHtml(pinTitle)}" aria-pressed="${isPinned ? 'true' : 'false'}">

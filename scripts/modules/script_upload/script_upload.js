@@ -2,7 +2,6 @@
     'use strict';
 
     const STORAGE_KEY = 'enableScriptUpload';
-    const DISCREET_KEY = 'enableDiscreetMode';
     const NSFT_THEME_KEY = 'nsftTheme';
     const FETCHER_PATH = 'scripts/modules/script_upload/script_upload_fetcher.js';
 
@@ -16,12 +15,11 @@
 
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
-        [DISCREET_KEY]: false,
         [NSFT_THEME_KEY]: 'auto'
     }, (settings) => {
         _theme = settings[NSFT_THEME_KEY] || 'auto';
         attachStorageListener();
-        if (!settings[STORAGE_KEY] || settings[DISCREET_KEY]) return;
+        if (!settings[STORAGE_KEY]) return;
         start();
     });
 
@@ -54,13 +52,8 @@
             if (area !== 'local') return;
             if (changes[STORAGE_KEY]) {
                 const enabled = changes[STORAGE_KEY].newValue !== false;
-                if (!enabled) {
-                    stop();
-                } else {
-                    chrome.storage.local.get({ [DISCREET_KEY]: false }, (s) => {
-                        if (!s[DISCREET_KEY]) start();
-                    });
-                }
+                if (enabled) start();
+                else stop();
             }
             if (changes[NSFT_THEME_KEY]) {
                 _theme = changes[NSFT_THEME_KEY].newValue || 'auto';
@@ -68,16 +61,6 @@
                     type: 'nsft-script-upload-theme',
                     theme: _theme
                 }, '*');
-            }
-            if (changes[DISCREET_KEY]) {
-                const discreet = !!changes[DISCREET_KEY].newValue;
-                if (discreet) {
-                    stop();
-                } else {
-                    chrome.storage.local.get({ [STORAGE_KEY]: true }, (s) => {
-                        if (s[STORAGE_KEY] !== false) start();
-                    });
-                }
             }
         };
         chrome.storage.onChanged.addListener(storageListener);

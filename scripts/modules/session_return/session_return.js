@@ -228,12 +228,7 @@
         }
 
         function place() {
-            const box = document.querySelector('.login-page-box');
-            if (box) {
-                box.insertBefore(card, anchorInBox(box));
-                if (stopObserver) { stopObserver(); stopObserver = null; }
-                return;
-            }
+            if (placeInBox()) return;
             card.classList.add('nsft-sret-floating');
             const stack = window.NSFT_Notices && window.NSFT_Notices.mount(card);
             if (!stack) document.body.appendChild(card);
@@ -243,14 +238,26 @@
         function watchForBox() {
             if (stopObserver || !window.NSFT_Observer) return;
             stopObserver = window.NSFT_Observer.subscribe(() => {
-                const box = document.querySelector('.login-page-box');
-                if (!box || !card) return;
+                if (!card || !document.querySelector('.login-page-box')) return;
                 card.classList.remove('nsft-sret-floating');
                 if (window.NSFT_Notices) window.NSFT_Notices.unmount(card);
-                box.insertBefore(card, anchorInBox(box));
-                if (stopObserver) { stopObserver(); stopObserver = null; }
+                placeInBox();
             }, { throttle: 250 });
             setTimeout(() => { if (stopObserver) { stopObserver(); stopObserver = null; } }, BOX_MAX_MS);
+        }
+
+        function placeInBox() {
+            const box = document.querySelector('.login-page-box');
+            if (!box) return false;
+            const id = window.NSFT_LoginIdentity;
+            if (id && id.put('back', card)) {
+                card.classList.add('nsft-sret-inline');
+                cardBtn.classList.remove('nsft-ui-button');
+            } else {
+                box.insertBefore(card, anchorInBox(box));
+            }
+            if (stopObserver) { stopObserver(); stopObserver = null; }
+            return true;
         }
 
         function anchorInBox(box) {
@@ -287,7 +294,9 @@
             document.removeEventListener('input', onInput, true);
             if (stopObserver) { stopObserver(); stopObserver = null; }
             if (card) {
-                if (window.NSFT_Notices) window.NSFT_Notices.unmount(card);
+                if (card.classList.contains('nsft-sret-inline') && window.NSFT_LoginIdentity) {
+                    window.NSFT_LoginIdentity.remove(card);
+                } else if (window.NSFT_Notices) window.NSFT_Notices.unmount(card);
                 else if (card.parentNode) card.parentNode.removeChild(card);
                 card = null;
                 cardBody = null;

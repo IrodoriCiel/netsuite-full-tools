@@ -18,11 +18,10 @@
 
     chrome.storage.local.get({
         [STORAGE_KEY]: true,
-        enableDiscreetMode: false,
         formatCodeFieldsOnBlur: false
     }, (items) => {
         _formatOnBlur = !!items.formatCodeFieldsOnBlur;
-        if (!items[STORAGE_KEY] || items.enableDiscreetMode) return;
+        if (!items[STORAGE_KEY]) return;
         start();
     });
 
@@ -31,7 +30,7 @@
         if (changes.formatCodeFieldsOnBlur) _formatOnBlur = !!changes.formatCodeFieldsOnBlur.newValue;
         if (changes[STORAGE_KEY]) {
             if (changes[STORAGE_KEY].newValue) {
-                chrome.storage.local.get({ enableDiscreetMode: false }, (s) => { if (!s.enableDiscreetMode) start(); });
+                start();
             } else {
                 teardown();
             }

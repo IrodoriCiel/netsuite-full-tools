@@ -790,6 +790,12 @@
                     <label><input type="checkbox" id="recordOptionsMenuShowCopyUrl"><span data-i18n="recordOptionCopyCleanUrl"></span></label>
                   </div>
                   <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowGenericUrl"><span data-i18n="recordOptionCopyGenericUrl"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowMenuPath"><span data-i18n="recordOptionCopyMenuPath"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
                     <label><input type="checkbox" id="recordOptionsMenuShowOpenInEnv"><span data-i18n="recordOptionOpenInEnv"></span></label>
                   </div>
                   <div class="nsft-subopt-item">
@@ -923,6 +929,11 @@
                 <div class="nsft-subopts-sub" data-i18n="sfv_tab_history"></div>
                 <div class="nsft-subopts-grid is-child">
                   <label><input type="checkbox" id="enableFieldAuditQuickView"><span data-i18n="sfvShowHistoryLabel"></span></label>
+                </div>
+
+                <div class="nsft-subopts-sub" data-i18n="sfv_tab_code"></div>
+                <div class="nsft-subopts-grid is-child">
+                  <label><input type="checkbox" id="setFieldValuesShowCode"><span data-i18n="sfvShowCodeLabel"></span></label>
                 </div>
               </div>
             </div>
@@ -1252,30 +1263,6 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableEditorOpenInNewTab">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="option-row">
-            <div>
-              <span id="label_enableLiveMode" data-i18n="enableScriptLiveModeLabel"></span>
-              <div id="desc_enableLiveMode" class="description" data-i18n="enableScriptLiveModeDesc"></div>
-
-              <div id="live-mode-container" style="margin-top: 5px; display: none; align-items: center; gap: 8px;">
-                <label for="liveModeInterval" style="font-size: 12px; margin-left: 5px;"
-                  data-i18n="secondsLabel"></label>
-                <input type="number" id="liveModeInterval" value="3" min="1" max="60"
-                  style="width: 50px; padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 12px;">
-
-                <div style="display: flex; align-items: center; margin-left: 10px;">
-                  <input type="checkbox" id="liveModeAutoStart" style="margin-right: 5px;">
-                  <label for="liveModeAutoStart" style="font-size: 12px; cursor: pointer;"
-                    data-i18n="liveModeAutoStartLabel"></label>
-                </div>
-              </div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableLiveMode">
               <span class="slider round"></span>
             </label>
           </div>
@@ -1662,6 +1649,17 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableSavedSearchSplit">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableClearSort" data-i18n="enableClearSortLabel"></span>
+              <div id="desc_enableClearSort" class="description" data-i18n="enableClearSortDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableClearSort">
               <span class="slider round"></span>
             </label>
           </div>
@@ -2066,6 +2064,17 @@
             </label>
           </div>
 
+          <div class="option-row">
+            <div>
+              <span id="label_enableDeletedRecords" data-i18n="enableDeletedRecordsLabel"></span>
+              <div id="desc_enableDeletedRecords" class="description" data-i18n="enableDeletedRecordsDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableDeletedRecords">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
           <div class="option-row" style="flex-wrap: wrap;">
             <div style="flex: 1; min-width: 200px;">
               <span id="label_enableAutogenerateIds" data-i18n="enableAutogenerateIdsLabel"></span>
@@ -2140,6 +2149,17 @@
 
           <div class="option-row">
             <div>
+              <span id="label_enableLoginTrustDevice" data-i18n="enableLoginTrustDeviceLabel"></span>
+              <div id="desc_enableLoginTrustDevice" class="description" data-i18n="enableLoginTrustDeviceDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableLoginTrustDevice">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
               <span id="label_enableLogoutBlocker" data-i18n="enableLogoutBlockerLabel"></span>
               <div id="desc_enableLogoutBlocker" class="description" data-i18n="enableLogoutBlockerDesc"></div>
             </div>
@@ -2173,24 +2193,47 @@
 
           <div class="option-row">
             <div>
-              <span id="label_enableAutoRefresh" data-i18n="enableAutoRefreshLabel"></span>
-              <div id="desc_enableAutoRefresh" class="description" data-i18n="enableAutoRefreshDesc"></div>
+              <span id="label_enableLiveMode" data-i18n="enableScriptLiveModeLabel"></span>
+              <div id="desc_enableLiveMode" class="description" data-i18n="enableScriptLiveModeDesc"></div>
 
-              <div id="auto-refresh-container" style="margin-top: 5px; display: none; align-items: center; gap: 8px;">
-                <label for="autoRefreshInterval" style="font-size: 12px; margin-left: 5px;"
+              <div id="live-mode-container" style="margin-top: 5px; display: none; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <label for="liveModeInterval" style="font-size: 12px; margin-left: 5px;"
                   data-i18n="secondsLabel"></label>
-                <input type="number" id="autoRefreshInterval" value="5" min="1" max="999"
+                <input type="number" id="liveModeInterval" value="3" min="1" max="300"
                   style="width: 50px; padding: 2px 5px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 12px;">
 
                 <div style="display: flex; align-items: center; margin-left: 10px;">
-                  <input type="checkbox" id="autoRefreshAutoStart" style="margin-right: 5px;">
-                  <label for="autoRefreshAutoStart" style="font-size: 12px; cursor: pointer;"
-                    data-i18n="autoRefreshAutoStartLabel"></label>
+                  <input type="checkbox" id="liveModeAutoStart" style="margin-right: 5px;">
+                  <label for="liveModeAutoStart" style="font-size: 12px; cursor: pointer;"
+                    data-i18n="liveModeAutoStartLabel"></label>
+                </div>
+
+                <div style="display: flex; align-items: center; margin-left: 10px;">
+                  <input type="checkbox" id="liveModeStatusAutoStart" style="margin-right: 5px;">
+                  <label for="liveModeStatusAutoStart" style="font-size: 12px; cursor: pointer;"
+                    data-i18n="liveModeStatusAutoStartLabel"></label>
+                </div>
+
+                <div style="display: flex; align-items: center; margin-left: 10px;">
+                  <input type="checkbox" id="liveModeSublists" style="margin-right: 5px;">
+                  <label for="liveModeSublists" style="font-size: 12px; cursor: pointer;"
+                    data-i18n="liveModeSublistsLabel"></label>
                 </div>
               </div>
             </div>
             <label class="switch">
-              <input type="checkbox" id="enableAutoRefresh">
+              <input type="checkbox" id="enableLiveMode">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableBundleUninstallGuard" data-i18n="enableBundleUninstallGuardLabel"></span>
+              <div id="desc_enableBundleUninstallGuard" class="description" data-i18n="enableBundleUninstallGuardDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableBundleUninstallGuard">
               <span class="slider round"></span>
             </label>
           </div>

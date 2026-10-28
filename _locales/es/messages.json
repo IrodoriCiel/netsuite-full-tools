@@ -646,9 +646,6 @@
   "autogenerateIdsPrefixLabel": {
     "message": "Prefijo:"
   },
-  "autoRefresh": {
-    "message": "Auto-Actualizar"
-  },
   "portletRefresherCtrl": {
     "message": "Auto-refresco"
   },
@@ -668,9 +665,6 @@
     "message": "Segundos entre refrescos"
   },
   "portletRefresherAutoStartLabel": {
-    "message": "Iniciar activado"
-  },
-  "autoRefreshAutoStartLabel": {
     "message": "Iniciar activado"
   },
   "badJson": {
@@ -765,6 +759,54 @@
   },
   "cl_cat_ui": {
     "message": "Herramientas de UI / UX"
+  },
+  "cl_tipo_new": {
+    "message": "Nueva"
+  },
+  "cl_tipo_improvement": {
+    "message": "Mejora"
+  },
+  "cl_tipo_fix": {
+    "message": "Corrección"
+  },
+  "cl_ui_all": {
+    "message": "Todo"
+  },
+  "cl_ui_new": {
+    "message": "Nuevas"
+  },
+  "cl_ui_improvement": {
+    "message": "Mejoras"
+  },
+  "cl_ui_fix": {
+    "message": "Correcciones"
+  },
+  "cl_ui_filter": {
+    "message": "Filtrar por tipo de cambio"
+  },
+  "cl_ui_latest": {
+    "message": "Última"
+  },
+  "cl_ui_empty": {
+    "message": "No hay cambios de este tipo."
+  },
+  "cl_sum_new_one": {
+    "message": "$1 nueva"
+  },
+  "cl_sum_new_other": {
+    "message": "$1 nuevas"
+  },
+  "cl_sum_improvement_one": {
+    "message": "$1 mejora"
+  },
+  "cl_sum_improvement_other": {
+    "message": "$1 mejoras"
+  },
+  "cl_sum_fix_one": {
+    "message": "$1 corrección"
+  },
+  "cl_sum_fix_other": {
+    "message": "$1 correcciones"
   },
   "cl_date_1_0_0": {
     "message": "2026-01-21"
@@ -1576,6 +1618,18 @@
   "cmdp_act_other_fields": {
     "message": "Otros Campos Personalizados"
   },
+  "cmdp_act_page_copy_generic_url": {
+    "message": "Copiar URL genérica"
+  },
+  "cmdp_act_page_copy_generic_url_desc": {
+    "message": "Sin número de cuenta: abre esta página en la cuenta en la que se tenga sesión"
+  },
+  "cmdp_act_page_copy_menu_path": {
+    "message": "Copiar ruta del menú"
+  },
+  "cmdp_act_page_copy_menu_path_desc": {
+    "message": "Cómo llegar a esta página desde el menú de NetSuite"
+  },
   "cmdp_act_page_copy_rec_url": {
     "message": "Copiar URL directa del registro"
   },
@@ -2369,7 +2423,7 @@
     "message": "Hoja de atajos de teclado (Ctrl+Shift+?)"
   },
   "welcomeCatPowerItem3": {
-    "message": "Formateador JSON, buscador de roles, auto-refresh"
+    "message": "Formateador JSON y buscador de roles"
   },
   "welcomeCatPowerItem4": {
     "message": "Autogenerar IDs de campos y registros"
@@ -2394,6 +2448,9 @@
   },
   "welcomeCatSqlItem11": {
     "message": "Filtros en bloque en los resultados de búsquedas guardadas (aplicar de una vez)"
+  },
+  "welcomeCatSqlItem12": {
+    "message": "Quitar el orden de una columna, en listas y en sublistas, y volver al de partida"
   },
   "welcomeCatRecordItem5": {
     "message": "Ver Scripts del Registro"
@@ -2448,6 +2505,9 @@
   },
   "welcomeCatRecordItem22": {
     "message": "Formato de fecha dentro de los campos de fecha vacíos"
+  },
+  "welcomeCatRecordItem24": {
+    "message": "Dónde se usa un campo en el código de los scripts"
   },
   "welcomeCatRecordItem23": {
     "message": "Shift para marcar un rango entero de casillas"
@@ -2536,6 +2596,9 @@
   "welcomeCatLoginItem6": {
     "message": "Versión de NetSuite en el header"
   },
+  "welcomeCatLoginItem8": {
+    "message": "«Confiar en este dispositivo» ya marcado en la verificación en dos pasos"
+  },
   "welcomeCatLoginItem7": {
     "message": "Volver a tu página tras iniciar sesión en otra pestaña"
   },
@@ -2553,6 +2616,15 @@
   },
   "welcomeCatPowerItem9": {
     "message": "Auto-refresh de portlets"
+  },
+  "welcomeCatPowerItem15": {
+    "message": "Modo en vivo también en listas y sublistas: se ponen al día solas, sin recargar la página"
+  },
+  "welcomeCatPowerItem16": {
+    "message": "Freno al desinstalar bundles: escribir la palabra antes de desinstalar, para no hacerlo queriendo actualizar"
+  },
+  "welcomeCatPowerItem14": {
+    "message": "Registros eliminados: quién borró un registro, cuándo y desde dónde"
   },
   "welcomeCatPowerItem13": {
     "message": "Modo reunión: la extensión fuera de en medio y las otras cuentas ocultas, en un clic"
@@ -2591,7 +2663,7 @@
     "message": "Copiar SQL"
   },
   "copySublistId": {
-    "message": "COPIAR ID SUBLISTA"
+    "message": "Copiar ID sublista"
   },
   "copyFreeMarker": {
     "message": "Copiar FreeMarker"
@@ -2655,6 +2727,69 @@
   },
   "enableAutoRefreshLabel": {
     "message": "Auto Refresco en Bundles"
+  },
+  "enableBundleUninstallGuardLabel": {
+    "message": "Freno al desinstalar bundles"
+  },
+  "enableBundleUninstallGuardDesc": {
+    "message": "Pide escribir la palabra de confirmación antes de desinstalar un bundle, para no hacerlo por error al querer actualizarlo."
+  },
+  "bundleGuardTitle": {
+    "message": "Desinstalar bundle"
+  },
+  "bundleGuardName": {
+    "message": "Bundle: $1"
+  },
+  "bundleGuardBody": {
+    "message": "Desinstalarlo borra de la cuenta el bundle y todos sus objetos (registros personalizados, formularios, scripts…). No se puede deshacer."
+  },
+  "bundleGuardPrompt": {
+    "message": "Escribe $1 para desinstalarlo."
+  },
+  "bundleGuardOk": {
+    "message": "Desinstalar"
+  },
+  "enableClearSortLabel": {
+    "message": "Quitar orden de columnas"
+  },
+  "enableClearSortDesc": {
+    "message": "En las listas, los resultados de búsqueda y las sublistas de los registros ordenados por una columna, añade un botón para quitar ese orden y volver al de partida."
+  },
+  "clearSortBtn": {
+    "message": "Quitar orden"
+  },
+  "clearSortTitle": {
+    "message": "Vuelve al orden de partida: quita el orden por «$1»"
+  },
+  "liveModeStatusAutoStartLabel": {
+    "message": "Encender solo en páginas de estado"
+  },
+  "liveModeSublistsLabel": {
+    "message": "También en las sublistas de los registros"
+  },
+  "llm_title": {
+    "message": "Pone la lista al día cada $1 s sin recargar la página"
+  },
+  "llm_error": {
+    "message": "No se pudo poner la lista al día; el modo en vivo se detuvo."
+  },
+  "llm_paused_hidden": {
+    "message": "En pausa: la pestaña está oculta"
+  },
+  "llm_paused_typing": {
+    "message": "En pausa mientras escribes los segundos"
+  },
+  "llm_paused_checks": {
+    "message": "En pausa: has marcado casillas en la lista"
+  },
+  "llm_paused_editing": {
+    "message": "En pausa mientras editas en la lista"
+  },
+  "llm_paused_selection": {
+    "message": "En pausa: hay texto seleccionado en la lista"
+  },
+  "llm_paused_window": {
+    "message": "En pausa: hay una ventana de la extensión abierta"
   },
   "enableBetterPageTitlesDesc": {
     "message": "Incluye el nombre y el ID del registro en el título de la página."
@@ -2961,6 +3096,111 @@
   },
   "enableCustomizationFinderDesc": {
     "message": "Una sola ventana para encontrar scripts, workflows, campos, búsquedas guardadas, plantillas, archivos, despliegues y listas de la cuenta."
+  },
+  "enableDeletedRecordsLabel": {
+    "message": "Registros Eliminados"
+  },
+  "enableDeletedRecordsDesc": {
+    "message": "Busca quién borró un registro, cuándo y desde dónde, sin salir de la página. Se abre desde el menú Herramientas."
+  },
+  "cmdp_act_delrec": {
+    "message": "¿Quién borró este registro?…"
+  },
+  "cmdp_act_delrec_desc": {
+    "message": "Busca en el registro de eliminados de NetSuite por documento, tipo o ID"
+  },
+  "delrec_search": {
+    "message": "Buscar"
+  },
+  "delrec_ph": {
+    "message": "Documento, tipo o ID…"
+  },
+  "delrec_period_label": {
+    "message": "Periodo"
+  },
+  "delrec_period_all": {
+    "message": "Toda la historia"
+  },
+  "delrec_period_today": {
+    "message": "Hoy"
+  },
+  "delrec_period_d7": {
+    "message": "Últimos 7 días"
+  },
+  "delrec_period_d30": {
+    "message": "Últimos 30 días"
+  },
+  "delrec_period_d90": {
+    "message": "Últimos 90 días"
+  },
+  "delrec_period_y1": {
+    "message": "Último año"
+  },
+  "delrec_col_when": {
+    "message": "Cuándo"
+  },
+  "delrec_col_name": {
+    "message": "Documento"
+  },
+  "delrec_col_type": {
+    "message": "Tipo"
+  },
+  "delrec_col_id": {
+    "message": "ID"
+  },
+  "delrec_col_user": {
+    "message": "Eliminado por"
+  },
+  "delrec_col_from": {
+    "message": "Desde"
+  },
+  "delrec_user_filter": {
+    "message": "Eliminado por: $1"
+  },
+  "delrec_user_filter_clear": {
+    "message": "Quitar este filtro"
+  },
+  "delrec_user_title": {
+    "message": "Ver sólo lo que borró $1"
+  },
+  "delrec_loading": {
+    "message": "Leyendo el registro de eliminados…"
+  },
+  "delrec_none": {
+    "message": "No hay registros eliminados con estos filtros."
+  },
+  "delrec_results_n": {
+    "message": "$1 registros eliminados"
+  },
+  "delrec_capped": {
+    "message": "se ven los $1 más recientes: afina la búsqueda para ver los demás"
+  },
+  "delrec_error": {
+    "message": "No se pudieron leer los registros eliminados."
+  },
+  "delrec_error_perm": {
+    "message": "No se pudieron leer los registros eliminados. Suele ser el permiso: tu rol necesita «Registros eliminados» (en Listas)."
+  },
+  "delrec_stale": {
+    "message": "Recarga la pestaña y vuelve a intentarlo."
+  },
+  "delrec_copy_id": {
+    "message": "Copiar ID"
+  },
+  "delrec_copied_id": {
+    "message": "ID copiado: $1"
+  },
+  "delrec_export": {
+    "message": "Exportar"
+  },
+  "delrec_export_csv": {
+    "message": "Exportar a CSV"
+  },
+  "delrec_exported": {
+    "message": "$1 filas exportadas"
+  },
+  "delrec_hints": {
+    "message": "↑↓ · Ctrl+C copiar ID · Esc limpiar/cerrar"
   },
   "enableScriptExecuteLabel": {
     "message": "Ejecutar Map/Reduce y Scheduled"
@@ -3629,6 +3869,9 @@
   },
   "rr_action_open": {
     "message": "Abrir en nueva pestaña"
+  },
+  "rr_action_run": {
+    "message": "Ejecutar búsqueda"
   },
   "rr_action_edit": {
     "message": "Editar"
@@ -4324,7 +4567,7 @@
     "message": "Embellecer Logs"
   },
   "enableScriptLiveModeDesc": {
-    "message": "Muestra logs en tiempo real."
+    "message": "Pone al día cada pocos segundos, sin recargar la página, el registro de ejecución de los scripts, las listas de NetSuite y las sublistas de los registros."
   },
   "enableScriptLiveModeLabel": {
     "message": "Activar Modo en Vivo"
@@ -4345,10 +4588,19 @@
     "message": "Borrar la búsqueda"
   },
   "lv_export_csv_title": {
-    "message": "Exportar las filas filtradas a CSV"
+    "message": "Exportar a CSV todas las filas del log; con texto en la búsqueda, sólo las que casan"
   },
   "lv_export_json_title": {
-    "message": "Exportar las filas filtradas a JSON"
+    "message": "Exportar a JSON todas las filas del log; con texto en la búsqueda, sólo las que casan"
+  },
+  "lv_export_loading": {
+    "message": "Trayendo las demás páginas… $1/$2"
+  },
+  "lv_export_partial": {
+    "message": "No se pudieron traer las demás páginas: se exportó sólo la que ves."
+  },
+  "lv_export_capped": {
+    "message": "Se exportaron las primeras $1 de $2 páginas del log."
   },
   "enableRecordTrailLabel": {
     "message": "Record Trail (registros relacionados)"
@@ -5706,6 +5958,15 @@
   "recordOptionAddColumn": {
     "message": "Agregar Columna"
   },
+  "recordOptionCopyGenericUrl": {
+    "message": "Copiar URL genérica"
+  },
+  "recordOptionCopyMenuPath": {
+    "message": "Copiar ruta del menú"
+  },
+  "ro_menu_path_none": {
+    "message": "Esta página no está en el menú de NetSuite"
+  },
   "recordOptionCopyCleanUrl": {
     "message": "Copiar URL limpia"
   },
@@ -6350,6 +6611,75 @@
   },
   "sfv_tab_definition": {
     "message": "Definición"
+  },
+  "sfv_tab_code": {
+    "message": "En scripts"
+  },
+  "sfvShowCodeLabel": {
+    "message": "Buscar el campo en el código de los scripts"
+  },
+  "sfv_code_placeholder": {
+    "message": "Id del campo o cualquier texto"
+  },
+  "sfv_code_searching": {
+    "message": "Buscando en el código…"
+  },
+  "sfv_code_regex": {
+    "message": "Expresión regular"
+  },
+  "sfv_code_search": {
+    "message": "Buscar en el código"
+  },
+  "sfv_code_all": {
+    "message": "Incluir SuiteBundles y SuiteApps"
+  },
+  "sfv_code_bad_regex": {
+    "message": "La expresión regular no es válida"
+  },
+  "sfv_code_error": {
+    "message": "No se pudieron listar los archivos de los scripts."
+  },
+  "sfv_code_hint": {
+    "message": "Escribe el id de un campo o cualquier texto para buscarlo en el código de los scripts."
+  },
+  "sfv_code_listing": {
+    "message": "Listando los archivos de los scripts…"
+  },
+  "sfv_code_skipped": {
+    "message": "{n} demasiado grandes"
+  },
+  "sfv_code_unreadable": {
+    "message": "{n} sin leer"
+  },
+  "sfv_code_capped": {
+    "message": "tope de {n} archivos"
+  },
+  "sfv_code_progress": {
+    "message": "Buscando… {done} de {total} archivos"
+  },
+  "sfv_code_stop": {
+    "message": "Detener"
+  },
+  "sfv_code_found": {
+    "message": "En {n} de {total} archivos"
+  },
+  "sfv_code_none": {
+    "message": "No aparece en {total} archivos"
+  },
+  "sfv_code_stopped": {
+    "message": "detenida"
+  },
+  "sfv_code_write": {
+    "message": "escribe"
+  },
+  "sfv_code_read": {
+    "message": "lee"
+  },
+  "sfv_code_library": {
+    "message": "Biblioteca"
+  },
+  "sfv_code_more": {
+    "message": "Sólo las primeras {n} líneas"
   },
   "sfv_tab_history": {
     "message": "Historial"
@@ -7936,6 +8266,42 @@
   "sr_search_placeholder": {
     "message": "Filtrar..."
   },
+  "sr_runs_col": {
+    "message": "¿Para ti?"
+  },
+  "sr_runs_yes": {
+    "message": "Se ejecuta"
+  },
+  "sr_runs_no": {
+    "message": "No"
+  },
+  "sr_runs_maybe": {
+    "message": "Depende"
+  },
+  "sr_runs_unknown": {
+    "message": "No se pudo comprobar"
+  },
+  "sr_runs_yes_tip": {
+    "message": "Cumple todo para ejecutarse contigo: desplegado, liberado (o eres su propietario) y estás en su audiencia."
+  },
+  "sr_runs_r_inactive": {
+    "message": "El script está inactivo"
+  },
+  "sr_runs_r_undeployed": {
+    "message": "No está desplegado"
+  },
+  "sr_runs_r_testing": {
+    "message": "En pruebas: sólo corre para su propietario ($1)"
+  },
+  "sr_runs_r_maxed": {
+    "message": "Pasa del límite de 10 client scripts por tipo de registro"
+  },
+  "sr_runs_r_audience": {
+    "message": "No estás en su audiencia"
+  },
+  "sr_runs_r_group": {
+    "message": "Sólo te alcanza por un grupo: no se pudo comprobar"
+  },
   "sr_status": {
     "message": "Estado"
   },
@@ -8300,6 +8666,21 @@
   "sublistFilterCountTitle": {
     "message": "Filas visibles / total"
   },
+  "sublistPagesLoading": {
+    "message": "Buscando en las demás páginas… $1/$2"
+  },
+  "sublistPagesError": {
+    "message": "No se pudieron buscar las demás páginas"
+  },
+  "sublistPagesPage": {
+    "message": "Página $1 · $2"
+  },
+  "sublistPagesNone": {
+    "message": "No hay coincidencias en las demás páginas"
+  },
+  "sublistPagesCapped": {
+    "message": "Sólo se buscó en las primeras $1 de $2 páginas"
+  },
   "enableSublistLineIdsLabel": {
     "message": "IDs de línea en sublistas"
   },
@@ -8386,6 +8767,12 @@
   },
   "enableBundleFilterLabelsBetaDesc": {
     "message": "Muestra el nombre del bundle junto al ID en el filtro From Bundle de búsquedas."
+  },
+  "enableLoginTrustDeviceLabel": {
+    "message": "Confiar en este Dispositivo"
+  },
+  "enableLoginTrustDeviceDesc": {
+    "message": "En la verificación en dos pasos, deja marcada la casilla «Confiar en este dispositivo» para que este equipo no vuelva a pedir el código durante un tiempo. No lo actives en un equipo compartido."
   },
   "enableLoginSandboxIndicatorBetaLabel": {
     "message": "Indicador de Sandbox en login"
@@ -9166,8 +9553,8 @@
   "csvRvView": {
     "message": "Ver"
   },
-  "csvRvReset": {
-    "message": "Restablecer"
+  "csvRvRefresh": {
+    "message": "Actualizar"
   },
   "csvRvLoading": {
     "message": "Cargando..."
@@ -9175,8 +9562,8 @@
   "csvRvSuccess": {
     "message": "Todos los registros se importaron correctamente."
   },
-  "csvRvConfirmReset": {
-    "message": "¿Restablecer los datos del CSV?"
+  "csvRvConfirmRefresh": {
+    "message": "Se perderán las correcciones que hiciste. ¿Actualizar de todos modos?"
   },
   "csvRvDownloadError": {
     "message": "Hubo un problema al descargar el CSV."
@@ -9186,6 +9573,99 @@
   },
   "csvRvUnavailable": {
     "message": "Visor CSV no disponible (librería no cargada)."
+  },
+  "csvRvMetaRecordType": {
+    "message": "Tipo de registro"
+  },
+  "csvRvMetaFile": {
+    "message": "Archivo"
+  },
+  "csvRvMetaUser": {
+    "message": "Usuario"
+  },
+  "csvRvMetaDate": {
+    "message": "Fecha"
+  },
+  "csvRvMetaProgress": {
+    "message": "Progreso"
+  },
+  "csvRvMetaColumns": {
+    "message": "Columnas"
+  },
+  "csvRvBannerOk": {
+    "message": "Importación completa: $1 de $2 registros importados"
+  },
+  "csvRvBannerPartial": {
+    "message": "Importación parcial: $1 de $2 registros importados"
+  },
+  "csvRvBannerFail": {
+    "message": "La importación no se completó: 0 de $1 registros importados"
+  },
+  "csvRvStatImported": {
+    "message": "Importados"
+  },
+  "csvRvStatErrors": {
+    "message": "Con error"
+  },
+  "csvRvStatTotal": {
+    "message": "Total"
+  },
+  "csvRvTabAll": {
+    "message": "Todos"
+  },
+  "csvRvSearchPh": {
+    "message": "Buscar en todos los campos"
+  },
+  "csvRvUpload": {
+    "message": "Cargar CSV"
+  },
+  "csvRvUploadTitle": {
+    "message": "Abrir en este visor un CSV de tu equipo"
+  },
+  "csvRvColRow": {
+    "message": "Fila"
+  },
+  "csvRvColStatus": {
+    "message": "Estado"
+  },
+  "csvRvRowOk": {
+    "message": "Importado"
+  },
+  "csvRvRowOkTitle": {
+    "message": "Importado correctamente"
+  },
+  "csvRvYes": {
+    "message": "Sí"
+  },
+  "csvRvNo": {
+    "message": "No"
+  },
+  "csvRvEmptyFile": {
+    "message": "El archivo no contiene registros."
+  },
+  "csvRvNoMatches": {
+    "message": "No hay registros que coincidan."
+  },
+  "csvRvNote": {
+    "message": "$1 columnas · Fila = número de registro en el archivo (la fila 1 es el encabezado) · Doble clic en una celda para corregirla."
+  },
+  "csvRvDlAll": {
+    "message": "Descargar CSV completo"
+  },
+  "csvRvDlErrorsOne": {
+    "message": "Descargar 1 fila con error"
+  },
+  "csvRvDlErrorsMany": {
+    "message": "Descargar $1 filas con error"
+  },
+  "csvRvFileErrors": {
+    "message": "Filas con error"
+  },
+  "csvRvEditedTitle": {
+    "message": "Corregido"
+  },
+  "csvRvLoadError": {
+    "message": "No se pudo leer el archivo."
   },
   "enableInSearchPreviewLabel": {
     "message": "Preview inline de búsquedas"
@@ -11081,6 +11561,15 @@
   "sqlai_maxrows_hint": {
     "message": "Filas de NetSuite que se envían al modelo."
   },
+  "sqlai_err_refusal": {
+    "message": "El modelo declinó la petición (motivo: $1). Prueba a reformularla o elige otro modelo.",
+    "placeholders": {
+      "reason": {
+        "content": "$1",
+        "example": "cyber"
+      }
+    }
+  },
   "sqlai_err_ollama_cors": {
     "message": "Ollama rechazó la conexión (403). Por seguridad solo acepta llamadas locales: reinícialo con OLLAMA_ORIGINS=chrome-extension://* para que la extensión pueda usarlo."
   },
@@ -11926,10 +12415,25 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "Al poner el Modo Reunión, ahora también se ocultan las otras cuentas del menú de rol; si no lo quieres, se quita en Configuración."
+    "message": "* **Registros Eliminados**, en Herramientas: quién borró un registro, cuándo y desde dónde."
   },
   "un_hl_2": {
-    "message": "Arreglados: con Agrupar Pestañas encendido, editar un script ya no cierra Brave entero, y el Modo Discreto se aplica sin recargar. Más detalles en el changelog."
+    "message": "El **Modo en Vivo** pone al día solas las listas y las sublistas, sin recargar la página."
+  },
+  "un_hl_3": {
+    "message": "Los filtros de sublista y el buscador del Execution Log buscan en **todas las páginas**, y el log se exporta entero."
+  },
+  "un_hl_4": {
+    "message": "Scripts del Registro te dice si cada script **se ejecuta para ti**, y si no, por qué."
+  },
+  "un_hl_5": {
+    "message": "Desinstalar un bundle te pide escribir la palabra de confirmación, como al eliminar un registro."
+  },
+  "un_hl_6": {
+    "message": "Además: quitar el orden de una columna, la URL genérica de una página, búsquedas desde Recientes y los controles a tono con Redwood."
+  },
+  "un_hl_7": {
+    "message": "Arreglados fallos de Eliminar, Scripts del Registro, el Modo Discreto y el nuevo login. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -12235,6 +12739,156 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
+  },
+  "cl_ver_7_3_0": {
+    "message": "v7.3.0"
+  },
+  "cl_date_7_3_0": {
+    "message": "2026-10-27"
+  },
+  "cl_7_3_0_rr_run_title": {
+    "message": "Ejecutar búsquedas guardadas desde Recientes"
+  },
+  "cl_7_3_0_rr_run_desc": {
+    "message": "Se agregó un botón para ejecutar una búsqueda guardada desde Registros Recientes sin pasar por su formulario."
+  },
+  "cl_7_3_0_trust_device_title": {
+    "message": "Confiar en este dispositivo"
+  },
+  "cl_7_3_0_trust_device_desc": {
+    "message": "Se agregó una opción para dejar marcada «Confiar en este dispositivo» en la verificación en dos pasos."
+  },
+  "cl_7_3_0_autorefresh_live_title": {
+    "message": "Bundles e importaciones CSV, en vivo"
+  },
+  "cl_7_3_0_autorefresh_live_desc": {
+    "message": "Se cambió el Auto Refresco por el Modo en Vivo, que pone al día la lista de bundles y las importaciones CSV sin recargar la página."
+  },
+  "cl_7_3_0_list_live_title": {
+    "message": "Modo en Vivo en listas y sublistas"
+  },
+  "cl_7_3_0_list_live_desc": {
+    "message": "Se agregó el Modo en Vivo a las listas de NetSuite y a las sublistas de los registros; su opción pasa a Productividad."
+  },
+  "cl_7_3_0_sf_all_pages_title": {
+    "message": "Los filtros buscan en todas las páginas"
+  },
+  "cl_7_3_0_sf_all_pages_desc": {
+    "message": "Se agregó que el filtro de sublistas y el buscador del Execution Log busquen en las demás páginas, y que el log se exporte entero."
+  },
+  "cl_7_3_0_bundle_guard_title": {
+    "message": "Freno al desinstalar bundles"
+  },
+  "cl_7_3_0_bundle_guard_desc": {
+    "message": "Se agregó un freno que pide escribir la palabra de confirmación antes de desinstalar un bundle."
+  },
+  "cl_7_3_0_clear_sort_title": {
+    "message": "Quitar el orden de una columna"
+  },
+  "cl_7_3_0_clear_sort_desc": {
+    "message": "Se agregó un botón para quitar el orden por columna de una lista o una sublista y volver al orden de partida."
+  },
+  "cl_7_3_0_sf_native_bar_title": {
+    "message": "El filtro de sublistas, en su barra"
+  },
+  "cl_7_3_0_sf_native_bar_desc": {
+    "message": "Se cambió el filtro de las sublistas en edición para que vaya en su barra de controles, con la misma cara que la de NetSuite."
+  },
+  "cl_7_3_0_redwood_title": {
+    "message": "Controles a tono con Redwood"
+  },
+  "cl_7_3_0_redwood_desc": {
+    "message": "Se cambió el aspecto de las barras, botones y visores de la extensión dentro de las páginas para que vayan a tono con el tema Redwood."
+  },
+  "cl_7_3_0_csvrv_redesign_title": {
+    "message": "La respuesta CSV, de un vistazo"
+  },
+  "cl_7_3_0_csvrv_redesign_desc": {
+    "message": "Se agregó al visor de respuestas CSV un resumen de la importación, filtros por estado y la descarga de sólo las filas con error."
+  },
+  "cl_7_3_0_delrec_title": {
+    "message": "Registros Eliminados"
+  },
+  "cl_7_3_0_delrec_desc": {
+    "message": "Se agregó una ventana en el menú Herramientas para ver quién borró un registro, cuándo y desde dónde."
+  },
+  "cl_7_3_0_ai_models_title": {
+    "message": "Modelos de IA al día"
+  },
+  "cl_7_3_0_ai_models_desc": {
+    "message": "Se agregaron al Asistente de IA los modelos más recientes, como Claude Sonnet 5.5, y se reemplazaron los retirados."
+  },
+  "cl_7_3_0_ai_refusal_title": {
+    "message": "El Asistente de IA avisa cuando el modelo declina"
+  },
+  "cl_7_3_0_ai_refusal_desc": {
+    "message": "Se arregló que el Asistente de IA se quedara en blanco cuando el modelo declinaba una petición."
+  },
+  "cl_7_3_0_sfv_code_title": {
+    "message": "Dónde se usa un campo en el código"
+  },
+  "cl_7_3_0_sfv_code_desc": {
+    "message": "Se agregó a la información del campo una pestaña que busca el campo en el código de los scripts de la cuenta."
+  },
+  "cl_7_3_0_copy_location_title": {
+    "message": "Copiar URL genérica y ruta del menú"
+  },
+  "cl_7_3_0_copy_location_desc": {
+    "message": "Se agregó copiar la URL genérica de una página y su ruta en el menú, desde Opciones del registro y la paleta de comandos."
+  },
+  "cl_7_3_0_sr_runs_title": {
+    "message": "¿Se ejecuta para ti?"
+  },
+  "cl_7_3_0_sr_runs_desc": {
+    "message": "Se agregó a Scripts del Registro una columna que dice si cada script se ejecuta para ti y, si no, por qué."
+  },
+  "cl_7_3_0_sr_owner_title": {
+    "message": "Scripts del Registro los enseña todos"
+  },
+  "cl_7_3_0_sr_owner_desc": {
+    "message": "Se arregló que Scripts del Registro no mostrara los scripts sin propietario ni los desplegados en todos los registros."
+  },
+  "cl_7_3_0_sr_lazy_title": {
+    "message": "Scripts del Registro consulta al abrirlo"
+  },
+  "cl_7_3_0_sr_lazy_desc": {
+    "message": "Se arregló que Scripts del Registro consultara la cuenta en cada registro abierto, aunque no se usara."
+  },
+  "cl_7_3_0_rectype_title": {
+    "message": "Eliminar actúa sobre el registro que ves"
+  },
+  "cl_7_3_0_rectype_desc": {
+    "message": "Se arregló que Eliminar y Editar y guardar pudieran actuar sobre otro registro personalizado con el mismo número."
+  },
+  "cl_7_3_0_adv_suitescripts_title": {
+    "message": "El Editor Avanzado abre en SuiteScripts"
+  },
+  "cl_7_3_0_adv_suitescripts_desc": {
+    "message": "Se cambió el árbol del Editor Avanzado para que abra en la carpeta SuiteScripts en lugar de la raíz del File Cabinet."
+  },
+  "cl_7_3_0_adv_root_keep_title": {
+    "message": "El Editor Avanzado recuerda su carpeta"
+  },
+  "cl_7_3_0_adv_root_keep_desc": {
+    "message": "Se arregló que el árbol del Editor Avanzado olvidara la carpeta elegida al abrir otro archivo."
+  },
+  "cl_7_3_0_adv_search_all_title": {
+    "message": "El Editor Avanzado busca en todo el código"
+  },
+  "cl_7_3_0_adv_search_all_desc": {
+    "message": "Se arregló que «Buscar en todos los archivos» del Editor Avanzado no buscara sin un archivo abierto; ahora busca en todo el código de la cuenta."
+  },
+  "cl_7_3_0_discreet_scope_title": {
+    "message": "El Modo Discreto sólo oculta las cuentas"
+  },
+  "cl_7_3_0_discreet_scope_desc": {
+    "message": "Se arregló que el Modo Discreto apagara el Buscador de Campos y otras funciones en lugar de sólo ocultar las otras cuentas."
+  },
+  "cl_7_3_0_login_identity_title": {
+    "message": "Adaptado al nuevo login de NetSuite"
+  },
+  "cl_7_3_0_login_identity_desc": {
+    "message": "Se arregló que la marca de la empresa, «Volver a mi página» y el aviso de sandbox desentonaran en el nuevo login de NetSuite."
   },
   "cl_ver_7_2_3": {
     "message": "v7.2.3"
@@ -13669,7 +14323,7 @@
     "message": "Buscar en los archivos (Ctrl+Shift+F)"
   },
   "adv_bus_ph": {
-    "message": "Buscar en esta carpeta y sus subcarpetas"
+    "message": "Buscar en el código de la cuenta"
   },
   "adv_quick_ph": {
     "message": "Escribe el nombre de un archivo"
@@ -13709,22 +14363,26 @@
   "adv_bus_sin_carpeta": {
     "message": "No hay carpeta en la que buscar"
   },
+  "adv_bus_todo": {
+    "message": "Todo el código"
+  },
+  "adv_bus_carpeta": {
+    "message": "Esta carpeta"
+  },
+  "adv_bus_carpeta_tip": {
+    "message": "La carpeta del archivo abierto y sus subcarpetas"
+  },
+  "adv_bus_carpeta_no": {
+    "message": "Abre un archivo para buscar en su carpeta"
+  },
+  "sfv_code_quotes": {
+    "message": "Sólo entre comillas, como se escribe un id en el código"
+  },
   "adv_bus_listando": {
     "message": "Listando archivos…"
   },
-  "adv_bus_listando_n": {
-    "message": "$1 carpetas · $2 archivos",
-    "placeholders": {
-      "1": {
-        "content": "$1"
-      },
-      "2": {
-        "content": "$2"
-      }
-    }
-  },
   "adv_bus_nada_que_mirar": {
-    "message": "No hay archivos de texto en esta carpeta"
+    "message": "No hay archivos de código donde buscar"
   },
   "adv_bus_yendo": {
     "message": "$1 de $2 · $3 con coincidencias",

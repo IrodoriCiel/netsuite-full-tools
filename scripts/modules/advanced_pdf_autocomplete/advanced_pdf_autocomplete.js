@@ -12,9 +12,9 @@
     }
     if (!isApplicablePage()) return;
 
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false, nsftSelectorDiagnostics: false }, (settings) => {
+    chrome.storage.local.get({ [STORAGE_KEY]: true, nsftSelectorDiagnostics: false }, (settings) => {
         if (settings.nsftSelectorDiagnostics) document.documentElement.dataset.nsftApdfacDiag = '1';
-        if (settings[STORAGE_KEY] && !settings.enableDiscreetMode) enable();
+        if (settings[STORAGE_KEY]) enable();
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -23,11 +23,9 @@
             if (changes.nsftSelectorDiagnostics.newValue) document.documentElement.dataset.nsftApdfacDiag = '1';
             else delete document.documentElement.dataset.nsftApdfacDiag;
         }
-        if (!changes[STORAGE_KEY] && !changes.enableDiscreetMode) return;
-        chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (s) => {
-            if (s[STORAGE_KEY] && !s.enableDiscreetMode) enable();
-            else teardown();
-        });
+        if (!changes[STORAGE_KEY]) return;
+        if (changes[STORAGE_KEY].newValue !== false) enable();
+        else teardown();
     });
 
     function enable() {

@@ -143,20 +143,18 @@
                         SELECT
                              s.name, s.apiversion, s.id as script_internal_id, s.scriptid as script_text_id, s.scripttype, s.description, s.scriptfile, s.isinactive,
                             sd.primarykey as deployment_id, sd.scriptid as deployment_text_id, sd.status, sd.isdeployed,
-                            emp.firstName || ' ' || emp.lastName  AS owner,
+                            BUILTIN.DF(s.owner) AS owner,
                             ${functionFields.map(f => `s.${f}`).join(', ')}
                         FROM
                             ScriptDeployment sd
                         INNER JOIN
                             Script s ON sd.script = s.id
-                        INNER JOIN
-                            Employee emp ON s.owner = emp.id
                         WHERE
-                            sd.recordtype = ?
+                            sd.recordtype IN (?, 'RECORD')
                     `;
 
                     T.run({
-                        rest: sql.replace('sd.recordtype = ?', 'sd.recordtype = ' + T.lit(String(recordType).toUpperCase())),
+                        rest: sql.replace('sd.recordtype IN (?,', 'sd.recordtype IN (' + T.lit(String(recordType).toUpperCase()) + ','),
                         sql: sql,
                         params: [String(recordType).toUpperCase()],
                         limit: 1000
@@ -270,6 +268,8 @@
                             isCustomList: false
                         });
 
+                        fetchRunsForMe(recordType);
+
                         } catch (e) {
                             sendMessageToExtension('error', (translations.sr_error_logic || 'SuiteQL/Logic Error: ') + e.message);
                         }
@@ -282,6 +282,67 @@
         } catch (globalE) {
             sendMessageToExtension('error', (translations.sr_error_global || 'Global Fetch Error: ') + globalE.message);
         }
+    }
+
+    function fetchRunsForMe(recordType) {
+        const T = window.NSFT_SQL;
+        if (!T) return;
+        let ctx = null;
+        try { ctx = (typeof nlapiGetContext === 'function') ? nlapiGetContext() : null; } catch (e) { ctx = null; }
+        const num = (fn) => {
+            try {
+                const v = ctx && typeof ctx[fn] === 'function' ? String(ctx[fn]()) : '';
+                return /^-?\d{1,12}$/.test(v) ? v : null;
+            } catch (e) { return null; }
+        };
+        const me = num('getUser');
+        const role = num('getRole');
+        const sub = num('getSubsidiary');
+        const dep = num('getDepartment');
+        if (!me) { sendMessageToExtension('runs_error', 'no-user'); return; }
+
+        const casa = [
+            "sd.allemployees = 'T'",
+            "sd.allroles = 'T'",
+            'sd.audience IN (SELECT m.audience FROM audienceemployeemap m WHERE m.employee = ' + me + ')'
+        ];
+        if (role) casa.push('sd.audience IN (SELECT o.audience FROM audiencerolemap o WHERE o.role = ' + role + ')');
+        if (sub) casa.push('sd.audience IN (SELECT u.audience FROM audiencesubsidiarymap u WHERE u.subsidiary = ' + sub + ')');
+        if (dep) casa.push('sd.audience IN (SELECT d.audience FROM audiencedepartmentmap d WHERE d.department = ' + dep + ')');
+
+        const armar = (conGrupo) => [
+            'SELECT sd.primarykey AS deployment_id, CASE',
+            "  WHEN s.isinactive = 'T' THEN 'INACTIVE'",
+            "  WHEN sd.isdeployed = 'F' THEN 'UNDEPLOYED'",
+            "  WHEN sd.status = 'TESTING' AND (s.owner IS NULL OR s.owner <> " + me + ") THEN 'TESTING'",
+            '  WHEN ' + casa.join(' OR ') + " THEN 'RUNS'",
+            conGrupo ? "  WHEN sd.audience IN (SELECT g.audience FROM audiencegroupmap g WHERE g.group IS NOT NULL) THEN 'GROUP'" : '',
+            "  ELSE 'AUDIENCE' END AS runs",
+            'FROM ScriptDeployment sd INNER JOIN Script s ON sd.script = s.id',
+            "WHERE sd.recordtype IN (?, 'RECORD')"
+        ].join(' ');
+        const tipo = String(recordType || '').toUpperCase();
+        const spec = (conGrupo) => {
+            const q = armar(conGrupo);
+            return {
+                rest: q.replace('sd.recordtype IN (?,', 'sd.recordtype IN (' + T.lit(tipo) + ','),
+                sql: q,
+                params: [tipo],
+                limit: 1000
+            };
+        };
+        const principal = spec(true);
+        principal.fallback = spec(false);
+
+        T.run(principal, function (err, rows) {
+            if (err) { sendMessageToExtension('runs_error', err.message || err.code || 'query'); return; }
+            const map = {};
+            (rows || []).forEach((r) => {
+                const id = r.deployment_id != null ? r.deployment_id : r.DEPLOYMENT_ID;
+                if (id != null) map[String(id)] = String(r.runs || r.RUNS || '');
+            });
+            sendMessageToExtension('runs_success', null, map);
+        });
     }
 
     function handleCustomList(custListId) {

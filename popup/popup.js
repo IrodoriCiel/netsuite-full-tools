@@ -669,10 +669,6 @@ function applyStoredSettings(items) {
                     const container = document.getElementById('format-code-fields-container');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
                 }
-                if (key === 'enableAutoRefresh') {
-                    const container = document.getElementById('auto-refresh-container');
-                    if (container) container.style.display = element.checked ? 'flex' : 'none';
-                }
                 if (key === 'enableColorThemes') {
                     const container = document.getElementById('color-themes-controls');
                     if (container) container.style.display = element.checked ? 'block' : 'none';

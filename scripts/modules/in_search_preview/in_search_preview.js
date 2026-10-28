@@ -38,22 +38,16 @@
         onWindowResize: null
     };
 
-    function shouldRun(settings) {
-        return !!settings[STORAGE_KEY] && !settings.enableDiscreetMode;
-    }
-
     if (!/\/app\/common\/search\/search\.nl$/i.test(window.location.pathname)) return;
 
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
-        if (shouldRun(settings) && resolvePreviewButton()) start();
+    chrome.storage.local.get({ [STORAGE_KEY]: true }, (settings) => {
+        if (settings[STORAGE_KEY] && resolvePreviewButton()) start();
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local' || (!changes[STORAGE_KEY] && !changes.enableDiscreetMode)) return;
-        chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
-            if (shouldRun(settings) && resolvePreviewButton()) start();
-            else stop();
-        });
+        if (area !== 'local' || !changes[STORAGE_KEY]) return;
+        if (changes[STORAGE_KEY].newValue !== false && resolvePreviewButton()) start();
+        else stop();
     });
 
     const PREVIEW_IDS = ['submitter', 'secondarysubmitter'];

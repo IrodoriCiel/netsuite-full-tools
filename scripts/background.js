@@ -1243,6 +1243,15 @@ async function nsftAiClaude(req) {
     const r = await nsftAiFetchJson(url, headers, body);
     if (!r.ok) return r;
 
+    if (r.data && r.data.stop_reason === 'refusal') {
+        const cat = (r.data.stop_details && r.data.stop_details.category) || '—';
+        return {
+            ok: false,
+            error: chrome.i18n.getMessage('sqlai_err_refusal', [String(cat)])
+                || ('The model declined the request (' + cat + ').')
+        };
+    }
+
     const content = (r.data && r.data.content) || [];
     let text = '';
     const toolCalls = [];

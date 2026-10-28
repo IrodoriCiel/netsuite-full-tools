@@ -1,0 +1,55 @@
+
+#nsft-login-id {
+    --nsft-lid-text: rgb(229, 241, 245);
+    --nsft-lid-muted: rgba(229, 241, 245, 0.72);
+    --nsft-lid-link: rgb(240, 204, 114);
+    --nsft-lid-link-hover: rgb(255, 224, 143);
+    --nsft-lid-online: #5fd3a0;
+
+    box-sizing: border-box;
+    align-self: stretch;
+    width: 100%;
+    margin: 0 !important;
+    overflow: hidden;
+    color: var(--nsft-lid-text);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    text-align: center;
+}
+
+#nsft-login-id[hidden],
+#nsft-login-id [hidden] {
+    display: none !important;
+}
+
+
+#nsft-login-id .nsft-login-id-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 22px 20px 16px;
+}
+
+
+#nsft-login-id .nsft-login-id-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 11.5px;
+    line-height: 1.3;
+    background: rgba(0, 0, 0, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+#nsft-login-id.is-foot-only .nsft-login-id-foot {
+    border-top: 0;
+}
+
+#nsft-login-id .nsft-login-id-foot > :only-child {
+    margin-inline: auto;
+}

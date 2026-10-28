@@ -1,0 +1,17 @@
+tr.nsft-pg-sep > td {
+    padding: 6px 8px !important;
+    background: color-mix(in srgb, var(--nsft-ns-accent, #607799) 10%, white) !important;
+    border-top: 1px solid color-mix(in srgb, var(--nsft-ns-accent, #607799) 22%, white) !important;
+    color: #475569 !important;
+    font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+tr.nsft-pg-sep.is-note > td {
+    font-weight: 500 !important;
+    font-style: italic;
+    color: #64748b !important;
+}

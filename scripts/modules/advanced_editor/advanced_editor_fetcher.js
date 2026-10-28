@@ -47,7 +47,30 @@
         if (d.type === 'nombres') { buscaNombres(String(p.term || ''), p.token); return; }
         if (d.type === 'carpetas') { buscaCarpetas(String(p.term || ''), p.token); return; }
         if (d.type === 'cambiado') { marcaCambiado(!!p.marco, p.token); return; }
+        if (d.type === 'codigo') { listaCodigo(!!p.todo, p.carpeta, p.token); return; }
     });
+
+    function listaCodigo(todo, carpeta, token) {
+        var CS = window.NSFT_CodeSearch;
+        if (!CS || !window.NSFT_SQL) { responde('codigo', token, { code: 'stale' }, null); return; }
+        var enCarpeta = (carpeta != null && carpeta !== '');
+        var ruta = enCarpeta ? CS.rutaDeCarpeta(window.NSFT_SQL, carpeta) : Promise.resolve(null);
+        ruta.then(function (r) {
+            if (enCarpeta && !r) { responde('codigo', token, { code: 'folder' }, null); return; }
+            return CS.listar(window.NSFT_SQL, { tipos: 'codigo', todo: enCarpeta || todo }).then(function (filas) {
+                var lista = enCarpeta ? filas.filter(function (f) { return CS.enCarpeta(f.ruta, r); }) : filas;
+                responde('codigo', token, null, {
+                    ruta: r || '',
+                    files: lista.map(function (f) {
+                        return {
+                            id: String(f.id), name: String(f.name || ''), url: String(f.url || ''),
+                            filesize: Number(f.filesize) || 0, modif: String(f.modif || ''), ruta: String(f.ruta || '')
+                        };
+                    })
+                });
+            });
+        }).catch(function () { responde('codigo', token, { code: 'sql' }, null); });
+    }
 
     function marcaCambiado(enMarco, token) {
         var hecho = false;

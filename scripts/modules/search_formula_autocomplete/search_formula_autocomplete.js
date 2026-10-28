@@ -36,20 +36,14 @@
         searchType: null
     };
 
-    function shouldRun(settings) {
-        return !!settings[STORAGE_KEY] && !settings.enableDiscreetMode;
-    }
-
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
-        if (shouldRun(settings)) start();
+    chrome.storage.local.get({ [STORAGE_KEY]: true }, (settings) => {
+        if (settings[STORAGE_KEY]) start();
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local' || (!changes[STORAGE_KEY] && !changes.enableDiscreetMode)) return;
-        chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
-            if (shouldRun(settings)) start();
-            else stop();
-        });
+        if (area !== 'local' || !changes[STORAGE_KEY]) return;
+        if (changes[STORAGE_KEY].newValue !== false) start();
+        else stop();
     });
 
     function start() {

@@ -66,12 +66,14 @@
             const cuerpoEl = cuerpo(op.body);
 
             let campo = null;
-            if (tipo === 'prompt') {
+            const palabra = (tipo === 'confirm' && op.word) ? String(op.word) : '';
+            if (tipo === 'prompt' || palabra) {
                 campo = el('input', 'nsft-dlg-input');
                 campo.type = 'text';
-                campo.value = op.value == null ? '' : String(op.value);
+                campo.value = (tipo === 'prompt' && op.value != null) ? String(op.value) : '';
                 if (op.placeholder) campo.placeholder = op.placeholder;
                 campo.spellcheck = false;
+                campo.autocomplete = 'off';
                 cuerpoEl.appendChild(campo);
             }
             caja.appendChild(cuerpoEl);
@@ -90,6 +92,12 @@
             aceptar.type = 'button';
             pie.appendChild(aceptar);
             caja.appendChild(pie);
+
+            const vale = () => !palabra || campo.value.trim().toUpperCase() === palabra.toUpperCase();
+            if (palabra) {
+                aceptar.disabled = true;
+                campo.addEventListener('input', () => { aceptar.disabled = !vale(); });
+            }
 
             telon.appendChild(caja);
             document.body.appendChild(telon);
@@ -113,7 +121,10 @@
                 resolve(valor);
             };
             const vetar = () => cerrar(tipo === 'confirm' ? false : (tipo === 'prompt' ? null : undefined));
-            const pasar = () => cerrar(tipo === 'confirm' ? true : (tipo === 'prompt' ? campo.value : undefined));
+            const pasar = () => {
+                if (!vale()) return;
+                cerrar(tipo === 'confirm' ? true : (tipo === 'prompt' ? campo.value : undefined));
+            };
 
             const teclas = (e) => {
                 if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); vetar(); return; }

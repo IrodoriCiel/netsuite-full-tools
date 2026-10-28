@@ -6,7 +6,6 @@
 
     const DEFAULTS = {
         [STORAGE_KEY]: true,
-        enableDiscreetMode: false,
         wfColoredTransitionsPalette: 'vivid',
         wfColoredTransitionsLineStyle: 'solid',
         wfColoredTransitionsLineWidth: 2
@@ -21,16 +20,16 @@
     if (!isApplicablePage()) return;
 
     chrome.storage.local.get(DEFAULTS, (settings) => {
-        if (settings[STORAGE_KEY] && !settings.enableDiscreetMode) enable();
+        if (settings[STORAGE_KEY]) enable();
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== 'local') return;
         const cfgChanged = changes.wfColoredTransitionsPalette ||
             changes.wfColoredTransitionsLineStyle || changes.wfColoredTransitionsLineWidth;
-        if (changes[STORAGE_KEY] || changes.enableDiscreetMode) {
+        if (changes[STORAGE_KEY]) {
             chrome.storage.local.get(DEFAULTS, (s) => {
-                if (s[STORAGE_KEY] && !s.enableDiscreetMode) enable();
+                if (s[STORAGE_KEY]) enable();
                 else teardown();
             });
         } else if (cfgChanged && injected) {

@@ -22,9 +22,9 @@
         catch (e) { return null; }
     }
 
-    chrome.storage.local.get({ [STORAGE_KEY]: false, enableDiscreetMode: false, [NSFT_THEME_KEY]: 'light' }, (settings) => {
+    chrome.storage.local.get({ [STORAGE_KEY]: false, [NSFT_THEME_KEY]: 'light' }, (settings) => {
         _nsftTheme = settings[NSFT_THEME_KEY] || 'light';
-        if (settings[STORAGE_KEY] && !settings.enableDiscreetMode) start();
+        if (settings[STORAGE_KEY]) start();
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -33,11 +33,9 @@
             _nsftTheme = changes[NSFT_THEME_KEY].newValue || 'light';
             applyTheme();
         }
-        if (changes[STORAGE_KEY] || changes.enableDiscreetMode) {
-            chrome.storage.local.get({ [STORAGE_KEY]: false, enableDiscreetMode: false }, (s) => {
-                if (s[STORAGE_KEY] && !s.enableDiscreetMode) start();
-                else teardown();
-            });
+        if (changes[STORAGE_KEY]) {
+            if (changes[STORAGE_KEY].newValue) start();
+            else teardown();
         }
     });
 

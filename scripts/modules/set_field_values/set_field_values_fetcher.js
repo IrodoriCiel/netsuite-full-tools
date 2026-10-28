@@ -88,7 +88,17 @@
         TYPE_SLOT: "nsft-sfv-type-slot",
         SOURCE_ROW: "nsft-sfv-source-row",
         SOURCE_SLOT: "nsft-sfv-source-slot",
-        DISPLAY_SLOT: "nsft-sfv-display-slot"
+        DISPLAY_SLOT: "nsft-sfv-display-slot",
+        CODE_BAR: "nsft-sfv-code-bar",
+        CODE_INPUT: "nsft-sfv-code-input",
+        CODE_CLEAR: "nsft-sfv-code-clear",
+        CODE_SPIN: "nsft-sfv-code-spin",
+        CODE_REGEX: "nsft-sfv-code-regex",
+        CODE_QUOTES: "nsft-sfv-code-quotes",
+        CODE_GO: "nsft-sfv-code-go",
+        CODE_ALL: "nsft-sfv-code-all",
+        CODE_STATUS: "nsft-sfv-code-status",
+        CODE_LIST: "nsft-sfv-code-list"
     };
 
     let NSFT_THEME = 'light';
@@ -981,6 +991,7 @@
             let tabDefFin = "";
             let tabDefBoton = "";
             let tabHist = "";
+            let tabCode = "";
             let metaHtml = "";
 
             const api = sublistId ? {
@@ -1264,10 +1275,13 @@
             if (metaHtml) tabDef += `<div class="nsft-sfv-card">${metaHtml}</div>`;
             tabDef += tabDefFin + tabDefBoton;
 
+            if (ver("setFieldValuesShowCode") && fieldName) tabCode = codigoTabHtml(fieldName);
+
             const panes = [
                 { id: "valor", label: translations.sfv_tab_value, body: tabValor },
                 { id: "def", label: translations.sfv_tab_definition, body: tabDef },
-                { id: "hist", label: translations.sfv_tab_history, body: tabHist }
+                { id: "hist", label: translations.sfv_tab_history, body: tabHist },
+                { id: "code", label: translations.sfv_tab_code, body: tabCode }
             ].filter(function (p) { return p.body && p.body.trim(); });
 
             if (panes.length > 1) {
@@ -1303,6 +1317,9 @@
 
                 if (activeTab === "hist") pedirHistorialSiHaceFalta();
                 else setTimeout(pedirHistorialSiHaceFalta, 250);
+
+                wireCodigo(fieldName);
+                if (activeTab === "code") codigoSiHaceFalta();
 
                 fillSourceSlot(fieldName);
 
@@ -2963,6 +2980,251 @@
             caja.style.maxHeight = Math.max(altoDeValor, ALTO_MINIMO) + "px";
         }
 
+        const codCS = function () { return window.NSFT_CodeSearch || null; };
+
+        let _cod = null;
+
+        function codigoTabHtml(campo) {
+            const st = (_cod && _cod.campo === campo) ? _cod : null;
+            const term = st ? st.term : campo;
+            return `<div class="nsft-sfv-code">
+                        <div class="nsft-sfv-list-barwrap">
+                        <div id="${NSFT.CODE_BAR}" class="nsft-sfv-bar nsft-sfv-list-bar${term ? " has-query" : ""}">
+                            <input type="text" id="${NSFT.CODE_INPUT}" class="nsft-sfv-field nsft-sfv-list-search"
+                                   value="${escapeHtml(term)}"
+                                   placeholder="${escapeHtml(translations.sfv_code_placeholder || "")}" autocomplete="off" spellcheck="false">
+                            <button type="button" id="${NSFT.CODE_CLEAR}" class="nsft-sfv-list-clear"
+                                    title="${escapeHtml(translations.sfv_find_clear || "")}"
+                                    aria-label="${escapeHtml(translations.sfv_find_clear || "")}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                            </button>
+                            <span id="${NSFT.CODE_SPIN}" class="nsft-sfv-list-spin" role="status"
+                                  aria-label="${escapeHtml(translations.sfv_code_searching || "")}"></span>
+                            <button type="button" id="${NSFT.CODE_QUOTES}" class="nsft-sfv-code-re"
+                                    aria-pressed="${!st || st.comillas ? "true" : "false"}"${st && st.regex ? " disabled" : ""}
+                                    title="${escapeHtml(translations.sfv_code_quotes || "")}"
+                                    aria-label="${escapeHtml(translations.sfv_code_quotes || "")}">&quot;&quot;</button>
+                            <button type="button" id="${NSFT.CODE_REGEX}" class="nsft-sfv-code-re"
+                                    aria-pressed="${st && st.regex ? "true" : "false"}"
+                                    title="${escapeHtml(translations.sfv_code_regex || "")}"
+                                    aria-label="${escapeHtml(translations.sfv_code_regex || "")}">.*</button>
+                            <button type="button" id="${NSFT.CODE_GO}" class="nsft-sfv-list-go"
+                                    title="${escapeHtml(translations.sfv_code_search || "")}"
+                                    aria-label="${escapeHtml(translations.sfv_code_search || "")}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                            </button>
+                        </div>
+                        <label class="nsft-sfv-code-all">
+                            <input type="checkbox" id="${NSFT.CODE_ALL}"${st && st.todo ? " checked" : ""}>
+                            <span>${escapeHtml(translations.sfv_code_all || "")}</span>
+                        </label>
+                        </div>
+                        <div id="${NSFT.CODE_STATUS}" class="nsft-sfv-list-foot nsft-sfv-code-status"></div>
+                        <div id="${NSFT.CODE_LIST}" class="nsft-sfv-code-list"></div>
+                     </div>`;
+        }
+
+        function wireCodigo(campo) {
+            const box = document.getElementById(NSFT.CODE_INPUT);
+            if (!box) return;
+            const bar = document.getElementById(NSFT.CODE_BAR);
+            const marcarBar = function () { if (bar) bar.classList.toggle("has-query", !!box.value); };
+            const buscar = function () { codBuscar(campo, box.value); };
+            const limpiar = function () {
+                box.value = "";
+                marcarBar();
+                box.focus();
+                codParar();
+                if (_cod && _cod.campo === campo) { _cod.term = ""; _cod.resultados = []; _cod.estado = "vacio"; }
+                codPintar();
+            };
+            box.addEventListener("input", marcarBar);
+            box.addEventListener("keydown", function (e) {
+                if (e.key === "Enter") { e.preventDefault(); buscar(); }
+                if (e.key === "Escape" && box.value) { e.preventDefault(); e.stopPropagation(); limpiar(); }
+            });
+            const clr = document.getElementById(NSFT.CODE_CLEAR);
+            if (clr) clr.addEventListener("click", limpiar);
+            const go = document.getElementById(NSFT.CODE_GO);
+            if (go) go.addEventListener("click", buscar);
+            const qt = document.getElementById(NSFT.CODE_QUOTES);
+            if (qt) qt.addEventListener("click", function () {
+                const on = qt.getAttribute("aria-pressed") !== "true";
+                qt.setAttribute("aria-pressed", String(on));
+                if (box.value) buscar();
+            });
+            const re = document.getElementById(NSFT.CODE_REGEX);
+            if (re) re.addEventListener("click", function () {
+                const on = re.getAttribute("aria-pressed") !== "true";
+                re.setAttribute("aria-pressed", String(on));
+                if (qt) qt.disabled = on;
+                if (box.value) buscar();
+            });
+            const todo = document.getElementById(NSFT.CODE_ALL);
+            if (todo) todo.addEventListener("change", function () { if (box.value) buscar(); });
+            codPintar();
+        }
+
+        function codigoSiHaceFalta() {
+            const campo = _lastRenderCtx && _lastRenderCtx.fieldName;
+            if (!campo || !document.getElementById(NSFT.CODE_INPUT)) return;
+            if (_cod && _cod.campo === campo) return;
+            codBuscar(campo, campo);
+        }
+
+        function codParar() {
+            if (_cod && _cod.corriendo) _cod.cortar = true;
+        }
+
+        async function codBuscar(campo, termCrudo) {
+            const term = String(termCrudo || "").trim();
+            const reBtn = document.getElementById(NSFT.CODE_REGEX);
+            const todoBox = document.getElementById(NSFT.CODE_ALL);
+            const qtBtn = document.getElementById(NSFT.CODE_QUOTES);
+            const regex = !!(reBtn && reBtn.getAttribute("aria-pressed") === "true");
+            const todo = !!(todoBox && todoBox.checked);
+            const comillas = !qtBtn || qtBtn.getAttribute("aria-pressed") === "true";
+            codParar();
+            const st = {
+                campo: campo, term: term, regex: regex, todo: todo, comillas: comillas,
+                corriendo: false, cortar: false, estado: "vacio",
+                hechos: 0, total: 0, saltados: 0, ilegibles: 0, tope: false,
+                resultados: [], error: ""
+            };
+            _cod = st;
+            if (!term) { codPintar(); return; }
+            const CS = codCS();
+            if (!CS) {
+                st.estado = "error";
+                st.error = translations.sfv_code_error || "The script files could not be listed.";
+                codPintar();
+                return;
+            }
+            const regla = CS.regla(term, regex, { comillas: comillas });
+            if (regla.error) { st.estado = "error"; st.error = (translations.sfv_code_bad_regex || "Invalid regular expression") + ": " + regla.error; codPintar(); return; }
+
+            st.corriendo = true;
+            st.estado = "listando";
+            codPintar();
+            let archivos;
+            try { archivos = await CS.listar(window.NSFT_SQL, { tipos: "scripts", todo: todo }); }
+            catch (e) {
+                if (_cod !== st) return;
+                st.corriendo = false; st.estado = "error";
+                st.error = translations.sfv_code_error || "The script files could not be listed.";
+                codPintar();
+                return;
+            }
+            if (_cod !== st) return;
+            if (archivos.length > CS.TOPE) { archivos = archivos.slice(0, CS.TOPE); st.tope = true; }
+            st.total = archivos.length;
+            st.estado = "buscando";
+            codPintar();
+
+            let pintarPendiente = false;
+            const pintarPronto = function () {
+                if (pintarPendiente) return;
+                pintarPendiente = true;
+                setTimeout(function () { pintarPendiente = false; if (_cod === st) codPintar(); }, 150);
+            };
+            const fin = await CS.buscar({
+                archivos: archivos,
+                regla: regla,
+                debeParar: function () { return st.cortar || _cod !== st; },
+                alPaso: function (c) {
+                    st.hechos = c.hechos; st.saltados = c.saltados; st.ilegibles = c.ilegibles;
+                    pintarPronto();
+                }
+            });
+            if (_cod !== st) return;
+            st.hechos = fin.hechos; st.saltados = fin.saltados; st.ilegibles = fin.ilegibles;
+
+            const hallados = CS.ordenar(fin.hallados);
+            const mapa = await CS.scripts(window.NSFT_SQL, hallados.map(function (h) { return h.f.id; }));
+            if (_cod !== st) return;
+            hallados.forEach(function (h) { h.scripts = mapa[String(h.f.id)] || []; });
+            st.resultados = hallados;
+            st.corriendo = false;
+            st.estado = st.cortar ? "parado" : "hecho";
+            codPintar();
+        }
+
+        function codPintar() {
+            const status = document.getElementById(NSFT.CODE_STATUS);
+            const lista = document.getElementById(NSFT.CODE_LIST);
+            const bar = document.getElementById(NSFT.CODE_BAR);
+            if (!status || !lista) return;
+            const campo = _lastRenderCtx && _lastRenderCtx.fieldName;
+            const st = (_cod && _cod.campo === campo) ? _cod : null;
+            const CS = codCS();
+            if (bar) bar.classList.toggle("is-loading", !!(st && st.corriendo));
+            const t = function (k, fb, n) {
+                let s = translations[k] || fb;
+                if (n) Object.keys(n).forEach(function (x) { s = s.split("{" + x + "}").join(String(n[x])); });
+                return s;
+            };
+            status.classList.remove("is-error");
+            if (!st || st.estado === "vacio") { status.textContent = t("sfv_code_hint", "Type a field id or any text to find it in the script code."); lista.innerHTML = ""; return; }
+            if (st.estado === "error") { status.textContent = st.error; status.classList.add("is-error"); lista.innerHTML = ""; return; }
+            if (st.estado === "listando") { status.textContent = t("sfv_code_listing", "Listing the script files..."); lista.innerHTML = ""; return; }
+
+            const extras = [];
+            if (st.saltados) extras.push(t("sfv_code_skipped", "{n} too large", { n: st.saltados }));
+            if (st.ilegibles) extras.push(t("sfv_code_unreadable", "{n} unreadable", { n: st.ilegibles }));
+            if (st.tope) extras.push(t("sfv_code_capped", "limit of {n} files reached", { n: CS ? CS.TOPE : "" }));
+            const cola = extras.length ? " · " + extras.join(" · ") : "";
+
+            if (st.estado === "buscando") {
+                let barra = status.querySelector(".nsft-sfv-code-bar");
+                if (!barra) {
+                    status.innerHTML = '<span class="nsft-sfv-code-prog"></span>'
+                        + ' <button type="button" class="nsft-sfv-code-stop">' + escapeHtml(t("sfv_code_stop", "Stop")) + "</button>"
+                        + '<div class="nsft-sfv-code-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><span></span></div>';
+                    const stop = status.querySelector(".nsft-sfv-code-stop");
+                    if (stop) stop.addEventListener("click", codParar);
+                    barra = status.querySelector(".nsft-sfv-code-bar");
+                }
+                const pct = st.total ? Math.min(100, Math.round(st.hechos * 100 / st.total)) : 0;
+                status.querySelector(".nsft-sfv-code-prog").textContent =
+                    t("sfv_code_progress", "Searching... {done} of {total} files", { done: st.hechos, total: st.total });
+                barra.setAttribute("aria-valuenow", String(pct));
+                barra.firstChild.style.width = pct + "%";
+                lista.innerHTML = "";
+                return;
+            }
+
+            const n = st.resultados.length;
+            const resumen = n
+                ? t("sfv_code_found", "In {n} of {total} files", { n: n, total: st.hechos })
+                : t("sfv_code_none", "Not found in {total} files", { total: st.hechos });
+            status.textContent = resumen + (st.estado === "parado" ? " · " + t("sfv_code_stopped", "stopped") : "") + cola;
+
+            if (!CS) { lista.innerHTML = ""; return; }
+            const regla = CS.regla(st.term, st.regex, { comillas: st.comillas });
+            if (regla.error) { lista.innerHTML = ""; return; }
+            const TIPOS = { w: t("sfv_code_write", "writes"), r: t("sfv_code_read", "reads") };
+            lista.innerHTML = st.resultados.map(function (h) {
+                const f = h.f;
+                const abrir = "/app/common/media/mediaitem.nl?id=" + encodeURIComponent(f.id) + "&e=T";
+                const donde = h.scripts.length
+                    ? h.scripts.map(function (s) {
+                        return '<a href="/app/common/scripting/script.nl?id=' + encodeURIComponent(s.id) + '" target="_blank" rel="noopener">' + escapeHtml(s.name) + "</a>";
+                    }).join(", ")
+                    : '<span class="nsft-sfv-code-lib">' + escapeHtml(t("sfv_code_library", "Library")) + "</span>";
+                const lineas = h.lineas.map(function (x) {
+                    const etiqueta = x.tipo ? '<span class="nsft-sfv-code-tag is-' + x.tipo + '">' + escapeHtml(TIPOS[x.tipo]) + "</span>" : "";
+                    return '<div class="nsft-sfv-code-line"><span class="nsft-sfv-code-ln">' + x.n + "</span>" + etiqueta
+                        + '<code class="nsft-sfv-code-src">' + CS.trozoHtml(x.l, regla, "nsft-sfv-list-hl") + "</code></div>";
+                }).join("");
+                const mas = h.lineas.length >= CS.POR_ARCHIVO ? '<div class="nsft-sfv-code-more">' + escapeHtml(t("sfv_code_more", "Showing the first {n} lines", { n: CS.POR_ARCHIVO })) + "</div>" : "";
+                return '<div class="nsft-sfv-code-file">'
+                    + '<div class="nsft-sfv-code-fhead"><a class="nsft-sfv-code-fname" href="' + abrir + '" target="_blank" rel="noopener" title="' + escapeHtml(f.ruta || "") + '">' + escapeHtml(f.name) + "</a>"
+                    + '<span class="nsft-sfv-code-where">' + donde + "</span></div>"
+                    + '<div class="nsft-sfv-code-path">' + escapeHtml(f.ruta || "") + "</div>"
+                    + lineas + mas + "</div>";
+            }).join("");
+        }
+
         function pedirHistorialSiHaceFalta() {
             try {
                 if (!document.getElementById(NSFT.AUDIT_LIST)) return;
@@ -3840,6 +4102,7 @@
                     aplicarTopeDeAlto();
                 });
                 if (id === "hist") pedirHistorialSiHaceFalta();
+                if (id === "code") codigoSiHaceFalta();
                 try { requestAnimationFrame(fitModalInViewport); } catch (e) { }
             },
             toggleMeta: function (headEl) {

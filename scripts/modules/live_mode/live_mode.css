@@ -1,0 +1,6 @@
+
+.nsft-llm-item { vertical-align: middle; }
+
+.nsft-tb-group.nsft-llm.is-paused .nsft-tb-spinslot.is-live { color: #d97706 !important; }
+
+.nsft-tb-group.nsft-llm.is-error .nsft-tb-label { color: #dc2626 !important; }

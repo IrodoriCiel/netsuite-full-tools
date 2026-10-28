@@ -22,11 +22,11 @@
 
     chrome.storage.local.get(
         {
-            [STORAGE_KEY]: true, enableDiscreetMode: false,
+            [STORAGE_KEY]: true,
             [INTERVAL_KEY]: DEFAULT_INTERVAL_SECONDS, [AUTOSTART_KEY]: false
         },
         (settings) => {
-            if (!settings[STORAGE_KEY] || settings.enableDiscreetMode || !isApplicablePage()) return;
+            if (!settings[STORAGE_KEY] || !isApplicablePage()) return;
             const secs = clamp(settings[INTERVAL_KEY]);
             _paused = !settings[AUTOSTART_KEY];
             if (findRefreshEls().length) injectControl(secs);

@@ -11,6 +11,23 @@
 }
 
 
+.nsft-tb-bar {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 6px 4px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 8px 7px 4px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: var(--nsft-tb-native-bg, color-mix(in srgb, var(--nsft-ns-accent, #607799) 17%, white)) !important;
+}
+
 .nsft-tb-group {
     display: inline-flex !important;
     align-items: center !important;
@@ -281,3 +298,51 @@
 .nsft-tb-clear[hidden] { display: none !important; }
 .nsft-tb-clear svg { width: 10px; height: 10px; }
 .nsft-tb-clear:hover { background: var(--tb-inner) !important; color: var(--tb-text) !important; }
+
+html[data-nsft-redwood] .nsft-tb-group {
+    --tb-field: #ffffff;
+    --tb-inner: rgba(22, 21, 19, 0.06);
+    --tb-divider: rgba(22, 21, 19, 0.12);
+    --tb-text: #161513;
+    --tb-text-2: #161513;
+    --tb-text-3: rgba(22, 21, 19, 0.7);
+    --tb-accent: #227E9E;
+    --tb-live: #227E9E;
+    height: 32px !important;
+    border: 1px solid rgba(22, 21, 19, 0.5) !important;
+    border-radius: 4px !important;
+    font-family: inherit !important;
+    top: 0;
+}
+
+html[data-nsft-redwood] .nsft-tb-num,
+html[data-nsft-redwood] .nsft-tb-count {
+    font-family: inherit !important;
+    font-variant-numeric: tabular-nums;
+}
+
+html[data-nsft-redwood] .nsft-tb-num { border-radius: 3px !important; }
+
+html[data-nsft-redwood] .nsft-tb-switch .nsft-tb-slider { background: rgba(22, 21, 19, 0.3); }
+
+html[data-nsft-redwood] .nsft-tb-ghost:disabled,
+html[data-nsft-redwood] .nsft-tb-icon:disabled { color: rgba(22, 21, 19, 0.35) !important; }
+
+html[data-nsft-redwood] .nsft-tb-search input::placeholder { color: rgba(22, 21, 19, 0.5) !important; }
+
+html[data-nsft-redwood] .nsft-tb-group.nsft-tb-search:focus-within {
+    border-color: #227E9E !important;
+    box-shadow: 0 0 0 1px #227E9E !important;
+}
+
+html[data-nsft-redwood] .nsft-tb-group.is-refreshing {
+    background: color-mix(in srgb, #227E9E 8%, white) !important;
+    animation-name: nsft-tb-glow-rw;
+}
+
+@keyframes nsft-tb-glow-rw {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 126, 158, 0); }
+    50% { box-shadow: 0 0 0 3px rgba(34, 126, 158, 0.18); }
+}
+
+html[data-nsft-redwood] .nsft-tb-bar { background: transparent !important; }

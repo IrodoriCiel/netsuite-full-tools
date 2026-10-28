@@ -16,8 +16,8 @@
         return true;
     }
 
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
-        if (!settings[STORAGE_KEY] || settings.enableDiscreetMode || !isApplicablePage()) return;
+    chrome.storage.local.get({ [STORAGE_KEY]: true }, (settings) => {
+        if (!settings[STORAGE_KEY] || !isApplicablePage()) return;
         init();
     });
 

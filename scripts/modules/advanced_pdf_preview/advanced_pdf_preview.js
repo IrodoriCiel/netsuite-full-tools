@@ -42,21 +42,14 @@
 
     if (!/\/pdftemplate\.nl/i.test(location.pathname)) return;
 
-    function shouldRun(settings) {
-        return !!settings[STORAGE_KEY] && !settings.enableDiscreetMode;
-    }
-
-    chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (settings) => {
-        if (shouldRun(settings)) onReady(start);
+    chrome.storage.local.get({ [STORAGE_KEY]: true }, (settings) => {
+        if (settings[STORAGE_KEY]) onReady(start);
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local') return;
-        if (!changes[STORAGE_KEY] && !changes.enableDiscreetMode) return;
-        chrome.storage.local.get({ [STORAGE_KEY]: true, enableDiscreetMode: false }, (s) => {
-            if (shouldRun(s)) onReady(start);
-            else stop();
-        });
+        if (area !== 'local' || !changes[STORAGE_KEY]) return;
+        if (changes[STORAGE_KEY].newValue !== false) onReady(start);
+        else stop();
     });
 
     function onReady(cb) {

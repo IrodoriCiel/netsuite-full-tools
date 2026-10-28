@@ -1,10 +1,18 @@
 
+html.nsft-lcb-on .login-page-box-logos:has(#companyLogo) > .login-page-box-logo-link {
+    display: none !important;
+}
+
 html.nsft-lcb-on #companyLogo {
     display: block;
-    margin: 0 auto 16px auto;
+    width: 230px;
     max-width: 100%;
     max-height: 80px;
     height: auto;
+    object-fit: contain;
+    margin: 0 auto;
+    background: transparent;
+    filter: url(#nsft-lcb-logo-white);
     transition: transform 200ms ease;
 }
 
@@ -12,44 +20,49 @@ html.nsft-lcb-on #companyLogo:hover {
     transform: scale(1.04);
 }
 
-html.nsft-lcb-on .nsft-lcb-lastvisit {
-    margin: 2px 0 10px;
-    font-size: 12px;
-    text-align: center;
-    color: light-dark(#64748b, #94a3b8);
-}
-
-html.nsft-lcb-on #companyLogo:not(.transparent) {
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px #ffffff;
-    border-radius: 4px;
-}
-
 html.nsft-lcb-on #companyName {
     display: block;
     width: 100%;
-    margin: 0 0 12px 0;
-    font-size: 19px !important;
-    line-height: 28px;
-    color: light-dark(#4d5f79, #e5e7eb);
-    font-weight: bold;
+    margin: 0;
+    font-size: 14px !important;
+    font-weight: 600;
+    line-height: 1.35;
+    color: inherit;
     text-align: center !important;
 }
 
-html.nsft-lcb-on .login-page-box-logo-link:has(+ #companyLogo) {
-    display: none !important;
+html.nsft-lcb-on .nsft-lcb-lastvisit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+    color: var(--nsft-lid-muted, rgba(229, 241, 245, 0.72));
+    white-space: nowrap;
+}
+
+html.nsft-lcb-on .nsft-lcb-lastvisit > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+html.nsft-lcb-on .nsft-lcb-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--nsft-lid-online, #5fd3a0);
 }
 
 html.nsft-lcb-on .login-page-box-logos {
-    margin-bottom: 20px;
     text-align: center;
 }
 
-html.nsft-lcb-on .login-page-box-logos > * {
-    margin-block: 0 !important;
+html.nsft-lcb-on .login-page-box-logos > .login-page-box-logo-link {
     margin-inline: auto;
 }
 
-html.nsft-lcb-on .login-page-box-logo-link > svg {
-    height: 42px;
+html.nsft-lcb-on .login-page-box-logos > :is(#companyLogo, #companyName, .nsft-lcb-lastvisit) {
+    margin-inline: auto;
+    justify-content: center;
 }

@@ -16,7 +16,18 @@
             window.NSFT_SuiteQLRest.ensureTransport();
         }
         ensureTextSearch();
+        ensureCodeSearch();
         ensureDialog();
+    }
+
+    function ensureCodeSearch() {
+        if (document.getElementById("nsft-code-search-mw")) return;
+        const s = document.createElement("script");
+        s.id = "nsft-code-search-mw";
+        s.src = chrome.runtime.getURL("scripts/modules/_shared/nsft_code_search.js");
+        s.async = false;
+        s.onload = function () { this.remove(); };
+        (document.head || document.documentElement).appendChild(s);
     }
 
     function ensureDialog() {
@@ -36,7 +47,7 @@
     const SECCIONES = ['setFieldValuesShowHelp', 'setFieldValuesShowId',
         'setFieldValuesShowValue', 'setFieldValuesShowText', 'setFieldValuesShowType',
         'setFieldValuesShowFlags', 'setFieldValuesShowSetter', 'setFieldValuesShowOptions',
-        'setFieldValuesShowEdit'];
+        'setFieldValuesShowEdit', 'setFieldValuesShowCode'];
     const _secciones = {};
     const NO_ICON_KEY = 'setFieldValuesNoIcon';
     const LINE_MODE_KEY = 'setFieldValuesLineMode';
@@ -236,6 +247,29 @@
                 sfv_tab_value: chrome.i18n.getMessage("sfv_tab_value"),
                 sfv_tab_definition: chrome.i18n.getMessage("sfv_tab_definition"),
                 sfv_tab_history: chrome.i18n.getMessage("sfv_tab_history"),
+                sfv_tab_code: chrome.i18n.getMessage("sfv_tab_code"),
+                sfv_code_placeholder: chrome.i18n.getMessage("sfv_code_placeholder"),
+                sfv_code_searching: chrome.i18n.getMessage("sfv_code_searching"),
+                sfv_code_regex: chrome.i18n.getMessage("sfv_code_regex"),
+                sfv_code_quotes: chrome.i18n.getMessage("sfv_code_quotes"),
+                sfv_code_search: chrome.i18n.getMessage("sfv_code_search"),
+                sfv_code_all: chrome.i18n.getMessage("sfv_code_all"),
+                sfv_code_bad_regex: chrome.i18n.getMessage("sfv_code_bad_regex"),
+                sfv_code_error: chrome.i18n.getMessage("sfv_code_error"),
+                sfv_code_hint: chrome.i18n.getMessage("sfv_code_hint"),
+                sfv_code_listing: chrome.i18n.getMessage("sfv_code_listing"),
+                sfv_code_skipped: chrome.i18n.getMessage("sfv_code_skipped"),
+                sfv_code_unreadable: chrome.i18n.getMessage("sfv_code_unreadable"),
+                sfv_code_capped: chrome.i18n.getMessage("sfv_code_capped"),
+                sfv_code_progress: chrome.i18n.getMessage("sfv_code_progress"),
+                sfv_code_stop: chrome.i18n.getMessage("sfv_code_stop"),
+                sfv_code_found: chrome.i18n.getMessage("sfv_code_found"),
+                sfv_code_none: chrome.i18n.getMessage("sfv_code_none"),
+                sfv_code_stopped: chrome.i18n.getMessage("sfv_code_stopped"),
+                sfv_code_write: chrome.i18n.getMessage("sfv_code_write"),
+                sfv_code_read: chrome.i18n.getMessage("sfv_code_read"),
+                sfv_code_library: chrome.i18n.getMessage("sfv_code_library"),
+                sfv_code_more: chrome.i18n.getMessage("sfv_code_more"),
                 sfv_field_type: chrome.i18n.getMessage("sfv_field_type"),
                 sfv_display_type: chrome.i18n.getMessage("sfv_display_type"),
                 sfv_display_normal: chrome.i18n.getMessage("sfv_display_normal"),

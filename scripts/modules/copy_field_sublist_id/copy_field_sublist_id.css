@@ -99,6 +99,33 @@
     opacity: 0.85;
 }
 
+html[data-nsft-redwood] :is(.nsft-copy-fs-id-sublist, .nsft-open-custrec-btn,
+    .nsft-add-custfield-btn, .nsft-sublist-menu-trigger) {
+    height: 28px;
+    padding: 0 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    border-radius: 4px;
+    color: #161513;
+    background: transparent;
+    border: 1px solid rgba(22, 21, 19, 0.5);
+    box-shadow: none;
+}
+
+html[data-nsft-redwood] :is(.nsft-copy-fs-id-sublist, .nsft-open-custrec-btn,
+    .nsft-add-custfield-btn, .nsft-sublist-menu-trigger):hover {
+    background: rgba(22, 21, 19, 0.06);
+    border-color: rgba(22, 21, 19, 0.7);
+    color: #161513;
+    box-shadow: none;
+}
+
+html[data-nsft-redwood] :is(.nsft-copy-fs-id-sublist, .nsft-open-custrec-btn,
+    .nsft-add-custfield-btn, .nsft-sublist-menu-trigger) svg { opacity: 0.8; }
+
 .nsft-sublist-menu {
     position: relative;
     display: inline-flex;

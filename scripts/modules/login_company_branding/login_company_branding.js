@@ -6,6 +6,7 @@
     const LOGO_ID = 'companyLogo';
     const NAME_ID = 'companyName';
     const LAST_VISIT_ID = 'nsft-lcb-lastvisit';
+    const FILTER_ID = 'nsft-lcb-logo-white';
     const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
     let _cache = {};
@@ -23,7 +24,7 @@
 
     function apply(enabled) {
         document.documentElement.classList.toggle(HTML_CLASS, !!enabled);
-        if (!enabled) return;
+        if (!enabled) { removeAll(); return; }
         if (!/^\/app\/login\//.test(location.pathname) && !/^\/pages\/customerlogin\.jsp/.test(location.pathname)) return;
 
         const companyId = getCompanyIdFromUrl();
@@ -34,6 +35,15 @@
         } else {
             injectFromCache(companyId);
         }
+    }
+
+    function removeAll() {
+        [LOGO_ID, NAME_ID, LAST_VISIT_ID].forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (window.NSFT_LoginIdentity) window.NSFT_LoginIdentity.remove(el);
+            else el.remove();
+        });
     }
 
     function getCompanyIdFromUrl() {
@@ -72,29 +82,63 @@
             const test = new Image();
             test.onload = () => {
                 if (document.getElementById(LOGO_ID)) return;
+                if (!document.documentElement.classList.contains(HTML_CLASS)) return;
                 const img = document.createElement('img');
                 img.id = LOGO_ID;
                 img.src = info.logoUrl;
                 img.alt = info.companyName || 'Company logo';
                 img.className = 'uir-logo';
                 img.loading = 'lazy';
-                const link = logos.querySelector('.login-page-box-logo-link');
-                if (link) link.insertAdjacentElement('afterend', img);
-                else logos.insertBefore(img, logos.firstChild);
+                ensureWhiteFilter();
+                place('logo', img, logos);
             };
             test.onerror = () => { };
             test.src = info.logoUrl;
         }
 
         if (info.companyName && !document.getElementById(NAME_ID)) {
-            const h1 = document.createElement('h1');
-            h1.id = NAME_ID;
-            h1.textContent = info.companyName;
-            logos.appendChild(h1);
+            const name = document.createElement('div');
+            name.id = NAME_ID;
+            name.textContent = info.companyName;
+            place('name', name, logos);
         }
 
         injectLastVisit(logos, info);
 
+    }
+
+    function place(slot, el, logos) {
+        if (window.NSFT_LoginIdentity && window.NSFT_LoginIdentity.put(slot, el)) return;
+        if (slot === 'logo') {
+            const link = logos.querySelector('.login-page-box-logo-link');
+            if (link) link.insertAdjacentElement('afterend', el);
+            else logos.insertBefore(el, logos.firstChild);
+        } else {
+            logos.appendChild(el);
+        }
+    }
+
+    function ensureWhiteFilter() {
+        if (document.getElementById(FILTER_ID)) return;
+        const NS = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('width', '0');
+        svg.setAttribute('height', '0');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.style.position = 'absolute';
+        const filter = document.createElementNS(NS, 'filter');
+        filter.id = FILTER_ID;
+        filter.setAttribute('x', '0');
+        filter.setAttribute('y', '0');
+        filter.setAttribute('width', '1');
+        filter.setAttribute('height', '1');
+        filter.setAttribute('color-interpolation-filters', 'sRGB');
+        const matrix = document.createElementNS(NS, 'feColorMatrix');
+        matrix.setAttribute('type', 'matrix');
+        matrix.setAttribute('values', '0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  -1.2 -1.2 -1.2 3.3 0');
+        filter.appendChild(matrix);
+        svg.appendChild(filter);
+        document.body.appendChild(svg);
     }
 
     function injectLastVisit(logos, info) {
@@ -109,7 +153,13 @@
         const el = document.createElement('div');
         el.id = LAST_VISIT_ID;
         el.className = 'nsft-lcb-lastvisit';
-        el.textContent = `${label} ${rel}`.trim();
-        logos.appendChild(el);
+        const dot = document.createElement('span');
+        dot.className = 'nsft-lcb-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        const text = document.createElement('span');
+        text.textContent = `${label} ${rel}`.trim();
+        el.appendChild(dot);
+        el.appendChild(text);
+        place('last', el, logos);
     }
 })();

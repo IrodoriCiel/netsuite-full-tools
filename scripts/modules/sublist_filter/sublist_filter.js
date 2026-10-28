@@ -3,7 +3,10 @@
 
     const STORAGE_KEY = 'enableSublistFilter';
     const BAR_CLASS = 'nsft-sf-bar';
+    const STRIP_CLASS = 'nsft-sf-strip';
     const HIDDEN_CLASS = 'nsft-sf-hidden';
+    const PG_EXTRA = 'nsft-pg-extra';
+    const PG_DUENO = 'sf';
     const HL_CLASS = 'nsft-sf-hl';
     const APPLIED_ATTR = 'data-nsft-sf';
     const TABLE_SEL = ':is(.uir-machine-table, .listtable)';
@@ -83,16 +86,18 @@
         if (_unsub) { try { _unsub(); } catch (e) { } _unsub = null; }
         if (_slashHandler) { document.removeEventListener('keydown', _slashHandler, true); _slashHandler = null; }
         document.querySelectorAll('.' + BAR_CLASS).forEach((b) => {
-            const cell = b.closest('td.nsft-sf-cell');
+            const cell = b.closest('td.nsft-sf-cell') || b.closest('.' + STRIP_CLASS);
             (cell || b).remove();
         });
         document.querySelectorAll('.' + HIDDEN_CLASS).forEach(r => r.classList.remove(HIDDEN_CLASS));
+        if (window.NSFT_SublistPages) NSFT_SublistPages.limpia(document, PG_DUENO);
         clearHighlights(document);
         document.querySelectorAll('[' + APPLIED_ATTR + ']').forEach(c => c.removeAttribute(APPLIED_ATTR));
     }
 
     const NOT_DATA = ['uir-machine-headerrow', 'uir-list-headerrow', 'uir-nodata-row',
-        'uir-loading-row', 'uir-machine-button-row', 'uir-machine-row-last'];
+        'uir-loading-row', 'uir-machine-button-row', 'uir-machine-row-last',
+        'nsft-pg-extra', 'nsft-pg-sep'];
 
     function dataRows(scope) {
         const rows = scope.querySelectorAll(TABLE_SEL + ' > tbody > tr');
@@ -104,30 +109,51 @@
         scanView();
     }
 
+    function filaNativa(capa) {
+        const barra = capa.querySelector('.uir-list-control-bar[data-above="true"]')
+            || capa.querySelector('.uir-list-control-bar');
+        return barra ? barra.querySelector(':scope > table > tbody > tr > td > table > tbody > tr') : null;
+    }
+
+    function copiaFondoNativo(el) {
+        const nativa = document.querySelector('.uir-list-control-bar');
+        if (!nativa) return;
+        const bg = getComputedStyle(nativa).backgroundColor;
+        if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') el.style.setProperty('--nsft-tb-native-bg', bg);
+    }
+
     function scanEdit() {
         document.querySelectorAll('.uir-machine-table-container').forEach((container) => {
             if (!container.querySelector('.uir-machine-headerrow:not(.uir-loading-row)')) return;
 
+            const capa = container.closest('[data-nsps-layer]');
+            const fila = capa && filaNativa(capa);
+            if (fila) {
+                const total = dataRows(capa).length;
+                const bar = fila.querySelector('.' + BAR_CLASS);
+                if (bar) { bar.dataset.nsftSfEdit = '1'; refresh(capa, bar, total); return; }
+                injectBar(capa, total, fila, true);
+                return;
+            }
+
             const rows = dataRows(container);
-            const bar = container.previousElementSibling && container.previousElementSibling.classList.contains(BAR_CLASS)
-                ? container.previousElementSibling
-                : null;
+            const prev = container.previousElementSibling;
+            const bar = prev && prev.classList.contains(STRIP_CLASS) ? prev.querySelector('.' + BAR_CLASS) : null;
 
             if (bar) { refresh(container, bar, rows.length); return; }
 
-            injectBar(container, rows.length);
+            injectBar(container, rows.length, null, true);
         });
     }
 
     function scanView() {
         document.querySelectorAll('[data-nsps-layer]').forEach((layer) => {
             if (layer.querySelector('.uir-machine-headerrow:not(.uir-loading-row)')) {
-                const pastilla = layer.querySelector('.' + BAR_CLASS + '.nsft-sf-pill');
+                const pastilla = layer.querySelector('.' + BAR_CLASS + ':not([data-nsft-sf-edit])');
                 if (pastilla) {
                     (pastilla.closest('td.nsft-sf-cell') || pastilla).remove();
                     layer.removeAttribute(APPLIED_ATTR);
-                    const franja = layer.querySelector('.' + BAR_CLASS + '.nsft-sf-strip');
-                    const suyo = franja && franja.querySelector('.nsft-sf-input');
+                    const suyo = layer.querySelector('.' + BAR_CLASS + '[data-nsft-sf-edit] .nsft-sf-input');
                     if (!suyo || !suyo.value) {
                         layer.querySelectorAll('tr.' + HIDDEN_CLASS)
                             .forEach((tr) => tr.classList.remove(HIDDEN_CLASS));
@@ -140,9 +166,10 @@
             const bar = layer.querySelector('.' + BAR_CLASS);
             if (lvBar) {
                 if (bar) {
-                    bar.remove();
+                    (bar.closest('td.nsft-sf-cell') || bar).remove();
                     layer.removeAttribute(APPLIED_ATTR);
                     layer.querySelectorAll('tr.nsft-sf-hidden').forEach((tr) => tr.classList.remove('nsft-sf-hidden'));
+                    if (window.NSFT_SublistPages) NSFT_SublistPages.limpia(layer, PG_DUENO);
                 }
                 return;
             }
@@ -152,10 +179,7 @@
 
             if (!layer.querySelector(TABLE_SEL)) return;
 
-            const controlBar = layer.querySelector('.uir-list-control-bar[data-above="true"]')
-                || layer.querySelector('.uir-list-control-bar');
-            if (!controlBar) return;
-            const innerRow = controlBar.querySelector(':scope > table > tbody > tr > td > table > tbody > tr');
+            const innerRow = filaNativa(layer);
             if (!innerRow) return;
             injectBar(layer, rows.length, innerRow);
         });
@@ -167,14 +191,13 @@
         else updateCount(bar, total, total);
     }
 
-    function injectBar(scope, total, innerRow) {
+    function injectBar(scope, total, innerRow, deEdicion) {
         if (scope.getAttribute(APPLIED_ATTR)) return;
         scope.setAttribute(APPLIED_ATTR, '1');
 
         const bar = document.createElement('div');
-        bar.className = innerRow
-            ? 'nsft-tb-group nsft-tb-search ' + BAR_CLASS + ' nsft-sf-pill'
-            : BAR_CLASS + ' nsft-sf-strip';
+        bar.className = 'nsft-tb-group nsft-tb-search ' + BAR_CLASS + ' nsft-sf-pill';
+        if (deEdicion) bar.dataset.nsftSfEdit = '1';
 
         const search = document.createElement('div');
         search.className = 'nsft-sf-search';
@@ -229,10 +252,11 @@
             td.appendChild(bar);
             innerRow.appendChild(td);
         } else {
-            const spacer = document.createElement('span');
-            spacer.className = 'nsft-sf-spacer';
-            bar.appendChild(spacer);
-            scope.parentNode.insertBefore(bar, scope);
+            const franja = document.createElement('div');
+            franja.className = 'nsft-tb-bar ' + STRIP_CLASS;
+            copiaFondoNativo(franja);
+            franja.appendChild(bar);
+            scope.parentNode.insertBefore(franja, scope);
         }
         updateCount(bar, total, total);
     }
@@ -261,23 +285,72 @@
             tr.classList.toggle(HIDDEN_CLASS, !match);
             if (match) visible++;
         });
-        updateCount(bar, visible, rows.length);
 
-        const marksOk = !needle || visible === 0 || !!scope.querySelector('mark.' + HL_CLASS);
+        const marksOk = !needle || visible === 0
+            || Array.from(scope.querySelectorAll('mark.' + HL_CLASS)).some((m) => !m.closest('.' + PG_EXTRA));
         const same = bar.dataset.nsftSfQ === needle &&
             Number(bar.dataset.nsftSfRows) === rows.length && marksOk;
         if (!same) {
-            clearHighlights(scope);
+            clearHighlights(scope, true);
             if (needle) rows.forEach((tr) => {
                 if (!tr.classList.contains(HIDDEN_CLASS)) highlightRow(tr, needle);
             });
             bar.dataset.nsftSfQ = needle;
             bar.dataset.nsftSfRows = String(rows.length);
         }
+
+        const fuera = otrasPaginas(scope, needle, bar);
+        if (fuera) updateCount(bar, visible + fuera.coinciden, fuera.total);
+        else updateCount(bar, visible, rows.length);
     }
 
-    function clearHighlights(root) {
+    function otrasPaginas(scope, needle, bar) {
+        const SP = window.NSFT_SublistPages;
+        if (!SP) return null;
+        const est = needle ? SP.pide(scope, avisoDe(scope, bar)) : null;
+        if (!est) {
+            SP.limpia(scope, PG_DUENO);
+            delete bar.dataset.nsftSfPg;
+            return null;
+        }
+        const grupos = (est.paginas || []).map((p) => ({
+            numero: p.numero,
+            etiqueta: p.etiqueta,
+            filas: p.filas.filter((tr) => textoFuera(tr).indexOf(needle) !== -1)
+        }));
+        const clave = est.clave + '|' + needle;
+        if (bar.dataset.nsftSfPg !== clave || !SP.pintadas(scope, PG_DUENO)) {
+            SP.pinta(scope, est, grupos, PG_DUENO).forEach((tr) => highlightRow(tr, needle));
+            bar.dataset.nsftSfPg = clave;
+        }
+        if (!est.paginas) return null;
+        return { coinciden: grupos.reduce((n, g) => n + g.filas.length, 0), total: est.total };
+    }
+
+    const _avisos = new WeakMap();
+    function avisoDe(scope, bar) {
+        let f = _avisos.get(bar);
+        if (!f) {
+            f = () => {
+                if (!bar.isConnected) return;
+                const input = bar.querySelector('.nsft-sf-input');
+                applyFilter(scope, input ? input.value : '', bar);
+            };
+            _avisos.set(bar, f);
+        }
+        return f;
+    }
+
+    const _textosFuera = new WeakMap();
+    function textoFuera(tr) {
+        let s = _textosFuera.get(tr);
+        if (s == null) { s = rowText(tr); _textosFuera.set(tr, s); }
+        return s;
+    }
+
+    function clearHighlights(root, soloPropias) {
         root.querySelectorAll('mark.' + HL_CLASS).forEach((m) => {
+            if (soloPropias && m.closest('.' + PG_EXTRA)) return;
             const parent = m.parentNode;
             if (!parent) return;
             parent.replaceChild(document.createTextNode(m.textContent), m);
@@ -322,7 +395,9 @@
         const rows = total === 1
             ? (chrome.i18n.getMessage('sublistFilterRowLabel') || 'fila')
             : (chrome.i18n.getMessage('sublistFilterRowsLabel') || 'filas');
-        shown.textContent = String(visible);
-        totalEl.textContent = '/ ' + total + ' ' + rows;
+        const txtShown = String(visible);
+        const txtTotal = '/ ' + total + ' ' + rows;
+        if (shown.textContent !== txtShown) shown.textContent = txtShown;
+        if (totalEl.textContent !== txtTotal) totalEl.textContent = txtTotal;
     }
 })();

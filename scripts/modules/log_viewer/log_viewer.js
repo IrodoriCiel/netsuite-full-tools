@@ -4,6 +4,8 @@
     const STORAGE_KEY = 'enableLogViewer';
     const BAR_CLASS = 'nsft-lv-bar';
     const HIDDEN = 'nsft-lv-hidden';
+    const PG_EXTRA = 'nsft-pg-extra';
+    const PG_DUENO = 'lv';
 
     let _unsub = null;
     let _q = '';
@@ -40,12 +42,14 @@
         document.querySelectorAll('.nsft-lv-cell').forEach(c => c.remove());
         document.querySelectorAll('.' + BAR_CLASS).forEach(b => b.remove());
         document.querySelectorAll('.' + HIDDEN).forEach(r => r.classList.remove(HIDDEN));
+        if (window.NSFT_SublistPages) NSFT_SublistPages.limpia(document, PG_DUENO);
         unhighlight(document);
         _table = null; _bar = null;
     }
 
-    function logRows(table) {
-        return Array.from(table.querySelectorAll('tr')).filter(tr => tr.querySelector('td.uir-list-row-cell'));
+    function logRows(table, conOtras) {
+        return Array.from(table.querySelectorAll('tr')).filter(tr => tr.querySelector('td.uir-list-row-cell')
+            && (conOtras || !tr.classList.contains(PG_EXTRA)));
     }
 
     function isVisible(el) {
@@ -82,7 +86,10 @@
 
     function rowCells(tr) {
         return Array.from(tr.querySelectorAll('td.uir-list-row-cell'))
-            .map(td => (td.textContent || '').replace(/\s+/g, ' ').trim());
+            .map((td) => {
+                const original = td.querySelector('.nsft-logfmt-wrapper code');
+                return ((original || td).textContent || '').replace(/\s+/g, ' ').trim();
+            });
     }
 
     function scan() {
@@ -198,8 +205,8 @@
             b.addEventListener('click', handler);
             return b;
         };
-        const csvBtn = exportBtn('CSV', 'lv_export_csv_title', 'Exportar filas filtradas a CSV', exportCsv);
-        const jsonBtn = exportBtn('JSON', 'lv_export_json_title', 'Exportar filas filtradas a JSON', exportJson);
+        const csvBtn = exportBtn('CSV', 'lv_export_csv_title', 'Exportar a CSV todas las filas del log', (e) => exportar(guardarCsv, e.currentTarget));
+        const jsonBtn = exportBtn('JSON', 'lv_export_json_title', 'Exportar a JSON todas las filas del log', (e) => exportar(guardarJson, e.currentTarget));
 
         bar.appendChild(icon);
         bar.appendChild(search);
@@ -213,7 +220,7 @@
 
     function setCount(text) {
         const count = _bar && _bar.querySelector('.nsft-lv-count');
-        if (count) count.textContent = text;
+        if (count && count.textContent !== text) count.textContent = text;
     }
 
     function apply() {
@@ -222,20 +229,63 @@
         const q = fold(_q.trim());
         let visible = 0;
         rows.forEach(tr => {
-            unhighlight(tr);
             const show = !q || fold(tr.textContent || '').indexOf(q) !== -1;
             tr.classList.toggle(HIDDEN, !show);
-            if (show) {
-                visible++;
-                if (q) highlightTexts(tr, q);
-            }
+            if (show) visible++;
         });
-        setCount(q ? (visible + ' / ' + rows.length) : String(rows.length));
+
+        const marcasOk = !q || visible === 0
+            || Array.from(_table.querySelectorAll('mark.nsft-lv-hl')).some(mk => !mk.closest('.' + PG_EXTRA));
+        const igual = _bar.dataset.nsftLvQ === q
+            && Number(_bar.dataset.nsftLvRows) === rows.length && marcasOk;
+        if (!igual) {
+            unhighlight(_table, true);
+            if (q) rows.forEach(tr => { if (!tr.classList.contains(HIDDEN)) highlightTexts(tr, q); });
+            _bar.dataset.nsftLvQ = q;
+            _bar.dataset.nsftLvRows = String(rows.length);
+        }
+
+        const fuera = otrasPaginas(q);
+        if (!q) setCount(String(rows.length));
+        else if (fuera) setCount((visible + fuera.coinciden) + ' / ' + fuera.total);
+        else setCount(visible + ' / ' + rows.length);
+    }
+
+    function otrasPaginas(q) {
+        const SP = window.NSFT_SublistPages;
+        const capa = SP && _table.closest('[data-nsps-layer]');
+        if (!capa) return null;
+        const est = q ? SP.pide(capa, apply) : null;
+        if (!est) {
+            SP.limpia(_table, PG_DUENO);
+            delete _bar.dataset.nsftLvPg;
+            return null;
+        }
+        const grupos = (est.paginas || []).map(p => ({
+            numero: p.numero,
+            etiqueta: p.etiqueta,
+            filas: p.filas.filter(tr => textoFuera(tr).indexOf(q) !== -1)
+        }));
+        const clave = est.clave + '|' + q;
+        if (_bar.dataset.nsftLvPg !== clave || !SP.pintadas(_table, PG_DUENO)) {
+            SP.pinta(_table, est, grupos, PG_DUENO).forEach(tr => highlightTexts(tr, q));
+            _bar.dataset.nsftLvPg = clave;
+        }
+        if (!est.paginas) return null;
+        return { coinciden: grupos.reduce((n, g) => n + g.filas.length, 0), total: est.total };
+    }
+
+    const _textosFuera = new WeakMap();
+    function textoFuera(tr) {
+        let s = _textosFuera.get(tr);
+        if (s == null) { s = fold(tr.textContent || ''); _textosFuera.set(tr, s); }
+        return s;
     }
 
 
-    function unhighlight(root) {
+    function unhighlight(root, soloPropias) {
         root.querySelectorAll('mark.nsft-lv-hl').forEach((mk) => {
+            if (soloPropias && mk.closest('.' + PG_EXTRA)) return;
             const p = mk.parentNode;
             if (!p) return;
             p.replaceChild(document.createTextNode(mk.textContent), mk);
@@ -298,12 +348,62 @@
     }
 
 
-    function currentExportData() {
-        if (!_table) return null;
-        const rows = logRows(_table)
-            .filter(tr => !tr.classList.contains(HIDDEN))
-            .map(rowCells);
-        return { columns: headerLabels(_table), rows };
+    let _exportando = false;
+
+    function exportar(guardar, btn) {
+        if (!_table || _exportando) return;
+        const SP = window.NSFT_SublistPages;
+        const capa = SP && _table.closest('[data-nsps-layer]');
+        if (!capa) { entrega(guardar, null); return; }
+        _exportando = true;
+        const intenta = () => {
+            if (!_exportando) return;
+            const est = SP.pide(capa, intenta);
+            if (est && est.cargando) { ocupado(btn, est); return; }
+            _exportando = false;
+            ocupado(btn, null);
+            entrega(guardar, est);
+        };
+        intenta();
+    }
+
+    function ocupado(btn, est) {
+        if (!btn) return;
+        if (btn.dataset.nsftLvTitle == null) btn.dataset.nsftLvTitle = btn.title;
+        btn.disabled = !!est;
+        btn.title = est
+            ? i18n('lv_export_loading', 'Trayendo las demás páginas…', [String(est.hechas || 0), String(est.porHacer || '?')])
+            : btn.dataset.nsftLvTitle;
+    }
+
+    function entrega(guardar, est) {
+        const q = fold(_q.trim());
+        const casa = (tr) => !q || fold(tr.textContent || '').indexOf(q) !== -1;
+        const propias = logRows(_table).filter(casa);
+        let filas = propias;
+        if (est && est.paginas) {
+            const numeros = est.paginas.map(p => p.numero);
+            let actual = 1;
+            while (numeros.indexOf(actual) !== -1) actual++;
+            filas = [];
+            est.paginas.concat([{ numero: actual, propia: true }])
+                .sort((a, b) => a.numero - b.numero)
+                .forEach((p) => {
+                    filas = filas.concat(p.propia ? propias
+                        : p.filas.filter(tr => tr.querySelector('td.uir-list-row-cell') && casa(tr)));
+                });
+        }
+        if (!filas.length) return;
+        guardar({ columns: headerLabels(_table), rows: filas.map(rowCells) });
+
+        const C = window.NSFT_Clipboard;
+        if (!C || !C.showToast || !est) return;
+        if (est.error) {
+            C.showToast(i18n('lv_export_partial', 'No se pudieron traer las demás páginas: se exportó sólo la que ves.'), { type: 'error' });
+        } else if (est.capped) {
+            C.showToast(i18n('lv_export_capped', 'Se exportaron las primeras páginas del log.',
+                [String((est.paginas || []).length + 1), String(est.totalPaginas || '')]), { type: 'info' });
+        }
     }
 
     function exportFilename(ext) {
@@ -311,18 +411,14 @@
         return 'execution-log_' + ts + '.' + ext;
     }
 
-    function exportCsv() {
-        const data = currentExportData();
-        if (!data || !data.rows.length) return;
+    function guardarCsv(data) {
         const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
         const lines = [data.columns.map(esc).join(',')];
         data.rows.forEach(r => lines.push(r.map(esc).join(',')));
         saveBlob('\uFEFF' + lines.join('\r\n'), 'text/csv;charset=utf-8', exportFilename('csv'));
     }
 
-    function exportJson() {
-        const data = currentExportData();
-        if (!data || !data.rows.length) return;
+    function guardarJson(data) {
         const cols = data.columns;
         const objs = data.rows.map(r => {
             const o = {};
