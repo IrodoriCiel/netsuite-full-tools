@@ -59,7 +59,8 @@
         const els = form && form.elements;
         const barra = form && form.querySelector('.uir-control-bar');
         if (els && els.sortcol && barra && document.querySelector('td.uir-list-header-td[onclick^="doServerSort"]')) {
-            out.push({ id: PAGINA, prefijo: '', donde: barra, raiz: document, col: els.sortcol.value || '', dir: (els.sortdir && els.sortdir.value) || '' });
+            const arriba = filaDeArriba();
+            out.push({ id: PAGINA, prefijo: '', donde: arriba || barra, enFila: !!arriba, raiz: document, col: els.sortcol.value || '', dir: (els.sortdir && els.sortdir.value) || '' });
         }
 
         document.querySelectorAll('[data-nsps-layer]').forEach((capa) => {
@@ -73,6 +74,14 @@
             out.push({ id: m, prefijo: m, donde: fila, raiz: capa, col: e.sortcol.value || '', dir: (e.sortdir && e.sortdir.value) || '' });
         });
         return out;
+    }
+
+    function filaDeArriba() {
+        const SEL = 'table.uir-list-buttonbar-left > tbody > tr';
+        const top = document.querySelector('table.uir-list-top-button-bar')
+            || document.querySelector('table.uir-list-filter-bar');
+        const fila = top ? top.querySelector(SEL) : null;
+        return fila && fila.getClientRects().length ? fila : null;
     }
 
     function filaNativa(capa) {
@@ -125,7 +134,7 @@
         btn.addEventListener('click', () => quitaOrden(btn, tabla.id));
         grupo.appendChild(btn);
 
-        if (tabla.id === PAGINA) {
+        if (tabla.id === PAGINA && !tabla.enFila) {
             const item = document.createElement('span');
             item.className = 'uir-control-bar-item nsft-csort-item';
             item.dataset.csort = tabla.id;

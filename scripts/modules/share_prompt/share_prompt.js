@@ -175,15 +175,12 @@
         copiar.innerHTML = ICONS.copy + '<span>' + t('shareCopy', 'Copiar enlace') + '</span>';
         copiar.title = t('shareCopyTitle', 'Copiar el enlace de la Chrome Web Store');
         copiar.addEventListener('click', () => {
-            const hecho = () => { marcaCompuerta(pages); silence(); };
             const C = window.NSFT_Clipboard;
             if (C && C.copy) {
                 C.copy(STORE_URL, { toast: { message: t('shareCopied', 'Enlace copiado') } });
-                hecho();
                 return;
             }
             try { navigator.clipboard.writeText(STORE_URL); } catch (e) { }
-            hecho();
         });
 
         const red = (clase, icono, etiqueta, url) => {
@@ -193,7 +190,7 @@
             b.innerHTML = icono;
             b.title = etiqueta;
             b.setAttribute('aria-label', etiqueta);
-            b.addEventListener('click', () => { openTab(url); marcaCompuerta(pages); silence(); });
+            b.addEventListener('click', () => { openTab(url); });
             return b;
         };
 
@@ -223,7 +220,6 @@
                         text: mensaje,
                         url: STORE_URL
                     }))
-                    .then(() => { marcaCompuerta(pages); silence(); })
                     .catch(() => { });
             });
             iconos.appendChild(mas);

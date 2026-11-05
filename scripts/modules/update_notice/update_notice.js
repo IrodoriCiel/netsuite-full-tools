@@ -83,7 +83,7 @@
             let msg = chrome.i18n.getMessage('un_hl_' + i);
             if (!msg) continue;
             const li = document.createElement('li');
-            if (msg.charAt(0) === '*') {
+            if (/^\*(?!\*)/.test(msg) || /^\*\*\*/.test(msg)) {
                 li.className = 'is-new';
                 msg = msg.slice(1).replace(/^\s+/, '');
             }
@@ -104,8 +104,6 @@
         see.textContent = chrome.i18n.getMessage('un_toast_btn');
         see.addEventListener('click', () => {
             try { window.open(chrome.runtime.getURL('popup/changelog.html'), '_blank', 'noopener'); } catch (e) { }
-            markSeen();
-            removeToast();
         });
         text.appendChild(title);
         text.appendChild(body);

@@ -236,6 +236,11 @@
         return btn.querySelector('span') || btn;
     }
 
+    function ampliar(wrapper) {
+        const LF = window.NSFT_LogFormat;
+        if (LF && LF.addExpand) LF.addExpand(wrapper);
+    }
+
     function addRawToggle(wrapper, btnGroup, viewEls, rawText, opts) {
         const LF = window.NSFT_LogFormat;
         if (!LF || !LF.addRawToggle || !rawText) return;
@@ -268,9 +273,17 @@
             recType = p.get('rectype') || '';
             recId = p.get('id') || '';
         } catch (e) { }
-        const form = (location.pathname.split('/').pop() || '').replace(/\.nl$/i, '');
+        if (!recId) {
+            const idInput = document.querySelector('input[name="id"]');
+            if (idInput && /^\d+$/.test(idInput.value)) recId = idInput.value;
+        }
+        const base = document.querySelector('input[name="baserecordtype"]');
+        const titulo = document.querySelector('h1.uir-record-type');
+        const tipo = (base && base.value)
+            || (titulo && titulo.textContent.trim())
+            || (location.pathname.split('/').pop() || '').replace(/\.nl$/i, '');
         return [
-            form,
+            tipo,
             recType ? 'rt' + recType : '',
             recId ? 'id' + recId : '',
             fieldNameOf(span),
@@ -392,6 +405,7 @@
         wrapper.appendChild(pre);
 
         addRawToggle(wrapper, btnGroup, [pre], rawSource);
+        ampliar(wrapper);
 
         if (window.hljs) {
             try { window.hljs.highlightElement(code); } catch (err) { console.warn('[NSFT] Highlight error:', err); }
@@ -453,6 +467,7 @@
         });
 
         addRawToggle(wrapper, btnGroup, [host, codePre], content, { alsoDisable: [toggleBtn] });
+        ampliar(wrapper);
 
         wrapper._nsftOriginal = span;
         span.replaceWith(wrapper);

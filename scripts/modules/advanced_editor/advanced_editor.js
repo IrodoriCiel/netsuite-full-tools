@@ -730,6 +730,7 @@
             { id: 'archivo', et: i18n('adv_menu_file', 'File'), items: [
                 { et: i18n('adv_quick_titulo_corto', 'Open file'), tecla: 'Ctrl+P',
                   pide: true, fn: () => abreRapido() },
+                { et: i18n('adv_vacio_dir', 'Open folder'), pide: true, fn: () => abreRapido('carpeta') },
                 { et: i18n('adv_save', 'Save'), tecla: 'Ctrl+S', fn: () => guardar() },
                 { et: i18n('adv_reload', 'Reload from the server'), fn: () => pulsa('#nsft-adv-reload') },
                 { et: i18n('adv_diff_title', 'Compare with the saved version'),
@@ -1189,12 +1190,7 @@
                         + btn('nsft-adv-bus-cerrar', ICO.cerrar, i18n('adv_visor_close', 'Back to the editor'))
                     + '</div>'
                     + '<div class="nsft-adv-bus-op">'
-                        + '<button type="button" class="nsft-adv-find-btn is-on" id="nsft-adv-bus-todo" aria-pressed="true">'
-                            + escapeHtml(i18n('adv_bus_todo', 'All code')) + '</button>'
-                        + '<button type="button" class="nsft-adv-find-btn" id="nsft-adv-bus-carpeta" aria-pressed="false">'
-                            + escapeHtml(i18n('adv_bus_carpeta', 'This folder')) + '</button>'
-                        + '<label class="nsft-adv-bus-bundles"><input type="checkbox" id="nsft-adv-bus-bundles"> '
-                            + escapeHtml(i18n('sfv_code_all', 'Include SuiteBundles and SuiteApps')) + '</label>'
+                        + '<span class="nsft-adv-bus-donde" id="nsft-adv-bus-donde"></span>'
                     + '</div>'
                     + '<div class="nsft-adv-bus-estado" id="nsft-adv-bus-estado"></div>'
                     + '<div class="nsft-adv-bus-barra" id="nsft-adv-bus-barra" role="progressbar"'
@@ -2092,6 +2088,7 @@
         pideHijos(r, true);
         pintaArbol();
         pintaCabeceraArbol();
+        if (_busAbierto) pintaOpciones();
         const t = _caja && _caja.querySelector('#nsft-adv-tree');
         if (t && t.hidden) alternaArbol();
     }
@@ -5593,9 +5590,12 @@
     let _busSeq = 0;
     const _busCb = new Map();
     let _busIrALinea = null;
-    let _busAlcance = 'todo';
-    let _busBundles = false;
     let _busRegex = false;
+
+    function carpetaDeBusqueda() {
+        const r = raizElegida();
+        return (r && r.id) ? String(r.id) : null;
+    }
 
     function pideCodigo(carpeta) {
         return new Promise((resolver) => {
@@ -5609,7 +5609,7 @@
             };
             _busCb.set(token, una);
             setTimeout(() => una({ error: { code: 'timeout' } }), 60000);
-            manda('codigo', { todo: _busBundles, carpeta: carpeta, token: token });
+            manda('codigo', { todo: carpeta == null, carpeta: carpeta, token: token });
         });
     }
 
@@ -5683,11 +5683,7 @@
             busEstado(i18n('sfv_code_bad_regex', 'The regular expression is not valid') + ': ' + regla.error);
             return;
         }
-        const carpeta = _busAlcance === 'carpeta' ? carpetaDelArchivo() : null;
-        if (_busAlcance === 'carpeta' && (carpeta == null || carpeta === '')) {
-            busEstado(i18n('adv_bus_sin_carpeta', 'No folder to search in'));
-            return;
-        }
+        const carpeta = carpetaDeBusqueda();
 
         _busCorriendo = true;
         _busCortar = false;
@@ -5849,45 +5845,21 @@
             pintaOpciones();
             if (input.value.trim() && !_busCorriendo) lanzaBusqueda();
         });
-        const alcance = (a) => {
-            if (_busAlcance === a) return;
-            _busAlcance = a;
-            pintaOpciones();
-            if (input.value.trim() && !_busCorriendo) lanzaBusqueda();
-        };
-        caja.querySelector('#nsft-adv-bus-todo').addEventListener('click', () => alcance('todo'));
-        caja.querySelector('#nsft-adv-bus-carpeta').addEventListener('click', () => alcance('carpeta'));
-        caja.querySelector('#nsft-adv-bus-bundles').addEventListener('change', (ev) => {
-            _busBundles = !!ev.target.checked;
-            if (input.value.trim() && !_busCorriendo && _busAlcance === 'todo') lanzaBusqueda();
-        });
     }
 
     function pintaOpciones() {
         if (!_caja) return;
-        const c = _sinArchivo ? null : carpetaDelArchivo();
-        const hayCarpeta = c != null && c !== '';
-        if (!hayCarpeta && _busAlcance === 'carpeta') _busAlcance = 'todo';
-        const pon = (id, on) => {
-            const b = _caja.querySelector(id);
-            if (!b) return;
-            b.classList.toggle('is-on', on);
-            b.setAttribute('aria-pressed', String(on));
-        };
-        pon('#nsft-adv-bus-todo', _busAlcance === 'todo');
-        pon('#nsft-adv-bus-carpeta', _busAlcance === 'carpeta');
-        pon('#nsft-adv-bus-re', _busRegex);
-        const bc = _caja.querySelector('#nsft-adv-bus-carpeta');
-        if (bc) {
-            bc.disabled = !hayCarpeta;
-            bc.title = hayCarpeta
-                ? i18n('adv_bus_carpeta_tip', 'The open file’s folder and its subfolders')
-                : i18n('adv_bus_carpeta_no', 'Open a file to search its folder');
+        const b = _caja.querySelector('#nsft-adv-bus-re');
+        if (b) {
+            b.classList.toggle('is-on', _busRegex);
+            b.setAttribute('aria-pressed', String(_busRegex));
         }
-        const bun = _caja.querySelector('#nsft-adv-bus-bundles');
-        if (bun) {
-            bun.checked = _busBundles;
-            bun.disabled = _busAlcance !== 'todo';
+        const donde = _caja.querySelector('#nsft-adv-bus-donde');
+        if (donde) {
+            const r = raizElegida();
+            donde.textContent = (r && r.name)
+                ? fmt('adv_bus_en', 'Searching in $1 and its subfolders', [r.name])
+                : i18n('adv_bus_en_todo', 'Searching the whole File Cabinet');
         }
     }
 

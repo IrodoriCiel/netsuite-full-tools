@@ -60,6 +60,13 @@
     let hasGithubBackup = false;
     let hasScriptExecute = true;
     let hasDeletedRecords = true;
+    let hasSetFieldValues = true;
+    const FRAGMENTOS_KEY = 'nsftSscSnippets';
+    const FRAGMENTOS_SQL_KEY = 'nsftSqlSnippets';
+    let fragmentosSql = [];
+    let hasSscConsole = true;
+    let hasConsoleUtils = true;
+    let fragmentos = [];
     let hasAdvEditor = false;
 
     chrome.storage.local.get({
@@ -73,6 +80,11 @@
         enableGithubBackup: false,
         enableScriptExecute: true,
         enableDeletedRecords: true,
+        enableSetFieldValues: true,
+        enableSuiteScriptConsole: true,
+        enableConsoleUtils: true,
+        [FRAGMENTOS_KEY]: [],
+        [FRAGMENTOS_SQL_KEY]: [],
         enableAdvancedEditor: true
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
@@ -80,6 +92,11 @@
         hasGithubBackup = items.enableGithubBackup === true;
         hasScriptExecute = items.enableScriptExecute !== false;
         hasDeletedRecords = items.enableDeletedRecords !== false;
+        hasSetFieldValues = items.enableSetFieldValues !== false;
+        hasSscConsole = items.enableSuiteScriptConsole !== false;
+        hasConsoleUtils = items.enableConsoleUtils !== false;
+        fragmentos = Array.isArray(items[FRAGMENTOS_KEY]) ? items[FRAGMENTOS_KEY] : [];
+        fragmentosSql = Array.isArray(items[FRAGMENTOS_SQL_KEY]) ? items[FRAGMENTOS_SQL_KEY] : [];
         hasAdvEditor = items.enableAdvancedEditor !== false && enPaginaDelEditor();
 
         if (items[SHORTCUT_KEY]) shortcut = items[SHORTCUT_KEY];
@@ -125,6 +142,15 @@
         }
         if (changes[CUSTOM_URLS_KEY] && Array.isArray(changes[CUSTOM_URLS_KEY].newValue)) {
             customUrls = changes[CUSTOM_URLS_KEY].newValue;
+            actions = buildActions();
+            if (overlayEl) renderList(inputEl ? inputEl.value : '');
+        }
+        if (changes[FRAGMENTOS_SQL_KEY]) {
+            fragmentosSql = Array.isArray(changes[FRAGMENTOS_SQL_KEY].newValue) ? changes[FRAGMENTOS_SQL_KEY].newValue : [];
+            actions = buildActions();
+        }
+        if (changes[FRAGMENTOS_KEY]) {
+            fragmentos = Array.isArray(changes[FRAGMENTOS_KEY].newValue) ? changes[FRAGMENTOS_KEY].newValue : [];
             actions = buildActions();
             if (overlayEl) renderList(inputEl ? inputEl.value : '');
         }
@@ -354,6 +380,24 @@
                     window.location.href = url.toString();
                 }
             },
+            ...(hasConsoleUtils ? [{
+                id: 'page:suitescript',
+                label: i18n('cmdp_act_ss_version', 'Which SuiteScript does this page support?'),
+                description: i18n('cmdp_act_ss_version_desc', 'Whether SuiteScript 2.x (require) and 1.0 (nlapi) are available here'),
+                category: T.catPage,
+                iconKey: 'page',
+                keywords: 'suitescript version 2.x 1.0 require nlapi api disponible available pagina page soporta supports',
+                run: () => window.dispatchEvent(new CustomEvent('nsft-ss-versiones'))
+            }] : []),
+            ...(hasSetFieldValues ? [{
+                id: 'page:enable-all-fields',
+                label: i18n('sfv_all_menu', 'Enable all fields'),
+                description: i18n('cmdp_act_enable_all_desc', 'Unlock the disabled fields of this form until the page reloads'),
+                category: T.catPage,
+                iconKey: 'page',
+                keywords: 'habilitar todos campos deshabilitados desbloquear enable all fields disabled unlock editar edit',
+                run: () => window.dispatchEvent(new CustomEvent('nsft-enable-all-fields'))
+            }] : []),
             {
                 id: 'page:view',
                 label: i18n('cmdp_act_page_view', 'Switch to View mode'),
@@ -533,6 +577,19 @@
                 keywords: 'eliminado eliminados borrado borrados borro quien deleted delete who audit papelera trash log registro',
                 run: () => window.dispatchEvent(new CustomEvent('nsft-show-deleted-records'))
             }] : []),
+            ...(hasSscConsole ? fragmentosYGuardados()
+                .filter((f) => f && typeof f.name === 'string' && f.name.trim() && typeof f.code === 'string')
+                .map((f) => ({
+                    id: 'frag:' + f.lang + ':' + f.name,
+                    label: (chrome.i18n.getMessage('cmdp_act_fragment', [f.name]) || ('Run snippet: ' + f.name)),
+                    description: (f.lang === 'sql' ? 'SQL · ' : 'JS · ') + f.code.replace(/\s+/g, ' ').trim().slice(0, 90),
+                    category: T.catNsft,
+                    iconKey: 'nsft',
+                    keywords: '! fragmento fragmentos snippet snippets ejecutar run ' + (f.lang === 'sql' ? 'sql suiteql consulta query ' : 'suitescript script ') + f.name,
+                    run: () => window.dispatchEvent(new CustomEvent('nsft-ssc-fragmento', {
+                        detail: { name: f.name, code: f.code, lang: f.lang }
+                    }))
+                })) : []),
             {
                 id: 'nsft:findfield',
                 label: i18n('cmdp_act_nsft_findfield', 'Find Field by ID'),
@@ -618,7 +675,29 @@
         }
     }
 
+    function fragmentosYGuardados() {
+        const out = [];
+        const junta = (lang, snips, claveGuardados) => {
+            const vistos = new Set();
+            (snips || []).forEach((f) => {
+                if (!f || typeof f.name !== 'string') return;
+                vistos.add(f.name);
+                out.push({ name: f.name, code: f.code, lang: lang });
+            });
+            let saved = {};
+            try { saved = JSON.parse(localStorage.getItem(claveGuardados) || '{}') || {}; } catch (e) { saved = {}; }
+            Object.keys(saved).forEach((n) => {
+                const q = saved[n] && saved[n].query;
+                if (!vistos.has(n) && typeof q === 'string' && q.trim()) out.push({ name: n, code: q, lang: lang });
+            });
+        };
+        junta('js', fragmentos, 'nsftSscSaved');
+        junta('sql', fragmentosSql, 'nsftSavedQueries');
+        return out;
+    }
+
     function openPalette() {
+        if (hasSscConsole) actions = buildActions();
         refreshContextBoosts();
         overlayEl = document.createElement('div');
         overlayEl.id = OVERLAY_ID;

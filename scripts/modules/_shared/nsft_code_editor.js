@@ -114,6 +114,47 @@
         'Promise.then': 'js:Promise', 'Promise.catch': 'js:Promise', 'Promise.finally': 'js:Promise'
     };
 
+    const _esUi = (() => { try { return /^es/i.test(chrome.i18n.getUILanguage()); } catch (e) { return false; } })();
+    const D = (es, en) => (_esUi ? es : en);
+    const NSFT_API = {
+        help: { p: [], r: 'void', d: D('Lista todas las utilidades NSFT.* en la consola.', 'Lists every NSFT.* utility in the console.') },
+        ss: { p: [], r: '{ ss2, ss1, record }', d: D('Qué SuiteScript admite la página: 2.x (require), 1.0 (nlapi) y si hay registro.', 'Which SuiteScript the page supports: 2.x (require), 1.0 (nlapi) and whether there is a record.') },
+        rec: { p: [], r: '{ type, id, mode }', d: D('El registro de la página: tipo, id interno y modo (create, edit, view).', 'The page\'s record: type, internal id and mode (create, edit, view).') },
+        get: { p: [{ n: 'fieldId', t: 'string' }], r: 'any', d: D('Valor de un campo del registro abierto.', 'Value of a field of the open record.') },
+        text: { p: [{ n: 'fieldId', t: 'string' }], r: 'string', d: D('Texto que se ve de un campo (el nombre en una lista, no el id).', 'Display text of a field (the name in a list, not the id).') },
+        set: { p: [{ n: 'fieldId', t: 'string' }, { n: 'value', t: 'any' }], r: 'any', d: D('Cambia un campo del registro abierto (en edición).', 'Changes a field of the open record (in edit mode).') },
+        field: { p: [{ n: 'fieldId', t: 'string' }], r: '{ id, label, type, disabled, value, text }', d: D('Lo que se sabe de un campo: etiqueta, tipo, valor y si está deshabilitado.', 'What is known about a field: label, type, value and whether it is disabled.') },
+        fields: { p: [{ n: 'filtro', t: 'string', o: 1 }], r: 'Array', d: D('Todos los campos del registro como tabla. Con filtro, los que lo llevan en el id o la etiqueta.', 'Every field of the record as a table. With a filter, those that contain it in the id or label.') },
+        line: { p: [{ n: 'sublistId', t: 'string' }, { n: 'fieldId', t: 'string' }, { n: 'line', t: 'number', o: 1 }], r: 'any', d: D('Valor de una columna de sublista: la línea en edición, o la que se diga.', 'A sublist column value: the line being edited, or the one given.') },
+        lines: { p: [{ n: 'sublistId', t: 'string' }], r: 'number', d: D('Cuántas líneas tiene una sublista.', 'How many lines a sublist has.') },
+        sublist: { p: [{ n: 'sublistId', t: 'string' }, { n: 'columnas', t: 'string[]', o: 1 }], r: 'Array', d: D('Todas las líneas de una sublista como tabla.', 'Every line of a sublist as a table.') },
+        find: { p: [{ n: 'texto', t: 'string' }], r: 'Array', d: D('Busca un campo por id o etiqueta, lo resalta y te lleva a él.', 'Finds a field by id or label, highlights it and scrolls to it.') },
+        N: { p: [{ n: 'modulos', t: 'string…' }], r: 'Promise', d: D('Carga módulos N de SuiteScript 2.x: await NSFT.N(\'record\').', 'Loads SuiteScript 2.x N modules: await NSFT.N(\'record\').') },
+        load: { p: [{ n: 'type', t: 'string', o: 1 }, { n: 'id', t: 'number', o: 1 }], r: 'Promise<Record>', d: D('record.load del registro abierto, o del que se diga.', 'record.load of the open record, or the one given.') },
+        lookup: { p: [{ n: 'type', t: 'string' }, { n: 'id', t: 'number' }, { n: 'campos', t: 'string[]' }], r: 'Promise<Object>', d: D('search.lookupFields en una línea.', 'search.lookupFields in one line.') },
+        search: { p: [{ n: 'searchId', t: 'string' }, { n: 'max', t: 'number', o: 1 }], r: 'Promise<Array>', d: D('Ejecuta una búsqueda guardada y devuelve sus filas (hasta 1000) como tabla.', 'Runs a saved search and returns its rows (up to 1000) as a table.') },
+        sql: { p: [{ n: 'consulta', t: 'string' }, { n: 'params', t: 'Array', o: 1 }], r: 'Promise<Array>', d: D('Ejecuta una consulta SuiteQL y devuelve las filas como objetos.', 'Runs a SuiteQL query and returns the rows as objects.') },
+        table: { p: [{ n: 'consulta', t: 'string' }, { n: 'params', t: 'Array', o: 1 }], r: 'Promise<number>', d: D('Como sql(), pero pinta las filas con console.table.', 'Like sql(), but prints the rows with console.table.') },
+        me: { p: [], r: 'Promise<Object>', d: D('Tu usuario: rol, subsidiaria y formatos de fecha, hora y número.', 'Your user: role, subsidiary and date, time and number formats.') },
+        account: { p: [], r: 'Promise<Object>', d: D('La cuenta, el entorno (producción o sandbox) y las versiones.', 'The account, the environment (production or sandbox) and the versions.') },
+        watch: { p: [{ n: 'fieldId', t: 'string' }], r: 'string', d: D('Vigila un campo: cada cambio sale en la consola, y quién lo hizo.', 'Watches a field: every change goes to the console, and who made it.') },
+        unwatch: { p: [{ n: 'fieldId', t: 'string', o: 1 }], r: 'string[]', d: D('Deja de vigilar uno o todos los campos.', 'Stops watching one or every field.') },
+        url: { p: [{ n: 'type', t: 'string' }, { n: 'id', t: 'number' }, { n: 'edit', t: 'boolean', o: 1 }], r: 'Promise<string>', d: D('La URL de un registro.', 'A record\'s URL.') },
+        open: { p: [{ n: 'type', t: 'string' }, { n: 'id', t: 'number' }, { n: 'edit', t: 'boolean', o: 1 }], r: 'Promise<string>', d: D('Abre un registro en otra pestaña.', 'Opens a record in another tab.') },
+        toast: { p: [{ n: 'texto', t: 'string' }, { n: 'ms', t: 'number', o: 1 }], r: 'string', d: D('Un aviso abajo en la página.', 'A notice at the bottom of the page.') },
+        copy: { p: [{ n: 'valor', t: 'any' }], r: 'Promise<boolean>', d: D('Copia al portapapeles (un objeto, como JSON).', 'Copies to the clipboard (an object, as JSON).') },
+        csv: { p: [{ n: 'filas', t: 'Object[]' }, { n: 'nombre', t: 'string', o: 1 }], r: 'number', d: D('Descarga filas como CSV que Excel abre con los acentos bien.', 'Downloads rows as a CSV that Excel opens with correct accents.') },
+        version: { prop: 1, r: 'string', d: D('La versión de NetSuite Full Tools.', 'The NetSuite Full Tools version.') }
+    };
+    let _nsftUtilsOn = true;
+    try {
+        chrome.storage.local.get({ enableConsoleUtils: true }, (it) => { _nsftUtilsOn = it.enableConsoleUtils !== false; });
+        chrome.storage.onChanged.addListener((ch, area) => {
+            if (area === 'local' && ch.enableConsoleUtils) _nsftUtilsOn = ch.enableConsoleUtils.newValue !== false;
+        });
+    } catch (e) { }
+    const nsftEnEditor = (cm) => _nsftUtilsOn && !(cm && cm.state && cm.state.nsftAmbitoIa === 'adv');
+
     const JS_FIRMAS = {
         'JSON.stringify': { p: [{ n: 'value', t: 'any' }, { n: 'replacer', t: 'Function|Array', o: 1 }, { n: 'space', t: 'string|number', o: 1 }], r: 'js:String' },
         'JSON.parse': { p: [{ n: 'text', t: 'string' }, { n: 'reviver', t: 'Function', o: 1 }], r: 'js:Object' },
@@ -1504,6 +1545,11 @@
 
     let _panelSig = null;
 
+    function desplegableVisible(cm) {
+        const ca = cm && cm.state && cm.state.completionActive;
+        return !!(ca && ca.widget);
+    }
+
     function cierraSig() {
         if (_panelSig && _panelSig.parentNode) _panelSig.parentNode.removeChild(_panelSig);
         _panelSig = null;
@@ -1535,7 +1581,7 @@
 
     function pintaSig(cm) {
         cierraSig();
-        if (!cm.hasFocus() || (cm.state && cm.state.completionActive)) return;
+        if (!cm.hasFocus() || desplegableVisible(cm)) return;
 
         let ll = null;
         try { ll = llamadaEnCurso(cm); } catch (e) { return; }
@@ -1816,7 +1862,7 @@
     function pintaHoverDoc(cm, ev) {
         if (_panelDoc && _panelDoc.dataset.nsftOrigen === 'lista') return;
         cierraPanelDoc();
-        if (cm.state && cm.state.completionActive) return;
+        if (desplegableVisible(cm)) return;
 
         const pos = cm.coordsChar({ left: ev.clientX, top: ev.clientY }, 'window');
         try {
@@ -2255,6 +2301,13 @@
             }
             const base = chain[2] || chain[1];
 
+            if (base === 'NSFT' && !chain[2] && nsftEnEditor(cm)) {
+                const got = hintList(Object.keys(NSFT_API).map((n) => {
+                    const f = NSFT_API[n];
+                    return { text: n, kind: f.prop ? 'prop' : 'fn', sig: f.prop ? '' : textoFirma(f), tag: f.r || 'NSFT', doc: f };
+                }), typedLc, from, to);
+                if (got) return got;
+            }
             const mods = (soloApi === '1') ? null : _members[base];
             const jsm = mods ? null : jsEstaticosDe(base);
             if (jsm && jsm.length) {
@@ -2356,6 +2409,7 @@
         const modulos = (soloApi === '1') ? [] : CANDIDATOS
             .filter(c => !_disponibles || _disponibles.indexOf(c.path) >= 0)
             .map(c => ({ text: c.alias, kind: 'mod', tag: c.path }));
+        if (nsftEnEditor(cm)) modulos.push({ text: 'NSFT', kind: 'mod', tag: 'NSFT.*' });
         const globales1 = (soloApi === '2') ? [] : _nlapi;
 
         const items = mios.concat(modulos)
@@ -2493,7 +2547,18 @@
         const g = {
             timer: null,
             pedido: null,
-            visible: null
+            visible: null,
+            cache: new Map()
+        };
+        const CACHE_MAX = 40;
+        const claveDe = (prefix, suffix) => prefix.slice(-600) + '\u0001' + suffix.slice(0, 160);
+
+        g.cortaPedido = () => {
+            if (!g.pedido) return;
+            const id = g.pedido.id;
+            delete _ghostPend[id];
+            g.pedido = null;
+            try { window.dispatchEvent(new CustomEvent('nsft-ssc-ai-complete-cancel', { detail: { id } })); } catch (e) { }
         };
 
         g.enSuCasa = () => (opts.ambitoIa === 'adv' ? _ghostScopeAdv : _ghostScopeSsc);
@@ -2511,7 +2576,7 @@
 
         g.limpia = () => {
             clearTimeout(g.timer);
-            if (g.pedido) { delete _ghostPend[g.pedido.id]; g.pedido = null; }
+            g.cortaPedido();
             if (g.visible) {
                 try { g.visible.mark.clear(); } catch (e) { }
                 if (g.visible.widget) { try { g.visible.widget.clear(); } catch (e) { } }
@@ -2532,14 +2597,48 @@
                 && texto.indexOf(resto.charAt(k)) >= 0) k++;
             cm.replaceRange(texto, cur, { line: cur.line, ch: cur.ch + k }, '+nsftGhost');
             clearTimeout(g.timer);
-            g.timer = setTimeout(g.pide, 250);
+            g.timer = setTimeout(g.pide, 150);
             return true;
         };
 
-        g.muestra = (texto) => {
+        g.aceptaPalabra = () => {
+            const v = g.visible;
+            if (!v) return false;
+            const m = v.text.match(/^(\s*[A-Za-z0-9_$]+|\s*[^A-Za-z0-9_$\s]+|\s+)/);
+            const parte = m ? m[0] : v.text;
+            const resto = v.text.slice(parte.length);
+            const cur = cm.getCursor();
+            g.limpia();
+            cm.replaceRange(parte, cur, cur, '+nsftGhost');
+            const trozos = parte.split('\n');
+            const fin = trozos.length > 1
+                ? { line: cur.line + trozos.length - 1, ch: trozos[trozos.length - 1].length }
+                : { line: cur.line, ch: cur.ch + parte.length };
+            cm.setCursor(fin);
+            if (resto) g.muestra(resto, fin);
+            else { clearTimeout(g.timer); g.timer = setTimeout(g.pide, 150); }
+            return true;
+        };
+
+        g.consume = (ch) => {
+            const v = g.visible;
+            if (!v || ch.origin !== '+input') return false;
+            if (ch.removed && ch.removed.join('') !== '') return false;
+            if (ch.from.line !== v.pos.line || ch.from.ch !== v.pos.ch) return false;
+            const escrito = ch.text.join('\n');
+            if (!escrito || v.text.indexOf(escrito) !== 0) return false;
+            const resto = v.text.slice(escrito.length);
+            const fin = CodeMirror.changeEnd(ch);
+            g.limpia();
+            if (resto) g.muestra(resto, fin);
+            else { clearTimeout(g.timer); g.timer = setTimeout(g.pide, 150); }
+            return true;
+        };
+
+        g.muestra = (texto, pos) => {
             g.limpia();
             const lineas = String(texto).split('\n');
-            const cur = cm.getCursor();
+            const cur = pos || cm.getCursor();
             const span = document.createElement('span');
             span.className = 'nsft-ssc-ghost';
             span.textContent = lineas[0];
@@ -2553,28 +2652,37 @@
                 widget = cm.addLineWidget(cur.line, block);
                 alto = block.offsetHeight || 0;
             }
-            g.visible = { mark, widget, text: texto };
+            g.visible = { mark, widget, text: texto, pos: { line: cur.line, ch: cur.ch } };
             try { cm.scrollIntoView({ line: cur.line, ch: cur.ch }, alto + 24); } catch (e) { }
         };
 
         g.pide = () => {
             if (!g.activo()) { ghostDebug('el asistente está apagado en el popup'); return; }
             if (!cm.hasFocus() || cm.somethingSelected()) { ghostDebug('sin foco o con selección'); return; }
-            if (cm.state.completionActive) { ghostDebug('desplegable abierto'); return; }
+            if (desplegableVisible(cm)) { ghostDebug('desplegable abierto'); return; }
             const cur = cm.getCursor();
             const prefix = cm.getRange({ line: 0, ch: 0 }, cur);
             if (!prefix.trim()) { ghostDebug('documento vacío'); return; }
             const finDoc = { line: cm.lastLine(), ch: cm.getLine(cm.lastLine()).length };
             const suffix = cm.getRange(cur, finDoc);
+            const clave = claveDe(prefix, suffix);
+            if (g.cache.has(clave)) {
+                g.cortaPedido();
+                ghostDebug('de la caché');
+                g.muestra(g.cache.get(clave));
+                return;
+            }
+            g.cortaPedido();
             const id = 'g' + (++_ghostSeq);
-            g.pedido = { id, gen: cm.changeGeneration(), line: cur.line, ch: cur.ch };
+            g.pedido = { id, gen: cm.changeGeneration(), line: cur.line, ch: cur.ch, clave };
             _ghostPend[id] = g;
             window.dispatchEvent(new CustomEvent('nsft-ssc-ai-complete', {
                 detail: {
                     id,
                     prefix: prefix.slice(-3000),
                     suffix: suffix.slice(0, 800),
-                    line: cm.getLine(cur.line).slice(0, cur.ch)
+                    line: cm.getLine(cur.line).slice(0, cur.ch),
+                    ambito: (opts && opts.ambitoIa) || 'ssc'
                 }
             }));
             ghostDebug('pedido', id);
@@ -2591,10 +2699,12 @@
 
         g.recibe = (d) => {
             const p = g.pedido;
+            if (!p || p.id !== d.id) return;
             g.pedido = null;
             g.pintaBoton();
-            if (!p) return;
             if (!d.ok || !d.text) { ghostDebug(d.id, 'el agente contestó sin sugerencia'); return; }
+            g.cache.set(p.clave, String(d.text));
+            if (g.cache.size > CACHE_MAX) g.cache.delete(g.cache.keys().next().value);
             const cur = cm.getCursor();
             if (cm.changeGeneration() !== p.gen || cur.line !== p.line || cur.ch !== p.ch) {
                 ghostDebug(d.id, 'descartada: el texto o el cursor se movieron mientras viajaba');
@@ -2605,10 +2715,10 @@
             g.muestra(String(d.text));
         };
 
-        g.programa = () => {
+        g.programa = (ms) => {
             clearTimeout(g.timer);
-            if (!g.activo()) return;
-            g.timer = setTimeout(g.pide, 800);
+            if (!g.activo() || g.visible) return;
+            g.timer = setTimeout(g.pide, typeof ms === 'number' ? ms : 300);
         };
 
         g.toggle = () => {
@@ -2975,6 +3085,8 @@
                 'Ctrl-Space': 'autocomplete',
                 'F12': (c) => { if (!vaADefinicion(c, nombreEnCursor(c))) return CodeMirror.Pass; },
                 'Tab': () => { if (!ghost.acepta()) return CodeMirror.Pass; },
+                'Ctrl-Right': () => { if (!ghost.aceptaPalabra()) return CodeMirror.Pass; },
+                'Cmd-Right': () => { if (!ghost.aceptaPalabra()) return CodeMirror.Pass; },
                 'Esc': (c) => {
                     if (ghost.visible) { ghost.limpia(); return; }
                     if (_panelSig) { callaSig(c); return; }
@@ -3027,6 +3139,7 @@
         if (o.indentGuides && !esCm6) montaGuias(cm);
         if (o.highlightWord && !esCm6) montaResaltePalabra(cm);
 
+        cm.state.nsftAmbitoIa = o.ambitoIa || 'ssc';
         const ghost = crearGhost(cm, o);
         watchHintsPopup();
 
@@ -3049,8 +3162,18 @@
 
         cm.on('inputRead', ghost.programa);
         cm.on('endCompletion', ghost.programa);
-        cm.on('change', (c, ch) => { if (ch.origin !== '+nsftGhost') ghost.limpia(); });
-        cm.on('cursorActivity', () => { if (ghost.visible) ghost.limpia(); });
+        cm.on('change', (c, ch) => {
+            if (ch.origin === '+nsftGhost') return;
+            if (ghost.consume(ch)) return;
+            ghost.limpia();
+            if (ch.origin === '+input' && ch.text.length > 1) ghost.programa(60);
+        });
+        cm.on('cursorActivity', () => {
+            const v = ghost.visible;
+            if (!v) return;
+            const cur = cm.getCursor();
+            if (cur.line !== v.pos.line || cur.ch !== v.pos.ch) ghost.limpia();
+        });
         cm.on('blur', ghost.limpia);
 
         cm.on('cursorActivity', () => programaSig(cm));

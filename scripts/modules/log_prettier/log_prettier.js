@@ -163,12 +163,12 @@
         const stamp = (date + ' ' + time).trim();
 
         const scriptId = scriptIdFromUrl();
-        return [
-            scriptId ? 'script-' + scriptId : '',
+        const dueno = LF && LF.ownerParts ? LF.ownerParts(td) : [];
+        return (dueno.length ? dueno : [scriptId ? 'script-' + scriptId : '']).concat([
             type.toLowerCase(),
             title,
             LF && LF.stampPart ? LF.stampPart(stamp) : ''
-        ];
+        ]);
     }
 
     const formatTD = (td) => {

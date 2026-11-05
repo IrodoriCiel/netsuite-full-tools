@@ -138,10 +138,82 @@
         viaje.avisos.forEach((f) => { try { f(); } catch (e) { } });
     }
 
+
+    const _exportes = new Map();
+
+    function info(capa) {
+        const m = sublista(capa);
+        const r = m && rango(m);
+        if (!r) return null;
+        const porPagina = r.end - r.start + 1;
+        const f = document.forms[m + '_main_form'];
+        const seg = f && f.elements[m + 'segmentsize'] ? Number(f.elements[m + 'segmentsize'].value) : 0;
+        const tam = seg > 0 ? seg : porPagina;
+        return {
+            sublista: m,
+            total: r.total,
+            porPagina: tam,
+            paginas: Math.max(1, Math.ceil(r.total / tam)),
+            actual: Math.floor((r.start - 1) / tam) + 1
+        };
+    }
+
+    function exporta(capa, desde, hasta, alAvisar, fechas) {
+        const m = sublista(capa);
+        const reqId = 'ex-' + (++_seq);
+        _exportes.set(reqId, alAvisar);
+        let vivo = true;
+        const avisaExp = (e) => { try { alAvisar(e); } catch (er) { } };
+        if (!m) { _exportes.delete(reqId); setTimeout(() => avisaExp({ tipo: 'error', error: 'sublista' }), 0); return { cancela() {} }; }
+        fetcherListo().then(() => {
+            if (!vivo) return;
+            window.postMessage({ dest: FETCHER_DEST, reqId: reqId, payload: { machine: m, modo: 'export', desde: desde, hasta: hasta, fechas: fechas || null } }, '*');
+        }, () => { _exportes.delete(reqId); avisaExp({ tipo: 'error', error: 'fetcher' }); });
+        return {
+            cancela() {
+                if (!vivo) return;
+                vivo = false;
+                window.postMessage({ dest: FETCHER_DEST, reqId: reqId, cancel: true }, '*');
+            }
+        };
+    }
+
+    function onExporte(d) {
+        const alAvisar = _exportes.get(d.reqId);
+        if (!alAvisar) return false;
+        const avisaExp = (e) => { try { alAvisar(e); } catch (er) { } };
+        if (d.type === 'buscando') { avisaExp({ tipo: 'buscando', consultas: d.consultas }); return true; }
+        if (d.type === 'page') {
+            avisaExp({ tipo: 'pagina', numero: d.number, filas: parsea(d.html), hechas: d.done, total: d.total });
+            return true;
+        }
+        _exportes.delete(d.reqId);
+        if (d.type === 'done') avisaExp({ tipo: 'fin' });
+        else if (d.type === 'cancelled') avisaExp({ tipo: 'cancelada', hechas: d.done, total: d.total });
+        else avisaExp({ tipo: 'error', error: d.error || 'error' });
+        return true;
+    }
+
+    const _horas = new Map();
+    function horas(filas) {
+        return new Promise((resolver) => {
+            const reqId = 'hr-' + (++_seq);
+            let hecho = false;
+            const fin = (v) => { if (hecho) return; hecho = true; _horas.delete(reqId); resolver(v); };
+            _horas.set(reqId, fin);
+            setTimeout(() => fin(null), PLAZO_MS);
+            fetcherListo().then(() => {
+                window.postMessage({ dest: FETCHER_DEST, reqId: reqId, payload: { modo: 'horas', filas: filas } }, '*');
+            }, () => fin(null));
+        });
+    }
+
     function onRespuesta(ev) {
         if (ev.source !== window) return;
         const d = ev.data;
         if (!d || d.dest !== REPLY_DEST || typeof d.reqId !== 'string') return;
+        if (d.type === 'horas') { const f = _horas.get(d.reqId); if (f) f(d.ms || null); return; }
+        if (onExporte(d)) return;
         const m = _peticiones.get(d.reqId);
         const viaje = m && _enCurso.get(m);
         if (!viaje || viaje.reqId !== d.reqId) return;
@@ -247,5 +319,5 @@
         return pintadasAhora;
     }
 
-    window.NSFT_SublistPages = { pide, pinta, limpia, pintadas, esExtra, EXTRA, SEP };
+    window.NSFT_SublistPages = { pide, pinta, limpia, pintadas, esExtra, info, exporta, horas, EXTRA, SEP };
 })();

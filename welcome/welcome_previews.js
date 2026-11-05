@@ -1514,6 +1514,43 @@
                     </table>`
     });
 
+    const PV_HOJA = (b, t) => `<path d="M3 1h10.5l3.5 3.5V17H3z" fill="${t}" stroke="${b}" stroke-width="2"/><path d="M12.5 1v4.5H17" fill="none" stroke="${b}" stroke-width="1"/>`;
+    P.enableBetterExport = ventanaNS({
+        clase: 'nsft-pv-prod',
+        url: '1234567.app.netsuite.com/app/common/search/searchresults.nl',
+        cuerpo: `
+                    <div class="nsft-pv-logbar">
+                        <span class="nsft-pv-bexpico"><svg viewBox="0 0 20 18" shape-rendering="crispEdges">${PV_HOJA('#999999', '#FFFFFF')}<path d="M5 8.5h8M5 10.5h8M5 12.5h8M5 14.5h5" stroke="#C2C2C2"/></svg></span>
+                        <span class="nsft-pv-bexpico"><svg viewBox="0 0 20 18" shape-rendering="crispEdges">${PV_HOJA('#51914C', '#F1F8E6')}<path d="M6 7.5l6 7M12 7.5l-6 7" stroke="#34710F" stroke-width="2"/></svg></span>
+                        <span class="nsft-pv-bexpico"><svg viewBox="0 0 20 18" shape-rendering="crispEdges">${PV_HOJA('#FF4E4E', '#FFFFFF')}<path d="M6 14c2-5 4-7 6-3" fill="none" stroke="#DC0C0C" stroke-width="1.4"/></svg></span>
+                        <span class="nsft-pv-lgpart is-suyo nsft-pv-bexppart">
+                            <img class="nsft-pv-logomark" src="{{logo}}" alt="">
+                            <span class="nsft-pv-bexpico nsft-pv-bexpbtn"><svg viewBox="0 0 20 18" shape-rendering="crispEdges">${PV_HOJA('#51914C', '#F1F8E6')}<rect x="5" y="7" width="9" height="2" fill="#34710F"/><path d="M5 10.5h9M5 12.5h9M5 14.5h9M7.5 9v6M10.5 9v6" stroke="#71B76C"/></svg>
+                                <span class="nsft-pv-tap" aria-hidden="true"></span>
+                                <span class="nsft-pv-cursor" aria-hidden="true">${PUNTERO}</span>
+                            </span>
+                            <span class="nsft-pv-bexpico"><svg viewBox="0 0 20 18" shape-rendering="crispEdges">${PV_HOJA('#0F766E', '#E6F4F1')}<path d="M5 8.5h3M9.5 8.5h4.5M5 11.5h3M9.5 11.5h4.5M5 14.5h3M9.5 14.5h4.5" stroke="#0F766E"/></svg></span>
+                            <span class="nsft-pv-bexpico"><svg viewBox="0 0 20 18"><g shape-rendering="crispEdges">${PV_HOJA('#C98A1B', '#FDF5E4')}</g><text x="9.6" y="14.6" text-anchor="middle" font-family="Consolas,Menlo,monospace" font-size="8" font-weight="700" fill="#8A5A00">{}</text></svg></span>
+                            <span class="nsft-pv-bexpico"><svg viewBox="0 0 20 18" shape-rendering="crispEdges">${PV_HOJA('#4A7FC1', '#EAF2FB')}<rect x="5.5" y="7.5" width="5" height="6" fill="#EAF2FB" stroke="#1F5FA8"/><rect x="8.5" y="9.5" width="5" height="6" fill="#fff" stroke="#1F5FA8"/></svg></span>
+                        </span>
+                    </div>
+                    <table class="nsft-pv-table nsft-pv-logtable">
+                        <tr><th>{{name}}</th><th>{{date}}</th></tr>
+                        <tr><td>Demo Record A</td><td class="nsft-pv-mono">15/11/2026</td></tr>
+                        <tr><td>Demo Record B</td><td class="nsft-pv-mono">16/11/2026</td></tr>
+                        <tr><td>Demo Record C</td><td class="nsft-pv-mono">16/11/2026</td></tr>
+                    </table>`,
+        extra: `
+            <div class="nsft-pv-bexpfile" aria-hidden="true">
+                <div class="nsft-pv-bexpname nsft-pv-mono">&#9638; Demo-Search_20261116-0930.xlsx</div>
+                <table class="nsft-pv-bexpsheet">
+                    <tr><th>{{name}} <i>&#9662;</i></th><th>{{date}} <i>&#9662;</i></th></tr>
+                    <tr><td>Demo Record A</td><td class="nsft-pv-mono">15/11/2026</td></tr>
+                    <tr><td>Demo Record B</td><td class="nsft-pv-mono">16/11/2026</td></tr>
+                </table>
+            </div>`
+    });
+
     P.enableRecordTrail = ventanaNS({
         clase: 'nsft-pv-menuflow nsft-pv-rt',
         sublista: true,
@@ -1607,6 +1644,25 @@
                     <div><span class="k">[NSFT]</span> <span class="m">{{@lrc_vars_label}}</span> <span class="f">recordType</span><span class="m">,</span> <span class="f">recordId</span><span class="m">,</span> <span class="f">objRecord</span></div>
                     <div><span class="m">&#8250;</span> objRecord.<span class="f">getValue</span>(<span class="s">'entity'</span>)</div>
                     <div><span class="m">&#8249;</span> <span class="s">"{{pvCoSa}}"</span></div>
+                </div>
+            </div>`
+    });
+
+    P.enableConsoleUtils = ventanaNS({
+        clase: 'nsft-pv-cu',
+        sublista: true,
+        extra: `
+            <div class="nsft-pv-console">
+                <div class="nsft-pv-console-bar">
+                    <span class="is-on">Console</span><span>Network</span><span>Sources</span>
+                    <span class="nsft-pv-grow"></span>
+                    <span>&#10005;</span>
+                </div>
+                <div class="nsft-pv-code">
+                    <div class="nsft-pv-cul l1"><span class="m">&#8250;</span> <span class="k">NSFT</span>.<span class="f">get</span>(<span class="s">'entity'</span>)</div>
+                    <div class="nsft-pv-cul l2"><span class="m">&#8249;</span> <span class="s">"{{pvCoSa}}"</span></div>
+                    <div class="nsft-pv-cul l3"><span class="m">&#8250;</span> <span class="k">await</span> <span class="k">NSFT</span>.<span class="f">table</span>(<span class="s">"SELECT id, tranid FROM transaction"</span>)</div>
+                    <div class="nsft-pv-cul l4"><span class="m">&#8249;</span> <span class="nsft-pv-cutab"><b>id</b><b>tranid</b><i>1051</i><i>SO10482</i><i>1052</i><i>SO10483</i></span></div>
                 </div>
             </div>`
     });

@@ -345,19 +345,36 @@
         return (barra && tabla) ? { barra: barra, tabla: tabla } : null;
     }
 
+    function filaDeArriba() {
+        const SEL = 'table.uir-list-buttonbar-left > tbody > tr';
+        const top = document.querySelector('table.uir-list-top-button-bar')
+            || document.querySelector('table.uir-list-filter-bar');
+        const fila = top ? top.querySelector(SEL) : null;
+        return fila && fila.getClientRects().length ? fila : null;
+    }
+
     function montaPagina(encender) {
         const l = listaDePagina();
         if (!l || document.querySelector('.nsft-llm-item')) return;
         const v = pastilla();
-        const item = document.createElement('span');
-        item.className = 'uir-control-bar-item nsft-llm-item';
-        item.appendChild(v.grupo);
-        if (l.barra.childElementCount) {
-            const sep = document.createElement('span');
-            sep.className = 'uir-control-bar-separator nsft-llm-sep';
-            l.barra.appendChild(sep);
+        const arriba = filaDeArriba();
+        let item;
+        if (arriba) {
+            item = document.createElement('td');
+            item.className = 'nsft-llm-item nsft-llm-td';
+            item.appendChild(v.grupo);
+            arriba.appendChild(item);
+        } else {
+            item = document.createElement('span');
+            item.className = 'uir-control-bar-item nsft-llm-item';
+            item.appendChild(v.grupo);
+            if (l.barra.childElementCount) {
+                const sep = document.createElement('span');
+                sep.className = 'uir-control-bar-separator nsft-llm-sep';
+                l.barra.appendChild(sep);
+            }
+            l.barra.appendChild(item);
         }
-        l.barra.appendChild(item);
         v.raiz = item;
         v.alcance = () => document.querySelector('table#div__body');
         v.refresca = refrescaPagina;

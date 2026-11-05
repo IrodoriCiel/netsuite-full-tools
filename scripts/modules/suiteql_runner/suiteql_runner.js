@@ -511,7 +511,7 @@
 
     function _tabRenderKey(t, savedMap) {
         const entry = t.fileName ? savedMap[t.fileName] : null;
-        return [t.title, t.dirty ? 1 : 0, entry ? 1 : 0, (entry && entry.favorite === true) ? 1 : 0].join('');
+        return [t.title, t.dirty ? 1 : 0, entry ? 1 : 0, (entry && entry.favorite === true) ? 1 : 0].join('\u0001');
     }
 
     function syncTabsNav() {
@@ -5000,6 +5000,8 @@
                         'Cmd-F': () => { handleEditFind(); },
                         'Ctrl-Space': 'autocomplete',
                         'Tab': (cm) => { if (!sqlGhostAcepta()) return CodeMirror.Pass; },
+                        'Ctrl-Right': () => { if (!sqlGhostAceptaPalabra()) return CodeMirror.Pass; },
+                        'Cmd-Right': () => { if (!sqlGhostAceptaPalabra()) return CodeMirror.Pass; },
                         'Esc': () => { if (_sqlGhost) sqlGhostLimpia(); else return CodeMirror.Pass; }
                     })),
 
@@ -5021,9 +5023,16 @@
                 editor.on('inputRead', sqlGhostProgramar);
                 editor.on('endCompletion', sqlGhostProgramar);
                 editor.on('change', (cm, ch) => {
-                    if (ch.origin !== '+nsftGhost') sqlGhostLimpia();
+                    if (ch.origin === '+nsftGhost') return;
+                    if (sqlGhostConsume(ch)) return;
+                    sqlGhostLimpia();
+                    if (ch.origin === '+input' && ch.text.length > 1) sqlGhostProgramar(60);
                 });
-                editor.on('cursorActivity', () => { if (_sqlGhost) sqlGhostLimpia(); });
+                editor.on('cursorActivity', () => {
+                    if (!_sqlGhost) return;
+                    const c = editor.getCursor();
+                    if (c.line !== _sqlGhost.pos.line || c.ch !== _sqlGhost.pos.ch) sqlGhostLimpia();
+                });
                 editor.on('blur', sqlGhostLimpia);
 
                 const hintTrasPintar = (cm) => {
@@ -5855,6 +5864,16 @@
     let _sqlGhostSeq = 0;
     let _sqlGhostPedido = null;
     let _sqlGhost = null;
+    const _sqlGhostCache = new Map();
+    const SQL_GHOST_CACHE_MAX = 40;
+    const sqlGhostClave = (prefix, suffix) => prefix.slice(-600) + '\u0001' + suffix.slice(0, 160);
+
+    function sqlGhostCortaPedido() {
+        if (!_sqlGhostPedido) return;
+        const id = _sqlGhostPedido.id;
+        _sqlGhostPedido = null;
+        try { window.dispatchEvent(new CustomEvent('nsft-sql-ai-complete-cancel', { detail: { id } })); } catch (e) { }
+    }
 
     let _sqlGhostMaster = true;
     let _sqlGhostScope = true;
@@ -5977,7 +5996,7 @@
 
     function sqlGhostLimpia() {
         clearTimeout(_sqlGhostTimer);
-        _sqlGhostPedido = null;
+        sqlGhostCortaPedido();
         if (_sqlGhost) {
             try { _sqlGhost.mark.clear(); } catch (e) { }
             if (_sqlGhost.widget) { try { _sqlGhost.widget.clear(); } catch (e) { } }
@@ -5998,15 +6017,49 @@
             && texto.indexOf(resto.charAt(k)) >= 0) k++;
         editor.replaceRange(texto, cur, { line: cur.line, ch: cur.ch + k }, '+nsftGhost');
         clearTimeout(_sqlGhostTimer);
-        _sqlGhostTimer = setTimeout(sqlGhostPedir, 250);
+        _sqlGhostTimer = setTimeout(sqlGhostPedir, 150);
         return true;
     }
 
-    function sqlGhostMuestra(texto) {
+    function sqlGhostAceptaPalabra() {
+        const v = _sqlGhost;
+        if (!v || !editor) return false;
+        const m = v.text.match(/^(\s*[A-Za-z0-9_$]+|\s*[^A-Za-z0-9_$\s]+|\s+)/);
+        const parte = m ? m[0] : v.text;
+        const resto = v.text.slice(parte.length);
+        const cur = editor.getCursor();
+        sqlGhostLimpia();
+        editor.replaceRange(parte, cur, cur, '+nsftGhost');
+        const trozos = parte.split('\n');
+        const fin = trozos.length > 1
+            ? { line: cur.line + trozos.length - 1, ch: trozos[trozos.length - 1].length }
+            : { line: cur.line, ch: cur.ch + parte.length };
+        editor.setCursor(fin);
+        if (resto) sqlGhostMuestra(resto, fin);
+        else { clearTimeout(_sqlGhostTimer); _sqlGhostTimer = setTimeout(sqlGhostPedir, 150); }
+        return true;
+    }
+
+    function sqlGhostConsume(ch) {
+        const v = _sqlGhost;
+        if (!v || ch.origin !== '+input') return false;
+        if (ch.removed && ch.removed.join('') !== '') return false;
+        if (ch.from.line !== v.pos.line || ch.from.ch !== v.pos.ch) return false;
+        const escrito = ch.text.join('\n');
+        if (!escrito || v.text.indexOf(escrito) !== 0) return false;
+        const resto = v.text.slice(escrito.length);
+        const fin = CodeMirror.changeEnd(ch);
+        sqlGhostLimpia();
+        if (resto) sqlGhostMuestra(resto, fin);
+        else { clearTimeout(_sqlGhostTimer); _sqlGhostTimer = setTimeout(sqlGhostPedir, 150); }
+        return true;
+    }
+
+    function sqlGhostMuestra(texto, pos) {
         if (!editor) return;
         sqlGhostLimpia();
         const lineas = String(texto).split('\n');
-        const cur = editor.getCursor();
+        const cur = pos || editor.getCursor();
         const span = document.createElement('span');
         span.className = 'nsft-sql-ghost';
         span.textContent = lineas[0];
@@ -6020,7 +6073,7 @@
             widget = editor.addLineWidget(cur.line, block);
             alto = block.offsetHeight || 0;
         }
-        _sqlGhost = { mark, widget, text: texto };
+        _sqlGhost = { mark, widget, text: texto, pos: { line: cur.line, ch: cur.ch } };
         try { editor.scrollIntoView({ line: cur.line, ch: cur.ch }, alto + 24); } catch (e) { }
     }
 
@@ -6032,14 +6085,23 @@
         if (!(_sqlGhostMaster && _sqlGhostScope)) { sqlGhostDebug('el asistente está apagado en el popup'); return; }
         if (!_sqlGhostOn || !editor) { sqlGhostDebug('apagado o sin editor'); return; }
         if (!editor.hasFocus() || editor.somethingSelected()) { sqlGhostDebug('sin foco o con selección'); return; }
-        if (editor.state.completionActive) { sqlGhostDebug('desplegable abierto'); return; }
+        const ca = editor.state.completionActive;
+        if (ca && ca.widget) { sqlGhostDebug('desplegable abierto'); return; }
         const cur = editor.getCursor();
         const prefix = editor.getRange({ line: 0, ch: 0 }, cur);
         if (!prefix.trim()) { sqlGhostDebug('documento vacío'); return; }
         const finDoc = { line: editor.lastLine(), ch: editor.getLine(editor.lastLine()).length };
         const suffix = editor.getRange(cur, finDoc);
+        const clave = sqlGhostClave(prefix, suffix);
+        if (_sqlGhostCache.has(clave)) {
+            sqlGhostCortaPedido();
+            sqlGhostDebug('de la caché');
+            sqlGhostMuestra(_sqlGhostCache.get(clave));
+            return;
+        }
+        sqlGhostCortaPedido();
         const id = 'g' + (++_sqlGhostSeq);
-        _sqlGhostPedido = { id, gen: editor.changeGeneration(), line: cur.line, ch: cur.ch };
+        _sqlGhostPedido = { id, gen: editor.changeGeneration(), line: cur.line, ch: cur.ch, clave };
         window.dispatchEvent(new CustomEvent('nsft-sql-ai-complete', {
             detail: {
                 id,
@@ -6067,6 +6129,8 @@
         _sqlGhostPedido = null;
         sqlGhostPintaBoton();
         if (!d.ok || !d.text || !editor) { sqlGhostDebug(d.id, 'el agente contestó sin sugerencia'); return; }
+        _sqlGhostCache.set(p.clave, String(d.text));
+        if (_sqlGhostCache.size > SQL_GHOST_CACHE_MAX) _sqlGhostCache.delete(_sqlGhostCache.keys().next().value);
         const cur = editor.getCursor();
         if (editor.changeGeneration() !== p.gen || cur.line !== p.line || cur.ch !== p.ch) {
             sqlGhostDebug(d.id, 'descartada: el texto o el cursor se movieron mientras viajaba');
@@ -6077,10 +6141,10 @@
         sqlGhostMuestra(String(d.text));
     });
 
-    function sqlGhostProgramar() {
+    function sqlGhostProgramar(ms) {
         clearTimeout(_sqlGhostTimer);
-        if (!_sqlGhostOn) return;
-        _sqlGhostTimer = setTimeout(sqlGhostPedir, 800);
+        if (!_sqlGhostOn || _sqlGhost) return;
+        _sqlGhostTimer = setTimeout(sqlGhostPedir, typeof ms === 'number' ? ms : 300);
     }
 
     function getSqlHintTables() {

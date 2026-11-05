@@ -188,7 +188,10 @@
     function refresh(scope, bar, total) {
         const input = bar.querySelector('.nsft-sf-input');
         if (input && input.value) applyFilter(scope, input.value, bar);
-        else updateCount(bar, total, total);
+        else {
+            const todas = totalDeTodas(scope, total);
+            updateCount(bar, todas, todas);
+        }
     }
 
     function injectBar(scope, total, innerRow, deEdicion) {
@@ -258,7 +261,14 @@
             franja.appendChild(bar);
             scope.parentNode.insertBefore(franja, scope);
         }
-        updateCount(bar, total, total);
+        const todas = totalDeTodas(scope, total);
+        updateCount(bar, todas, todas);
+    }
+
+    function totalDeTodas(scope, total) {
+        const SP = window.NSFT_SublistPages;
+        const inf = SP && SP.info ? SP.info(scope) : null;
+        return inf && inf.total > total ? inf.total : total;
     }
 
     function rowText(tr) {
@@ -301,6 +311,10 @@
 
         const fuera = otrasPaginas(scope, needle, bar);
         if (fuera) updateCount(bar, visible + fuera.coinciden, fuera.total);
+        else if (!needle) {
+            const todas = totalDeTodas(scope, rows.length);
+            updateCount(bar, todas, todas);
+        }
         else updateCount(bar, visible, rows.length);
     }
 

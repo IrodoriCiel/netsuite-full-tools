@@ -5,6 +5,17 @@ td.listtext.uir-list-row-cell {
     overflow-wrap: break-word !important;
 }
 
+html.nsft-log-prettier-active td.listtext.uir-list-row-cell:has(.nsft-logfmt-wrapper) {
+    min-width: 900px;
+}
+
+html.nsft-log-prettier-active td.listtext.uir-list-row-cell .nsft-logfmt-wrapper {
+    width: 0;
+    min-width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
 html.nsft-log-prettier-active div#scriptnote__div {
     max-height: 800px !important;
     overflow-y: auto !important;

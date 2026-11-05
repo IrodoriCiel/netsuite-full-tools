@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "NetSuite Full Tools",
-    "version": "7.3.1",
+    "version": "7.4.0",
     "description": "__MSG_extDescription__",
     "default_locale": "en",
     "icons": {
@@ -158,6 +158,20 @@
                 "scripts/modules/full_logs_button/full_logs_button.css",
                 "scripts/modules/script_auto_name/script_auto_name.css",
                 "scripts/modules/editor_theme/open_file_new_tab.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/common/integration/integrapp.nl*"
+            ],
+            "js": [
+                "scripts/modules/_shared/nsft_sublist_pages.js",
+                "scripts/modules/log_viewer/log_viewer.js"
+            ],
+            "css": [
+                "scripts/modules/_shared/nsft_sublist_pages.css",
+                "scripts/modules/log_viewer/log_viewer.css"
             ],
             "run_at": "document_end"
         },
@@ -432,6 +446,9 @@
             "js": [
                 "scripts/modules/view_record_object/add_right_menu_tools.js"
             ],
+            "css": [
+                "scripts/modules/view_record_object/tools_menu_modal.css"
+            ],
             "run_at": "document_end"
         },
         {
@@ -620,6 +637,27 @@
             ],
             "css": [
                 "scripts/modules/clear_sort/clear_sort.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/*"
+            ],
+            "js": [
+                "scripts/modules/better_export/better_export.js"
+            ],
+            "css": [
+                "scripts/modules/better_export/better_export.css"
+            ],
+            "run_at": "document_end"
+        },
+        {
+            "matches": [
+                "https://*.app.netsuite.com/app/*"
+            ],
+            "js": [
+                "scripts/modules/console_utils/console_utils.js"
             ],
             "run_at": "document_end"
         },
@@ -1325,6 +1363,8 @@
                 "scripts/modules/_shared/nsft_sublist_pages_fetcher.js",
                 "scripts/modules/bundle_uninstall_guard/bundle_uninstall_guard_fetcher.js",
                 "scripts/modules/clear_sort/clear_sort_fetcher.js",
+                "scripts/modules/better_export/better_export_fetcher.js",
+                "scripts/modules/console_utils/console_utils_main.js",
                 "scripts/modules/view_scripted_record/scripted_record_fetcher.js",
                 "scripts/modules/suiteql_runner/suiteql_fetcher.js",
                 "scripts/modules/file_cabinet_drag_drop/file_cabinet_drag_drop_fetcher.js",

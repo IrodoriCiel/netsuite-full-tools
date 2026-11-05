@@ -151,6 +151,7 @@
             dirty: false,
             renamed: false
         };
+        if (opts && opts.fragmento) t.fragmento = String(opts.fragmento);
         tabs.push(t);
         activateTab(t.id);
         if (editor) {
@@ -508,7 +509,7 @@
 
     function _tabRenderKey(t, savedMap) {
         const entry = t.fileName ? savedMap[t.fileName] : null;
-        return [t.title, t.dirty ? 1 : 0, entry ? 1 : 0, (entry && entry.favorite === true) ? 1 : 0].join('');
+        return [t.title, t.dirty ? 1 : 0, entry ? 1 : 0, (entry && entry.favorite === true) ? 1 : 0].join('\u0001');
     }
 
     function syncTabsNav() {
@@ -870,8 +871,14 @@
                 ].join('\n');
                 titulo = pf.type + ' ' + pf.id;
             }
+            const frag = e && e.detail && e.detail.fragmento;
+            const autorun = !!(e && e.detail && e.detail.autorun);
             const applyPrefill = () => {
                 if (!code || !editor) return;
+                if (frag) {
+                    sscAbreFragmento({ name: String(frag), code: String(code) }, autorun);
+                    return;
+                }
                 createTab({ title: titulo || undefined, query: String(code) });
                 editor.focus();
             };
@@ -3156,12 +3163,16 @@
             if (!snips.length) {
                 html += `<div class="nsft-ssc-fav-empty">${emptyLabel}</div>`;
             } else {
+                const tRun = escapeHtml(chrome.i18n.getMessage('ssc_frag_run') || 'Run this snippet');
+                const tOpen = escapeHtml(chrome.i18n.getMessage('ssc_frag_open') || 'Open in a tab to edit it');
                 html += snips.map((s, idx) => {
                     const safeName = escapeHtml(s.name);
                     const preview = escapeHtml((s.code || '').replace(/\s+/g, ' ').slice(0, 90));
                     return `<div class="nsft-ssc-fav-item nsft-ssc-snip-item" data-snip-idx="${idx}" title="${preview}">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                                 <span class="nsft-ssc-fav-name">${safeName}</span>
+                                <span class="nsft-ssc-snip-act" data-snip-run="${idx}" title="${tRun}" aria-label="${tRun}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg></span>
+                                <span class="nsft-ssc-snip-act" data-snip-open="${idx}" title="${tOpen}" aria-label="${tOpen}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg></span>
                                 <span class="nsft-ssc-fav-delete" data-snip-delete="${idx}" title="${escapeHtml(chrome.i18n.getMessage('sql_snip_remove') || 'Delete snippet')}">×</span>
                             </div>`;
                 }).join('');
@@ -3185,11 +3196,25 @@
                     }
                     const idx = parseInt(item.getAttribute('data-snip-idx'), 10);
                     const snip = snippetsCache[idx];
-                    if (snip) handleSnippetInsert(snip.code);
+                    const accion = e.target.closest('[data-snip-run]') ? 'run'
+                        : e.target.closest('[data-snip-open]') ? 'open' : 'insert';
                     menu.classList.remove('open');
+                    if (!snip) return;
+                    if (accion === 'insert') handleSnippetInsert(snip.code);
+                    else sscAbreFragmento(snip, accion === 'run');
                 });
             });
         });
+    }
+
+    function sscAbreFragmento(snip, ejecutar) {
+        if (!snip || typeof snip.code !== 'string') return;
+        captureActiveTabFromEditor();
+        const ya = tabs.find((t) => t.fragmento === snip.name && t.query === snip.code);
+        if (ya) activateTab(ya.id);
+        else createTab({ title: snip.name, query: snip.code, fragmento: snip.name });
+        if (ejecutar) sscEjecutar();
+        else if (editor) editor.focus();
     }
 
     function handleSnippetInsert(code) {
@@ -3207,15 +3232,17 @@
             logToToolbar(chrome.i18n.getMessage('sql_empty_query') || 'Editor is empty', 'warning');
             return;
         }
+        const activa = getActiveTab();
         showSaveQueryDialog((name) => {
             loadSnippets((snips) => {
+                if (activa && !sel) activa.fragmento = name;
                 const others = snips.filter(s => s.name !== name);
                 others.push({ name, code });
                 saveSnippets(others, () => {
                     logToToolbar(`${chrome.i18n.getMessage('sql_snip_saved') || 'Snippet saved'}: ${name}`, 'success');
                 });
             });
-        });
+        }, (activa && activa.fragmento) || '');
     }
 
     function handleSnippetDelete(idx, menu) {
@@ -3228,7 +3255,7 @@
     }
 
 
-    function showSaveQueryDialog(onConfirm) {
+    function showSaveQueryDialog(onConfirm, nombrePrevio) {
         if (document.getElementById('nsft-save-dialog')) return;
 
         const overlay = document.createElement('div');
@@ -3273,8 +3300,9 @@
             box-sizing: border-box;
         `;
         input.placeholder = chrome.i18n.getMessage('ssc_save_placeholder') || 'My Script...';
+        if (nombrePrevio) input.value = String(nombrePrevio);
 
-        setTimeout(() => input.focus(), 100);
+        setTimeout(() => { input.focus(); if (nombrePrevio) input.select(); }, 100);
 
         const btnContainer = document.createElement('div');
         btnContainer.style.cssText = 'display: flex; justify-content: flex-end; gap: 10px;';
@@ -4547,6 +4575,10 @@
         if (!d || typeof d !== 'object' || d.dest !== SSC_EXTENSION_DEST) return;
         const p = d.payload || {};
         if (d.type !== 'result') return;
+        if (_sscFrag && p.token === _sscFrag.token) {
+            sscFragResultado(p);
+            return;
+        }
         if (_sscAiReq && _sscAiReq.running && p.token === _sscAiReq.token) {
             sscResuelveAi(p, (p.ms != null) ? p.ms : (Date.now() - _sscAiReq.t0));
             return;
@@ -4637,6 +4669,368 @@
         const riesgos = sscDetectaEscrituras(raw);
         if (riesgos.length) { sscConfirmar(riesgos, raw); return; }
         sscLanzarSilencioso(raw);
+    });
+
+    let _sscFrag = null;
+    let _sscFragEsc = false;
+
+    async function sscFragEjecuta(name, code) {
+        code = String(code || '');
+        name = String(name || '');
+        if (!code.trim()) return;
+        const C = window.NSFT_Clipboard;
+        if (_sscFrag || _runPhase !== 'idle' || sscAiVivo()) {
+            if (C && C.showToast) C.showToast(sscI18n('ssc_already_running', 'Something is already running.'), { type: 'info' });
+            return;
+        }
+        const riesgos = sscDetectaEscrituras(code);
+        if (riesgos.length) {
+            const env = (window.NSFT_ENV && NSFT_ENV.envFromUrl) ? NSFT_ENV.envFromUrl(location.href) : null;
+            const esPrd = !!(env && env.code === 'PRD');
+            const D = window.NSFT_Dialog;
+            if (!D || !D.confirm) return;
+            const ok = await D.confirm({
+                title: esPrd ? sscI18n('ssc_confirm_prd', 'This writes to PRODUCTION') : sscI18n('ssc_confirm', 'This code writes to the account'),
+                body: name + ' — ' + riesgos.join(' · '),
+                danger: true,
+                word: esPrd ? sscI18n('ssc_confirm_word', 'RUN') : undefined,
+                ok: sscI18n('ssc_confirm_go', 'Run anyway'),
+                cancel: sscI18n('ssc_confirm_cancel', 'Cancel')
+            });
+            if (!ok) return;
+        }
+        _sscFrag = { name: name, code: code, token: ++_sscToken, t0: Date.now() };
+        sscFragTarjeta('running');
+        const previos = SSC_CANDIDATOS.filter((c) => !_sscDisponibles || _sscDisponibles.indexOf(c.path) >= 0);
+        sscPost({ dest: SSC_FETCHER_DEST, type: 'run', payload: { code: code, token: _sscFrag.token, preload: previos } });
+    }
+
+    function sscFragResultado(p) {
+        const f = _sscFrag;
+        _sscFrag = null;
+        if (!f) return;
+        const ms = (p.ms != null) ? p.ms : (Date.now() - f.t0);
+        if (f.lang === 'sql' && f.puente) {
+            if (p.error) {
+                sscFragTarjeta('error', { f: f, ms: ms, texto: (p.error.name || 'Error') + ': ' + (p.error.message || '') });
+                return;
+            }
+            let d = null;
+            try { d = JSON.parse(p.value && p.value.v); } catch (e) { d = null; }
+            const filas = (d && Array.isArray(d.filas)) ? d.filas : [];
+            const cols = [];
+            filas.forEach((r) => Object.keys(r || {}).forEach((k) => { if (cols.indexOf(k) < 0) cols.push(k); }));
+            const total = (d && d.total) || filas.length;
+            sscFragTarjeta('ok', { f: f, ms: ms, tabla: { cols: cols, filas: filas, total: total, hayMas: total > filas.length } });
+            return;
+        }
+        const lineas = [];
+        (p.logs || []).forEach((l) => {
+            lineas.push('[' + (l.level || 'log') + '] ' + (l.parts || []).map((x) => sscFormatea(x)).join(' '));
+        });
+        if (p.error) {
+            lineas.push((p.error.name || 'Error') + ': ' + (p.error.message || ''));
+        } else {
+            const v = sscFormatea(p.value);
+            if (v !== '' && v !== 'undefined') lineas.push(v);
+        }
+        sscFragTarjeta(p.error ? 'error' : 'ok', { ms: ms, texto: lineas.join('\n').slice(0, 20000), f: f });
+    }
+
+    function sscFragTarjeta(estado, info) {
+        const ID = 'nsft-ssc-frag-card';
+        let card = document.getElementById(ID);
+        if (!card) {
+            card = document.createElement('div');
+            card.id = ID;
+            card.className = 'nsft-ssc-frag-card';
+            card.setAttribute('role', 'status');
+            card.setAttribute('data-nsft-ui', '');
+            document.body.appendChild(card);
+            if (!_sscFragEsc) {
+                _sscFragEsc = true;
+                document.addEventListener('keydown', (e) => {
+                    if (e.key !== 'Escape') return;
+                    const c = document.getElementById(ID);
+                    if (c && c.dataset.estado !== 'running') c.remove();
+                }, true);
+            }
+        }
+        const f = (info && info.f) || _sscFrag || {};
+        card.dataset.estado = estado;
+        const titulo = escapeHtml(f.name || sscI18n('ssc_frag_menu', 'Snippets'));
+        const estadoTxt = estado === 'running' ? escapeHtml(sscI18n('ssc_running', 'Running…'))
+            : estado === 'error' ? '✗ ' + escapeHtml(sscI18n('ssc_frag_failed', 'Failed'))
+                : '✓ ' + escapeHtml(sscI18n('ssc_frag_ms', '$1 ms', [String(info && info.ms != null ? info.ms : '')]));
+        const tabla = info && info.tabla;
+        const celda = (v) => escapeHtml(v == null ? '' : (typeof v === 'object' ? JSON.stringify(v) : String(v)));
+        const cuerpo = estado === 'running' ? ''
+            : tabla ? (tabla.filas.length
+                ? '<div class="nsft-ssc-frag-count">' + escapeHtml(sscI18n('ssc_frag_sql_rows', '$1 rows', [String(tabla.total)]))
+                    + (tabla.hayMas ? ' · ' + escapeHtml(sscI18n('ssc_frag_sql_more', 'only the first $1 here: open it in the Runner to see them all', [String(tabla.filas.length)])) : '') + '</div>'
+                    + '<div class="nsft-ssc-frag-tablewrap"><table class="nsft-ssc-frag-table"><thead><tr>'
+                    + tabla.cols.map((c) => '<th>' + escapeHtml(c) + '</th>').join('') + '</tr></thead><tbody>'
+                    + tabla.filas.map((r) => '<tr>' + tabla.cols.map((c) => '<td>' + celda(r[c]) + '</td>').join('') + '</tr>').join('')
+                    + '</tbody></table></div>'
+                : '<div class="nsft-ssc-frag-empty">' + escapeHtml(sscI18n('ssc_frag_sql_none', 'No rows.')) + '</div>')
+            : (info && info.texto) ? '<pre class="nsft-ssc-frag-out">' + escapeHtml(info.texto) + '</pre>'
+                : '<div class="nsft-ssc-frag-empty">' + escapeHtml(sscI18n('ssc_frag_nothing', 'Done, with nothing to show.')) + '</div>';
+        const esSql = f.lang === 'sql';
+        const copiable = (info && info.texto) || (tabla && tabla.filas.length);
+        card.innerHTML = '<div class="nsft-ssc-frag-head">'
+            + '<span class="nsft-ssc-frag-play" aria-hidden="true">▶</span>'
+            + '<span class="nsft-ssc-frag-title">' + titulo + '</span>'
+            + '<span class="nsft-ssc-frag-state">' + estadoTxt + '</span>'
+            + '<button type="button" class="nsft-ssc-frag-x" aria-label="' + escapeHtml(sscI18n('ssc_confirm_cancel', 'Close')) + '">✕</button>'
+            + '</div>' + cuerpo
+            + (estado === 'running' ? '' : '<div class="nsft-ssc-frag-foot">'
+                + (copiable ? '<button type="button" class="nsft-ssc-frag-btn" data-act="copy">' + escapeHtml(sscI18n('copy', 'Copy')) + '</button>' : '')
+                + '<button type="button" class="nsft-ssc-frag-btn" data-act="open">' + escapeHtml(esSql ? sscI18n('ssc_frag_in_runner', 'Open in the Runner') : sscI18n('ssc_frag_in_console', 'Open in the console')) + '</button>'
+                + '</div>');
+        const x = card.querySelector('.nsft-ssc-frag-x');
+        if (x) x.addEventListener('click', () => { if (card.dataset.estado !== 'running') card.remove(); });
+        card.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => {
+            if (b.dataset.act === 'copy') {
+                const C = window.NSFT_Clipboard;
+                const txt = tabla
+                    ? [tabla.cols.join('\t')].concat(tabla.filas.map((r) => tabla.cols.map((c) => String(r[c] == null ? '' : r[c]).replace(/[\t\r\n]+/g, ' ')).join('\t'))).join('\n')
+                    : info.texto;
+                if (C && C.copy) C.copy(txt);
+            } else {
+                card.remove();
+                if (esSql) {
+                    sscFragAlRunner(f.code);
+                } else {
+                    window.dispatchEvent(new CustomEvent('nsft-show-suitescript-console', {
+                        detail: { prefillCode: f.code, prefillTitle: f.name, fragmento: f.name }
+                    }));
+                }
+            }
+        }));
+    }
+
+    const SQL_SNIPPETS_KEY = 'nsftSqlSnippets';
+    const SQL_SAVED_KEY = 'nsftSavedQueries';
+    const RAPIDOS_KEY = 'nsftSnippetsRapidos';
+
+    function sscFragTodos(cb) {
+        loadSnippets((snipsJs) => {
+            loadSavedQueries((savedJs) => {
+                chrome.storage.local.get({ [SQL_SNIPPETS_KEY]: [], [RAPIDOS_KEY]: [] }, (it) => {
+                    let savedSql = {};
+                    try { savedSql = JSON.parse(localStorage.getItem(SQL_SAVED_KEY) || '{}') || {}; } catch (e) { savedSql = {}; }
+                    const snipsSql = (Array.isArray(it[SQL_SNIPPETS_KEY]) ? it[SQL_SNIPPETS_KEY] : [])
+                        .filter((x) => x && typeof x.name === 'string' && x.name.trim() && typeof x.code === 'string');
+                    const out = [];
+                    const junta = (lang, snips, saved) => {
+                        const vistos = new Set();
+                        snips.forEach((x) => {
+                            vistos.add(x.name);
+                            out.push({ id: lang + ':s:' + x.name, name: x.name, code: x.code, lang: lang, guardado: false });
+                        });
+                        Object.keys(saved || {})
+                            .filter((n) => !vistos.has(n) && saved[n] && typeof saved[n].query === 'string' && saved[n].query.trim())
+                            .sort((a, b) => (saved[b].favorite === true) - (saved[a].favorite === true) || a.localeCompare(b))
+                            .forEach((n) => out.push({ id: lang + ':g:' + n, name: n, code: saved[n].query, lang: lang, guardado: true }));
+                    };
+                    junta('js', snipsJs, savedJs);
+                    junta('sql', snipsSql, savedSql);
+                    const rapidos = new Set(Array.isArray(it[RAPIDOS_KEY]) ? it[RAPIDOS_KEY] : []);
+                    cb(out, rapidos);
+                });
+            });
+        });
+    }
+
+    function sscFragEjecutaItem(item) {
+        if (!item) return;
+        if (item.lang === 'sql') sscFragSql(item.name, item.code);
+        else sscFragEjecuta(item.name, item.code);
+    }
+
+    function sscFragLista(x, y, verTodos) {
+        const ID = 'nsft-ssc-frag-list';
+        const prev = document.getElementById(ID);
+        if (prev) prev.remove();
+        sscFragTodos((items, rapidos) => {
+            const hayRapidos = items.some((i) => rapidos.has(i.id));
+            const visibles = (hayRapidos && !verTodos) ? items.filter((i) => rapidos.has(i.id)) : items;
+            const box = document.createElement('div');
+            box.id = ID;
+            box.className = 'nsft-ssc-frag-list';
+            box.setAttribute('data-nsft-ui', '');
+            box.setAttribute('role', 'menu');
+            let html = '<div class="nsft-ssc-frag-list-head">' + escapeHtml(sscI18n('ssc_frag_menu', 'Snippets')) + '</div>';
+            if (!items.length) {
+                html += '<div class="nsft-ssc-frag-empty">' + escapeHtml(sscI18n('ssc_frag_none', 'No snippets yet: save a script in the SuiteScript Console (Save) or a piece in Snippets.')) + '</div>'
+                    + '<button type="button" class="nsft-ssc-frag-item is-open" data-open="1">' + escapeHtml(sscI18n('ssc_frag_in_console', 'Open in the console')) + '</button>';
+            } else {
+                const tPin = escapeHtml(sscI18n('ssc_frag_pin', 'Show in the quick list'));
+                const tUnpin = escapeHtml(sscI18n('ssc_frag_unpin', 'Remove from the quick list'));
+                html += '<div class="nsft-ssc-frag-items">' + visibles.map((s) => {
+                    const i = items.indexOf(s);
+                    const on = rapidos.has(s.id);
+                    return '<div class="nsft-ssc-frag-row">'
+                        + '<button type="button" class="nsft-ssc-frag-item" role="menuitem" data-i="' + i + '" title="'
+                        + escapeHtml(s.code.replace(/\s+/g, ' ').slice(0, 120)) + '"><span class="nsft-ssc-frag-play" aria-hidden="true">▶</span>'
+                        + '<span class="nsft-ssc-frag-name">' + escapeHtml(s.name) + '</span>'
+                        + '<span class="nsft-ssc-frag-tag is-' + s.lang + '">' + (s.lang === 'sql' ? 'SQL' : 'JS') + '</span>'
+                        + (s.guardado ? '<span class="nsft-ssc-frag-tag">' + escapeHtml(sscI18n('ssc_frag_saved_tag', 'saved')) + '</span>' : '')
+                        + '</button>'
+                        + '<button type="button" class="nsft-ssc-frag-pin' + (on ? ' is-on' : '') + '" data-pin="' + i + '" title="' + (on ? tUnpin : tPin) + '" aria-label="' + (on ? tUnpin : tPin) + '" aria-pressed="' + on + '">' + (on ? '★' : '☆') + '</button>'
+                        + '</div>';
+                }).join('') + '</div>';
+                if (hayRapidos) {
+                    html += verTodos
+                        ? '<button type="button" class="nsft-ssc-frag-more" data-todos="0">' + escapeHtml(sscI18n('ssc_frag_only_pinned', 'Only the marked ones')) + '</button>'
+                        : '<button type="button" class="nsft-ssc-frag-more" data-todos="1">' + escapeHtml(sscI18n('ssc_frag_all', 'See all ($1)', [String(items.length)])) + '</button>';
+                } else {
+                    html += '<div class="nsft-ssc-frag-hint">' + escapeHtml(sscI18n('ssc_frag_pin_hint', 'Mark with ★ the ones you want here; the rest stays under “See all”.')) + '</div>';
+                }
+            }
+            box.innerHTML = html;
+            document.body.appendChild(box);
+            const r = box.getBoundingClientRect();
+            box.style.left = Math.max(8, Math.min(x, window.innerWidth - r.width - 8)) + 'px';
+            box.style.top = Math.max(8, Math.min(y + 6, window.innerHeight - r.height - 8)) + 'px';
+
+            const cierra = () => {
+                box.remove();
+                document.removeEventListener('mousedown', fuera, true);
+                document.removeEventListener('keydown', tecla, true);
+            };
+            const fuera = (e) => { if (!box.contains(e.target)) cierra(); };
+            const tecla = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cierra(); } };
+            document.addEventListener('mousedown', fuera, true);
+            document.addEventListener('keydown', tecla, true);
+            box.querySelectorAll('.nsft-ssc-frag-item').forEach((b) => b.addEventListener('click', () => {
+                cierra();
+                if (b.dataset.open) { window.dispatchEvent(new CustomEvent('nsft-show-suitescript-console')); return; }
+                sscFragEjecutaItem(items[Number(b.dataset.i)]);
+            }));
+            box.querySelectorAll('[data-pin]').forEach((b) => b.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const it = items[Number(b.dataset.pin)];
+                if (!it) return;
+                const lista = Array.from(rapidos);
+                const k = lista.indexOf(it.id);
+                if (k >= 0) lista.splice(k, 1); else lista.push(it.id);
+                const izq = parseFloat(box.style.left) || x;
+                const arr = (parseFloat(box.style.top) || y) - 6;
+                chrome.storage.local.set({ [RAPIDOS_KEY]: lista }, () => {
+                    cierra();
+                    sscFragLista(izq, arr, verTodos || (k >= 0 && lista.length > 0 ? verTodos : true));
+                });
+            }));
+            const mas = box.querySelector('[data-todos]');
+            if (mas) mas.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const izq = parseFloat(box.style.left) || x;
+                const arr = (parseFloat(box.style.top) || y) - 6;
+                cierra();
+                sscFragLista(izq, arr, mas.dataset.todos === '1');
+            });
+            const primero = box.querySelector('.nsft-ssc-frag-item');
+            if (primero) primero.focus();
+        });
+    }
+
+    const SQL_RAPIDO_FILAS = 100;
+
+    function sscFragAlRunner(sql, aviso) {
+        if (aviso) {
+            const C = window.NSFT_Clipboard;
+            if (C && C.showToast) C.showToast(aviso, { type: 'info', duration: 3500 });
+        }
+        window.dispatchEvent(new CustomEvent('nsft-show-suiteql-runner', { detail: { prefillSql: String(sql || '') } }));
+    }
+
+    async function sscFragSql(name, sql) {
+        sql = String(sql || '').trim().replace(/;\s*$/, '');
+        name = String(name || '');
+        if (!sql) return;
+        if (/\{\{\s*[\w.$-]+\s*\}\}/.test(sql)) {
+            sscFragAlRunner(sql, sscI18n('ssc_frag_sql_vars', 'This query uses variables: it opens in the SuiteQL Runner.'));
+            return;
+        }
+        if (_sscFrag) {
+            const C = window.NSFT_Clipboard;
+            if (C && C.showToast) C.showToast(sscI18n('ssc_already_running', 'Something is already running.'), { type: 'info' });
+            return;
+        }
+        const f = { name: name, code: sql, lang: 'sql', token: -1, t0: Date.now() };
+        _sscFrag = f;
+        sscFragTarjeta('running', { f: f });
+        if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.isKnownOff) {
+            let off = false;
+            try { off = await window.NSFT_SuiteQLRest.isKnownOff(); } catch (e) { off = false; }
+            if (off) { sscFragSqlPuente(f); return; }
+        }
+        let info;
+        try {
+            const url = new URL('/services/rest/query/v1/suiteql?limit=' + SQL_RAPIDO_FILAS + '&offset=0', location.origin);
+            const res = await fetch(url.href, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'Prefer': 'transient' },
+                body: JSON.stringify({ q: sql })
+            });
+            const datos = await res.json().catch(() => null);
+            const sinRest = !res.ok && (res.status === 401 || res.status === 403)
+                && /REST Web Services|not enabled|INVALID_LOGIN|USER_ERROR/i.test(JSON.stringify(datos || {}));
+            if (sinRest) {
+                try { if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.markOff) window.NSFT_SuiteQLRest.markOff(); } catch (e) { }
+                sscFragSqlPuente(f);
+                return;
+            }
+            if (!res.ok) {
+                const det = datos && datos['o:errorDetails'] && datos['o:errorDetails'][0];
+                const msg = (det && (det.detail || det['o:errorCode'])) || (datos && datos.title) || ('HTTP ' + res.status);
+                info = { f: f, ms: Date.now() - f.t0, texto: String(msg) };
+                _sscFrag = null;
+                sscFragTarjeta('error', info);
+                return;
+            }
+            const filas = ((datos && datos.items) || []).map((r) => { const o = Object.assign({}, r); delete o.links; return o; });
+            const cols = [];
+            filas.forEach((r) => Object.keys(r).forEach((k) => { if (cols.indexOf(k) < 0) cols.push(k); }));
+            info = {
+                f: f, ms: Date.now() - f.t0,
+                tabla: { cols: cols, filas: filas, total: (datos && datos.totalResults) || filas.length, hayMas: !!(datos && datos.hasMore) }
+            };
+        } catch (e) {
+            info = { f: f, ms: Date.now() - f.t0, texto: String((e && e.message) || e) };
+            _sscFrag = null;
+            sscFragTarjeta('error', info);
+            return;
+        }
+        _sscFrag = null;
+        sscFragTarjeta('ok', info);
+    }
+
+    function sscFragSqlPuente(f) {
+        const codigo = [
+            'const _r = query.runSuiteQL({ query: ' + JSON.stringify(f.code) + ' }).asMappedResults();',
+            'let _f = _r.slice(0, ' + SQL_RAPIDO_FILAS + ');',
+            'let _s = JSON.stringify({ total: _r.length, filas: _f });',
+            'while (_s.length > 38000 && _f.length > 1) { _f = _f.slice(0, Math.floor(_f.length / 2)); _s = JSON.stringify({ total: _r.length, filas: _f }); }',
+            '_s'
+        ].join('\n');
+        f.token = ++_sscToken;
+        f.puente = true;
+        _sscFrag = f;
+        sscPost({ dest: SSC_FETCHER_DEST, type: 'run', payload: { code: codigo, token: f.token, preload: [{ alias: 'query', path: 'N/query' }] } });
+    }
+
+    window.addEventListener('nsft-ssc-fragmento', function (e) {
+        const d = e && e.detail;
+        if (!d || !d.code) return;
+        if (d.lang === 'sql') sscFragSql(d.name, d.code);
+        else sscFragEjecuta(d.name, d.code);
+    });
+    window.addEventListener('nsft-show-fragmentos', function (e) {
+        const d = (e && e.detail) || {};
+        sscFragLista(Number(d.x) || 80, Number(d.y) || 80);
     });
 
 

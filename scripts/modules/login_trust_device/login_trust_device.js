@@ -17,7 +17,7 @@
     let moTimer = 0;
     let rafPending = false;
 
-    chrome.storage.local.get({ [STORAGE_KEY]: false, nsftSelectorDiagnostics: false }, (items) => {
+    chrome.storage.local.get({ [STORAGE_KEY]: true, nsftSelectorDiagnostics: false }, (items) => {
         _diag = !!items.nsftSelectorDiagnostics;
         if (items[STORAGE_KEY]) arrancar();
     });

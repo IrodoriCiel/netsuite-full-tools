@@ -305,6 +305,19 @@ const NSFT_DEV_TAP_WINDOW_MS = 3000;
         } catch (e) { return true; }
     };
 
+    const resetToolsChooser = document.getElementById('nsftDevResetToolsChooser');
+    if (resetToolsChooser) {
+        resetToolsChooser.addEventListener('click', () => {
+            chrome.storage.local.remove('nsftToolsMenuModeChosen', () => {
+                showToast(
+                    chrome.i18n.getMessage('devResetToolsChooserDone') ||
+                    'Listo: al abrir Herramientas en NetSuite vuelve a salir la pregunta.',
+                    { duration: 4000 }
+                );
+            });
+        });
+    }
+
     const resetShare = document.getElementById('nsftDevResetShare');
     if (resetShare) {
         resetShare.addEventListener('click', () => {
@@ -2179,7 +2192,33 @@ function refreshDetailCount() {
     countEl.textContent = `${on}/${cbs.length}`;
 }
 
+function initToolsMenuSeg() {
+    const seg = document.getElementById('nsftToolsMenuSeg');
+    if (!seg) return;
+    const btns = Array.from(seg.querySelectorAll('.nsft-seg-btn'));
+    const pinta = (ventana) => btns.forEach((b) => {
+        const on = (b.dataset.seg === 'ventana') === !!ventana;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.setAttribute('aria-checked', on ? 'true' : 'false');
+    });
+    btns.forEach((b) => {
+        if (b.title) b.setAttribute('aria-label', b.title);
+        b.addEventListener('click', () => {
+            const ventana = b.dataset.seg === 'ventana';
+            pinta(ventana);
+            chrome.storage.local.set({ enableToolsMenuModal: ventana, nsftToolsMenuModeChosen: true }, () => {
+                chrome.storage.sync.set({ enableToolsMenuModal: ventana });
+            });
+        });
+    });
+    chrome.storage.local.get({ enableToolsMenuModal: false }, (it) => pinta(it.enableToolsMenuModal));
+    chrome.storage.onChanged.addListener((ch, area) => {
+        if (area === 'local' && ch.enableToolsMenuModal) pinta(ch.enableToolsMenuModal.newValue);
+    });
+}
+
 function initializeSettingsScreen() {
+    initToolsMenuSeg();
     const seg = document.getElementById('nsftThemeSegmented');
     if (seg) {
         const tb = document.getElementById('nsftThemeToggle');

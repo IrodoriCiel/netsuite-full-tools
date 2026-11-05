@@ -2452,6 +2452,9 @@
   "welcomeCatSqlItem12": {
     "message": "Quitar el orden de una columna, en listas y en sublistas, y volver al de partida"
   },
+  "welcomeCatSqlItem13": {
+    "message": "Exportar mejor las listas: Excel listo para trabajar, JSON y copiar como tabla"
+  },
   "welcomeCatRecordItem5": {
     "message": "Ver Scripts del Registro"
   },
@@ -2623,6 +2626,9 @@
   "welcomeCatPowerItem16": {
     "message": "Freno al desinstalar bundles: escribir la palabra antes de desinstalar, para no hacerlo queriendo actualizar"
   },
+  "welcomeCatPowerItem17": {
+    "message": "Menú Herramientas en una ventana con buscador"
+  },
   "welcomeCatPowerItem14": {
     "message": "Registros eliminados: quién borró un registro, cuándo y desde dónde"
   },
@@ -2754,6 +2760,45 @@
   },
   "enableClearSortDesc": {
     "message": "En las listas, los resultados de búsqueda y las sublistas de los registros ordenados por una columna, añade un botón para quitar ese orden y volver al de partida."
+  },
+  "enableBetterExportLabel": {
+    "message": "Exportar mejor las listas"
+  },
+  "enableBetterExportDesc": {
+    "message": "Junto a los iconos de exportar de una lista o búsqueda: el Excel con la fila de títulos fija, filtros y columnas a su ancho, un CSV que Excel abre con los acentos bien, un JSON y copiar la tabla para pegarla en una hoja."
+  },
+  "bexp_excel": {
+    "message": "Excel"
+  },
+  "bexp_excel_title": {
+    "message": "Descargar el Excel con la fila de títulos fija, filtros y las columnas a su ancho"
+  },
+  "bexp_json": {
+    "message": "JSON"
+  },
+  "bexp_json_title": {
+    "message": "Descargar todas las filas de la lista en JSON"
+  },
+  "bexp_copy": {
+    "message": "Copiar"
+  },
+  "bexp_copy_title": {
+    "message": "Copiar la lista como tabla, para pegarla en Excel o Google Sheets"
+  },
+  "bexp_copied": {
+    "message": "$1 filas copiadas"
+  },
+  "bexp_error": {
+    "message": "No se pudo exportar: $1"
+  },
+  "bexp_no_url": {
+    "message": "esta página no tiene exportación"
+  },
+  "bexp_session": {
+    "message": "la sesión caducó"
+  },
+  "bexp_not_excel": {
+    "message": "NetSuite no devolvió una hoja de cálculo"
   },
   "clearSortBtn": {
     "message": "Quitar orden"
@@ -3090,6 +3135,147 @@
   },
   "enableCommandPaletteDesc": {
     "message": "Paleta de comandos rápida para navegar y ejecutar herramientas."
+  },
+  "enableToolsMenuModalLabel": {
+    "message": "Herramientas en una ventana"
+  },
+  "enableToolsMenuModalDesc": {
+    "message": "El menú Herramientas se abre como una ventana con las herramientas por grupos y un buscador: escribe «sql» y Enter abre la primera que coincide."
+  },
+  "tmm_grp_dev": {
+    "message": "Desarrollo"
+  },
+  "tmm_grp_record": {
+    "message": "Registro actual"
+  },
+  "tmm_grp_find": {
+    "message": "Buscar e ir"
+  },
+  "tmm_grp_more": {
+    "message": "Más"
+  },
+  "tmm_close": {
+    "message": "Cerrar"
+  },
+  "tmm_search_ph": {
+    "message": "Buscar herramienta o acción…"
+  },
+  "tmm_empty": {
+    "message": "Ninguna herramienta coincide con"
+  },
+  "tmm_none": {
+    "message": "No hay herramientas encendidas"
+  },
+  "tmm_recent": {
+    "message": "Recientes"
+  },
+  "tmm_k_nav": {
+    "message": "navegar"
+  },
+  "tmm_k_open": {
+    "message": "abrir"
+  },
+  "tmm_k_close": {
+    "message": "cerrar"
+  },
+  "tmm_count": {
+    "message": "$1 herramientas"
+  },
+  "tmm_count_one": {
+    "message": "1 herramienta"
+  },
+  "tmm_new": {
+    "message": "Nuevo"
+  },
+  "tmm_d_sql": {
+    "message": "Consultas SuiteQL con exportación"
+  },
+  "tmm_d_ssc": {
+    "message": "Módulos N/* ya cargados"
+  },
+  "tmm_d_adv": {
+    "message": "Edita y guarda en el File Cabinet"
+  },
+  "tmm_d_frag": {
+    "message": "Tus snippets y consultas guardados"
+  },
+  "tmm_d_lnm": {
+    "message": "Módulos N/* en la consola"
+  },
+  "tmm_d_sx": {
+    "message": "Lanza y sigue el despliegue"
+  },
+  "tmm_d_github": {
+    "message": "Sube los scripts a un repositorio"
+  },
+  "tmm_d_vro": {
+    "message": "Campos y sublistas en JSON"
+  },
+  "tmm_d_scripted": {
+    "message": "Scripts y workflows del registro"
+  },
+  "tmm_d_logs": {
+    "message": "Ejecuciones de sus scripts"
+  },
+  "tmm_d_findfield": {
+    "message": "Lo resalta y te lleva a él"
+  },
+  "tmm_d_enableall": {
+    "message": "Desbloquea los deshabilitados"
+  },
+  "tmm_d_ss1": {
+    "message": "nlapiLoadRecord en la consola"
+  },
+  "tmm_d_ss2": {
+    "message": "record.load en la consola"
+  },
+  "tmm_d_goto": {
+    "message": "Por número, tipo o nombre"
+  },
+  "tmm_d_palette": {
+    "message": "Páginas, listas y acciones"
+  },
+  "tmm_d_cfind": {
+    "message": "Scripts, campos, búsquedas…"
+  },
+  "tmm_d_delrec": {
+    "message": "Quién borró qué y cuándo"
+  },
+  "tmm_d_exportsearch": {
+    "message": "La búsqueda como SuiteScript"
+  },
+  "tmm_d_perf": {
+    "message": "Servidor, scripts y red"
+  },
+  "tmm_d_env": {
+    "message": "Producción o un sandbox"
+  },
+  "tmm_d_cheatsheet": {
+    "message": "Todos los atajos"
+  },
+  "tmc_title": {
+    "message": "¿Cómo quieres el menú Herramientas?"
+  },
+  "tmc_sub": {
+    "message": "Elige uno. Puedes cambiarlo cuando quieras en Configuración → Preferencias."
+  },
+  "tmc_list_title": {
+    "message": "Lista desplegable"
+  },
+  "tmc_list_desc": {
+    "message": "La de siempre: pasas el ratón por Herramientas y eliges de la lista."
+  },
+  "tmc_win_title": {
+    "message": "Ventana con buscador"
+  },
+  "tmc_win_desc": {
+    "message": "Un clic abre las herramientas por grupos; escribe «sql» y Enter abre la primera."
+  },
+  "tmc_save": {
+    "message": "Guardar"
+  },
+  "tmc_later": {
+    "message": "Ahora no"
   },
   "enableCustomizationFinderLabel": {
     "message": "Buscador de personalizaciones"
@@ -3440,10 +3626,10 @@
     "message": "Sólo los modelos rápidos de tus claves, aptos para completar mientras escribes."
   },
   "ssc_ghost_btn_title": {
-    "message": "Sugerencias de código con IA — Tab acepta · clic: encender/apagar · clic derecho: elegir modelo"
+    "message": "Sugerencias de código con IA — Tab acepta · Ctrl+→ acepta una palabra · clic: encender/apagar · clic derecho: elegir modelo"
   },
   "sql_ghost_btn_title": {
-    "message": "Sugerencias de SQL con IA — Tab acepta · clic: encender/apagar · clic derecho: elegir modelo"
+    "message": "Sugerencias de SQL con IA — Tab acepta · Ctrl+→ acepta una palabra · clic: encender/apagar · clic derecho: elegir modelo"
   },
   "themeAuto": {
     "message": "Automático (sigue el modo oscuro)"
@@ -4209,7 +4395,7 @@
     "message": "Tema del editor"
   },
   "adv_ghost_title": {
-    "message": "Sugerencias con IA mientras escribes"
+    "message": "Sugerencias con IA mientras escribes — Tab acepta · Ctrl+→ acepta una palabra"
   },
   "adv_wrap_title": {
     "message": "Ajustar las líneas largas"
@@ -4585,7 +4771,197 @@
     "message": "Execution Log buscable"
   },
   "enableLogViewerDesc": {
-    "message": "Te permite buscar en el Execution Log del script para encontrar al instante las líneas que necesitas."
+    "message": "Te permite buscar en el Execution Log de un script o despliegue y exportarlo a CSV o JSON, entero o por páginas. También exporta el log de los registros de integración."
+  },
+  "lv_exp_title": {
+    "message": "Exportar el log a $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lv_exp_actual": {
+    "message": "Página actual"
+  },
+  "lv_exp_todas": {
+    "message": "Todas las páginas"
+  },
+  "lv_exp_n_filas": {
+    "message": "($1 filas)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lv_exp_n_filas_pags": {
+    "message": "($1 filas en $2 páginas)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      }
+    }
+  },
+  "lv_exp_desde": {
+    "message": "Desde"
+  },
+  "lv_exp_hasta": {
+    "message": "Hasta"
+  },
+  "lv_exp_rango": {
+    "message": "Páginas"
+  },
+  "lv_exp_rango_a": {
+    "message": "a"
+  },
+  "lv_exp_rango_de": {
+    "message": "de $1",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lv_exp_filtro": {
+    "message": "Sólo las filas que casan con «$1».",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lv_exp_ok": {
+    "message": "Exportar"
+  },
+  "lv_exp_detener": {
+    "message": "Detener"
+  },
+  "lv_exp_empezando": {
+    "message": "Trayendo las páginas…"
+  },
+  "lv_exp_progreso": {
+    "message": "Página $1 de $2 · $3 filas · $4 · quedan ~$5",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      },
+      "3": {
+        "content": "$3"
+      },
+      "4": {
+        "content": "$4"
+      },
+      "5": {
+        "content": "$5"
+      }
+    }
+  },
+  "lv_exp_cancelada": {
+    "message": "Exportación detenida: no se guardó nada."
+  },
+  "lv_exp_error": {
+    "message": "No se pudo terminar la exportación ($1): no se guardó nada.",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lv_exp_vacio": {
+    "message": "No hay filas que exportar."
+  },
+  "lv_col_linea": {
+    "message": "Línea"
+  },
+  "lf_fn_script": {
+    "message": "script"
+  },
+  "lf_fn_despliegue": {
+    "message": "despliegue"
+  },
+  "lf_fn_completos": {
+    "message": "logs-completos"
+  },
+  "lf_fn_integracion": {
+    "message": "integracion"
+  },
+  "lv_fn_todo": {
+    "message": "todo"
+  },
+  "lv_fn_pagina": {
+    "message": "pagina"
+  },
+  "lv_fn_a": {
+    "message": "a"
+  },
+  "lv_exp_fechas": {
+    "message": "Entre"
+  },
+  "lv_exp_buscando": {
+    "message": "Buscando las páginas de esas fechas… ($1 consultadas)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lv_exp_orden": {
+    "message": "El log no está ordenado por hora: ordénalo por su columna de hora y vuelve a intentarlo."
+  },
+  "lv_exp_cambio": {
+    "message": "El log cambió mientras se exportaba (entraron o se borraron entradas): no se guardó nada. Vuelve a intentarlo."
+  },
+  "lv_exp_cuerpos": {
+    "message": "Añadir el contenido de la petición y la respuesta"
+  },
+  "lv_exp_cuerpos_prog": {
+    "message": "Contenido $1 de $2 · $3 · quedan ~$4",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      },
+      "2": {
+        "content": "$2"
+      },
+      "3": {
+        "content": "$3"
+      },
+      "4": {
+        "content": "$4"
+      }
+    }
+  },
+  "lv_exp_sesion": {
+    "message": "la sesión caducó"
+  },
+  "lv_body_col": {
+    "message": "$1 (contenido)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "lv_exp_leyendo": {
+    "message": "Leyendo las fechas…"
+  },
+  "lv_exp_fecha": {
+    "message": "no se pudo leer la fecha de alguna fila"
+  },
+  "lv_url_col": {
+    "message": "$1 (URL)",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
   },
   "lv_search_ph": {
     "message": "Buscar en logs…"
@@ -4598,15 +4974,6 @@
   },
   "lv_export_json_title": {
     "message": "Exportar a JSON todas las filas del log; con texto en la búsqueda, sólo las que casan"
-  },
-  "lv_export_loading": {
-    "message": "Trayendo las demás páginas… $1/$2"
-  },
-  "lv_export_partial": {
-    "message": "No se pudieron traer las demás páginas: se exportó sólo la que ves."
-  },
-  "lv_export_capped": {
-    "message": "Se exportaron las primeras $1 de $2 páginas del log."
   },
   "enableRecordTrailLabel": {
     "message": "Record Trail (registros relacionados)"
@@ -5806,7 +6173,13 @@
     "message": "ej. Empresa SB1"
   },
   "headerSubtitle": {
-    "message": "Por Miguel García (IrodoriCiel)"
+    "message": "Por Miguel García"
+  },
+  "authorBadge": {
+    "message": "Iro Dev"
+  },
+  "authorBadgeTitle": {
+    "message": "Abrir irodoriciel.dev, el portafolio de Iro Dev"
   },
   "jsonParseError": {
     "message": "Error al procesar JSON"
@@ -5819,6 +6192,12 @@
   },
   "log_html_code": {
     "message": "Código"
+  },
+  "log_expand": {
+    "message": "Ampliar"
+  },
+  "log_expand_close": {
+    "message": "Cerrar"
   },
   "log_view_original": {
     "message": "Ver original"
@@ -6831,6 +7210,27 @@
   },
   "sfv_set_non_mandatory": {
     "message": "Hacer No Obligatorio"
+  },
+  "sfv_all_menu": {
+    "message": "Habilitar todos los campos"
+  },
+  "sfv_all_view": {
+    "message": "Abre el registro en modo edición para habilitar sus campos"
+  },
+  "sfv_all_noapi": {
+    "message": "Esta página no deja cambiar sus campos"
+  },
+  "sfv_all_none": {
+    "message": "No había campos deshabilitados"
+  },
+  "sfv_all_none_inline": {
+    "message": "No había campos deshabilitados; $1 son en línea y no se pueden habilitar"
+  },
+  "sfv_all_done": {
+    "message": "Habilitados $1 campos y $2 columnas, hasta recargar la página"
+  },
+  "cmdp_act_enable_all_desc": {
+    "message": "Habilita los campos deshabilitados de este formulario hasta recargar la página"
   },
   "sfv_standard_field": {
     "message": "Campo Estándar"
@@ -8071,6 +8471,72 @@
   "ssc_fav_save_current": {
     "message": "Agregar script actual a favoritos..."
   },
+  "ssc_frag_run": {
+    "message": "Ejecutar este snippet"
+  },
+  "ssc_frag_open": {
+    "message": "Abrirlo en una pestaña para editarlo"
+  },
+  "ssc_frag_menu": {
+    "message": "Snippets"
+  },
+  "ssc_frag_menu_tools": {
+    "message": "Ejecutar snippets"
+  },
+  "ssc_frag_none": {
+    "message": "Aún no hay snippets: guarda un script en la Consola de SuiteScript (Guardar) o un trozo en Snippets."
+  },
+  "ssc_frag_saved_tag": {
+    "message": "guardado"
+  },
+  "ssc_frag_pin": {
+    "message": "Mostrar en la lista rápida"
+  },
+  "ssc_frag_unpin": {
+    "message": "Quitar de la lista rápida"
+  },
+  "ssc_frag_all": {
+    "message": "Ver todos ($1)"
+  },
+  "ssc_frag_only_pinned": {
+    "message": "Ver sólo los marcados"
+  },
+  "ssc_frag_pin_hint": {
+    "message": "Marca con ★ los que quieras ver aquí; el resto seguirá en «Ver todos»."
+  },
+  "ssc_frag_sql_vars": {
+    "message": "Esta consulta usa variables: se abre en el SuiteQL Runner."
+  },
+  "ssc_frag_sql_rest_off": {
+    "message": "Esta cuenta no tiene servicios web REST: la consulta se abre en el SuiteQL Runner."
+  },
+  "ssc_frag_sql_rows": {
+    "message": "$1 filas"
+  },
+  "ssc_frag_sql_more": {
+    "message": "aquí sólo las primeras $1: ábrela en el Runner para verlas todas"
+  },
+  "ssc_frag_sql_none": {
+    "message": "Sin filas."
+  },
+  "ssc_frag_in_runner": {
+    "message": "Abrir en el Runner"
+  },
+  "ssc_frag_in_console": {
+    "message": "Abrir en la consola"
+  },
+  "ssc_frag_failed": {
+    "message": "Falló"
+  },
+  "ssc_frag_ms": {
+    "message": "$1 ms"
+  },
+  "ssc_frag_nothing": {
+    "message": "Hecho, sin nada que mostrar."
+  },
+  "cmdp_act_fragment": {
+    "message": "Ejecutar snippet: $1"
+  },
   "ssc_history_empty": {
     "message": "Aún no hay scripts ejecutados"
   },
@@ -8778,7 +9244,7 @@
     "message": "Confiar en este Dispositivo"
   },
   "enableLoginTrustDeviceDesc": {
-    "message": "En la verificación en dos pasos, deja marcada la casilla «Confiar en este dispositivo» para que este equipo no vuelva a pedir el código durante un tiempo. No lo actives en un equipo compartido."
+    "message": "En la verificación en dos pasos, deja marcada la casilla «Confiar en este dispositivo» para que este equipo no vuelva a pedir el código durante un tiempo. Apágalo en un equipo compartido."
   },
   "enableLoginSandboxIndicatorBetaLabel": {
     "message": "Indicador de Sandbox en login"
@@ -9328,6 +9794,45 @@
   },
   "enableLoadNModuleDesc": {
     "message": "Agrega una opción para usar los módulos de SuiteScript 2 desde la consola del navegador."
+  },
+  "enableConsoleUtilsLabel": {
+    "message": "Utilidades de consola (NSFT.*)"
+  },
+  "enableConsoleUtilsDesc": {
+    "message": "Deja en la consola del navegador, y en tus snippets, atajos como NSFT.fields(), NSFT.sql(consulta) o NSFT.watch('campo'), y te dice qué SuiteScript admite la página. NSFT.help() los lista."
+  },
+  "cu_yes": {
+    "message": "sí"
+  },
+  "cu_no": {
+    "message": "no"
+  },
+  "cu_ss_result": {
+    "message": "SuiteScript 2.x: $1 · SuiteScript 1.0: $2"
+  },
+  "cu_ss_none": {
+    "message": "esta página no carga SuiteScript: aquí ni los scripts ni la consola encuentran require ni nlapi."
+  },
+  "cu_ss_hint": {
+    "message": "En la consola del navegador, NSFT.help() lista los atajos."
+  },
+  "cu_ss_unknown": {
+    "message": "No se pudo comprobar esta página."
+  },
+  "cmdp_act_ss_version": {
+    "message": "¿Qué SuiteScript admite esta página?"
+  },
+  "cmdp_act_ss_version_desc": {
+    "message": "Si aquí están SuiteScript 2.x (require) y 1.0 (nlapi)"
+  },
+  "bexp_csv": {
+    "message": "CSV"
+  },
+  "bexp_csv_title": {
+    "message": "Descargar el CSV listo para Excel: los acentos y la ñ se leen bien"
+  },
+  "bexp_not_csv": {
+    "message": "NetSuite no devolvió un CSV"
   },
   "lnm_menu_label": {
     "message": "Cargar módulo N"
@@ -11456,6 +11961,12 @@
   "sqlai_f_apikey": {
     "message": "API key"
   },
+  "sqlai_key_required": {
+    "message": "Obligatoria"
+  },
+  "sqlai_key_needed_hint": {
+    "message": "Pega aquí tu API key: sin ella este proveedor no responde."
+  },
   "sqlai_f_baseurl": {
     "message": "Base URL (endpoint)"
   },
@@ -12421,10 +12932,25 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "El **Editor Avanzado** trae un engrane en su barra para cambiar el tema, y lo ves antes de elegirlo."
+    "message": "Abre **Herramientas** como lista o como **ventana con buscador**: escribe «sql» y pulsa **Enter**."
   },
   "un_hl_2": {
-    "message": "Arreglados el fondo y las sugerencias del Editor Avanzado, y el tipo de los campos Documento en Información de Campos. Más detalles en el changelog."
+    "message": "Ejecuta tus **snippets** y **consultas SQL** guardados desde Herramientas o la Paleta (escribe **!**)."
+  },
+  "un_hl_3": {
+    "message": "Exporta una lista a **Excel**, a **CSV** con los acentos bien, a **JSON** o **cópiala como tabla**."
+  },
+  "un_hl_4": {
+    "message": "Exporta el **Execution Log** entero, por páginas o entre fechas, también el de integraciones."
+  },
+  "un_hl_5": {
+    "message": "Escribe **NSFT.help()** en la consola del navegador para ver atajos de campos, módulos N y SuiteQL."
+  },
+  "un_hl_6": {
+    "message": "Las sugerencias de código con **IA** llegan antes y se aceptan palabra a palabra con **Ctrl+→**."
+  },
+  "un_hl_7": {
+    "message": "Y más: **habilitar todos los campos**, «Confiar en este dispositivo» marcado de fábrica y varios arreglos. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -12730,6 +13256,150 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
+  },
+  "cl_ver_7_4_0": {
+    "message": "v7.4.0"
+  },
+  "cl_date_7_4_0": {
+    "message": "2026-11-04"
+  },
+  "cl_7_4_0_adv_scope_title": {
+    "message": "Buscar en todos los archivos, en la carpeta del árbol"
+  },
+  "cl_7_4_0_adv_scope_desc": {
+    "message": "Se agregó que «Buscar en todos los archivos» del Editor Avanzado busque en la carpeta que muestra el árbol de la izquierda."
+  },
+  "cl_7_4_0_adv_opendir_title": {
+    "message": "Abrir carpeta desde el menú Archivo"
+  },
+  "cl_7_4_0_adv_opendir_desc": {
+    "message": "Se agregó «Abrir carpeta» al menú Archivo del Editor Avanzado, que antes sólo salía sin un archivo abierto."
+  },
+  "cl_7_4_0_custrec_list_title": {
+    "message": "Abrir Registro Personalizado desde su lista"
+  },
+  "cl_7_4_0_custrec_list_desc": {
+    "message": "Se agregó «Abrir Registro Personalizado» al menú de la lista de un registro personalizado, que lleva a su configuración."
+  },
+  "cl_7_4_0_enable_all_title": {
+    "message": "Habilitar todos los campos"
+  },
+  "cl_7_4_0_enable_all_desc": {
+    "message": "Se agregó al menú Herramientas y a la Paleta de Comandos una opción para habilitar de una vez los campos deshabilitados del formulario."
+  },
+  "cl_7_4_0_lv_range_title": {
+    "message": "Exportar el Execution Log por páginas"
+  },
+  "cl_7_4_0_lv_range_desc": {
+    "message": "Se agregó elegir qué exportar del Execution Log —la página actual, todas, un rango de páginas o un intervalo de fechas—, con el progreso y la opción de detenerlo."
+  },
+  "cl_7_4_0_lv_integ_title": {
+    "message": "Exportar el log de un registro de integración"
+  },
+  "cl_7_4_0_lv_integ_desc": {
+    "message": "Se agregó la exportación a CSV y JSON del log de un registro de integración, por categoría, con las URL de petición y respuesta y, si se pide, su contenido."
+  },
+  "cl_7_4_0_logfmt_wide_title": {
+    "message": "El log embellecido ocupa todo el ancho"
+  },
+  "cl_7_4_0_logfmt_wide_desc": {
+    "message": "Se agregó que el panel de un log embellecido en el Execution Log ocupe todo el ancho de la columna Detalles."
+  },
+  "cl_7_4_0_logfmt_expand_title": {
+    "message": "Ampliar los logs y los campos de código"
+  },
+  "cl_7_4_0_logfmt_expand_desc": {
+    "message": "Se agregó un botón para ver un log formateado o un campo de código casi a pantalla completa, con todo el espacio para leerlo."
+  },
+  "cl_7_4_0_fragments_title": {
+    "message": "Snippets que se ejecutan desde cualquier página"
+  },
+  "cl_7_4_0_fragments_desc": {
+    "message": "Se agregó ejecutar los snippets, scripts y consultas SQL guardados desde Herramientas o la Paleta sin abrir la consola ni el Runner, con una lista rápida de los marcados con ★."
+  },
+  "cl_7_4_0_better_export_title": {
+    "message": "Exportar mejor las listas"
+  },
+  "cl_7_4_0_better_export_desc": {
+    "message": "Se agregó junto a los iconos de exportar de las listas un Excel con títulos fijos, filtros y columnas a su ancho, un CSV con los acentos bien para Excel, un JSON y copiar como tabla."
+  },
+  "cl_7_4_0_console_utils_title": {
+    "message": "Utilidades de consola NSFT.*"
+  },
+  "cl_7_4_0_console_utils_desc": {
+    "message": "Se agregó un objeto NSFT en la consola del navegador con atajos para campos, sublistas, búsquedas, SuiteQL, tu usuario y vigilar un campo, y un comando que dice qué SuiteScript admite la página."
+  },
+  "cl_7_4_0_tools_modal_title": {
+    "message": "Herramientas en una ventana con buscador"
+  },
+  "cl_7_4_0_tools_modal_desc": {
+    "message": "Se agregó la opción de abrir el menú Herramientas como una ventana por grupos con buscador, donde Enter abre la primera coincidencia."
+  },
+  "cl_7_4_0_filenames_title": {
+    "message": "Archivos que dicen de dónde salen"
+  },
+  "cl_7_4_0_filenames_desc": {
+    "message": "Se agregó al nombre de las exportaciones y descargas de logs y campos de código el script, la integración o el registro de donde salen, con su id."
+  },
+  "cl_7_4_0_lv_count_title": {
+    "message": "Los contadores de búsqueda cuentan la lista entera"
+  },
+  "cl_7_4_0_lv_count_desc": {
+    "message": "Se arregló que los contadores del buscador del Execution Log y de «Filtrar filas», sin texto, contaran sólo la página que se ve."
+  },
+  "cl_7_4_0_sf_integ_title": {
+    "message": "Filtrar filas en el log de una integración"
+  },
+  "cl_7_4_0_sf_integ_desc": {
+    "message": "Se agregó «Filtrar filas» al log de un registro de integración, buscando en todas sus páginas."
+  },
+  "cl_7_4_0_full_logs_title": {
+    "message": "«En vivo» y «Quitar orden» en los Logs Completos"
+  },
+  "cl_7_4_0_full_logs_desc": {
+    "message": "Se arregló que «En vivo» y «Quitar orden» no salieran en la página de Logs Completos de un script."
+  },
+  "cl_7_4_0_ai_ghost_title": {
+    "message": "Las sugerencias de código con IA vuelven a salir"
+  },
+  "cl_7_4_0_ai_ghost_desc": {
+    "message": "Se arregló que las sugerencias de código con IA dejaran de salir en los editores después de un autocompletado sin resultados."
+  },
+  "cl_7_4_0_ai_require_title": {
+    "message": "Sugerencias de la consola sin require()"
+  },
+  "cl_7_4_0_ai_require_desc": {
+    "message": "Se arregló que las sugerencias de código con IA de la Consola de SuiteScript envolvieran el código en require() con los módulos ya cargados."
+  },
+  "cl_7_4_0_ai_key_title": {
+    "message": "La API key del asistente, a la vista"
+  },
+  "cl_7_4_0_ai_key_desc": {
+    "message": "Se agregó en los ajustes del asistente de IA un resalte en el campo de la API key, que además avisa cuando falta."
+  },
+  "cl_7_4_0_ai_fluid_title": {
+    "message": "Sugerencias de código con IA más rápidas y fluidas"
+  },
+  "cl_7_4_0_ai_fluid_desc": {
+    "message": "Se cambió el autocompletado con IA para que llegue antes, siga a la vista mientras escribes lo que propone y se acepte palabra a palabra con Ctrl+→."
+  },
+  "cl_7_4_0_pills_row_title": {
+    "message": "«En vivo» y «Quitar orden» junto a la tabla"
+  },
+  "cl_7_4_0_pills_row_desc": {
+    "message": "Se cambió la posición de «En vivo» y «Quitar orden» en las listas, que ahora van en la fila de «Mostrar inactivos» y «Editar»."
+  },
+  "cl_7_4_0_avisos_title": {
+    "message": "Los avisos se quedan hasta que los cierras"
+  },
+  "cl_7_4_0_avisos_desc": {
+    "message": "Se agregó que los avisos de calificar, compartir y novedades sigan abiertos al pulsar sus botones; sólo «No volver a mostrar» los silencia."
+  },
+  "cl_7_4_0_trust_on_title": {
+    "message": "Confiar en este dispositivo, encendido de fábrica"
+  },
+  "cl_7_4_0_trust_on_desc": {
+    "message": "Se agregó que la casilla «Confiar en este dispositivo» de la verificación en dos pasos salga marcada sin tener que activarlo antes."
   },
   "cl_ver_7_3_1": {
     "message": "v7.3.1"
@@ -14082,6 +14752,9 @@
   "welcomeCatScriptItem14": {
     "message": "Ejecutar Map/Reduce y Scheduled desde la ficha o la paleta"
   },
+  "welcomeCatScriptItem15": {
+    "message": "Utilidades de consola NSFT.* y qué SuiteScript admite la página"
+  },
   "adv_save": {
     "message": "Guardar"
   },
@@ -14387,20 +15060,19 @@
   "adv_bus_corto": {
     "message": "Escribe al menos dos caracteres"
   },
+  "adv_bus_en": {
+    "message": "Buscando en $1 y sus subcarpetas",
+    "placeholders": {
+      "1": {
+        "content": "$1"
+      }
+    }
+  },
+  "adv_bus_en_todo": {
+    "message": "Buscando en todo el File Cabinet"
+  },
   "adv_bus_sin_carpeta": {
     "message": "No hay carpeta en la que buscar"
-  },
-  "adv_bus_todo": {
-    "message": "Todo el código"
-  },
-  "adv_bus_carpeta": {
-    "message": "Esta carpeta"
-  },
-  "adv_bus_carpeta_tip": {
-    "message": "La carpeta del archivo abierto y sus subcarpetas"
-  },
-  "adv_bus_carpeta_no": {
-    "message": "Abre un archivo para buscar en su carpeta"
   },
   "sfv_code_quotes": {
     "message": "Sólo entre comillas, como se escribe un id en el código"
@@ -14625,6 +15297,18 @@
   },
   "devResetShareDesc": {
     "message": "Lo muestra al momento en tus pestañas de NetSuite abiertas."
+  },
+  "devResetToolsChooserLabel": {
+    "message": "Volver a preguntar cómo abrir Herramientas"
+  },
+  "devResetToolsChooserDesc": {
+    "message": "La próxima vez que abras Herramientas en NetSuite, sale otra vez la pregunta de lista o ventana."
+  },
+  "devResetToolsChooserTitle": {
+    "message": "Volver a preguntar cómo abrir Herramientas"
+  },
+  "devResetToolsChooserDone": {
+    "message": "Listo: al abrir Herramientas en NetSuite vuelve a salir la pregunta."
   },
   "devResetShareTitle": {
     "message": "Mostrar ahora el aviso de compartir"

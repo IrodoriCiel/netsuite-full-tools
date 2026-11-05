@@ -43,8 +43,12 @@
               <a id="popupVersion" class="nsft-brand-version" href="changelog.html" target="_blank" rel="noopener"
                  data-i18n-title="changelogLink" title="Ver changelog"></a>
             </div>
-            <span class="nsft-brand-subtitle" data-i18n="headerSubtitle"
-              data-i18n-title="headerSubtitle" title="Por Miguel García (IrodoriCiel)"></span>
+            <span class="nsft-brand-subtitle nsft-author-line">
+              <span data-i18n="headerSubtitle">Por Miguel García</span>
+              <span aria-hidden="true">·</span>
+              <a class="nsft-author-badge" href="https://irodoriciel.dev" target="_blank" rel="noopener"
+                data-i18n-title="authorBadgeTitle" title="Abrir irodoriciel.dev"><span data-i18n="authorBadge">Iro Dev</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M8 7h9v9"></path></svg></a>
+            </span>
           </div>
         </div>
         <div class="nsft-topbar-actions">
@@ -1374,6 +1378,17 @@
 
           <div class="option-row">
             <div>
+              <span id="label_enableConsoleUtils" data-i18n="enableConsoleUtilsLabel"></span>
+              <div id="desc_enableConsoleUtils" class="description" data-i18n="enableConsoleUtilsDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableConsoleUtils">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
               <span id="label_enableJsonFormatter" data-i18n="enableJsonFormatterLabel"></span>
               <div id="desc_enableJsonFormatter" class="description" data-i18n="enableJsonFormatterDesc"></div>
               <div id="theme-container-jf" style="margin-top: 5px; display: none;">
@@ -1660,6 +1675,17 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableClearSort">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableBetterExport" data-i18n="enableBetterExportLabel"></span>
+              <div id="desc_enableBetterExport" class="description" data-i18n="enableBetterExportDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableBetterExport">
               <span class="slider round"></span>
             </label>
           </div>
@@ -2671,6 +2697,31 @@
                 <span class="slider round"></span>
               </label>
             </div>
+            <div class="nsft-settings-row">
+              <div class="nsft-settings-row-icon is-site">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 9h18"></path><circle cx="8" cy="14.5" r="2"></circle><path d="M9.5 16l1.5 1.5"></path><path d="M14 14h4"></path></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="enableToolsMenuModalLabel">Herramientas en una ventana</strong>
+                <small data-i18n="enableToolsMenuModalDesc"></small>
+              </div>
+              <div class="nsft-seg" id="nsftToolsMenuSeg" role="radiogroup">
+                <button type="button" class="nsft-seg-btn" data-seg="lista" role="radio"
+                  data-i18n-title="tmc_list_title" title="Lista desplegable">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path>
+                    <path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path>
+                  </svg>
+                </button>
+                <button type="button" class="nsft-seg-btn" data-seg="ventana" role="radio"
+                  data-i18n-title="tmc_win_title" title="Ventana con buscador">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 9h18"></path>
+                    <circle cx="9.5" cy="14" r="2"></circle><path d="m11 15.5 1.5 1.5"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
             <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftSettingsWizard">
               <div class="nsft-settings-row-icon nsft-settings-row-icon-accent">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"></path><path d="M4 12h10"></path><path d="M4 18h7"></path><circle cx="18" cy="16" r="3"></circle></svg>
@@ -2936,6 +2987,17 @@
               </div>
               <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
             </button>
+            <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevResetToolsChooser"
+              data-i18n-title="devResetToolsChooserTitle" title="Volver a preguntar cómo abrir Herramientas">
+              <div class="nsft-settings-row-icon is-site">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 9h18"></path><path d="M9 14a3 3 0 1 0 1-2.2"></path><polyline points="9 10.5 9 12.5 11 12.5"></polyline></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="devResetToolsChooserLabel">Volver a preguntar cómo abrir Herramientas</strong>
+                <small data-i18n="devResetToolsChooserDesc">La próxima vez que abras Herramientas en NetSuite, sale otra vez la pregunta de lista o ventana.</small>
+              </div>
+              <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
+            </button>
             <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevFreshInstall"
               data-i18n-title="devFreshInstallTitle" title="Abrir la bienvenida como en una instalación nueva">
               <div class="nsft-settings-row-icon nsft-settings-row-icon-accent">
@@ -2961,7 +3023,12 @@
           </div>
 
           <div class="nsft-settings-foot">
-            <small data-i18n="headerSubtitle" data-i18n-title="headerSubtitle"></small>
+            <small class="nsft-author-line">
+              <span data-i18n="headerSubtitle">Por Miguel García</span>
+              <span aria-hidden="true">·</span>
+              <a class="nsft-author-badge" href="https://irodoriciel.dev" target="_blank" rel="noopener"
+                data-i18n-title="authorBadgeTitle" title="Abrir irodoriciel.dev"><span data-i18n="authorBadge">Iro Dev</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"></path><path d="M8 7h9v9"></path></svg></a>
+            </small>
             <button type="button" id="nsftDevTap" class="nsft-settings-foot-version"
               data-i18n-title="popupFootVersionTitle" title="Versión instalada"></button>
             <small id="nsftDevTapHint" class="nsft-settings-foot-hint" hidden></small>

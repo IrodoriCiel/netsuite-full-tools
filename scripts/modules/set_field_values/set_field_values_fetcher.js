@@ -148,6 +148,9 @@
             applyEnabledChange(event.data.enabled !== false);
         } else if (event.data.type === 'nsft-set-field-values-linemode') {
             lineMode = event.data.lineMode === 'menu' ? 'menu' : 'direct';
+        } else if (event.data.type === 'nsft-set-field-values-enable-all') {
+            const res = habilitarTodos();
+            window.postMessage({ type: 'nsft-set-field-values-enable-all-done', res: res }, '*');
         } else if (event.data.type === 'nsft-set-field-values-open-last') {
             abrirUltima();
         } else if (event.data.type === 'nsft-set-field-values-noicon') {
@@ -347,6 +350,52 @@
             const inner = targetCell.querySelector('.listinlinefocusedrowcellnoedit');
             if (inner) inner.className = 'listinlinefocusedrowcell';
         }
+    }
+
+    function habilitarTodos() {
+        const enEdicion = !!document.querySelector('#btn_multibutton_submitter, #submitter, input[name="submitter"]');
+        const res = { cuerpo: 0, columnas: 0, enLinea: 0, sinApi: false, enEdicion: enEdicion };
+        if (!enEdicion) return res;
+        if (typeof nlapiGetField !== 'function' || typeof nlapiSetFieldDisabled !== 'function') {
+            res.sinApi = true;
+            return res;
+        }
+        const vistos = new Set();
+        document.querySelectorAll('[data-field-name]').forEach(function (w) {
+            const n = w.getAttribute('data-field-name');
+            if (!n || vistos.has(n)) return;
+            vistos.add(n);
+            let fld = null;
+            try { fld = nlapiGetField(n); } catch (e) { fld = null; }
+            if (!fld) return;
+            if (fld.disabled) {
+                try { nlapiSetFieldDisabled(n, false); res.cuerpo++; } catch (e) { }
+            } else if (!document.getElementById(n + '_fs') && w.closest('#main_form, form[name="main_form"]')) {
+                res.enLinea++;
+            }
+        });
+
+        if (typeof nlapiDisableLineItemField === 'function') {
+            document.querySelectorAll('form[id$="_form"]').forEach(function (f) {
+                const fid = f.getAttribute('id') || '';
+                if (fid === 'main_form') return;
+                const sub = fid.slice(0, -5);
+                if (!document.getElementById(sub + '_splits') && !window[sub + '_machine']) return;
+                let linea = null;
+                try { linea = typeof nlapiGetCurrentLineItemIndex === 'function' ? nlapiGetCurrentLineItemIndex(sub) : null; } catch (e) { linea = null; }
+                const cols = new Set();
+                f.querySelectorAll('[data-field-name]').forEach(function (c) { cols.add(c.getAttribute('data-field-name')); });
+                cols.forEach(function (col) {
+                    if (!col || !readLineItemDisabledFromDom(sub, linea, col)) return;
+                    try {
+                        nlapiDisableLineItemField(sub, col, false);
+                        syncSublistCellDisabledDom(sub, linea, col, false);
+                        res.columnas++;
+                    } catch (e) { }
+                });
+            });
+        }
+        return res;
     }
 
     function resolveSublistIdFromCell(cell) {

@@ -1012,6 +1012,11 @@
         });
     }
 
+    function cancelAI(reqId) {
+        if (!reqId) return;
+        try { chrome.runtime.sendMessage({ action: 'nsftAiCancel', reqId: String(reqId) }, () => { void chrome.runtime.lastError; }); } catch (e) { }
+    }
+
     async function askAI(payload) {
         const message = {
             action: 'nsftAiChat',
@@ -1024,7 +1029,8 @@
             tools: payload.tools,
             maxTokens: payload.maxTokens,
             thinking: payload.thinking || null,
-            previousInteractionId: payload.previousInteractionId || null
+            previousInteractionId: payload.previousInteractionId || null,
+            reqId: payload.reqId || null
         };
         for (let attempt = 0; attempt < 3; attempt++) {
             const r = await sendToBackground(message);
@@ -3992,6 +3998,8 @@
             const info = el('span', NS + '-infodot', 'i');
             info.appendChild(el('span', NS + '-infotip', chrome.i18n.getMessage('sqlai_key_info')));
             keyLeft.appendChild(info);
+            const keyReq = el('span', NS + '-keyreq', chrome.i18n.getMessage('sqlai_key_required') || 'Required');
+            keyLeft.appendChild(keyReq);
             keyRow.appendChild(keyLeft);
             const keySlot = el('span', NS + '-linkslot');
             keyRow.appendChild(keySlot);
@@ -4005,9 +4013,22 @@
             const keyClear = el('button', NS + '-eye ' + NS + '-keyclear'); keyClear.type = 'button';
             keyClear.title = chrome.i18n.getMessage('sqlai_key_clear') || 'Borrar clave';
             keyClear.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
-            keyClear.addEventListener('click', () => { keyInput.value = ''; keyInput.focus(); });
+            keyClear.addEventListener('click', () => { keyInput.value = ''; keyInput.focus(); marcaClave(); });
             keyWrap.appendChild(keyInput); keyWrap.appendChild(keyEye); keyWrap.appendChild(keyClear);
             form.appendChild(keyWrap);
+            const keyHint = el('div', NS + '-keyhint', chrome.i18n.getMessage('sqlai_key_needed_hint')
+                || 'Paste your API key here: without it this provider does not answer.');
+            keyHint.hidden = true;
+            form.appendChild(keyHint);
+            function marcaClave() {
+                const pide = !keyInput.readOnly;
+                const falta = pide && !keyInput.value.trim();
+                keyReq.hidden = !pide;
+                keyWrap.classList.toggle(NS + '-pidekey', pide);
+                keyWrap.classList.toggle(NS + '-needkey', falta);
+                keyHint.hidden = !falta;
+            }
+            keyInput.addEventListener('input', marcaClave);
 
             const urlSlot = labelRow(chrome.i18n.getMessage('sqlai_f_baseurl'));
             const urlInput = el('input', NS + '-input'); urlInput.type = 'text';
@@ -4284,6 +4305,7 @@
                 keyInput.placeholder = preset.needsKey
                     ? chrome.i18n.getMessage('sqlai_key_ph')
                     : chrome.i18n.getMessage('sqlai_key_ph_none');
+                marcaClave();
                 const eff = resolveCfg(pk, a.configs, a.maxRows);
                 models = eff.models.slice();
                 activeModel = eff.model || '';
@@ -4744,14 +4766,32 @@
                         }
                     } catch (e) { }
                 }
-                loadConfig().then(resolve);
+                loadConfig().then((cfg) => {
+                    try {
+                        const RAPIDO = /flash|mini|haiku|lite|nano|small|fast|instant|turbo/i;
+                        if (cfg && cfg.model && !RAPIDO.test(cfg.model) && Array.isArray(cfg.models)) {
+                            const r = cfg.models.find((m) => RAPIDO.test(m));
+                            if (r) cfg = Object.assign({}, cfg, { model: r });
+                        }
+                    } catch (e) { }
+                    resolve(cfg);
+                });
             });
         });
     }
 
+    let _ghostVuelo = null;
+    window.addEventListener('nsft-ssc-ai-complete-cancel', (ev) => {
+        const d = ev && ev.detail;
+        if (!d || !_ghostVuelo || _ghostVuelo.id !== d.id) return;
+        cancelAI(_ghostVuelo.reqId);
+        _ghostVuelo = null;
+    });
+
     window.addEventListener('nsft-ssc-ai-complete', async (ev) => {
         const d = ev && ev.detail;
         if (!d || !d.id) return;
+        if (_ghostVuelo) { cancelAI(_ghostVuelo.reqId); _ghostVuelo = null; }
         const reply = (payload) => window.dispatchEvent(
             new CustomEvent('nsft-ssc-ai-complete-result', { detail: payload }));
         if (!aiInConsole()) {
@@ -4785,6 +4825,12 @@
                 '- Complete the whole current statement or block, up to ~8 lines.',
                 '- Match the style of the surrounding code (quotes, indent, const/var).',
                 '- Only if the code is already complete, reply with an empty message.',
+                (d.ambito === 'adv')
+                    ? '- This is a SuiteScript FILE: load modules with define()/require() as its header does.'
+                    : '- This is the browser CONSOLE: every N/* module is ALREADY a plain variable\n'
+                    + '  (record, search, query, dialog, message, url, format, runtime, currentRecord...).\n'
+                    + '  NEVER write require() or define() and never wrap the code in a callback:\n'
+                    + '  call the module directly, e.g. dialog.create({...}), record.load({...}).',
                 '',
                 sscModulesContext()
             ].join('\n');
@@ -4793,11 +4839,19 @@
                 + '\n<CURSOR>\nCode AFTER the cursor:\n' + (d.suffix || '');
 
             const pensar = (cfg.providerKey === 'deepseek') ? { type: 'disabled' } : null;
+            const reqId = 'ghost-' + d.id + '-' + Date.now();
+            _ghostVuelo = { id: d.id, reqId: reqId };
             const resp = await askAI({
-                ...cfg, system,
+                ...cfg, system, reqId,
                 messages: [{ role: 'user', content: [{ type: 'text', text: user }] }],
                 tools: [], maxTokens: GHOST_MAX_OUT, thinking: pensar
             });
+            if (_ghostVuelo && _ghostVuelo.id === d.id) _ghostVuelo = null;
+            if (resp && resp.cancelled) {
+                console.debug('[NSFT] ghost:', d.id, 'cancelada: llegó otra o se descartó');
+                reply({ id: d.id, ok: false });
+                return;
+            }
             const texto = (resp && resp.ok) ? limpiaSugerencia(resp.text, d.line) : '';
             console.debug('[NSFT] ghost:', d.id, cfg.model + (pensar ? ' (sin razonamiento)' : ''), 'contestó en', (Date.now() - t0) + ' ms');
             console.debug('[NSFT] ghost raw:', JSON.stringify(String((resp && resp.text) || '').slice(0, 200)));
@@ -4858,9 +4912,18 @@
         return buenas.join('\n').replace(/\s+$/, '');
     }
 
+    let _sqlGhostVuelo = null;
+    window.addEventListener('nsft-sql-ai-complete-cancel', (ev) => {
+        const d = ev && ev.detail;
+        if (!d || !_sqlGhostVuelo || _sqlGhostVuelo.id !== d.id) return;
+        cancelAI(_sqlGhostVuelo.reqId);
+        _sqlGhostVuelo = null;
+    });
+
     window.addEventListener('nsft-sql-ai-complete', async (ev) => {
         const d = ev && ev.detail;
         if (!d || !d.id) return;
+        if (_sqlGhostVuelo) { cancelAI(_sqlGhostVuelo.reqId); _sqlGhostVuelo = null; }
         const reply = (payload) => window.dispatchEvent(
             new CustomEvent('nsft-sql-ai-complete-result', { detail: payload }));
         if (!aiInSuiteql()) {
@@ -4907,11 +4970,19 @@
                 + '\n<CURSOR>\nSQL AFTER the cursor:\n' + (d.suffix || '');
 
             const pensar = (cfg.providerKey === 'deepseek') ? { type: 'disabled' } : null;
+            const reqId = 'sqlghost-' + d.id + '-' + Date.now();
+            _sqlGhostVuelo = { id: d.id, reqId: reqId };
             const resp = await askAI({
-                ...cfg, system,
+                ...cfg, system, reqId,
                 messages: [{ role: 'user', content: [{ type: 'text', text: user }] }],
                 tools: [], maxTokens: GHOST_MAX_OUT, thinking: pensar
             });
+            if (_sqlGhostVuelo && _sqlGhostVuelo.id === d.id) _sqlGhostVuelo = null;
+            if (resp && resp.cancelled) {
+                console.debug('[NSFT] ghost:', d.id, 'cancelada: llegó otra o se descartó');
+                reply({ id: d.id, ok: false });
+                return;
+            }
             const texto = (resp && resp.ok) ? limpiaSugerenciaSql(resp.text, d.line) : '';
             console.debug('[NSFT] ghost:', d.id, cfg.model + (pensar ? ' (sin razonamiento)' : ''), 'contestó en', (Date.now() - t0) + ' ms');
             console.debug('[NSFT] ghost raw:', JSON.stringify(String((resp && resp.text) || '').slice(0, 200)));

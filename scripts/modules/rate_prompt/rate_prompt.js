@@ -154,13 +154,13 @@
         go.type = 'button';
         go.className = 'nsft-rp-btn nsft-rp-btn-primary';
         go.textContent = t('rateCta', 'Calificar');
-        go.addEventListener('click', () => { openTab(STORE_URL); silence(); });
+        go.addEventListener('click', () => { openTab(STORE_URL); });
 
         const coffee = document.createElement('button');
         coffee.type = 'button';
         coffee.className = 'nsft-rp-btn nsft-rp-btn-coffee';
         coffee.textContent = t('rateCoffee', 'Invítame un café');
-        coffee.addEventListener('click', () => { openTab(COFFEE_URL); snooze(pages); });
+        coffee.addEventListener('click', () => { openTab(COFFEE_URL); });
 
         actions.appendChild(go);
         actions.appendChild(coffee);

@@ -181,7 +181,7 @@
     ]);
 
     const looksLikeXml = (text) => {
-        const t = (text || '').replace(/^[﻿​]+/, '').trim();
+        const t = (text || '').replace(/^[\uFEFF\u200B]+/, '').trim();
         if (t.length < 5) return false;
         if (!t.startsWith('<')) return false;
         if (/^<\?xml\b/i.test(t)) return true;
@@ -195,7 +195,7 @@
     };
 
     const looksLikeHtml = (text) => {
-        const t = (text || '').replace(/^[﻿​]+/, '').trim();
+        const t = (text || '').replace(/^[\uFEFF\u200B]+/, '').trim();
         if (t.length < 5) return false;
         if (!t.startsWith('<')) return false;
         if (!/<[a-zA-Z][^>]*>[\s\S]*?<\/[a-zA-Z][^>]*>|<[a-zA-Z][^>]*\/>/.test(t)) return false;
@@ -304,6 +304,10 @@
     const ICON_DOWNLOAD = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2.5v7.5"/><path d="M5 7.4 8 10.4l3-3"/><path d="M2.8 12.2v.4a1.4 1.4 0 0 0 1.4 1.4h7.6a1.4 1.4 0 0 0 1.4-1.4v-.4"/></svg>';
     const ICON_RAW = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11"/><path d="M2.5 7.3h7.5"/><path d="M2.5 10.6h9.5"/><path d="M2.5 13.9h5.5"/></svg>';
 
+    const ICON_CERRAR = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+
+    const ICON_EXPAND = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4"/><path d="M13.5 2.5 9 7"/><path d="M6.5 13.5h-4v-4"/><path d="M2.5 13.5 7 9"/></svg>';
+
     const makeBarButton = (label, iconSvg) => {
         const btn = document.createElement('button');
         btn.className = COPY_BTN_CLASS;
@@ -322,7 +326,7 @@
 
     function slugPart(v) {
         return String(v == null ? '' : v)
-            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .replace(/[^\w.\- ]+/g, ' ')
             .trim()
             .replace(/[\s-]+/g, '-')
@@ -347,6 +351,45 @@
         const p = (n) => String(n).padStart(2, '0');
         return '' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate())
             + '-' + p(d.getHours()) + p(d.getMinutes());
+    }
+
+    const INTEGRACION_CATEGORIA = { soaplog: 'SOAP', restwslog: 'REST', restletlog: 'RESTlets', mcpwslog: 'MCP' };
+
+    function textOf(el) {
+        if (!el) return '';
+        return String((el.tagName === 'INPUT' ? el.value : el.textContent) || '').replace(/\s+/g, ' ').trim();
+    }
+
+    function fieldText(name) {
+        return textOf(document.querySelector('[data-field-name="' + name + '"] .uir-field'));
+    }
+
+    function urlIdPart(param) {
+        let v = '';
+        try { v = new URLSearchParams(location.search).get(param || 'id') || ''; } catch (e) { }
+        return /^\d+$/.test(v) ? 'id' + v : '';
+    }
+
+    function ownerParts(anchor) {
+        const p = location.pathname;
+        if (/\/integration\/integrapp\.nl$/i.test(p)) {
+            const capa = anchor && anchor.closest && anchor.closest('[data-nsps-layer]');
+            return [i18n('lf_fn_integracion', 'integration'), urlIdPart('id'), fieldText('name'),
+                capa ? (INTEGRACION_CATEGORIA[capa.dataset.nspsLayer] || '') : ''];
+        }
+        if (/scriptnotearchive\.nl$/i.test(p)) {
+            const dep = textOf(document.querySelector('input[name="inpt_scriptRecordId"]'));
+            return [i18n('lf_fn_completos', 'full-logs'), urlIdPart('scriptId'),
+                textOf(document.querySelector('input[name="inpt_scriptId"]')),
+                /^-/.test(dep) ? '' : dep];
+        }
+        if (!/\/scripting\/(?:script|scriptrecord|scriptdeploy)\.nl$/i.test(p)) return [];
+        const SP = window.NSFT_ScriptPage;
+        const despliegue = SP && SP.isDeploymentPage
+            ? SP.isDeploymentPage()
+            : /scriptdeploy\.nl$/i.test(p) || (/scriptrecord\.nl$/i.test(p) && !document.querySelector('[data-nsps-layer="deployments"]'));
+        return [despliegue ? i18n('lf_fn_despliegue', 'deployment') : i18n('lf_fn_script', 'script'),
+            urlIdPart('id'), fieldText('name') || fieldText('title') || fieldText('scriptid')];
     }
 
     const createButtonGroup = (text, lang, nameParts) => {
@@ -753,7 +796,72 @@
         return 'stack';
     };
 
+    const addExpand = (wrapper) => {
+        if (!wrapper) return;
+        const group = wrapper.querySelector(':scope > .nsft-codecard-bar');
+        if (!group || group.querySelector('.nsft-logfmt-expand')) return;
+        const abrirLbl = i18n('log_expand', 'Expand');
+        const cerrarLbl = i18n('log_expand_close', 'Close');
+        const btn = makeBarButton(abrirLbl, ICON_EXPAND);
+        btn.classList.add('nsft-logfmt-expand');
+        group.appendChild(btn);
+
+        let telon = null;
+        let marca = null;
+
+        const aspa = document.createElement('button');
+        aspa.type = 'button';
+        aspa.className = 'nsft-codecard-btn nsft-logfmt-cerrar';
+        aspa.title = cerrarLbl;
+        aspa.setAttribute('aria-label', cerrarLbl);
+        aspa.innerHTML = ICON_CERRAR;
+        aspa.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); cerrar(); });
+
+        const teclas = (e) => {
+            if (e.key !== 'Escape') return;
+            e.preventDefault();
+            e.stopPropagation();
+            cerrar();
+        };
+        const cerrar = () => {
+            if (!telon) return;
+            window.removeEventListener('keydown', teclas, true);
+            wrapper.classList.remove('is-ampliada');
+            aspa.remove();
+            btn.style.display = '';
+            if (marca && marca.parentNode) marca.replaceWith(wrapper);
+            telon.remove();
+            telon = null;
+            marca = null;
+        };
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (telon) { cerrar(); return; }
+            marca = document.createComment('nsft-logfmt-ampliado');
+            wrapper.replaceWith(marca);
+            telon = document.createElement('div');
+            telon.className = 'nsft-logfmt-telon';
+            telon.setAttribute('role', 'dialog');
+            telon.setAttribute('aria-modal', 'true');
+            telon.addEventListener('mousedown', (ev) => { if (ev.target === telon) cerrar(); });
+            wrapper.classList.add('is-ampliada');
+            telon.appendChild(wrapper);
+            document.body.appendChild(telon);
+            window.addEventListener('keydown', teclas, true);
+            btn.style.display = 'none';
+            group.appendChild(aspa);
+            try { aspa.focus(); } catch (er) { }
+        });
+    };
+
     const renderInto = (el, rawText, opts) => {
+        const lang = pintaVista(el, rawText, opts);
+        if (lang) addExpand(el.querySelector('.' + WRAPPER_OWN_CLASS));
+        return lang;
+    };
+
+    const pintaVista = (el, rawText, opts) => {
         if (!el) return null;
         const raw = (rawText != null ? String(rawText) : (el.textContent || '')).trim();
         if (!raw) return null;
@@ -809,8 +917,10 @@
         btnLabelEl,
         ICONS: { copy: ICON_COPY, download: ICON_DOWNLOAD, raw: ICON_RAW },
         addRawToggle,
+        addExpand,
         buildFileName,
         stampPart,
+        ownerParts,
         looksLikeXml,
         looksLikeHtml,
         looksLikeStack,

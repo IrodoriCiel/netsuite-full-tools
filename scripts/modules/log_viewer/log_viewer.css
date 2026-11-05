@@ -38,3 +38,139 @@ mark.nsft-lv-hl {
     font-weight: 700;
     box-shadow: 0 0 0 1px var(--nsft-hl-ring, rgba(180, 130, 0, 0.25));
 }
+
+.nsft-lv-bar.nsft-lv-solo {
+    min-width: 0 !important;
+}
+
+.nsft-lv-exp {
+    width: 420px;
+    max-width: calc(100vw - 32px);
+}
+
+.nsft-lv-exp-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nsft-lv-exp-op {
+    display: grid;
+    grid-template-columns: 18px 80px minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: center;
+    min-height: 32px;
+    cursor: pointer;
+    font-size: 13.5px;
+}
+
+.nsft-lv-exp [hidden] {
+    display: none !important;
+}
+
+.nsft-lv-exp-op.is-largo .nsft-lv-exp-t {
+    grid-column: 2 / -1;
+}
+
+.nsft-lv-exp-n {
+    color: var(--nsft-text-2, #5b6b7b);
+}
+
+.nsft-lv-exp-ctl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+.nsft-lv-exp-op.is-fechas {
+    align-items: start;
+}
+
+.nsft-lv-exp-op.is-fechas > input[type="radio"],
+.nsft-lv-exp-op.is-fechas > .nsft-lv-exp-t {
+    margin-top: 9px;
+}
+
+.nsft-lv-exp-op.is-fechas .nsft-lv-exp-ctl {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 12px;
+}
+
+.nsft-lv-exp-op input[type="radio"] {
+    margin: 0;
+    accent-color: var(--nsft-ns-accent, #3b82f6);
+}
+
+.nsft-lv-exp .nsft-lv-exp-num {
+    width: 64px;
+    margin: 0;
+    padding: 6px 8px;
+}
+
+.nsft-lv-exp-de,
+.nsft-lv-exp-nota,
+.nsft-lv-exp-estado {
+    color: var(--nsft-text-2, #5b6b7b);
+    font-size: 12px;
+    margin: 0;
+}
+
+.nsft-lv-exp-estado {
+    font-variant-numeric: tabular-nums;
+}
+
+.nsft-lv-exp-barra {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--nsft-border, #e5e7eb);
+    overflow: hidden;
+}
+
+.nsft-lv-exp-barra > span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--nsft-ns-accent, #3b82f6);
+    transition: width 0.2s ease;
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-lv-exp-de,
+.nsft-dlg[data-theme="dark"] .nsft-lv-exp-n,
+.nsft-dlg[data-theme="dark"] .nsft-lv-exp-nota,
+.nsft-dlg[data-theme="dark"] .nsft-lv-exp-estado {
+    color: #8B95A5;
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-lv-exp-barra {
+    background: var(--nsft-dk-border);
+}
+
+.nsft-lv-exp .nsft-lv-exp-dt {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 6px 8px;
+}
+
+.nsft-lv-exp-op.nsft-lv-exp-cuerpos {
+    grid-template-columns: 18px minmax(0, 1fr);
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid var(--nsft-border, #e5e7eb);
+}
+
+.nsft-lv-exp-cuerpos input[type="checkbox"] {
+    margin: 0;
+    accent-color: var(--nsft-ns-accent, #3b82f6);
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-lv-exp-cuerpos {
+    border-top-color: var(--nsft-dk-border);
+}
+
+.nsft-dlg[data-theme="dark"] .nsft-lv-exp-dt {
+    color-scheme: dark;
+}

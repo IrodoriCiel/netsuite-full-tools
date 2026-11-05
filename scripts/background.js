@@ -51,6 +51,13 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
         });
     });
 
+    if (reason === 'update') {
+        chrome.storage.local.get({ nsftMigTrustDeviceOn: false }, (m) => {
+            if (chrome.runtime.lastError || m.nsftMigTrustDeviceOn) return;
+            chrome.storage.local.set({ enableLoginTrustDevice: true, nsftMigTrustDeviceOn: true });
+        });
+    }
+
     chrome.storage.local.get({ nsftTheme: 'light', enableDarkMode: false }, (t) => {
         if (chrome.runtime.lastError) return;
         const isDark = t.enableDarkMode === true || t.nsftTheme === 'dark';
@@ -587,6 +594,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             .then((text) => sendResponse({ ok: true, text }))
             .catch((err) => sendResponse({ ok: false, reason: (err && err.message) || 'fetch_failed' }));
         return true;
+    }
+
+    if (message.action === 'nsftAiCancel') {
+        const ac = _nsftAiVuelo.get(String(message.reqId || ''));
+        if (ac) { try { ac.abort(); } catch (e) { } }
+        sendResponse({ ok: true, cancelled: !!ac });
+        return false;
     }
 
     if (message.action === 'nsftAiChat') {
@@ -1141,14 +1155,26 @@ chrome.tabGroups.onUpdated.addListener((group) => {
     });
 });
 
+const _nsftAiVuelo = new Map();
+
 async function nsftAiChat(req) {
     const provider = req.provider || 'claude';
     const model = req.model;
     if (!model) return { ok: false, error: 'Falta el modelo en la configuración de IA.' };
 
-    if (provider === 'claude') return nsftAiClaude(req);
-    if (provider === 'gemini-interactions') return nsftAiGeminiInteractions(req);
-    return nsftAiOpenAICompat(req);
+    const reqId = req.reqId ? String(req.reqId) : '';
+    if (reqId) {
+        const ac = new AbortController();
+        _nsftAiVuelo.set(reqId, ac);
+        req.__signal = ac.signal;
+    }
+    try {
+        if (provider === 'claude') return await nsftAiClaude(req);
+        if (provider === 'gemini-interactions') return await nsftAiGeminiInteractions(req);
+        return await nsftAiOpenAICompat(req);
+    } finally {
+        if (reqId) _nsftAiVuelo.delete(reqId);
+    }
 }
 
 function nsftAiUsage(u) {
@@ -1180,15 +1206,20 @@ function nsftAiRetrySeconds(header, raw) {
     return 0;
 }
 
-async function nsftAiFetchJson(url, headers, body, attempt) {
+async function nsftAiFetchJson(url, headers, body, attempt, signal) {
     attempt = attempt || 0;
     let res;
     try {
-        res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+        res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body), signal: signal || undefined });
     } catch (e) {
+        if (e && e.name === 'AbortError') return { ok: false, error: 'cancelada', cancelled: true };
         return { ok: false, error: 'No se pudo conectar con el proveedor: ' + ((e && e.message) || e) };
     }
-    const raw = await res.text();
+    let raw = '';
+    try { raw = await res.text(); } catch (e) {
+        if (e && e.name === 'AbortError') return { ok: false, error: 'cancelada', cancelled: true };
+        throw e;
+    }
     let data = null;
     try { data = raw ? JSON.parse(raw) : null; } catch (e) { data = null; }
 
@@ -1196,7 +1227,7 @@ async function nsftAiFetchJson(url, headers, body, attempt) {
         const wait = nsftAiRetrySeconds(res.headers.get('retry-after'), raw);
         if (wait > 0 && wait <= 12) {
             await nsftAiSleep((wait + 1) * 1000);
-            return nsftAiFetchJson(url, headers, body, attempt + 1);
+            return nsftAiFetchJson(url, headers, body, attempt + 1, signal);
         }
     }
 
@@ -1240,7 +1271,7 @@ async function nsftAiClaude(req) {
         body.system = [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }];
     }
 
-    const r = await nsftAiFetchJson(url, headers, body);
+    const r = await nsftAiFetchJson(url, headers, body, 0, req.__signal);
     if (!r.ok) return r;
 
     if (r.data && r.data.stop_reason === 'refusal') {
@@ -1326,7 +1357,7 @@ async function nsftAiOpenAICompat(req) {
         body.parallel_tool_calls = false;
     }
 
-    const r = await nsftAiFetchJson(url, headers, body);
+    const r = await nsftAiFetchJson(url, headers, body, 0, req.__signal);
     if (!r.ok) {
         let host = '';
         try { host = new URL(url).hostname; } catch (e) { host = ''; }
@@ -1402,7 +1433,7 @@ async function nsftAiGeminiInteractions(req) {
         }));
     }
 
-    const r = await nsftAiFetchJson(url, headers, body);
+    const r = await nsftAiFetchJson(url, headers, body, 0, req.__signal);
     if (!r.ok) return r;
     const data = r.data || {};
 

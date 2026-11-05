@@ -1138,6 +1138,40 @@ body[data-nsft-ssc-theme="light"] .nsft-ai-hint-badge.nsft-ai-hint-warn {
     font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace !important;
     letter-spacing: 0.06em !important;
 }
+.nsft-ai-keyreq {
+    margin-left: 6px !important;
+    padding: 1px 7px !important;
+    border-radius: 999px !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    color: var(--ai-accent) !important;
+    background: color-mix(in srgb, var(--ai-accent) 14%, transparent) !important;
+}
+.nsft-ai-keyreq[hidden] { display: none !important; }
+.nsft-ai-secretwrap.nsft-ai-pidekey .nsft-ai-input {
+    border: 1.5px solid var(--ai-accent) !important;
+    background: color-mix(in srgb, var(--ai-accent) 10%, var(--ai-panel)) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ai-accent) 22%, transparent),
+        0 0 14px color-mix(in srgb, var(--ai-accent) 35%, transparent) !important;
+}
+.nsft-ai-secretwrap.nsft-ai-needkey .nsft-ai-input {
+    background: color-mix(in srgb, var(--ai-accent) 14%, var(--ai-panel)) !important;
+    animation: nsftAiKeyPulse 1.1s ease-in-out 2;
+}
+@keyframes nsftAiKeyPulse {
+    0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ai-accent) 22%, transparent), 0 0 14px color-mix(in srgb, var(--ai-accent) 35%, transparent); }
+    50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--ai-accent) 12%, transparent), 0 0 22px color-mix(in srgb, var(--ai-accent) 45%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .nsft-ai-secretwrap.nsft-ai-needkey .nsft-ai-input { animation: none; }
+}
+.nsft-ai-keyhint {
+    margin: 6px 0 2px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--ai-accent) !important;
+}
+.nsft-ai-keyhint[hidden] { display: none !important; }
 .nsft-ai-input-secret.nsft-ai-revealed {
     -webkit-text-security: none !important;
     letter-spacing: normal !important;

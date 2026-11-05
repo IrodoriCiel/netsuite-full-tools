@@ -178,3 +178,69 @@ html[data-nsft-theme="dark"] .nsft-logfmt-err {
     white-space: normal;
     overflow-wrap: anywhere;
 }
+
+.nsft-logfmt-telon {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.nsft-logfmt-telon > .nsft-codecard.is-ampliada {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: calc(100vh - 48px) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column;
+    resize: none !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.nsft-logfmt-wrapper.is-ampliada > pre,
+.nsft-logfmt-wrapper.is-ampliada > .nsft-logfmt-html-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0;
+}
+
+.nsft-logfmt-wrapper.is-ampliada > pre {
+    display: flex;
+}
+
+.nsft-logfmt-wrapper.is-ampliada > pre[style*="display: none"] {
+    display: none !important;
+}
+
+.nsft-logfmt-wrapper.is-ampliada pre code.hljs,
+.nsft-logfmt-wrapper.is-ampliada .nsft-logfmt-html-content {
+    flex: 1 1 auto;
+    max-height: none !important;
+    overflow: auto;
+}
+
+html[data-nsft-theme="dark"] .nsft-logfmt-telon {
+    background: rgba(0, 0, 0, 0.65);
+}
+
+.nsft-logfmt-wrapper.is-ampliada > .nsft-logfmt-err-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+}
+
+.nsft-codecard-bar .nsft-logfmt-cerrar {
+    margin-left: auto;
+    padding: 0 6px;
+}
+
+.nsft-codecard-bar .nsft-logfmt-cerrar svg {
+    width: 15px;
+    height: 15px;
+}

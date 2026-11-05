@@ -160,6 +160,7 @@
         window.removeEventListener('nsft-roptions-copy-menupath', copiaRutaMenu);
         const existing = document.getElementById(MENU_ID);
         if (existing) existing.remove();
+        quitaBotonLista();
         _menuCell = null;
         _cachedUrl = null;
     }
@@ -202,7 +203,61 @@
             || document.querySelector('tr.uir-buttons');
     }
 
+    const LIST_ITEM_ID = 'nsft-open-custrec-type';
+
+    function rectypeDeLaLista() {
+        if (!/\/app\/common\/custom\/custrecordentrylist\.nl$/.test(window.location.pathname)) return null;
+        const r = new URLSearchParams(window.location.search).get('rectype');
+        return (r && ID_RE.test(r)) ? r : null;
+    }
+
+    function menuDelTitulo() {
+        return document.querySelector('div.page-title-menu.noprint.page-title-menu-context ul.ns-menu')
+            || Array.from(document.querySelectorAll('ul.ns-menu')).find((ul) => !ul.closest('.uir-button-menu') && !ul.closest('#' + MENU_ID));
+    }
+
+    function quitaBotonLista() {
+        const c = document.getElementById(LIST_ITEM_ID);
+        if (c) c.remove();
+    }
+
+    function addListButton() {
+        const rectype = _enabled ? rectypeDeLaLista() : null;
+        if (!rectype || !ver('recordOptionsMenuShowOpenCustom')) {
+            quitaBotonLista();
+            return;
+        }
+        if (document.getElementById(LIST_ITEM_ID)) return;
+        const menu = menuDelTitulo();
+        if (!menu) return;
+
+        const label = chrome.i18n.getMessage('recordOptionOpenCustomRecord') || 'Open Custom Record';
+        const li = document.createElement('li');
+        li.id = LIST_ITEM_ID;
+        li.className = 'ns-menuitem';
+        li.setAttribute('data-nsps-type', 'menu_item');
+        li.setAttribute('data-nsps-label', label);
+        const a = document.createElement('a');
+        a.className = 'ns-menuitem-link';
+        a.href = '/app/common/custom/custrecord.nl?id=' + rectype + '&e=T';
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.style.cssText = 'display:flex; align-items:center; gap:5px;';
+        const img = document.createElement('img');
+        img.src = chrome.runtime.getURL('assets/img/logomini.png');
+        img.alt = '';
+        img.style.cssText = 'width:16px; height:16px; object-fit:contain; vertical-align:text-top;';
+        a.append(img, document.createTextNode(label));
+        li.appendChild(a);
+
+        const lista = Array.from(menu.querySelectorAll(':scope > li.ns-menuitem'))
+            .find((x) => ['lista', 'list', 'listas', 'lists'].includes(x.textContent.trim().toLowerCase()));
+        if (lista) menu.insertBefore(li, lista);
+        else menu.appendChild(li);
+    }
+
     function addMenu() {
+        addListButton();
         if (document.getElementById(MENU_ID)) return;
 
         const buttonsRow = getButtonsRow();
@@ -508,6 +563,7 @@
         if (_unsubscribe) return;
         const reinject = () => {
             if (!document.getElementById(MENU_ID)) addMenu();
+            else addListButton();
         };
         if (window.NSFT_Observer && typeof window.NSFT_Observer.subscribe === 'function') {
             _unsubscribe = window.NSFT_Observer.subscribe(reinject, { throttle: 200 });

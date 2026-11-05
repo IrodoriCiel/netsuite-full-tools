@@ -129,6 +129,11 @@
             return;
         }
 
+        if (event.data.type === 'nsft-set-field-values-enable-all-done') {
+            avisaHabilitados(event.data.res || {});
+            return;
+        }
+
         if (event.data.type === 'nsft-sfv-help-template') {
             const key = String(event.data.key || '');
             const params = event.data.params;
@@ -202,6 +207,31 @@
 
     function init(items) {
         injectScript();
+        window.addEventListener('nsft-enable-all-fields', () => {
+            window.postMessage({ type: 'nsft-set-field-values-enable-all' }, '*');
+        });
+    }
+
+    function avisaHabilitados(res) {
+        const C = window.NSFT_Clipboard;
+        if (!C || !C.showToast) return;
+        const t = (k, f, s) => chrome.i18n.getMessage(k, s) || f;
+        if (!res.enEdicion) {
+            C.showToast(t('sfv_all_view', 'Open the record in edit mode to enable its fields'), { type: 'info', duration: 3500 });
+            return;
+        }
+        if (res.sinApi) {
+            C.showToast(t('sfv_all_noapi', 'This page does not let its fields be changed'), { type: 'error', duration: 3500 });
+            return;
+        }
+        if (!res.cuerpo && !res.columnas) {
+            C.showToast(res.enLinea
+                ? t('sfv_all_none_inline', 'No disabled fields; ' + res.enLinea + ' are inline and cannot be enabled', [String(res.enLinea)])
+                : t('sfv_all_none', 'There were no disabled fields'), { type: 'info', duration: 3500 });
+            return;
+        }
+        C.showToast(t('sfv_all_done', 'Enabled ' + res.cuerpo + ' fields and ' + res.columnas + ' columns, until the page reloads',
+            [String(res.cuerpo), String(res.columnas)]), { type: 'success', duration: 4000 });
     }
 
     function injectScript() {

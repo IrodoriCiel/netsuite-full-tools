@@ -105,6 +105,7 @@ globalThis.NSFT_DEFAULTS = {
     enableScriptAutoName: true,
 
     enableCommandPalette: true,
+    enableToolsMenuModal: false,
     enableCustomizationFinder: true,
     enableDeletedRecords: true,
     enableScriptExecute: true,
@@ -175,6 +176,7 @@ globalThis.NSFT_DEFAULTS = {
     enableProfileButton: true,
     enableBundleUninstallGuard: true,
     enableClearSort: true,
+    enableBetterExport: true,
 
     enableSuiteQLRunner: true,
     enableAiAssistant: true,
@@ -218,6 +220,7 @@ globalThis.NSFT_DEFAULTS = {
     enableSearchFormulaAutocomplete: true,
 
     enableLoadNModule: true,
+    enableConsoleUtils: true,
     enableLogoutBlocker: true,
     enableHideGuidedLearning: true,
 
@@ -260,7 +263,7 @@ globalThis.NSFT_DEFAULTS = {
     enableBundleFolderNamesBeta: true,
     enableFileCabinetCopyPathBeta: true,
     enableLoginCompanyBrandingBeta: true,
-    enableLoginTrustDevice: false,
+    enableLoginTrustDevice: true,
     enableErrorPagePolishBeta: true,
     enableLoggedoutRedirectBeta: true,
     enableSessionReturn: true,
