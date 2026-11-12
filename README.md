@@ -381,6 +381,12 @@ Las únicas diferencias entre este repositorio y el paquete publicado son **esa 
 
 The only differences between this repository and the published package are **that minification** and the removal of comments. When this mirror is generated, it is verified **byte-for-byte** that minifying each file here produces the same output as the published build — functional equivalence is not a promise, it is an automated check on every release.
 
+## Firefox
+
+`node tools/firefox/build.mjs` genera `dist/firefox/` y un ZIP listo para [addons.mozilla.org](https://addons.mozilla.org/developers/). Para probarlo: `about:debugging` → *Este Firefox* → *Cargar complemento temporal* → `dist/firefox/manifest.json`. Requiere Firefox 140+. El panel lateral de Chrome no existe en Firefox; esas vistas se abren dentro de la página.
+
+`node tools/firefox/build.mjs` builds `dist/firefox/` and a ZIP ready for [addons.mozilla.org](https://addons.mozilla.org/developers/). To try it: `about:debugging` → *This Firefox* → *Load Temporary Add-on* → `dist/firefox/manifest.json`. Requires Firefox 140+. Chrome's side panel doesn't exist in Firefox; those views open inside the page instead.
+
 ## Ficha técnica · Technical details
 
 | | |
