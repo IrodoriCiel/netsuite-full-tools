@@ -86,10 +86,14 @@
             if (/^\*(?!\*)/.test(msg) || /^\*\*\*/.test(msg)) {
                 li.className = 'is-new';
                 msg = msg.slice(1).replace(/^\s+/, '');
+            } else if (/^!/.test(msg)) {
+                li.className = 'is-aviso';
+                msg = msg.slice(1).replace(/^\s+/, '');
             }
             pintaConNegritas(li, msg);
             list.appendChild(li);
         }
+        Array.from(list.querySelectorAll(':scope > li.is-aviso')).reverse().forEach((li) => list.prepend(li));
         const thanksMsg = chrome.i18n.getMessage('un_thanks');
         let thanks = null;
         if (thanksMsg) {
@@ -100,7 +104,7 @@
 
         const see = document.createElement('button');
         see.type = 'button';
-        see.className = 'nsft-un-btn';
+        see.className = 'nsft-un-btn nsft-dlg-btn nsft-dlg-btn-ok';
         see.textContent = chrome.i18n.getMessage('un_toast_btn');
         see.addEventListener('click', () => {
             try { window.open(chrome.runtime.getURL('popup/changelog.html'), '_blank', 'noopener'); } catch (e) { }
@@ -113,7 +117,7 @@
 
         const close = document.createElement('button');
         close.type = 'button';
-        close.className = 'nsft-un-close';
+        close.className = 'nsft-un-close nsft-cerrar';
         close.title = chrome.i18n.getMessage('un_toast_close');
         close.textContent = '✕';
         close.addEventListener('click', () => { markSeen(); removeToast(); });

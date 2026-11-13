@@ -177,6 +177,7 @@
     }
 
     function urlEditorAvanzado(url) {
+        if (window.NSFT_CodeLink) return window.NSFT_CodeLink.avanzado(url);
         try {
             const u = new URL(url, location.origin);
             if (!/edittextmediaitem\.nl/i.test(u.pathname)) return null;

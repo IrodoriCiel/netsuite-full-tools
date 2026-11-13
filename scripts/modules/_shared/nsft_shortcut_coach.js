@@ -6,6 +6,11 @@
     if (window.top !== window) return;
 
     const NS = 'nsft-coach';
+
+    function vistePiel(el) {
+        el.classList.add('nsft-w');
+        el.setAttribute('data-theme', document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light');
+    }
     const MASTER_KEY = 'enableShortcutHints';
     const STATE_KEY = 'nsftShortcutHints';
     const MAX_SHOWS = 5;
@@ -133,6 +138,7 @@
         const wrap = document.createElement('div');
         wrap.className = NS + ' ' + NS + '-note';
         wrap.setAttribute('data-nsft-ui', '');
+        vistePiel(wrap);
         wrap.setAttribute('role', 'status');
 
         const body = document.createElement('div');
@@ -149,6 +155,21 @@
         openCfg.className = NS + '-never';
         openCfg.textContent = t('coach_open_settings', 'Abrir configuración');
         openCfg.addEventListener('click', () => {
+            const A = window.NSFT_Ajustes;
+            if (A) {
+                const icono = '<rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"></path>';
+                A.abre({ tono: 'ambar',
+                    modulo: t('enableShortcutHintsLabel', 'Shortcut hints'),
+                    icono,
+                    categorias: [{
+                        id: 'general', titulo: t('set_cat_general', 'General'), icono,
+                        secciones: [{ filas: [{ tipo: 'switch', clave: 'enableShortcutHints', defecto: true,
+                            titulo: t('enableShortcutHintsLabel', 'Shortcut hints'), ayuda: t('enableShortcutHintsDesc', '') }] }]
+                    }]
+                });
+                wrap.remove();
+                return;
+            }
             try {
                 chrome.runtime.sendMessage({
                     action: 'nsftOpenSettings',
@@ -214,6 +235,7 @@
         const wrap = document.createElement('div');
         wrap.className = NS;
         wrap.setAttribute('data-nsft-ui', '');
+        vistePiel(wrap);
         wrap.setAttribute('role', 'status');
         wrap.setAttribute('aria-live', 'polite');
 

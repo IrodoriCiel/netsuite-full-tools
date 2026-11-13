@@ -46,7 +46,7 @@
 
 .nsft-bexp-ico:focus-visible {
     border-radius: 3px;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, .45);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-ns-accent, #2563eb) 45%, transparent);
 }
 
 .nsft-bexp-td.is-busy .nsft-bexp-ico {

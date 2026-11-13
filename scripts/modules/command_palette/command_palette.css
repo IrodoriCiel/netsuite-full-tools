@@ -9,9 +9,9 @@
     --cmdp-text-subtle: #6b7280;
     --cmdp-divider: #f3f4f6;
     --cmdp-footer-bg: #ffffff;
-    --cmdp-selected-bg: #f0f7ff;
-    --cmdp-selected-label: #0056b3;
-    --cmdp-selected-cat: #0070f3;
+    --cmdp-selected-bg: color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 8%, transparent);
+    --cmdp-selected-label: var(--nsft-ns-accent, #0056b3);
+    --cmdp-selected-cat: var(--nsft-ns-accent, #0070f3);
     --cmdp-kbd-bg: #ffffff;
     --cmdp-kbd-border: #d1d5db;
     --cmdp-kbd-text: #374151;
@@ -45,9 +45,9 @@
     --cmdp-text-subtle: #9AA4B5;
     --cmdp-divider: var(--nsft-dk-border, #282A30);
     --cmdp-footer-bg: var(--nsft-dk-hover, #1E2025);
-    --cmdp-selected-bg: rgba(110, 124, 245, 0.18);
-    --cmdp-selected-label: #8FA3FF;
-    --cmdp-selected-cat: #B3C1FF;
+    --cmdp-selected-bg: color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 18%, transparent);
+    --cmdp-selected-label: var(--nsft-ns-accent-light, var(--nsft-ns-accent, #8FA3FF));
+    --cmdp-selected-cat: var(--nsft-ns-accent-light, var(--nsft-ns-accent, #B3C1FF));
     --cmdp-kbd-bg: var(--nsft-dk-border);
     --cmdp-kbd-border: var(--nsft-dk-border2);
     --cmdp-kbd-text: #C6CEDB;
@@ -228,25 +228,22 @@
     color: var(--cmdp-text-subtle);
 }
 
-.nsft-cmdp-item-label mark.nsft-cmdp-match {
+.nsft-cmdp-item-label mark.nsft-cmdp-match,
+.nsft-cmdp-item-cat mark.nsft-cmdp-match {
     background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
     color: inherit;
     border-radius: 2px;
     padding: 0;
 }
 
-.nsft-cmdp-overlay[data-theme="dark"] .nsft-cmdp-item-label mark.nsft-cmdp-match {
+.nsft-cmdp-overlay[data-theme="dark"] .nsft-cmdp-item-label mark.nsft-cmdp-match,
+.nsft-cmdp-overlay[data-theme="dark"] .nsft-cmdp-item-cat mark.nsft-cmdp-match {
     background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
     color: var(--nsft-hl-fg-dark, #0D1410);
 }
 
 .nsft-cmdp-item-cat {
-    color: var(--cmdp-text-muted);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     flex-shrink: 0;
-    font-weight: 600;
 }
 
 .nsft-cmdp-item-pin {
@@ -318,9 +315,6 @@
     color: var(--cmdp-selected-label);
 }
 
-.nsft-cmdp-selected .nsft-cmdp-item-cat {
-    color: var(--cmdp-selected-cat);
-}
 
 .nsft-cmdp-empty {
     padding: 24px;
@@ -330,13 +324,30 @@
     font-weight: 500;
 }
 
-.nsft-cmdp-slash-header {
-    padding: 10px 14px 6px;
-    font-size: 10.5px;
+.nsft-cmdp-empty:has(> .nsft-vacio) { padding: 0; }
+
+.nsft-cmdp-list > .nsft-paleta-sec {
+    padding: 8px 14px 4px;
+}
+
+.nsft-cmdp-item > .nsft-cmdp-item-label {
+    flex: 1;
+    min-width: 0;
+}
+
+.nsft-cmdp-item-delete {
+    flex-shrink: 0;
+    margin-left: 8px;
+    padding: 0 4px;
+    border-radius: 3px;
     color: var(--cmdp-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.nsft-cmdp-item-delete:hover {
+    opacity: 1;
+    color: var(--nsft-w-danger, #c0392b);
 }
 
 .nsft-cmdp-footer {
@@ -392,3 +403,5 @@
     opacity: 1;
     transform: translateY(0);
 }
+
+.nsft-paleta .nsft-cmdp-item.nsft-cmdp-selected:not(#nsft-x) { background: color-mix(in srgb, var(--nsft-cat) 8%, transparent); }

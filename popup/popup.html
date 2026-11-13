@@ -25,13 +25,17 @@
   </style>
   <script src="early-theme.js"></script>
   <link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
+  <link rel="stylesheet" href="../scripts/modules/_shared/nsft_combo.css">
+  <link rel="stylesheet" href="../scripts/modules/_shared/nsft_modal.css">
+  <link rel="stylesheet" href="../scripts/modules/_shared/nsft_dialog.css">
   <link rel="stylesheet" href="popup.css">
   <link rel="stylesheet" href="../welcome/welcome_previews.css">
   <link rel="stylesheet" href="submenus.css">
+  <link rel="stylesheet" href="acabados.css">
   <link rel="stylesheet" href="../scripts/libs/fonts/editor_fonts.css">
 </head>
 
-<body>
+<body class="nsft-combos">
   <div class="container nsft-app" data-screen="home">
     <header class="nsft-topbar">
       <div class="nsft-tb-mode" data-tb-mode="home">
@@ -342,6 +346,18 @@
               <label>
                 <input type="checkbox" id="aiAssistantAdv">
                 <span data-i18n="aiAssistantAdvLabel"></span>
+              </label>
+              <label>
+                <input type="checkbox" id="aiAssistantLogs">
+                <span data-i18n="aiAssistantLogsLabel"></span>
+              </label>
+              <label>
+                <input type="checkbox" id="aiAssistantSearchSql">
+                <span data-i18n="aiAssistantSearchSqlLabel"></span>
+              </label>
+              <label>
+                <input type="checkbox" id="aiAssistantPick">
+                <span data-i18n="aiAssistantPickLabel"></span>
               </label>
             </div>
           </div>
@@ -727,6 +743,39 @@
             </label>
           </div>
 
+          <div class="option-row">
+            <div>
+              <span id="label_enableRecordHistory" data-i18n="enableRecordHistoryLabel"></span>
+              <div id="desc_enableRecordHistory" class="description" data-i18n="enableRecordHistoryDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableRecordHistory">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableCsvImportTemplate" data-i18n="enableCsvImportTemplateLabel"></span>
+              <div id="desc_enableCsvImportTemplate" class="description" data-i18n="enableCsvImportTemplateDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableCsvImportTemplate">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableRecordAttachments" data-i18n="enableRecordAttachmentsLabel"></span>
+              <div id="desc_enableRecordAttachments" class="description" data-i18n="enableRecordAttachmentsDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableRecordAttachments">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
           
           <div class="option-row">
             <div>
@@ -801,6 +850,9 @@
                   </div>
                   <div class="nsft-subopt-item">
                     <label><input type="checkbox" id="recordOptionsMenuShowOpenInEnv"><span data-i18n="recordOptionOpenInEnv"></span></label>
+                  </div>
+                  <div class="nsft-subopt-item">
+                    <label><input type="checkbox" id="recordOptionsMenuShowPdf"><span data-i18n="recordOptionViewPdf"></span></label>
                   </div>
                   <div class="nsft-subopt-item">
                     <label><input type="checkbox" id="recordOptionsMenuShowXml"><span data-i18n="recordOptionViewXml"></span></label>
@@ -1088,6 +1140,16 @@
                   <option value="120">120</option>
                 </select>
               </div>
+
+              <div id="treeroot-container-adv" style="margin-top: 5px; display: none;">
+                <label for="advancedEditorTreeRoot" style="font-size: 12px; margin-right: 5px;"
+                  data-i18n="advTreeRootLabel"></label>
+                <select id="advancedEditorTreeRoot"
+                  style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="file" data-i18n="advTreeRootFile"></option>
+                  <option value="chosen" data-i18n="advTreeRootChosen"></option>
+                </select>
+              </div>
             </div>
             <label class="switch">
               <input type="checkbox" id="enableAdvancedEditor">
@@ -1147,104 +1209,6 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableScriptExecute">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="option-row">
-            <div>
-              <span id="label_enableEditorTheme" data-i18n="enableEditorThemeLabel"></span><span class="nsft-deprecated" data-i18n="deprecatedBadge" data-i18n-title="deprecatedBadgeTitle"></span>
-              <div id="desc_enableEditorTheme" class="description" data-i18n="enableEditorThemeDesc"></div>
-
-              <div id="theme-container-editor" style="margin-top: 5px; display: none;">
-                <label for="editorTheme" style="font-size: 12px; margin-right: 5px;" data-i18n="themeLabel"></label>
-                <select id="editorTheme"
-                  style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
-                  <option value="auto" data-i18n="jfThemeAuto"></option>
-                  <option value="atom-one-dark">Atom One Dark</option>
-                  <option value="atom-one-light">Atom One Light</option>
-                  <option value="default">Default</option>
-                  <option value="github">GitHub Light</option>
-                  <option value="github-dark">GitHub Dark</option>
-                  <option value="monokai">Monokai</option>
-                  <option value="obsidian">Obsidian</option>
-                  <option value="shades-of-purple">Shades of Purple</option>
-                  <option value="synthwave-84">Synthwave &#39;84</option>
-                  <option value="vs">Visual Studio</option>
-                  <option value="vs2015">VS2015</option>
-                  <option value="stackoverflow-light">StackOverflow Light</option>
-                  <option value="stackoverflow-dark">StackOverflow Dark</option>
-                  <option value="custom" data-i18n="editorThemeCustomOption"></option>
-                </select>
-                <pre id="editor-theme-preview" class="nsft-editor-theme-preview"><code class="cm-content"><span class="ͼb">function</span> <span class="ͼg">hello</span>() {
-  <span class="ͼb">const</span> name = <span class="ͼe">"world"</span>;
-  <span class="ͼm">// greet someone</span>
-  <span class="ͼb">return</span> <span class="ͼd">42</span>;
-}</code></pre>
-
-                <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px;">
-                  <label for="editorFontFamily" data-i18n="editorFontFamilyLabel" style="cursor: pointer;"></label>
-                  <select id="editorFontFamily"
-                    style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;"></select>
-                </div>
-
-                <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px;">
-                  <label for="editorFontSize" data-i18n="editorFontSizeLabel" style="cursor: pointer;"></label>
-                  <select id="editorFontSize"
-                    style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
-                    <option value="0" data-i18n="editorFontSizeDefaultOption"></option>
-                    <option value="11">11 px</option>
-                    <option value="12">12 px</option>
-                    <option value="13">13 px</option>
-                    <option value="14">14 px</option>
-                    <option value="15">15 px</option>
-                    <option value="16">16 px</option>
-                    <option value="17">17 px</option>
-                    <option value="18">18 px</option>
-                    <option value="19">19 px</option>
-                    <option value="20">20 px</option>
-                    <option value="21">21 px</option>
-                    <option value="22">22 px</option>
-                  </select>
-                </div>
-
-                <div id="editor-theme-io" style="display: flex; gap: 6px; margin-top: 6px; font-size: 11px;">
-                  <button type="button" id="editorThemeExport" data-i18n="editorThemeExportLabel"
-                    style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: inherit; cursor: pointer;"></button>
-                  <button type="button" id="editorThemeImport" data-i18n="editorThemeImportLabel"
-                    style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: inherit; cursor: pointer;"></button>
-                  <input type="file" id="editorThemeImportFile" accept=".json,application/json" hidden>
-                  <button type="button" id="editorThemeReset" data-i18n="editorThemeResetLabel"
-                    data-i18n-title="editorThemeResetTitle"
-                    style="padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-strong); background: transparent; color: inherit; cursor: pointer; margin-left: auto;"></button>
-                </div>
-
-                <div id="custom-theme-editor" style="display: none; margin-top: 8px; font-size: 11px;">
-                  <div style="display: grid; grid-template-columns: auto 1fr auto 1fr; column-gap: 8px; row-gap: 4px; align-items: center;">
-                    <label for="editorCustomBg" data-i18n="editorCustomBgLabel"></label>
-                    <input type="color" id="editorCustomBg">
-                    <label for="editorCustomFg" data-i18n="editorCustomFgLabel"></label>
-                    <input type="color" id="editorCustomFg">
-                    <label for="editorCustomKeyword" data-i18n="editorCustomKeywordLabel"></label>
-                    <input type="color" id="editorCustomKeyword">
-                    <label for="editorCustomLiteral" data-i18n="editorCustomLiteralLabel"></label>
-                    <input type="color" id="editorCustomLiteral">
-                    <label for="editorCustomString" data-i18n="editorCustomStringLabel"></label>
-                    <input type="color" id="editorCustomString">
-                    <label for="editorCustomNumber" data-i18n="editorCustomNumberLabel"></label>
-                    <input type="color" id="editorCustomNumber">
-                    <label for="editorCustomVariable" data-i18n="editorCustomVariableLabel"></label>
-                    <input type="color" id="editorCustomVariable">
-                    <label for="editorCustomProperty" data-i18n="editorCustomPropertyLabel"></label>
-                    <input type="color" id="editorCustomProperty">
-                    <label for="editorCustomComment" data-i18n="editorCustomCommentLabel"></label>
-                    <input type="color" id="editorCustomComment">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <label class="switch" style="align-self: flex-start;">
-              <input type="checkbox" id="enableEditorTheme">
               <span class="slider round"></span>
             </label>
           </div>
@@ -1317,6 +1281,17 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableFullLogsButton">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableDeployScheduleSummary" data-i18n="enableDeployScheduleSummaryLabel"></span>
+              <div id="desc_enableDeployScheduleSummary" class="description" data-i18n="enableDeployScheduleSummaryDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableDeployScheduleSummary">
               <span class="slider round"></span>
             </label>
           </div>
@@ -1427,6 +1402,17 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enablePagePerformance">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableRolePermissions" data-i18n="enableRolePermissionsLabel"></span>
+              <div id="desc_enableRolePermissions" class="description" data-i18n="enableRolePermissionsDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableRolePermissions">
               <span class="slider round"></span>
             </label>
           </div>
@@ -1653,17 +1639,6 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableInSearchPreview">
-              <span class="slider round"></span>
-            </label>
-          </div>
-
-          <div class="option-row">
-            <div>
-              <span id="label_enableSavedSearchSplit" data-i18n="enableSavedSearchSplitLabel"></span><span class="nsft-deprecated" data-i18n="deprecatedBadge" data-i18n-title="deprecatedBadgeTitle"></span>
-              <div id="desc_enableSavedSearchSplit" class="description" data-i18n="enableSavedSearchSplitDesc"></div>
-            </div>
-            <label class="switch">
-              <input type="checkbox" id="enableSavedSearchSplit">
               <span class="slider round"></span>
             </label>
           </div>
@@ -2020,6 +1995,17 @@
 
           <div class="option-row">
             <div>
+              <span id="label_enablePopupSelectContains" data-i18n="enablePopupSelectContainsLabel"></span>
+              <div id="desc_enablePopupSelectContains" class="description" data-i18n="enablePopupSelectContainsDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enablePopupSelectContains">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
               <span id="label_enableShiftRangeSelect" data-i18n="enableShiftRangeSelectLabel"></span>
               <div id="desc_enableShiftRangeSelect" class="description" data-i18n="enableShiftRangeSelectDesc"></div>
             </div>
@@ -2078,6 +2064,17 @@
               </button>
             </span>
           </h3>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableCapturaGuiada" data-i18n="enableCapturaGuiadaLabel"></span>
+              <div id="desc_enableCapturaGuiada" class="description" data-i18n="enableCapturaGuiadaDesc"></div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableCapturaGuiada">
+              <span class="slider round"></span>
+            </label>
+          </div>
 
           <div class="option-row">
             <div>
@@ -2382,6 +2379,27 @@
             </div>
             <label class="switch">
               <input type="checkbox" id="enableFileCabinetFolderLinkBeta">
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="option-row">
+            <div>
+              <span id="label_enableFileCabinetFavorites" data-i18n="enableFileCabinetFavoritesLabel"></span>
+              <div id="desc_enableFileCabinetFavorites" class="description" data-i18n="enableFileCabinetFavoritesDesc"></div>
+              <div id="fcfav-layout-container" style="margin-top: 5px; display: none;">
+                <label for="fileCabinetFavoritesLayout" style="font-size: 12px; margin-right: 5px;"
+                  data-i18n="fcfav_layout"></label>
+                <select id="fileCabinetFavoritesLayout"
+                  style="padding: 2px; border-radius: 4px; border: 1px solid var(--border-strong); font-size: 11px;">
+                  <option value="section" data-i18n="fcfav_layout_section"></option>
+                  <option value="tabs" data-i18n="fcfav_layout_tabs"></option>
+                  <option value="chips" data-i18n="fcfav_layout_chips"></option>
+                </select>
+              </div>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="enableFileCabinetFavorites">
               <span class="slider round"></span>
             </label>
           </div>
@@ -3009,6 +3027,17 @@
               </div>
               <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
             </button>
+            <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevReinstall"
+              data-i18n-title="devReinstallTitle" title="Dejar la extensión como recién instalada">
+              <div class="nsft-settings-row-icon nsft-settings-row-icon-danger">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><polyline points="3 4 3 9 8 9"></polyline><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12" y2="16.6"></line></svg>
+              </div>
+              <div class="nsft-settings-row-text">
+                <strong data-i18n="devReinstallLabel">Reinstalar desde cero</strong>
+                <small data-i18n="devReinstallDesc">Borra todo lo guardado, sin copia, y abre la bienvenida como al instalar.</small>
+              </div>
+              <span class="nsft-settings-row-chev" aria-hidden="true">→</span>
+            </button>
             <button type="button" class="nsft-settings-row nsft-settings-row-btn" id="nsftDevDisable"
               data-i18n-title="devDisableTitle" title="Salir del modo desarrollador">
               <div class="nsft-settings-row-icon is-diagnostic">
@@ -3070,14 +3099,18 @@
     </div>
 
     <div id="nsftConfirm" class="nsft-confirm" hidden>
-      <div class="nsft-confirm-box" role="alertdialog" aria-modal="true" aria-labelledby="nsftConfirmTitle"
-        aria-describedby="nsftConfirmBody">
-        <h3 id="nsftConfirmTitle" class="nsft-confirm-title"></h3>
+      <div class="nsft-confirm-box nsft-w nsft-caja-barra" role="alertdialog" aria-modal="true"
+        aria-labelledby="nsftConfirmTitle" aria-describedby="nsftConfirmBody">
+        <div class="nsft-barra-titulo">
+          <h3 id="nsftConfirmTitle" class="nsft-titulo is-pregunta"></h3>
+          <button type="button" id="nsftConfirmClose" class="nsft-cerrar" data-i18n-title="closeModal"
+            title="Close">&#10005;</button>
+        </div>
         <p id="nsftConfirmBody" class="nsft-confirm-body"></p>
         <div class="nsft-confirm-actions">
-          <button type="button" id="nsftConfirmCancel" class="nsft-confirm-btn"
+          <button type="button" id="nsftConfirmCancel" class="nsft-dlg-btn nsft-dlg-btn-cancel"
             data-i18n="bulkConfirmCancel">Cancelar</button>
-          <button type="button" id="nsftConfirmOk" class="nsft-confirm-btn nsft-confirm-btn-primary"></button>
+          <button type="button" id="nsftConfirmOk" class="nsft-dlg-btn nsft-dlg-btn-ok"></button>
         </div>
       </div>
     </div>
@@ -3087,8 +3120,7 @@
   <script src="../scripts/modules/_shared/nsft_mac_keys.js"></script>
   <script src="../scripts/modules/_shared/nsft_defaults.js"></script>
   <script src="../scripts/modules/_shared/nsft_text_search.js"></script>
-  <script src="../scripts/modules/editor_theme/theme_transform.js"></script>
-  <script src="../welcome/welcome_previews.js"></script>
+  <script src="module_icons.js"></script>
   <script src="popup.js"></script>
   <script src="submenus.js"></script>
 </body>

@@ -16,7 +16,7 @@ tr.nsft-script-upload-row > td {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 10.5px;
     font-weight: 600;
-    color: #607799;
+    color: var(--nsft-ns-accent, #607799);
     background: #f4f6f9;
     border: 1.5px dashed #b8c2cf;
     border-radius: 6px;
@@ -28,7 +28,7 @@ tr.nsft-script-upload-row > td {
     content: '';
     width: 14px;
     height: 14px;
-    background: #607799;
+    background: var(--nsft-ns-accent, #607799);
     flex-shrink: 0;
     -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") no-repeat center / contain;
     mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='17 8 12 3 7 8'/><line x1='12' y1='3' x2='12' y2='15'/></svg>") no-repeat center / contain;
@@ -37,19 +37,19 @@ tr.nsft-script-upload-row > td {
 
 #nsft-script-drop-zone:hover,
 #nsft-script-drop-zone:focus-visible {
-    border-color: #4c87b3;
-    color: #4c87b3;
-    background: #e9eff5;
+    border-color: var(--nsft-ns-accent, #4c87b3);
+    color: var(--nsft-ns-accent, #4c87b3);
+    background: color-mix(in srgb, var(--nsft-ns-accent, #4c87b3) 10%, #ffffff);
     outline: none;
 }
 
 #nsft-script-drop-zone:focus-visible {
-    box-shadow: 0 0 0 3px rgba(76, 135, 179, 0.22);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent, #4c87b3) 22%, transparent);
 }
 
 #nsft-script-drop-zone:hover::before,
 #nsft-script-drop-zone:focus-visible::before {
-    background: #4c87b3;
+    background: var(--nsft-ns-accent, #4c87b3);
     transform: translateY(-2px);
 }
 
@@ -58,14 +58,14 @@ tr.nsft-script-upload-row > td {
 }
 
 #nsft-script-drop-zone[data-state="hover"] {
-    border-color: #4c87b3;
-    color: #4c87b3;
-    background: #e0ecf5;
-    box-shadow: 0 0 0 3px rgba(76, 135, 179, 0.18);
+    border-color: var(--nsft-ns-accent, #4c87b3);
+    color: var(--nsft-ns-accent, #4c87b3);
+    background: color-mix(in srgb, var(--nsft-ns-accent, #4c87b3) 15%, #ffffff);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent, #4c87b3) 18%, transparent);
 }
 
 #nsft-script-drop-zone[data-state="hover"]::before {
-    background: #4c87b3;
+    background: var(--nsft-ns-accent, #4c87b3);
     animation: nsft-su-bounce 0.7s ease-in-out infinite;
 }
 

@@ -6,6 +6,7 @@
 
     let _unsub = null;
     let _fetcherInjected = false;
+    let _fetcherReady = false;
     let _reqSeq = 0;
     const _pending = new Map();
     let _state = new WeakMap();
@@ -53,8 +54,8 @@
         _fetcherInjected = true;
         const s = document.createElement('script');
         s.src = chrome.runtime.getURL('scripts/modules/sublist_line_ids/sublist_line_ids_fetcher.js');
-        s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        s.onload = function () { this.remove(); _fetcherReady = true; scan(); };
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function dataRows(container) {
@@ -67,6 +68,7 @@
     }
 
     function scan() {
+        if (!_fetcherReady) return;
         document.querySelectorAll('.uir-machine-table-container').forEach((container) => {
             if (!container.querySelector('.uir-machine-headerrow:not(.uir-loading-row)')) return;
 

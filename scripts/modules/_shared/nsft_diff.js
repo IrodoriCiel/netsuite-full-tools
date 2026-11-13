@@ -24,19 +24,34 @@
             const overlay = el('div', 'nsft-diff-overlay');
             overlay.id = PREVIEW_OVERLAY_ID;
             overlay.setAttribute('data-theme', theme);
-            const modal = el('div', 'nsft-diff-modal');
+            const modal = el('div', 'nsft-w nsft-diff-modal');
+            modal.setAttribute('data-theme', theme);
 
-            const header = el('div', 'nsft-diff-header');
-            const titleWrap = el('div', 'nsft-diff-title-wrap');
-            const title = el('h3', 'nsft-diff-title');
-            title.textContent = T.Title + ': ' + fileName;
-            const subtitle = el('p', 'nsft-diff-subtitle');
-            subtitle.textContent = T.Subtitle;
-            titleWrap.appendChild(title);
-            titleWrap.appendChild(subtitle);
-            header.appendChild(titleWrap);
+            const header = el('div', 'nsft-diff-header nsft-barra-titulo');
+            const title = el('h3', 'nsft-diff-title nsft-titulo');
+            title.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"></path></svg>';
+            const titleTxt = el('span', 'nsft-diff-title-txt');
+            titleTxt.textContent = T.Title;
+            title.appendChild(titleTxt);
+            title.title = T.Subtitle;
+            header.appendChild(title);
+            if (fileName) {
+                header.appendChild(el('span', 'nsft-cab-sep'));
+                const ctx = el('span', 'nsft-cab-ctx');
+                const ctxTxt = el('span', 'nsft-cab-txt');
+                ctxTxt.textContent = fileName;
+                ctx.title = fileName;
+                ctx.appendChild(ctxTxt);
+                header.appendChild(ctx);
+            }
             const stats = el('div', 'nsft-diff-stats');
             header.appendChild(stats);
+            const closeBtn = el('button', 'nsft-diff-close nsft-cerrar');
+            closeBtn.type = 'button';
+            closeBtn.textContent = '\u2715';
+            closeBtn.title = T.Cancel;
+            closeBtn.setAttribute('aria-label', T.Cancel);
+            header.appendChild(closeBtn);
             modal.appendChild(header);
 
             let diffRows = null;
@@ -163,6 +178,7 @@
                 if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
             };
             cancelBtn.addEventListener('click', onCancel);
+            closeBtn.addEventListener('click', onCancel);
             confirmBtn.addEventListener('click', onConfirm);
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay) onCancel();

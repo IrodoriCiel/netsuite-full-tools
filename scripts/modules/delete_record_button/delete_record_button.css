@@ -54,7 +54,7 @@ button.nsft-del-danger-redwood {
 }
 
 .nsft-del-modal-content {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     width: 420px;
     max-width: 92vw;
     border: 1px solid #e5e7eb;
@@ -67,7 +67,7 @@ button.nsft-del-danger-redwood {
 }
 
 .nsft-del-modal-header {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     color: #111827;
     padding: 8px 14px;
     border-bottom: 1px solid #f3f4f6;
@@ -111,7 +111,7 @@ button.nsft-del-danger-redwood {
 
 .nsft-del-modal-body {
     padding: 20px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -164,7 +164,7 @@ button.nsft-del-danger-redwood {
 
 .nsft-del-modal-footer {
     padding: 10px 14px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border-top: 1px solid #f3f4f6;
     display: flex;
     justify-content: flex-end;
@@ -182,7 +182,7 @@ button.nsft-del-danger-redwood {
 }
 
 .nsft-del-btn-cancel {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border-color: #d1d5db;
     color: #374151;
 }
@@ -218,7 +218,7 @@ button.nsft-del-danger-redwood {
 }
 
 .nsft-del-progress-box {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border-radius: 10px;
     padding: 24px 32px;
     min-width: 200px;
@@ -323,4 +323,14 @@ html[data-nsft-theme="dark"] .nsft-del-btn-cancel {
 
 html[data-nsft-theme="dark"] .nsft-del-btn-cancel:hover {
     background: var(--nsft-dk-hover);
+}
+
+.nsft-modal:not(#nsft-x).nsft-del-modal-content .nsft-del-modal-body {
+    background: var(--nsft-w-content);
+    color: var(--nsft-w-t1);
+}
+
+.nsft-modal:not(#nsft-x).nsft-del-modal-content .nsft-del-modal-footer {
+    background: var(--nsft-w-s1);
+    border-top: 1px solid var(--nsft-w-bd);
 }

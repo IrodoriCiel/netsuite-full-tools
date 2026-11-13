@@ -1,0 +1,115 @@
+
+html.nsft-aipick-on,
+html.nsft-aipick-on * { cursor: crosshair !important; }
+
+.nsft-aipick-box {
+    position: fixed;
+    z-index: 2147483645;
+    pointer-events: none;
+    box-sizing: border-box;
+    border: 2px solid var(--nsft-ai-b, #9B6EF5);
+    border-radius: 3px;
+    background: rgba(155, 110, 245, 0.14);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 0 14px rgba(155, 110, 245, 0.35);
+    transition: left 0.06s ease, top 0.06s ease, width 0.06s ease, height 0.06s ease;
+}
+.nsft-aipick-box[hidden],
+.nsft-aipick-tip[hidden],
+.nsft-aipick-tip-ctx[hidden] { display: none; }
+
+.nsft-aipick-tip {
+    position: fixed;
+    z-index: 2147483646;
+    pointer-events: none;
+    max-width: 360px;
+    padding: 6px 9px;
+    border-radius: 7px;
+    border: 1px solid var(--nsft-border, #e5e7eb);
+    background: var(--nsft-surface-0, #ffffff);
+    color: var(--nsft-text, #1f2937);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+    font: 12px/1.35 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.nsft-aipick-tip-head { display: flex; align-items: baseline; gap: 10px; }
+.nsft-aipick-tip-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+    color: var(--nsft-ai-text, #6D28D9);
+}
+.nsft-aipick-tip-size { flex: none; color: #6b7280; font-variant-numeric: tabular-nums; }
+.nsft-aipick-tip-ctx {
+    margin-top: 3px;
+    color: #4b5563;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nsft-aipick-bar {
+    position: fixed;
+    z-index: 2147483647;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: calc(100vw - 32px);
+    padding: 7px 8px 7px 12px;
+    border: 1.5px solid transparent;
+    border-radius: 10px;
+    background:
+        linear-gradient(var(--nsft-ai-face, #FDFCFF), var(--nsft-ai-face, #FDFCFF)) padding-box,
+        linear-gradient(135deg, var(--nsft-ai-a, #6E7CF5), var(--nsft-ai-b, #9B6EF5), var(--nsft-ai-a, #6E7CF5)) border-box;
+    box-shadow: 0 8px 26px rgba(15, 23, 42, 0.2), 0 0 12px var(--nsft-ai-glow, rgba(155, 110, 245, 0.20));
+    font: 13px/1.3 system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color: var(--nsft-ai-text, #6D28D9);
+    cursor: default !important;
+}
+.nsft-aipick-bar * { cursor: default !important; }
+.nsft-aipick-spark { display: inline-flex; flex: none; }
+.nsft-aipick-spark svg { width: 15px; height: 15px; }
+.nsft-aipick-msg { font-weight: 600; white-space: nowrap; }
+.nsft-aipick-keys { color: #6b7280; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nsft-aipick-cancel {
+    flex: none;
+    padding: 3px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: var(--nsft-w-s0, #fff);
+    color: #374151;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer !important;
+}
+.nsft-aipick-cancel:hover { background: #f3f4f6; }
+
+html[data-nsft-theme="dark"] .nsft-aipick-tip {
+    background: var(--nsft-dk-panel);
+    border-color: var(--nsft-dk-border2);
+    color: #E6EBF2;
+}
+html[data-nsft-theme="dark"] .nsft-aipick-tip-name { color: var(--nsft-ai-text-dark, #D6C6FB); }
+html[data-nsft-theme="dark"] .nsft-aipick-tip-size,
+html[data-nsft-theme="dark"] .nsft-aipick-tip-ctx,
+html[data-nsft-theme="dark"] .nsft-aipick-keys { color: #9AA4B5; }
+html[data-nsft-theme="dark"] .nsft-aipick-bar {
+    background:
+        linear-gradient(var(--nsft-ai-face-dark, rgba(20, 24, 34, 0.95)), var(--nsft-ai-face-dark, rgba(20, 24, 34, 0.95))) padding-box,
+        linear-gradient(135deg, var(--nsft-ai-a-dark, rgba(110, 124, 245, 0.9)), var(--nsft-ai-b-dark, rgba(190, 110, 245, 0.9)), var(--nsft-ai-a-dark, rgba(110, 124, 245, 0.9))) border-box;
+    color: var(--nsft-ai-text-dark, #D6C6FB);
+}
+html[data-nsft-theme="dark"] .nsft-aipick-cancel {
+    background: var(--nsft-dk-surface);
+    border-color: var(--nsft-dk-border2);
+    color: #E6EBF2;
+}
+html[data-nsft-theme="dark"] .nsft-aipick-cancel:hover { background: var(--nsft-dk-hover); }
+
+@media (prefers-reduced-motion: reduce) {
+    .nsft-aipick-box { transition: none; }
+}

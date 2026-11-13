@@ -21,15 +21,19 @@
         return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    function temaActual() {
+        return document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light';
+    }
+
     function showModal(title, message) {
         const modalId = `nsft-sae-modal-${Date.now()}`;
         const btnOkText = escapeHtml(TXT.BTN_OK);
         const html = `
-            <div id="${modalId}" class="nsft-sae-modal-overlay">
-                <div class="nsft-sae-modal-content">
-                    <div class="nsft-sae-modal-header">
-                        <span class="nsft-sae-modal-title">${escapeHtml(title)}</span>
-                        <button id="${modalId}-close" class="nsft-sae-close-btn">✕</button>
+            <div id="${modalId}" class="nsft-sae-modal-overlay nsft-modal-backdrop" data-theme="${temaActual()}">
+                <div class="nsft-sae-modal-content nsft-modal nsft-modal--dialog" data-theme="${temaActual()}">
+                    <div class="nsft-modal-header nsft-sae-modal-header">
+                        <span class="nsft-modal-title is-danger nsft-sae-modal-title">${escapeHtml(title)}</span>
+                        <div class="nsft-header-actions"><button id="${modalId}-close" class="nsft-modal-btn-close nsft-sae-close-btn">✕</button></div>
                     </div>
                     <div class="nsft-sae-modal-body">${escapeHtml(message).replace(/\n/g, '<br>')}</div>
                     <div class="nsft-sae-modal-footer">

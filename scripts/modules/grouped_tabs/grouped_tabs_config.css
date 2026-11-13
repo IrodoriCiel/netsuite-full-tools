@@ -206,7 +206,7 @@ small {
     flex-wrap: wrap;
     row-gap: 10px;
     padding: 16px;
-    background: #fff;
+    background: var(--nsft-w-s0, #fff);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     transition: all 0.2s;
@@ -391,13 +391,6 @@ small {
     border: 1px solid var(--border-color);
 }
 
-.modal-card h3 {
-    margin: 0 0 12px;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text-main);
-}
-
 .modal-card p {
     margin: 0 0 20px;
     color: var(--text-muted);
@@ -411,17 +404,6 @@ small {
     justify-content: flex-end;
 }
 
-.modal-actions button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s;
-    font-family: inherit;
-}
-
 .btn-secondary {
     background: var(--bg-color);
     color: var(--text-main);
@@ -430,15 +412,6 @@ small {
 
 .btn-secondary:hover {
     background: var(--border-color);
-}
-
-.btn-danger {
-    background: var(--danger-color);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
 }
 
 @keyframes nsftFade {
@@ -570,7 +543,7 @@ small {
     font-size: 14px;
     font-family: inherit;
     outline: none;
-    background: #fff;
+    background: var(--nsft-w-s0, #fff);
     margin-bottom: 6px;
 }
 
@@ -581,10 +554,6 @@ small {
 
 .modal-card .modal-actions {
     margin-top: 16px;
-}
-
-.btn-primary--compact {
-    padding: 8px 16px !important;
 }
 
 

@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('.nsft-csv-response-modal', 'csvviewer');
 
     const STORAGE_KEY = 'enableCsvResponseViewer';
     const CSV_LINK_SELECTOR = 'a[href*="uploadlogcsv.nl?wqid="], a[onclick*="uploadlogcsv.nl?wqid="]';
@@ -595,8 +596,8 @@
         modal.querySelector('.nsft-csvrv-table tbody').innerHTML = base.map((r) => {
             const err = hayError && r.v[vista.errIdx].trim() !== '';
             const st = hayError
-                ? '<td class="is-st"><span class="nsft-csvrv-pill ' + (err ? 'is-err' : 'is-ok') + '" title="'
-                    + escapeAttr(err ? r.v[vista.errIdx] : okTitle) + '"><i></i><span>'
+                ? '<td class="is-st"><span class="nsft-csvrv-pill nsft-estado ' + (err ? 'is-err is-mal' : 'is-ok') + '" title="'
+                    + escapeAttr(err ? r.v[vista.errIdx] : okTitle) + '"><span>'
                     + (err ? resalta(r.v[vista.errIdx], needle) : escapeHtml(okLabel)) + '</span></span></td>'
                 : '';
             return '<tr data-r="' + r.i + '"><td class="is-line">' + r.n + '</td>' + st
@@ -605,9 +606,12 @@
 
         const vacio = modal.querySelector('.nsft-csvrv-empty');
         vacio.hidden = base.length > 0;
-        vacio.textContent = vista.records.length === 0
+        const sinNada = vista.records.length === 0;
+        const vacioTxt = sinNada
             ? t('csvRvEmptyFile', 'The file has no records.')
             : t('csvRvNoMatches', 'No records match.');
+        if (window.NSFT_Herramientas) vacio.innerHTML = window.NSFT_Herramientas.vacio(sinNada ? 'bandeja' : 'buscar', vacioTxt);
+        else vacio.textContent = vacioTxt;
 
         modal.querySelector('.nsft-csvrv-note').textContent =
             t('csvRvNote', '$1 columns · Row = record number in the file (row 1 is the header) · Double-click a cell to fix it.', [String(cols.length)]);
@@ -818,11 +822,11 @@
 
     function snapToEdge(el) {
         if (!el) return;
+        const rect = el.getBoundingClientRect();
         el.style.right = 'auto';
         el.style.bottom = 'auto';
 
-        const rect = el.getBoundingClientRect();
-        const targetWidth = el.dataset.state === 'minimised' ? 165 : rect.width;
+        const targetWidth = el.dataset.state === 'minimised' ? 44 : rect.width;
         const centerX = rect.left + (rect.width / 2);
         const p = 15;
 

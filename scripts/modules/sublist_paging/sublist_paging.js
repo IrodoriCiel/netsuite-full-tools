@@ -111,7 +111,7 @@
             this.remove();
             nudgeUnsettled();
         };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     const QUERY_RETRY_MS = [250, 600, 1200, 2500, 5000];

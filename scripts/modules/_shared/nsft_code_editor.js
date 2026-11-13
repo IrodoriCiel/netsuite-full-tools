@@ -118,7 +118,7 @@
     const D = (es, en) => (_esUi ? es : en);
     const NSFT_API = {
         help: { p: [], r: 'void', d: D('Lista todas las utilidades NSFT.* en la consola.', 'Lists every NSFT.* utility in the console.') },
-        ss: { p: [], r: '{ ss2, ss1, record }', d: D('Qué SuiteScript admite la página: 2.x (require), 1.0 (nlapi) y si hay registro.', 'Which SuiteScript the page supports: 2.x (require), 1.0 (nlapi) and whether there is a record.') },
+        ss: { p: [], r: '{ ss2, ss1, record }', d: D('Qué SuiteScript admite la página: 2.1 (require), 1.0 (nlapi) y si hay registro.', 'Which SuiteScript the page supports: 2.1 (require), 1.0 (nlapi) and whether there is a record.') },
         rec: { p: [], r: '{ type, id, mode }', d: D('El registro de la página: tipo, id interno y modo (create, edit, view).', 'The page\'s record: type, internal id and mode (create, edit, view).') },
         get: { p: [{ n: 'fieldId', t: 'string' }], r: 'any', d: D('Valor de un campo del registro abierto.', 'Value of a field of the open record.') },
         text: { p: [{ n: 'fieldId', t: 'string' }], r: 'string', d: D('Texto que se ve de un campo (el nombre en una lista, no el id).', 'Display text of a field (the name in a list, not the id).') },
@@ -129,7 +129,7 @@
         lines: { p: [{ n: 'sublistId', t: 'string' }], r: 'number', d: D('Cuántas líneas tiene una sublista.', 'How many lines a sublist has.') },
         sublist: { p: [{ n: 'sublistId', t: 'string' }, { n: 'columnas', t: 'string[]', o: 1 }], r: 'Array', d: D('Todas las líneas de una sublista como tabla.', 'Every line of a sublist as a table.') },
         find: { p: [{ n: 'texto', t: 'string' }], r: 'Array', d: D('Busca un campo por id o etiqueta, lo resalta y te lleva a él.', 'Finds a field by id or label, highlights it and scrolls to it.') },
-        N: { p: [{ n: 'modulos', t: 'string…' }], r: 'Promise', d: D('Carga módulos N de SuiteScript 2.x: await NSFT.N(\'record\').', 'Loads SuiteScript 2.x N modules: await NSFT.N(\'record\').') },
+        N: { p: [{ n: 'modulos', t: 'string…' }], r: 'Promise', d: D('Carga módulos N de SuiteScript 2.1: await NSFT.N(\'record\').', 'Loads SuiteScript 2.1 N modules: await NSFT.N(\'record\').') },
         load: { p: [{ n: 'type', t: 'string', o: 1 }, { n: 'id', t: 'number', o: 1 }], r: 'Promise<Record>', d: D('record.load del registro abierto, o del que se diga.', 'record.load of the open record, or the one given.') },
         lookup: { p: [{ n: 'type', t: 'string' }, { n: 'id', t: 'number' }, { n: 'campos', t: 'string[]' }], r: 'Promise<Object>', d: D('search.lookupFields en una línea.', 'search.lookupFields in one line.') },
         search: { p: [{ n: 'searchId', t: 'string' }, { n: 'max', t: 'number', o: 1 }], r: 'Promise<Array>', d: D('Ejecuta una búsqueda guardada y devuelve sus filas (hasta 1000) como tabla.', 'Runs a saved search and returns its rows (up to 1000) as a table.') },
@@ -556,7 +556,7 @@
     function repintaResaltado() {
         if (_repintePedido) return;
         _repintePedido = true;
-        const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+        const raf = (window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null) || ((cb) => setTimeout(cb, 16));
         raf(() => {
             _repintePedido = false;
             _editores.forEach((x) => {
@@ -580,7 +580,7 @@
     function cargaCatalogoApis() {
         if (_apiPedido) return;
         _apiPedido = true;
-        const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+        const raf = (window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null) || ((cb) => setTimeout(cb, 16));
         raf(() => setTimeout(() => {
             API_RUTAS.forEach((rel, i) => {
                 try {
@@ -1408,7 +1408,7 @@
             const yaPintado = cm._nsftInlayVp;
             const soloSeMovio = genAhora !== -1 && yaPintado && yaPintado.gen === genAhora;
             if (soloSeMovio) {
-                const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+                const raf = (window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null) || ((cb) => setTimeout(cb, 16));
                 cm._nsftInlayCuadro = raf(() => { cm._nsftInlayCuadro = null; trabajo(); });
                 return;
             }
@@ -1744,7 +1744,7 @@
             ? () => window.performance.now()
             : () => Date.now();
         const t0 = reloj();
-        const raf = window.requestAnimationFrame || ((cb) => setTimeout(() => cb(Date.now()), 16));
+        const raf = (window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null) || ((cb) => setTimeout(() => cb(Date.now()), 16));
 
         const paso = (ahora) => {
             const t = Math.max(0, Math.min(1, (ahora - t0) / SALTO_MS));
@@ -3190,7 +3190,7 @@
         programaInlay(cm);
 
         const trasPintar = (c) => {
-            const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+            const raf = (window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null) || ((cb) => setTimeout(cb, 16));
             raf(() => setTimeout(() => {
                 if (!c.hasFocus()) return;
                 c.showHint({ completeSingle: false, extraKeys: TECLAS_TARJETA });

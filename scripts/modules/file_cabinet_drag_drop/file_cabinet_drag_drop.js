@@ -189,14 +189,14 @@
             d.async = false;
             d.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_diff.js');
             d.onload = function () { this.remove(); };
-            (document.head || document.documentElement).appendChild(d);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(d) : (document.head || document.documentElement).appendChild(d));
         }
         const s = document.createElement('script');
         s.id = 'nsft-fcdd-fetcher';
         s.async = false;
         s.src = chrome.runtime.getURL('scripts/modules/file_cabinet_drag_drop/file_cabinet_drag_drop_fetcher.js');
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     window.addEventListener('message', (event) => {
@@ -271,7 +271,7 @@
     function mostrarChoques(files, chocan, folderId, porNombre) {
         const nuevos = files.filter(f => chocan.indexOf(f) === -1);
         const modal = document.createElement('div');
-        modal.className = 'nsft-fcdd-modal is-warn';
+        modal.className = 'nsft-fcdd-modal nsft-modal-backdrop is-warn';
         modal.setAttribute('data-theme', resolveTheme());
 
         const tpl = chrome.i18n.getMessage('fcdd_dup_title', [String(chocan.length)])
@@ -295,10 +295,10 @@
             : '';
 
         modal.innerHTML =
-            '<div class="nsft-fcdd-modal-box">' +
-                '<div class="nsft-fcdd-modal-head">' +
-                    '<span>\u26A0 ' + escapeHtml(tpl) + '</span>' +
-                    '<button type="button" class="nsft-fcdd-modal-close" aria-label="Close">\u00D7</button>' +
+            '<div class="nsft-fcdd-modal-box nsft-modal nsft-modal--dialog" data-theme="' + resolveTheme() + '">' +
+                '<div class="nsft-modal-header nsft-fcdd-modal-head">' +
+                    '<span class="nsft-modal-title is-aviso">' + escapeHtml(tpl) + '</span>' +
+                    '<div class="nsft-header-actions"><button type="button" class="nsft-modal-btn-close nsft-fcdd-modal-close" aria-label="Close">\u00D7</button></div>' +
                 '</div>' +
                 '<div class="nsft-fcdd-warn-lead">' + escapeHtml(aviso) + '</div>' +
                 restantes +
@@ -534,7 +534,7 @@
 
     function showErrorList(okCount, errList, folderId) {
         const modal = document.createElement('div');
-        modal.className = 'nsft-fcdd-modal';
+        modal.className = 'nsft-fcdd-modal nsft-modal-backdrop';
         modal.setAttribute('data-theme', resolveTheme());
         const okMsg = okCount > 0
             ? '<div class="nsft-fcdd-ok-summary">✔ ' + okCount + ' ' + (chrome.i18n.getMessage('fcdd_ok_partial') || 'uploaded successfully') + '</div>'
@@ -543,10 +543,10 @@
             '<li><strong>' + escapeHtml(r.name) + '</strong>: ' + escapeHtml(r.err || 'Error') + '</li>'
         ).join('');
         modal.innerHTML =
-            '<div class="nsft-fcdd-modal-box">' +
-                '<div class="nsft-fcdd-modal-head">' +
-                    '<span>⚠ ' + errList.length + ' ' + (chrome.i18n.getMessage('fcdd_err_title') || 'file(s) failed to upload') + '</span>' +
-                    '<button type="button" class="nsft-fcdd-modal-close" aria-label="Close">×</button>' +
+            '<div class="nsft-fcdd-modal-box nsft-modal nsft-modal--dialog" data-theme="' + resolveTheme() + '">' +
+                '<div class="nsft-modal-header nsft-fcdd-modal-head">' +
+                    '<span class="nsft-modal-title is-danger">' + errList.length + ' ' + (chrome.i18n.getMessage('fcdd_err_title') || 'file(s) failed to upload') + '</span>' +
+                    '<div class="nsft-header-actions"><button type="button" class="nsft-modal-btn-close nsft-fcdd-modal-close" aria-label="Close">×</button></div>' +
                 '</div>' +
                 okMsg +
                 '<ul class="nsft-fcdd-err-list">' + errRows + '</ul>' +

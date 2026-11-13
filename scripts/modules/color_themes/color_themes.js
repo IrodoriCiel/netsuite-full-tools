@@ -125,6 +125,7 @@
         const base = `hsl(${hue}, ${sat}%, ${lig}%)`;
         style.textContent = `
             :root { --h: ${hue}; --s-val: ${sat}; --l-val: ${lig}; }
+            html.${BODY_CLASS} #div__header__skeleton .bgoff,
             html.${BODY_CLASS} [data-header-section="navigation"],
             html.${BODY_CLASS} [data-widget="MenuBar"],
             html.${BODY_CLASS} [data-widget="MenuBar"] [role="menubar"],
@@ -234,9 +235,23 @@
         _acentoBuscando = true;
         if (typeof MutationObserver === 'undefined') return;
         let obs = null;
-        const fin = () => { if (obs) { obs.disconnect(); obs = null; } _acentoBuscando = false; };
+        let cuadro = 0;
+        const fin = () => { if (obs) { obs.disconnect(); obs = null; } if (cuadro) cancelAnimationFrame(cuadro); _acentoBuscando = false; };
+        const hayCabecera = () => SEL_CABECERA.some((s) => {
+            const el = document.querySelector(s);
+            if (!el) return false;
+            let c = '';
+            try { c = window.getComputedStyle(el).backgroundColor; } catch (e) { return false; }
+            return !!c && c !== 'transparent' && !/rgba\([^)]*,\s*0\s*\)/.test(c);
+        });
         try {
-            obs = new MutationObserver(() => { if (mira()) fin(); });
+            obs = new MutationObserver(() => {
+                if (cuadro) return;
+                cuadro = requestAnimationFrame(() => {
+                    cuadro = 0;
+                    if (mira() || hayCabecera()) fin();
+                });
+            });
             obs.observe(document.documentElement, { childList: true, subtree: true });
             setTimeout(fin, 10000);
         } catch (e) { _acentoBuscando = false; }

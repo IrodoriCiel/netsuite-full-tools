@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('.nsft-gtr-card', 'goto', { filas: '.nsft-gtr-suggest-item' });
 
     const STORAGE_KEY = 'enableGoToRecord';
     const SHORTCUT_KEY = 'gotoRecordShortcut';
@@ -244,13 +245,13 @@
             ts.async = false;
             ts.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
             ts.onload = function () { this.remove(); };
-            (document.head || document.documentElement).appendChild(ts);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(ts) : (document.head || document.documentElement).appendChild(ts));
         }
         const s = document.createElement('script');
         s.async = false;
         s.src = chrome.runtime.getURL('scripts/modules/goto_record/goto_record_fetcher.js');
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function postToFetcher(type, payload) {
@@ -459,25 +460,25 @@
         overlay.className = 'nsft-gtr-overlay nsft-modal-backdrop';
         overlay.setAttribute('data-theme', resolveTheme());
         overlay.innerHTML = `
-            <div class="nsft-gtr-card nsft-modal nsft-modal--dialog" data-theme="${escapeHtml(resolveTheme())}" role="dialog" aria-modal="true" aria-labelledby="nsft-gtr-title">
+            <div class="nsft-gtr-card nsft-modal nsft-modal--dialog nsft-paleta" data-theme="${escapeHtml(resolveTheme())}" role="dialog" aria-modal="true" aria-labelledby="nsft-gtr-title">
                 <header class="nsft-modal-header">
-                    <h2 id="nsft-gtr-title" class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>NetSuite Full Tools - ${escapeHtml(i18n('gtr_title', 'Go to record'))}</h2>
+                    <h2 id="nsft-gtr-title" class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>${escapeHtml(i18n('gtr_title', 'Go to record'))}</h2>
                     <div class="nsft-header-actions">
                         <button type="button" class="nsft-gtr-close nsft-modal-btn-close" aria-label="${escapeHtml(i18n('gtr_close_aria', 'Close'))}">✕</button>
                     </div>
                 </header>
+                
+                <div class="nsft-gtr-input-wrap nsft-paleta-barra">
+                    <input type="text" class="nsft-gtr-input nsft-paleta-input"
+                           placeholder="${escapeHtml(i18n('gtr_placeholder', 'e.g. INV-00123  ·  customer 942  ·  invoice 12847'))}"
+                           autocomplete="off" spellcheck="false"
+                           role="combobox" aria-autocomplete="list" aria-expanded="false"
+                           aria-controls="nsft-gtr-suggestions" />
+                    <button type="button" class="nsft-gtr-clear" hidden
+                            title="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}"
+                            aria-label="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}">✕</button>
+                </div>
                 <div class="nsft-gtr-body">
-                    
-                    <div class="nsft-gtr-input-wrap">
-                        <input type="text" class="nsft-gtr-input"
-                               placeholder="${escapeHtml(i18n('gtr_placeholder', 'e.g. INV-00123  ·  customer 942  ·  invoice 12847'))}"
-                               autocomplete="off" spellcheck="false"
-                               role="combobox" aria-autocomplete="list" aria-expanded="false"
-                               aria-controls="nsft-gtr-suggestions" />
-                        <button type="button" class="nsft-gtr-clear" hidden
-                                title="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}"
-                                aria-label="${escapeHtml(i18n('ro_clear_search', 'Limpiar búsqueda'))}">✕</button>
-                    </div>
                     <ul id="nsft-gtr-suggestions" class="nsft-gtr-suggestions" role="listbox" hidden></ul>
                     <p class="nsft-gtr-hint">${escapeHtml(i18n('gtr_hint', 'Search by document or transaction number, "type id", or a custom record name (id is optional). Enter to go · Esc to close.'))}</p>
                     <p class="nsft-gtr-status" aria-live="polite"></p>

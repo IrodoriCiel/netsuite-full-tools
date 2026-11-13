@@ -78,7 +78,7 @@
     flex: none;
     border: 0;
     border-radius: 6px;
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-primary, var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6)));
     color: var(--nsft-text-on-accent, #ffffff);
     font: inherit;
     font-size: 12px;
@@ -188,10 +188,9 @@
     background: transparent;
     padding: 0;
     font: inherit;
-    font-size: 10px;
+    font-size: 11.5px;
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
     color: var(--nsft-text-3, #9ca3af);
     cursor: pointer;
     user-select: none;
@@ -241,7 +240,7 @@ a.nsft-cfind-name::after {
 .nsft-cfind-name svg { width: 14px; height: 14px; flex: none; color: var(--nsft-text-3, #9ca3af); }
 .nsft-cfind-row.is-active .nsft-cfind-name svg { color: var(--nsft-ns-accent, #3b82f6); }
 .nsft-cfind-name > span {
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     color: var(--nsft-text-1, #111827);
     overflow: hidden;
@@ -250,9 +249,10 @@ a.nsft-cfind-name::after {
 }
 
 .nsft-cfind-kind {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.055em;
+    justify-self: start;
+    max-width: 100%;
+    min-width: 0;
+    font-size: 12.5px;
     color: var(--nsft-text-3, #9ca3af);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -260,8 +260,7 @@ a.nsft-cfind-name::after {
 }
 
 .nsft-cfind-sid {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 11.5px;
+    font-size: 12.5px;
     color: var(--nsft-text-2, #4b5563);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -316,10 +315,9 @@ a.nsft-cfind-name::after {
     padding: 6px 16px;
     background: var(--nsft-surface-1, #f9fafb);
     border-bottom: 1px solid var(--nsft-border, #e5e7eb);
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
     color: var(--nsft-text-2, #4b5563);
 }
 
@@ -404,13 +402,6 @@ a.nsft-cfind-name::after {
 
 .nsft-cfind-statusline { font-size: 11px; color: var(--nsft-text-2, #4b5563); }
 .nsft-cfind-toast { font-size: 11px; color: var(--nsft-text-3, #9ca3af); }
-.nsft-cfind-hints {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 10px;
-    color: var(--nsft-text-3, #9ca3af);
-    flex: none;
-    white-space: nowrap;
-}
 
 html[data-nsft-theme="dark"] .nsft-cfind .nsft-cfind-row.is-active {
     background: var(--nsft-ns-accent-darksoft, rgba(59, 130, 246, 0.16));
@@ -445,3 +436,6 @@ mark.nsft-cfind-hl {
     color: var(--nsft-hl-fg-dark, #0D1410);
     box-shadow: 0 0 0 1px var(--nsft-hl-ring-dark, rgba(234, 179, 8, 0.5));
 }
+
+.nsft-paleta .nsft-cfind-topbar:not(#nsft-x) { margin: 0; padding: 0; gap: 0; background: none; border: 0; }
+.nsft-paleta .nsft-cfind-topbar > .nsft-paleta-barra { flex: 1; }

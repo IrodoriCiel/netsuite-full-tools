@@ -1,4 +1,28 @@
 
+@font-face {
+    font-family: 'NSFT IBM Plex Sans';
+    src: url('chrome-extension://__MSG_@@extension_id__/scripts/libs/fonts/ibm-plex-sans-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NSFT IBM Plex Sans';
+    src: url('chrome-extension://__MSG_@@extension_id__/scripts/libs/fonts/ibm-plex-sans-500.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NSFT IBM Plex Sans';
+    src: url('chrome-extension://__MSG_@@extension_id__/scripts/libs/fonts/ibm-plex-sans-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --nsft-dk-deepest: #0D0E10;  
     --nsft-dk-panel:   #111215;  
@@ -140,12 +164,12 @@ html[data-nsft-theme="dark"] [data-nsft-ui]:not([data-nsft-force-light]) {
 .nsft-ui-button:focus-visible { outline: none; box-shadow: var(--nsft-shadow-glow); }
 
 .nsft-ui-button--primary {
-    background: var(--nsft-accent);
+    background: var(--nsft-ns-primary, var(--nsft-ns-button, var(--nsft-accent)));
     color: var(--nsft-text-on-accent);
     box-shadow: var(--nsft-shadow-sm);
 }
 
-.nsft-ui-button--primary:hover { background: var(--nsft-accent-hover); box-shadow: var(--nsft-shadow-md); }
+.nsft-ui-button--primary:hover { background: var(--nsft-ns-primary-hover, color-mix(in srgb, var(--nsft-ns-button, var(--nsft-accent)) 85%, #000000)); box-shadow: var(--nsft-shadow-md); }
 
 .nsft-ui-button--ghost {
     background: transparent;
@@ -197,7 +221,7 @@ html[data-nsft-theme="dark"] [data-nsft-ui]:not([data-nsft-force-light]) {
 }
 
 .nsft-ui-chip:hover { background: var(--nsft-surface-2); color: var(--nsft-text-1); }
-.nsft-ui-chip--active { background: var(--nsft-accent); color: var(--nsft-text-on-accent); border-color: transparent; }
+.nsft-ui-chip--active { background: var(--nsft-ns-primary, var(--nsft-ns-button, var(--nsft-accent))); color: var(--nsft-text-on-accent); border-color: transparent; }
 
 @keyframes nsft-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes nsft-slide-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -207,8 +231,8 @@ html[data-nsft-theme="dark"] [data-nsft-ui]:not([data-nsft-force-light]) {
 .nsft-ui-spinner {
     width: 18px;
     height: 18px;
-    border: 2px solid var(--nsft-accent-soft);
-    border-top-color: var(--nsft-accent);
+    border: 2px solid color-mix(in srgb, var(--nsft-ns-accent, var(--nsft-accent)) 18%, transparent);
+    border-top-color: var(--nsft-ns-accent, var(--nsft-accent));
     border-radius: 50%;
     animation: nsft-spin 0.7s linear infinite;
 }

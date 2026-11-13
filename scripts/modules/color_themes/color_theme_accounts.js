@@ -23,7 +23,9 @@
     const $ = (id) => document.getElementById(id);
 
     function stampTheme(mode) {
-        document.documentElement.setAttribute('data-nsft-theme', mode === 'dark' ? 'dark' : 'light');
+        const tema = mode === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-nsft-theme', tema);
+        document.querySelectorAll('.nsft-w').forEach((el) => el.setAttribute('data-theme', tema));
     }
     chrome.storage.local.get({ nsftTheme: 'light' }, (it) => stampTheme(it.nsftTheme));
     chrome.storage.onChanged.addListener((ch, area) => {

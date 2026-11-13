@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>NSFT</title>
+	<script src="../scripts/modules/_shared/nsft_page_theme.js"></script>
+	<link rel="stylesheet" href="../scripts/modules/_shared/design_tokens.css">
+	<style>
+		body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+			background-color: #f9f9f9;
+			color: #333;
+			line-height: 1.5;
+			margin: 0;
+			padding: 22px;
+		}
+
+		.head {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 14px;
+		}
+
+		.head img {
+			width: 32px;
+			height: 32px;
+		}
+
+		h1 {
+			font-size: 17px;
+			margin: 0;
+			color: #2c3e50;
+		}
+
+		p {
+			margin: 8px 0;
+			font-size: 13.5px;
+		}
+
+		code {
+			font-family: Consolas, "JetBrains Mono", Menlo, monospace;
+			font-size: 12.5px;
+			background: #f4f4f5;
+			border: 1px solid #e4e4e7;
+			border-radius: 4px;
+			padding: 1px 5px;
+		}
+
+		button {
+			margin-top: 14px;
+			padding: 8px 18px;
+			border: 0;
+			border-radius: 6px;
+			background: var(--nsft-accent, #6d5bd0);
+			color: var(--nsft-text-on-accent, #fff);
+			font: inherit;
+			font-size: 13.5px;
+			font-weight: 600;
+			cursor: pointer;
+		}
+
+		button:hover {
+			background: var(--nsft-accent-hover, #5b4bc0);
+		}
+
+		button[hidden] {
+			display: none;
+		}
+
+		.estado {
+			margin-top: 12px;
+			font-weight: 600;
+		}
+
+		.estado.ok {
+			color: #15803d;
+		}
+
+		.estado.no {
+			color: #b91c1c;
+		}
+
+		/* ---- Modo oscuro: del toggle del popup, nunca del sistema ---- */
+		html[data-nsft-theme="dark"] body {
+			background-color: var(--nsft-dk-deepest, #0D0E10);
+			color: #d4d4d8;
+		}
+
+		html[data-nsft-theme="dark"] h1 {
+			color: #e4e4e7;
+		}
+
+		html[data-nsft-theme="dark"] code {
+			background: var(--nsft-dk-surface, #141519);
+			border-color: var(--nsft-dk-border, #282A30);
+		}
+
+		html[data-nsft-theme="dark"] .estado.ok {
+			color: #4ade80;
+		}
+
+		html[data-nsft-theme="dark"] .estado.no {
+			color: #f87171;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="head">
+		<img src="../assets/icons/icon48.png" alt="">
+		<h1 data-i18n="aiperm_title"></h1>
+	</div>
+	<p id="texto"></p>
+	<p><code id="origen"></code></p>
+	<button type="button" id="conceder" data-i18n="aiperm_grant"></button>
+	<p class="estado" id="estado" hidden></p>
+	<script src="ai_permission.js"></script>
+</body>
+
+</html>

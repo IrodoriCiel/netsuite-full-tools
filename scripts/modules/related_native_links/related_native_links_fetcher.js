@@ -37,21 +37,48 @@
 
             if (unresolved.length &&
                 typeof nlapiGetRecordType === 'function' &&
-                typeof nlapiGetRecordId === 'function' &&
-                typeof nlapiLookupField === 'function') {
-                try {
-                    const recType = nlapiGetRecordType();
-                    const recId = nlapiGetRecordId();
-                    if (recType && recId) {
-                        const vals = nlapiLookupField(recType, recId, unresolved);
-                        if (vals) unresolved.forEach(f => { if (vals[f]) setAttribute(f, vals[f]); });
-                    }
-                } catch (e) { }
+                typeof nlapiGetRecordId === 'function') {
+                const recType = nlapiGetRecordType();
+                const recId = nlapiGetRecordId();
+                if (recType && recId) {
+                    lookupAsync(recType, recId, unresolved).then(avisar, avisar);
+                    return;
+                }
             }
         } catch (err) {
         }
+        avisar();
+    }
 
+    function avisar() {
         window.postMessage({ dest: 'extension_rnl', type: 'fieldsReady' }, '*');
+    }
+
+    function lookupAsync(recType, recId, fields) {
+        const aplica = (vals) => {
+            if (!vals) return;
+            fields.forEach((f) => {
+                let v = vals[f];
+                if (Array.isArray(v)) v = v[0] && v[0].value;
+                if (v && typeof v === 'object' && 'value' in v) v = v.value;
+                if (v) setAttribute(f, String(v));
+            });
+        };
+        if (typeof require === 'function') {
+            return new Promise((resolve) => {
+                try {
+                    require(['N/search'], (search) => {
+                        search.lookupFields.promise({ type: recType, id: recId, columns: fields })
+                            .then((vals) => { aplica(vals); resolve(); })
+                            .catch(() => resolve());
+                    }, () => resolve());
+                } catch (e) { resolve(); }
+            });
+        }
+        try {
+            if (typeof nlapiLookupField === 'function') aplica(nlapiLookupField(recType, recId, fields));
+        } catch (e) { }
+        return Promise.resolve();
     }
 
     run();

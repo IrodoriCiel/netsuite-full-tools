@@ -109,7 +109,7 @@
             s.async = false;
             s.onload = () => resolver();
             s.onerror = () => { _listo = null; rechazar(new Error('fetcher')); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         });
         return _listo;
     }

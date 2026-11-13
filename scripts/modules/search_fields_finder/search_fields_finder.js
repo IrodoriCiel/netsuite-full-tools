@@ -106,14 +106,14 @@
             ts.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
             ts.async = false;
             ts.onload = function () { this.remove(); };
-            (document.head || document.documentElement).appendChild(ts);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(ts) : (document.head || document.documentElement).appendChild(ts));
         }
 
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL('scripts/modules/search_fields_finder/search_fields_finder_fetcher.js');
         script.async = false;
         script.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(script);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
     }
 
     function teardown() {

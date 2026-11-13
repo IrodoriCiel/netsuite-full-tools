@@ -9,6 +9,7 @@
     const SAVED_QUERIES_KEY = 'nsftSscSaved';
     const SNIPPETS_STORAGE_KEY = 'nsftSscSnippets';
     let HISTORY_MAX = 30;
+    let _logToolbarTimer = null;
     const DEFAULT_QUERY = [
         '// ' + (chrome.i18n.getMessage('ssc_tpl_1')
             || 'The N/* modules are ready: record, search, query, runtime…'),
@@ -357,7 +358,10 @@
             item.className = 'nsft-ssc-ctx-item'
                 + (o.danger ? ' is-danger' : '')
                 + (o.disabled ? ' is-disabled' : '');
-            item.textContent = label;
+            if (o.icono) item.innerHTML = rpIcono(o.icono, 13);
+            const texto = document.createElement('span');
+            texto.textContent = label;
+            item.appendChild(texto);
             if (o.disabled) {
                 item.setAttribute('aria-disabled', 'true');
                 return item;
@@ -379,23 +383,24 @@
 
         ctx.appendChild(mkItem(
             chrome.i18n.getMessage('sql_tab_rename') || 'Rename',
-            () => startTabRename(id)
+            () => startTabRename(id),
+            { icono: '<path d="M12 20h8M16.5 3.5a2 2 0 0 1 3 3L7 19l-4 1 1-4z"></path>' }
         ));
         ctx.appendChild(sep());
         ctx.appendChild(mkItem(
             chrome.i18n.getMessage('sql_tab_close') || 'Close',
             () => closeTab(id),
-            { danger: true }
+            { danger: true, icono: '<path d="M6 6l12 12M18 6L6 18"></path>' }
         ));
         ctx.appendChild(mkItem(
             chrome.i18n.getMessage('sql_tab_close_right') || 'Close tabs to the right',
             () => closeTabsBulk(id, 'right'),
-            { danger: true, disabled: idx >= tabs.length - 1 }
+            { danger: true, disabled: idx >= tabs.length - 1, icono: '<path d="M5 12h13M13 6l6 6-6 6"></path>' }
         ));
         ctx.appendChild(mkItem(
             chrome.i18n.getMessage('sql_tab_close_left') || 'Close tabs to the left',
             () => closeTabsBulk(id, 'left'),
-            { danger: true, disabled: idx <= 0 }
+            { danger: true, disabled: idx <= 0, icono: '<path d="M19 12H6M11 6l-6 6 6 6"></path>' }
         ));
         ctx.appendChild(mkItem(
             chrome.i18n.getMessage('sql_tab_close_others') || 'Close other tabs',
@@ -729,7 +734,9 @@
         return _nsftTheme === 'dark' ? 'dark' : 'light';
     }
     function _nsftApplyThemeToModal() {
-        const theme = _nsftResolveTheme();
+        const theme = (window.NSFT_MarcoTema && currentTheme)
+            ? (window.NSFT_MarcoTema.esOscuro(currentTheme) ? 'dark' : 'light')
+            : _nsftResolveTheme();
         const m = document.getElementById('nsft-ssc-modal');
         if (m) m.setAttribute('data-theme', theme);
         const advLado = document.documentElement.getAttribute('data-nsft-adv-code-theme');
@@ -823,6 +830,7 @@
             currentTheme = _nsftResolveTheme() === 'dark' ? 'atom-one-dark' : 'atom-one-light';
         }
         setupListeners();
+        window.dispatchEvent(new CustomEvent('nsft-suite-ready', { detail: { module: 'console' } }));
     }
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -844,6 +852,13 @@
         if (editor) {
             editor.setOption("theme", themeName);
         }
+        _nsftApplyThemeToModal();
+        tintaMarco();
+    }
+
+    function tintaMarco() {
+        if (!window.NSFT_MarcoTema || !editor) return;
+        window.NSFT_MarcoTema.pinta(document.getElementById('nsft-ssc-modal'), editor.getWrapperElement(), currentTheme);
     }
 
     function setupListeners() {
@@ -1192,7 +1207,15 @@
     }
 
     function addRunLog(entry, opts) {
-        pushLog(Object.assign({ kind: 'run', at: Date.now() }, entry), opts);
+        const e = Object.assign({ kind: 'run', at: Date.now() }, entry);
+        pushLog(e, opts);
+        try {
+            window.dispatchEvent(new CustomEvent('nsft-ai-run-done', { detail: {
+                source: 'ssc', status: e.status, code: e.query || '',
+                error: e.errorMsg ? e.errorMsg + (e.errorLine != null ? ' (line ' + e.errorLine + ')' : '') : '',
+                at: e.at
+            } }));
+        } catch (err) { }
     }
 
     function pushLog(entry, opts) {
@@ -1287,11 +1310,11 @@
         const now = new Date();
         const sameDay = (a, b) => a.toDateString() === b.toDateString();
         const yesterday = new Date(now.getTime() - 86400000);
-        if (sameDay(d, now)) return (chrome.i18n.getMessage('sql_logs_today') || 'TODAY').toUpperCase();
-        if (sameDay(d, yesterday)) return (chrome.i18n.getMessage('sql_logs_yesterday') || 'YESTERDAY').toUpperCase();
+        if (sameDay(d, now)) return chrome.i18n.getMessage('sql_logs_today') || 'Today';
+        if (sameDay(d, yesterday)) return chrome.i18n.getMessage('sql_logs_yesterday') || 'Yesterday';
         try {
             return d.toLocaleDateString(chrome.i18n.getUILanguage(),
-                { day: 'numeric', month: 'long' }).toUpperCase();
+                { day: 'numeric', month: 'long' });
         } catch (e) {
             return '';
         }
@@ -1335,10 +1358,12 @@
         });
 
         if (!visible.length) {
-            list.innerHTML = `<div class="nsft-ssc-logs-empty">${escapeHtml(
-                _sqlLogs.length
-                    ? (chrome.i18n.getMessage('sql_logs_no_match') || 'Nothing matches that filter.')
-                    : (chrome.i18n.getMessage('sql_logs_empty') || 'No activity yet.'))}</div>`;
+            const vacio = _sqlLogs.length
+                ? (chrome.i18n.getMessage('sql_logs_no_match') || 'Nothing matches that filter.')
+                : (chrome.i18n.getMessage('sql_logs_empty') || 'No activity yet.');
+            list.innerHTML = window.NSFT_Herramientas
+                ? window.NSFT_Herramientas.vacio(_sqlLogs.length ? 'buscar' : 'bandeja', vacio)
+                : `<div class="nsft-ssc-logs-empty">${escapeHtml(vacio)}</div>`;
             return;
         }
 
@@ -1419,8 +1444,10 @@
 
         const entry = _sqlLogs.find((e) => e.id === _selectedLogId);
         if (!entry) {
-            box.innerHTML = `<div class="nsft-ssc-logs-empty">${escapeHtml(
-                chrome.i18n.getMessage('sql_logs_pick') || 'Pick an entry to see the detail.')}</div>`;
+            const elige = chrome.i18n.getMessage('sql_logs_pick') || 'Pick an entry to see the detail.';
+            box.innerHTML = window.NSFT_Herramientas
+                ? window.NSFT_Herramientas.vacio('record_logs', elige)
+                : `<div class="nsft-ssc-logs-empty">${escapeHtml(elige)}</div>`;
             box.scrollTop = 0;
             return;
         }
@@ -1627,12 +1654,12 @@
         if (!slot) return;
 
         slot.innerHTML = `
-            <div class="nsft-ssc-fix-card is-loading">
+            <div class="nsft-ssc-fix-card nsft-ia-trabajo is-loading">
                 <div class="nsft-ssc-fix-title">${AI_SPARK_SVG}${escapeHtml(
                     chrome.i18n.getMessage('sql_logs_fix_title') || 'Suggested fix')}</div>
                 <div class="nsft-ssc-fix-loading">
                     <span class="nsft-ssc-fix-spark">${AI_SPARK_SVG}</span>
-                    <span class="nsft-ssc-fix-shimmer">${escapeHtml(
+                    <span class="nsft-ssc-fix-shimmer nsft-ia-estado">${escapeHtml(
                         chrome.i18n.getMessage('sql_logs_fix_working') || 'Working on a fix…')}</span>
                 </div>
             </div>`;
@@ -1687,7 +1714,7 @@
 
         if (!sql) {
             slot.innerHTML = `
-                <div class="nsft-ssc-fix-card is-error">
+                <div class="nsft-ssc-fix-card nsft-ia-trabajo is-error">
                     <div class="nsft-ssc-fix-title">${AI_SPARK_SVG}${escapeHtml(
                         chrome.i18n.getMessage('sql_logs_fix_title') || 'Suggested fix')}</div>
                     <p class="nsft-ssc-fix-explain">${escapeHtml(
@@ -1705,7 +1732,7 @@
         _pendingFix = { id: entry.id, fixed: normalizeForDiff(sql) };
         setTimeout(scrollFixCardIntoView, 0);
         slot.innerHTML = `
-            <div class="nsft-ssc-fix-card">
+            <div class="nsft-ssc-fix-card nsft-ia-trabajo">
                 <div class="nsft-ssc-fix-title">${AI_SPARK_SVG}${escapeHtml(
                     chrome.i18n.getMessage('sql_logs_fix_title') || 'Suggested fix')}</div>
                 ${explain ? `<p class="nsft-ssc-fix-explain">${escapeHtml(explain)}</p>` : ''}
@@ -1750,10 +1777,22 @@
             overlay.className = 'nsft-ssc-dialog nsft-ssc-confirm';
 
             const box = document.createElement('div');
-            box.className = 'nsft-ssc-confirm-box';
+            box.className = 'nsft-ssc-confirm-box nsft-caja-barra';
 
             const h = document.createElement('h3');
+            h.className = 'nsft-titulo ' + (o.danger ? 'is-danger' : 'is-pregunta');
             h.textContent = o.title || '';
+            const barra = document.createElement('div');
+            barra.className = 'nsft-barra-titulo';
+            const equis = document.createElement('button');
+            equis.type = 'button';
+            equis.className = 'nsft-cerrar';
+            equis.textContent = '\u2715';
+            equis.title = o.cancelLabel || chrome.i18n.getMessage('sql_confirm_cancel') || 'Cancelar';
+            equis.setAttribute('aria-label', equis.title);
+            barra.appendChild(h);
+            barra.appendChild(equis);
+            box.appendChild(barra);
             const p = document.createElement('p');
             p.className = 'nsft-ssc-confirm-body';
             p.textContent = o.body || '';
@@ -1770,8 +1809,12 @@
 
             acts.appendChild(cancel);
             acts.appendChild(ok);
-            box.appendChild(h);
-            if (o.body) box.appendChild(p);
+            const fila = document.createElement('div');
+            fila.className = 'nsft-ssc-confirm-fila';
+            const texto = document.createElement('div');
+            if (o.body) texto.appendChild(p);
+            fila.appendChild(texto);
+            box.appendChild(fila);
 
             let rememberBox = null;
             if (o.rememberLabel) {
@@ -1807,6 +1850,7 @@
             };
             overlay.addEventListener('click', (ev) => { if (ev.target === overlay) close(false); });
             cancel.addEventListener('click', () => close(false));
+            equis.addEventListener('click', () => close(false));
             ok.addEventListener('click', () => close(true));
             document.addEventListener('keydown', onKey, true);
 
@@ -2069,6 +2113,16 @@
                 newItem.classList.add('marquee-active');
             }
         }, 50);
+
+        clearTimeout(_logToolbarTimer);
+        const vida = Math.max((type === 'error' || type === 'warning') ? 9000 : 5000, String(msg).length * 90);
+        _logToolbarTimer = setTimeout(() => {
+            newItem.classList.remove('active');
+            newItem.classList.add('exit');
+            setTimeout(() => {
+                if (newItem.parentNode === container) container.removeChild(newItem);
+            }, 300);
+        }, vida);
     }
 
 
@@ -2102,7 +2156,7 @@
 
     function afterPaint() {
         return new Promise((resolve) => {
-            const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+            const raf = (window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null) || ((cb) => setTimeout(cb, 16));
             raf(() => setTimeout(resolve, 0));
         });
     }
@@ -2217,6 +2271,8 @@
                     }
                 });
                 editor = _sscEd && _sscEd.cm;
+        _nsftApplyThemeToModal();
+        setTimeout(tintaMarco, 0);
                 if (_sscEd) _sscEd.ghost.pintaBoton();
             }
             if (editor) {
@@ -2373,7 +2429,7 @@
 
 
     function clearResults() {
-        sscPintaMensaje(chrome.i18n.getMessage('ssc_out_empty') || 'Run the script to see its result here.');
+        sscPintaMensaje(chrome.i18n.getMessage('ssc_out_empty') || 'Run the script to see its result here.', 'suitescript_console');
 
         setRunState('idle');
         paintClearResultsBtn();
@@ -2406,6 +2462,7 @@
             document.head.appendChild(link);
         }
 
+        link.onload = () => tintaMarco();
         link.href = chrome.runtime.getURL(`scripts/libs/codemirror/theme/${fileName}.min.css`);
     }
 
@@ -2416,17 +2473,15 @@
         const titleEl = document.getElementById('nsft-ssc-title');
         if (!titleEl) return;
 
-        const baseTitle = chrome.i18n.getMessage('ssc_title') || 'SuiteScript Console';
-        const displayTitle = currentFileName ? `${baseTitle} - ${currentFileName}` : baseTitle;
+        const baseTitle = chrome.i18n.getMessage('ssc_title_minimised') || 'SuiteScript';
 
         if (modal.dataset.state === 'minimised') {
-            titleEl.innerHTML = `<span class="nsft-ssc-title-minimised">
-                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><rect x="3" y="4" width="18" height="16" rx="2"></rect><polyline points="7 9 10 12 7 15"></polyline><line x1="13" y1="15" x2="17" y2="15"></line></svg>
-                 ${chrome.i18n.getMessage('ssc_title_minimised') || 'SuiteScript'}
-             </span>`;
+            titleEl.title = '';
+            titleEl.innerHTML = `<span class="nsft-ssc-title-minimised">${TITLE_LOGO}<span class="nsft-ssc-title-text">${chrome.i18n.getMessage('ssc_title_minimised') || 'SuiteScript'}</span></span>`;
             setTimeout(() => snapToEdge(modal), 10);
         } else {
-            titleEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><rect x="3" y="4" width="18" height="16" rx="2"></rect><polyline points="7 9 10 12 7 15"></polyline><line x1="13" y1="15" x2="17" y2="15"></line></svg>${escapeHtml(displayTitle)}`;
+            titleEl.title = chrome.i18n.getMessage('ssc_app_menu') || 'SuiteQL menu';
+            titleEl.innerHTML = `${TITLE_LOGO}<span class="nsft-ssc-title-text">${escapeHtml(baseTitle)}</span>${TITLE_CARET}`;
             constrainModalAfterTransition(modal);
         }
     }
@@ -2508,10 +2563,11 @@
                 if (!isResizing) return;
 
                 const containerRect = runnerContent.getBoundingClientRect();
-                let newHeight = e.clientY - containerRect.top;
+                const editorTop = mainPanel.getBoundingClientRect().top;
+                let newHeight = e.clientY - editorTop;
 
                 const minHeight = 120;
-                const totalHeight = containerRect.height;
+                const totalHeight = containerRect.bottom - editorTop;
                 if (newHeight < minHeight) newHeight = minHeight;
                 if (newHeight > totalHeight - minHeight) newHeight = totalHeight - minHeight;
 
@@ -2543,37 +2599,48 @@
             });
         }
 
-        const menuItems = modal.querySelectorAll('.nsft-ssc-menu-item');
-        let isMenuOpen = false;
+        const appMenu = modal.querySelector('.nsft-ssc-menubar');
+        const appMenuBtn = document.getElementById('nsft-ssc-title');
 
         const closeAllMenus = () => {
-            menuItems.forEach(item => item.classList.remove('active'));
-            isMenuOpen = false;
+            if (appMenu) appMenu.classList.remove('is-open');
+            if (appMenuBtn) appMenuBtn.setAttribute('aria-expanded', 'false');
         };
 
-        menuItems.forEach(item => {
-            item.addEventListener('click', (e) => {
+        const toggleAppMenu = () => {
+            if (!appMenu || modal.dataset.state === 'minimised') return;
+            const abrir = !appMenu.classList.contains('is-open');
+            appMenu.classList.toggle('is-open', abrir);
+            appMenuBtn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+        };
+
+        if (appMenu && appMenuBtn) {
+            appMenuBtn.addEventListener('click', (e) => {
+                if (modal.dataset.state === 'minimised') return;
                 e.stopPropagation();
-
-
-                const wasActive = item.classList.contains('active');
+                toggleAppMenu();
+            });
+            appMenuBtn.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                e.preventDefault();
+                e.stopPropagation();
+                toggleAppMenu();
+            });
+            appMenu.addEventListener('click', (e) => {
+                if (e.target.closest('.nsft-ssc-submenu-item')) closeAllMenus();
+            }, true);
+            appMenu.addEventListener('click', (e) => e.stopPropagation());
+            modal.addEventListener('mousedown', (e) => {
+                if (!appMenu.classList.contains('is-open')) return;
+                if (!e.target.closest('.nsft-ssc-menubar, #nsft-ssc-title')) closeAllMenus();
+            }, true);
+            modal.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape' || !appMenu.classList.contains('is-open')) return;
+                e.preventDefault();
+                e.stopPropagation();
                 closeAllMenus();
-
-
-                if (!wasActive) {
-                    item.classList.add('active');
-                    isMenuOpen = true;
-                }
-            });
-
-            item.addEventListener('mouseenter', () => {
-                if (isMenuOpen) {
-                    closeAllMenus();
-                    item.classList.add('active');
-                    isMenuOpen = true;
-                }
-            });
-        });
+            }, true);
+        }
 
         const docClickListener = () => {
             if (!document.getElementById('nsft-ssc-modal')) {
@@ -2593,14 +2660,10 @@
             const btn = document.getElementById('nsft-ssc-fullscreen');
             if (!btn) return;
             btn.title = chrome.i18n.getMessage(modal.dataset.state === 'fullscreen'
-                ? 'sql_fullscreen_exit' : 'sql_fullscreen_enter') || '';
+                ? 'sql_windowfill_exit' : 'sql_windowfill_enter') || '';
         };
 
-        clickHandler('nsft-ssc-settings', () => {
-            try {
-                chrome.runtime.sendMessage({ action: 'nsftOpenSettings', highlight: 'enableSuiteScriptConsole' });
-            } catch (e) { }
-        });
+        clickHandler('nsft-ssc-settings', showRunnerSettings);
 
         clickHandler('nsft-ssc-minimise', () => {
             modal.dataset.state = 'minimised';
@@ -2631,14 +2694,61 @@
             dispatchLayoutUpdate();
         });
 
+        let estadoAntesDeFs = null;
+        const syncFsReal = () => {
+            const btn = document.getElementById('nsft-ssc-fsreal');
+            if (btn) btn.title = chrome.i18n.getMessage(document.fullscreenElement ? 'sql_fsreal_exit' : 'sql_fsreal_enter') || '';
+        };
+        const alCambiarFs = () => {
+            syncFsReal();
+            if (document.fullscreenElement) return;
+            document.removeEventListener('fullscreenchange', alCambiarFs);
+            const previo = estadoAntesDeFs;
+            estadoAntesDeFs = null;
+            if (previo === null || !modal.isConnected) return;
+            modal.dataset.state = previo;
+            if (previo === 'maximised') {
+                modal.style.top = lastMaximizedTop;
+                modal.style.left = lastMaximizedLeft;
+            }
+            updateTitleState();
+            syncFullscreenBtn();
+            dispatchLayoutUpdate();
+        };
+        clickHandler('nsft-ssc-fsreal', () => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(() => {});
+                return;
+            }
+            const previo = modal.dataset.state;
+            document.addEventListener('fullscreenchange', alCambiarFs);
+            document.documentElement.requestFullscreen().then(() => {
+                estadoAntesDeFs = previo;
+                modal.dataset.state = 'fullscreen';
+                updateTitleState();
+                syncFullscreenBtn();
+                dispatchLayoutUpdate();
+            }).catch(() => {
+                document.removeEventListener('fullscreenchange', alCambiarFs);
+            });
+        });
+
         clickHandler('nsft-ssc-close', () => {
+            if (estadoAntesDeFs !== null && document.fullscreenElement) document.exitFullscreen().catch(() => {});
             modal.remove();
             dispatchLayoutUpdate();
         });
 
         const header = modal.querySelector('.suitescript-console-header');
         if (header) {
-            header.addEventListener('dblclick', () => {
+            const esControlDeCabecera = (el) => !!el.closest('.nsft-header-actions')
+                || (modal.dataset.state !== 'minimised'
+                    && !!el.closest('button, input, select, #nsft-ssc-title, .nsft-ssc-favorites-menu, .nsft-ssc-log-item'));
+
+            header.addEventListener('dblclick', (event) => {
+                if (esControlDeCabecera(event.target)) return;
+                if (Date.now() - restauradaEn < 500) return;
+                if (document.fullscreenElement) return;
                 const state = modal.dataset.state;
                 if (state === 'minimised' || state === 'fullscreen') {
                     modal.dataset.state = 'maximised';
@@ -2655,10 +2765,109 @@
             let mouseIsDown = false;
             let offsetX = 0;
             let offsetY = 0;
+            let inicioX = 0;
+            let inicioY = 0;
+            let restauradaEn = 0;
+            let arrastroBurbuja = false;
+            let rastro = [];
+
+            const esBurbuja = () => modal.dataset.state === 'minimised';
+            const BORDE_DE_CIERRE = 6;
+            const estaFuera = (x, y) => x <= BORDE_DE_CIERRE || y <= BORDE_DE_CIERRE
+                || x >= window.innerWidth - BORDE_DE_CIERRE || y >= window.innerHeight - BORDE_DE_CIERRE;
+
+            const salidaDeBurbuja = (event) => {
+                const ahora = performance.now();
+                const reciente = rastro.filter((p) => ahora - p.t <= 100)[0];
+                const dt = reciente ? ahora - reciente.t : 0;
+                const vx = dt >= 16 ? (event.clientX - reciente.x) / dt : 0;
+                const vy = dt >= 16 ? (event.clientY - reciente.y) / dt : 0;
+                const lanzada = Math.hypot(vx, vy) >= 1.2
+                    && estaFuera(event.clientX + vx * 260, event.clientY + vy * 260);
+                return (lanzada || estaFuera(event.clientX, event.clientY))
+                    ? { x: event.clientX, y: event.clientY, vx, vy }
+                    : null;
+            };
+
+            const cerrarBurbuja = (gesto) => {
+                const cerrar = () => document.getElementById('nsft-ssc-close').click();
+                if (gesto && gesto.ya) { cerrar(); return; }
+                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { cerrar(); return; }
+                let dx = gesto.vx;
+                let dy = gesto.vy;
+                if (Math.hypot(dx, dy) < 0.2) {
+                    const distancias = [
+                        [-1, 0, gesto.x], [1, 0, window.innerWidth - gesto.x],
+                        [0, -1, gesto.y], [0, 1, window.innerHeight - gesto.y]
+                    ].sort((a, b) => a[2] - b[2]);
+                    dx = distancias[0][0];
+                    dy = distancias[0][1];
+                }
+                const largo = Math.hypot(dx, dy);
+                modal.style.transition = 'transform 0.2s ease-in, opacity 0.2s ease-in';
+                modal.style.transform = `translate(${(dx / largo) * 240}px, ${(dy / largo) * 240}px) scale(0.7)`;
+                modal.style.opacity = '0';
+                setTimeout(cerrar, 200);
+            };
+
+            const mostrarMenuBurbuja = (evt) => {
+                removeSchemaContextMenu();
+                const ctx = document.createElement('div');
+                ctx.className = 'nsft-ssc-schema-ctx';
+                ctx.id = 'nsft-ssc-schema-ctx';
+                ctx.style.left = evt.clientX + 'px';
+                ctx.style.top = evt.clientY + 'px';
+                const fila = (icono, texto, clase, accion) => {
+                    const el = document.createElement('div');
+                    el.className = 'nsft-ssc-schema-ctx-item' + clase;
+                    el.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icono}</svg><span></span>`;
+                    el.querySelector('span').textContent = texto;
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        removeSchemaContextMenu();
+                        accion();
+                    });
+                    return el;
+                };
+                ctx.appendChild(fila('<rect x="5" y="5" width="14" height="14" rx="2"></rect>',
+                    chrome.i18n.getMessage('sql_bubble_restore') || 'Restore', '',
+                    () => document.getElementById('nsft-ssc-maximise').click()));
+                ctx.appendChild(fila('<path d="M6 6l12 12M18 6L6 18"></path>',
+                    chrome.i18n.getMessage('sql_tab_close') || 'Close', ' is-danger',
+                    () => document.getElementById('nsft-ssc-close').click()));
+                document.body.appendChild(ctx);
+                clampMenuToViewport(ctx, evt.clientX, evt.clientY);
+                setTimeout(() => {
+                    document.addEventListener('click', removeSchemaContextMenu, { once: true });
+                }, 0);
+            };
+
+            header.addEventListener('contextmenu', (event) => {
+                if (!esBurbuja()) return;
+                event.preventDefault();
+                mostrarMenuBurbuja(event);
+            });
 
             const handleMouseMove = (event) => {
                 if (mouseIsDown) {
                     event.preventDefault();
+                    if (esBurbuja()) {
+                        if (!arrastroBurbuja) {
+                            if (Math.abs(event.clientX - inicioX) < 4 && Math.abs(event.clientY - inicioY) < 4) return;
+                            arrastroBurbuja = true;
+                            modal.classList.add('nsft-dragging');
+                            if (window.NSFT_Bubble && window.NSFT_Bubble.papelera) window.NSFT_Bubble.papelera.muestra();
+                        }
+                        const ahora = performance.now();
+                        rastro.push({ t: ahora, x: event.clientX, y: event.clientY });
+                        rastro = rastro.filter((p) => ahora - p.t <= 100);
+                        { const pap = window.NSFT_Bubble && window.NSFT_Bubble.papelera; modal.classList.toggle('nsft-ssc-burbuja-cierra', pap ? pap.cerca(event.clientX, event.clientY) : estaFuera(event.clientX, event.clientY)); }
+                        modal.style.left = (event.clientX - 22) + 'px';
+                        modal.style.top = (event.clientY - 22) + 'px';
+                        modal.style.right = 'auto';
+                        modal.style.bottom = 'auto';
+                        return;
+                    }
                     const newLeft = (event.clientX - offsetX) + 'px';
                     const newTop = Math.max(0, event.clientY - offsetY) + 'px';
                     modal.style.left = newLeft;
@@ -2674,22 +2883,40 @@
             };
 
             header.addEventListener('mousedown', (event) => {
+                if (esControlDeCabecera(event.target)) return;
+                if (esBurbuja() && event.button !== 0) return;
                 if (document.activeElement) document.activeElement.blur();
-                if (event.target.closest('.nsft-header-actions')) return;
                 if (modal.dataset.state === 'fullscreen') return;
 
                 mouseIsDown = true;
-                modal.classList.add('nsft-dragging');
+                inicioX = event.clientX;
+                inicioY = event.clientY;
+                arrastroBurbuja = false;
+                rastro = [];
+                if (!esBurbuja()) modal.classList.add('nsft-dragging');
                 offsetX = event.clientX - modal.offsetLeft;
                 offsetY = event.clientY - modal.offsetTop;
                 window.addEventListener('mousemove', handleMouseMove);
             });
 
-            window.addEventListener('mouseup', () => {
+            window.addEventListener('mouseup', (event) => {
                 if (mouseIsDown) {
-                    modal.classList.remove('nsft-dragging');
-                    if (modal.dataset.state === 'minimised') {
-                        requestAnimationFrame(() => snapToEdge(modal));
+                    modal.classList.remove('nsft-dragging', 'nsft-ssc-burbuja-cierra');
+                    if (esBurbuja()) {
+                        if (!arrastroBurbuja) {
+                            restauradaEn = Date.now();
+                            document.getElementById('nsft-ssc-maximise').click();
+                        } else {
+                            const pap = window.NSFT_Bubble && window.NSFT_Bubble.papelera;
+                            if (pap) {
+                                if (pap.cerca(event.clientX, event.clientY)) pap.tragar(modal, () => cerrarBurbuja({ x: event.clientX, y: event.clientY, vx: 0, vy: 0, ya: true }));
+                                else { pap.oculta(); requestAnimationFrame(() => snapToEdge(modal)); }
+                            } else {
+                                const gesto = salidaDeBurbuja(event);
+                                if (gesto) cerrarBurbuja(gesto);
+                                else requestAnimationFrame(() => snapToEdge(modal));
+                            }
+                        }
                     }
                 }
                 mouseIsDown = false;
@@ -2728,6 +2955,7 @@
         });
 
         registerAction('nsft-ssc-action-run', handleRunRun);
+        registerAction('nsft-ssc-action-run-selection', handleRunSelection);
 
         registerAction('nsft-ssc-action-view-table', handleViewTable);
         registerAction('nsft-ssc-action-view-editor', handleViewEditor);
@@ -2914,139 +3142,36 @@
     }
 
     function initFavoritesUI() {
-        const btn = document.getElementById('nsft-ssc-tool-favorites');
-        const menu = document.getElementById('nsft-ssc-favorites-menu');
-        if (!btn || !menu) return;
-
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (menu.classList.contains('open')) {
-                menu.classList.remove('open');
-                return;
-            }
-            renderFavoritesMenu(menu);
-            menu.classList.add('open');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!menu.contains(e.target) && e.target !== btn) {
-                menu.classList.remove('open');
-            }
-        });
+        iniciarPopover('nsft-ssc-tool-favorites', 'nsft-ssc-favorites-menu', 'fav', renderFavoritesMenu);
+        iniciarPopover('nsft-ssc-tool-history', 'nsft-ssc-history-menu', 'hist', renderHistoryMenu);
     }
 
     function renderFavoritesMenu(menu) {
-        menu.innerHTML = `<div class="nsft-ssc-fav-loading">${escapeHtml(chrome.i18n.getMessage('sql_loading') || 'Loading...')}</div>`;
         loadFavorites((favs) => {
-            loadHistory((history) => {
-                const names = Object.keys(favs).sort();
-                const saveLabel = escapeHtml(chrome.i18n.getMessage('ssc_fav_save_current') || 'Save current query as...');
-                const favEmptyLabel = escapeHtml(chrome.i18n.getMessage('sql_fav_empty') || 'No favorites yet');
-                const favHeader = escapeHtml(chrome.i18n.getMessage('sql_fav_header') || 'Favorites');
-                const histHeader = escapeHtml(chrome.i18n.getMessage('sql_history_header') || 'Recent');
-                const histEmpty = escapeHtml(chrome.i18n.getMessage('ssc_history_empty') || 'No executed scripts yet');
-                const histClear = escapeHtml(chrome.i18n.getMessage('sql_history_clear') || 'Clear history');
-
-                let html = `<div class="nsft-ssc-fav-action" id="nsft-ssc-fav-add">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                <span>${saveLabel}</span>
-                            </div>`;
-
-                html += `<div class="nsft-ssc-fav-section-header">${favHeader}</div>`;
-                if (names.length === 0) {
-                    html += `<div class="nsft-ssc-fav-empty">${favEmptyLabel}</div>`;
-                } else {
-                    html += names.map(n => {
-                        const safeName = escapeHtml(n);
-                        return `<div class="nsft-ssc-fav-item" data-fav-name="${safeName}" title="${safeName}">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                    <span class="nsft-ssc-fav-name">${safeName}</span>
-                                    <span class="nsft-ssc-fav-delete" data-fav-delete="${safeName}" title="${escapeHtml(chrome.i18n.getMessage('sql_fav_unstar') || 'Remove from favorites')}">×</span>
-                                </div>`;
-                    }).join('');
-                }
-
-                html += `<div class="nsft-ssc-fav-section-header nsft-ssc-fav-section-history">
-                            <span>${histHeader}</span>
-                            ${history.length > 0 ? `<button class="nsft-ssc-history-clear" id="nsft-ssc-history-clear" title="${histClear}">${histClear}</button>` : ''}
-                         </div>`;
-                if (history.length === 0) {
-                    html += `<div class="nsft-ssc-fav-empty">${histEmpty}</div>`;
-                } else {
-                    html += history.map((entry, idx) => {
-                        const q = entry.query || '';
-                        const preview = q.replace(/\s+/g, ' ').slice(0, 80);
-                        const safePreview = escapeHtml(preview);
-                        const timeAgo = entry.executedAt ? formatTimeAgo(entry.executedAt) : '';
-
-                        const status = entry.status || 'ok';
-                        const statusClass = `nsft-ssc-hist-dot nsft-ssc-hist-dot-${status}`;
-
-                        const chipParts = [];
-                        if (typeof entry.rows === 'number') {
-                            chipParts.push(entry.rows + ' ' + (entry.rows === 1 ? 'row' : 'rows'));
-                        }
-                        if (typeof entry.durationMs === 'number') {
-                            chipParts.push(entry.durationMs + ' ms');
-                        }
-                        const chip = chipParts.length
-                            ? `<span class="nsft-ssc-hist-chip">${escapeHtml(chipParts.join(' · '))}</span>`
-                            : '';
-
-                        const tipLines = [q];
-                        if (status === 'error' && entry.errorMsg) tipLines.push('⚠ ' + entry.errorMsg);
-                        const tooltip = escapeHtml(tipLines.join('\n'));
-
-                        return `<div class="nsft-ssc-hist-item" data-hist-idx="${idx}" title="${tooltip}">
-                                    <span class="${statusClass}" aria-hidden="true"></span>
-                                    <span class="nsft-ssc-hist-preview">${safePreview}</span>
-                                    ${chip}
-                                    <span class="nsft-ssc-hist-time">${escapeHtml(timeAgo)}</span>
-                                </div>`;
-                    }).join('');
-                }
-
-                menu.innerHTML = html;
-
-                const addBtn = document.getElementById('nsft-ssc-fav-add');
-                if (addBtn) addBtn.addEventListener('click', () => {
+            const items = Object.keys(favs).sort().map((name) => ({ name, entry: favs[name], query: (favs[name] && favs[name].query) || '' }));
+            montarPopover(menu, {
+                key: 'fav',
+                placeholder: chrome.i18n.getMessage('sql_rp_filter_favs') || 'Filter favorites…',
+                items,
+                buscable: (it) => it.name + ' ' + it.query,
+                titulo: (it) => it.query,
+                icono: RP_I.estrella,
+                vacio: rpVacio(RP_I.estrella, chrome.i18n.getMessage('sql_fav_empty') || 'No favorites yet', '', true),
+                fila: (it, q) => `
+                    <span class="nsft-ssc-rp-ico is-amber">${rpIcono(RP_I.estrella)}</span>
+                    <span class="nsft-ssc-rp-tx"><b>${markMatches(it.name, q)}</b><small class="is-mono">${markMatches(rpPreview(it.query, 70), q)}</small></span>
+                    <span class="nsft-ssc-rp-der">${escapeHtml(it.entry && it.entry.date ? formatTimeAgo(it.entry.date) : '')}</span>
+                    <span class="nsft-ssc-rp-acc"><button type="button" data-rp-quitar title="${escapeHtml(chrome.i18n.getMessage('sql_fav_unstar') || 'Remove from favorites')}">${rpIcono(RP_I.cerrar, 12)}</button></span>`,
+                alElegir: (it, e) => {
+                    if (e.target.closest && e.target.closest('[data-rp-quitar]')) { handleFavoriteDelete(it.name, menu); return; }
                     menu.classList.remove('open');
-                    handleFavoriteAdd();
-                });
-                menu.querySelectorAll('.nsft-ssc-fav-item').forEach(el => {
-                    el.addEventListener('click', (ev) => {
-                        if (ev.target && ev.target.hasAttribute('data-fav-delete')) {
-                            const n = ev.target.getAttribute('data-fav-delete');
-                            handleFavoriteDelete(n, menu);
-                            return;
-                        }
-                        const name = el.getAttribute('data-fav-name');
-                        if (name && favs[name]) {
-                            menu.classList.remove('open');
-                            handleFavoriteLoad(name, favs[name]);
-                        }
-                    });
-                });
-                menu.querySelectorAll('.nsft-ssc-hist-item').forEach(el => {
-                    el.addEventListener('click', () => {
-                        const i = parseInt(el.getAttribute('data-hist-idx'), 10);
-                        const entry = history[i];
-                        if (!entry) return;
-                        menu.classList.remove('open');
-                        createTab({
-                            title: (chrome.i18n.getMessage('ssc_tab_default_title') || 'Query') + ' ' + (tabs.length + 1),
-                            query: entry.query,
-                            fileName: null
-                        });
-                    });
-                });
-                const clearBtn = document.getElementById('nsft-ssc-history-clear');
-                if (clearBtn) clearBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    clearHistory(() => {
-                        renderFavoritesMenu(menu);
-                    });
-                });
+                    handleFavoriteLoad(it.name, it.entry);
+                },
+                pie: {
+                    icono: RP_I.estrella,
+                    texto: chrome.i18n.getMessage('ssc_fav_save_current') || 'Save current query as favorite…',
+                    accion: () => { menu.classList.remove('open'); handleFavoriteAdd(); }
+                }
             });
         });
     }
@@ -3077,7 +3202,7 @@
         showSaveQueryDialog((name) => {
             saveQueryDirectly(name, query, { favorite: true });
             logToToolbar(`${chrome.i18n.getMessage('sql_fav_saved') || 'Added to favorites'}: ${name}`, 'success');
-        });
+        }, { titulo: chrome.i18n.getMessage('sql_rd_save_fav') || 'Add to favorites' });
     }
 
     function handleFavoriteLoad(name, fav) {
@@ -3118,6 +3243,16 @@
     function initToolbarMenuExclusivity() {
         const toolbar = document.querySelector('#nsft-ssc-modal .nsft-ssc-toolbar');
         if (!toolbar) return;
+        initRunMenu();
+        toolbar.addEventListener('mouseover', (e) => {
+            if (e.target.closest('.nsft-ssc-favorites-menu')) return;
+            const wrap = e.target.closest('.nsft-ssc-favorites-wrap');
+            if (!wrap || wrap.contains(e.relatedTarget)) return;
+            const abierto = toolbar.querySelector('.nsft-ssc-favorites-menu.open');
+            if (!abierto || wrap.contains(abierto)) return;
+            const boton = wrap.querySelector('button.nsft-ssc-toolbar-button:not(#nsft-ssc-tool-run)');
+            if (boton) boton.click();
+        });
         toolbar.addEventListener('click', (e) => {
             const btn = e.target.closest('.nsft-ssc-toolbar-button');
             if (!btn) return;
@@ -3132,77 +3267,49 @@
 
 
     function initSnippetsUI() {
-        const btn = document.getElementById('nsft-ssc-tool-snippets');
-        const menu = document.getElementById('nsft-ssc-snippets-menu');
-        if (!btn || !menu) return;
-
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (menu.classList.contains('open')) { menu.classList.remove('open'); return; }
-            renderSnippetsMenu(menu);
-            menu.classList.add('open');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!menu.contains(e.target) && e.target !== btn) menu.classList.remove('open');
-        });
+        iniciarPopover('nsft-ssc-tool-snippets', 'nsft-ssc-snippets-menu', 'snip', renderSnippetsMenu);
     }
 
     function renderSnippetsMenu(menu) {
-        menu.innerHTML = `<div class="nsft-ssc-fav-loading">${escapeHtml(chrome.i18n.getMessage('sql_loading') || 'Loading...')}</div>`;
         loadSnippets((snips) => {
-            const saveLabel = escapeHtml(chrome.i18n.getMessage('sql_snip_save_current') || 'Save selection as snippet…');
-            const header = escapeHtml(chrome.i18n.getMessage('sql_snip_header') || 'Snippets');
-            const emptyLabel = escapeHtml(chrome.i18n.getMessage('sql_snip_empty') || 'No snippets yet');
-
-            let html = `<div class="nsft-ssc-fav-action" id="nsft-ssc-snip-add">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            <span>${saveLabel}</span>
-                        </div>`;
-            html += `<div class="nsft-ssc-fav-section-header">${header}</div>`;
-            if (!snips.length) {
-                html += `<div class="nsft-ssc-fav-empty">${emptyLabel}</div>`;
-            } else {
-                const tRun = escapeHtml(chrome.i18n.getMessage('ssc_frag_run') || 'Run this snippet');
-                const tOpen = escapeHtml(chrome.i18n.getMessage('ssc_frag_open') || 'Open in a tab to edit it');
-                html += snips.map((s, idx) => {
-                    const safeName = escapeHtml(s.name);
-                    const preview = escapeHtml((s.code || '').replace(/\s+/g, ' ').slice(0, 90));
-                    return `<div class="nsft-ssc-fav-item nsft-ssc-snip-item" data-snip-idx="${idx}" title="${preview}">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                                <span class="nsft-ssc-fav-name">${safeName}</span>
-                                <span class="nsft-ssc-snip-act" data-snip-run="${idx}" title="${tRun}" aria-label="${tRun}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg></span>
-                                <span class="nsft-ssc-snip-act" data-snip-open="${idx}" title="${tOpen}" aria-label="${tOpen}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg></span>
-                                <span class="nsft-ssc-fav-delete" data-snip-delete="${idx}" title="${escapeHtml(chrome.i18n.getMessage('sql_snip_remove') || 'Delete snippet')}">×</span>
-                            </div>`;
-                }).join('');
-            }
-            menu.innerHTML = html;
-
-            const addEl = menu.querySelector('#nsft-ssc-snip-add');
-            if (addEl) addEl.addEventListener('click', (e) => {
-                e.stopPropagation();
-                menu.classList.remove('open');
-                handleSnippetSave();
-            });
-
-            menu.querySelectorAll('.nsft-ssc-snip-item').forEach((item) => {
-                item.addEventListener('click', (e) => {
-                    const delEl = e.target.closest('[data-snip-delete]');
-                    if (delEl) {
-                        e.stopPropagation();
-                        handleSnippetDelete(parseInt(delEl.getAttribute('data-snip-delete'), 10), menu);
+            montarPopover(menu, {
+                key: 'snip',
+                placeholder: chrome.i18n.getMessage('sql_rp_filter_snippets') || 'Filter snippets…',
+                items: snips.map((s, idx) => ({ ...s, idx })),
+                buscable: (s) => s.name + ' ' + s.code,
+                titulo: (s) => s.code,
+                icono: RP_I.codigo,
+                tecla: rpTecla('pal_k_insert', 'insert'),
+                vacio: rpVacio(RP_I.codigo, chrome.i18n.getMessage('sql_snip_empty') || 'No snippets yet', '', true),
+                fila: (s, q) => `
+                    <span class="nsft-ssc-rp-ico">${rpIcono(RP_I.codigo)}</span>
+                    <span class="nsft-ssc-rp-tx"><b>${markMatches(s.name, q)}</b><small class="is-mono">${markMatches(rpPreview(s.code, 70), q)}</small></span>
+                    <span class="nsft-ssc-rp-acc">
+                        <button type="button" data-snip-run title="${escapeHtml(chrome.i18n.getMessage('ssc_frag_run') || 'Run this snippet')}">${rpIcono('<path d="M8 5l11 7-11 7z"></path>', 12)}</button>
+                        <button type="button" data-snip-open title="${escapeHtml(chrome.i18n.getMessage('ssc_frag_open') || 'Open in a tab to edit it')}">${rpIcono('<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path>', 12)}</button>
+                        <button type="button" data-rp-copiar title="${escapeHtml(chrome.i18n.getMessage('sql_copy_results_btn') || 'Copy')}">${rpIcono(RP_I.copiar, 12)}</button>
+                        <button type="button" data-rp-borrar title="${escapeHtml(chrome.i18n.getMessage('sql_snip_remove') || 'Delete snippet')}">${rpIcono(RP_I.papelera, 12)}</button>
+                    </span>`,
+                alElegir: (s, e) => {
+                    const t = e.target;
+                    if (t.closest && (t.closest('[data-snip-run]') || t.closest('[data-snip-open]'))) {
+                        menu.classList.remove('open');
+                        sscAbreFragmento(s, !!t.closest('[data-snip-run]'));
                         return;
                     }
-                    const idx = parseInt(item.getAttribute('data-snip-idx'), 10);
-                    const snip = snippetsCache[idx];
-                    const accion = e.target.closest('[data-snip-run]') ? 'run'
-                        : e.target.closest('[data-snip-open]') ? 'open' : 'insert';
+                    if (t.closest && t.closest('[data-rp-borrar]')) { handleSnippetDelete(s.idx, menu); return; }
+                    if (t.closest && t.closest('[data-rp-copiar]')) {
+                        if (window.NSFT_Clipboard) window.NSFT_Clipboard.copy(s.code, { toast: true });
+                        return;
+                    }
+                    handleSnippetInsert(s.code);
                     menu.classList.remove('open');
-                    if (!snip) return;
-                    if (accion === 'insert') handleSnippetInsert(snip.code);
-                    else sscAbreFragmento(snip, accion === 'run');
-                });
+                },
+                pie: {
+                    icono: RP_I.mas,
+                    texto: chrome.i18n.getMessage('sql_snip_save_current') || 'Save selection as snippet…',
+                    accion: () => { menu.classList.remove('open'); handleSnippetSave(); }
+                }
             });
         });
     }
@@ -3234,15 +3341,15 @@
         }
         const activa = getActiveTab();
         showSaveQueryDialog((name) => {
+            if (activa && !sel) activa.fragmento = name;
             loadSnippets((snips) => {
-                if (activa && !sel) activa.fragmento = name;
                 const others = snips.filter(s => s.name !== name);
                 others.push({ name, code });
                 saveSnippets(others, () => {
                     logToToolbar(`${chrome.i18n.getMessage('sql_snip_saved') || 'Snippet saved'}: ${name}`, 'success');
                 });
             });
-        }, (activa && activa.fragmento) || '');
+        }, { titulo: chrome.i18n.getMessage('sql_rd_save_snippet') || 'Save snippet', existentes: snippetsCache.map((s) => s.name), vista: code, nombre: (activa && activa.fragmento) || '' });
     }
 
     function handleSnippetDelete(idx, menu) {
@@ -3255,103 +3362,48 @@
     }
 
 
-    function showSaveQueryDialog(onConfirm, nombrePrevio) {
+    function showSaveQueryDialog(onConfirm, opts) {
         if (document.getElementById('nsft-save-dialog')) return;
+        const o = opts || {};
+        let existentes = o.existentes;
+        if (!existentes) {
+            try { existentes = Object.keys(JSON.parse(localStorage.getItem(SAVED_QUERIES_KEY) || '{}')); }
+            catch (e) { existentes = []; }
+        }
+        const vista = o.vista !== undefined ? o.vista : (editor ? editor.getValue() : '');
+        const d = crearDialogo('nsft-save-dialog', { titulo: o.titulo || chrome.i18n.getMessage('ssc_rd_save_title') || 'Save query', icono: 'guardar' });
 
-        const overlay = document.createElement('div');
-        overlay.id = 'nsft-save-dialog';
-        overlay.className = 'nsft-ssc-dialog';
-        overlay.style.cssText = `
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        `;
+        d.cuerpo.innerHTML = `
+            <label class="nsft-ssc-rd-et"><span>${escapeHtml(chrome.i18n.getMessage('col_name') || 'Name')}</span><input type="text" class="nsft-ssc-rd-inp" placeholder="${escapeHtml(chrome.i18n.getMessage('ssc_save_placeholder') || 'My query…')}"></label>
+            <div class="nsft-ssc-rd-aviso" hidden>${rpIcono('<path d="M12 4L2.5 20h19zM12 10v4M12 17.2v.1"></path>', 14)}<span>${escapeHtml(chrome.i18n.getMessage('sql_rd_exists') || 'That name already exists. It will be replaced.')}</span></div>
+            ${vista && vista.trim() ? `<pre class="nsft-ssc-rd-cod">${codigoResaltado(vista)}</pre>` : ''}`;
+        const input = d.cuerpo.querySelector('input');
+        if (o.nombre) input.value = String(o.nombre);
+        const aviso = d.cuerpo.querySelector('.nsft-ssc-rd-aviso');
 
-        const dialog = document.createElement('div');
-        dialog.style.cssText = `
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            min-width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        `;
-
-        const title = document.createElement('h3');
-        title.textContent = chrome.i18n.getMessage('ssc_save_prompt') || 'Query Name';
-        title.style.margin = '0';
-        title.style.fontSize = '16px';
-        title.style.color = '#111827';
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.style.cssText = `
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-size: 14px;
-            width: 100%;
-            box-sizing: border-box;
-        `;
-        input.placeholder = chrome.i18n.getMessage('ssc_save_placeholder') || 'My Script...';
-        if (nombrePrevio) input.value = String(nombrePrevio);
-
-        setTimeout(() => { input.focus(); if (nombrePrevio) input.select(); }, 100);
-
-        const btnContainer = document.createElement('div');
-        btnContainer.style.cssText = 'display: flex; justify-content: flex-end; gap: 10px;';
-
-        const btnCancel = document.createElement('button');
-        btnCancel.textContent = chrome.i18n.getMessage('btn_cancel') || 'Cancel';
-        btnCancel.style.cssText = `
-            padding: 8px 16px;
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            cursor: pointer;
-        `;
-        btnCancel.onclick = () => overlay.remove();
-
-        const btnSave = document.createElement('button');
-        btnSave.textContent = chrome.i18n.getMessage('sql_submenu_save') || 'Save';
-        btnSave.style.cssText = `
-            padding: 8px 16px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        `;
-        btnSave.onclick = () => {
+        const guardar = () => {
             const val = input.value.trim();
-            if (val) {
-                onConfirm(val);
-                const dialogEl = document.getElementById('nsft-save-dialog');
-                if (dialogEl) dialogEl.remove();
-            }
+            if (!val) { input.focus(); return; }
+            d.cerrar();
+            onConfirm(val);
         };
+        const btnOk = botonDialogo(chrome.i18n.getMessage('sql_submenu_save') || 'Save', true, guardar, 'Enter');
+        d.pie.appendChild(botonDialogo(chrome.i18n.getMessage('btn_cancel') || 'Cancel', false, d.cerrar));
+        d.pie.appendChild(btnOk);
 
-        input.onkeydown = (e) => {
-            if (e.key === 'Enter') btnSave.click();
-            if (e.key === 'Escape') btnCancel.click();
+        const revisa = () => {
+            const ya = existentes.includes(input.value.trim());
+            aviso.hidden = !ya;
+            btnOk.querySelector('span').textContent = ya
+                ? (chrome.i18n.getMessage('sql_rd_replace') || 'Replace')
+                : (chrome.i18n.getMessage('sql_submenu_save') || 'Save');
         };
-
-        btnContainer.appendChild(btnCancel);
-        btnContainer.appendChild(btnSave);
-        dialog.appendChild(title);
-        dialog.appendChild(input);
-        dialog.appendChild(btnContainer);
-        overlay.appendChild(dialog);
-
-        const modalContainer = document.getElementById('nsft-ssc-modal');
-        if (modalContainer) modalContainer.appendChild(overlay);
+        input.addEventListener('input', revisa);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); guardar(); }
+        });
+        revisa();
+        setTimeout(() => { input.focus(); if (o.nombre) input.select(); }, 40);
     }
     function handleFileExport() {
         if (!editor) return;
@@ -3376,83 +3428,14 @@
     }
 
     function showExportFormatDialog(onConfirm) {
-        if (document.getElementById('nsft-export-dialog')) return;
-
-        const overlay = document.createElement('div');
-        overlay.id = 'nsft-export-dialog';
-        overlay.className = 'nsft-ssc-dialog';
-        overlay.style.cssText = `
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        `;
-
-        const dialog = document.createElement('div');
-        dialog.style.cssText = `
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            min-width: 250px;
-            font-family: 'Inter', system-ui, sans-serif;
-        `;
-
-        const title = document.createElement('h3');
-        title.textContent = 'Select Format';
-        title.style.cssText = 'margin: 0 0 16px 0; font-size: 16px; color: #111827;';
-
-        const btnContainer = document.createElement('div');
-        btnContainer.style.cssText = 'display: flex; gap: 10px; justify-content: center;';
-
-        const btnSQL = document.createElement('button');
-        btnSQL.textContent = 'SQL (.sql)';
-        btnSQL.style.cssText = `
-            padding: 8px 16px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        `;
-        btnSQL.onclick = () => { close(); onConfirm('sql'); };
-
-        const btnTXT = document.createElement('button');
-        btnTXT.textContent = 'Text (.txt)';
-        btnTXT.style.cssText = `
-            padding: 8px 16px;
-            background: #6b7280;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-        `;
-        btnTXT.onclick = () => { close(); onConfirm('txt'); };
-
-        const close = () => {
-            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-        };
-
-        overlay.onclick = (e) => {
-            if (e.target === overlay) close();
-        };
-
-        btnContainer.appendChild(btnSQL);
-        btnContainer.appendChild(btnTXT);
-        dialog.appendChild(title);
-        dialog.appendChild(btnContainer);
-        overlay.appendChild(dialog);
-
-        const modalContainer = document.getElementById('nsft-ssc-modal');
-        if (modalContainer) {
-            modalContainer.appendChild(overlay);
-        }
+        const hoy = new Date().toISOString().slice(0, 10);
+        dialogoFormatos('nsft-export-dialog', {
+            titulo: chrome.i18n.getMessage('ssc_rd_export_script') || 'Export query',
+            accion: chrome.i18n.getMessage('sql_rd_download') || 'Download',
+            formatos: [{ label: 'JavaScript', fmt: 'js', ext: 'js' }, { label: chrome.i18n.getMessage('sql_rd_text') || 'Text', fmt: 'txt', ext: 'txt' }],
+            archivo: (f) => `script_${hoy}.${f.ext}`,
+            alConfirmar: onConfirm
+        });
     }
 
     function exportSavedQueriesToFile() {
@@ -3540,279 +3523,148 @@
 
     function showSavedQueriesDialog(queries, onSelect) {
         if (document.getElementById('nsft-open-dialog')) return;
+        const d = crearDialogo('nsft-open-dialog', { titulo: chrome.i18n.getMessage('ssc_open_dialog_title') || 'Saved queries', grande: true, icono: 'abrir' });
+        const entradas = () => Object.entries(queries).map(([name, v]) => {
+            const obj = typeof v === 'object' && v !== null;
+            return { name, query: obj ? (v.query || '') : String(v || ''), date: obj ? v.date : null, favorite: obj && v.favorite === true };
+        });
 
-        const overlay = document.createElement('div');
-        overlay.id = 'nsft-open-dialog';
-        overlay.className = 'nsft-ssc-dialog';
-        overlay.style.cssText = `
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(2px);
-        `;
+        if (!Object.keys(queries).length) {
+            d.overlay.querySelector('.nsft-ssc-rd').classList.remove('is-grande');
+            d.cuerpo.innerHTML = rpVacio('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>', chrome.i18n.getMessage('ssc_no_saved_scripts') || 'No saved queries found.');
+            d.pie.appendChild(botonDialogo(chrome.i18n.getMessage('sql_settings_close') || 'Close', false, d.cerrar));
+            return;
+        }
 
-        const dialog = document.createElement('div');
-        dialog.style.cssText = `
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            width: 500px;
-            max-width: 90%;
-            max-height: 85%;
-            display: flex;
-            flex-direction: column;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        `;
+        const col = (k, def) => escapeHtml(chrome.i18n.getMessage(k) || def);
+        const ph = col('sql_rp_filter_saved', 'Filter saved queries…');
+        d.cuerpo.classList.add('is-dos', 'nsft-paleta');
+        d.cuerpo.dataset.tono = 'indigo';
+        d.cuerpo.innerHTML = `
+            <div class="nsft-ssc-find nsft-paleta-barra nsft-ssc-rd-barra">${rpBarraIco()}<input type="text" id="nsft-ssc-open-filter" class="nsft-paleta-input" placeholder="${ph}" aria-label="${ph}" autocomplete="off" spellcheck="false"></div>
+            <div class="nsft-ssc-rd-izq">
+                <div class="nsft-ssc-rd-seg" role="group"><button type="button" data-orden="name" aria-pressed="true">${col('col_name', 'Name')}</button><button type="button" data-orden="date" aria-pressed="false">${col('col_date', 'Date')}</button></div>
+                <div class="nsft-ssc-rp-lista" role="listbox"></div>
+            </div>
+            <div class="nsft-ssc-rd-der"><div class="nsft-ssc-rd-meta"></div><pre class="nsft-ssc-rd-cod"></pre></div>`;
+        const input = d.cuerpo.querySelector('input');
+        const lista = d.cuerpo.querySelector('.nsft-ssc-rp-lista');
+        const meta = d.cuerpo.querySelector('.nsft-ssc-rd-meta');
+        const cod = d.cuerpo.querySelector('.nsft-ssc-rd-cod');
+        let orden = { campo: 'name', dir: 1 };
+        let visibles = [];
+        let actual = null;
 
-        const title = document.createElement('h3');
-        title.textContent = chrome.i18n.getMessage('ssc_open_dialog_title') || 'Saved Scripts';
-        title.style.cssText = `
-            margin: 0 0 20px 0;
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-        `;
+        const abrir = () => {
+            if (!actual) return;
+            d.cerrar();
+            onSelect(queries[actual.name], actual.name);
+        };
+        const btnAbrir = botonDialogo(chrome.i18n.getMessage('sql_submenu_open') || 'Open', true, abrir, 'Enter');
+        d.pie.insertAdjacentHTML('beforeend', rpPieTeclas([
+            ['↑↓', rpTecla('tmm_k_nav', 'navigate')],
+            ['Esc', rpTecla('tmm_k_close', 'close')]
+        ]));
+        const pieTeclas = d.pie.lastElementChild;
+        d.pie.appendChild(botonDialogo(chrome.i18n.getMessage('btn_cancel') || 'Cancel', false, d.cerrar));
+        d.pie.appendChild(btnAbrir);
 
-        const listContainer = document.createElement('div');
-        listContainer.style.cssText = `
-            flex: 1;
-            overflow-y: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            max-height: 400px;
-        `;
+        const pintaDetalle = () => {
+            lista.querySelectorAll('[data-rp]').forEach((f) => f.classList.toggle('is-sel', !!actual && f.dataset.nombre === actual.name));
+            btnAbrir.disabled = !actual;
+            if (!actual) { meta.textContent = ''; cod.innerHTML = ''; return; }
+            const lineas = actual.query.split('\n').length;
+            const partes = [];
+            if (actual.date) partes.push(new Date(actual.date).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }));
+            partes.push(chrome.i18n.getMessage('sql_rd_lines', [String(lineas)]) || `${lineas} lines`);
+            meta.textContent = partes.join(' · ');
+            cod.innerHTML = codigoResaltado(actual.query);
+            const f = lista.querySelector('.is-sel');
+            if (f) f.scrollIntoView({ block: 'nearest' });
+        };
 
-        let currentSort = { field: 'name', dir: 'asc' };
+        const pinta = () => {
+            const q = tsFold(input.value.trim());
+            visibles = entradas()
+                .filter((e) => !q || tsFold(e.name + ' ' + e.query).includes(q))
+                .sort((a, b) => {
+                    const r = orden.campo === 'name'
+                        ? a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+                        : new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime();
+                    return r * orden.dir;
+                });
+            lista.innerHTML = visibles.length
+                ? visibles.map((e, i) => `
+                    <div class="nsft-ssc-rp-fila" role="option" data-rp="${i}" data-nombre="${escapeHtml(e.name)}">
+                        <button type="button" class="nsft-ssc-rp-ico${e.favorite ? ' is-amber' : ''}" data-rd-star title="${col(e.favorite ? 'sql_fav_unstar' : 'sql_fav_star', 'Favorite')}">${rpIcono(RP_I.estrella)}</button>
+                        <span class="nsft-ssc-rp-tx"><b>${markMatches(e.name, q)}</b><small>${escapeHtml(e.date ? new Date(e.date).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '')}</small></span>
+                        <span class="nsft-ssc-rp-acc"><button type="button" data-rd-borrar title="${col('btn_delete', 'Delete')}">${rpIcono(RP_I.papelera, 12)}</button></span>
+                    </div>`).join('')
+                : rpSinCoincidencias();
+            rpCuenta(pieTeclas, visibles.length);
+            if (!actual || !visibles.some((e) => e.name === actual.name)) actual = visibles[0] || null;
+            else actual = visibles.find((e) => e.name === actual.name);
+            pintaDetalle();
+        };
 
-        function renderList() {
-            listContainer.innerHTML = '';
+        d.cuerpo.querySelector('.nsft-ssc-rd-seg').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-orden]');
+            if (!b) return;
+            orden = orden.campo === b.dataset.orden ? { campo: orden.campo, dir: -orden.dir } : { campo: b.dataset.orden, dir: 1 };
+            b.parentElement.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+            pinta();
+        });
 
-            const entries = Object.entries(queries);
-            if (entries.length === 0) {
-                listContainer.innerHTML = `<div style="padding:24px; text-align:center; color:#6b7280; font-size:14px;">${chrome.i18n.getMessage('ssc_no_saved_scripts') || 'No saved scripts found.'}</div>`;
+        const recargar = () => loadSavedQueries((nuevas) => {
+            Object.keys(queries).forEach((k) => delete queries[k]);
+            Object.assign(queries, nuevas);
+            pinta();
+        });
+
+        lista.addEventListener('click', (e) => {
+            const f = e.target.closest('[data-rp]');
+            if (!f) return;
+            const entrada = visibles[Number(f.dataset.rp)];
+            if (e.target.closest('[data-rd-star]')) { toggleFavorite(entrada.name, recargar); return; }
+            if (e.target.closest('[data-rd-borrar]')) {
+                showRunnerConfirm({
+                    title: chrome.i18n.getMessage('btn_delete') || 'Delete',
+                    body: chrome.i18n.getMessage('ssc_confirm_delete', [entrada.name]) || `Delete query "${entrada.name}"?`,
+                    confirmLabel: chrome.i18n.getMessage('btn_delete') || 'Delete',
+                    danger: true
+                }).then((ok) => {
+                    if (!ok) return;
+                    delete queries[entrada.name];
+                    localStorage.setItem(SAVED_QUERIES_KEY, JSON.stringify(queries));
+                    _savedQueriesCache = queries;
+                    pinta();
+                });
                 return;
             }
+            actual = entrada;
+            pintaDetalle();
+        });
+        lista.addEventListener('dblclick', (e) => {
+            if (e.target.closest('[data-rp]') && !e.target.closest('button')) abrir();
+        });
 
-            entries.sort((a, b) => {
-                const nameA = a[0].toLowerCase();
-                const nameB = b[0].toLowerCase();
-
-                const getObj = (x) => typeof x === 'object' && x !== null ? x : { date: 0 };
-                const dateA = new Date(getObj(a[1]).date || 0).getTime();
-                const dateB = new Date(getObj(b[1]).date || 0).getTime();
-
-                let res = 0;
-                if (currentSort.field === 'name') {
-                    res = nameA.localeCompare(nameB);
-                } else if (currentSort.field === 'date') {
-                    res = dateA - dateB;
-                }
-
-                return currentSort.dir === 'asc' ? res : -res;
-            });
-
-            const table = document.createElement('table');
-            table.style.cssText = `
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 13px;
-                color: #374151;
-            `;
-
-            const createHeader = (text, field, width) => {
-                const th = document.createElement('th');
-                th.style.cssText = `
-                    padding: 10px 12px;
-                    font-weight: 600;
-                    text-align: left;
-                    background: #f9fafb;
-                    position: sticky;
-                    top: 0;
-                    z-index: 10;
-                    border-bottom: 1px solid #e5e7eb;
-                    cursor: pointer;
-                    user-select: none;
-                    width: ${width};
-                    color: #4b5563;
-                `;
-
-                let icon = '';
-                if (currentSort.field === field) {
-                    icon = currentSort.dir === 'asc' ? ' ↑' : ' ↓';
-                }
-                th.textContent = text + icon;
-
-                th.onclick = () => {
-                    if (currentSort.field === field) {
-                        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        currentSort.field = field;
-                        currentSort.dir = 'asc';
-                    }
-                    renderList();
-                };
-                return th;
-            };
-
-            const thead = document.createElement('thead');
-            const trHead = document.createElement('tr');
-
-            const thFav = document.createElement('th');
-            thFav.style.cssText = 'padding: 10px 8px; width: 36px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; text-align: center;';
-            thFav.title = chrome.i18n.getMessage('col_favorite') || 'Favorite';
-            thFav.textContent = '★';
-            thFav.style.color = '#9ca3af';
-            trHead.appendChild(thFav);
-
-            trHead.appendChild(createHeader(chrome.i18n.getMessage('col_name') || 'Name', 'name', '45%'));
-            trHead.appendChild(createHeader(chrome.i18n.getMessage('col_date') || 'Date', 'date', '40%'));
-
-            const thAction = document.createElement('th');
-            thAction.style.cssText = 'padding: 10px 12px; width: 40px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0;';
-            trHead.appendChild(thAction);
-
-            thead.appendChild(trHead);
-            table.appendChild(thead);
-
-            const tbody = document.createElement('tbody');
-            entries.forEach(([key, queryData]) => {
-                const isObject = typeof queryData === 'object' && queryData !== null;
-                const dateObj = isObject && queryData.date ? new Date(queryData.date) : null;
-                const dateStr = dateObj ? dateObj.toLocaleString(undefined, {
-                    year: 'numeric', month: 'short', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                }) : '';
-
-                const tr = document.createElement('tr');
-                tr.className = 'nsft-ssc-dialog-row';
-                tr.style.cssText = `
-                    border-bottom: 1px solid #f3f4f6;
-                    cursor: pointer;
-                    transition: background-color 0.15s ease;
-                `;
-
-                const isFav = isObject && queryData.favorite === true;
-                tr.innerHTML = `
-                    <td class="nsft-ssc-dialog-cell-fav" style="padding: 10px 0; text-align: center; width: 36px;"></td>
-                    <td class="nsft-ssc-dialog-cell-name" style="padding: 10px 12px; font-weight: 500; color: #1f2937;">${escapeHtml(key)}</td>
-                    <td class="nsft-ssc-dialog-cell-date" style="padding: 10px 12px; color: #6b7280; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">${dateStr}</td>
-                    <td style="padding: 10px 12px; text-align: right; width: 40px;"></td>
-                `;
-
-                const starBtn = document.createElement('button');
-                starBtn.type = 'button';
-                starBtn.className = 'nsft-ssc-dialog-star' + (isFav ? ' is-on' : '');
-                starBtn.innerHTML = isFav ? '★' : '☆';
-                starBtn.title = isFav
-                    ? (chrome.i18n.getMessage('sql_fav_unstar') || 'Remove from favorites')
-                    : (chrome.i18n.getMessage('sql_fav_star') || 'Mark as favorite');
-                starBtn.style.cssText = `
-                    border: none;
-                    background: none;
-                    color: ${isFav ? '#f59e0b' : '#d1d5db'};
-                    cursor: pointer;
-                    font-size: 18px;
-                    line-height: 1;
-                    padding: 2px 6px;
-                    transition: color 0.15s;
-                `;
-                starBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    toggleFavorite(key, () => {
-                        loadSavedQueries((updated) => {
-                            Object.keys(queries).forEach(k => delete queries[k]);
-                            Object.assign(queries, updated);
-                            renderList();
-                        });
-                    });
-                };
-                tr.cells[0].appendChild(starBtn);
-
-                tr.onclick = (e) => {
-                    if (e.target.closest('button')) return;
-                    onSelect(queries[key], key);
-                    overlay.remove();
-                };
-
-                const btnCell = tr.cells[3];
-                const btnDel = document.createElement('button');
-                btnDel.innerHTML = `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                `;
-                btnDel.style.cssText = `
-                    border: none;
-                    background: none;
-                    color: #9ca3af;
-                    cursor: pointer;
-                    padding: 4px;
-                    border-radius: 4px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.2s;
-                `;
-                btnDel.title = chrome.i18n.getMessage('btn_delete') || 'Delete';
-
-
-                btnDel.onclick = (e) => {
-                    e.stopPropagation();
-                    showRunnerConfirm({
-                        title: chrome.i18n.getMessage('btn_delete') || 'Delete',
-                        body: chrome.i18n.getMessage('ssc_confirm_delete', [key]) || `Delete query "${key}"?`,
-                        confirmLabel: chrome.i18n.getMessage('btn_delete') || 'Delete',
-                        danger: true
-                    }).then((ok) => {
-                        if (!ok) return;
-                        delete queries[key];
-                        localStorage.setItem(SAVED_QUERIES_KEY, JSON.stringify(queries));
-                        _savedQueriesCache = queries;
-                        renderList();
-                    });
-                };
-
-                btnCell.appendChild(btnDel);
-                tbody.appendChild(tr);
-            });
-            table.appendChild(tbody);
-            listContainer.appendChild(table);
-        }
-
-        renderList();
-
-        const btnCancel = document.createElement('button');
-        btnCancel.textContent = chrome.i18n.getMessage('btn_cancel') || 'Close';
-        btnCancel.style.cssText = `
-            padding: 8px 16px;
-            background: white;
-            color: #374151;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        `;
-        btnCancel.onclick = () => overlay.remove();
-
-        dialog.appendChild(title);
-        dialog.appendChild(listContainer);
-        dialog.appendChild(btnCancel);
-        overlay.appendChild(dialog);
-
-        const modalContainer = document.getElementById('nsft-ssc-modal');
-        if (modalContainer) {
-            modalContainer.appendChild(overlay);
-        }
+        wireFindClear('nsft-ssc-open-filter');
+        input.addEventListener('input', pinta);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!visibles.length) return;
+                const i = visibles.findIndex((x) => actual && x.name === actual.name);
+                const n = e.key === 'ArrowDown' ? i + 1 : i - 1;
+                actual = visibles[(n + visibles.length) % visibles.length];
+                pintaDetalle();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                abrir();
+            }
+        });
+        pinta();
+        setTimeout(() => input.focus(), 40);
     }
     function handleEditFormat() { formatScriptContent(); }
 
@@ -3844,26 +3696,29 @@
         const btnNext = document.createElement('button');
         btnNext.type = 'button';
         btnNext.className = 'nsft-ssc-findbar-btn';
-        btnNext.innerHTML = '&#9660;';
+        btnNext.innerHTML = rpIcono('<path d="M6 9l6 6 6-6"></path>', 13);
         btnNext.title = chrome.i18n.getMessage('sql_findbar_next') || 'Next (Enter)';
         btnNext.setAttribute('aria-label', btnNext.title);
 
         const btnPrev = document.createElement('button');
         btnPrev.type = 'button';
         btnPrev.className = 'nsft-ssc-findbar-btn';
-        btnPrev.innerHTML = '&#9650;';
+        btnPrev.innerHTML = rpIcono('<path d="M6 15l6-6 6 6"></path>', 13);
         btnPrev.title = chrome.i18n.getMessage('sql_findbar_prev') || 'Previous (Shift+Enter)';
         btnPrev.setAttribute('aria-label', btnPrev.title);
 
         const btnClose = document.createElement('button');
         btnClose.type = 'button';
         btnClose.className = 'nsft-ssc-findbar-btn nsft-ssc-findbar-close';
-        btnClose.innerHTML = '&times;';
+        btnClose.innerHTML = rpIcono('<path d="M6 6l12 12M18 6L6 18"></path>', 12);
         btnClose.title = chrome.i18n.getMessage('sql_findbar_close') || 'Close (Esc)';
         btnClose.setAttribute('aria-label', btnClose.title);
         btnClose.onclick = () => { widget.style.display = 'none'; editor.focus(); };
 
+        const cuenta = document.createElement('span');
+        cuenta.className = 'nsft-ssc-findbar-count';
         widget.appendChild(input);
+        widget.appendChild(cuenta);
         widget.appendChild(btnPrev);
         widget.appendChild(btnNext);
         widget.appendChild(btnClose);
@@ -3876,6 +3731,7 @@
             const query = input.value;
             if (!query) {
                 if (currentMarker) { currentMarker.clear(); currentMarker = null; }
+                cuenta.textContent = '';
                 return;
             }
 
@@ -3907,6 +3763,13 @@
                 idx = lowerContent.lastIndexOf(lowerQuery, Math.max(0, searchStart - 1));
                 if (idx === -1) idx = lowerContent.lastIndexOf(lowerQuery);
             }
+
+            let total = 0, posicion = 0;
+            for (let i = lowerContent.indexOf(lowerQuery); i !== -1; i = lowerContent.indexOf(lowerQuery, i + lowerQuery.length)) {
+                total++;
+                if (i === idx) posicion = total;
+            }
+            cuenta.textContent = total ? (chrome.i18n.getMessage('sql_rd_find_count', [String(posicion), String(total)]) || `${posicion} / ${total}`) : '0';
 
             if (idx !== -1) {
                 const start = editor.posFromIndex(idx);
@@ -3945,6 +3808,468 @@
 
         input.focus();
     }
+    const EDITOR_DEFAULT_PCT = 64;
+    const _popTermino = {};
+    const rpIcono = (cuerpo, tam = 13) => `<svg viewBox="0 0 24 24" width="${tam}" height="${tam}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${cuerpo}</svg>`;
+    const RP_I = {
+        estrella: '<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 3 1.1-6.2L3 9.7l6.2-.9z"></path>',
+        papelera: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path>',
+        codigo: '<path d="M8 8l-5 4 5 4M16 8l5 4-5 4"></path>',
+        copiar: '<path d="M8 8h12v12H8zM16 8V4H4v12h4"></path>',
+        mas: '<path d="M12 5v14M5 12h14"></path>',
+        reloj: '<circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path>',
+        engrane: '<circle cx="12" cy="12" r="3"></circle><path d="M12 3v2.5M12 18.5V21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M3 12h2.5M18.5 12H21M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"></path>',
+        llave: '<path d="M8 4c-2 0-3 1-3 3v2.5c0 1.5-1 2.5-2 2.5 1 0 2 1 2 2.5V17c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2.5c0 1.5 1 2.5 2 2.5-1 0-2 1-2 2.5V17c0 2-1 3-3 3"></path>',
+        cerrar: '<path d="M6 6l12 12M18 6L6 18"></path>'
+    };
+    const rpPreview = (texto, largo) => String(texto || '').replace(/\s+/g, ' ').trim().slice(0, largo);
+    const rpVacio = (icono, texto, ayuda, linea) => (window.NSFT_Herramientas ? window.NSFT_Herramientas.vacio(icono, texto, ayuda, '', { linea: !!linea })
+        : `<div class="nsft-ssc-rp-vacio">${rpIcono(icono, 18)}<b>${escapeHtml(texto)}</b>${ayuda ? `<span>${escapeHtml(ayuda)}</span>` : ''}</div>`);
+    const rpSinCoincidencias = (linea) => {
+        const t = chrome.i18n.getMessage('sql_join_empty') || 'No matches';
+        return window.NSFT_Herramientas ? window.NSFT_Herramientas.vacio('buscar', t, '', '', { linea: !!linea })
+            : `<div class="nsft-ssc-rp-vacio"><span>${escapeHtml(t)}</span></div>`;
+    };
+    const RP_LUPA = '<circle cx="10.5" cy="10.5" r="6.8"></circle><path d="m20.5 20.5-5.2-5.2"></path>';
+    function rpBarraIco(cuerpo) {
+        return `<span class="nsft-paleta-ico" aria-hidden="true">${rpIcono(cuerpo || RP_LUPA, 16)}</span>`;
+    }
+    function rpTecla(clave, respaldo) {
+        return chrome.i18n.getMessage(clave) || respaldo;
+    }
+    function rpPieTeclas(lista) {
+        const H = window.NSFT_Herramientas;
+        return `<div class="nsft-paleta-pie"><span class="nsft-paleta-cuenta"></span>${H && H.teclas ? H.teclas(lista) : ''}</div>`;
+    }
+    function rpCuenta(pie, n) {
+        const c = pie && pie.querySelector('.nsft-paleta-cuenta');
+        if (!c) return;
+        const txt = n ? (chrome.i18n.getMessage('pal_resultados', [String(n)]) || String(n)) : '';
+        if (c.textContent !== txt) c.textContent = txt;
+    }
+    const RD_ICONO_FMT = {
+        csv: '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h6"></path>',
+        js: '<path d="M8 8l-5 4 5 4M16 8l5 4-5 4"></path>',
+        txt: '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 13h6M9 17h4"></path>',
+        excel: '<rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M4 10h16M10 10v9"></path>',
+        json: '<path d="M9 4c-2 0-3 1-3 3v2.5c0 1.5-1 2.5-2 2.5 1 0 2 1 2 2.5V17c0 2 1 3 3 3M15 4c2 0 3 1 3 3v2.5c0 1.5 1 2.5 2 2.5-1 0-2 1-2 2.5V17c0 2-1 3-3 3"></path>',
+        html: '<path d="M8 8l-5 4 5 4M16 8l5 4-5 4"></path>'
+    };
+    function codigoResaltado(texto) {
+        return escapeHtml(String(texto || '').slice(0, 2000))
+            .replace(/\b(const|let|var|function|return|if|else|for|while|new|require|define|async|await|try|catch|throw|typeof|null|true|false)\b/g, '<i>$1</i>');
+    }
+
+    const TITLE_LOGO = '<span class="nsft-ssc-logo" aria-hidden="true"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-5 4 5 4M16 8l5 4-5 4"></path></svg></span>';
+    const TITLE_CARET = '<svg class="nsft-ssc-title-caret" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>';
+
+    function initRunMenu() {
+        const btn = document.getElementById('nsft-ssc-tool-run-more');
+        const menu = document.getElementById('nsft-ssc-run-menu');
+        if (!btn || !menu) return;
+        const filaSeleccion = menu.querySelector('[data-nsft-proxy="nsft-ssc-action-run-selection"]');
+        const pinta = (abierto) => {
+            if (abierto && filaSeleccion) filaSeleccion.classList.toggle('is-disabled', !hayTextoSeleccionado());
+            menu.classList.toggle('open', abierto);
+            btn.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+        };
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pinta(!menu.classList.contains('open'));
+        });
+        const run = document.getElementById('nsft-ssc-tool-run');
+        if (run) run.addEventListener('click', () => pinta(false), true);
+        menu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const item = e.target.closest('[data-nsft-proxy]');
+            if (!item) return;
+            pinta(false);
+            const destino = document.getElementById(item.dataset.nsftProxy);
+            if (destino) destino.click();
+        });
+        const fuera = () => {
+            if (!document.getElementById('nsft-ssc-modal')) {
+                document.removeEventListener('click', fuera);
+                return;
+            }
+            pinta(false);
+        };
+        document.addEventListener('click', fuera);
+    }
+
+    function hayTextoSeleccionado() {
+        return !!(editor && editor.getSelection().trim());
+    }
+
+    function handleRunSelection() {
+        if (!hayTextoSeleccionado()) {
+            logToToolbar(chrome.i18n.getMessage('sql_run_no_selection') || 'Select the text you want to run first.', 'warning');
+            return;
+        }
+        executeCurrentQuery({ soloSeleccion: true });
+    }
+
+    function montarPopover(menu, cfg) {
+        menu.classList.add('nsft-ssc-rp', 'nsft-paleta');
+        menu.dataset.tono = 'indigo';
+        menu.innerHTML = '';
+        let input = null;
+        let pieTeclas = null;
+        let visibles = [];
+        let marcada = -1;
+
+        if (cfg.items.length) {
+            const cab = document.createElement('div');
+            cab.className = 'nsft-ssc-find nsft-paleta-barra';
+            cab.innerHTML = rpBarraIco(cfg.icono);
+            input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'nsft-ssc-rp-' + cfg.key;
+            input.className = 'nsft-paleta-input';
+            input.placeholder = cfg.placeholder;
+            input.setAttribute('aria-label', cfg.placeholder);
+            input.autocomplete = 'off';
+            input.spellcheck = false;
+            input.value = _popTermino[cfg.key] || '';
+            cab.appendChild(input);
+            cab.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape') return;
+                e.preventDefault();
+                e.stopPropagation();
+                menu.classList.remove('open');
+                if (editor) editor.focus();
+            });
+            menu.appendChild(cab);
+        }
+
+        const lista = document.createElement('div');
+        lista.className = 'nsft-ssc-rp-lista';
+        menu.appendChild(lista);
+
+        const pintaMarca = () => {
+            lista.querySelectorAll('[data-rp]').forEach((f, i) => f.classList.toggle('is-kbd', i === marcada));
+            const f = lista.querySelector('.is-kbd');
+            if (f) f.scrollIntoView({ block: 'nearest' });
+        };
+
+        const pinta = () => {
+            const q = input ? tsFold(input.value.trim()) : '';
+            if (input) _popTermino[cfg.key] = input.value;
+            visibles = cfg.items.filter((it) => !q || tsFold(cfg.buscable(it)).includes(q));
+            marcada = -1;
+            if (visibles.length) {
+                lista.innerHTML = visibles.map((it, i) => `<div class="nsft-ssc-rp-fila" data-rp="${i}"${cfg.titulo ? ` title="${escapeHtml(cfg.titulo(it))}"` : ''}>${cfg.fila(it, q)}</div>`).join('');
+            } else if (cfg.items.length) {
+                lista.innerHTML = rpSinCoincidencias(true);
+            } else {
+                lista.innerHTML = cfg.vacio;
+            }
+            rpCuenta(pieTeclas, visibles.length);
+        };
+
+        lista.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const f = e.target.closest('[data-rp]');
+            if (!f) return;
+            cfg.alElegir(visibles[Number(f.dataset.rp)], e);
+        });
+
+        if (cfg.pie) {
+            const pie = document.createElement('button');
+            pie.type = 'button';
+            pie.className = 'nsft-ssc-rp-pie';
+            pie.innerHTML = `${rpIcono(cfg.pie.icono)}<span>${escapeHtml(cfg.pie.texto)}</span>`;
+            pie.addEventListener('click', (e) => { e.stopPropagation(); cfg.pie.accion(); });
+            menu.appendChild(pie);
+        }
+
+        if (input) {
+            menu.insertAdjacentHTML('beforeend', rpPieTeclas([
+                ['↑↓', rpTecla('tmm_k_nav', 'navigate')],
+                ['↵', cfg.tecla || rpTecla('tmm_k_open', 'open')],
+                ['Esc', rpTecla('pal_k_clear_close', 'clear or close')]
+            ]));
+            pieTeclas = menu.lastElementChild;
+        }
+
+        pinta();
+        if (input) {
+            wireFindClear(input.id);
+            input.addEventListener('input', pinta);
+            input.addEventListener('click', (e) => e.stopPropagation());
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (!visibles.length) return;
+                    marcada = e.key === 'ArrowDown'
+                        ? (marcada + 1) % visibles.length
+                        : (marcada - 1 + visibles.length) % visibles.length;
+                    pintaMarca();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const i = marcada >= 0 ? marcada : (visibles.length === 1 ? 0 : -1);
+                    if (i >= 0) cfg.alElegir(visibles[i], e);
+                }
+            });
+            setTimeout(() => { if (menu.classList.contains('open') && menu.contains(input)) input.focus(); }, 40);
+        }
+    }
+
+    function iniciarPopover(idBoton, idMenu, clave, pintar) {
+        const btn = document.getElementById(idBoton);
+        const menu = document.getElementById(idMenu);
+        if (!btn || !menu) return;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (menu.classList.contains('open')) { menu.classList.remove('open'); return; }
+            _popTermino[clave] = '';
+            menu.classList.add('open');
+            pintar(menu);
+        });
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('open');
+        });
+    }
+
+    function renderHistoryMenu(menu) {
+        loadHistory((history) => {
+            const durar = (ms) => (ms >= 1000 ? (ms / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + ' s' : ms + ' ms');
+            montarPopover(menu, {
+                key: 'hist',
+                placeholder: chrome.i18n.getMessage('sql_rp_filter_history') || 'Filter history…',
+                items: history,
+                buscable: (en) => (en.query || '') + ' ' + (en.errorMsg || ''),
+                titulo: (en) => en.query || '',
+                icono: RP_I.reloj,
+                vacio: rpVacio(RP_I.reloj, chrome.i18n.getMessage('ssc_history_empty') || 'No executed queries yet', '', true),
+                fila: (en, q) => {
+                    const estado = en.status || 'ok';
+                    let detalle = '';
+                    if (estado === 'error') {
+                        detalle = en.errorMsg || '';
+                    } else {
+                        const partes = [];
+                        
+                        if (typeof en.durationMs === 'number') partes.push(durar(en.durationMs));
+                        detalle = partes.join(' · ');
+                    }
+                    return `<span class="nsft-ssc-hist-dot nsft-ssc-hist-dot-${escapeHtml(estado)}" aria-hidden="true"></span>
+                        <span class="nsft-ssc-rp-tx"><b class="is-mono">${markMatches(rpPreview(en.query, 80), q)}</b><small${estado === 'error' ? ' class="is-error"' : ''}>${markMatches(detalle, q)}</small></span>
+                        <span class="nsft-ssc-rp-der">${escapeHtml(en.executedAt ? formatTimeAgo(en.executedAt) : '')}</span>`;
+                },
+                alElegir: (en) => {
+                    menu.classList.remove('open');
+                    createTab({
+                        title: (chrome.i18n.getMessage('ssc_tab_default_title') || 'Query') + ' ' + (tabs.length + 1),
+                        query: en.query,
+                        fileName: null
+                    });
+                },
+                pie: history.length ? {
+                    icono: RP_I.papelera,
+                    texto: chrome.i18n.getMessage('sql_rp_clear_history') || 'Clear history',
+                    accion: () => clearHistory(() => renderHistoryMenu(menu))
+                } : null
+            });
+        });
+    }
+
+    function crearDialogo(id, cfg) {
+        const prev = document.getElementById(id);
+        if (prev) prev.remove();
+        const host = document.getElementById('nsft-ssc-modal');
+        const overlay = document.createElement('div');
+        overlay.id = id;
+        overlay.className = 'nsft-ssc-dialog nsft-ssc-rd-velo';
+        const cerrarTxt = escapeHtml(chrome.i18n.getMessage('sql_settings_close') || 'Close');
+        overlay.innerHTML = `
+            <div class="nsft-ssc-rd${cfg.grande ? ' is-grande' : ''}" role="dialog" aria-modal="true" aria-label="${escapeHtml(cfg.titulo)}">
+                <div class="nsft-ssc-rd-cab"><h3>${cfg.icono && window.NSFT_Herramientas && window.NSFT_Herramientas.tituloDialogo ? window.NSFT_Herramientas.tituloDialogo(cfg.icono, cfg.titulo, 'indigo') : escapeHtml(cfg.titulo)}</h3><button type="button" class="nsft-ssc-panel-close" title="${cerrarTxt}" aria-label="${cerrarTxt}">${CLOSE_SVG}</button></div>
+                <div class="nsft-ssc-rd-cuerpo"></div>
+                <div class="nsft-ssc-rd-pie"></div>
+            </div>`;
+        const onKey = (e) => {
+            if (e.key !== 'Escape') return;
+            e.preventDefault();
+            e.stopPropagation();
+            cerrar();
+        };
+        const cerrar = () => {
+            document.removeEventListener('keydown', onKey, true);
+            overlay.remove();
+        };
+        document.addEventListener('keydown', onKey, true);
+        overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) cerrar(); });
+        overlay.querySelector('.nsft-ssc-rd-cab .nsft-ssc-panel-close').addEventListener('click', cerrar);
+        if (host) host.appendChild(overlay);
+        return { overlay, cuerpo: overlay.querySelector('.nsft-ssc-rd-cuerpo'), pie: overlay.querySelector('.nsft-ssc-rd-pie'), cerrar };
+    }
+
+    function botonDialogo(texto, primario, alPulsar, atajo) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'nsft-ssc-dlg-btn' + (primario ? ' nsft-ssc-dlg-primary' : '');
+        b.innerHTML = `<span>${escapeHtml(texto)}</span>${atajo ? `<kbd>${escapeHtml(atajo)}</kbd>` : ''}`;
+        b.addEventListener('click', alPulsar);
+        return b;
+    }
+
+    function dialogoFormatos(id, cfg) {
+        if (document.getElementById(id)) return;
+        const d = crearDialogo(id, { titulo: cfg.titulo, icono: cfg.icono || 'exportar' });
+        let elegido = cfg.formatos[0];
+        d.cuerpo.innerHTML = `
+            ${cfg.meta ? `<div class="nsft-ssc-rd-meta">${escapeHtml(cfg.meta)}</div>` : ''}
+            <div class="nsft-ssc-rd-fmts" role="radiogroup" aria-label="${escapeHtml(cfg.titulo)}" style="--n:${Math.min(cfg.formatos.length, 4)}">
+                ${cfg.formatos.map((f, i) => `<button type="button" class="nsft-ssc-rd-fmt" role="radio" aria-checked="${i === 0}" data-i="${i}">${rpIcono(RD_ICONO_FMT[f.fmt] || RD_ICONO_FMT.csv, 20)}<span>${escapeHtml(f.label)}</span>${f.ext ? `<small>.${escapeHtml(f.ext)}</small>` : ''}</button>`).join('')}
+            </div>`;
+        const nota = document.createElement('span');
+        nota.className = 'nsft-ssc-rd-nota';
+        const pintaNota = () => { nota.textContent = cfg.archivo ? cfg.archivo(elegido) : ''; };
+        const confirmar = () => { d.cerrar(); cfg.alConfirmar(elegido.fmt); };
+
+        d.cuerpo.addEventListener('click', (e) => {
+            const b = e.target.closest('.nsft-ssc-rd-fmt');
+            if (!b) return;
+            elegido = cfg.formatos[Number(b.dataset.i)];
+            d.cuerpo.querySelectorAll('.nsft-ssc-rd-fmt').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+            pintaNota();
+        });
+        d.cuerpo.addEventListener('dblclick', (e) => { if (e.target.closest('.nsft-ssc-rd-fmt')) confirmar(); });
+
+        const descargar = botonDialogo(cfg.accion, true, confirmar);
+        d.pie.appendChild(nota);
+        d.pie.appendChild(botonDialogo(chrome.i18n.getMessage('btn_cancel') || 'Cancel', false, d.cerrar));
+        d.pie.appendChild(descargar);
+        pintaNota();
+        setTimeout(() => descargar.focus(), 40);
+    }
+
+
+    const CONSOLA_SET_DEFAULTS = {
+        suitescriptConsoleTheme: 'atom-one-light',
+        suitescriptConsoleThemeOverridden: false,
+        suitescriptConsoleHistoryMax: 30
+    };
+    const CONSOLA_TEMAS = [
+        ['atom-one-light', 'Atom One Light'], ['atom-one-dark', 'Atom One Dark'], ['material-darker', 'Material Darker'],
+        ['dracula', 'Dracula'], ['monokai', 'Monokai'], ['nord', 'Nord'], ['darcula', 'Darcula'], ['cobalt', 'Cobalt'],
+        ['night', 'Night'], ['synthwave-84', "Synthwave '84"], ['eclipse', 'Eclipse'], ['idea', 'IDEA'], ['neo', 'Neo'],
+        ['solarized dark', 'Solarized Dark'], ['solarized light', 'Solarized Light']
+    ];
+
+    function showRunnerSettings() {
+        const yaAbierto = document.getElementById('nsft-ssc-settings-dialog');
+        if (yaAbierto) { yaAbierto.remove(); return; }
+        const modalContainer = document.getElementById('nsft-ssc-modal');
+        if (!modalContainer) return;
+
+        const msg = (k) => chrome.i18n.getMessage(k) || '';
+        const tx = (k) => escapeHtml(msg(k));
+        const ico = (cuerpo) => `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${cuerpo}</svg>`;
+        const overlay = document.createElement('div');
+        overlay.id = 'nsft-ssc-settings-dialog';
+        overlay.className = 'nsft-ssc-dialog nsft-set-raiz nsft-tono';
+        overlay.dataset.tono = 'indigo';
+        overlay.innerHTML = `
+            <div class="nsft-set-dlg" role="dialog" aria-modal="true" aria-label="${tx('sql_settings_title')}">
+                <nav class="nsft-set-nav" role="tablist" aria-orientation="vertical">
+                    <div class="nsft-set-navtitle">${tx('sql_set_nav_title')}</div>
+                    <div class="nsft-set-navsub">${TITLE_LOGO}<span>${tx('enableSuiteScriptConsoleLabel')}</span></div>
+                    <button type="button" class="nsft-set-tab" role="tab" aria-selected="true"><span class="nsft-set-tabico">${ico('<path d="M8 8l-5 4 5 4M16 8l5 4-5 4"></path>')}</span><span class="nsft-set-tabtxt"><span class="nsft-set-tabl">${tx('sql_set_tab_editor')}</span><span class="nsft-set-tabs">${tx('sql_set_tab_editor_sub')}</span></span></button>
+                    <button type="button" class="nsft-set-reset">${ico('<path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4"></path>')}<span>${tx('sql_set_reset')}</span></button>
+                </nav>
+                <div class="nsft-set-main">
+                    <div class="nsft-set-head">
+                        <h3><span>${tx('sql_set_tab_editor')}</span><span class="nsft-set-saved" data-role="guardado" hidden>${tx('sql_set_saved')}</span></h3>
+                        <button type="button" class="nsft-ssc-panel-close nsft-set-close" title="${tx('sql_settings_close')}" aria-label="${tx('sql_settings_close')}">${CLOSE_SVG}</button>
+                    </div>
+                    <div class="nsft-set-body">
+                        <div class="nsft-set-sec">${tx('sql_set_sec_look')}</div>
+                        <div class="nsft-set-row"><div class="nsft-set-lbl"><span class="nsft-set-t">${tx('sql_set_theme')}</span></div><select data-role="tema"><option value="auto">${tx('themeAuto')}</option>${CONSOLA_TEMAS.map(([v, l]) => `<option value="${escapeHtml(v)}">${escapeHtml(l)}</option>`).join('')}</select></div>
+                        <div class="nsft-set-sep"></div>
+                        <div class="nsft-set-sec">${tx('sql_set_sec_history')}</div>
+                        <div class="nsft-set-row"><div class="nsft-set-lbl"><span class="nsft-set-t">${tx('ssc_set_history')}</span><span class="nsft-set-h">${tx('ssc_set_history_help')}</span></div><div class="nsft-set-range"><input type="range" data-role="historial" min="10" max="200" step="10"><span data-role="historial-val"></span></div></div>
+                    </div>
+                </div>
+            </div>`;
+        const dlg = overlay.firstElementChild;
+        const rol = (r) => dlg.querySelector(`[data-role="${r}"]`);
+        let s = { ...CONSOLA_SET_DEFAULTS };
+        let timerGuardado = null;
+
+        const guarda = (cambios, despues) => {
+            chrome.storage.local.set(cambios, despues);
+            const aviso = rol('guardado');
+            aviso.hidden = false;
+            clearTimeout(timerGuardado);
+            timerGuardado = setTimeout(() => { aviso.hidden = true; }, 1600);
+        };
+        let temaAntes = null;
+        if (window.NSFT_SetCombo) {
+            window.NSFT_SetCombo.convierte(rol('tema'), {
+                previa: (v) => {
+                    if (temaAntes === null) temaAntes = currentTheme;
+                    updateTheme(v === 'auto' ? (_nsftResolveTheme() === 'dark' ? 'atom-one-dark' : 'atom-one-light') : v);
+                },
+                fin: () => {
+                    if (temaAntes !== null) { updateTheme(temaAntes); temaAntes = null; }
+                },
+                confirma: () => { temaAntes = null; }
+            });
+        }
+
+        const render = () => {
+            rol('tema').value = s.suitescriptConsoleThemeOverridden ? s.suitescriptConsoleTheme : 'auto';
+            if (window.NSFT_SetCombo) window.NSFT_SetCombo.refresca(dlg);
+            rol('historial').value = s.suitescriptConsoleHistoryMax;
+            rol('historial-val').textContent = s.suitescriptConsoleHistoryMax;
+        };
+        const carga = () => chrome.storage.local.get(CONSOLA_SET_DEFAULTS, (it) => { s = it; render(); });
+        const temaClaroUOscuro = () => (_nsftResolveTheme() === 'dark' ? 'atom-one-dark' : 'atom-one-light');
+
+        dlg.addEventListener('click', (e) => {
+            if (!e.target.closest('.nsft-set-reset')) return;
+            guarda({ ...CONSOLA_SET_DEFAULTS, suitescriptConsoleTheme: temaClaroUOscuro() }, _syncCodeThemeFromNsftTheme);
+        });
+        dlg.addEventListener('input', (e) => {
+            if (e.target === rol('historial')) rol('historial-val').textContent = e.target.value;
+        });
+        dlg.addEventListener('change', (e) => {
+            if (e.target === rol('tema')) {
+                if (e.target.value === 'auto') {
+                    guarda({ suitescriptConsoleThemeOverridden: false, suitescriptConsoleTheme: temaClaroUOscuro() }, _syncCodeThemeFromNsftTheme);
+                } else {
+                    guarda({ suitescriptConsoleTheme: e.target.value, suitescriptConsoleThemeOverridden: true });
+                }
+                return;
+            }
+            if (e.target === rol('historial')) {
+                const n = parseInt(e.target.value, 10);
+                guarda({ suitescriptConsoleHistoryMax: Number.isFinite(n) ? Math.min(1000, Math.max(1, n)) : 30 });
+            }
+        });
+
+        const alCambiar = (cambios, area) => {
+            if (!overlay.isConnected) { chrome.storage.onChanged.removeListener(alCambiar); return; }
+            if (area === 'local' && Object.keys(CONSOLA_SET_DEFAULTS).some((k) => cambios[k])) carga();
+        };
+        chrome.storage.onChanged.addListener(alCambiar);
+        const cerrar = () => {
+            chrome.storage.onChanged.removeListener(alCambiar);
+            clearTimeout(timerGuardado);
+            overlay.remove();
+        };
+        dlg.querySelector('.nsft-set-close').addEventListener('click', cerrar);
+        overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) cerrar(); });
+        overlay.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { e.stopPropagation(); cerrar(); }
+        });
+        modalContainer.appendChild(overlay);
+        carga();
+        dlg.querySelector('.nsft-set-tab').focus();
+    }
+
     function handleRunRun() { executeCurrentQuery(); }
 
 
@@ -4011,7 +4336,7 @@
             mainPanel.classList.remove('nsft-ssc-panel-collapsed');
             mainPanel.style.display = 'flex';
             mainPanel.style.flex = 'none';
-            mainPanel.style.height = (_sscEditorPct >= 15 && _sscEditorPct <= 80) ? _sscEditorPct + '%' : '300px';
+            mainPanel.style.height = ((_sscEditorPct >= 15 && _sscEditorPct <= 80) ? _sscEditorPct : EDITOR_DEFAULT_PCT) + '%';
 
             if (tableMenuItem) tableMenuItem.textContent = chrome.i18n.getMessage('ssc_menu_hide_output') || 'Hide Output';
             if (editorMenuItem) editorMenuItem.textContent = chrome.i18n.getMessage('sql_menu_hide_editor') || 'Hide Editor';
@@ -4048,7 +4373,7 @@
             mainPanel.classList.remove('nsft-ssc-panel-collapsed');
             mainPanel.style.display = 'flex';
             mainPanel.style.flex = 'none';
-            mainPanel.style.height = (_sscEditorPct >= 15 && _sscEditorPct <= 80) ? _sscEditorPct + '%' : '300px';
+            mainPanel.style.height = ((_sscEditorPct >= 15 && _sscEditorPct <= 80) ? _sscEditorPct : EDITOR_DEFAULT_PCT) + '%';
 
             resizer.classList.remove('nsft-ssc-resizer-hidden');
             resultsPanel.classList.remove('nsft-ssc-panel-collapsed');
@@ -4233,7 +4558,7 @@
             const neto = opens - closes;
             depth = Math.max(0, depth + (neto > 0 ? 1 : (neto < 0 ? -1 : 0)));
 
-            if (/\/\*(?!.*\*\/)/.test(trimmed)) inBlockComment = true;
+            if (code.includes('/*')) inBlockComment = true;
             if (templateOpens(code)) inTemplate = true;
         }
 
@@ -4306,6 +4631,11 @@
 
 
 
+
+    function removeSchemaContextMenu() {
+        const el = document.getElementById('nsft-ssc-schema-ctx');
+        if (el) el.remove();
+    }
 
     function clampMenuToViewport(menuEl, x, y) {
         const margin = 6;
@@ -4531,7 +4861,7 @@
         return out;
     }
 
-    function sscEjecutar() {
+    function sscEjecutar(opciones) {
         if (!editor) return;
         if (_runPhase !== 'idle') {
             logToToolbar(sscI18n('ssc_already_running', 'Ya hay algo en marcha.'), 'warning');
@@ -4546,7 +4876,7 @@
             _sscAiReq = null;
             sscAiResultado({ id, ok: false, cancelled: true, text: sscI18n('ssc_cancelled', 'Cancelado.') });
         }
-        const codigo = editor.getValue();
+        const codigo = (opciones && opciones.soloSeleccion) ? editor.getSelection() : editor.getValue();
         if (!codigo.trim()) return;
 
         const riesgos = sscDetectaEscrituras(codigo);
@@ -4737,6 +5067,16 @@
         sscFragTarjeta(p.error ? 'error' : 'ok', { ms: ms, texto: lineas.join('\n').slice(0, 20000), f: f });
     }
 
+    function sscFragVacio(icono, txt) {
+        return window.NSFT_Herramientas ? window.NSFT_Herramientas.vacio(icono, txt, '', '', { linea: true })
+            : '<div class="nsft-ssc-frag-empty">' + escapeHtml(txt) + '</div>';
+    }
+
+    function sscFragTema(el) {
+        el.classList.add('nsft-w');
+        el.setAttribute('data-theme', document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light');
+    }
+
     function sscFragTarjeta(estado, info) {
         const ID = 'nsft-ssc-frag-card';
         let card = document.getElementById(ID);
@@ -4758,6 +5098,7 @@
         }
         const f = (info && info.f) || _sscFrag || {};
         card.dataset.estado = estado;
+        sscFragTema(card);
         const titulo = escapeHtml(f.name || sscI18n('ssc_frag_menu', 'Snippets'));
         const estadoTxt = estado === 'running' ? escapeHtml(sscI18n('ssc_running', 'Running…'))
             : estado === 'error' ? '✗ ' + escapeHtml(sscI18n('ssc_frag_failed', 'Failed'))
@@ -4772,16 +5113,20 @@
                     + tabla.cols.map((c) => '<th>' + escapeHtml(c) + '</th>').join('') + '</tr></thead><tbody>'
                     + tabla.filas.map((r) => '<tr>' + tabla.cols.map((c) => '<td>' + celda(r[c]) + '</td>').join('') + '</tr>').join('')
                     + '</tbody></table></div>'
-                : '<div class="nsft-ssc-frag-empty">' + escapeHtml(sscI18n('ssc_frag_sql_none', 'No rows.')) + '</div>')
+                : sscFragVacio('table', sscI18n('ssc_frag_sql_none', 'No rows.')))
             : (info && info.texto) ? '<pre class="nsft-ssc-frag-out">' + escapeHtml(info.texto) + '</pre>'
-                : '<div class="nsft-ssc-frag-empty">' + escapeHtml(sscI18n('ssc_frag_nothing', 'Done, with nothing to show.')) + '</div>';
+                : sscFragVacio('bandeja', sscI18n('ssc_frag_nothing', 'Done, with nothing to show.'));
         const esSql = f.lang === 'sql';
         const copiable = (info && info.texto) || (tabla && tabla.filas.length);
-        card.innerHTML = '<div class="nsft-ssc-frag-head">'
-            + '<span class="nsft-ssc-frag-play" aria-hidden="true">▶</span>'
-            + '<span class="nsft-ssc-frag-title">' + titulo + '</span>'
+        const H = window.NSFT_Herramientas;
+        const icoFrag = (H && H.icono && H.icono('fragments', 16))
+            || '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="8 5 19 12 8 19 8 5"/></svg>';
+        const cerrarTxt = escapeHtml(sscI18n('ssc_confirm_cancel', 'Close'));
+        card.innerHTML = '<div class="nsft-ssc-frag-head nsft-barra-titulo">'
+            + '<span class="nsft-titulo nsft-ssc-frag-titulo">' + icoFrag
+            + '<span class="nsft-ssc-frag-title">' + titulo + '</span></span>'
             + '<span class="nsft-ssc-frag-state">' + estadoTxt + '</span>'
-            + '<button type="button" class="nsft-ssc-frag-x" aria-label="' + escapeHtml(sscI18n('ssc_confirm_cancel', 'Close')) + '">✕</button>'
+            + '<button type="button" class="nsft-ssc-frag-x nsft-cerrar" title="' + cerrarTxt + '" aria-label="' + cerrarTxt + '">✕</button>'
             + '</div>' + cuerpo
             + (estado === 'running' ? '' : '<div class="nsft-ssc-frag-foot">'
                 + (copiable ? '<button type="button" class="nsft-ssc-frag-btn" data-act="copy">' + escapeHtml(sscI18n('copy', 'Copy')) + '</button>' : '')
@@ -4848,90 +5193,163 @@
         else sscFragEjecuta(item.name, item.code);
     }
 
-    function sscFragLista(x, y, verTodos) {
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('.nsft-ssc-frag-pal', 'frag', { filas: '.nsft-ssc-frag-row' });
+
+    function sscFragLista(_x, _y, verTodosIni) {
         const ID = 'nsft-ssc-frag-list';
         const prev = document.getElementById(ID);
         if (prev) prev.remove();
-        sscFragTodos((items, rapidos) => {
+        const TS = window.NSFT_TextSearch;
+        const fold = (s) => (TS ? TS.fold(s) : String(s || '').toLowerCase());
+        const marca = (txt, q) => (TS && q ? TS.markHtml(txt, q, 'nsft-ssc-frag-hl') : escapeHtml(txt));
+        const tema = document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light';
+        const tx = (k, fb, s) => sscI18n(k, fb, s);
+
+        const telon = document.createElement('div');
+        telon.id = ID;
+        telon.className = 'nsft-modal-backdrop nsft-ssc-frag-telon';
+        telon.setAttribute('data-theme', tema);
+        telon.setAttribute('data-nsft-ui', '');
+        telon.style.zIndex = '2147483000';
+        telon.innerHTML = '<div class="nsft-modal nsft-modal--dialog nsft-ssc-frag-pal nsft-paleta" role="dialog" aria-modal="true" tabindex="-1"'
+            + ' data-theme="' + tema + '" aria-label="' + escapeHtml(tx('ssc_frag_menu', 'Snippets')) + '">'
+            + '<div class="nsft-paleta-barra">'
+            + '<input type="text" class="nsft-paleta-input nsft-ssc-frag-q" spellcheck="false" autocomplete="off"'
+            + ' placeholder="' + escapeHtml(tx('ssc_frag_search_ph', 'Search snippets…')) + '">'
+            + '<button type="button" class="nsft-ssc-frag-clear" aria-label="' + escapeHtml(tx('sql_find_clear', 'Clear')) + '" title="' + escapeHtml(tx('sql_find_clear', 'Clear')) + '">'
+            + '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>'
+            + '</div>'
+            + '<div class="nsft-ssc-frag-cuerpo" role="listbox"></div>'
+            + '<div class="nsft-paleta-pie"><span class="nsft-paleta-cuenta"></span>'
+            + (window.NSFT_Herramientas && window.NSFT_Herramientas.teclas
+                ? window.NSFT_Herramientas.teclas([['↑↓', tx('tmm_k_nav', 'navigate')], ['↵', tx('ssc_frag_k_run', 'run')], ['Esc', tx('tmm_k_close', 'close')]])
+                : '')
+            + '</div></div>';
+        document.body.appendChild(telon);
+        const caja = telon.querySelector('.nsft-ssc-frag-pal');
+        const inp = telon.querySelector('.nsft-ssc-frag-q');
+        const cuerpo = telon.querySelector('.nsft-ssc-frag-cuerpo');
+        const aspa = telon.querySelector('.nsft-ssc-frag-clear');
+        const est = { q: '', verTodos: !!verTodosIni, activo: 0, items: [], rapidos: new Set(), visibles: [] };
+
+        const cierra = () => {
+            telon.remove();
+            document.removeEventListener('keydown', tecla, true);
+        };
+
+        function pinta() {
+            const { items, rapidos } = est;
+            const q = fold(est.q.trim());
+            aspa.classList.toggle('has-query', !!q);
+            caja.classList.toggle('has-query', !!q);
             const hayRapidos = items.some((i) => rapidos.has(i.id));
-            const visibles = (hayRapidos && !verTodos) ? items.filter((i) => rapidos.has(i.id)) : items;
-            const box = document.createElement('div');
-            box.id = ID;
-            box.className = 'nsft-ssc-frag-list';
-            box.setAttribute('data-nsft-ui', '');
-            box.setAttribute('role', 'menu');
-            let html = '<div class="nsft-ssc-frag-list-head">' + escapeHtml(sscI18n('ssc_frag_menu', 'Snippets')) + '</div>';
+            const base = q ? items : ((hayRapidos && !est.verTodos) ? items.filter((i) => rapidos.has(i.id)) : items);
+            est.visibles = q ? base.filter((s) => fold(s.name).indexOf(q) !== -1) : base;
+            if (est.activo >= est.visibles.length) est.activo = Math.max(0, est.visibles.length - 1);
+            let html = '';
             if (!items.length) {
-                html += '<div class="nsft-ssc-frag-empty">' + escapeHtml(sscI18n('ssc_frag_none', 'No snippets yet: save a script in the SuiteScript Console (Save) or a piece in Snippets.')) + '</div>'
-                    + '<button type="button" class="nsft-ssc-frag-item is-open" data-open="1">' + escapeHtml(sscI18n('ssc_frag_in_console', 'Open in the console')) + '</button>';
+                const vacioTxt = tx('ssc_frag_none', 'No snippets yet: save a script in the SuiteScript Console (Save) or a piece in Snippets.');
+                html = (window.NSFT_Herramientas ? window.NSFT_Herramientas.vacio('fragments', vacioTxt,
+                    '', '<button type="button" class="nsft-vacio-accion" data-open="1">' + escapeHtml(tx('ssc_frag_in_console', 'Open in the console')) + '</button>')
+                    : '<div class="nsft-ssc-frag-empty">' + escapeHtml(vacioTxt) + '</div>');
+            } else if (!est.visibles.length) {
+                html = window.NSFT_Herramientas ? window.NSFT_Herramientas.vacio('buscar', tx('adv_find_none', 'No matches'))
+                    : '<div class="nsft-ssc-frag-empty">' + escapeHtml(tx('adv_find_none', 'No matches')) + '</div>';
             } else {
-                const tPin = escapeHtml(sscI18n('ssc_frag_pin', 'Show in the quick list'));
-                const tUnpin = escapeHtml(sscI18n('ssc_frag_unpin', 'Remove from the quick list'));
-                html += '<div class="nsft-ssc-frag-items">' + visibles.map((s) => {
+                const tPin = escapeHtml(tx('ssc_frag_pin', 'Show in the quick list'));
+                const tUnpin = escapeHtml(tx('ssc_frag_unpin', 'Remove from the quick list'));
+                html = '<div class="nsft-ssc-frag-items">' + est.visibles.map((s, n) => {
                     const i = items.indexOf(s);
                     const on = rapidos.has(s.id);
-                    return '<div class="nsft-ssc-frag-row">'
-                        + '<button type="button" class="nsft-ssc-frag-item" role="menuitem" data-i="' + i + '" title="'
+                    return '<div class="nsft-ssc-frag-row' + (n === est.activo ? ' is-activa' : '') + '" data-n="' + n + '">'
+                        + '<button type="button" class="nsft-ssc-frag-item" role="option" aria-selected="' + (n === est.activo) + '" data-i="' + i + '" title="'
                         + escapeHtml(s.code.replace(/\s+/g, ' ').slice(0, 120)) + '"><span class="nsft-ssc-frag-play" aria-hidden="true">▶</span>'
-                        + '<span class="nsft-ssc-frag-name">' + escapeHtml(s.name) + '</span>'
+                        + '<span class="nsft-ssc-frag-name">' + marca(s.name, q) + '</span>'
                         + '<span class="nsft-ssc-frag-tag is-' + s.lang + '">' + (s.lang === 'sql' ? 'SQL' : 'JS') + '</span>'
-                        + (s.guardado ? '<span class="nsft-ssc-frag-tag">' + escapeHtml(sscI18n('ssc_frag_saved_tag', 'saved')) + '</span>' : '')
+                        + (s.guardado ? '<span class="nsft-ssc-frag-tag">' + escapeHtml(tx('ssc_frag_saved_tag', 'saved')) + '</span>' : '')
                         + '</button>'
                         + '<button type="button" class="nsft-ssc-frag-pin' + (on ? ' is-on' : '') + '" data-pin="' + i + '" title="' + (on ? tUnpin : tPin) + '" aria-label="' + (on ? tUnpin : tPin) + '" aria-pressed="' + on + '">' + (on ? '★' : '☆') + '</button>'
                         + '</div>';
                 }).join('') + '</div>';
-                if (hayRapidos) {
-                    html += verTodos
-                        ? '<button type="button" class="nsft-ssc-frag-more" data-todos="0">' + escapeHtml(sscI18n('ssc_frag_only_pinned', 'Only the marked ones')) + '</button>'
-                        : '<button type="button" class="nsft-ssc-frag-more" data-todos="1">' + escapeHtml(sscI18n('ssc_frag_all', 'See all ($1)', [String(items.length)])) + '</button>';
-                } else {
-                    html += '<div class="nsft-ssc-frag-hint">' + escapeHtml(sscI18n('ssc_frag_pin_hint', 'Mark with ★ the ones you want here; the rest stays under “See all”.')) + '</div>';
+                if (!q) {
+                    if (hayRapidos) {
+                        html += est.verTodos
+                            ? '<button type="button" class="nsft-ssc-frag-more" data-todos="0">' + escapeHtml(tx('ssc_frag_only_pinned', 'Only the marked ones')) + '</button>'
+                            : '<button type="button" class="nsft-ssc-frag-more" data-todos="1">' + escapeHtml(tx('ssc_frag_all', 'See all ($1)', [String(items.length)])) + '</button>';
+                    } else {
+                        html += '<div class="nsft-ssc-frag-hint">' + escapeHtml(tx('ssc_frag_pin_hint', 'Mark with ★ the ones you want here; the rest stays under “See all”.')) + '</div>';
+                    }
                 }
             }
-            box.innerHTML = html;
-            document.body.appendChild(box);
-            const r = box.getBoundingClientRect();
-            box.style.left = Math.max(8, Math.min(x, window.innerWidth - r.width - 8)) + 'px';
-            box.style.top = Math.max(8, Math.min(y + 6, window.innerHeight - r.height - 8)) + 'px';
+            cuerpo.innerHTML = html;
+            const act = cuerpo.querySelector('.nsft-ssc-frag-row.is-activa');
+            if (act) act.scrollIntoView({ block: 'nearest' });
+        }
 
-            const cierra = () => {
-                box.remove();
-                document.removeEventListener('mousedown', fuera, true);
-                document.removeEventListener('keydown', tecla, true);
-            };
-            const fuera = (e) => { if (!box.contains(e.target)) cierra(); };
-            const tecla = (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cierra(); } };
-            document.addEventListener('mousedown', fuera, true);
-            document.addEventListener('keydown', tecla, true);
-            box.querySelectorAll('.nsft-ssc-frag-item').forEach((b) => b.addEventListener('click', () => {
-                cierra();
-                if (b.dataset.open) { window.dispatchEvent(new CustomEvent('nsft-show-suitescript-console')); return; }
-                sscFragEjecutaItem(items[Number(b.dataset.i)]);
-            }));
-            box.querySelectorAll('[data-pin]').forEach((b) => b.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const it = items[Number(b.dataset.pin)];
+        const ejecuta = (n) => {
+            const it = est.visibles[n];
+            if (!it) return;
+            cierra();
+            sscFragEjecutaItem(it);
+        };
+
+        cuerpo.addEventListener('click', (e) => {
+            const abrir = e.target.closest('[data-open]');
+            if (abrir) { cierra(); window.dispatchEvent(new CustomEvent('nsft-show-suitescript-console')); return; }
+            const pin = e.target.closest('[data-pin]');
+            if (pin) {
+                const it = est.items[Number(pin.dataset.pin)];
                 if (!it) return;
-                const lista = Array.from(rapidos);
+                const lista = Array.from(est.rapidos);
                 const k = lista.indexOf(it.id);
                 if (k >= 0) lista.splice(k, 1); else lista.push(it.id);
-                const izq = parseFloat(box.style.left) || x;
-                const arr = (parseFloat(box.style.top) || y) - 6;
                 chrome.storage.local.set({ [RAPIDOS_KEY]: lista }, () => {
-                    cierra();
-                    sscFragLista(izq, arr, verTodos || (k >= 0 && lista.length > 0 ? verTodos : true));
+                    est.rapidos = new Set(lista);
+                    if (!lista.length) est.verTodos = false;
+                    pinta();
+                    inp.focus();
                 });
-            }));
-            const mas = box.querySelector('[data-todos]');
-            if (mas) mas.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const izq = parseFloat(box.style.left) || x;
-                const arr = (parseFloat(box.style.top) || y) - 6;
-                cierra();
-                sscFragLista(izq, arr, mas.dataset.todos === '1');
-            });
-            const primero = box.querySelector('.nsft-ssc-frag-item');
-            if (primero) primero.focus();
+                return;
+            }
+            const mas = e.target.closest('[data-todos]');
+            if (mas) { est.verTodos = mas.dataset.todos === '1'; est.activo = 0; pinta(); inp.focus(); return; }
+            const fila = e.target.closest('.nsft-ssc-frag-row');
+            if (fila) ejecuta(Number(fila.dataset.n));
+        });
+        cuerpo.addEventListener('mousemove', (e) => {
+            const fila = e.target.closest('.nsft-ssc-frag-row');
+            if (!fila) return;
+            const n = Number(fila.dataset.n);
+            if (n === est.activo) return;
+            est.activo = n;
+            cuerpo.querySelectorAll('.nsft-ssc-frag-row').forEach((r) => r.classList.toggle('is-activa', Number(r.dataset.n) === n));
+        });
+        inp.addEventListener('input', () => { est.q = inp.value; est.activo = 0; pinta(); });
+        aspa.addEventListener('click', () => { inp.value = ''; est.q = ''; est.activo = 0; pinta(); inp.focus(); });
+        telon.addEventListener('mousedown', (e) => { if (e.target === telon) cierra(); });
+        const tecla = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault(); e.stopPropagation();
+                if (est.q) { inp.value = ''; est.q = ''; est.activo = 0; pinta(); } else cierra();
+                return;
+            }
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const n = est.visibles.length;
+                if (!n) return;
+                est.activo = (est.activo + (e.key === 'ArrowDown' ? 1 : -1) + n) % n;
+                pinta();
+                return;
+            }
+            if (e.key === 'Enter' && document.activeElement === inp) { e.preventDefault(); ejecuta(est.activo); }
+        };
+        document.addEventListener('keydown', tecla, true);
+
+        sscFragTodos((items, rapidos) => {
+            est.items = items;
+            est.rapidos = rapidos;
+            pinta();
+            inp.focus();
         });
     }
 
@@ -5036,13 +5454,18 @@
 
     function sscOut() { return document.getElementById('nsft-ssc-output'); }
 
-    function sscPintaMensaje(txt) {
+    function sscPintaMensaje(txt, icono) {
         const o = sscOut();
         if (!o) return;
         o.innerHTML = '';
         const d = document.createElement('div');
         d.className = 'nsft-ssc-out-empty';
-        d.textContent = txt;
+        if (icono && window.NSFT_Herramientas) {
+            d.classList.add('is-vacio');
+            d.innerHTML = window.NSFT_Herramientas.vacio(icono, txt);
+        } else {
+            d.textContent = txt;
+        }
         o.appendChild(d);
         paintClearResultsBtn();
         sscFiltraSalida();
@@ -5366,7 +5789,13 @@
             if (!aviso) {
                 aviso = document.createElement('div');
                 aviso.className = 'nsft-ssc-out-empty nsft-ssc-out-nomatch';
-                aviso.textContent = sscI18n('ssc_out_nomatch', 'Nothing matches the filter.');
+                const txt = sscI18n('ssc_out_nomatch', 'Nothing matches the filter.');
+                if (window.NSFT_Herramientas) {
+                    aviso.classList.add('is-vacio');
+                    aviso.innerHTML = window.NSFT_Herramientas.vacio('buscar', txt);
+                } else {
+                    aviso.textContent = txt;
+                }
                 const cons = o.querySelector('.nsft-ssc-console');
                 (cons || o).appendChild(aviso);
             }
@@ -5447,10 +5876,10 @@
 
         o.innerHTML = '';
         const box = document.createElement('div');
-        box.className = 'nsft-ssc-confirm' + (esPrd ? ' is-prd' : '');
+        box.className = 'nsft-ssc-guarda' + (esPrd ? ' is-prd' : '');
 
         const t = document.createElement('div');
-        t.className = 'nsft-ssc-confirm-title';
+        t.className = 'nsft-ssc-confirm-title nsft-titulo ' + (esPrd ? 'is-danger' : 'is-aviso');
         t.textContent = esPrd
             ? sscI18n('ssc_confirm_prd', 'This writes to PRODUCTION')
             : sscI18n('ssc_confirm', 'This code writes to the account');
@@ -5505,8 +5934,8 @@
         });
     }
 
-    function executeCurrentQuery() {
-        sscEjecutar();
+    function executeCurrentQuery(opciones) {
+        sscEjecutar(opciones);
     }
 
     function handleToolbarRun() {
@@ -5606,17 +6035,20 @@
         const isMin = el.dataset.state === 'minimised';
         const rect = el.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
-        const targetWidth = isMin ? 165 : rect.width;
+        const targetWidth = isMin ? 44 : rect.width;
         const centerX = rect.left + (rect.width / 2);
 
         const p = 15;
 
         if (centerX < (viewportWidth / 2)) {
             el.style.left = p + 'px';
+            el.dataset.snap = 'left';
         } else {
             el.style.left = (viewportWidth - targetWidth - p) + 'px';
+            el.dataset.snap = 'right';
         }
         constrainModalToWindow(el);
+        if (isMin && window.NSFT_Bubble && window.NSFT_Bubble.separar) window.NSFT_Bubble.separar(el);
     }
 
     const NSFT_KEYS = window.NSFT_MacKeys
@@ -5627,18 +6059,91 @@
     const KBD_ENTER = 'Enter';
     const kbd = (combo) => `<span class="nsft-ssc-kbd">${combo}</span>`;
 
+    const sscOutHint = () => {
+        const msg = chrome.i18n.getMessage('ssc_empty_run_hint', [kbd(NSFT_KEYS.mod) + kbd(KBD_ENTER)]) || 'No output';
+        const H = window.NSFT_Herramientas;
+        if (!H) return `<span>${msg}</span>`;
+        const p = msg.indexOf(' · ');
+        const titulo = p > 0 ? msg.slice(0, p) : msg;
+        const resto = p > 0 ? msg.slice(p + 3) : '';
+        return H.vacio('suitescript_console', titulo, '', resto ? `<span class="nsft-vacio-txt">${resto}</span>` : '');
+    };
+
     const getHtmlTemplate = () => `
         <div class="suitescript-console-modal" id="nsft-ssc-modal" data-state="maximised">
             <div class="suitescript-console-header">
-                <span id="nsft-ssc-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><rect x="3" y="4" width="18" height="16" rx="2"></rect><polyline points="7 9 10 12 7 15"></polyline><line x1="13" y1="15" x2="17" y2="15"></line></svg>${chrome.i18n.getMessage('ssc_title') || 'SuiteScript Console'}</span>
-                <span class="nsft-header-actions">
-                    <span id="nsft-ssc-settings" class="nsft-modal-hide-min" title="${chrome.i18n.getMessage('nsft_open_settings') || 'Ajustes'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;pointer-events:none;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
-                    <span id="nsft-ssc-minimise"></span>
-                    <span id="nsft-ssc-fullscreen" title="${chrome.i18n.getMessage('sql_fullscreen_enter') || 'Full screen'}"></span>
-                    <span id="nsft-ssc-maximise"></span>
-                    <span id="nsft-ssc-close">✕</span>
+                <span id="nsft-ssc-title" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" title="${escapeHtml(chrome.i18n.getMessage('ssc_app_menu') || 'SuiteQL menu')}">${TITLE_LOGO}<span class="nsft-ssc-title-text">${chrome.i18n.getMessage('ssc_title_minimised') || 'SuiteScript'}</span>${TITLE_CARET}</span>
+                
+                <div class="nsft-ssc-toolbar">
+                    <div class="nsft-ssc-favorites-wrap nsft-ssc-run-split">
+                        <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-run" title="${chrome.i18n.getMessage('sql_submenu_run') || 'Run'} (${KBD_MOD}${KBD_ENTER})">
+                            <span class="nsft-ssc-btn-glyph nsft-ssc-run-glyph">▶</span><span class="nsft-ssc-run-label">${chrome.i18n.getMessage('sql_submenu_run') || 'Run'}</span>
+                        </button>
+                        <button type="button" class="nsft-ssc-toolbar-button nsft-ssc-run-more" id="nsft-ssc-tool-run-more" aria-haspopup="true" aria-expanded="false"
+                            title="${escapeHtml(chrome.i18n.getMessage('sql_run_options') || 'Run options')}"
+                            aria-label="${escapeHtml(chrome.i18n.getMessage('sql_run_options') || 'Run options')}">${TITLE_CARET}</button>
+                        <div class="nsft-ssc-favorites-menu nsft-ssc-run-menu" id="nsft-ssc-run-menu">
+                            <div class="nsft-ssc-submenu-item" data-nsft-proxy="nsft-ssc-action-run"><span>${chrome.i18n.getMessage('sql_submenu_run') || 'Run'}</span>${kbd(KBD_MOD + KBD_ENTER)}</div>
+                            <div class="nsft-ssc-submenu-item" data-nsft-proxy="nsft-ssc-action-run-selection"><span>${chrome.i18n.getMessage('sql_submenu_run_selection') || 'Run Selected'}</span></div>
+                        </div>
+                    </div>
+                    <div class="nsft-ssc-toolbar-sep"></div>
+                    <div class="nsft-ssc-toolbar-group">
+                        <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn" id="nsft-ssc-tool-open" title="${chrome.i18n.getMessage('sql_submenu_open') || 'Open'} (${KBD_MOD}O)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                        </button>
+                        <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn" id="nsft-ssc-tool-save" title="${chrome.i18n.getMessage('sql_submenu_save') || 'Save'} (${KBD_MOD}S)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"></path></svg>
+                        </button>
+                        <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn nsft-ssc-iconbtn-wide" id="nsft-ssc-tool-save-as" title="${chrome.i18n.getMessage('sql_submenu_save_as') || 'Save As...'} (${KBD_MOD}${KBD_SHIFT}S)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"></path></svg><span class="nsft-ssc-iconbtn-plus">+</span>
+                        </button>
+                    </div>
+                    <div class="nsft-ssc-toolbar-sep"></div>
+                    <div class="nsft-ssc-toolbar-group">
+                        <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-format" title="${chrome.i18n.getMessage('sql_submenu_format') || 'Format'} (${KBD_MOD}${KBD_SHIFT}F)">
+                            <span class="nsft-ssc-tc nsft-ssc-c1"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l10-10M14 4v2M18 6l-1.5 1.5M20 10h-2M13 8l3 3"></path></svg></span><span class="nsft-ssc-tool-label">${chrome.i18n.getMessage('sql_submenu_format') || 'Format'}</span>
+                        </button>
+                        <div class="nsft-ssc-favorites-wrap">
+                            <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-snippets" title="${chrome.i18n.getMessage('sql_snippets') || 'Snippets'}">
+                                <span class="nsft-ssc-tc nsft-ssc-c4"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM16.5 13v7M13 16.5h7"></path></svg></span><span class="nsft-ssc-tool-label">${chrome.i18n.getMessage('sql_snippets') || 'Snippets'}</span>
+                            </button>
+                            <div class="nsft-ssc-favorites-menu" id="nsft-ssc-snippets-menu"></div>
+                        </div>
+                        <div class="nsft-ssc-favorites-wrap">
+                            <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-favorites" title="${chrome.i18n.getMessage('sql_favorites') || 'Favorites'}">
+                                <span class="nsft-ssc-tc nsft-ssc-c5"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v16l-5-3.5L7 20z"></path></svg></span><span class="nsft-ssc-tool-label">${chrome.i18n.getMessage('sql_favorites') || 'Favorites'}</span>
+                            </button>
+                            <div class="nsft-ssc-favorites-menu" id="nsft-ssc-favorites-menu"></div>
+                        </div>
+                        <div class="nsft-ssc-favorites-wrap">
+                            <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-history" title="${chrome.i18n.getMessage('sql_rp_history') || 'History'}">
+                                <span class="nsft-ssc-tc nsft-ssc-c6"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg></span><span class="nsft-ssc-tool-label">${chrome.i18n.getMessage('sql_rp_history') || 'History'}</span>
+                            </button>
+                            <div class="nsft-ssc-favorites-menu" id="nsft-ssc-history-menu"></div>
+                        </div>
+                    </div>
+                    <div class="nsft-ssc-toolbar-spacer"></div>
+                    
+                    <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn" id="nsft-ssc-tool-ghost" hidden
+                        title="${escapeHtml(chrome.i18n.getMessage('ssc_ghost_btn_title') || 'AI SQL suggestions — Tab accepts (click to toggle)')}"
+                        aria-label="${escapeHtml(chrome.i18n.getMessage('ssc_ghost_btn_title') || 'AI SQL suggestions')}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6 4.7 1.8-4.7 1.8L12 16l-1.8-4.8-4.7-1.8 4.7-1.8z"></path><path d="M4 21h10"></path></svg>
+                        <span class="nsft-ssc-ghost-spin" aria-hidden="true"></span>
+                    </button>
+                    <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn is-active" id="nsft-ssc-tool-results-toggle" title="${chrome.i18n.getMessage('ssc_results_toggle_title') || 'Show/hide results'}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 14h18"></path></svg>
+                    </button>
+                </div>
+<span class="nsft-header-actions">
+                    <span class="nsft-ssc-bar-sep nsft-modal-hide-min" aria-hidden="true"></span>
+                    <span id="nsft-ssc-settings" class="nsft-modal-hide-min" title="${chrome.i18n.getMessage('nsft_open_settings') || 'Ajustes'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
+                    <span id="nsft-ssc-minimise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg></span>
+                    <span id="nsft-ssc-fsreal" class="nsft-modal-hide-min" title="${chrome.i18n.getMessage('sql_fsreal_enter') || 'Full screen'}"><svg class="nsft-fsr-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg><svg class="nsft-fsr-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6"></path><path d="M20 10h-6V4"></path><path d="M14 10l7-7"></path><path d="M3 21l7-7"></path></svg></span>
+                    <span id="nsft-ssc-fullscreen" title="${chrome.i18n.getMessage('sql_windowfill_enter') || 'Fill the window'}"><svg class="nsft-fill-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg><svg class="nsft-fill-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"></path></svg></span>
+                    <span id="nsft-ssc-maximise"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg></span>
+                    <span id="nsft-ssc-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></span>
                 </span>
-                <div class="suitescript-console-header-line"></div>
             </div>
             <div class="suitescript-console-content">
                 <div class="nsft-ssc-menubar">
@@ -5668,6 +6173,7 @@
                         ${chrome.i18n.getMessage('sql_menu_run') || 'Run'}
                         <div class="nsft-ssc-submenu">
                             <div class="nsft-ssc-submenu-item" id="nsft-ssc-action-run"><span>${chrome.i18n.getMessage('sql_submenu_run') || 'Run'}</span>${kbd(KBD_MOD + KBD_ENTER)}</div>
+                        <div class="nsft-ssc-submenu-item" id="nsft-ssc-action-run-selection"><span>${chrome.i18n.getMessage('sql_submenu_run_selection') || 'Run Selected'}</span></div>
                         </div>
                     </div>
                     <div class="nsft-ssc-menu-item" id="nsft-ssc-menu-view">
@@ -5683,58 +6189,17 @@
                             <div class="nsft-ssc-submenu-item" id="nsft-ssc-action-api-docs">${chrome.i18n.getMessage('ssc_submenu_api_docs') || 'SuiteScript API Reference'}</div>
                         </div>
                     </div>
-                    <div id="nsft-ssc-logs-container" class="nsft-ssc-logs-container"></div>
-                </div>
-
-                <div class="nsft-ssc-toolbar">
-                    <div class="nsft-ssc-toolbar-group">
-                        <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn" id="nsft-ssc-tool-open" title="${chrome.i18n.getMessage('sql_submenu_open') || 'Open'} (${KBD_MOD}O)">
-                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M1.5 4.5v8h11l2-5.5H4L2.5 11.5"></path><path d="M1.5 4.5v-1.5h4.5l1.5 1.5h5v1.5"></path></svg>
-                        </button>
-                        <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn" id="nsft-ssc-tool-save" title="${chrome.i18n.getMessage('sql_submenu_save') || 'Save'} (${KBD_MOD}S)">
-                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M2 2h9.5L14 4.5V14H2z"></path><path d="M4.5 2v3.5h6V2"></path><path d="M4.5 14v-5h7v5"></path></svg>
-                        </button>
-                        <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn nsft-ssc-iconbtn-wide" id="nsft-ssc-tool-save-as" title="${chrome.i18n.getMessage('sql_submenu_save_as') || 'Save As...'} (${KBD_MOD}${KBD_SHIFT}S)">
-                            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M2 2h9.5L14 4.5V14H2z"></path><path d="M4.5 2v3.5h6V2"></path><path d="M4.5 14v-5h7v5"></path></svg><span class="nsft-ssc-iconbtn-plus">+</span>
-                        </button>
-                    </div>
-                    <div class="nsft-ssc-toolbar-sep"></div>
-
-                    <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-run" title="${chrome.i18n.getMessage('sql_submenu_run') || 'Run'} (${KBD_MOD}${KBD_ENTER})" style="background-color: var(--nsft-ns-accent, #3b82f6); color: white; border-color: var(--nsft-ns-accent-bd, #2563eb);">
-                        <span class="nsft-ssc-btn-glyph nsft-ssc-run-glyph">▶</span><span class="nsft-ssc-run-label">${chrome.i18n.getMessage('sql_submenu_run') || 'Run'}</span><span class="nsft-ssc-kbd">${IS_MAC ? '⌘↵' : 'Ctrl+↵'}</span>
-                    </button>
-                    <div class="nsft-ssc-toolbar-sep"></div>
-
-                    <div class="nsft-ssc-toolbar-group">
-                        <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-format" title="${chrome.i18n.getMessage('sql_submenu_format') || 'Format'} (${KBD_MOD}${KBD_SHIFT}F)">
-                            <span class="nsft-ssc-btn-glyph">≡</span>${chrome.i18n.getMessage('sql_submenu_format') || 'Format'}
-                        </button>
-                        <div class="nsft-ssc-favorites-wrap">
-                            <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-snippets" title="${chrome.i18n.getMessage('sql_snippets') || 'Snippets'}">
-                                <span class="nsft-ssc-btn-glyph">&lt;/&gt;</span>${chrome.i18n.getMessage('sql_snippets') || 'Snippets'}
-                            </button>
-                            <div class="nsft-ssc-favorites-menu" id="nsft-ssc-snippets-menu"></div>
-                        </div>
-                        <div class="nsft-ssc-favorites-wrap">
-                            <button class="nsft-ssc-toolbar-button" id="nsft-ssc-tool-favorites" title="${chrome.i18n.getMessage('sql_favorites') || 'Favorites'}">
-                                <span class="nsft-ssc-btn-glyph">☆</span>${chrome.i18n.getMessage('sql_favorites') || 'Favorites'}
-                            </button>
-                            <div class="nsft-ssc-favorites-menu" id="nsft-ssc-favorites-menu"></div>
-                        </div>
-                    </div>
-                    <div class="nsft-ssc-toolbar-spacer"></div>
-
                     
-                    <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn" id="nsft-ssc-tool-ghost" hidden
-                        title="${escapeHtml(chrome.i18n.getMessage('ssc_ghost_btn_title') || 'AI code suggestions — Tab accepts (click to toggle)')}"
-                        aria-label="${escapeHtml(chrome.i18n.getMessage('ssc_ghost_btn_title') || 'AI code suggestions')}">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6 4.7 1.8-4.7 1.8L12 16l-1.8-4.8-4.7-1.8 4.7-1.8z"></path><path d="M4 21h10"></path></svg>
-                        <span class="nsft-ssc-ghost-spin" aria-hidden="true"></span>
-                    </button>
-                    <button class="nsft-ssc-toolbar-button nsft-ssc-iconbtn is-active" id="nsft-ssc-tool-results-toggle" title="${chrome.i18n.getMessage('ssc_results_toggle_title') || 'Show/hide output'}">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"></rect><path d="M1.5 9.5h13"></path></svg>
-                    </button>
                 </div>
+
+                <div class="nsft-ssc-workzone">
+                    
+                    <button type="button" class="nsft-ssc-edge-tab nsft-ssc-edge-tab-ai" id="nsft-ssc-edge-ai"
+                        title="${escapeHtml(chrome.i18n.getMessage('ssc_ai_toggle_title') || 'AI')}">${chrome.i18n.getMessage('sql_edge_ai') || 'IA'}</button>
+                <div class="nsft-ssc-center">
+                    
+                    <button type="button" class="nsft-ssc-edge-tab nsft-ssc-edge-tab-results" id="nsft-ssc-edge-results"
+                        title="${chrome.i18n.getMessage('ssc_results_toggle_title') || 'Show/hide output'}">${chrome.i18n.getMessage('ssc_tab_output') || 'Salida'}</button>
                 
                 <div class="nsft-ssc-tabs-row">
                     <button type="button" class="nsft-ssc-tabs-nav" id="nsft-ssc-tabs-prev" hidden
@@ -5745,15 +6210,7 @@
                         title="${escapeHtml(chrome.i18n.getMessage('sql_tabs_scroll_next') || 'Pestañas siguientes')}"
                         aria-label="${escapeHtml(chrome.i18n.getMessage('sql_tabs_scroll_next') || 'Pestañas siguientes')}">›</button>
                 </div>
-                <div class="nsft-ssc-workzone">
-                    
-                    <button type="button" class="nsft-ssc-edge-tab nsft-ssc-edge-tab-ai" id="nsft-ssc-edge-ai"
-                        title="${escapeHtml(chrome.i18n.getMessage('ssc_ai_toggle_title') || 'AI')}">${chrome.i18n.getMessage('sql_edge_ai') || 'IA'}</button>
-                <div class="nsft-ssc-center">
-                    
-                    <button type="button" class="nsft-ssc-edge-tab nsft-ssc-edge-tab-results" id="nsft-ssc-edge-results"
-                        title="${chrome.i18n.getMessage('ssc_results_toggle_title') || 'Show/hide output'}">${chrome.i18n.getMessage('ssc_tab_output') || 'Salida'}</button>
-                <div class="nsft-ssc-main-panel">
+                        <div class="nsft-ssc-main-panel">
                     <div class="nsft-ssc-editor-container">
                         
                         <textarea id="nsft-ssc-query-input" class="nsft-ssc-textarea" spellcheck="false">${escapeHtml(DEFAULT_QUERY)}</textarea>
@@ -5769,24 +6226,17 @@
                 </div>
                 <div class="nsft-ssc-results-panel">
                     
-                    <div class="nsft-ssc-panel-tabs" role="tablist">
+                    <div class="nsft-ssc-panel-tabs">
+                                <div class="nsft-ssc-panel-seg" role="tablist">
                         <button type="button" class="nsft-ssc-panel-tab is-active" data-panel-tab="results"
                             role="tab" aria-selected="true">${chrome.i18n.getMessage('ssc_tab_output') || 'Output'}</button>
                         <button type="button" class="nsft-ssc-panel-tab" data-panel-tab="logs"
                             role="tab" aria-selected="false">
                             <span>${chrome.i18n.getMessage('sql_tab_logs') || 'Logs'}</span>
-                            <span class="nsft-ssc-logs-badge" id="nsft-ssc-logs-badge" hidden>0</span>
+                            <span class="nsft-ssc-logs-badge nsft-alerta" id="nsft-ssc-logs-badge" hidden>0</span>
                         </button>
-                        <span class="nsft-ssc-panel-tabs-spacer"></span>
-                        
-                        <button type="button" class="nsft-ssc-logs-clear" id="nsft-ssc-logs-clear"
-                            >${chrome.i18n.getMessage('sql_logs_clear') || 'Clear all'}</button>
-                        
-                        <button type="button" class="nsft-ssc-panel-close" id="nsft-ssc-results-close"
-                            title="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}"
-                            aria-label="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}">${CLOSE_SVG}</button>
-                    </div>
-                    <div class="nsft-ssc-results-toolbar">
+                        </div>
+                                <div class="nsft-ssc-results-toolbar">
                         
                         <div class="nsft-ssc-out-seg" id="nsft-ssc-out-seg" role="group"
                             aria-label="${escapeHtml(chrome.i18n.getMessage('ssc_out_filter_group') || 'Filter output')}">
@@ -5797,7 +6247,7 @@
                             <button type="button" class="nsft-ssc-out-segbtn" data-out-filter="error" aria-pressed="false"
                                 >${escapeHtml(chrome.i18n.getMessage('ssc_out_f_errors') || 'Errors')} <b>0</b></button>
                         </div>
-                        <div class="nsft-ssc-out-find nsft-ssc-find">
+                        <div class="nsft-ssc-out-find nsft-ssc-results-search-wrap nsft-ssc-find">
                             <span class="nsft-ssc-search-glyph" aria-hidden="true">${SEARCH_SVG}</span>
                             <input id="nsft-ssc-out-filter" class="nsft-ssc-out-filter"
                                 placeholder="${escapeHtml(chrome.i18n.getMessage('ssc_out_filter_ph') || 'Filter output…')}"
@@ -5805,23 +6255,33 @@
                         </div>
                         <div class="nsft-ssc-toolbar-spacer"></div>
                         <span id="nsft-ssc-status-text"></span>
-                        <button type="button" id="nsft-ssc-copy-btn" class="nsft-ssc-outbtn" title="${chrome.i18n.getMessage('sql_copy_results_btn') || 'Copy'} (${KBD_MOD}${KBD_SHIFT}C)">
-                            <span class="nsft-ssc-btn-glyph">⧉</span><span>${chrome.i18n.getMessage('sql_copy_results_btn') || 'Copy'}</span>
+                        <button type="button" id="nsft-ssc-copy-btn" class="nsft-ssc-chart-toggle" title="${chrome.i18n.getMessage('sql_copy_results_btn') || 'Copy'} (${KBD_MOD}${KBD_SHIFT}C)">
+                            <span class="nsft-ssc-btn-glyph"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8h12v12H8zM16 8V4H4v12h4"></path></svg></span><span>${chrome.i18n.getMessage('sql_copy_results_btn') || 'Copy'}</span>
                         </button>
                         
-                        <button type="button" id="nsft-ssc-clear-btn" class="nsft-ssc-outbtn nsft-ssc-clear-btn" disabled
+                        <button type="button" id="nsft-ssc-clear-btn" class="nsft-ssc-chart-toggle nsft-ssc-clear-btn" disabled
                             title="${escapeHtml(chrome.i18n.getMessage('ssc_clear_results_title') || 'Clear the output')}"
                             aria-label="${escapeHtml(chrome.i18n.getMessage('ssc_clear_results_title') || 'Clear the output')}">
                             <svg class="nsft-ssc-btn-ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg><span>${chrome.i18n.getMessage('sql_clear_results_btn') || 'Clear results'}</span>
                         </button>
                     </div>
+                                <span class="nsft-ssc-panel-tabs-spacer"></span>
+                        
+                        <button type="button" class="nsft-ssc-logs-clear" id="nsft-ssc-logs-clear"
+                            >${chrome.i18n.getMessage('sql_logs_clear') || 'Clear all'}</button>
+                        
+                        <button type="button" class="nsft-ssc-panel-close" id="nsft-ssc-results-close"
+                            title="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}"
+                            aria-label="${escapeHtml(chrome.i18n.getMessage('sql_panel_close') || 'Cerrar panel')}">${CLOSE_SVG}</button>
+                    </div>
                     
-                    <div id="nsft-ssc-run-pill" class="nsft-ssc-run-pill" hidden>
+                    <div id="nsft-ssc-run-pill" class="nsft-ssc-run-pill nsft-estado" hidden>
                         <span class="nsft-ui-spinner nsft-ssc-run-pill-spin" aria-hidden="true"></span>
                         <span id="nsft-ssc-run-pill-text"></span>
                     </div>
                     
                     <div id="nsft-ssc-output" class="nsft-ssc-output"></div>
+                            <div class="nsft-ssc-out-hint">${sscOutHint()}</div>
                     
                     <div id="nsft-ssc-logs-view" class="nsft-ssc-logs-view" hidden>
                         <div class="nsft-ssc-logs-side">
@@ -5854,7 +6314,10 @@
                 </div>
             <div class="suitescript-console-footer">
                 <span class="nsft-ssc-footer-left">
-                    <span id="nsft-ssc-conn-status" class="nsft-ssc-footer-status">● ${chrome.i18n.getMessage('sql_footer_connected') || 'Connected'}</span>
+                    <span class="nsft-ssc-status-slot">
+                        <span id="nsft-ssc-conn-status" class="nsft-ssc-conn-chip nsft-estado is-ok"><span>${chrome.i18n.getMessage('sql_footer_connected') || 'Connected'}</span></span>
+                        <div id="nsft-ssc-logs-container" class="nsft-ssc-logs-container"></div>
+                    </span>
                     
                     <span id="nsft-ssc-mods" class="nsft-ssc-mods"></span>
                 </span>

@@ -46,7 +46,9 @@
         const raiz = document.body;
         const el = document.createElement('div');
         el.id = VELO_ID;
-        el.className = 'nsft-adv-velo';
+        el.className = 'nsft-adv-velo nsft-w';
+        const h = document.documentElement;
+        el.setAttribute('data-theme', (h.getAttribute('data-nsft-theme') === 'dark' || h.classList.contains('nsft-adv-oscuro')) ? 'dark' : 'light');
         el.setAttribute('data-nsft-ui', '');
         el.setAttribute('role', 'status');
         el.setAttribute('aria-live', 'polite');
@@ -58,6 +60,7 @@
             + '</div>'
             + '<div class="nsft-adv-velo-step"></div>'
             + '<div class="nsft-adv-velo-bar"><span></span></div>'
+            + '<div class="nsft-adv-velo-nota" hidden></div>'
             + '</div>';
         el.querySelector('.nsft-adv-velo-title').textContent =
             i18n('enableAdvancedEditorLabel', 'Advanced Editor');
@@ -103,7 +106,7 @@
     let _cm = null;
     let _caja = null;
     let _sueltaMudo = null;
-    let _prefs = { advancedEditorWrap: false, advancedEditorTree: true, advancedEditorMinimap: false };
+    let _prefs = { advancedEditorWrap: false, advancedEditorTree: true, advancedEditorMinimap: true };
     let _genLimpia = 0;
     let _saliendoAGuardar = false;
 
@@ -112,10 +115,11 @@
         advancedEditorWrap: false,
         advancedEditorEngine: 'cm5',
         advancedEditorTree: true,
-        advancedEditorMinimap: false,
+        advancedEditorMinimap: true,
         advancedEditorTheme: 'atom-one-light',
         advancedEditorThemeOverridden: false,
         advancedEditorRuler: 0,
+        advancedEditorTreeRoot: 'file',
         enableSuiteQLRunner: true,
         enableSuiteScriptConsole: true,
         [CACHE_KEY]: null,
@@ -474,8 +478,12 @@
         _caja = caja;
         caja.className = 'nsft-adv-editor';
         caja.setAttribute('data-nsft-ui', '');
+        caja.classList.add('nsft-w');
         caja.setAttribute('data-theme', oscuro ? 'dark' : 'light');
         caja.innerHTML = plantilla(nombre);
+        if (window.NSFT_Herramientas && window.NSFT_Herramientas.vigila) {
+            window.NSFT_Herramientas.vigila('.nsft-adv-quick-caja', 'adv');
+        }
 
         ta.parentNode.insertBefore(caja, ta);
         caja.querySelector('#nsft-adv-host').appendChild(ta);
@@ -563,6 +571,7 @@
 
         cm.on('cursorActivity', pintarEstado);
         cm.on('cursorActivity', programaMigas);
+        cm.on('swapDoc', () => { pintarEstado(); pintarCuentas(); });
 
         pintaMarco(tema);
         pintaRegla();
@@ -619,6 +628,7 @@
         pintarLenguaje(nombre);
 
         pintaBotonTabla();
+        tablaSiToca();
 
         actualizaBotonesArchivo();
         pintaSimbolos();
@@ -640,6 +650,11 @@
         } else {
             _veloArbol = true;
             pasoVelo('adv_velo_arbol', 'Loading the File Cabinet…', 3);
+            const nota = document.querySelector('#' + VELO_ID + ' .nsft-adv-velo-nota');
+            if (nota) {
+                nota.textContent = i18n('adv_velo_primera', 'The first time takes a little longer. After that it opens right away.');
+                nota.hidden = false;
+            }
         }
 
         if (window.NSFT_ShortcutCoach) {
@@ -664,6 +679,14 @@
             if (ch.advancedEditorRuler) {
                 _prefs.advancedEditorRuler = ch.advancedEditorRuler.newValue;
                 pintaRegla();
+                return;
+            }
+            if (ch.advancedEditorTreeRoot) {
+                const antes = modoCarpetaArchivo();
+                _prefs.advancedEditorTreeRoot = ch.advancedEditorTreeRoot.newValue;
+                if (modoCarpetaArchivo() === antes) return;
+                _raizSesion = undefined;
+                reRaiz();
                 return;
             }
             if (!ch.nsftTheme) return;
@@ -807,18 +830,132 @@
         aplicaTema(temaGuardado(_prefs));
     }
 
-    function menuAjustes() {
+    const AJUSTES_DEFAULTS = {
+        advancedEditorTheme: 'atom-one-light',
+        advancedEditorThemeOverridden: false,
+        advancedEditorRuler: 0,
+        advancedEditorTreeRoot: 'file'
+    };
+
+    function abreAjustes() {
+        const yaAbierto = _caja.querySelector('#nsft-adv-settings-dialog');
+        if (yaAbierto) { yaAbierto.remove(); return; }
+        cierraMenu();
+
+        const tx = (k, f) => escapeHtml(i18n(k, f));
+        const combo = (r) => '<button type="button" class="nsft-set-combo" data-role="' + r + '" aria-haspopup="menu" aria-expanded="false">'
+            + '<span class="nsft-set-combo-t"></span>' + svg('M6 9l6 6 6-6') + '</button>';
+        const overlay = document.createElement('div');
+        overlay.id = 'nsft-adv-settings-dialog';
+        overlay.className = 'nsft-set-raiz nsft-tono';
+        overlay.dataset.tono = 'cielo';
+        overlay.innerHTML = '<div class="nsft-set-dlg" role="dialog" aria-modal="true" aria-label="' + tx('adv_ajustes_title', 'Editor settings') + '">'
+            + '<nav class="nsft-set-nav" role="tablist" aria-orientation="vertical">'
+                + '<div class="nsft-set-navtitle">' + tx('sql_set_nav_title', 'Settings') + '</div>'
+                + '<div class="nsft-set-navsub">' + svg('M8 8l-5 4 5 4M16 8l5 4-5 4') + '<span>' + tx('adv_title_short', 'Advanced Editor') + '</span></div>'
+                + '<button type="button" class="nsft-set-tab" role="tab" aria-selected="true">'
+                    + '<span class="nsft-set-tabico">' + svg('M8 8l-5 4 5 4M16 8l5 4-5 4') + '</span>'
+                    + '<span class="nsft-set-tabtxt"><span class="nsft-set-tabl">' + tx('sql_set_tab_editor', 'Editor') + '</span>'
+                    + '<span class="nsft-set-tabs">' + tx('adv_set_tab_sub', 'Theme and column ruler') + '</span></span>'
+                + '</button>'
+                + '<button type="button" class="nsft-set-reset">' + svg('M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4') + '<span>' + tx('sql_set_reset', 'Reset') + '</span></button>'
+            + '</nav>'
+            + '<div class="nsft-set-main">'
+                + '<div class="nsft-set-head">'
+                    + '<h3><span>' + tx('sql_set_tab_editor', 'Editor') + '</span><span class="nsft-set-saved" data-role="guardado" hidden>' + tx('sql_set_saved', 'Saved') + '</span></h3>'
+                    + '<button type="button" class="nsft-set-close" title="' + tx('sql_settings_close', 'Close') + '" aria-label="' + tx('sql_settings_close', 'Close') + '">' + svg(ICO.cerrar) + '</button>'
+                + '</div>'
+                + '<div class="nsft-set-body">'
+                    + '<div class="nsft-set-sec">' + tx('sql_set_sec_look', 'Appearance') + '</div>'
+                    + '<div class="nsft-set-row"><div class="nsft-set-t">' + tx('sql_set_theme', 'Theme') + '</div>'
+                        + combo('tema') + '</div>'
+                    + '<div class="nsft-set-row"><div class="nsft-set-t">' + tx('advRulerLabel', 'Column ruler') + '</div>'
+                        + combo('regla') + '</div>'
+                    + '<div class="nsft-set-sec">' + tx('adv_set_sec_tree', 'Explorer') + '</div>'
+                    + '<div class="nsft-set-row"><div class="nsft-set-t">' + tx('advTreeRootLabel', 'Open the explorer in') + '</div>'
+                        + combo('raiz') + '</div>'
+                + '</div>'
+            + '</div>'
+            + '</div>';
+
+        const dlg = overlay.firstElementChild;
+        const rol = (r) => dlg.querySelector('[data-role="' + r + '"]');
+        let timerGuardado = null;
+
+        const avisa = () => {
+            rol('guardado').hidden = false;
+            clearTimeout(timerGuardado);
+            timerGuardado = setTimeout(() => { rol('guardado').hidden = true; }, 1600);
+        };
+        const etiquetaAuto = i18n('themeAuto', 'Automatic');
+        const etiquetaRegla = (n) => (n ? String(n) : i18n('advRulerOff', 'No ruler'));
+        const RAICES = [['file', i18n('advTreeRootFile', "The file's folder")], ['chosen', i18n('advTreeRootChosen', 'SuiteScripts or the one you chose')]];
+        const etiquetaRaiz = (v) => (RAICES.find(([k]) => k === v) || RAICES[0])[1];
+        const pinta = (r, texto) => { rol(r).querySelector('.nsft-set-combo-t').textContent = texto; };
+        const carga = () => chrome.storage.local.get(AJUSTES_DEFAULTS, (it) => {
+            const tema = TEMAS.find(([v]) => v === it.advancedEditorTheme);
+            pinta('tema', it.advancedEditorThemeOverridden && tema ? tema[1] : etiquetaAuto);
+            pinta('regla', etiquetaRegla(Number(it.advancedEditorRuler) || 0));
+            pinta('raiz', etiquetaRaiz(it.advancedEditorTreeRoot));
+        });
+
         const manual = () => !!_prefs.advancedEditorThemeOverridden;
         const auto = () => (oscuroAhora() ? 'atom-one-dark' : 'atom-one-light');
-        return { id: 'ajustes', items: [
-            { titulo: i18n('adv_tema_titulo', 'Editor theme') },
-            { et: i18n('themeAuto', 'Automatic (follows dark mode)'),
-              marca: () => !manual(), previa: () => previaTema(auto()), fn: () => eligeTema(null) },
-            { sep: true }
-        ].concat(TEMAS.map(([v, et]) => ({
-            et, marca: () => manual() && _prefs.advancedEditorTheme === v,
-            previa: () => previaTema(v), fn: () => eligeTema(v)
-        }))) };
+        const eligeYAvisa = (nombre) => { eligeTema(nombre); avisa(); };
+        const menus = {
+            tema: () => ({ id: 'ajustes-tema', ancho: true, items: [
+                { et: etiquetaAuto, marca: () => !manual(), previa: () => previaTema(auto()), fn: () => eligeYAvisa(null) },
+                { sep: true }
+            ].concat(TEMAS.map(([v, et]) => ({
+                et, marca: () => manual() && _prefs.advancedEditorTheme === v,
+                previa: () => previaTema(v), fn: () => eligeYAvisa(v)
+            }))) }),
+            regla: () => ({ id: 'ajustes-regla', ancho: true, items: [0, 80, 100, 120].map((n) => ({
+                et: etiquetaRegla(n),
+                marca: () => (Number(_prefs.advancedEditorRuler) || 0) === n,
+                fn: () => { chrome.storage.local.set({ advancedEditorRuler: n }); avisa(); }
+            })) }),
+            raiz: () => ({ id: 'ajustes-raiz', ancho: true, items: RAICES.map(([v, et]) => ({
+                et,
+                marca: () => (_prefs.advancedEditorTreeRoot === 'chosen' ? 'chosen' : 'file') === v,
+                fn: () => { chrome.storage.local.set({ advancedEditorTreeRoot: v }); avisa(); }
+            })) })
+        };
+        ['tema', 'regla', 'raiz'].forEach((r) => {
+            rol(r).addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                const def = menus[r]();
+                if (_menuAbierto === def.id) { cierraMenu(); return; }
+                abreMenu(rol(r), def);
+            });
+        });
+        dlg.querySelector('.nsft-set-reset').addEventListener('click', () => {
+            eligeTema(null);
+            chrome.storage.local.set({ advancedEditorRuler: 0, advancedEditorTreeRoot: 'file' });
+            avisa();
+        });
+
+        const alCambiar = (cambios, area) => {
+            if (area === 'local' && Object.keys(AJUSTES_DEFAULTS).some((k) => cambios[k])) carga();
+        };
+        chrome.storage.onChanged.addListener(alCambiar);
+        const cerrar = () => {
+            cierraMenu();
+            chrome.storage.onChanged.removeListener(alCambiar);
+            clearTimeout(timerGuardado);
+            overlay.remove();
+            if (_cm) _cm.focus();
+        };
+        dlg.querySelector('.nsft-set-close').addEventListener('click', cerrar);
+        overlay.addEventListener('mousedown', (e) => { if (e.target === overlay && !_menuAbierto) cerrar(); });
+        overlay.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            e.stopPropagation();
+            if (_menuAbierto) cierraMenu(); else cerrar();
+        });
+        _caja.appendChild(overlay);
+        carga();
+        dlg.querySelector('.nsft-set-tab').focus();
     }
 
     function eligeTema(nombre) {
@@ -910,7 +1047,7 @@
         quitaPrevia();
         const v = _caja.querySelector('.nsft-adv-menu-pop');
         if (v) v.remove();
-        _caja.querySelectorAll('.nsft-adv-menu-t, #nsft-adv-ajustes').forEach((b) => {
+        _caja.querySelectorAll('.nsft-adv-menu-t, .nsft-set-combo').forEach((b) => {
             b.classList.remove('is-open');
             b.setAttribute('aria-expanded', 'false');
         });
@@ -983,23 +1120,29 @@
         });
 
         pop.addEventListener('mouseleave', () => quitaPrevia());
-        pop.style.left = (boton.offsetLeft) + 'px';
-        pop.style.top = (boton.offsetTop + boton.offsetHeight) + 'px';
+        const rCaja = _caja.getBoundingClientRect();
+        const rBoton = boton.getBoundingClientRect();
+        const izquierda = rBoton.left - rCaja.left;
+        const arriba = rBoton.bottom - rCaja.top;
+        if (def.ancho) pop.style.minWidth = rBoton.width + 'px';
+        pop.style.left = izquierda + 'px';
+        pop.style.top = arriba + 'px';
         _caja.appendChild(pop);
+        if (arriba + pop.offsetHeight > _caja.clientHeight - 8) {
+            pop.style.top = Math.max(8, _caja.clientHeight - pop.offsetHeight - 8) + 'px';
+        }
         if (pop.offsetLeft + pop.offsetWidth > _caja.clientWidth - 8) {
-            pop.style.left = Math.max(8, boton.offsetLeft + boton.offsetWidth - pop.offsetWidth) + 'px';
+            pop.style.left = Math.max(8, izquierda + rBoton.width - pop.offsetWidth) + 'px';
         }
     }
 
     function cablearAjustes(caja) {
         const b = caja.querySelector('#nsft-adv-ajustes');
         if (!b) return;
-        b.setAttribute('aria-haspopup', 'true');
-        b.setAttribute('aria-expanded', 'false');
+        b.setAttribute('aria-haspopup', 'dialog');
         b.addEventListener('click', (ev) => {
             ev.stopPropagation();
-            if (_menuAbierto === 'ajustes') { cierraMenu(); return; }
-            abreMenu(b, menuAjustes());
+            abreAjustes();
         });
     }
 
@@ -1017,8 +1160,8 @@
 
         return ''
             + '<div class="nsft-adv-bar">'
-                + '<img class="nsft-adv-logo" alt="" aria-hidden="true" src="'
-                    + escapeHtml(chrome.runtime.getURL('assets/icons/icon48.png')) + '">'
+                + '<span class="nsft-adv-titulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l-5 4 5 4M16 8l5 4-5 4"></path></svg><span>'
+                + escapeHtml(i18n('adv_title_short', 'Advanced Editor')) + '</span></span>'
                 + chapaEntorno()
                 + menuBarra()
                 + '<span class="nsft-adv-spacer"></span>'
@@ -1199,18 +1342,30 @@
                 + '</div>'
                 + '</div>'
                 + '<div class="nsft-adv-quick" id="nsft-adv-quick" hidden>'
-                    + '<div class="nsft-adv-quick-caja" role="dialog" aria-modal="true">'
-                        + '<input type="text" id="nsft-adv-quick-input" spellcheck="false"'
-                            + ' autocomplete="off" placeholder="'
-                            + escapeHtml(i18n('adv_quick_ph', 'Type a file name')) + '">'
+                    + '<div class="nsft-adv-quick-caja nsft-paleta" role="dialog" aria-modal="true">'
+                        + '<div class="nsft-paleta-barra">'
+                            + '<input type="text" id="nsft-adv-quick-input" class="nsft-paleta-input" spellcheck="false"'
+                                + ' autocomplete="off" placeholder="'
+                                + escapeHtml(i18n('adv_quick_ph', 'Type a file name')) + '">'
+                        + '</div>'
                         + '<div class="nsft-adv-quick-lista" id="nsft-adv-quick-lista" role="listbox"></div>'
-                        + '<div class="nsft-adv-quick-pie" id="nsft-adv-quick-pie"></div>'
+                        + '<div class="nsft-adv-quick-pie nsft-paleta-pie" id="nsft-adv-quick-pie">'
+                            + '<span class="nsft-paleta-cuenta"></span>'
+                            + '<span class="nsft-paleta-teclas">'
+                                + '<kbd>↑↓</kbd> ' + escapeHtml(i18n('tmm_k_nav', 'navigate'))
+                                + ' <kbd>↵</kbd> ' + escapeHtml(i18n('tmm_k_open', 'open'))
+                                + ' <kbd>Esc</kbd> ' + escapeHtml(i18n('tmm_k_close', 'close'))
+                            + '</span>'
+                        + '</div>'
                     + '</div>'
                 + '</div>'
                 + '<div class="nsft-adv-dlg" id="nsft-adv-dlg" hidden>'
-                    + '<div class="nsft-adv-dlg-caja" role="alertdialog" aria-modal="true"'
+                    + '<div class="nsft-adv-dlg-caja nsft-caja-barra" role="alertdialog" aria-modal="true"'
                         + ' aria-labelledby="nsft-adv-dlg-tit" aria-describedby="nsft-adv-dlg-txt">'
-                        + '<div class="nsft-adv-dlg-tit" id="nsft-adv-dlg-tit"></div>'
+                        + '<div class="nsft-barra-titulo">'
+                            + '<div class="nsft-adv-dlg-tit nsft-titulo is-pregunta" id="nsft-adv-dlg-tit"></div>'
+                            + '<button type="button" class="nsft-cerrar" id="nsft-adv-dlg-x">\u2715</button>'
+                        + '</div>'
                         + '<div class="nsft-adv-dlg-txt" id="nsft-adv-dlg-txt"></div>'
                         + '<input type="text" class="nsft-adv-dlg-inp" id="nsft-adv-dlg-inp"'
                             + ' autocomplete="off" spellcheck="false" hidden>'
@@ -1661,10 +1816,13 @@
         const no = fondo.querySelector('#nsft-adv-dlg-no');
         const otro = fondo.querySelector('#nsft-adv-dlg-otro');
         tit.textContent = cfg.titulo;
+        tit.classList.toggle('is-danger', !!cfg.peligro);
+        tit.classList.toggle('is-pregunta', !cfg.peligro);
         txt.textContent = cfg.texto;
         si.textContent = cfg.si;
         no.textContent = cfg.no || i18n('adv_dlg_cancel', 'Cancel');
         si.classList.toggle('is-danger', !!cfg.peligro);
+        equisDePregunta(fondo, no);
         if (otro) {
             otro.hidden = !cfg.otro;
             otro.textContent = cfg.otro || '';
@@ -1704,6 +1862,14 @@
         try { no.focus(); } catch (e) { }
     }
 
+    function equisDePregunta(fondo, no) {
+        const x = fondo.querySelector('#nsft-adv-dlg-x');
+        if (!x) return;
+        x.title = no.textContent;
+        x.setAttribute('aria-label', no.textContent);
+        x.onclick = () => no.click();
+    }
+
     function pide(cfg, cb) {
         const fondo = _caja && _caja.querySelector('#nsft-adv-dlg');
         const inp = fondo && fondo.querySelector('#nsft-adv-dlg-inp');
@@ -1716,10 +1882,13 @@
         const si = fondo.querySelector('#nsft-adv-dlg-si');
         const no = fondo.querySelector('#nsft-adv-dlg-no');
         tit.textContent = cfg.titulo;
+        tit.classList.remove('is-danger');
+        tit.classList.add('is-pregunta');
         txt.textContent = cfg.texto;
         si.textContent = cfg.si || i18n('adv_dlg_ok', 'OK');
         no.textContent = cfg.no || i18n('adv_dlg_cancel', 'Cancel');
         si.classList.remove('is-danger');
+        equisDePregunta(fondo, no);
         inp.type = cfg.tipo === 'number' ? 'number' : 'text';
         inp.value = cfg.valor == null ? '' : String(cfg.valor);
         inp.placeholder = cfg.pista || '';
@@ -2075,14 +2244,39 @@
 
     const SUITESCRIPTS = { id: '-15', name: 'SuiteScripts' };
 
+    let _raizArchivo = null;
+    let _raizSesion;
+
+    function modoCarpetaArchivo() {
+        return !(_prefs && _prefs.advancedEditorTreeRoot === 'chosen');
+    }
+
     function raizElegida() {
+        if (modoCarpetaArchivo()) {
+            if (_raizSesion !== undefined) return _raizSesion;
+            return _raizArchivo || SUITESCRIPTS;
+        }
         const r = _cache && _cache.raiz;
         return r === undefined ? SUITESCRIPTS : r;
     }
 
+    function reRaiz() {
+        if (!_arbolPedido) return;
+        const r = raizPanel();
+        getNodo(r).abierto = true;
+        pideHijos(r);
+        pintaArbol();
+        pintaCabeceraArbol();
+        if (_busAbierto) pintaOpciones();
+    }
+
     function acotaArbol(id, nombre) {
-        _cache.raiz = (id == null || id === '') ? null : { id: String(id), name: String(nombre || '') };
-        guardaCache();
+        const elegida = (id == null || id === '') ? null : { id: String(id), name: String(nombre || '') };
+        if (modoCarpetaArchivo()) _raizSesion = elegida;
+        else {
+            _cache.raiz = elegida;
+            guardaCache();
+        }
         const r = raizPanel();
         getNodo(r).abierto = true;
         pideHijos(r, true);
@@ -2301,6 +2495,13 @@
 
         const folder = carpetaDelArchivo();
         const ruta = (folder != null) ? _cache.rutas[String(folder)] : null;
+        if (folder != null && folder !== '' && !_raizArchivo) {
+            const ult = ruta && ruta.length ? ruta[ruta.length - 1] : null;
+            _raizArchivo = { id: String(folder), name: (ult && ult.name) || getNodo(String(folder)).name || '' };
+            getNodo(String(folder)).abierto = true;
+            pintaCabeceraArbol();
+        }
+        const raizEsCarpeta = folder != null && raizPanel() === String(folder);
         if (ruta) {
             ruta.forEach((c) => { getNodo(c.id, c.name).abierto = true; });
             pintaMigas(ruta);
@@ -2308,7 +2509,7 @@
 
         if (!pintaArbol()) pintaMensajeArbol(i18n('adv_tree_loading', 'Loading…'));
 
-        pideHijos(raizPanel());
+        if (!raizEsCarpeta) pideHijos(raizPanel());
         if (folder == null || folder === '') return;
 
         const n = getNodo(String(folder));
@@ -2318,7 +2519,7 @@
             manda('tree', { folder: String(folder), token: token });
             return;
         }
-        ruta.slice(0, -1).forEach((c) => pideHijos(c.id));
+        if (!raizEsCarpeta) ruta.slice(0, -1).forEach((c) => pideHijos(c.id));
         pideHijos(String(folder), true);
     }
 
@@ -2372,10 +2573,14 @@
         const ruta = p.data.path || [];
         pintaMigas(ruta);
         ruta.forEach((c) => { getNodo(c.id, c.name).abierto = true; });
+        if (_raizArchivo && _raizArchivo.id === n.id && !_raizArchivo.name && ruta.length) {
+            _raizArchivo.name = ruta[ruta.length - 1].name || '';
+            pintaCabeceraArbol();
+        }
         apunta(n.id, n.subs, n.files);
         _cache.rutas[n.id] = ruta;
         apuntaAbiertas();
-        ruta.slice(0, -1).forEach((c) => pideHijos(c.id));
+        if (raizPanel() !== n.id) ruta.slice(0, -1).forEach((c) => pideHijos(c.id));
         pintaArbol();
         veloTrasArbol();
     }
@@ -2395,6 +2600,7 @@
         };
 
         try {
+            if (window.NSFT_AfterLoad) window.NSFT_AfterLoad.flush();
             if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
                 window.NSFT_SuiteQLRest.ensureTransport();
             }
@@ -2414,14 +2620,23 @@
         } catch (e) { suelta(); }
     }
 
-    function pintaMensajeArbol(msg) {
+    function pintaMensajeArbol(msg, ico) {
         const lista = _caja && _caja.querySelector('#nsft-adv-tree-list');
         if (!lista) return;
         lista.textContent = '';
+        lista.appendChild(mensajeVacio(msg, ico));
+    }
+
+    function mensajeVacio(msg, ico) {
         const d = document.createElement('div');
         d.className = 'nsft-adv-tree-msg';
-        d.textContent = msg;
-        lista.appendChild(d);
+        if (ico && window.NSFT_Herramientas) {
+            d.classList.add('is-vacio');
+            d.innerHTML = window.NSFT_Herramientas.vacio(ico, msg, '', '', { linea: true });
+        } else {
+            d.textContent = msg;
+        }
+        return d;
     }
 
     function pintaMigasDe(carpeta) {
@@ -2448,7 +2663,8 @@
             b.className = 'nsft-adv-crumb';
             b.textContent = c.name;
             b.title = c.name;
-            b.addEventListener('click', () => revela(c.id));
+            b.title = fmt('adv_crumb_ir', 'Show $1 in the explorer', [c.name]);
+            b.addEventListener('click', () => acotaArbol(c.id, c.name));
             dir.appendChild(b);
         });
         if (ruta.length) {
@@ -2488,7 +2704,7 @@
         lista.textContent = '';
         pintaNivel(raiz, 0, lista);
         if (!lista.firstChild) {
-            pintaMensajeArbol(i18n('adv_tree_empty', 'Empty folder'));
+            pintaMensajeArbol(i18n('adv_tree_empty', 'Empty folder'), 'carpeta');
             return true;
         }
         lista.scrollTop = alto;
@@ -2555,7 +2771,7 @@
             if (!n.abierto) return;
             if (n.error) { dest.appendChild(mensajeNivel(i18n('adv_tree_error', 'Could not read the folder'), prof + 1)); return; }
             if (!n.cargado) { dest.appendChild(mensajeNivel(i18n('adv_tree_loading', 'Loading…'), prof + 1)); return; }
-            if (!n.subs.length && !n.files.length) { dest.appendChild(mensajeNivel(i18n('adv_tree_empty', 'Empty folder'), prof + 1)); return; }
+            if (!n.subs.length && !n.files.length) { dest.appendChild(mensajeNivel(i18n('adv_tree_empty', 'Empty folder'), prof + 1, 'carpeta')); return; }
             pintaNivel(n, prof + 1, dest);
         });
 
@@ -2689,11 +2905,16 @@
         return null;
     }
 
-    function mensajeNivel(texto, prof) {
+    function mensajeNivel(texto, prof, ico) {
         const d = document.createElement('div');
         d.className = 'nsft-adv-tree-sub';
         d.style.setProperty('--d', String(prof));
-        d.textContent = texto;
+        if (ico && window.NSFT_Herramientas) {
+            d.classList.add('is-vacio');
+            d.innerHTML = window.NSFT_Herramientas.vacio(ico, texto, '', '', { linea: true });
+        } else {
+            d.textContent = texto;
+        }
         return d;
     }
 
@@ -3390,7 +3611,11 @@
         if (!filas.length) {
             const nada = document.createElement('div');
             nada.className = 'nsft-adv-vacio-nada';
-            nada.textContent = i18n('adv_vacio_none', 'Nothing here yet');
+            if (window.NSFT_Herramientas) {
+                nada.innerHTML = window.NSFT_Herramientas.vacio('bandeja', i18n('adv_vacio_none', 'Nothing here yet'), '', '', { linea: true });
+            } else {
+                nada.textContent = i18n('adv_vacio_none', 'Nothing here yet');
+            }
             filas.push(nada);
         }
         bloque.appendChild(seccionVacio(i18n('adv_vacio_recent', 'Recent'), filas));
@@ -3827,10 +4052,7 @@
         if (n) n.textContent = simbolos.length ? String(simbolos.length) : '';
 
         if (!simbolos.length) {
-            const d = document.createElement('div');
-            d.className = 'nsft-adv-tree-msg';
-            d.textContent = i18n('adv_sym_none', 'Nothing to list in this file');
-            lista.appendChild(d);
+            lista.appendChild(mensajeVacio(i18n('adv_sym_none', 'Nothing to list in this file'), 'bandeja'));
             return;
         }
 
@@ -4143,6 +4365,7 @@
                     'color:#c00');
             } else {
                 console.table(filas);
+                console.log('filas en texto: ' + JSON.stringify(filas));
             }
             largas.sort((a, b) => b - a);
             const sumaLargas = largas.reduce((a, b) => a + b, 0);
@@ -4293,6 +4516,7 @@
         console.log('%cTAL CUAL: ' + base.toFixed(1) + ' ms por tecla · '
             + baseRaf.toFixed(0) + ' ms una rafaga de 10', 'font-weight:bold;font-size:13px');
         console.table(filas);
+        console.log('filas en texto: ' + JSON.stringify(filas));
         const deriva = Math.abs(baseFinal - base) / base;
         if (deriva > 0.25) {
             console.log('%cCUIDADO: la base al final es ' + baseFinal.toFixed(1)
@@ -4406,6 +4630,7 @@
         _simGen = null;
         _migHuella = null;
         if (_csvAbierto) cierraTabla();
+        tablaSiToca();
         pintaTabs();
         try { _cm.focus(); } catch (e) { }
 
@@ -4886,16 +5111,35 @@
 
 
     function alternaTabla() {
-        if (_csvAbierto) cierraTabla(); else abreTabla();
+        if (_csvAbierto) { cierraTablaAMano(); return; }
+        const t = tabActiva();
+        if (t) t.verTexto = false;
+        abreTabla();
     }
 
-    function abreTabla() {
+    function cierraTablaAMano() {
+        const t = tabActiva();
+        if (t) t.verTexto = true;
+        cierraTabla();
+    }
+
+    function tablaSiToca() {
+        if (_csvAbierto || _sinArchivo || _busIrALinea != null) return;
+        if (!esCsv(nombreDelActual())) return;
+        const t = tabActiva();
+        if (t && t.verTexto) return;
+        abreTabla(true);
+    }
+
+    function abreTabla(sinAviso) {
         if (!_caja || !_cm || _sinArchivo) return;
         const texto = _cm.getValue();
         _csvModelo = leeCsv(texto);
         if (_csvModelo.filas.length > CSV_TOPE) {
-            toast(fmt('adv_csv_enorme', 'Too many rows to show as a table ($1)',
-                [miles(_csvModelo.filas.length)]));
+            if (sinAviso !== true) {
+                toast(fmt('adv_csv_enorme', 'Too many rows to show as a table ($1)',
+                    [miles(_csvModelo.filas.length)]));
+            }
             _csvModelo = null;
             return;
         }
@@ -5111,7 +5355,7 @@
             _csvRaf = requestAnimationFrame(() => { _csvRaf = 0; pintaFilasTabla(); });
         });
         const cerrar = caja.querySelector('#nsft-adv-tabla-cerrar');
-        if (cerrar) cerrar.addEventListener('click', cierraTabla);
+        if (cerrar) cerrar.addEventListener('click', cierraTablaAMano);
     }
 
     let _csvRaf = 0;
@@ -5706,7 +5950,13 @@
             let tope = false;
             if (archivos.length > CS.TOPE) { archivos = archivos.slice(0, CS.TOPE); tope = true; }
             if (!archivos.length) {
-                busEstado(i18n('adv_bus_nada_que_mirar', 'No code files to search here'));
+                const txt = i18n('adv_bus_nada_que_mirar', 'No code files to search here');
+                if (window.NSFT_Herramientas) {
+                    busEstado('');
+                    lista.innerHTML = window.NSFT_Herramientas.vacio('carpeta', txt);
+                } else {
+                    busEstado(txt);
+                }
                 return;
             }
 
@@ -5750,7 +6000,12 @@
                 [miles(total), miles(hallazgos.length), miles(fin.hechos)]))
             + (extras.length ? ' · ' + extras.join(' · ') : ''));
 
-        if (!hallazgos.length) return;
+        if (!hallazgos.length) {
+            if (!_busCortar && window.NSFT_Herramientas) {
+                lista.innerHTML = window.NSFT_Herramientas.vacio('buscar', i18n('adv_find_none', 'No matches'));
+            }
+            return;
+        }
 
         hallazgos.forEach((h) => {
             const grupo = document.createElement('div');
@@ -6025,7 +6280,8 @@
     function pintaRapido() {
         if (!_caja) return;
         const lista = _caja.querySelector('#nsft-adv-quick-lista');
-        const pie = _caja.querySelector('#nsft-adv-quick-pie');
+        const pie = _caja.querySelector('#nsft-adv-quick-pie .nsft-paleta-cuenta')
+            || _caja.querySelector('#nsft-adv-quick-pie');
         _qkFilas = filtraRapido(_qkTermino);
         _qkSel = 0;
         lista.textContent = '';
@@ -6034,10 +6290,15 @@
             const v = document.createElement('div');
             v.className = 'nsft-adv-quick-vacio';
             const dirVacio = (_qkModo === 'carpeta');
-            v.textContent = _qkTermino
+            const vacioTxt = _qkTermino
                 ? i18n(dirVacio ? 'adv_quick_nada_dir' : 'adv_quick_nada',
                     dirVacio ? 'No folder with that name' : 'No file with that name')
                 : i18n('adv_quick_vacio', 'Type to search the File Cabinet');
+            if (window.NSFT_Herramientas) {
+                v.innerHTML = window.NSFT_Herramientas.vacio(_qkTermino ? 'buscar' : (dirVacio ? 'carpeta' : 'bandeja'), vacioTxt);
+            } else {
+                v.textContent = vacioTxt;
+            }
             lista.appendChild(v);
             pie.textContent = '';
             return;
@@ -6048,8 +6309,7 @@
         const dir = (_qkModo === 'carpeta');
         pie.textContent = _qkTermino
             ? fmt(dir ? 'adv_quick_pie_dir' : 'adv_quick_pie',
-                dir ? '$1 folders · ↑↓ to move · Enter to open'
-                    : '$1 files · ↑↓ to move · Enter to open', [miles(_qkFilas.length)])
+                dir ? '$1 folders' : '$1 files', [miles(_qkFilas.length)])
             : i18n(dir ? 'adv_quick_pie_dir_vacio' : 'adv_quick_pie_rec',
                 dir ? 'Folders already loaded' : 'Recent files');
     }
@@ -6088,8 +6348,8 @@
 
         if (f.reciente) {
             const chip = document.createElement('span');
-            chip.className = 'nsft-adv-quick-chip';
-            chip.textContent = i18n('adv_quick_reciente', 'recent');
+            chip.className = 'nsft-adv-quick-chip nsft-tipo';
+            chip.textContent = i18n('adv_quick_reciente', 'Recent');
             b.appendChild(chip);
         }
 

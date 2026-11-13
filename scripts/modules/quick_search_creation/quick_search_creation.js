@@ -447,7 +447,9 @@
             const matches = [...exact, ...starts, ...contains].slice(0, 80);
             if (!matches.length) {
                 const emptyMsg = chrome.i18n.getMessage('qscNoMatches') || 'Sin coincidencias';
-                list.innerHTML = `<div class="nsft-qsc-empty-row">${emptyMsg}</div>`;
+                list.innerHTML = `<div class="nsft-qsc-empty-row">${window.NSFT_Herramientas
+                    ? window.NSFT_Herramientas.vacio('buscar', emptyMsg, '', '', { linea: true })
+                    : emptyMsg}</div>`;
                 openList();
                 return;
             }

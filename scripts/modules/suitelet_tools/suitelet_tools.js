@@ -81,7 +81,7 @@
             fetcherInjected = true;
             postInitMessage();
         };
-        (document.head || document.documentElement).appendChild(script);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
     }
 
     function postInitMessage() {

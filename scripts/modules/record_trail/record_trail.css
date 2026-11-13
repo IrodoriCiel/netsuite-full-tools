@@ -20,10 +20,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-html.nsft-dark-on .nsft-rtrail-overlay {
+html.nsft-dark-on .nsft-rtrail-overlay,
+html[data-nsft-theme="dark"] .nsft-rtrail-overlay {
     --rt-card: var(--nsft-dk-deepest);
     --rt-surface: var(--nsft-dk-panel);
     --rt-border: #1C222C;
@@ -86,12 +86,6 @@ html.nsft-dark-on .nsft-rtrail-overlay {
     line-height: 1.2;
 }
 
-.nsft-rtrail-subtitle {
-    font-size: 12px;
-    color: var(--rt-text-dim);
-    margin-top: 2px;
-}
-
 .nsft-rtrail-iconbtn {
     flex: 0 0 auto;
     width: 30px;
@@ -127,7 +121,8 @@ html.nsft-dark-on .nsft-rtrail-overlay {
     color: #ef4444;
 }
 
-html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error {
+html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error ,
+html[data-nsft-theme="dark"] .nsft-rtrail-overlay .nsft-rtrail-error {
     color: #F0708A;
 }
 
@@ -154,10 +149,9 @@ html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0;
     color: var(--rt-text-faint);
 }
 
@@ -180,9 +174,9 @@ html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.9px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0;
     color: var(--rt-accent);
 }
 
@@ -233,21 +227,6 @@ html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error {
 
 .nsft-rtrail-type {
     flex: 0 0 auto;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: var(--rt-badge-text);
-    background: var(--rt-badge-bg);
-    border: 1px solid var(--rt-border-strong);
-    border-radius: 5px;
-    padding: 2px 7px;
-    text-transform: uppercase;
-}
-
-.nsft-rtrail-node-current .nsft-rtrail-type {
-    color: var(--rt-accent);
-    border-color: var(--rt-accent-border);
-    background: var(--rt-accent-soft);
 }
 
 .nsft-rtrail-tranid {
@@ -265,12 +244,22 @@ html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error {
     color: var(--rt-text-dim);
 }
 
-.nsft-rtrail-rel {
+.nsft-rtrail-status.nsft-estado:not(#a):not(#b) {
+    display: flex;
+    align-items: baseline;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.nsft-rtrail-status.nsft-estado:not(#a):not(#b)::before { transform: translateY(-1px); }
+
+.nsft-rtrail-rel.nsft-tipo {
     margin-top: 4px;
-    font-size: 11.5px;
-    font-style: italic;
-    color: var(--rt-text-dim);
-    opacity: 0.85;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    height: auto;
+    line-height: 1.35;
 }
 
 .nsft-rtrail-status {
@@ -323,6 +312,8 @@ html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error {
     text-decoration: underline !important;
 }
 
+.nsft-rtrail-col > .nsft-vacio { margin: 0; }
+
 .nsft-rtrail-empty {
     display: flex;
     flex-direction: column;
@@ -346,3 +337,77 @@ html.nsft-dark-on .nsft-rtrail-overlay .nsft-rtrail-error {
     max-width: 200px;
     line-height: 1.45;
 }
+
+.nsft-modal:not(#nsft-x).nsft-rtrail-card .nsft-rtrail-body {
+    background: var(--nsft-w-content);
+}
+
+
+.nsft-rtrail-refresh svg {
+    transition: transform 0.2s ease;
+}
+
+.nsft-rtrail-refresh:hover svg {
+    transform: rotate(30deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nsft-rtrail-refresh svg {
+        transition: none;
+    }
+}
+
+.nsft-rtrail-node-gap {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--rt-border-strong);
+}
+.nsft-rtrail-node-gap .nsft-rtrail-tranid,
+.nsft-rtrail-node-hidden .nsft-rtrail-tranid {
+    color: var(--rt-text-dim);
+    font-style: normal;
+}
+.nsft-rtrail-node-hidden {
+    opacity: 0.72;
+}
+.nsft-rtrail-nota {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--rt-text-dim);
+    text-align: center;
+}
+
+.nsft-rtrail-checks {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rt-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.nsft-rtrail-checks-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rt-text-faint);
+}
+.nsft-rtrail-checks-state {
+    font-size: 12px;
+    color: var(--rt-text-dim);
+}
+.nsft-rtrail-check {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-size: 12.5px;
+    color: var(--rt-text);
+}
+.nsft-rtrail-check-detail {
+    color: var(--rt-text-dim);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.nsft-rtrail-check .nsft-rtrail-open { margin-left: auto; }

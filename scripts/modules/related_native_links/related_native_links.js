@@ -48,7 +48,8 @@
         if (_enabled) return;
         _enabled = true;
         window.addEventListener('message', onFetcherMessage);
-        injectFetcher();
+        const ya = () => (window.requestIdleCallback ? requestIdleCallback(injectFetcher, { timeout: 2000 }) : setTimeout(injectFetcher, 0));
+        if (document.readyState === 'complete') ya(); else window.addEventListener('load', ya, { once: true });
         processAll();
         if (window.NSFT_Observer && typeof window.NSFT_Observer.subscribe === 'function') {
             _observerUnsub = window.NSFT_Observer.subscribe(processAll, { throttle: 250 });
@@ -76,7 +77,7 @@
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL(FETCHER_PATH);
         script.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(script);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
     }
 
     function processAll() {

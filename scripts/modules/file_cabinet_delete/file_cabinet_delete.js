@@ -134,7 +134,7 @@
 
         const label = chrome.i18n.getMessage('fcd_delete_tooltip') || 'Delete';
         const btn = document.createElement('a');
-        btn.className = BTN_CLASS;
+        btn.className = BTN_CLASS + ' nsft-pastilla is-fila is-danger';
         btn.href = '#';
         btn.title = label;
         btn.innerHTML = svgTrash() + '<span class="nsft-fcd-label">' + label + '</span>';

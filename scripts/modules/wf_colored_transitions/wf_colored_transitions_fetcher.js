@@ -142,6 +142,7 @@
             const pts = [endpointScreen(path, 0), endpointScreen(path, len)].filter(Boolean);
             if (!pts.length) return;
             const wrapper = document.querySelector(WRAPPER_SEL);
+            const acento = getComputedStyle(document.documentElement).getPropertyValue('--nsft-ns-accent').trim() || '#1f6feb';
             const nodes = wrapper.querySelectorAll('g');
             nodes.forEach(n => {
                 if (!n.querySelector(':scope > rect')) return;
@@ -157,9 +158,9 @@
                     width: rect.getAttribute('stroke-width'),
                     filter: rect.style.filter
                 });
-                rect.setAttribute('stroke', '#1f6feb');
+                rect.setAttribute('stroke', acento);
                 rect.setAttribute('stroke-width', '3');
-                rect.style.filter = 'drop-shadow(0 0 4px rgba(31,111,235,.6))';
+                rect.style.filter = 'drop-shadow(0 0 4px color-mix(in srgb, ' + acento + ' 60%, transparent))';
             });
         } catch (e) { }
     }

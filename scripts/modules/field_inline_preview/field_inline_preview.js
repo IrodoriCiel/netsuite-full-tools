@@ -161,9 +161,14 @@
         const s = document.createElement('script');
         s.async = false;
         s.src = chrome.runtime.getURL('scripts/modules/field_inline_preview/field_inline_preview_fetcher.js');
-        s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        s.onload = function () {
+            this.remove();
+            _fetcherReady = true;
+            if (_recordContextRequested && _recordContext.recordType === null) requestRecordContext();
+        };
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
+    let _fetcherReady = false;
 
     window.addEventListener('message', (event) => {
         if (event.source !== window) return;
@@ -259,7 +264,7 @@
             ensureFetcher();
             if (_recordContext.recordType === null && !_recordContextRequested) {
                 _recordContextRequested = true;
-                setTimeout(requestRecordContext, 50);
+                if (_fetcherReady) requestRecordContext();
             }
             scheduleShow(hit.el, hit.scriptid, hit.context, hit.sublistId || null, hit.domType || '');
         });
@@ -398,6 +403,7 @@
         if (_hideTimer) { clearTimeout(_hideTimer); _hideTimer = null; }
         if (_currentScriptId === scriptid && _currentContext === context && _currentSublistId === (sublistId || null)) return;
         if (_showTimer) clearTimeout(_showTimer);
+        const yaAbierto = !!document.getElementById(TOOLTIP_ID);
 
         _showTimer = setTimeout(() => {
             _showTimer = null;
@@ -415,7 +421,7 @@
                 if (isCustom) ensureFetched(scriptid);
                 else if (!domType) ensureFieldType(scriptid, context, sublistId);
             }
-        }, _showDelayMs);
+        }, yaAbierto ? 0 : _showDelayMs);
     }
 
     function scheduleHide() {
@@ -510,7 +516,7 @@
         if (tip) return tip;
         tip = document.createElement('div');
         tip.id = TOOLTIP_ID;
-        tip.className = 'nsft-fip-tooltip';
+        tip.className = 'nsft-fip-tooltip nsft-w';
         tip.setAttribute('data-theme', resolveTheme());
         const header = document.createElement('div');
         header.className = 'nsft-fip-scriptid';
@@ -702,7 +708,7 @@
             pairs.push(pair(i18n('fip_sourcelist', 'Source list'), r.fieldvaluetyperecordname || r.fieldvaluetyperecord));
         }
         if (String(r.isinactive || '').toUpperCase() === 'T') {
-            pairs.push(`<div class="nsft-fip-badge nsft-fip-badge-inactive">${escapeHtml(i18n('fip_inactive', 'Inactive'))}</div>`);
+            pairs.push(`<div class="nsft-fip-badge nsft-fip-badge-inactive nsft-estado">${escapeHtml(i18n('fip_inactive', 'Inactive'))}</div>`);
         }
         if (r.help) {
             pairs.push(`

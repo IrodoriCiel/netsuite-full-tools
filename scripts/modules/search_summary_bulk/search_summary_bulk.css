@@ -34,7 +34,7 @@
     padding: 0 8px !important;
     border: 1px solid color-mix(in srgb, var(--nsft-ns-accent, #607799) 30%, white) !important;
     border-radius: 6px !important;
-    background: #fff !important;
+    background: var(--nsft-w-s0, #fff) !important;
     font-family: inherit !important;
     font-size: 12px !important;
     color: #111827 !important;
@@ -63,7 +63,7 @@
     display: flex;
     flex-direction: column;
     padding: 4px !important;
-    background: #fff !important;
+    background: var(--nsft-w-s0, #fff) !important;
     border: 1px solid color-mix(in srgb, var(--nsft-ns-accent, #607799) 30%, white) !important;
     border-radius: 6px !important;
     box-shadow: 0 6px 18px rgba(24, 39, 75, 0.16) !important;
@@ -101,7 +101,7 @@
     padding: 0 12px !important;
     border: 1px solid color-mix(in srgb, var(--nsft-ns-accent, #607799) 30%, white) !important;
     border-radius: 6px !important;
-    background: #fff !important;
+    background: var(--nsft-w-s0, #fff) !important;
     font-family: inherit !important;
     font-size: 12px !important;
     font-weight: 500 !important;

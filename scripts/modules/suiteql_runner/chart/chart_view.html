@@ -5,15 +5,36 @@
     <meta charset="UTF-8">
     <title>NSFT — Gráfica</title>
     <link rel="stylesheet" href="../../_shared/design_tokens.css">
+    <link rel="stylesheet" href="../../_shared/nsft_combo.css">
+    <link rel="stylesheet" href="../../_shared/nsft_modal.css">
     <link rel="stylesheet" href="chart_view.css">
 </head>
 
-<body data-nsft-ui>
-    <header class="cv-bar">
-        <div class="cv-title">
-            <span class="cv-dot" aria-hidden="true"></span>
-            <strong id="cv-title" data-i18n="sql_chart_view_title">Gráfica</strong>
-            <span class="cv-sub" id="cv-rows"></span>
+<body data-nsft-ui class="nsft-combos">
+    <header class="cv-head nsft-w">
+        <div class="nsft-barra-titulo cv-bar">
+            <span class="nsft-cab-herr" data-tono="azul">
+                <span class="nsft-cab-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18" />
+                        <path d="M7 16v-4M11.5 16V8M16 16v-6M20.5 16V5" />
+                    </svg></span>
+                <span class="nsft-cab-nombre" data-i18n="sql_chart_view_title">Gráfica</span>
+            </span>
+            <span class="nsft-cab-sep cv-ctx-sep" aria-hidden="true"></span>
+            <span class="nsft-cab-ctx">
+                <span class="nsft-cab-txt" id="cv-title"></span>
+                <span class="cv-rows" id="cv-rows"></span>
+            </span>
+            <button type="button" id="cv-png" class="cv-tool"
+                data-i18n-title="sql_chart_export_title" title="Descargar la gráfica como imagen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <path d="M12 15V3" />
+                </svg>
+            </button>
         </div>
 
         <div class="cv-controls">
@@ -42,11 +63,6 @@
                     <option value="count">Count</option>
                 </select>
             </label>
-            <button type="button" id="cv-png" class="cv-btn"
-                data-i18n-title="sql_chart_export_title" title="Descargar la gráfica como imagen">
-                <span aria-hidden="true">⇩</span>
-                <span data-i18n="sql_chart_export_btn">PNG</span>
-            </button>
         </div>
     </header>
 

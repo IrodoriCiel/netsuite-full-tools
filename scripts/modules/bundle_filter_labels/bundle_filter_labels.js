@@ -161,6 +161,6 @@
         s.src = chrome.runtime.getURL('scripts/modules/bundle_filter_labels/bundle_filter_labels_fetcher.js');
         s.dataset.bundles = JSON.stringify(bundles);
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 })();

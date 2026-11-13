@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('.nsft-cfind', 'cfind');
 
     const STORAGE_KEY = 'enableCustomizationFinder';
     const MODAL_ID = 'nsft-cfind-modal';
@@ -15,6 +16,20 @@
     }
 
     if (!isApplicablePage()) return;
+
+
+    function tipoLegible(kind, code) {
+        const c = String(code || '').trim();
+        if (!c) return '';
+        const k = c.toLowerCase().replace(/[^a-z0-9]/g, '');
+        let msg = '';
+        try {
+            if (kind === 'script' || kind === 'deploy') msg = chrome.i18n.getMessage('rlv_stype_' + k);
+            else if (kind === 'field') msg = chrome.i18n.getMessage('cfind_ftype_' + k);
+        } catch (e) { msg = ''; }
+        if (msg) return msg;
+        return /^[A-Z0-9_]+$/.test(c) ? c.charAt(0) + c.slice(1).toLowerCase().replace(/_/g, ' ') : c;
+    }
 
     const TIPOS = [
         { kind: 'script', msg: 'cfind_t_script', icon: 'M8 6l-5 6 5 6M16 6l5 6-5 6' },
@@ -117,7 +132,7 @@
 
     function abrir() {
         const T = {
-            title: 'NetSuite Full Tools - ' + i18n('enableCustomizationFinderLabel', 'Customization Finder'),
+            title: '' + i18n('enableCustomizationFinderLabel', 'Customization Finder'),
             search: i18n('cfind_search', 'Search'),
             close: i18n('sql_close', 'Close'),
             clear: i18n('sql_find_clear', 'Clear search'),
@@ -140,7 +155,7 @@
         const wrap = document.createElement('div');
         wrap.innerHTML = `
         <div id="${MODAL_ID}" class="nsft-modal-backdrop" data-theme="${resolveTheme()}">
-        <div class="nsft-modal nsft-modal--dialog nsft-cfind" data-nsft-ui data-theme="${resolveTheme()}"
+        <div class="nsft-modal nsft-modal--dialog nsft-cfind nsft-paleta" data-nsft-ui data-theme="${resolveTheme()}"
              tabindex="-1" role="dialog" aria-modal="true" aria-label="${escapeHtml(T.title)}">
             <div class="nsft-modal-header">
                 <span class="nsft-modal-title">${svg('M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM15.5 15.5L20 20')}<span>${escapeHtml(T.title)}</span></span>
@@ -152,15 +167,11 @@
 
             
             <div class="nsft-cfind-topbar">
-                <div class="nsft-cfind-searchbar" id="nsft-cfind-searchbar">
-                    <span class="nsft-cfind-searchicon">${svg('M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM15.5 15.5L20 20', 2)}</span>
-                    <input type="text" id="nsft-cfind-q" spellcheck="false" autocomplete="off">
+                <div class="nsft-cfind-searchbar nsft-paleta-barra" id="nsft-cfind-searchbar">
+                    <input type="text" id="nsft-cfind-q" class="nsft-paleta-input" spellcheck="false" autocomplete="off">
                     <button type="button" class="nsft-cfind-clearbtn" id="nsft-cfind-clear" title="${escapeHtml(T.clear)}" aria-label="${escapeHtml(T.clear)}">${svg('M6 6l12 12M18 6L6 18', 2.4)}</button>
-                    <button type="button" id="nsft-cfind-go">${escapeHtml(T.search)}</button>
+                    <button type="button" class="nsft-paleta-accion" id="nsft-cfind-export" title="${escapeHtml(T.exportCsv)}" aria-label="${escapeHtml(T.exportCsv)}">${svg('M12 4v10M8 11l4 4 4-4M5 20h14', 1.9)}</button>
                 </div>
-                <button type="button" class="nsft-cfind-btn" id="nsft-cfind-export" title="${escapeHtml(T.exportCsv)}">
-                    ${svg('M12 4v10M8 11l4 4 4-4M5 20h14', 1.9)}<span>${escapeHtml(i18n('cfind_export', 'Export'))}</span>
-                </button>
             </div>
 
             
@@ -176,12 +187,14 @@
                 </div>
             </div>
 
-            <div class="nsft-cfind-statusbar">
+            <div class="nsft-cfind-statusbar nsft-paleta-pie">
                 <span class="nsft-cfind-live"></span>
                 <span class="nsft-cfind-statusline" id="nsft-cfind-statusline"></span>
                 <span class="nsft-cfind-spacer"></span>
                 <span class="nsft-cfind-toast" id="nsft-cfind-toast"></span>
-                <span class="nsft-cfind-hints">${escapeHtml(i18n('cfind_hints', '↑↓ · ↵ open · Ctrl+C copy · Esc close'))}</span>
+                ${window.NSFT_Herramientas && window.NSFT_Herramientas.teclas
+                    ? window.NSFT_Herramientas.teclas([['↑↓', i18n('tmm_k_nav', 'navigate')], ['↵', i18n('tmm_k_open', 'open')], [['Ctrl', 'C'], i18n('pal_k_copy', 'copy')], ['Esc', i18n('tmm_k_close', 'close')]])
+                    : ''}
             </div>
         </div>
         </div>`;
@@ -208,10 +221,6 @@
 
     function wire() {
         _modal.querySelector('#nsft-cfind-close').addEventListener('click', cerrar);
-        _modal.querySelector('#nsft-cfind-go').addEventListener('click', () => {
-            clearTimeout(_liveTimer);
-            lanzarBusquedas(termino());
-        });
 
         _backdrop.addEventListener('click', (e) => {
             if (e.target === _backdrop) cerrar();
@@ -339,14 +348,15 @@
                 ts.async = false;
                 ts.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
                 ts.onload = function () { this.remove(); };
-                (document.head || document.documentElement).appendChild(ts);
+                (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(ts) : (document.head || document.documentElement).appendChild(ts));
             }
             const s = document.createElement('script');
             s.id = 'nsft-cfind-fetcher';
             s.async = false;
             s.src = chrome.runtime.getURL('scripts/modules/customization_finder/customization_finder_fetcher.js');
-            s.onload = function () { this.remove(); };
-            (document.head || document.documentElement).appendChild(s);
+            s.onload = function () { this.remove(); abrePuente(); };
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
+            setTimeout(abrePuente, 10000);
         } catch (e) {
             const line = _modal && _modal.querySelector('#nsft-cfind-statusline');
             if (line) line.textContent = i18n('cfind_error', 'The account could not be queried.');
@@ -371,13 +381,25 @@
         pintarResultados();
     }
 
+    let _puenteListo = false;
+    let _colaPuente = [];
+    function abrePuente() {
+        if (_puenteListo) return;
+        _puenteListo = true;
+        const cola = _colaPuente;
+        _colaPuente = [];
+        cola.forEach((m) => window.postMessage(m, '*'));
+    }
+
     function buscarTipo(kind, term) {
         _cargando[kind] = true;
-        window.postMessage({
+        const msg = {
             dest: FETCHER_DEST,
             type: 'find',
             payload: { kind: kind, term: term, token: _token }
-        }, '*');
+        };
+        if (_puenteListo) window.postMessage(msg, '*');
+        else _colaPuente.push(msg);
     }
 
     window.addEventListener('message', (e) => {
@@ -427,6 +449,11 @@
 
     function badgeHtml(status) {
         if (!status) return '<span></span>';
+        const H = window.NSFT_Herramientas;
+        if (H && H.estadoNS) {
+            const e = H.estadoNS(status);
+            return '<span class="nsft-cfind-badge ' + e.clase + '">' + escapeHtml(e.texto) + '</span>';
+        }
         const tone = STATUS_TONE[String(status).toUpperCase().replace(/\s+/g, '')] || '';
         return '<span class="nsft-cfind-badge' + (tone ? ' is-' + tone : '') + '">' + escapeHtml(status) + '</span>';
     }
@@ -500,7 +527,7 @@
 
                 row.innerHTML =
                     nombre
-                    + '<span class="nsft-cfind-kind">' + escapeHtml(it.kindDetail || '') + '</span>'
+                    + '<span class="nsft-cfind-kind' + (it.kindDetail ? ' nsft-tipo' : '') + '"' + (it.kindDetail ? ' title="' + escapeHtml(it.kindDetail) + '"' : '') + '>' + escapeHtml(tipoLegible(t.kind, it.kindDetail)) + '</span>'
                     + '<span class="nsft-cfind-sid">' + hl(it.sid || it.id) + '</span>'
                     + badgeHtml(it.status)
                     + acciones;
@@ -511,9 +538,11 @@
         if (!totalFilas && !cargandoAlgo) {
             const empty = document.createElement('div');
             empty.className = 'nsft-cfind-empty';
-            empty.textContent = _lastTerm
+            const vacioTxt = _lastTerm
                 ? i18n('cfind_none', 'Nothing found with that name.')
                 : i18n('cfind_ph', 'Search by name or ID…');
+            if (window.NSFT_Herramientas) empty.innerHTML = window.NSFT_Herramientas.vacio('customization_finder', vacioTxt.replace(/…$/, ''));
+            else empty.textContent = vacioTxt;
             frag.appendChild(empty);
         }
 

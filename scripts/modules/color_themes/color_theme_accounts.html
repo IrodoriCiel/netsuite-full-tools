@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Netsuite Full Tools</title>
     <link rel="stylesheet" href="../_shared/design_tokens.css">
+    <link rel="stylesheet" href="../_shared/nsft_modal.css">
+    <link rel="stylesheet" href="../_shared/nsft_dialog.css">
     <link rel="stylesheet" href="../../../welcome/welcome_previews.css">
     <link rel="stylesheet" href="color_theme_accounts.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -202,22 +204,27 @@
     </div>
 
     <div id="ctaDataModal" class="modal-overlay" hidden>
-        <div class="modal-card modal-card--wide" role="dialog" aria-modal="true" aria-labelledby="ctaDataTitle">
-            <div class="modal-head">
-                <div>
-                    <h3 id="ctaDataTitle" data-i18n="cta_data_title">Import and export</h3>
-                    <p class="modal-help" data-i18n="cta_data_desc">All your per-account colours in one JSON file.</p>
-                </div>
-                <button type="button" id="ctaDataClose" class="btn-ghost btn-square" data-i18n-title="cta_data_close"
-                    title="Close">&times;</button>
+        <div class="modal-card modal-card--wide nsft-w nsft-caja-barra" role="dialog" aria-modal="true"
+            aria-labelledby="ctaDataTitle">
+            <div class="nsft-barra-titulo">
+                <h3 class="nsft-titulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M7 3v13M3.5 12.5L7 16l3.5-3.5" />
+                        <path d="M17 21V8M13.5 11.5L17 8l3.5 3.5" />
+                    </svg><span id="ctaDataTitle" data-i18n="cta_data_title">Import and export</span></h3>
+                <button type="button" id="ctaDataClose" class="nsft-cerrar" data-i18n-title="cta_data_close"
+                    title="Close">&#10005;</button>
             </div>
+
+            <div class="modal-scroll">
+            <p class="modal-help" data-i18n="cta_data_desc">All your per-account colours in one JSON file.</p>
 
             <span class="kicker" data-i18n="cta_data_export">Export</span>
             <textarea id="ctaExportText" class="ta is-readonly" rows="6" readonly spellcheck="false"></textarea>
             <div class="modal-row">
-                <button type="button" id="ctaCopyBtn" class="btn-ghost"
+                <button type="button" id="ctaCopyBtn" class="nsft-dlg-btn nsft-dlg-btn-cancel"
                     data-i18n="cta_data_copy">Copy to clipboard</button>
-                <button type="button" id="ctaDownloadBtn" class="btn-ghost"
+                <button type="button" id="ctaDownloadBtn" class="nsft-dlg-btn nsft-dlg-btn-cancel"
                     data-i18n="cta_data_download">Download file</button>
             </div>
 
@@ -227,13 +234,14 @@
             <textarea id="ctaImportText" class="ta" rows="5" spellcheck="false"
                 data-i18n-placeholder="cta_data_import_placeholder"></textarea>
             <div class="modal-row">
-                <button type="button" id="ctaReplaceBtn" class="btn-primary btn-compact"
+                <button type="button" id="ctaReplaceBtn" class="nsft-dlg-btn nsft-dlg-btn-ok"
                     data-i18n="cta_data_replace">Replace settings</button>
-                <button type="button" id="ctaMergeBtn" class="btn-ghost" data-i18n="cta_data_merge">Merge</button>
+                <button type="button" id="ctaMergeBtn" class="nsft-dlg-btn nsft-dlg-btn-cancel" data-i18n="cta_data_merge">Merge</button>
                 <input type="file" id="ctaImportFile" accept=".json,application/json" hidden>
-                <button type="button" id="ctaImportFileBtn" class="btn-ghost"
+                <button type="button" id="ctaImportFileBtn" class="nsft-dlg-btn nsft-dlg-btn-cancel"
                     data-i18n="cta_data_from_file">From a file…</button>
                 <span id="ctaDataMsg" class="modal-msg"></span>
+            </div>
             </div>
         </div>
     </div>

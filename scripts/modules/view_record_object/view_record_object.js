@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const PANEL_MODE = location.protocol === 'chrome-extension:';
+  const PANEL_MODE = /^(chrome|moz)-extension:$/.test(location.protocol);
   let _pageHref = PANEL_MODE ? null : window.location.href;
 
   function pageHref() { return _pageHref; }
@@ -186,7 +186,6 @@
     }
 
     setupListeners();
-    initModal(true);
   }
 
   const themeCssCache = new Map();
@@ -443,9 +442,31 @@
     clickHandler('nsft-rec-obj-export', exportRecordAsJson);
 
     clickHandler('nsft-rec-obj-settings', () => {
-      try {
-        chrome.runtime.sendMessage({ action: 'nsftOpenSettings', highlight: 'enableViewRecordObject' });
-      } catch (e) { }
+      const A = window.NSFT_Ajustes;
+      if (!A) {
+        try { chrome.runtime.sendMessage({ action: 'nsftOpenSettings', highlight: 'enableViewRecordObject' }); } catch (e) { }
+        return;
+      }
+      const tx = (k, f) => { try { return chrome.i18n.getMessage(k) || f; } catch (e) { return f; } };
+      const icono = '<path d="M8 3H6a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h2M16 3h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-2"></path>';
+      A.abre({ tono: 'verde',
+        raiz: document.getElementById('nsft-rec-obj-modal'),
+        modulo: tx('enableRecordObjectLabel', 'View Record Object'),
+        icono,
+        categorias: [{
+          id: 'general', titulo: tx('set_cat_general', 'General'), icono,
+          secciones: [{
+            titulo: tx('sql_set_sec_look', 'Appearance'),
+            filas: [
+              { tipo: 'select', clave: 'viewRecordObjectTheme', titulo: tx('sql_set_theme', 'Theme'), defecto: 'atom-one-light',
+                opciones: [['auto', tx('themeAuto', 'Automatic')]].concat(A.TEMAS_HLJS),
+                tema: { bandera: 'viewRecordObjectThemeOverridden', claro: 'atom-one-light', oscuro: 'atom-one-dark' } },
+              { tipo: 'seg', clave: 'viewRecordObjectOpenMode', titulo: tx('openModeLabel', 'Open in'), defecto: 'modal',
+                opciones: [['modal', tx('openModeOptionModal', 'Floating window')], ['panel', tx('openModeOptionPanel', 'Side panel')]] }
+            ]
+          }]
+        }]
+      });
     });
 
 
@@ -621,7 +642,7 @@
       text = tpl.replace('$1', String(minutes));
     }
     el.textContent = text;
-    el.style.display = 'inline-block';
+    el.style.display = 'inline-flex';
     el.classList.remove('nsft-rec-obj-staleness-warn');
     if (!chrome || !chrome.runtime || !chrome.runtime.id) {
       stopStalenessTicker();
@@ -684,14 +705,15 @@
   function snapToEdge(el) {
     if (!el) return;
 
+    const rect = el.getBoundingClientRect();
+
     el.style.right = 'auto';
     el.style.bottom = 'auto';
 
     const isMin = el.dataset.state === 'minimised';
-    const rect = el.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
 
-    const targetWidth = isMin ? 165 : rect.width;
+    const targetWidth = isMin ? 44 : rect.width;
     const centerX = rect.left + (rect.width / 2);
 
     const p = 15;
@@ -729,28 +751,25 @@
     return `<div class="nsft-loading-text">${spans}</div>`;
   };
 
+  if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('#nsft-rec-obj-modal', 'vro', { registro: false });
+
   const getHtmlTemplate = () => `
-       <div class="nsft-rec-obj-modal" id="nsft-rec-obj-modal" data-state="maximised" style="display: none;">
-         <div class="nsft-rec-obj-header">
-             <span id="nsft-ro-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path></svg>${chrome.i18n.getMessage('ro_title')}</span>
+       <div class="nsft-modal nsft-modal--panel nsft-rec-obj-modal" id="nsft-rec-obj-modal" data-state="maximised" style="display: none;">
+         <div class="nsft-modal-header nsft-rec-obj-header">
+             <span id="nsft-ro-title" class="nsft-modal-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path></svg>${chrome.i18n.getMessage('ro_title')}</span>
+             <div class="nsft-modal-tools nsft-modal-hide-min">
+               <span id="nsft-rec-obj-reload" class="nsft-modal-tool" title="${chrome.i18n.getMessage('ro_reload')}"><span class="nsft-modal-tc nsft-c2"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></span><span>${chrome.i18n.getMessage('ro_tool_reload') || 'Reload'}</span></span>
+               <span id="nsft-rec-obj-export" class="nsft-modal-tool nsft-modal-tool--exportar" title="${chrome.i18n.getMessage('ro_export_title') || 'Descargar como JSON'}"><span class="nsft-modal-tc nsft-c1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span><span>${chrome.i18n.getMessage('ro_tool_download') || 'Download'}</span></span>
+             </div>
              <span class="nsft-header-actions">
-               <span id="nsft-rec-obj-settings" class="nsft-modal-hide-min" title="${chrome.i18n.getMessage('nsft_open_settings') || 'Ajustes'}">
+               <span id="nsft-rec-obj-settings" class="nsft-modal-btn-ajustes nsft-modal-hide-min" title="${chrome.i18n.getMessage('nsft_open_settings') || 'Ajustes'}">
                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                </span>
-               ${PANEL_MODE ? `<span id="nsft-rec-obj-undock" class="nsft-modal-hide-min" title="${chrome.i18n.getMessage('ro_undock_btn') || 'Desacoplar: volver a la página'}">
-                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path><path d="M11 9l-3 3 3 3"></path></svg>
-               </span>` : `<span id="nsft-rec-obj-dock" class="nsft-modal-hide-min" title="${chrome.i18n.getMessage('ro_dock_btn') || 'Acoplar al panel lateral del navegador'}">
-                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path></svg>
-               </span>`}
-               <span id="nsft-rec-obj-export" title="${chrome.i18n.getMessage('ro_export_title') || 'Descargar como JSON'}">
-                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-               </span>
-               <span id="nsft-rec-obj-reload" title="${chrome.i18n.getMessage('ro_reload')}">
-                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-               </span>
-               <span id="nsft-rec-obj-minimise" title="${chrome.i18n.getMessage('ro_minimise')}"></span>
-               <span id="nsft-rec-obj-maximise" title="${chrome.i18n.getMessage('ro_maximise')}"></span>
-               <span id="nsft-rec-obj-close" title="${chrome.i18n.getMessage('ro_close')}">✕</span>
+               
+               ${PANEL_MODE ? `<span id="nsft-rec-obj-undock" class="nsft-modal-btn-dock nsft-modal-hide-min" title="${chrome.i18n.getMessage('ro_undock_btn') || 'Desacoplar: volver a la página'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path><path d="M11 9l-3 3 3 3"></path></svg></span>` : `<span id="nsft-rec-obj-dock" class="nsft-modal-btn-dock nsft-modal-hide-min" title="${chrome.i18n.getMessage('ro_dock_btn') || 'Acoplar al panel lateral del navegador'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path></svg></span>`}
+               <span id="nsft-rec-obj-minimise" class="nsft-modal-btn-minimise" title="${chrome.i18n.getMessage('ro_minimise')}"></span>
+               <span id="nsft-rec-obj-maximise" class="nsft-modal-btn-maximise" title="${chrome.i18n.getMessage('ro_maximise')}"></span>
+               <span id="nsft-rec-obj-close" class="nsft-modal-btn-close" title="${chrome.i18n.getMessage('ro_close')}">✕</span>
              </span>
              <div class="nsft-rec-obj-header-line"></div>
          </div>
@@ -786,7 +805,7 @@
          </div>
          <div class="nsft-rec-obj-footer">
              <span id="nsft-rec-obj-legend">${chrome.i18n.getMessage('ro_legend')}</span>
-             <span id="nsft-rec-obj-staleness" class="nsft-rec-obj-staleness" style="display: none;"></span>
+             <span id="nsft-rec-obj-staleness" class="nsft-rec-obj-staleness nsft-estado" style="display: none;"></span>
          </div>
          <div id="nsft-toast" class="nsft-toast-notification"></div>
        </div>`;
@@ -1257,7 +1276,7 @@
     const s = document.createElement('script');
     s.src = chrome.runtime.getURL(RO_FETCHER_PATH);
     s.onload = function () { this.remove(); };
-    (document.head || document.documentElement).appendChild(s);
+    (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
   };
 
   const roPost = (msg) => {
@@ -1679,6 +1698,17 @@
     return n;
   }
 
+  function fvVacio(cls, icono, txt, linea) {
+    const n = fvEl('div', cls);
+    if (window.NSFT_Herramientas) {
+      n.classList.add('has-vacio');
+      n.innerHTML = window.NSFT_Herramientas.vacio(icono, txt, '', '', linea ? { linea: true } : undefined);
+    } else {
+      n.textContent = txt;
+    }
+    return n;
+  }
+
   let _fvQuery = '';
 
   const fvTS = () => window.NSFT_TextSearch;
@@ -1701,6 +1731,157 @@
 
   function fvSavePins() {
     try { chrome.storage.local.set({ [FV_PINS_KEY]: _fvPins || {} }); } catch (e) { }
+  }
+
+
+  const FV_SECRET = /(password|passwd|pwd|token|secret|apikey|api_key|hash|signature)/i;
+  const FV_TITLE_KEYS = ['tranid', 'companyname', 'name', 'entityid', 'altname', 'title', 'itemid', 'displayname'];
+  const FV_FACT_KEYS = ['email', 'phone', 'entityid', 'companyname', 'subsidiary', 'entity', 'status', 'trandate', 'total', 'datecreated'];
+  let _fvRev = {};
+  let _fvJson = {};
+  let _fvUno = {};
+  let _fvSpy = null;
+  let _fvSpyPedida = null;
+
+  function fvPlural(n, keyOne, fbOne, keyMany, fbMany) {
+    return n === 1 ? fvI18n(keyOne, fbOne) : fvI18n(keyMany, fbMany, [String(n)]);
+  }
+
+  function fvJsonDe(texto) {
+    const s = String(texto == null ? '' : texto).trim();
+    if (!/^[[{]/.test(s) || s.length < 2) return null;
+    try {
+      const o = JSON.parse(s);
+      return (o && typeof o === 'object') ? o : null;
+    } catch (e) { return null; }
+  }
+
+  function fvTitulo(record, body, recordType) {
+    if (!fvIsEmpty(body.tranid) && typeof body.tranid !== 'object') return { text: String(body.tranid), key: 'tranid' };
+    const persona = ['firstname', 'middlename', 'lastname']
+      .map((k) => body[k]).filter((x) => !fvIsEmpty(x) && typeof x !== 'object').join(' ');
+    if (persona) return { text: persona, key: null };
+    for (let i = 0; i < FV_TITLE_KEYS.length; i++) {
+      const k = FV_TITLE_KEYS[i];
+      if (!fvIsEmpty(body[k]) && typeof body[k] !== 'object') return { text: fvFmt(k, body[k]).text, key: k };
+    }
+    return { text: recordType + ' ' + (record.id != null ? record.id : ''), key: null };
+  }
+
+  function fvDatos(body, tituloKey, tituloTexto) {
+    const out = [{ text: tituloTexto }];
+    for (let i = 0; i < FV_FACT_KEYS.length && out.length < 4; i++) {
+      const k = FV_FACT_KEYS[i];
+      const v = body[k];
+      if (k === tituloKey || fvIsEmpty(v) || typeof v === 'object') continue;
+      const t = fvFmt(k, v).text;
+      const igual = (a) => fvFold(String(a).replace(/\s+/g, ' ').trim());
+      if (out.some((x) => igual(x.text) === igual(t))) continue;
+      out.push({ key: k, text: k === 'datecreated' ? fvI18n('ro_fv_fact_created', 'Created $1', [t]) : t });
+    }
+    return out.slice(1);
+  }
+
+  function fvUnElemento(k, label, row) {
+    const kt = fvIdKey(row);
+    const f = kt ? fvFmt(kt, row[kt]) : { text: label, raw: '' };
+    const idv = !fvIsEmpty(row.id) ? row.id : !fvIsEmpty(row.internalid) ? row.internalid : (f.raw || '');
+    const campos = Object.keys(row)
+      .filter((kk) => fvClassify(row[kk]) === 'scalar')
+      .map((kk) => ({ key: kk, label: fvHumanize(kk), text: fvFmt(kk, row[kk]).text }));
+    return {
+      key: k, label, id: 'uno:' + k, title: f.text, raw: idv != null ? String(idv) : '', campos,
+      hay: fvFold(k + ' ' + label + ' ' + campos.map((c) => c.key + ' ' + c.label + ' ' + c.text).join(' '))
+    };
+  }
+
+  function fvModelo(record) {
+    const stats = { shown: 0, hidden: 0 };
+    const m = { campos: [], otros: [], tablas: [], unos: [], vacias: [], stats };
+    const body = fvIsObj(record.bodyFields) ? record.bodyFields : {};
+    const grpBody = fvI18n('ro_fv_g_body', 'Header fields');
+    const tmp = [];
+    fvFlatten(body, [grpBody], 1, tmp, stats);
+    tmp.forEach((b) => (b.type === 'field' && b.depth === 1 ? m.campos : m.otros).push(b));
+
+    const lines = fvIsObj(record.lineFields) ? record.lineFields : {};
+    const grpLines = fvI18n('ro_fv_g_lines', 'Line sublists');
+    Object.keys(lines).forEach((k) => {
+      const v = lines[k];
+      const label = fvHumanize(k);
+      if (fvIsEmpty(v)) { m.vacias.push({ key: k, label, hay: fvFold(k + ' ' + label) }); return; }
+      if (fvIsArr(v) && v.length === 1 && fvIsObj(v[0])) {
+        m.unos.push(fvUnElemento(k, label, v[0]));
+        stats.shown++;
+        return;
+      }
+      const bloques = [];
+      fvFlatten({ [k]: v }, [grpLines], 1, bloques, stats);
+      const tabla = bloques.filter((b) => b.type === 'table' && b.depth === 2)[0];
+      if (tabla) {
+        m.tablas.push({ key: k, label, id: 'tabla:' + k, count: v.length, block: tabla, hay: fvFold(k + ' ' + label) });
+        bloques.forEach((b) => { if (b !== tabla && !(b.type === 'section' && b.depth === 1)) m.otros.push(b); });
+      } else {
+        bloques.forEach((b) => m.otros.push(b));
+      }
+    });
+
+    const resto = {};
+    Object.keys(record).forEach((k) => {
+      if (!/^(recordtype|id|perm|bodyfields|linefields)$/i.test(k)) resto[k] = record[k];
+    });
+    if (Object.keys(resto).length) fvFlatten(resto, [], 1, m.otros, stats);
+    return m;
+  }
+
+  function fvSeccion(main, id, titulo, sub, extra) {
+    const sec = fvEl('section', 'nsft-ro-av-sec');
+    sec.dataset.sec = id;
+    const sh = fvEl('div', 'nsft-ro-av-sh');
+    sh.appendChild(fvElQ('b', null, titulo));
+    if (sub) sh.appendChild(fvEl('span', 'sub', sub));
+    if (extra) { sh.appendChild(fvEl('span', 'spacer')); sh.appendChild(extra); }
+    sec.appendChild(sh);
+    main.appendChild(sec);
+    _fvSectionEls[id] = sec;
+    return sec;
+  }
+
+  function fvIrA(id) {
+    const target = _fvSectionEls[id];
+    const scroller = document.querySelector('.nsft-rec-obj-content');
+    if (!target || !scroller) return;
+    _fvSpyPedida = id;
+    const barra = document.getElementById('nsft-rec-obj-search-container');
+    const alto = barra ? Math.round(barra.getBoundingClientRect().height) : 48;
+    scroller.scrollTop += target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - alto - 6;
+    fvAbreCajon(false);
+  }
+
+  function fvVigia(rail) {
+    const scroller = document.querySelector('.nsft-rec-obj-content');
+    if (_fvSpy) { _fvSpy.el.removeEventListener('scroll', _fvSpy.fn); _fvSpy = null; }
+    if (!scroller) return;
+    const fn = () => {
+      const barra = document.getElementById('nsft-rec-obj-search-container');
+      const tope = scroller.getBoundingClientRect().top + (barra ? barra.getBoundingClientRect().height : 48) + 40;
+      let act = null;
+      Object.keys(_fvSectionEls).forEach((id) => {
+        const el = _fvSectionEls[id];
+        if (el.isConnected && el.getBoundingClientRect().top <= tope) {
+          if (!act || el.getBoundingClientRect().top > _fvSectionEls[act].getBoundingClientRect().top) act = id;
+        }
+      });
+      if (!act) act = Object.keys(_fvSectionEls)[0] || null;
+      if (scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 4) {
+        const ids = Object.keys(_fvSectionEls);
+        act = (_fvSpyPedida && _fvSectionEls[_fvSpyPedida]) ? _fvSpyPedida : ids[ids.length - 1];
+      }
+      rail.querySelectorAll('[data-go]').forEach((n) => n.classList.toggle('is-act', n.dataset.go === act));
+    };
+    scroller.addEventListener('scroll', fn, { passive: true });
+    _fvSpy = { el: scroller, fn };
+    requestAnimationFrame(fn);
   }
 
   function renderFriendly() {
@@ -1730,6 +1911,7 @@
 
     host.innerHTML = '';
     _fvSectionEls = {};
+    host.classList.toggle('is-tech', _fvShowTech);
 
     if (!STATE.nsftRecordObject) {
       host.appendChild(fvEl('div', 'nsft-ro-fv-state',
@@ -1742,50 +1924,48 @@
     const pins = (_fvPins && _fvPins[recordType]) || [];
     _fvQuery = String(searchbox ? searchbox.value : '').trim();
     const q = fvFold(_fvQuery);
+    const casa = (hay) => !q || (hay && hay.indexOf(q) !== -1);
 
-    const stats = { shown: 0, hidden: 0 };
-    const raw = [];
-    fvFlatten(record, [], 0, raw, stats);
+    const m = fvModelo(record);
+    const porNombre = (a, b) => a.label.localeCompare(b.label);
+    const campos = m.campos.filter((b) => casa(b.hay)).sort(porNombre);
+    const favs = pins.map((k) => campos.filter((b) => b.key === k)[0]).filter(Boolean);
+    const tablas = m.tablas.filter((t) => casa(t.hay) || casa(t.block.hay));
+    const unos = m.unos.filter((u) => casa(u.hay));
+    const vacias = m.vacias.filter((v) => casa(v.hay));
 
-    let visible = raw;
+    let otros = m.otros;
     if (q) {
       const keep = {};
-      const keepAncestors = (i, depth) => {
-        let d = depth;
-        for (let j = i - 1; j >= 0; j--) {
-          if (raw[j].type === 'section' && raw[j].depth < d) { keep[j] = true; d = raw[j].depth; if (d === 0) break; }
-        }
-      };
-      raw.forEach((b, i) => {
-        if (!b.hay || b.hay.indexOf(q) === -1) return;
+      otros.forEach((b, i) => {
+        if (!casa(b.hay)) return;
         keep[i] = true;
-        keepAncestors(i, b.depth);
+        let d = b.depth;
+        for (let j = i - 1; j >= 0 && d > 1; j--) {
+          if (otros[j].type === 'section' && otros[j].depth < d) { keep[j] = true; d = otros[j].depth; }
+        }
         if (b.type === 'section') {
-          for (let j = i + 1; j < raw.length; j++) {
-            if (raw[j].type === 'section' && raw[j].depth <= b.depth) break;
+          for (let j = i + 1; j < otros.length; j++) {
+            if (otros[j].type === 'section' && otros[j].depth <= b.depth) break;
             keep[j] = true;
           }
         }
       });
-      visible = raw.filter((_x, i) => keep[i]);
+      otros = otros.filter((_x, i) => keep[i]);
     }
 
     fvMideHuecos();
     fvVigilaAncho();
 
-    const branches = raw.filter((b) => b.type === 'section' && b.depth <= 1);
-    const irArriba = () => {
-      const scroller = document.querySelector('.nsft-rec-obj-content');
-      if (scroller) scroller.scrollTop = 0;
-    };
-
+    const navCount = (favs.length ? 1 : 0) + (campos.length ? 1 : 0) + tablas.length
+      + (unos.length ? 1 : 0) + (vacias.length ? 1 : 0) + (otros.length ? 1 : 0);
     const trigHost = document.getElementById('nsft-ro-rail-trigger');
     if (trigHost) {
       trigHost.innerHTML = '';
       const trig = fvEl('button', 'nsft-ro-fv-rail-trigger');
       trig.type = 'button';
       trig.appendChild(fvEl('span', null, '☰ ' + fvI18n('ro_fv_structure', 'Structure')));
-      trig.appendChild(fvEl('span', 'sub', String(branches.length)));
+      trig.appendChild(fvEl('span', 'sub', String(navCount)));
       trig.addEventListener('click', () => fvAbreCajon(!_fvRailOpen));
       trigHost.appendChild(trig);
     }
@@ -1794,171 +1974,282 @@
     velo.addEventListener('click', () => fvAbreCajon(false));
     host.appendChild(velo);
 
-    const rail = fvEl('nav', 'nsft-ro-fv-rail');
-
+    const rail = fvEl('nav', 'nsft-ro-fv-rail nsft-ro-av-rail');
     const rhead = fvEl('div', 'nsft-ro-fv-rail-head');
     rhead.appendChild(fvEl('span', 't', fvI18n('ro_fv_structure', 'Structure')));
-    const rclose = fvEl('button', null, '✕');
+    const rclose = fvEl('button', 'nsft-cerrar', '✕');
     rclose.type = 'button';
     rclose.title = fvI18n('sql_panel_close', 'Close');
     rclose.addEventListener('click', () => fvAbreCajon(false));
     rhead.appendChild(rclose);
     rail.appendChild(rhead);
 
-    rail.appendChild(fvEl('div', 'nsft-ro-fv-rail-title', fvI18n('ro_fv_structure', 'Structure')));
-
-    const top0 = fvEl('button', 'nsft-ro-fv-rail-top');
-    top0.type = 'button';
-    top0.appendChild(fvEl('span', 'arrow', '▲'));
-    top0.appendChild(fvEl('span', null, fvI18n('ro_fv_to_top', 'Back to the top')));
-    top0.addEventListener('click', () => { irArriba(); fvAbreCajon(false); });
-    rail.appendChild(top0);
-
     const rlist = fvEl('div', 'nsft-ro-fv-rail-list');
-    branches.forEach((b) => {
-      const btn = fvEl('button', 'nsft-ro-fv-rail-item depth-' + (b.depth === 0 ? '0' : 'n'));
+    const grupo = (txt) => rlist.appendChild(fvEl('div', 'nsft-ro-av-navgrp', txt));
+    const item = (id, label, count) => {
+      const btn = fvEl('button', 'nsft-ro-fv-rail-item nsft-ro-av-nav');
       btn.type = 'button';
-      btn.style.paddingLeft = (6 + b.depth * 12) + 'px';
-      btn.appendChild(fvElQ('span', 'label', b.label));
-      btn.appendChild(fvEl('span', 'count', b.count != null ? String(b.count) : '·'));
-      btn.addEventListener('click', () => {
-        const target = _fvSectionEls[b.id];
-        const scroller = document.querySelector('.nsft-rec-obj-content');
-        if (!target || !scroller) return;
-        const tr = target.getBoundingClientRect();
-        const sr = scroller.getBoundingClientRect();
-        const barra = document.getElementById('nsft-rec-obj-search-container');
-        const alto = barra ? Math.round(barra.getBoundingClientRect().height) : 48;
-        scroller.scrollTop += tr.top - sr.top - alto - 6;
-        fvAbreCajon(false);
-      });
+      btn.dataset.go = id;
+      btn.appendChild(fvEl('span', 'label', label));
+      btn.appendChild(fvEl('span', 'count', String(count)));
+      btn.addEventListener('click', () => fvIrA(id));
       rlist.appendChild(btn);
-    });
+    };
+    const gFav = fvI18n('ro_fv_g_fav', 'Favorites');
+    const gBody = fvI18n('ro_fv_g_body', 'Header fields');
+    const gUno = fvI18n('ro_fv_g_single', 'Single-item sublists');
+    const gVac = fvI18n('ro_fv_g_empty', 'Empty sublists');
+    const gOtros = fvI18n('ro_fv_g_other', 'Other data');
+    if (favs.length || campos.length || otros.length) {
+      grupo(fvI18n('ro_fv_nav_fields', 'Fields'));
+      if (favs.length) item('fav', gFav, favs.length);
+      if (campos.length) item('campos', gBody, campos.length);
+      if (otros.length) item('otros', gOtros, otros.filter((b) => b.type !== 'section').length);
+    }
+    if (tablas.length || unos.length || vacias.length) {
+      grupo(fvI18n('ro_fv_nav_subs', 'Sublists'));
+      tablas.forEach((t) => item(t.id, t.label, t.count));
+      if (unos.length) item('unos', fvI18n('ro_fv_nav_single', 'Single item'), unos.length);
+      if (vacias.length) item('vacias', fvI18n('ro_fv_nav_empty', 'Empty'), vacias.length);
+    }
     rail.appendChild(rlist);
 
     const racts = fvEl('div', 'nsft-ro-fv-rail-actions');
-    const bTop = fvEl('button', 'nsft-ro-fv-btn', fvI18n('ro_fv_to_top', 'Back to the top'));
+    const bTop = fvEl('button', 'nsft-dlg-btn nsft-dlg-btn-cancel', fvI18n('ro_fv_to_top', 'Back to the top'));
     bTop.type = 'button';
-    bTop.addEventListener('click', () => { irArriba(); fvAbreCajon(false); });
-    const bClose = fvEl('button', 'nsft-ro-fv-btn is-primary', fvI18n('sql_tab_close', 'Close'));
+    bTop.addEventListener('click', () => {
+      const scroller = document.querySelector('.nsft-rec-obj-content');
+      if (scroller) scroller.scrollTop = 0;
+      fvAbreCajon(false);
+    });
+    const bClose = fvEl('button', 'nsft-dlg-btn nsft-dlg-btn-ok', fvI18n('sql_tab_close', 'Close'));
     bClose.type = 'button';
     bClose.addEventListener('click', () => fvAbreCajon(false));
     racts.appendChild(bTop);
     racts.appendChild(bClose);
     rail.appendChild(racts);
-
     host.appendChild(rail);
 
-    const main = fvEl('div', 'nsft-ro-fv-main');
+    const main = fvEl('div', 'nsft-ro-fv-main nsft-ro-av-main');
     host.appendChild(main);
 
-    const hero = fvEl('div', 'nsft-ro-fv-hero');
+    const body = fvIsObj(record.bodyFields) ? record.bodyFields : {};
+    const tit = fvTitulo(record, body, recordType);
+    const hero = fvEl('div', 'nsft-ro-fv-hero nsft-ro-av-head');
     const top = fvEl('div', 'nsft-ro-fv-hero-top');
-    top.appendChild(fvEl('span', 'nsft-ro-fv-type', recordType));
+    top.appendChild(fvEl('span', 'nsft-ro-fv-type nsft-tipo', recordType));
     top.appendChild(fvEl('span', 'nsft-ro-fv-hero-meta', 'id ' + (record.id != null ? record.id : '—')));
     hero.appendChild(top);
-    const body = record.bodyFields || {};
-    hero.appendChild(fvEl('h1', null, body.tranid || body.name || (recordType + ' ' + (record.id || ''))));
-    const st = fvEl('div', 'nsft-ro-fv-hero-stats');
-    st.appendChild(fvEl('span', null, fvI18n('ro_fv_values_listed', '$1 values listed', [String(stats.shown)])));
-    st.appendChild(fvEl('span', null, fvI18n('ro_fv_sublists_n', '$1 sublists',
-      [String(raw.filter((b) => b.type === 'table').length)])));
-    st.appendChild(fvEl('span', null, fvI18n(_fvShowTech ? 'ro_fv_hidden_shown' : 'ro_fv_hidden_n',
-      _fvShowTech ? '$1 empty/technical shown' : '$1 empty/technical hidden', [String(stats.hidden)])));
-    hero.appendChild(st);
+    hero.appendChild(fvEl('h1', null, tit.text));
+    const datos = fvDatos(body, tit.key, tit.text);
+    if (datos.length) {
+      const facts = fvEl('div', 'nsft-ro-av-facts');
+      datos.forEach((d) => facts.appendChild(fvEl('span', null, d.text)));
+      hero.appendChild(facts);
+    }
+    const resultados = favs.length + campos.length + tablas.length + unos.length + vacias.length
+      + otros.filter((b) => b.type !== 'section').length;
+    const cuenta = q
+      ? [fvPlural(resultados, 'ro_fv_c_result_one', '1 result', 'ro_fv_c_results', '$1 results')]
+      : [fvI18n('ro_fv_values_listed', '$1 values listed', [String(m.stats.shown)]),
+        fvI18n('ro_fv_c_subs', '$1 sublists with data', [String(m.tablas.length + m.unos.length)]),
+        fvI18n(_fvShowTech ? 'ro_fv_hidden_shown' : 'ro_fv_hidden_n',
+          _fvShowTech ? '$1 empty/technical shown' : '$1 empty/technical hidden', [String(m.stats.hidden)])];
+    hero.appendChild(fvEl('div', 'nsft-ro-fv-hero-stats nsft-ro-av-counts', cuenta.join(' · ')));
     main.appendChild(hero);
 
-    if (pins.length) main.appendChild(fvRenderPins(recordType, pins, raw));
+    const cont = fvEl('div', 'nsft-ro-av-content');
+    main.appendChild(cont);
+    const nCampos = (n) => fvPlural(n, 'ro_fv_n_field_one', '1 field', 'ro_fv_badge_fields', '$1 fields');
 
-    let group = null;
-    visible.forEach((b) => {
-      if (b.type === 'field') {
-        if (!group || group.depth !== b.depth) {
-          group = { depth: b.depth, node: fvEl('div', 'nsft-ro-fv-fields') };
-          main.appendChild(fvWrap(b.depth, group.node));
+    if (favs.length) {
+      const quitar = fvEl('button', 'nsft-ro-av-link', fvI18n('ro_fv_pins_clear', 'Remove all'));
+      quitar.type = 'button';
+      quitar.addEventListener('click', () => {
+        if (!_fvPins) _fvPins = {};
+        _fvPins[recordType] = [];
+        fvSavePins();
+        renderFriendly();
+      });
+      const sec = fvSeccion(cont, 'fav', gFav, nCampos(favs.length), quitar);
+      const grid = fvEl('div', 'nsft-ro-av-grid');
+      favs.forEach((b) => grid.appendChild(fvFila(b, recordType, pins, q)));
+      sec.appendChild(grid);
+    }
+
+    if (campos.length) {
+      const sec = fvSeccion(cont, 'campos', gBody, nCampos(campos.length));
+      const grid = fvEl('div', 'nsft-ro-av-grid');
+      campos.forEach((b) => grid.appendChild(fvFila(b, recordType, pins, q)));
+      sec.appendChild(grid);
+    }
+
+    if (otros.length) {
+      const sec = fvSeccion(cont, 'otros', gOtros, '');
+      let grid = null;
+      otros.forEach((b) => {
+        if (b.type === 'field') {
+          if (!grid) { grid = fvEl('div', 'nsft-ro-av-grid'); sec.appendChild(fvWrap(b.depth - 1, grid)); }
+          grid.appendChild(fvFila(b, recordType, pins, q));
+          return;
         }
-        group.node.appendChild(fvRenderField(b, recordType, pins));
-        return;
-      }
-      group = null;
-      if (b.type === 'section') main.appendChild(fvWrap(b.depth, fvRenderSection(b)));
-      else if (b.type === 'table') main.appendChild(fvWrap(b.depth, fvRenderTable(b)));
-      else if (b.type === 'chips') main.appendChild(fvWrap(b.depth, fvRenderChips(b)));
-      else if (b.type === 'emptyNote') main.appendChild(fvWrap(b.depth, fvEl('div', 'nsft-ro-fv-empty-note', b.label)));
+        grid = null;
+        if (b.type === 'section') sec.appendChild(fvWrap(b.depth - 1, fvRenderSection(b)));
+        else if (b.type === 'table') sec.appendChild(fvWrap(b.depth - 1, fvRenderTable(b)));
+        else if (b.type === 'chips') sec.appendChild(fvWrap(b.depth - 1, fvRenderChips(b)));
+        else if (b.type === 'emptyNote') sec.appendChild(fvWrap(b.depth - 1, fvVacio('nsft-ro-fv-empty-note', 'bandeja', b.label, true)));
+      });
+    }
+
+    tablas.forEach((t) => {
+      const sec = fvSeccion(cont, t.id, t.label,
+        fvPlural(t.count, 'ro_fv_rows_sub_one', '1 row · sublist', 'ro_fv_rows_sub', '$1 rows · sublist'));
+      sec.appendChild(fvRenderTable(t.block));
     });
 
-    if (q && !visible.length) {
-      main.appendChild(fvEl('div', 'nsft-ro-fv-noresults',
+    if (unos.length) {
+      const sec = fvSeccion(cont, 'unos', gUno, String(unos.length));
+      const lista = fvEl('div', 'nsft-ro-av-single');
+      unos.forEach((u) => lista.appendChild(fvUnoFila(u)));
+      sec.appendChild(lista);
+    }
+
+    if (vacias.length) {
+      const sec = fvSeccion(cont, 'vacias', gVac, String(vacias.length));
+      const chips = fvEl('div', 'nsft-ro-av-empties');
+      vacias.forEach((v) => {
+        const c = fvElQ('span', null, v.label);
+        c.title = v.key;
+        chips.appendChild(c);
+      });
+      sec.appendChild(chips);
+    }
+
+    if (q && !resultados) {
+      cont.appendChild(fvVacio('nsft-ro-fv-noresults', 'buscar',
         fvI18n('ro_fv_no_results', 'No matches for “$1”', [searchbox.value])));
     }
 
     const foot = fvEl('div', 'nsft-ro-fv-foothint');
     foot.innerHTML = fvI18n('ro_fv_foot_hint',
-      '<strong>Ctrl + Click</strong> on a field to find it on the form · <strong>★</strong> to pin it');
-    main.appendChild(foot);
+      '<strong>Ctrl + Click</strong> on a field to find it on the form · <strong>★</strong> to add it to Favorites');
+    cont.appendChild(foot);
+
+    fvVigia(rail);
   }
 
   function fvWrap(depth, child) {
     const w = fvEl('div', 'nsft-ro-fv-block');
-    w.style.paddingLeft = (Math.min(depth, 3) * 14) + 'px';
+    w.style.paddingLeft = (Math.min(Math.max(depth, 0), 3) * 14) + 'px';
     w.appendChild(child);
     return w;
   }
 
   function fvRenderSection(b) {
-    const s = fvEl('div', 'nsft-ro-fv-section depth-' + (b.depth === 0 ? '0' : 'n'));
+    const s = fvEl('div', 'nsft-ro-fv-section depth-' + (b.depth <= 1 ? '0' : 'n'));
     s.appendChild(fvElQ('span', 'h', b.label));
-    s.appendChild(fvEl('span', 'nsft-ro-fv-badge' + (b.list ? ' is-list' : ''), b.badge));
+    s.appendChild(fvEl('span', 'nsft-ro-fv-badge nsft-tipo' + (b.list ? ' is-list' : ''), b.badge));
     s.appendChild(fvEl('span', 'rule'));
-    s.appendChild(fvEl('span', 'trail', b.trail.length ? b.trail.join(' › ') : '$'));
-    if (b.id) _fvSectionEls[b.id] = s;
     return s;
   }
 
-  function fvRenderField(b, recordType, pins) {
+  function fvLink(txt, onClick) {
+    const a = fvEl('button', 'nsft-ro-av-link', txt);
+    a.type = 'button';
+    a.addEventListener('click', (ev) => { ev.stopPropagation(); onClick(a); });
+    return a;
+  }
+
+  function fvFila(b, recordType, pins, q) {
     const pinned = pins.indexOf(b.key) !== -1;
-    const f = fvEl('div', 'nsft-ro-fv-field');
+    const row = fvEl('div', 'nsft-ro-av-row');
 
-    const keys = fvEl('div', 'keys');
-    const lab = fvElQ('div', 'label', b.label);
-    lab.title = b.label;
-    const rk = fvElQ('div', 'rawkey', b.key);
-    rk.title = b.key;
-    keys.appendChild(lab);
-    keys.appendChild(rk);
-    f.appendChild(keys);
+    const lbl = fvEl('div', 'nsft-ro-av-lbl');
+    const l = fvElQ('div', 'l', b.label);
+    l.title = b.label;
+    const id = fvElQ('div', 'id', b.key);
+    lbl.appendChild(l);
+    lbl.appendChild(id);
+    if (q && fvFold(b.key).indexOf(q) !== -1 && fvFold(b.label).indexOf(q) === -1) lbl.classList.add('has-id');
+    row.appendChild(lbl);
 
-    const val = fvEl('div', 'val');
+    const val = fvEl('div', 'nsft-ro-av-val');
+    const line = fvEl('div', 'nsft-ro-av-vline');
+    val.appendChild(line);
+    let copiar = b.value;
+
     if (b.tone === 'yes' || b.tone === 'no' || b.tone === 'neutral') {
-      val.appendChild(fvElQ('span', 'nsft-ro-fv-pill' + (b.tone === 'neutral' ? '' : ' is-' + b.tone), b.value));
+      const tono = b.tone === 'yes' ? ' is-ok' : b.tone === 'no' ? ' is-mal' : '';
+      const pill = fvEl('span', 'nsft-ro-fv-pill nsft-estado' + tono);
+      pill.appendChild(fvElQ('span', null, b.value));
+      line.appendChild(pill);
+    } else if (FV_SECRET.test(b.key) && String(b.value).length >= 6) {
+      const v = fvEl('span', 'v is-mono');
+      const pinta = () => {
+        v.textContent = _fvRev[b.key] ? b.value : '••••••••' + String(b.value).slice(-4);
+      };
+      pinta();
+      line.appendChild(v);
+      const a = fvLink(fvI18n(_fvRev[b.key] ? 'ro_fv_hide' : 'ro_fv_show', _fvRev[b.key] ? 'Hide' : 'Show'), (el) => {
+        _fvRev[b.key] = !_fvRev[b.key];
+        pinta();
+        el.textContent = fvI18n(_fvRev[b.key] ? 'ro_fv_hide' : 'ro_fv_show', _fvRev[b.key] ? 'Hide' : 'Show');
+      });
+      line.appendChild(a);
+    } else if (fvJsonDe(b.value)) {
+      const o = fvJsonDe(b.value);
+      const n = Array.isArray(o) ? o.length : Object.keys(o).length;
+      const resumen = Array.isArray(o)
+        ? '[ ' + fvPlural(n, 'ro_fv_json_item_one', '1 item', 'ro_fv_json_items', '$1 items') + ' ]'
+        : '{ ' + fvPlural(n, 'ro_fv_json_key_one', '1 key', 'ro_fv_json_keys', '$1 keys') + ' }';
+      const v = fvEl('span', 'v is-mono', resumen);
+      line.appendChild(v);
+      const pre = fvEl('pre', 'nsft-ro-av-pre');
+      const abre = (abrir) => {
+        pre.textContent = abrir ? JSON.stringify(o, null, 2) : '';
+        pre.style.display = abrir ? '' : 'none';
+        v.style.display = abrir ? 'none' : '';
+      };
+      line.appendChild(fvLink(fvI18n(_fvJson[b.key] ? 'ro_fv_json_fold' : 'ro_fv_json_view', _fvJson[b.key] ? 'Collapse' : 'View JSON'), (el) => {
+        _fvJson[b.key] = !_fvJson[b.key];
+        abre(_fvJson[b.key]);
+        el.textContent = fvI18n(_fvJson[b.key] ? 'ro_fv_json_fold' : 'ro_fv_json_view', _fvJson[b.key] ? 'Collapse' : 'View JSON');
+      }));
+      val.appendChild(pre);
+      abre(!!_fvJson[b.key]);
+      if (q && fvFold(b.value).indexOf(q) !== -1 && !_fvJson[b.key]) {
+        pre.textContent = JSON.stringify(o, null, 2);
+        fvMarca(pre, pre.textContent);
+        pre.style.display = '';
+      }
     } else {
       const numerico = /^[-$\s\d.,:/]+$/.test(b.value);
-      const t = fvElQ('span', 'text' + (numerico ? ' is-num' : ''), b.value);
-      t.title = b.value + '  ·  ' + fvI18n('ro_fv_click_copy', 'click to copy');
-      t.addEventListener('click', (ev) => {
-        if (ev.ctrlKey || ev.metaKey) return;
-        const antes = Array.prototype.slice.call(t.childNodes);
-        const ok = () => {
-          t.textContent = fvI18n('ro_fv_copied', 'copied ✓');
-          setTimeout(() => {
-            t.textContent = '';
-            antes.forEach((n) => t.appendChild(n));
-          }, 700);
-        };
-        if (window.NSFT_Clipboard && window.NSFT_Clipboard.copy) window.NSFT_Clipboard.copy(b.value, { onSuccess: ok });
-        else if (navigator.clipboard) navigator.clipboard.writeText(b.value).then(ok).catch(() => {});
-      });
-      val.appendChild(t);
-      if (b.raw) val.appendChild(fvElQ('span', 'rawval', b.raw));
+      line.appendChild(fvElQ('span', 'v' + (numerico ? ' is-mono' : ''), b.value));
+      if (b.raw) line.appendChild(fvElQ('span', 'nsft-ro-av-ref nsft-tipo', b.raw));
     }
-    f.appendChild(val);
+    row.appendChild(val);
 
-    const pin = fvEl('button', 'nsft-ro-fv-pinbtn' + (pinned ? ' is-pinned' : ''), pinned ? '★' : '☆');
+    const acts = fvEl('div', 'nsft-ro-av-acts');
+    const cp = fvEl('button', 'nsft-ro-av-copy', fvI18n('ro_fv_copy', 'Copy'));
+    cp.type = 'button';
+    cp.title = fvI18n('ro_fv_copy_tip', 'Copy value');
+    cp.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const ok = () => {
+        cp.textContent = fvI18n('ro_fv_copied_btn', 'Copied');
+        cp.classList.add('is-ok');
+        setTimeout(() => { cp.textContent = fvI18n('ro_fv_copy', 'Copy'); cp.classList.remove('is-ok'); }, 1200);
+      };
+      if (window.NSFT_Clipboard && window.NSFT_Clipboard.copy) window.NSFT_Clipboard.copy(copiar, { toast: false, onSuccess: ok });
+      else if (navigator.clipboard) navigator.clipboard.writeText(copiar).then(ok).catch(() => {});
+    });
+    acts.appendChild(cp);
+
+    const pin = fvEl('button', 'nsft-ro-av-star' + (pinned ? ' is-on' : ''), pinned ? '★' : '☆');
     pin.type = 'button';
-    pin.title = pinned
-      ? fvI18n('ro_fv_pin_remove', 'Unpin')
-      : fvI18n('ro_fv_pin_add', 'Pin at the top for this record type');
-    pin.addEventListener('click', () => {
+    pin.title = pinned ? fvI18n('ro_fv_pin_remove', 'Remove from Favorites') : fvI18n('ro_fv_pin_add', 'Add to Favorites');
+    pin.addEventListener('click', (ev) => {
+      ev.stopPropagation();
       if (!_fvPins) _fvPins = {};
       const list = (_fvPins[recordType] || []).slice();
       const at = list.indexOf(b.key);
@@ -1967,51 +2258,49 @@
       fvSavePins();
       renderFriendly();
     });
-    f.appendChild(pin);
+    acts.appendChild(pin);
+    row.appendChild(acts);
 
-    f.addEventListener('click', (ev) => {
+    row.addEventListener('click', (ev) => {
       if (!ev.ctrlKey && !ev.metaKey) return;
       fvBuscarCampoEnPagina(b.key);
     });
-
-    return f;
+    return row;
   }
 
-  function fvRenderPins(recordType, pins, raw) {
-    const box = fvEl('div', 'nsft-ro-fv-pins');
-    const head = fvEl('div', 'nsft-ro-fv-pins-head');
-    head.appendChild(fvEl('span', 't', '★ ' + fvI18n('ro_fv_pins_title', 'Pinned for $1', [recordType])));
-    head.appendChild(fvEl('span', 'spacer'));
-    const clear = fvEl('button', null, fvI18n('ro_fv_pins_clear', 'remove all'));
-    clear.type = 'button';
-    clear.addEventListener('click', () => {
-      if (!_fvPins) _fvPins = {};
-      _fvPins[recordType] = [];
-      fvSavePins();
-      renderFriendly();
-    });
-    head.appendChild(clear);
-    box.appendChild(head);
-
-    const grid = fvEl('div', 'nsft-ro-fv-pins-grid');
-    pins.forEach((key) => {
-      const hit = raw.filter((b) => b.type === 'field' && b.key === key)[0];
-      const row = fvEl('div', 'nsft-ro-fv-pin');
-      row.appendChild(fvElQ('span', 'k', fvHumanize(key)));
-      row.appendChild(fvElQ('span', 'v', hit ? hit.value : fvI18n('ro_fv_pin_missing', 'not present on this record')));
-      const x = fvEl('button', null, '✕');
-      x.type = 'button';
-      x.addEventListener('click', () => {
-        if (!_fvPins) _fvPins = {};
-        _fvPins[recordType] = (_fvPins[recordType] || []).filter((k) => k !== key);
-        fvSavePins();
-        renderFriendly();
+  function fvUnoFila(u) {
+    const row = fvEl('div', 'nsft-ro-av-uno');
+    const head = fvEl('div', 'nsft-ro-av-uno-head');
+    const l = fvElQ('span', 'l', u.label);
+    l.title = u.key;
+    head.appendChild(l);
+    const v = fvEl('span', 'v');
+    v.appendChild(fvElQ('b', null, u.title));
+    if (u.raw && u.raw !== u.title) v.appendChild(fvElQ('small', null, ' · id ' + u.raw));
+    head.appendChild(v);
+    const lista = fvEl('div', 'nsft-ro-av-uno-campos');
+    const abre = (abrir) => {
+      lista.innerHTML = '';
+      lista.style.display = abrir ? '' : 'none';
+      if (!abrir) return;
+      u.campos.forEach((c) => {
+        const r = fvEl('div', null);
+        r.appendChild(fvElQ('span', 'k', c.label));
+        r.appendChild(fvElQ('span', 'x', c.text));
+        lista.appendChild(r);
       });
-      row.appendChild(x);
-      grid.appendChild(row);
-    });
-    box.appendChild(grid);
-    return box;
+    };
+    if (u.campos.length > 1) {
+      head.appendChild(fvLink(fvI18n(_fvUno[u.key] ? 'ro_fv_json_fold' : 'ro_fv_single_view', _fvUno[u.key] ? 'Collapse' : 'View fields') ,(el) => {
+        _fvUno[u.key] = !_fvUno[u.key];
+        abre(_fvUno[u.key]);
+        el.textContent = fvI18n(_fvUno[u.key] ? 'ro_fv_json_fold' : 'ro_fv_single_view', _fvUno[u.key] ? 'Collapse' : 'View fields');
+      }));
+    }
+    row.appendChild(head);
+    row.appendChild(lista);
+    abre(!!_fvUno[u.key] || (!!_fvQuery && u.hay.indexOf(fvFold(_fvQuery)) !== -1 && fvFold(u.label + ' ' + u.title).indexOf(fvFold(_fvQuery)) === -1));
+    return row;
   }
 
   function fvMoreBtn(b) {
@@ -2085,25 +2374,7 @@
   }
 
   function fvBuscarCampoEnPagina(key) {
-    const k = String(key || '');
-    const candidatos = [
-      '#' + CSS.escape(k + '_fs_lbl'),
-      '#' + CSS.escape(k),
-      '[name="' + CSS.escape(k) + '"]',
-      '#' + CSS.escape('inpt_' + k)
-    ];
-    let target = null;
-    for (let i = 0; i < candidatos.length && !target; i++) {
-      try { target = document.querySelector(candidatos[i]); } catch (e) { }
-    }
-    if (!target) {
-      showToast(fvI18n('ro_fv_field_notfound', 'The field is not visible on this form.'));
-      return;
-    }
-    try { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { target.scrollIntoView(); }
-    const box = target.closest('td, div') || target;
-    box.classList.add('nsft-ro-fv-flash');
-    setTimeout(() => box.classList.remove('nsft-ro-fv-flash'), 1800);
+    irAlCampoDelFormulario(String(key || ''), false);
   }
 
   const renderRecord = () => {
@@ -2343,7 +2614,10 @@
 
     let key = keyEl.innerText.replace(':', '');
     if (path[0] == 'lineFields') key = path[1] + '_' + key;
+    irAlCampoDelFormulario(key, path[0] == 'lineFields');
+  };
 
+  function irAlCampoDelFormulario(key, enLinea) {
     const DOM = window.NSFT_DOM;
     const fieldLabel = DOM
       ? DOM.q([
@@ -2356,7 +2630,7 @@
 
     if (!fieldLabel) {
       let msg = chrome.i18n.getMessage('ro_field_not_found');
-      if (path[0] == 'lineFields') msg = chrome.i18n.getMessage('ro_sublist_field_not_found');
+      if (enLinea) msg = chrome.i18n.getMessage('ro_sublist_field_not_found');
       showToast(msg);
       return;
     }
@@ -2401,7 +2675,7 @@
     }
 
     setTimeout(() => highlightTarget.classList.remove('nsft-ffi-highlight', 'nsft-ffi-hl-green'), 4000);
-  };
+  }
 
   const getObjectPath = (keyEl) => {
     const path = [];

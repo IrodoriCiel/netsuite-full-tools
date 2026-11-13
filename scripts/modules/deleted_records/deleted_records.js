@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('.nsft-delrec', 'delrec');
 
     const STORAGE_KEY = 'enableDeletedRecords';
     const MODAL_ID = 'nsft-delrec-modal';
@@ -100,7 +101,7 @@
 
     function abrir() {
         const T = {
-            title: 'NetSuite Full Tools - ' + i18n('enableDeletedRecordsLabel', 'Deleted Records'),
+            title: '' + i18n('enableDeletedRecordsLabel', 'Deleted Records'),
             search: i18n('delrec_search', 'Search'),
             close: i18n('sql_close', 'Close'),
             clear: i18n('sql_find_clear', 'Clear search'),
@@ -123,7 +124,7 @@
         const wrap = document.createElement('div');
         wrap.innerHTML = `
         <div id="${MODAL_ID}" class="nsft-modal-backdrop" data-theme="${resolveTheme()}">
-        <div class="nsft-modal nsft-modal--dialog nsft-delrec" data-nsft-ui data-theme="${resolveTheme()}"
+        <div class="nsft-modal nsft-modal--dialog nsft-delrec nsft-paleta" data-nsft-ui data-theme="${resolveTheme()}"
              tabindex="-1" role="dialog" aria-modal="true" aria-label="${escapeHtml(T.title)}">
             <div class="nsft-modal-header">
                 <span class="nsft-modal-title">${svg(ICON_TRASH)}<span>${escapeHtml(T.title)}</span></span>
@@ -134,16 +135,12 @@
             </div>
 
             <div class="nsft-delrec-topbar">
-                <div class="nsft-delrec-searchbar" id="nsft-delrec-searchbar">
-                    <span class="nsft-delrec-searchicon">${svg(ICON_SEARCH, 2)}</span>
-                    <input type="text" id="nsft-delrec-q" spellcheck="false" autocomplete="off">
+                <div class="nsft-delrec-searchbar nsft-paleta-barra" id="nsft-delrec-searchbar">
+                    <input type="text" id="nsft-delrec-q" class="nsft-paleta-input" spellcheck="false" autocomplete="off">
                     <button type="button" class="nsft-delrec-clearbtn" id="nsft-delrec-clear" title="${escapeHtml(T.clear)}" aria-label="${escapeHtml(T.clear)}">${svg('M6 6l12 12M18 6L6 18', 2.4)}</button>
-                    <button type="button" id="nsft-delrec-go">${escapeHtml(T.search)}</button>
+                    <select id="nsft-delrec-period" class="nsft-delrec-select" title="${escapeHtml(T.period)}" aria-label="${escapeHtml(T.period)}">${opciones}</select>
+                    <button type="button" class="nsft-paleta-accion" id="nsft-delrec-export" title="${escapeHtml(T.exportCsv)}" aria-label="${escapeHtml(T.exportCsv)}">${svg('M12 4v10M8 11l4 4 4-4M5 20h14', 1.9)}</button>
                 </div>
-                <select id="nsft-delrec-period" class="nsft-delrec-select" title="${escapeHtml(T.period)}" aria-label="${escapeHtml(T.period)}">${opciones}</select>
-                <button type="button" class="nsft-delrec-btn" id="nsft-delrec-export" title="${escapeHtml(T.exportCsv)}">
-                    ${svg('M12 4v10M8 11l4 4 4-4M5 20h14', 1.9)}<span>${escapeHtml(i18n('delrec_export', 'Export'))}</span>
-                </button>
             </div>
 
             <div class="nsft-delrec-filters" id="nsft-delrec-filters"></div>
@@ -156,12 +153,14 @@
                 <div class="nsft-delrec-results" id="nsft-delrec-results" role="listbox"></div>
             </div>
 
-            <div class="nsft-delrec-statusbar">
+            <div class="nsft-delrec-statusbar nsft-paleta-pie">
                 <span class="nsft-delrec-live"></span>
                 <span class="nsft-delrec-statusline" id="nsft-delrec-statusline"></span>
                 <span class="nsft-delrec-spacer"></span>
                 <span class="nsft-delrec-toast" id="nsft-delrec-toast"></span>
-                <span class="nsft-delrec-hints">${escapeHtml(i18n('delrec_hints', '↑↓ · Ctrl+C copy ID · Esc close'))}</span>
+                ${window.NSFT_Herramientas && window.NSFT_Herramientas.teclas
+                    ? window.NSFT_Herramientas.teclas([['↑↓', i18n('tmm_k_nav', 'navigate')], [['Ctrl', 'C'], i18n('pal_k_copy_id', 'copy ID')], ['Esc', i18n('pal_k_clear_close', 'clear or close')]])
+                    : ''}
             </div>
         </div>
         </div>`;
@@ -194,10 +193,6 @@
         const bar = _modal.querySelector('#nsft-delrec-searchbar');
 
         _modal.querySelector('#nsft-delrec-close').addEventListener('click', cerrar);
-        _modal.querySelector('#nsft-delrec-go').addEventListener('click', () => {
-            clearTimeout(_liveTimer);
-            lanzar();
-        });
         _backdrop.addEventListener('click', (e) => { if (e.target === _backdrop) cerrar(); });
 
         _modal.querySelector('#nsft-delrec-period').addEventListener('change', (e) => {
@@ -346,7 +341,7 @@
                 ts.async = false;
                 ts.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
                 ts.onload = function () { this.remove(); };
-                (document.head || document.documentElement).appendChild(ts);
+                (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(ts) : (document.head || document.documentElement).appendChild(ts));
             }
             const s = document.createElement('script');
             s.id = 'nsft-delrec-fetcher';
@@ -354,7 +349,7 @@
             s.src = chrome.runtime.getURL('scripts/modules/deleted_records/deleted_records_fetcher.js');
             s.onload = function () { this.remove(); suelta(); };
             s.onerror = suelta;
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         } catch (e) {
             suelta();
         }
@@ -445,7 +440,9 @@
                     : i18n('delrec_error', 'The deleted records could not be read.');
             res.appendChild(vacio(msg, true));
         } else if (!lista.length) {
-            res.appendChild(vacio(i18n('delrec_none', 'No deleted records match these filters.')));
+            const el = vacio(i18n('delrec_none', 'No deleted records match these filters.'));
+            if (window.NSFT_Herramientas) el.innerHTML = window.NSFT_Herramientas.vacio('deleted_records', el.textContent);
+            res.appendChild(el);
         } else {
             const frag = document.createDocumentFragment();
             lista.forEach((it, n) => {

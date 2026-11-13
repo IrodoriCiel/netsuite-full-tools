@@ -1,7 +1,7 @@
 .nsft-env-picker-pop {
     position: fixed;
     z-index: 2147483645;
-    background: #fff;
+    background: var(--nsft-w-s0, #fff);
     color: #111827;
     border: 1px solid #d1d5db;
     border-radius: 6px;

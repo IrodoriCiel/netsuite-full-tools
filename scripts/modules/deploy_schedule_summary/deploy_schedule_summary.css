@@ -1,0 +1,90 @@
+.nsft-dss-hidden {
+    display: none !important;
+}
+
+.nsft-dss-wrap {
+    margin: 8px 0 10px;
+    max-width: 560px;
+}
+
+.nsft-dss-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--nsft-border, #e2e8f0);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--nsft-surface-0, #ffffff);
+    color: var(--nsft-text-2, #334155);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.nsft-dss-table th,
+.nsft-dss-table td {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--nsft-border, #e2e8f0);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.nsft-dss-table tbody tr:last-child th,
+.nsft-dss-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.nsft-dss-table thead th {
+    background: var(--nsft-surface-2, #eef1f6);
+    color: var(--nsft-text-1, #0f172a);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.nsft-dss-table tbody th {
+    width: 42%;
+    background: var(--nsft-surface-1, #f8fafc);
+    color: var(--nsft-text-1, #0f172a);
+    font-weight: 600;
+}
+
+.nsft-dss-wrap {
+    --nsft-w-t3: var(--nsft-text-3, #64748b);
+}
+
+.nsft-dss-badge {
+    margin-right: 8px;
+}
+
+html[data-nsft-theme="dark"] .nsft-dss-badge.nsft-estado.is-ok:not(#a):not(#b) {
+    color: #5cc994;
+}
+
+.nsft-dss-switch {
+    display: inline-flex;
+    margin-bottom: 6px;
+    padding: 2px;
+    border: 1px solid var(--nsft-border, #e2e8f0);
+    border-radius: 7px;
+    background: var(--nsft-surface-2, #eef1f6);
+}
+
+.nsft-dss-switch button {
+    padding: 3px 11px;
+    border: 0;
+    border-radius: 5px;
+    background: none;
+    color: var(--nsft-text-3, #64748b);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.nsft-dss-switch button:hover {
+    color: var(--nsft-text-1, #0f172a);
+}
+
+.nsft-dss-switch button.is-on {
+    background: var(--nsft-surface-0, #ffffff);
+    color: var(--nsft-text-1, #0f172a);
+    font-weight: 600;
+}

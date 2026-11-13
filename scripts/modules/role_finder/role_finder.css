@@ -2,7 +2,7 @@
 .nsft-role-search-container {
     padding: 10px 14px 6px !important;
     font-family: var(--nsft-font, 'Inter', 'Segoe UI', system-ui, sans-serif);
-    background: #ffffff !important;
+    background: var(--nsft-w-s0, #fff) !important;
 }
 
 .nsft-role-search-title {
@@ -27,7 +27,7 @@
     font-family: var(--nsft-font, 'Inter', 'Segoe UI', system-ui, sans-serif);
     font-size: 13px !important;
     color: #0f172a !important;
-    background: #ffffff !important;
+    background: var(--nsft-w-s0, #fff) !important;
     border: 1.5px solid #e2e8f0 !important;
     border-radius: 10px !important;
     outline: none !important;
@@ -42,7 +42,7 @@
 
 #nsft-role-search:focus {
     border-color: var(--nsft-ns-accent, #3b82f6) !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent, #4f46e5) 22%, transparent) !important;
 }
 
 #nsft-role-search.has-text {
@@ -92,8 +92,8 @@
 }
 
 .nsft-rf-sel {
-    background: rgba(79, 70, 229, 0.10) !important;
-    outline: 2px solid rgba(79, 70, 229, 0.35) !important;
+    background: color-mix(in srgb, var(--nsft-ns-accent, #4f46e5) 10%, transparent) !important;
+    outline: 2px solid color-mix(in srgb, var(--nsft-ns-accent, #4f46e5) 35%, transparent) !important;
     outline-offset: -2px;
     border-radius: 6px;
 }

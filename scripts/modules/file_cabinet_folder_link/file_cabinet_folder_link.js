@@ -77,7 +77,7 @@
     function createButton(folderId) {
         const label = chrome.i18n.getMessage('fcfl_copy_label') || 'Copiar permalink';
         const btn = document.createElement('a');
-        btn.className = BTN_CLASS;
+        btn.className = BTN_CLASS + ' nsft-pastilla';
         btn.href = '#';
         btn.title = chrome.i18n.getMessage('fcfl_copy_tooltip') || 'Copy folder permalink';
         btn.setAttribute('role', 'button');

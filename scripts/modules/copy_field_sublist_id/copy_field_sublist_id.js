@@ -123,7 +123,7 @@
             script.async = false;
             script.src = chrome.runtime.getURL('scripts/modules/copy_field_sublist_id/copy_field_sublist_id_fetcher.js');
             script.onload = function () { this.remove(); };
-            (document.head || document.documentElement).appendChild(script);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
         }
 
         runAll();

@@ -1,0 +1,15 @@
+#nsft-record-options-menu .ns-menuitem-link .nsft-tools-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 16px !important;
+    height: 16px !important;
+    flex: 0 0 16px !important;
+}
+#nsft-record-options-menu .ns-menuitem-link .nsft-tools-icon svg {
+    width: 14px !important;
+    height: 14px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}

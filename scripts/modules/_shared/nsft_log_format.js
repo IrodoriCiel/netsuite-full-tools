@@ -527,6 +527,12 @@
 
         if (window.hljs) {
             try { window.hljs.highlightElement(code); } catch (e) { }
+        } else if (window.NSFT_Libs) {
+            window.NSFT_Libs.listas().then(() => {
+                if (window.hljs && code.isConnected !== false) {
+                    try { window.hljs.highlightElement(code); } catch (e) { }
+                }
+            });
         }
     };
 
@@ -577,8 +583,13 @@
             const next = showingCode ? previewLabel : codeLabel;
             btnLabelEl(toggleBtn).textContent = next;
             toggleBtn.title = next;
-            if (showingCode && !highlighted && window.hljs) {
-                try { window.hljs.highlightElement(codeEl); highlighted = true; } catch (err) { }
+            if (showingCode && !highlighted) {
+                const pinta = () => {
+                    if (highlighted || !window.hljs) return;
+                    try { window.hljs.highlightElement(codeEl); highlighted = true; } catch (err) { }
+                };
+                if (window.hljs || !window.NSFT_Libs) pinta();
+                else window.NSFT_Libs.listas().then(pinta);
             }
         });
 

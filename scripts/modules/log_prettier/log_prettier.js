@@ -193,9 +193,46 @@
         if (lang) el.dataset[FORMATTED_ATTR] = lang;
     };
 
+    const COL_DETAIL = ['DETALLES', 'DETALLE', 'DETAILS', 'DETAIL'];
+    const COL_LEVEL = COL_TYPE.concat(['NIVEL DE REGISTRO', 'NIVEL', 'LOG LEVEL', 'LEVEL']);
+    const _filasVistas = new WeakSet();
+    function marcaError(td) {
+        const AE = window.NSFT_AiExplain;
+        const row = td.closest && td.closest('tr');
+        if (!AE || !row || _filasVistas.has(row)) return;
+        _filasVistas.add(row);
+        const map = headerMap(td);
+        if (!map) return;
+        const idx = (names) => { for (const n of names) if (map[n] != null) return map[n]; return -1; };
+        const cells = Array.from(row.children);
+        const txt = (i) => (i >= 0 && cells[i] ? (cells[i].innerText || cells[i].textContent || '').trim() : '');
+        const nivel = txt(idx(COL_LEVEL));
+        const dIdx = idx(COL_DETAIL);
+        const celda = dIdx >= 0 ? cells[dIdx] : null;
+        if (!celda || celda.querySelector('.nsft-aiexp-btn')) return;
+        const code = celda.querySelector('.nsft-logfmt-wrapper code');
+        const detalle = code ? code.textContent : txt(dIdx);
+        const titulo = txt(idx(COL_TITLE));
+        const script = String(document.title || '').split(' - NetSuite')[0].trim();
+        const b = AE.button({ detail: detalle, title: titulo, script, level: nivel });
+        if (!b) return;
+        const barra = celda.querySelector('.nsft-logfmt-wrapper .nsft-codecard-bar');
+        if (barra) {
+            b.classList.add('is-en-barra');
+            barra.appendChild(b);
+            return;
+        }
+        const caja = document.createElement('span');
+        caja.className = 'nsft-aiexp-float';
+        caja.appendChild(b);
+        celda.insertBefore(caja, celda.firstChild);
+    }
+
     const scan = (root) => {
         if (!root || !root.querySelectorAll) return;
-        Array.from(root.querySelectorAll(SELECTOR)).forEach(formatTD);
+        const celdas = Array.from(root.querySelectorAll(SELECTOR));
+        celdas.forEach(formatTD);
+        celdas.forEach(marcaError);
         if (IS_NOTE_PAGE) {
             Array.from(root.querySelectorAll(NOTE_SELECTOR)).reverse().forEach(formatNoteField);
         }

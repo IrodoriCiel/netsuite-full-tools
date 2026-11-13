@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('#nsft-sx-modal > .nsft-sx', 'sx', { filas: '.nsft-sx-row' });
 
     const STORAGE_KEY = 'enableScriptExecute';
     const CONFIRM_KEY = 'scriptExecuteConfirmSandbox';
@@ -98,7 +99,7 @@
                 while (_cola.length) window.postMessage(_cola.shift(), '*');
             };
             s.onerror = function () { this.remove(); romperPuente(); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         } catch (e) { romperPuente(); }
     }
 
@@ -175,7 +176,7 @@
             s.async = false;
             s.src = chrome.runtime.getURL('scripts/modules/script_execute/script_execute_hook.js');
             s.onload = function () { this.remove(); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         } catch (e) { _hookPuesto = false; }
     }
 
@@ -289,37 +290,30 @@
     }
 
     const ICONO_RUN = 'M7 5l12 7-12 7z';
-    const ICONO_LUPA = 'M11 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM15.5 15.5L20 20';
 
     function abrir(opts) {
         cerrar();
-        const titulo = 'NetSuite Full Tools - ' + T('sx_title', 'Run script');
+        const titulo = '' + T('sx_title', 'Run script');
         const clear = T('sql_find_clear', 'Clear search');
         const wrap = document.createElement('div');
         wrap.innerHTML = `
         <div id="${MODAL_ID}" class="nsft-modal-backdrop" data-theme="${tema()}">
-        <div class="nsft-modal nsft-modal--dialog nsft-sx" data-nsft-ui data-theme="${tema()}"
+        <div class="nsft-modal nsft-modal--dialog nsft-sx nsft-paleta" data-nsft-ui data-theme="${tema()}"
              tabindex="-1" role="dialog" aria-modal="true" aria-label="${esc(titulo)}">
-            <div class="nsft-modal-header">
-                <span class="nsft-modal-title">${svg(ICONO_RUN)}<span>${esc(titulo)}</span></span>
-                <span class="nsft-header-actions">
-                    <button type="button" class="nsft-modal-btn-close nsft-sx-close" title="${esc(T('sql_close', 'Close'))}">✕</button>
-                </span>
-                <div class="nsft-modal-header-line"></div>
-            </div>
-            <div class="nsft-sx-top">
-                <div class="nsft-sx-searchbar">
-                    <span class="nsft-sx-searchicon">${svg(ICONO_LUPA, 2)}</span>
-                    <input type="text" class="nsft-sx-q" spellcheck="false" autocomplete="off">
-                    <button type="button" class="nsft-sx-clearbtn" title="${esc(clear)}" aria-label="${esc(clear)}">${svg('M6 6l12 12M18 6L6 18', 2.4)}</button>
-                </div>
+            <div class="nsft-sx-searchbar nsft-paleta-barra">
+                <input type="text" class="nsft-sx-q nsft-paleta-input" spellcheck="false" autocomplete="off" aria-label="${esc(titulo)}">
+                <button type="button" class="nsft-sx-clearbtn" title="${esc(clear)}" aria-label="${esc(clear)}">${svg('M6 6l12 12M18 6L6 18', 2.4)}</button>
             </div>
             <div class="nsft-sx-scope" hidden></div>
             <div class="nsft-sx-results" role="listbox"></div>
-            <div class="nsft-sx-statusbar">
+            
+            <div class="nsft-sx-statusbar nsft-paleta-pie">
+                <span class="nsft-paleta-cuenta"></span>
                 <span class="nsft-sx-statusline"></span>
                 <span class="nsft-sx-spacer"></span>
-                <span class="nsft-sx-hints">${esc(T('sx_hints', '↑↓ · ↵ run · Esc close'))}</span>
+                ${window.NSFT_Herramientas && window.NSFT_Herramientas.teclas
+                    ? window.NSFT_Herramientas.teclas([['↑↓', T('tmm_k_nav', 'navigate')], ['↵', T('ssc_frag_k_run', 'run')], ['Esc', T('pal_k_clear_close', 'clear or close')]])
+                    : ''}
             </div>
         </div>
         </div>`;
@@ -373,7 +367,6 @@
         const q = _modal.querySelector('.nsft-sx-q');
         const barra = _modal.querySelector('.nsft-sx-searchbar');
 
-        _modal.querySelector('.nsft-sx-close').addEventListener('click', cerrar);
         _backdrop.addEventListener('click', (e) => { if (e.target === _backdrop) cerrar(); });
 
         q.addEventListener('input', () => {
@@ -473,9 +466,12 @@
             return;
         }
         if (!_vis.length) {
-            res.innerHTML = '<div class="nsft-sx-empty">' + esc(_filas.length
+            const vacioTxt = _filas.length
                 ? T('sx_none', 'No deployment matches the search.')
-                : T('sx_empty', 'This account has no deployed Map/Reduce or Scheduled scripts.')) + '</div>';
+                : T('sx_empty', 'This account has no deployed Map/Reduce or Scheduled scripts.');
+            res.innerHTML = '<div class="nsft-sx-empty">' + (window.NSFT_Herramientas
+                ? window.NSFT_Herramientas.vacio(_filas.length ? 'buscar' : 'script_execute', vacioTxt)
+                : esc(vacioTxt)) + '</div>';
             line.textContent = '';
             return;
         }
@@ -485,19 +481,19 @@
             const tono = TONO[f.dstatus] || '';
             return '<div class="nsft-sx-row' + (activa ? ' is-active' : (i % 2 ? ' is-zebra' : '')) + '"'
                 + ' role="option" aria-selected="' + activa + '" data-did="' + esc(f.did) + '">'
-                + '<span class="nsft-sx-type is-' + (f.stype === 'MAPREDUCE' ? 'mr' : 'sch') + '">' + esc(tipoCorto(f.stype)) + '</span>'
+                + '<span class="nsft-sx-type nsft-tipo is-' + (f.stype === 'MAPREDUCE' ? 'mr' : 'sch') + '">' + esc(tipoCorto(f.stype)) + '</span>'
                 + '<span class="nsft-sx-main">'
                 +   '<span class="nsft-sx-name">' + hl(f.sname || f.sscriptid) + '</span>'
                 +   '<span class="nsft-sx-sub">' + hl(f.dtitle) + ' · <span class="nsft-sx-id">' + hl(f.dscriptid) + '</span></span>'
                 + '</span>'
-                + '<span class="nsft-sx-badge' + (tono ? ' is-' + tono : '') + '">' + esc(f.dstatus) + '</span>'
+                + (window.NSFT_Herramientas
+                    ? (() => { const e = window.NSFT_Herramientas.estadoNS(f.dstatus); return '<span class="nsft-sx-badge ' + e.clase + '">' + esc(e.texto) + '</span>'; })()
+                    : '<span class="nsft-sx-badge' + (tono ? ' is-' + tono : '') + '">' + esc(f.dstatus) + '</span>')
                 + '<button type="button" class="nsft-sx-go" tabindex="-1">' + svg(ICONO_RUN, 2) + '<span>' + esc(T('sx_btn_run', 'Execute')) + '</span></button>'
                 + '</div>';
         }).join('');
         res.innerHTML = html;
-        line.textContent = _ocupado
-            ? T('sx_checking', 'Checking the deployment…')
-            : T('sx_count', '$1 deployments', [String(_vis.length)]) + (_term ? ' · “' + _term + '”' : '');
+        line.textContent = _ocupado ? T('sx_checking', 'Checking the deployment…') : '';
     }
 
     function revelar() {

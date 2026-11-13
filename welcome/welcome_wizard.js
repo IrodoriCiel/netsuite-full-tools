@@ -104,7 +104,8 @@
         profile = name;
         const defaults = globalThis.NSFT_DEFAULTS || {};
         allKeys.forEach((key) => {
-            if (name === 'none' || name === 'custom') state[key] = false;
+            if (name === 'custom' && actual) state[key] = !!actual[key];
+            else if (name === 'none' || name === 'custom') state[key] = false;
             else if (name === 'all') state[key] = true;
             else state[key] = SUGGESTED_OFF.includes(key) ? false : defaults[key] !== false;
         });
@@ -367,7 +368,7 @@
         $('wizBack').addEventListener('click', back);
         $('wizSkip').addEventListener('click', skip);
 
-        conPerfiles = !repaso;
+        conPerfiles = true;
         if (repaso) {
             await new Promise((resolve) => {
                 const pedido = {};
@@ -382,9 +383,9 @@
                     resolve();
                 });
             });
-            allKeys.forEach((k) => { state[k] = !!actual[k]; });
-            index = 0;
-            renderStep();
+            applyProfile('custom');
+            index = -1;
+            renderProfiles();
         } else {
             applyProfile('suggested');
             renderProfiles();
@@ -399,9 +400,7 @@
     function boot() {
         const repaso = window.location.hash === '#wizard';
         chrome.storage.local.get({ [DONE_KEY]: false }, (items) => {
-            if (repaso) start(true);
-            else if (!items[DONE_KEY]) start(false);
-            else closeWizard();
+            start(repaso || !!items[DONE_KEY]);
         });
     }
 

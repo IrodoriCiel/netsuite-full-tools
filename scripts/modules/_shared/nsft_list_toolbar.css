@@ -306,8 +306,8 @@ html[data-nsft-redwood] .nsft-tb-group {
     --tb-text: #161513;
     --tb-text-2: #161513;
     --tb-text-3: rgba(22, 21, 19, 0.7);
-    --tb-accent: #227E9E;
-    --tb-live: #227E9E;
+    --tb-accent: var(--nsft-ns-accent, #227E9E);
+    --tb-live: var(--nsft-ns-accent, #227E9E);
     height: 32px !important;
     border: 1px solid rgba(22, 21, 19, 0.5) !important;
     border-radius: 4px !important;
@@ -331,18 +331,18 @@ html[data-nsft-redwood] .nsft-tb-icon:disabled { color: rgba(22, 21, 19, 0.35) !
 html[data-nsft-redwood] .nsft-tb-search input::placeholder { color: rgba(22, 21, 19, 0.5) !important; }
 
 html[data-nsft-redwood] .nsft-tb-group.nsft-tb-search:focus-within {
-    border-color: #227E9E !important;
-    box-shadow: 0 0 0 1px #227E9E !important;
+    border-color: var(--tb-accent) !important;
+    box-shadow: 0 0 0 1px var(--tb-accent) !important;
 }
 
 html[data-nsft-redwood] .nsft-tb-group.is-refreshing {
-    background: color-mix(in srgb, #227E9E 8%, white) !important;
+    background: color-mix(in srgb, var(--tb-accent) 8%, white) !important;
     animation-name: nsft-tb-glow-rw;
 }
 
 @keyframes nsft-tb-glow-rw {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 126, 158, 0); }
-    50% { box-shadow: 0 0 0 3px rgba(34, 126, 158, 0.18); }
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tb-accent) 0%, transparent); }
+    50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--tb-accent) 18%, transparent); }
 }
 
 html[data-nsft-redwood] .nsft-tb-bar { background: transparent !important; }

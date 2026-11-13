@@ -68,7 +68,7 @@
         const s = document.createElement('script');
         s.src = chrome.runtime.getURL(FETCHER);
         s.async = false;
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         s.onload = () => s.remove();
     }
 

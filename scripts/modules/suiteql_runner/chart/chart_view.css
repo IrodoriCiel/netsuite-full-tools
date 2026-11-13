@@ -16,45 +16,48 @@ body {
     font-size: 13px;
 }
 
-.cv-bar {
+.cv-head {
     flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--nsft-space-4);
-    flex-wrap: wrap;
-    padding: 10px 16px;
-    background: var(--nsft-surface-0);
-    border-bottom: 1px solid var(--nsft-border);
+    background: var(--nsft-w-s0);
+    border-bottom: 1px solid var(--nsft-w-bd);
 }
 
-.cv-title {
-    display: flex;
-    align-items: center;
-    gap: var(--nsft-space-2);
-    min-width: 0;
-}
-
-.cv-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--nsft-accent);
-    flex: 0 0 auto;
-}
-
-.cv-title strong {
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.cv-sub {
-    color: var(--nsft-text-3);
+.cv-rows {
+    color: var(--nsft-w-t3);
     font-size: 12px;
-    white-space: nowrap;
+}
+
+.cv-ctx-sep:has(+ .nsft-cab-ctx > #cv-title:empty) { display: none; }
+
+.cv-tool {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-left: auto;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 6px;
+    color: var(--nsft-w-t3);
+    cursor: pointer;
+}
+
+.cv-tool:hover {
+    background: var(--nsft-w-hov);
+    color: var(--nsft-w-t1);
+}
+
+.cv-tool:focus-visible {
+    outline: 2px solid var(--nsft-w-accent);
+    outline-offset: 1px;
+}
+
+.cv-tool svg {
+    width: var(--nsft-w-ico, 15px);
+    height: var(--nsft-w-ico, 15px);
 }
 
 .cv-controls {
@@ -62,6 +65,7 @@ body {
     align-items: flex-end;
     gap: var(--nsft-space-3);
     flex-wrap: wrap;
+    padding: 8px 16px 10px;
 }
 
 .cv-field {
@@ -71,11 +75,9 @@ body {
 }
 
 .cv-field > span {
-    color: var(--nsft-text-3);
-    font-size: 10.5px;
+    color: var(--nsft-w-t3);
+    font-size: 11.5px;
     font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
 }
 
 .cv-field select {
@@ -108,30 +110,6 @@ body {
 
 .cv-field select option:checked {
     background: linear-gradient(0deg, var(--nsft-surface-2) 0%, var(--nsft-surface-2) 100%);
-    color: var(--nsft-text-1);
-}
-
-.cv-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 32px;
-    padding: 0 14px;
-    border: 1px solid var(--nsft-border);
-    border-radius: var(--nsft-radius-sm);
-    background: var(--nsft-surface-0);
-    color: var(--nsft-text-2);
-    font-family: inherit;
-    font-size: 12.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color var(--nsft-dur-fast) var(--nsft-ease),
-                border-color var(--nsft-dur-fast) var(--nsft-ease);
-}
-
-.cv-btn:hover {
-    background: var(--nsft-surface-2);
-    border-color: var(--nsft-border-strong);
     color: var(--nsft-text-1);
 }
 

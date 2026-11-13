@@ -46,7 +46,7 @@
                 align-items: center;
                 gap: 10px;
                 padding: 12px 16px;
-                background: linear-gradient(135deg, #4a6fa5, #3b5a85);
+                background: linear-gradient(135deg, var(--nsft-ns-primary, var(--nsft-ns-button, #4a6fa5)), color-mix(in srgb, var(--nsft-ns-primary, var(--nsft-ns-button, #4a6fa5)) 80%, #000000));
                 color: #fff;
                 font-size: 13px;
                 font-weight: 600;
@@ -90,8 +90,8 @@
                 width: 6px;
                 height: 6px;
                 border-radius: 50%;
-                background: #4a6fa5;
-                box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.18);
+                background: var(--nsft-ns-accent, #4a6fa5);
+                box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-ns-accent, #4a6fa5) 18%, transparent);
                 flex-shrink: 0;
             }
             #${PANEL_ID} .wfp-row[data-status="done"] .wfp-row-dot {
@@ -128,7 +128,7 @@
                 top: 0;
                 bottom: 0;
                 width: 0%;
-                background: linear-gradient(90deg, #4a6fa5, #6a8ec5);
+                background: linear-gradient(90deg, var(--nsft-ns-accent, #4a6fa5), color-mix(in srgb, var(--nsft-ns-accent, #4a6fa5) 78%, #ffffff));
                 border-radius: 999px;
                 transition: width 260ms ease;
             }
@@ -137,7 +137,7 @@
             }
             #${PANEL_ID} .wfp-row[data-indeterminate="true"] .wfp-row-bar-fill {
                 width: 35% !important;
-                background: linear-gradient(90deg, transparent, #4a6fa5, transparent);
+                background: linear-gradient(90deg, transparent, var(--nsft-ns-accent, #4a6fa5), transparent);
                 animation: nsft-wfp-indeterm 1.4s ease-in-out infinite;
             }
             @keyframes nsft-wfp-pulse {
@@ -229,21 +229,21 @@
                 padding: 8px 14px;
                 height: 40px;
                 box-sizing: border-box;
-                background: #ffffff;
-                color: #374151;
-                border-bottom: 1px solid #f3f4f6;
+                background: var(--nsft-w-s1, #fafaf9);
+                color: var(--nsft-w-t1, #1c1917);
+                border-bottom: 1px solid var(--nsft-w-bd, #e7e5e4);
                 cursor: move;
                 user-select: none;
                 flex-shrink: 0;
                 transition: padding 280ms ease;
             }
-            #nsft-wf-indexer-panel .wfi-head-icon { width: 14px; height: 14px; flex-shrink: 0; color: #4a6fa5; }
-            #nsft-wf-indexer-panel .wfi-title { flex: 1; font-size: 13px; font-weight: 600; letter-spacing: -0.01em; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            #nsft-wf-indexer-panel .wfi-head-icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--nsft-tono-violeta, #5b46c4); }
+            #nsft-wf-indexer-panel .wfi-title { flex: 1; font-size: 13px; font-weight: 600; letter-spacing: -0.01em; color: var(--nsft-w-t1, #1c1917); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             #nsft-wf-indexer-panel .wfi-capsule-count {
                 display: none;
                 align-items: center;
-                background: #eef2ff;
-                color: #3b5a85;
+                background: color-mix(in srgb, var(--nsft-ns-accent, #4a6fa5) 12%, #ffffff);
+                color: var(--nsft-ns-accent, #3b5a85);
                 padding: 1px 8px;
                 border-radius: 999px;
                 font-size: 10.5px;
@@ -254,10 +254,10 @@
             #nsft-wf-indexer-panel .wfi-max,
             #nsft-wf-indexer-panel .wfi-close {
                 background: transparent;
-                color: #9ca3af;
+                color: var(--nsft-w-t3, #78716c);
                 border: none;
-                width: 22px; height: 22px;
-                border-radius: 4px;
+                width: 28px; height: 28px;
+                border-radius: 6px;
                 cursor: pointer;
                 font-size: 11px;
                 line-height: 1;
@@ -269,8 +269,8 @@
                 transition: all 0.2s ease;
             }
             #nsft-wf-indexer-panel .wfi-min:hover,
-            #nsft-wf-indexer-panel .wfi-max:hover { background: #f3f4f6; color: #1f2937; }
-            #nsft-wf-indexer-panel .wfi-close:hover { background: #fee2e2; color: #ef4444; }
+            #nsft-wf-indexer-panel .wfi-max:hover { background: var(--nsft-w-hov, #f3f4f6); color: var(--nsft-w-t1, #1f2937); }
+            #nsft-wf-indexer-panel .wfi-close:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
             #nsft-wf-indexer-panel .wfi-tabs { display: flex; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; }
             #nsft-wf-indexer-panel .wfi-tab {
                 flex: 1;
@@ -285,13 +285,13 @@
                 font-family: inherit;
             }
             #nsft-wf-indexer-panel .wfi-tab:hover { color: #374151; }
-            #nsft-wf-indexer-panel .wfi-tab.is-active { color: #4a6fa5; }
+            #nsft-wf-indexer-panel .wfi-tab.is-active { color: var(--nsft-ns-accent, #4a6fa5); }
             #nsft-wf-indexer-panel .wfi-tab.is-active::after {
                 content: '';
                 position: absolute;
                 bottom: -1px; left: 18%; right: 18%;
                 height: 2px;
-                background: #4a6fa5;
+                background: var(--nsft-ns-accent, #4a6fa5);
                 border-radius: 2px;
             }
             #nsft-wf-indexer-panel .wfi-filters { padding: 12px 16px; border-bottom: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
@@ -309,7 +309,7 @@
                 font-family: inherit;
                 box-sizing: border-box;
             }
-            #nsft-wf-indexer-panel .wfi-search:focus { border-color: #4a6fa5; box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.18); }
+            #nsft-wf-indexer-panel .wfi-search:focus { border-color: var(--nsft-ns-accent, #4a6fa5); box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent, #4a6fa5) 18%, transparent); }
             /* El input es type="search" y Chrome le pone SU propia aspa; con la
                nuestra al lado salían dos. Se retira la del navegador, que ni se
                puede estilar ni respeta el tema. */
@@ -337,7 +337,7 @@
             }
             #nsft-wf-indexer-panel .wfi-search-clear[hidden] { display: none; }
             #nsft-wf-indexer-panel .wfi-search-clear:hover { background: #f3f4f6; color: #374151; }
-            #nsft-wf-indexer-panel .wfi-search-clear:focus-visible { outline: 2px solid #4a6fa5; outline-offset: 1px; }
+            #nsft-wf-indexer-panel .wfi-search-clear:focus-visible { outline: 2px solid var(--nsft-ns-accent, #4a6fa5); outline-offset: 1px; }
             #nsft-wf-indexer-panel .wfi-filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
             #nsft-wf-indexer-panel .wfi-filter {
                 flex: 1;
@@ -378,20 +378,9 @@
                 margin-bottom: 4px;
             }
             #nsft-wf-indexer-panel .wfi-item-head .wfi-title-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            #nsft-wf-indexer-panel .wfi-pill {
-                display: inline-block;
-                padding: 1px 7px;
-                border-radius: 999px;
-                font-size: 9.5px;
-                font-weight: 700;
-                background: #eef2ff;
-                color: #4338ca;
-                letter-spacing: 0.3px;
-                text-transform: uppercase;
-                flex-shrink: 0;
-            }
-            #nsft-wf-indexer-panel .wfi-pill.is-inactive { background: #fee2e2; color: #991b1b; }
-            #nsft-wf-indexer-panel .wfi-pill.is-start { background: #dcfce7; color: #166534; }
+            /* «Inactiva» / «Inicial»: el aspecto lo pone el badge de estado
+               común (.nsft-estado, Sistema de Ventanas §3). */
+            #nsft-wf-indexer-panel .wfi-pill { flex-shrink: 0; }
             #nsft-wf-indexer-panel .wfi-item-meta { font-size: 11px; color: #6b7280; line-height: 1.55; }
             #nsft-wf-indexer-panel .wfi-item-meta b { color: #374151; font-weight: 600; }
             #nsft-wf-indexer-panel .wfi-item-meta code {
@@ -402,11 +391,10 @@
                 font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
                 font-size: 10.5px;
             }
+            /* Sólo el aire alrededor: el vacío lo dibuja la pieza común
+               (.nsft-vacio), con sus colores. */
             #nsft-wf-indexer-panel .wfi-empty {
-                padding: 50px 24px;
-                text-align: center;
-                color: #9ca3af;
-                font-size: 12.5px;
+                padding: 8px;
             }
             /* Resaltado del filtro: el amarillo comun, con respaldo por si el
                CSS de _shared no llegara. */
@@ -421,8 +409,8 @@
             #nsft-wf-indexer-panel[data-theme="dark"] { background: #1f2430; color: #e6e9ef; border-color: rgba(255,255,255,0.08); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-head { background: #1f2430; color: #e6e9ef; border-color: rgba(255,255,255,0.08); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-title { color: #e6e9ef; }
-            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-head-icon { color: #88a8d4; }
-            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-capsule-count { background: rgba(136,168,212,0.18); color: #cbd5e1; }
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-head-icon { color: var(--nsft-ns-accent-light, #88a8d4); }
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-capsule-count { background: color-mix(in srgb, var(--nsft-ns-accent-light, #88a8d4) 18%, transparent); color: #cbd5e1; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-min,
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-max,
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-close { color: #8a93a3; }
@@ -432,18 +420,18 @@
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tabs { border-color: rgba(255,255,255,0.08); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab { color: #a5adba; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab:hover { color: #cbd5e1; }
-            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab.is-active { color: #88a8d4; }
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab.is-active { color: var(--nsft-ns-accent-light, #88a8d4); }
             #nsft-wf-indexer-panel[data-theme="dark"] mark.wfi-hl {
                 background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
                 color: var(--nsft-hl-fg-dark, #0D1410);
             }
-            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab.is-active::after { background: #88a8d4; }
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-tab.is-active::after { background: var(--nsft-ns-primary, var(--nsft-ns-button, #88a8d4)); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-filters,
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-count { border-color: rgba(255,255,255,0.08); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-count { background: rgba(255,255,255,0.04); color: #a5adba; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search,
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-filter { background: #2a3142; border-color: rgba(255,255,255,0.1); color: #e6e9ef; }
-            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search:focus { border-color: #88a8d4; box-shadow: 0 0 0 3px rgba(136, 168, 212, 0.2); }
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search:focus { border-color: var(--nsft-ns-accent-light-bd, #88a8d4); box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent-light, #88a8d4) 20%, transparent); }
             /* Oscuro por el gatillo del módulo (data-theme en el panel, alimentado
                desde nsftTheme por el content script), NUNCA por el tema del sistema.
                El hover tira del token compartido con respaldo: este CSS lo inyecta
@@ -451,7 +439,7 @@
                bloque _shared ha cargado. */
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search-clear { color: #94a3b8; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search-clear:hover { background: var(--nsft-dk-hover, rgba(255,255,255,0.08)); color: #e6e9ef; }
-            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search-clear:focus-visible { outline-color: #88a8d4; }
+            #nsft-wf-indexer-panel[data-theme="dark"] .wfi-search-clear:focus-visible { outline-color: var(--nsft-ns-accent-light-bd, #88a8d4); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-checkbox { color: #a5adba; }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-item { border-color: rgba(255,255,255,0.04); }
             #nsft-wf-indexer-panel[data-theme="dark"] .wfi-item:hover { background: rgba(255,255,255,0.03); }
@@ -846,6 +834,7 @@
         const actionsTotal = countActions();
         const panel = document.createElement('div');
         panel.id = 'nsft-wf-indexer-panel';
+        panel.className = 'nsft-w';
         panel.setAttribute('data-state', 'capsule');
         const nsftDark = document.documentElement.getAttribute('data-nsft-theme') === 'dark';
         panel.setAttribute('data-theme', nsftDark ? 'dark' : 'light');
@@ -854,9 +843,9 @@
                 <svg class="wfi-head-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
                 <span class="wfi-title">${t('wfs_title', 'Indexador')}</span>
                 <span class="wfi-capsule-count">${actionsTotal}</span>
-                <button class="wfi-min" type="button" aria-label="${t('wfs_minimize', 'Minimizar')}" title="${t('wfs_minimize', 'Minimizar')}">&mdash;</button>
-                <button class="wfi-max" type="button" aria-label="${t('wfs_maximize', 'Maximizar')}" title="${t('wfs_maximize', 'Maximizar')}">&#x25A2;</button>
-                <button class="wfi-close" type="button" aria-label="${t('wfs_close', 'Cerrar')}" title="${t('wfs_close', 'Cerrar')}">&#x2715;</button>
+                <button class="wfi-min" type="button" aria-label="${t('wfs_minimize', 'Minimizar')}" title="${t('wfs_minimize', 'Minimizar')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+                <button class="wfi-max" type="button" aria-label="${t('wfs_maximize', 'Maximizar')}" title="${t('wfs_maximize', 'Maximizar')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg></button>
+                <button class="wfi-close" type="button" aria-label="${t('wfs_close', 'Cerrar')}" title="${t('wfs_close', 'Cerrar')}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
             </div>
             <div class="wfi-tabs">
                 <button class="wfi-tab is-active" data-tab="actions" type="button">${t('wfs_actions', 'Acciones')}</button>
@@ -1151,7 +1140,11 @@
         counter.textContent = `${items.length} ${items.length === 1 ? t('wfs_result_one', 'resultado') : t('wfs_result_many', 'resultados')}`;
 
         if (items.length === 0) {
-            list.innerHTML = `<div class="wfi-empty">${t('wfs_empty', 'Sin resultados con los filtros actuales.')}</div>`;
+            const sinNada = String(t('wfs_empty', 'Sin resultados con los filtros actuales.')).trim().replace(/\.$/, '');
+            list.innerHTML = '<div class="wfi-empty"><div class="nsft-vacio">'
+                + '<svg class="nsft-vacio-ico" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+                + '<circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>'
+                + '<span class="nsft-vacio-tit">' + escapeHtml(sinNada) + '</span></div></div>';
             return;
         }
 
@@ -1222,7 +1215,7 @@
 
         if (tab === 'actions') {
             const title = item.actionType || t('wfs_no_type', '(sin tipo)');
-            const inactive = item.inactive ? `<span class="wfi-pill is-inactive">${t('wfs_inactive', 'Inactiva')}</span>` : '';
+            const inactive = item.inactive ? `<span class="wfi-pill is-inactive nsft-estado">${t('wfs_inactive', 'Inactiva')}</span>` : '';
             const stringId = item.stringId ? `<code>${hl(item.stringId)}</code>` : '';
             const metaLines = [];
             metaLines.push(`<b>${t('wfs_lbl_state', 'Estado')}:</b> ${hl(item.stateName)}`);
@@ -1247,7 +1240,7 @@
         }
 
         if (tab === 'states') {
-            const startPill = item.startState ? `<span class="wfi-pill is-start">Inicial</span>` : '';
+            const startPill = item.startState ? `<span class="wfi-pill is-start nsft-estado is-ok">${t('wfs_start_state', 'Inicial')}</span>` : '';
             return `
                 <div class="wfi-item" ${dataUrl}>
                     <div class="wfi-item-head">

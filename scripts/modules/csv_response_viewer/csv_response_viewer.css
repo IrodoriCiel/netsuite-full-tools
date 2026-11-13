@@ -316,7 +316,7 @@
     width: max-content;
     min-width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 12.5px;
 }
 
 .nsft-csvrv-table th {
@@ -345,8 +345,7 @@
 
 .nsft-csvrv-table td.is-line {
     min-width: 0;
-    font-family: var(--nsft-font-mono);
-    font-size: 12px;
+    font-variant-numeric: tabular-nums;
     color: var(--nsft-text-muted);
 }
 
@@ -371,22 +370,10 @@
 }
 
 .nsft-csvrv-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     max-width: 220px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 500;
 }
 
-.nsft-csvrv-pill i { flex: none; width: 6px; height: 6px; border-radius: 50%; }
 .nsft-csvrv-pill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nsft-csvrv-pill.is-err { background: var(--csvrv-err-soft); color: var(--csvrv-err); }
-.nsft-csvrv-pill.is-err i { background: var(--csvrv-err-dot); }
-.nsft-csvrv-pill.is-ok { background: var(--csvrv-ok-soft); color: var(--csvrv-ok); }
-.nsft-csvrv-pill.is-ok i { background: var(--csvrv-ok-dot); }
 
 .nsft-csvrv-v { display: inline-block; word-break: break-word; border-radius: 4px; }
 .nsft-csvrv-v.is-nw { white-space: nowrap; }
@@ -394,13 +381,12 @@
 .nsft-csvrv-v.is-empty { color: var(--nsft-text-muted); }
 .nsft-csvrv-v.is-code {
     padding: 2px 6px;
-    font-family: var(--nsft-font-mono);
-    font-size: 12px;
+    font-variant-numeric: tabular-nums;
     color: var(--nsft-text-2);
     background: var(--nsft-surface-1);
 }
-.nsft-csvrv-v.is-yes { padding: 2px 8px; font-size: 12px; background: var(--nsft-surface-2); }
-.nsft-csvrv-v.is-no { padding: 2px 8px; font-size: 12px; color: var(--nsft-text-3); }
+.nsft-csvrv-v.is-yes { padding: 2px 8px; background: var(--nsft-surface-2); }
+.nsft-csvrv-v.is-no { padding: 2px 8px; color: var(--nsft-text-3); }
 
 mark.nsft-csvrv-hl {
     background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
@@ -422,6 +408,7 @@ mark.nsft-csvrv-hl {
     font-size: 13px;
     color: var(--nsft-text-muted);
 }
+.nsft-csvrv-empty:has(> .nsft-vacio) { padding: 8px 0; }
 
 .nsft-csvrv-note {
     margin-top: 8px;
@@ -484,3 +471,7 @@ mark.nsft-csvrv-hl {
 }
 
 .nsft-csv-response-modal .nsft-csvrv-btn.is-pri:hover { background: var(--csvrv-pri-hover) !important; }
+
+#nsft-csv-response-modal {
+    --nsft-bubble-w: 176px;
+}

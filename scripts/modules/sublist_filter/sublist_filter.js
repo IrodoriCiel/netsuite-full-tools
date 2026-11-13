@@ -105,6 +105,7 @@
     }
 
     function scan() {
+        _fondoNativo = undefined;
         scanEdit();
         scanView();
     }
@@ -115,11 +116,14 @@
         return barra ? barra.querySelector(':scope > table > tbody > tr > td > table > tbody > tr') : null;
     }
 
+    let _fondoNativo;
     function copiaFondoNativo(el) {
-        const nativa = document.querySelector('.uir-list-control-bar');
-        if (!nativa) return;
-        const bg = getComputedStyle(nativa).backgroundColor;
-        if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') el.style.setProperty('--nsft-tb-native-bg', bg);
+        if (_fondoNativo === undefined) {
+            const nativa = document.querySelector('.uir-list-control-bar');
+            const bg = nativa ? getComputedStyle(nativa).backgroundColor : '';
+            _fondoNativo = (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') ? bg : '';
+        }
+        if (_fondoNativo) el.style.setProperty('--nsft-tb-native-bg', _fondoNativo);
     }
 
     function scanEdit() {

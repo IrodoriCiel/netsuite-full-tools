@@ -15,12 +15,17 @@
         });
         document.querySelectorAll('[data-i18n-title]').forEach((el) => {
             const msg = chrome.i18n.getMessage(el.getAttribute('data-i18n-title'));
-            if (msg) el.title = msg;
+            if (msg) {
+                el.title = msg;
+                if (el.tagName === 'BUTTON') el.setAttribute('aria-label', msg);
+            }
         });
     }
 
     function applyTheme(theme) {
-        document.documentElement.setAttribute('data-nsft-theme', theme === 'dark' ? 'dark' : 'light');
+        const tema = theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-nsft-theme', tema);
+        document.querySelectorAll('.nsft-w').forEach((el) => el.setAttribute('data-theme', tema));
     }
 
     function currentTheme() {

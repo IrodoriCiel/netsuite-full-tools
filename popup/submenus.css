@@ -162,7 +162,6 @@
   min-width: 56px !important;
 }
 
-.nsft-detail-body .option-row select { padding-right: 24px !important; cursor: pointer; }
 
 .nsft-detail-body .option-row input[id$="Hex"],
 .nsft-detail-body .option-row input[type="number"] { font-family: var(--font-mono) !important; }
@@ -297,17 +296,6 @@
   border-bottom: 1px solid var(--hairline);
 }
 
-.nsft-detail-body .option-row select {
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E7B73' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 8px center !important;
-  background-size: 12px 12px !important;
-}
-:root[data-theme="dark"] .nsft-detail-body .option-row select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238FA098' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
-}
 
 .nsft-detail-body .option-row > div:not(:first-child) > div > label:first-child,
 .nsft-detail-body .option-row > div:not(:first-child) > div > div:first-child {
@@ -606,8 +594,7 @@
   white-space: normal;
 }
 
-.nsft-detail-body .option-row pre,
-.nsft-detail-body .option-row .nsft-editor-theme-preview {
+.nsft-detail-body .option-row pre {
   flex: 1 1 100% !important;
   width: 100% !important;
   max-width: 100%;
@@ -1881,9 +1868,3 @@ html[data-view="tab"] .nsft-tabpreview-body {
   justify-content: center;
 }
 
-
-#editor-theme-preview[hidden],
-#custom-theme-editor[hidden],
-#editor-theme-io[hidden] {
-  display: none !important;
-}

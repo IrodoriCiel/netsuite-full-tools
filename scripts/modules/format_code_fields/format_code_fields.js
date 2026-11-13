@@ -259,6 +259,7 @@
     const createFormatButton = (textarea) => {
         if (!textarea || _processed.has(textarea)) return;
         _processed.add(textarea);
+        if (window.NSFT_Libs) window.NSFT_Libs.listas();
 
         const wrapper = document.createElement('div');
         wrapper.className = WRAPPER_CLASS;

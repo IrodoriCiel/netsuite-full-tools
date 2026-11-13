@@ -151,7 +151,7 @@ html[data-nsft-redwood] :is(.nsft-copy-fs-id-sublist, .nsft-open-custrec-btn,
     z-index: 10000;
     min-width: 230px;
     padding: 4px;
-    background: #fff;
+    background: var(--nsft-w-s0, #fff);
     border: 1px solid hsl(var(--h, 216), calc(var(--s-val, 23) * 1%), 80%);
     border-radius: 8px;
     box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);

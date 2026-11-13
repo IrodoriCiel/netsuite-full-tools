@@ -69,7 +69,7 @@
                 s.async = false;
                 s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_suiteql_transport.js');
                 s.onload = function () { this.remove(); };
-                (document.head || document.documentElement).appendChild(s);
+                (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
             } catch (e) { }
         }
     };

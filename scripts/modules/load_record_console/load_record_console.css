@@ -14,7 +14,7 @@
 }
 
 .nsft-lrc-modal-content {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     width: 400px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -26,7 +26,7 @@
 }
 
 .nsft-lrc-modal-header {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     color: #111827;
     padding: 8px 14px;
     border-bottom: 1px solid #f3f4f6;
@@ -69,7 +69,7 @@
 
 .nsft-lrc-modal-body {
     padding: 20px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     display: flex;
     flex-direction: column;
     font-size: 13px;
@@ -79,7 +79,7 @@
 
 .nsft-lrc-modal-footer {
     padding: 10px 14px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border-top: 1px solid #f3f4f6;
     display: flex;
     justify-content: flex-end;
@@ -97,7 +97,7 @@
 
 .nsft-lrc-btn-primary {
     border: none;
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
     color: #fff;
 }
 
@@ -152,7 +152,7 @@
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-btn-primary {
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
 }
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-btn-primary:hover {
@@ -161,4 +161,14 @@
 
 .nsft-lrc-modal-overlay[data-theme="dark"] .nsft-lrc-timer {
     color: #9AA4B5;
+}
+
+.nsft-modal:not(#nsft-x).nsft-lrc-modal-content .nsft-lrc-modal-body {
+    background: var(--nsft-w-content);
+    color: var(--nsft-w-t1);
+}
+
+.nsft-modal:not(#nsft-x).nsft-lrc-modal-content .nsft-lrc-modal-footer {
+    background: var(--nsft-w-s1);
+    border-top: 1px solid var(--nsft-w-bd);
 }

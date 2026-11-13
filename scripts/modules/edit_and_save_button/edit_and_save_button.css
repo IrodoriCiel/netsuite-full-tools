@@ -14,7 +14,7 @@
 }
 
 .nsft-eas-modal-content {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     width: 400px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -26,7 +26,7 @@
 }
 
 .nsft-eas-modal-header {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     color: #111827;
     padding: 8px 14px;
     border-bottom: 1px solid #f3f4f6;
@@ -69,7 +69,7 @@
 
 .nsft-eas-modal-body {
     padding: 20px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     display: flex;
     flex-direction: column;
     font-size: 13px;
@@ -79,7 +79,7 @@
 
 .nsft-eas-modal-footer {
     padding: 10px 14px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border-top: 1px solid #f3f4f6;
     display: flex;
     justify-content: flex-end;
@@ -97,12 +97,12 @@
 
 .nsft-eas-btn-primary {
     border: none;
-    background: #007bff;
+    background: var(--nsft-ns-primary, var(--nsft-ns-button, #007bff));
     color: #fff;
 }
 
 .nsft-eas-btn-primary:hover {
-    background: #0056b3;
+    background: var(--nsft-ns-primary-hover, color-mix(in srgb, var(--nsft-ns-button, #0056b3) 85%, #000000));
 }
 
 html[data-nsft-theme="dark"] .nsft-eas-modal-overlay {
@@ -146,9 +146,19 @@ html[data-nsft-theme="dark"] .nsft-eas-modal-footer {
 }
 
 html[data-nsft-theme="dark"] .nsft-eas-btn-primary {
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
 }
 
 html[data-nsft-theme="dark"] .nsft-eas-btn-primary:hover {
     background: var(--nsft-ns-accent-hover, #2563eb);
+}
+
+.nsft-modal:not(#nsft-x).nsft-eas-modal-content .nsft-eas-modal-body {
+    background: var(--nsft-w-content);
+    color: var(--nsft-w-t1);
+}
+
+.nsft-modal:not(#nsft-x).nsft-eas-modal-content .nsft-eas-modal-footer {
+    background: var(--nsft-w-s1);
+    border-top: 1px solid var(--nsft-w-bd);
 }

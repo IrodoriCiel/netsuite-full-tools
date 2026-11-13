@@ -59,7 +59,7 @@
         s.src = chrome.runtime.getURL('scripts/modules/netsuite_version_badge/netsuite_version_badge_fetcher.js');
         s.dataset.nsftNvbFetcher = 'true';
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function render(version) {

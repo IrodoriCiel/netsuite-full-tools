@@ -104,7 +104,7 @@
     function createButton(folderId) {
         const label = msg('fcdl_button_label', null, 'Descargar ZIP');
         const btn = document.createElement('a');
-        btn.className = BTN_CLASS;
+        btn.className = BTN_CLASS + ' nsft-pastilla';
         btn.href = '#';
         btn.title = msg('fcdl_button_tooltip', null, 'Descargar esta carpeta como ZIP');
         btn.setAttribute('role', 'button');
@@ -121,17 +121,23 @@
 
     function openPanel(anchor, folderId) {
         const panel = document.createElement('div');
-        panel.className = PANEL_CLASS;
+        panel.className = PANEL_CLASS + ' nsft-w';
         panel.setAttribute('data-theme', resolveTheme());
+        const cancelTxt = escapeHtml(msg('fcdl_cancel', null, 'Cancelar'));
         panel.innerHTML =
-            '<div class="nsft-fcdl-title">' + escapeHtml(msg('fcdl_title', null, 'Descargar carpeta')) + '</div>' +
+            '<div class="nsft-barra-titulo"><span class="nsft-titulo">' +
+            '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>' +
+            '<span>' + escapeHtml(msg('fcdl_title', null, 'Descargar carpeta')) + '</span></span>' +
+            '<button type="button" class="nsft-cerrar nsft-fcdl-x" title="' + cancelTxt + '" aria-label="' + cancelTxt + '">\u2715</button></div>' +
+            '<div class="nsft-dlg-body nsft-fcdl-body">' +
             '<label class="nsft-fcdl-check"><input type="checkbox" checked>' +
             '<span>' + escapeHtml(msg('fcdl_include_subfolders', null, 'Incluir subcarpetas')) + '</span></label>' +
             '<div class="nsft-fcdl-status" hidden></div>' +
             '<div class="nsft-fcdl-bar" hidden><div class="nsft-fcdl-bar-fill"></div></div>' +
-            '<div class="nsft-fcdl-actions">' +
-            '<button type="button" class="nsft-fcdl-go">' + escapeHtml(msg('fcdl_start', null, 'Descargar')) + '</button>' +
-            '<button type="button" class="nsft-fcdl-cancel">' + escapeHtml(msg('fcdl_cancel', null, 'Cancelar')) + '</button>' +
+            '</div>' +
+            '<div class="nsft-dlg-foot">' +
+            '<button type="button" class="nsft-dlg-btn nsft-dlg-btn-cancel nsft-fcdl-cancel">' + cancelTxt + '</button>' +
+            '<button type="button" class="nsft-dlg-btn nsft-dlg-btn-ok nsft-fcdl-go">' + escapeHtml(msg('fcdl_start', null, 'Descargar')) + '</button>' +
             '</div>';
 
         const rect = anchor.getBoundingClientRect();
@@ -145,10 +151,12 @@
             const includeSub = panel.querySelector('.nsft-fcdl-check input').checked;
             startDownload(folderId, includeSub);
         });
-        panel.querySelector('.nsft-fcdl-cancel').addEventListener('click', () => {
+        const cancelar = () => {
             if (_running && _abort) { _abort.abort(); return; }
             closePanel();
-        });
+        };
+        panel.querySelector('.nsft-fcdl-cancel').addEventListener('click', cancelar);
+        panel.querySelector('.nsft-fcdl-x').addEventListener('click', cancelar);
 
         setTimeout(() => {
             document.addEventListener('mousedown', onDocMouseDown, true);

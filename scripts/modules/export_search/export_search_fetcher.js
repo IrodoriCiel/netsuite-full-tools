@@ -99,6 +99,31 @@
         }
     }
 
+    function definicionBusqueda(search, filters, columns) {
+        try {
+            let title = '';
+            try { title = search.title || ''; } catch (e) { }
+            return JSON.parse(JSON.stringify({
+                id: search.id,
+                title: title,
+                searchType: search.searchType,
+                filterExpression: filters,
+                columns: (columns || []).map((c) => ({
+                    name: c.name || null,
+                    join: c.join || null,
+                    summary: c.summary || null,
+                    formula: c.formula || null,
+                    label: c.label || null,
+                    sort: c.sortdir || null,
+                    fn: c['function'] || null
+                })),
+                settings: search.settings || []
+            }));
+        } catch (e) {
+            return null;
+        }
+    }
+
     function generateAndSendCode(search) {
         try {
             const searchType = search.searchType;
@@ -280,6 +305,7 @@ ${columnVars('var', false, '        ')}
                         columns: columns.length,
                         filters: filters.filter(Array.isArray).length
                     },
+                    definicion: definicionBusqueda(search, filters, columns),
                     ss2console: searchCode2Console.replace(/&#92;/g, '\\')
                 }
             }, '*');

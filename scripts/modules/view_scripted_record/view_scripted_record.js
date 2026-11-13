@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('#nsft-scripted-rec-modal', 'scripted');
 
     function ensureSqlTransport() {
         if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
@@ -48,7 +49,7 @@
         const el = document.getElementById(id);
         if (!el) return;
         const base = chrome.i18n.getMessage(baseKey) || baseKey;
-        el.textContent = (count == null) ? base : `${base} (${count})`;
+        el.innerHTML = escapeHtml(base) + (count == null ? '' : '<span class="nsft-sr-cnt">' + escapeHtml(String(count)) + '</span>');
     }
 
     const _RB = window.NSFT_RecordButtons;
@@ -89,7 +90,6 @@
 
     function init(items) {
         setupListeners();
-        initModal(true);
     }
 
     function setupListeners() {
@@ -316,22 +316,50 @@
             }
         });
 
-        const filterModal = document.getElementById('nsft-scripted-rec-modal');
-        filterModal?.querySelectorAll('select[data-sr-filter-field]').forEach((sel) => {
-            sel.addEventListener('change', () => {
-                const tabIdx = parseInt(sel.getAttribute('data-sr-filter-tab'), 10);
-                applyContextualFilter(tabIdx);
-            });
-        });
-        filterModal?.querySelectorAll('[data-sr-reset-filters]').forEach((btn) => {
-            btn.addEventListener('click', () => {
-                const tabIdx = parseInt(btn.getAttribute('data-sr-filter-tab'), 10);
-                resetFilters(tabIdx);
-            });
-        });
+        if (modal) {
+            const onKey = (e) => {
+                if (e.key !== 'Escape') return;
+                if (_sr.abierto) { e.stopPropagation(); _sr.abierto = null; srPintaFiltros(); return; }
+                if (searchInput && e.target === searchInput && searchInput.value) {
+                    e.stopPropagation();
+                    searchInput.value = '';
+                    filterScripts('');
+                }
+            };
+            document.addEventListener('keydown', onKey, true);
+            addCleanup(() => document.removeEventListener('keydown', onKey, true));
+        }
 
         if (modal) {
             const onModalClick = (e) => {
+                const chip = e.target.closest('[data-sr-chip]');
+                if (chip) {
+                    const k = chip.getAttribute('data-sr-chip');
+                    _sr.abierto = _sr.abierto === k ? null : k;
+                    srPintaFiltros();
+                    return;
+                }
+                const opt = e.target.closest('[data-sr-opt]');
+                if (opt) {
+                    _sr.filtros[srTabActiva()][opt.getAttribute('data-sr-opt')] = opt.getAttribute('data-sr-val');
+                    _sr.abierto = null;
+                    srPinta();
+                    return;
+                }
+                if (e.target.closest('[data-sr-limpiar]')) {
+                    _sr.filtros[srTabActiva()] = {};
+                    _sr.abierto = null;
+                    srPinta();
+                    return;
+                }
+                if (_sr.abierto && !e.target.closest('.nsft-sr-dd')) {
+                    _sr.abierto = null;
+                    srPintaFiltros();
+                }
+                if (e.target.closest('#nsft-sr-bulk-all')) {
+                    srSeleccionaVisibles();
+                    return;
+                }
                 const logsBtn = e.target.closest('[data-sr-action="view-logs"]');
                 if (logsBtn) {
                     e.preventDefault();
@@ -399,15 +427,10 @@
                     return;
                 }
                 if (cb && cb.matches && cb.matches('input[type="checkbox"].nsft-sr-bulk-row')) {
-                    updateBulkToolbarState();
-                } else if (cb && cb.matches && cb.matches('input[type="checkbox"].nsft-sr-bulk-master')) {
-                    const groupId = cb.getAttribute('data-sr-bulk-master');
-                    const table = cb.closest('table');
-                    if (table) {
-                        table.querySelectorAll('input.nsft-sr-bulk-row').forEach((rowCb) => {
-                            rowCb.checked = cb.checked;
-                        });
-                    }
+                    const id = cb.getAttribute('data-sr-deployment-id');
+                    if (id) { if (cb.checked) _sr.sel.add(id); else _sr.sel.delete(id); }
+                    const fila = cb.closest('.nsft-sr-fila');
+                    if (fila) fila.classList.toggle('is-sel', cb.checked);
                     updateBulkToolbarState();
                 }
             };
@@ -419,6 +442,8 @@
 
     let _logsRequestSeq = 0;
     const _logsRequests = new Map();
+    const codeUrl = (u) => (window.NSFT_CodeLink ? window.NSFT_CodeLink.convierte(u) : u);
+
     let _currentLogsContext = null;
 
     const LOGS_COLS_KEY = 'nsftSrLogsHiddenCols';
@@ -501,7 +526,7 @@
             openScriptLink.style.display = scriptUrl ? '' : 'none';
         }
         if (editFileLink) {
-            editFileLink.href = scriptFile || '#';
+            editFileLink.href = codeUrl(scriptFile) || '#';
             editFileLink.style.display = scriptFile ? '' : 'none';
         }
         body.innerHTML = `<div class="nsft-sr-logs-loading">${escapeHtml(chrome.i18n.getMessage('sr_logs_loading') || 'Cargando logs...')}</div>`;
@@ -597,12 +622,22 @@
             if (t === 'DEBUG') return 'nsft-sr-log-debug';
             return 'nsft-sr-log-other';
         };
+        const tNivel = (typ) => {
+            const t = String(typ || '').toUpperCase().trim();
+            const k = t === 'EMERGENCY' ? 'emergency' : /^SYSTEM/.test(t) ? 'system'
+                : t === 'ERROR' ? 'error' : t === 'AUDIT' ? 'audit' : t === 'DEBUG' ? 'debug' : '';
+            return k ? ' nsft-sr-lvl-' + k : '';
+        };
+        const tNivelTxt = (typ) => {
+            const s = String(typ || '').trim().toLowerCase();
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        };
 
         const rows = data.map((r, i) => `
             <tr class="${tStatus(r.type)}">
               <td class="nsft-sr-log-num">${i + 1}</td>
               <td class="nsft-sr-log-ts">${escapeHtml(r.ts || '')}</td>
-              <td class="nsft-sr-log-type"><span class="nsft-scripted-rec-badge">${escapeHtml(r.type || '')}</span></td>
+              <td class="nsft-sr-log-type"><span class="nsft-scripted-rec-badge nsft-estado${tNivel(r.type)}">${escapeHtml(tNivelTxt(r.type))}</span></td>
               <td class="nsft-sr-log-title">${escapeHtml(r.title || '')}</td>
               <td class="nsft-sr-log-detail"><pre>${escapeHtml(r.detail || '')}</pre></td>
             </tr>
@@ -647,11 +682,15 @@
     let _bannerTimer = null;
 
     function getSelectedDeployments() {
-        const modal = document.getElementById('nsft-scripted-rec-modal');
-        if (!modal) return [];
-        return Array.from(modal.querySelectorAll('input.nsft-sr-bulk-row:checked'))
-            .map(cb => cb.getAttribute('data-sr-deployment-id'))
-            .filter(Boolean);
+        return Array.from(_sr.sel);
+    }
+
+    function srSeleccionaVisibles() {
+        const tab = srTabActiva();
+        if (tab === 2) return;
+        srVisibles(tab).forEach((s) => { if (s.deploymentId) _sr.sel.add(String(s.deploymentId)); });
+        srPinta();
+        updateBulkToolbarState();
     }
 
     function updateBulkToolbarState() {
@@ -660,28 +699,20 @@
         const countEl = document.getElementById('nsft-sr-bulk-count');
         if (!toolbar) return;
         toolbar.style.display = ids.length ? 'flex' : 'none';
+        const modalSel = document.getElementById('nsft-scripted-rec-modal');
+        if (modalSel) modalSel.classList.toggle('is-marcando', ids.length > 0);
         if (countEl) {
-            const tpl = chrome.i18n.getMessage('sr_bulk_count', [String(ids.length)])
-                || `${ids.length} seleccionados`;
+            const tpl = ids.length === 1
+                ? (chrome.i18n.getMessage('sr_bulk_count_one') || '1 selected')
+                : (chrome.i18n.getMessage('sr_bulk_count', [String(ids.length)]) || `${ids.length} selected`);
             countEl.textContent = tpl.replace('$1', String(ids.length));
         }
     }
 
     function clearBulkSelection(onlyIds) {
-        const modal = document.getElementById('nsft-scripted-rec-modal');
-        if (!modal) return;
-        const filter = Array.isArray(onlyIds) ? new Set(onlyIds.map(String)) : null;
-        modal.querySelectorAll('input.nsft-sr-bulk-row').forEach(cb => {
-            if (!filter || filter.has(cb.getAttribute('data-sr-deployment-id'))) {
-                cb.checked = false;
-            }
-        });
-        modal.querySelectorAll('input.nsft-sr-bulk-master').forEach(master => {
-            const table = master.closest('table');
-            if (!table) return;
-            const anyChecked = table.querySelector('input.nsft-sr-bulk-row:checked');
-            master.checked = !!anyChecked;
-        });
+        if (Array.isArray(onlyIds)) onlyIds.forEach((id) => _sr.sel.delete(String(id)));
+        else _sr.sel.clear();
+        srPinta();
         updateBulkToolbarState();
     }
 
@@ -701,25 +732,6 @@
         const banner = document.getElementById('nsft-sr-banner');
         if (banner) banner.style.display = 'none';
         if (_bannerTimer) { clearTimeout(_bannerTimer); _bannerTimer = null; }
-    }
-
-    function applyDeployedToRow(row, isDeployedBool) {
-        if (!row) return;
-        row.setAttribute('data-sr-deployed', isDeployedBool ? 'deployed' : 'notdeployed');
-
-        const badge = row.querySelector('td:nth-child(3) .nsft-scripted-rec-badge');
-        if (badge) {
-            badge.classList.toggle('nsft-scripted-rec-badge-blue', isDeployedBool);
-            badge.classList.toggle('nsft-scripted-rec-badge-red', !isDeployedBool);
-            badge.textContent = isDeployedBool
-                ? (chrome.i18n.getMessage('sr_yes') || 'Sí')
-                : (chrome.i18n.getMessage('sr_no') || 'No');
-        }
-
-        const scriptInactive = row.getAttribute('data-sr-script-inactive') === 'T';
-        const inactive = !isDeployedBool || scriptInactive;
-        row.classList.toggle('nsft-scripted-rec-row-inactive', inactive);
-        row.setAttribute('data-sr-active', inactive ? 'inactive' : 'active');
     }
 
     function flashRowFailure(row) {
@@ -761,18 +773,21 @@
         const okList = (results || []).filter(r => r.ok);
         const failList = (results || []).filter(r => !r.ok);
 
+        const okIds = new Set(okList.map(r => String(r.deploymentId)));
+        srTodos().forEach((s) => {
+            if (!okIds.has(String(s.deploymentId))) return;
+            s.isDeployed = isDeployedBool ? 'T' : 'F';
+            if (_srRunsMap) delete _srRunsMap[String(s.deploymentId)];
+        });
+        clearBulkSelection(okList.map(r => r.deploymentId));
+
         if (modal) {
-            okList.forEach(r => {
-                const row = modal.querySelector(`tr[data-sr-deployment-id="${CSS.escape(String(r.deploymentId))}"]`);
-                applyDeployedToRow(row, isDeployedBool);
-            });
             failList.forEach(r => {
-                const row = modal.querySelector(`tr[data-sr-deployment-id="${CSS.escape(String(r.deploymentId))}"]`);
+                const row = modal.querySelector(`.nsft-sr-fila[data-sr-deployment-id="${CSS.escape(String(r.deploymentId))}"]`);
                 flashRowFailure(row);
             });
         }
-
-        clearBulkSelection(okList.map(r => r.deploymentId));
+        if (okList.length) loadRecordData();
 
         const action = isDeployedBool
             ? (chrome.i18n.getMessage('sr_bulk_enable') || 'Activar')
@@ -794,57 +809,294 @@
     }
 
 
+    const _sr = {
+        datos: null,
+        filtros: [{}, {}, {}],
+        abierto: null,
+        q: '',
+        sel: new Set(),
+        yo: ''
+    };
+
+    const srT = (k, fb, subs) => chrome.i18n.getMessage(k, subs) || fb;
+    const srUp = (v) => String(v || '').toUpperCase().trim();
+
+    function srTabActiva() {
+        const t = document.querySelector('#nsft-scripted-rec-modal .nsft-scripted-rec-tab.active');
+        const n = t ? parseInt(t.dataset.index, 10) : 0;
+        return isNaN(n) ? 0 : n;
+    }
+
+    function srTodos() {
+        return _sr.datos ? [].concat(_sr.datos[0] || [], _sr.datos[1] || []) : [];
+    }
+
+    const SR_EVENTOS = {
+        beforeload: 'beforeLoad', beforesubmit: 'beforeSubmit', aftersubmit: 'afterSubmit',
+        pageinit: 'pageInit', saverecord: 'saveRecord', validatefield: 'validateField',
+        fieldchanged: 'fieldChanged', postsourcing: 'postSourcing', lineinit: 'lineInit',
+        validateline: 'validateLine', validateinsert: 'validateInsert', validatedelete: 'validateDelete',
+        recalc: 'sublistChanged', localizationcontextenter: 'localizationContextEnter',
+        localizationcontextexit: 'localizationContextExit'
+    };
+    const srEvento = (t) => SR_EVENTOS[String(t || '').toLowerCase()] || t;
+
+    const SR_FILTROS_SCRIPT = [
+        { k: 'active', l: ['sr_filter_active', 'Active'], v: (s) => (s.isInactive === 'T' ? 'inactive' : 'active'),
+          o: [['active', 'sr_opt_active', 'Active'], ['inactive', 'sr_opt_inactive', 'Inactive']] },
+        { k: 'deployed', l: ['sr_filter_deployed', 'Deployed'], v: (s) => (s.isDeployed === 'T' ? 'deployed' : 'notdeployed'),
+          o: [['deployed', 'sr_opt_yes', 'Yes'], ['notdeployed', 'sr_opt_no', 'No']] },
+        { k: 'release', l: ['sr_filter_release', 'Status'], v: (s) => srUp(s.status),
+          o: [['RELEASED', 'sr_opt_released', 'Released'], ['TESTING', 'sr_opt_testing', 'Testing'],
+              ['NOTSCHEDULED', 'sr_opt_not_scheduled', 'Not scheduled'], ['SUSPENDED', 'sr_opt_suspended', 'Suspended']] },
+        { k: 'api', l: ['sr_filter_api', 'API'], v: (s) => s.apiVersion || '-',
+          o: [['1.0', '', '1.0'], ['2.0', '', '2.0'], ['2.1', '', '2.1']] }
+    ];
+    const SR_FILTROS_WF = [
+        { k: 'release', l: ['sr_filter_release', 'Status'], v: (w) => srUp(w.releasestatus),
+          o: [['RELEASED', 'sr_opt_released', 'Released'], ['TESTING', 'sr_opt_testing', 'Testing'],
+              ['SUSPENDED', 'sr_opt_suspended', 'Suspended'], ['NOTINITIATING', 'sr_opt_not_initiating', 'Not initiating']] }
+    ];
+    const srFiltrosDe = (tab) => (tab === 2 ? SR_FILTROS_WF : SR_FILTROS_SCRIPT);
+    const srEstadoTxt = (v) => {
+        const s = srUp(v);
+        const f = SR_FILTROS_SCRIPT[2].o.concat(SR_FILTROS_WF[0].o).find((o) => o[0] === s);
+        return f ? srT(f[1], f[2]) : (v || '—');
+    };
+
+    function srPajar(tab, s) {
+        if (tab === 2) return srFold([s.name, s.owner, s.currentState, srEstadoTxt(s.releasestatus)].filter(Boolean).join(' '));
+        const fns = (s.functions || []).map((f) => srEvento(f.type) + ' ' + (f.name || '')).join(' ');
+        return srFold([s.name, s.owner, s.scriptTextId, s.deploymentTextId, fns].filter(Boolean).join(' '));
+    }
+
+    function srPasa(tab, s, salvo) {
+        if (_sr.q && srPajar(tab, s).indexOf(_sr.q) === -1) return false;
+        const f = _sr.filtros[tab];
+        return srFiltrosDe(tab).every((d) => d.k === salvo || !f[d.k] || d.v(s) === f[d.k]);
+    }
+    const srVisibles = (tab) => ((_sr.datos && _sr.datos[tab]) || []).filter((s) => srPasa(tab, s));
+
+    function srVeredictos(tab) {
+        const lista = (_sr.datos && _sr.datos[tab]) || [];
+        const out = new Map();
+        if (tab === 2) {
+            lista.forEach((w) => {
+                const st = srUp(w.releasestatus);
+                if (st === 'RELEASED') out.set(w, { corre: true, tono: 'ok' });
+                else if (st === 'TESTING') {
+                    const mio = _sr.yo && String(w.owner || '').trim().toLowerCase() === _sr.yo.trim().toLowerCase();
+                    out.set(w, mio
+                        ? { corre: true, tono: 'warn', mt: 'warn', por: srT('sr_runs_r_testing_mine', 'Testing · you are the owner') }
+                        : { corre: false, mt: 'warn', por: srT('sr_runs_r_testing', 'In testing: only runs for its owner ($1)', [w.owner || '—']) });
+                } else if (st === 'SUSPENDED' || st === 'NOTINITIATING') {
+                    out.set(w, { corre: false, mt: 'off', por: srEstadoTxt(st) });
+                } else out.set(w, { corre: null, por: '' });
+            });
+            return out;
+        }
+        let clientes = 0;
+        lista.forEach((s) => {
+            const est = srUp(s.status);
+            if (est === 'NOTSCHEDULED') { out.set(s, { corre: false, mt: 'off', por: srEstadoTxt(est) }); return; }
+            if (_srRunsMap === undefined) { out.set(s, { corre: null, espera: true }); return; }
+            let code = _srRunsMap ? (_srRunsMap[String(s.deploymentId)] || '') : '';
+            if (code === 'RUNS' && tab === 1 && ++clientes > 10) code = 'MAXED';
+            if (!code) { out.set(s, { corre: null, mt: 'info', por: srT('sr_runs_unknown', 'Could not be checked') }); return; }
+            if (code === 'RUNS') {
+                out.set(s, srUp(s.status) === 'TESTING'
+                    ? { corre: true, tono: 'warn', mt: 'warn', por: srT('sr_runs_r_testing_mine', 'Testing · you are the owner') }
+                    : { corre: true, tono: 'ok' });
+                return;
+            }
+            if (code === 'GROUP') { out.set(s, { corre: null, tono: 'warn', mt: 'warn', por: srT('sr_runs_r_group', 'Only through a group: could not be checked') }); return; }
+            out.set(s, {
+                corre: false,
+                mt: (code === 'TESTING' || code === 'MAXED') ? 'warn' : (code === 'INACTIVE' || code === 'UNDEPLOYED') ? 'off' : 'info',
+                por: code === 'INACTIVE' ? srT('sr_runs_r_inactive', 'The script is inactive')
+                    : code === 'UNDEPLOYED' ? srT('sr_runs_r_undeployed', 'Not deployed')
+                    : code === 'TESTING' ? srT('sr_runs_r_testing', 'In testing: only runs for its owner ($1)', [s.owner || '—'])
+                    : code === 'MAXED' ? srT('sr_runs_r_maxed', 'Over the limit of 10 client scripts per record type')
+                    : srT('sr_runs_r_audience', 'You are not in its audience')
+            });
+        });
+        return out;
+    }
+
+    const SR_ICO_INFO = '<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.4v3.6M8 5.2v.01"/></svg>';
+    const SR_ICO_LOG = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2h5.5L12 4.5V14H4z"/><path d="M6 7.5h4M6 10h4"/></svg>';
+    const SR_ICO_CODE = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg>';
+    const SR_ICO_WF = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="4" cy="4" r="1.8"/><circle cx="12" cy="12" r="1.8"/><path d="M4 6v2.5a2 2 0 0 0 2 2h4"/></svg>';
+    const SR_ICO_BAJA = '<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>';
+
+    function srMarcaTxt(txt) {
+        const TS = window.NSFT_TextSearch;
+        return _sr.q && TS && TS.markHtml ? TS.markHtml(String(txt == null ? '' : txt), _sr.q, 'nsft-sr-hl') : escapeHtml(txt);
+    }
+
+    function srFila(tab, s, v) {
+        const esWf = tab === 2;
+        const corre = v.corre === true;
+        const tono = corre ? (v.tono || 'ok') : (v.corre === null && v.tono ? v.tono : 'off');
+        const veredicto = v.espera
+            ? srT('sr_runs_checking', 'Checking…')
+            : corre ? srT('sr_runs_yes_you', 'Runs for you')
+            : v.corre === false ? srT('sr_runs_no_you', 'Not for you')
+            : srT('sr_runs_maybe', 'Depends');
+        const st = srUp(esWf ? s.releasestatus : s.status);
+        const stTono = st === 'RELEASED' ? 'ok' : st === 'TESTING' ? 'warn' : 'off';
+        const sep = '<span class="nsft-sr-sep">·</span>';
+        const id = String(s.deploymentId || '');
+        const marcado = !esWf && id && _sr.sel.has(id);
+
+        let meta = '<span>' + escapeHtml(srT('sr_propietario', 'Owner')) + ': ' + srMarcaTxt(s.owner || '-') + '</span>';
+        if (!esWf) {
+            const dep = s.isDeployed === 'T';
+            meta += sep + '<span class="nsft-sr-f is-' + (dep ? 'ok' : 'off') + (dep ? '' : ' is-fuerte') + '"><i></i>'
+                + escapeHtml(dep ? srT('sr_deployed', 'Deployed') : srT('sr_not_deployed', 'Not deployed')) + '</span>';
+        }
+        meta += sep + '<span class="nsft-sr-f is-' + stTono + (st === 'RELEASED' ? '' : ' is-fuerte') + '"><i></i>' + srMarcaTxt(srEstadoTxt(st)) + '</span>';
+        if (!esWf && s.isInactive === 'T') meta += sep + '<span class="nsft-sr-malo">' + escapeHtml(srT('sr_opt_inactive', 'Inactive')) + '</span>';
+        if (esWf && s.currentState) meta += sep + '<span>' + escapeHtml(srT('sr_current_state', 'Current state')) + ': <b>' + srMarcaTxt(s.currentState) + '</b></span>';
+
+        const ents = !esWf && s.functions && s.functions.length
+            ? '<div class="nsft-sr-ents">' + s.functions.map((f) => {
+                const ev = srEvento(f.type);
+                const fn = f.name || ev;
+                return '<span class="nsft-sr-ent"><i></i><span class="nsft-sr-ev">' + srMarcaTxt(ev) + '</span><span class="nsft-sr-fn" title="' + escapeHtml(fn) + '">' + srMarcaTxt(fn) + '</span></span>';
+            }).join('') + '</div>'
+            : '';
+
+        const apiV = String(s.apiVersion || '');
+        const apiCls = apiV === '2.1' ? ' is-21' : /^2\./.test(apiV) ? ' is-2x' : /^1\./.test(apiV) ? ' is-vieja' : '';
+        const api = esWf ? '' : '<span class="nsft-sr-api' + apiCls + '" title="' + escapeHtml(srT('sr_api_tip', 'SuiteScript version')) + '">' + escapeHtml(s.apiVersion || '—') + '</span>';
+        const acciones = esWf
+            ? '<a class="nsft-sr-act" href="' + escapeHtml(s.url || '#') + '" target="_blank" rel="noopener" data-tooltip="' + escapeHtml(srT('sr_open_workflow', 'Open workflow')) + '">' + SR_ICO_WF + '</a>'
+            : '<button type="button" class="nsft-sr-act" data-sr-action="view-logs" data-sr-script-id="' + escapeHtml(s.scriptId || '') + '" data-sr-script-name="' + escapeHtml(s.name || '') + '" data-sr-script-url="' + escapeHtml(s.url || '') + '" data-sr-script-file="' + escapeHtml(s.scriptFile || '') + '" data-tooltip="' + escapeHtml(srT('sr_logs_view_tooltip', 'View the latest 100 log entries')) + '">' + SR_ICO_LOG + '</button>'
+              + (s.scriptFile ? '<a class="nsft-sr-act" href="' + escapeHtml(codeUrl(s.scriptFile)) + '" target="_blank" rel="noopener" data-tooltip="' + escapeHtml(srT('sr_view_code', 'View code')) + '">' + SR_ICO_CODE + '</a>' : '');
+
+        const marca = '<span class="nsft-sr-marca"><span class="nsft-sr-punto is-' + tono + '"></span>'
+            + (esWf || !id ? '' : '<input type="checkbox" class="nsft-sr-bulk-row" data-sr-deployment-id="' + escapeHtml(id) + '"' + (marcado ? ' checked' : '') + ' aria-label="' + escapeHtml(s.name || '') + '">')
+            + '</span>';
+
+        return '<div class="nsft-sr-fila' + (corre ? ' is-corre' : '') + (esWf ? ' is-wf' : '') + (marcado ? ' is-sel' : '') + '"' + (id ? ' data-sr-deployment-id="' + escapeHtml(id) + '"' : '') + '>'
+            + marca
+            + '<a class="nsft-sr-nombre" href="' + escapeHtml(s.url || '#') + '" target="_blank" rel="noopener" data-tooltip="' + escapeHtml(s.description || srT('sr_no_description', 'No description')) + '">' + srMarcaTxt(s.name) + '</a>'
+            + '<span class="nsft-sr-veredicto"><b>' + escapeHtml(veredicto) + '</b>' + (v.por ? '<span class="nsft-sr-motivo is-' + (v.mt || 'info') + '" title="' + escapeHtml(v.por) + '">' + SR_ICO_INFO + '<span>' + escapeHtml(v.por) + '</span></span>' : '') + '</span>'
+            + api
+            + '<span class="nsft-sr-acts">' + acciones + '</span>'
+            + '<div class="nsft-sr-meta">' + meta + '</div>'
+            + ents
+            + '</div>';
+    }
+
+    function srPintaLista(tab) {
+        const cont = document.getElementById(_srContainerId(tab));
+        if (!cont || !_sr.datos) return;
+        const todos = _sr.datos[tab] || [];
+        const H = window.NSFT_Herramientas;
+        if (!todos.length) {
+            const txt = tab === 2 ? srT('sr_no_workflows_found', 'No workflows found.') : srT('sr_no_scripts_found', 'No scripts found.');
+            cont.innerHTML = H ? H.vacio(tab === 2 ? 'trail' : 'scripted', txt) : '<div class="nsft-sr-vacio">' + escapeHtml(txt) + '</div>';
+            return;
+        }
+        const lista = srVisibles(tab);
+        if (!lista.length) {
+            cont.innerHTML = H
+                ? H.vacio('buscar', srT('sr_empty_filtered', 'No results. Change the search or clear the filters.'))
+                : '<div class="nsft-sr-vacio">' + escapeHtml(srT('sr_empty_filtered', 'No results. Change the search or clear the filters.')) + '</div>';
+            return;
+        }
+        const ver = srVeredictos(tab);
+        const si = lista.filter((s) => ver.get(s).corre === true);
+        const duda = lista.filter((s) => ver.get(s).corre === null);
+        const no = lista.filter((s) => ver.get(s).corre === false);
+        let html = si.concat(duda).map((s) => srFila(tab, s, ver.get(s))).join('');
+        if (no.length) {
+            if (si.length || duda.length) {
+                html += '<div class="nsft-sr-grupo"><span>' + escapeHtml(srT('sr_group_not_for_you', 'Not running for you · $1', [String(no.length)])) + '</span><i></i></div>';
+            }
+            html += no.map((s) => srFila(tab, s, ver.get(s))).join('');
+        }
+        cont.innerHTML = '<div class="nsft-sr-lista">' + html + '</div>';
+    }
+
+    function srPintaFiltros() {
+        if (!_sr.datos) return;
+        [0, 1, 2].forEach((tab) => {
+            const fila = document.querySelector('#nsft-scripted-rec-modal .nsft-sr-filter-row[data-sr-tab-filter="' + tab + '"]');
+            if (!fila) return;
+            const todos = _sr.datos[tab] || [];
+            const f = _sr.filtros[tab];
+            const activa = srTabActiva() === tab;
+            let html = srFiltrosDe(tab).map((d) => {
+                const base = todos.filter((s) => srPasa(tab, s, d.k));
+                const val = f[d.k];
+                const elegida = d.o.find((o) => o[0] === val);
+                const valTxt = elegida ? (elegida[1] ? srT(elegida[1], elegida[2]) : elegida[2]) : srT('sr_opt_all', 'All');
+                const opciones = [['', 'sr_opt_all', 'All']].concat(d.o);
+                const menu = activa && _sr.abierto === d.k
+                    ? '<div class="nsft-sr-menu" role="menu">' + opciones.map((o) => {
+                        const on = (o[0] || '') === (val || '');
+                        const n = o[0] ? base.filter((s) => d.v(s) === o[0]).length : base.length;
+                        return '<button type="button" role="menuitemradio" aria-checked="' + on + '" class="nsft-sr-opt' + (on ? ' is-on' : '') + '" data-sr-opt="' + d.k + '" data-sr-val="' + escapeHtml(o[0]) + '">'
+                            + '<span class="nsft-sr-ck">' + (on ? '✓' : '') + '</span>'
+                            + '<span class="nsft-sr-ot">' + escapeHtml(o[1] ? srT(o[1], o[2]) : o[2]) + '</span>'
+                            + '<span class="nsft-sr-on">' + n + '</span></button>';
+                    }).join('') + '</div>'
+                    : '';
+                return '<div class="nsft-sr-dd"><button type="button" class="nsft-sr-chip' + (val ? ' is-on' : '') + '" data-sr-chip="' + d.k + '" aria-haspopup="menu" aria-expanded="' + (!!menu) + '">'
+                    + '<span class="nsft-sr-chip-l">' + escapeHtml(srT(d.l[0], d.l[1])) + ':</span><span class="nsft-sr-chip-v">' + escapeHtml(valTxt) + '</span>' + SR_ICO_BAJA + '</button>' + menu + '</div>';
+            }).join('');
+            if (Object.keys(f).some((k) => f[k])) {
+                html += '<button type="button" class="nsft-sr-limpiar" data-sr-limpiar>' + escapeHtml(srT('sr_filter_clear', 'Clear filters')) + '</button>';
+            }
+            fila.innerHTML = html;
+        });
+    }
+
+    function srPintaContadores() {
+        if (!_sr.datos) return;
+        const ids = ['nsft-scripted-rec-tab-user', 'nsft-scripted-rec-tab-client', 'nsft-scripted-rec-tab-workflow'];
+        const claves = ['sr_tab_user', 'sr_tab_client', 'sr_tab_workflow'];
+        const nombres = ['user', 'client', 'workflow'];
+        [0, 1, 2].forEach((tab) => {
+            const todos = _sr.datos[tab] || [];
+            const sabe = tab === 2 || _srRunsMap !== undefined;
+            let txt = String(todos.length);
+            if (sabe && todos.length) {
+                const ver = srVeredictos(tab);
+                txt = todos.filter((s) => ver.get(s).corre === true).length + '/' + todos.length;
+            }
+            _srCounts[nombres[tab]] = txt;
+            _srSetTabLabel(ids[tab], claves[tab], txt);
+        });
+    }
+
+    function srPintaPie() {
+        const pie = document.querySelector('#nsft-scripted-rec-modal .nsft-sr-footer');
+        if (!pie) return;
+        if (!_sr.datos) { pie.innerHTML = ''; return; }
+        const tab = srTabActiva();
+        const total = (_sr.datos[tab] || []).length;
+        const n = srVisibles(tab).length;
+        pie.innerHTML = (_sr.yo ? '<span>' + escapeHtml(srT('sr_viewing_as', 'Viewing as')) + ' <b>' + escapeHtml(_sr.yo) + '</b></span>' : '')
+            + '<span class="nsft-sr-pie-hueco"></span>'
+            + '<span class="nsft-sr-pie-cuenta">' + escapeHtml(srT('sr_count_of', '$1 of $2', [String(n), String(total)])) + '</span>';
+    }
+
+    function srPinta() {
+        if (!_sr.datos) return;
+        [0, 1, 2].forEach(srPintaLista);
+        srPintaFiltros();
+        srPintaContadores();
+        srPintaPie();
+    }
+
     function _srContainerId(index) {
         return ['nsft-scripted-rec-content-user',
                 'nsft-scripted-rec-content-client',
                 'nsft-scripted-rec-content-workflow'][index];
-    }
-
-    function _srFilterValue(tabIndex, field) {
-        const sel = document.querySelector(`select[data-sr-filter-field="${field}"][data-sr-filter-tab="${tabIndex}"]`);
-        return sel?.value || '__all__';
-    }
-
-    const _cssAttrEscape = (v) => String(v).replace(/[\\"]/g, '\\$&');
-
-    function applyContextualFilter(tabIndex) {
-        const containerId = _srContainerId(tabIndex);
-        if (!document.getElementById(containerId)) return;
-
-        const styleId = `nsft-sr-filter-style-${tabIndex}`;
-        let style = document.getElementById(styleId);
-        if (!style) {
-            style = document.createElement('style');
-            style.id = styleId;
-            document.head.appendChild(style);
-            addCleanup(() => style.remove());
-        }
-
-        const rules = [];
-        const pushRuleIf = (attrName, value) => {
-            if (value === '__all__' || value == null) return;
-            const safe = _cssAttrEscape(value);
-            rules.push(`#${containerId} tr[${attrName}]:not([${attrName}="${safe}"]) { display: none; }`);
-        };
-
-        if (tabIndex === 2) {
-            pushRuleIf('data-sr-wf-release', _srFilterValue(tabIndex, 'wf-release'));
-        } else {
-            pushRuleIf('data-sr-active', _srFilterValue(tabIndex, 'active'));
-            pushRuleIf('data-sr-deployed', _srFilterValue(tabIndex, 'deployed'));
-            pushRuleIf('data-sr-release', _srFilterValue(tabIndex, 'release'));
-            pushRuleIf('data-sr-api', _srFilterValue(tabIndex, 'api'));
-        }
-
-        style.textContent = rules.join('\n');
-    }
-
-    function resetFilters(tabIndex) {
-        const modal = document.getElementById('nsft-scripted-rec-modal');
-        modal?.querySelectorAll(`select[data-sr-filter-tab="${tabIndex}"]`).forEach((sel) => {
-            sel.value = '__all__';
-        });
-        applyContextualFilter(tabIndex);
     }
 
     function updateFilterBar(index) {
@@ -854,7 +1106,9 @@
             const rowIdx = parseInt(row.getAttribute('data-sr-tab-filter'), 10);
             row.style.display = rowIdx === index ? 'flex' : 'none';
         });
-        applyContextualFilter(index);
+        _sr.abierto = null;
+        srPintaFiltros();
+        srPintaPie();
     }
 
     function initUIFunctionality() {
@@ -864,16 +1118,8 @@
         tabs.forEach(tab => {
             tab.addEventListener('click', function () {
                 const index = parseInt(this.dataset.index);
-                tabs.forEach(t => {
-                    t.classList.remove('active');
-                    t.style.color = '#6b7280';
-                    t.style.borderBottomColor = 'transparent';
-                    t.style.fontWeight = '500';
-                });
+                tabs.forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
-                this.style.color = '#0070f3';
-                this.style.borderBottomColor = '#0070f3';
-                this.style.fontWeight = '600';
 
                 if (slider) slider.style.transform = `translateX(-${index * 33.333}%)`;
                 animateTabContent(index);
@@ -998,15 +1244,15 @@
 
     function snapToEdge(el) {
         if (!el) return;
+        const rect = el.getBoundingClientRect();
 
         el.style.right = 'auto';
         el.style.bottom = 'auto';
 
         const isMin = el.dataset.state === 'minimised';
-        const rect = el.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
 
-        const targetWidth = isMin ? 165 : rect.width;
+        const targetWidth = isMin ? 44 : rect.width;
         const centerX = rect.left + (rect.width / 2);
 
         const p = 15;
@@ -1070,51 +1316,15 @@
             window.postMessage(payload, '*');
             this.remove();
         };
-        (document.head || document.documentElement).appendChild(script);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
     }
 
     let _srRunsMap;
 
-    function renderRunsForMe(map) {
+    function renderRunsForMe(map, yo) {
         _srRunsMap = map;
-        const cells = document.querySelectorAll('#nsft-scripted-rec-modal td.nsft-sr-runs');
-        const t = (k, fb, subs) => chrome.i18n.getMessage(k, subs) || fb;
-        let clientesQueCorren = 0;
-        cells.forEach((td) => {
-            let code = map ? (map[td.dataset.srRunsFor] || '') : '';
-            if (code === 'RUNS' && td.dataset.srRunsType === 'CLIENT') {
-                clientesQueCorren++;
-                if (clientesQueCorren > 10) code = 'MAXED';
-            }
-            let badge, label, why;
-            if (!map || !code) {
-                badge = 'nsft-scripted-rec-badge-gray';
-                label = '—';
-                why = t('sr_runs_unknown', 'Could not be checked');
-            } else if (code === 'RUNS') {
-                badge = 'nsft-scripted-rec-badge-released';
-                label = '✓ ' + t('sr_runs_yes', 'Runs');
-                why = '';
-            } else if (code === 'GROUP') {
-                badge = 'nsft-scripted-rec-badge-yellow';
-                label = '? ' + t('sr_runs_maybe', 'Depends');
-                why = t('sr_runs_r_group', 'Only through a group: could not be checked');
-            } else {
-                badge = 'nsft-scripted-rec-badge-red';
-                label = '✗ ' + t('sr_runs_no', 'No');
-                why = code === 'INACTIVE' ? t('sr_runs_r_inactive', 'The script is inactive')
-                    : code === 'UNDEPLOYED' ? t('sr_runs_r_undeployed', 'Not deployed')
-                    : code === 'TESTING' ? t('sr_runs_r_testing', 'In testing: only runs for its owner ($1)', [td.dataset.srOwner || '—'])
-                    : code === 'MAXED' ? t('sr_runs_r_maxed', 'Over the limit of 10 client scripts per record type')
-                    : t('sr_runs_r_audience', 'You are not in its audience');
-            }
-            td.dataset.srRuns = code || 'UNKNOWN';
-            td.innerHTML = '<span class="nsft-scripted-rec-badge ' + badge + '">' + escapeHtml(label) + '</span>'
-                + (why ? '<div class="nsft-scripted-rec-owner-inline">' + escapeHtml(why) + '</div>' : '');
-            td.title = code === 'RUNS'
-                ? t('sr_runs_yes_tip', 'Meets everything to run for you: deployed, released (or you own it) and you are in its audience.')
-                : why;
-        });
+        if (yo) _sr.yo = String(yo).replace(/\s+/g, ' ').trim();
+        srPinta();
     }
 
     function handleExtensionMessage(message) {
@@ -1137,7 +1347,7 @@
             return;
         }
         if (message.type === 'runs_success') {
-            renderRunsForMe(message.data || {});
+            renderRunsForMe(message.data || {}, message.me || '');
             return;
         }
         if (message.type === 'runs_error') {
@@ -1206,107 +1416,20 @@
         };
 
         if (data.isCustomList && data.customListFields) {
-            const table = `<table class="nsft-scripted-rec-table"><thead><tr><th>Field Name/ID</th><th>Type</th></tr></thead><tbody>${data.customListFields.map(f => `<tr><td><span style="color:#0070f3;">${escapeHtml(f.name)}</span><br><span style="color:#9ca3af; font-size:10px;">${escapeHtml(f.fieldid)}</span></td><td>${escapeHtml(f.fieldvaluetype || '-')}</td></tr>`).join('')}</tbody></table>`;
+            const table = `<table class="nsft-scripted-rec-table"><thead><tr><th>Field Name/ID</th><th>Type</th></tr></thead><tbody>${data.customListFields.map(f => `<tr><td><span style="color:var(--nsft-ns-accent, #0070f3);">${escapeHtml(f.name)}</span><br><span style="color:#9ca3af;">${escapeHtml(f.fieldid)}</span></td><td>${escapeHtml(f.fieldvaluetype || '-')}</td></tr>`).join('')}</tbody></table>`;
             contentUser.innerHTML = createCard(table);
+            _sr.datos = null;
+            const pie = document.querySelector('#nsft-scripted-rec-modal .nsft-sr-footer');
+            if (pie) pie.innerHTML = '';
         } else {
-            let userScriptsHtml = '', clientScriptsHtml = '', userCount = 0, clientCount = 0;
-
-            if (data.scriptDeployments) {
-                Object.entries(data.scriptDeployments).forEach(([type, scripts]) => {
-                    const table = `<table class="nsft-scripted-rec-table">
-                  <thead>
-                    <tr>
-                        <th class="nsft-sr-th-bulk" style="text-align:center; width:24px;"><input type="checkbox" class="nsft-sr-bulk-master" data-sr-bulk-master="${escapeHtml(type)}" title="${escapeHtml(chrome.i18n.getMessage('sr_bulk_select_all') || 'Seleccionar todos')}"></th>
-                        <th>${chrome.i18n.getMessage('sr_owner')}</th>
-                        <th>${chrome.i18n.getMessage('sr_deployed')}</th>
-                        <th>${chrome.i18n.getMessage('sr_status')}</th>
-                        <th>${chrome.i18n.getMessage('sr_api')}</th>
-                        <th>${escapeHtml(chrome.i18n.getMessage('sr_runs_col') || 'For you?')}</th>
-                        <th style="text-align:center;">${chrome.i18n.getMessage('sr_logs_short') || 'Logs'}</th>
-                        <th style="text-align:center;">&lt;/&gt;</th>
-                    </tr>
-                  </thead>
-                  <tbody>${scripts.map(s => {
-                        let apiC = s.apiVersion === '2.1' ? 'nsft-scripted-rec-badge-teal' : (s.apiVersion === '2.0' ? 'nsft-scripted-rec-badge-purple' : 'nsft-scripted-rec-badge-yellow');
-                        let st = (s.status || '').toUpperCase();
-                        let stC = (st === 'RELEASED' || st === 'ACTIVE') ? 'nsft-scripted-rec-badge-released' : 'nsft-scripted-rec-badge-yellow';
-
-                        let fnH = s.functions && s.functions.length > 0
-                            ? `<div class="nsft-scripted-rec-functions-list">${s.functions.map(f => `<div class="nsft-scripted-rec-function-item"><span class="nsft-scripted-rec-function-type">${escapeHtml(f.type)}: </span><span style="font-weight:bolder;">${escapeHtml(f.name)}</span></div>`).join('')}</div>`
-                            : '';
-
-                        const isNotDeployedOrInactive = s.isDeployed !== 'T' || s.isInactive === 'T';
-                        const rowInactiveClass = isNotDeployedOrInactive ? 'nsft-scripted-rec-row-inactive' : '';
-                        const activeAttr = isNotDeployedOrInactive ? 'inactive' : 'active';
-                        const deployedAttr = s.isDeployed === 'T' ? 'deployed' : 'notdeployed';
-                        const releaseAttr = (s.status || '').toUpperCase().trim() || 'UNKNOWN';
-                        const apiAttr = s.apiVersion || '-';
-
-                        const fnNames = (s.functions || []).map(f => f.name).filter(Boolean).join(' ');
-                        const searchHaystack = srFold([s.name, s.owner, s.scriptTextId, s.deploymentTextId, fnNames]
-                            .filter(Boolean).join(' '));
-
-                        return `<tr class="${rowInactiveClass}" data-sr-active="${escapeHtml(activeAttr)}" data-sr-release="${escapeHtml(releaseAttr)}" data-sr-api="${escapeHtml(apiAttr)}" data-sr-deployed="${escapeHtml(deployedAttr)}" data-sr-script-inactive="${s.isInactive === 'T' ? 'T' : 'F'}" data-sr-deployment-id="${escapeHtml(s.deploymentId || '')}" data-sr-script-id="${escapeHtml(s.scriptId || '')}" data-sr-search="${escapeHtml(searchHaystack)}">
-                          <td class="nsft-sr-td-bulk" style="text-align:center;"><input type="checkbox" class="nsft-sr-bulk-row" data-sr-bulk-row data-sr-deployment-id="${escapeHtml(s.deploymentId || '')}"></td>
-                          <td data-tooltip="${escapeHtml(s.description || chrome.i18n.getMessage('sr_no_description'))}">
-                            <div class="nsft-sr-name-row">
-                                <a href="${escapeHtml(s.url)}" target="_blank" class="nsft-sr-name-link">${escapeHtml(s.name)}</a>
-                            </div>
-                            <div class="nsft-scripted-rec-owner-inline">${chrome.i18n.getMessage('sr_propietario')}: ${escapeHtml(s.owner || '-')}</div>
-                            ${fnH}
-                          </td>
-                          <td><span class="nsft-scripted-rec-badge ${s.isDeployed === 'T' ? 'nsft-scripted-rec-badge-blue' : 'nsft-scripted-rec-badge-red'}">${escapeHtml(tStatus(s.isDeployed))}</span></td>
-                          <td><span class="nsft-scripted-rec-badge ${stC}">${escapeHtml(tStatus(s.status))}</span></td>
-                          <td><span class="nsft-scripted-rec-badge ${apiC}" style="font-family:monospace;">${escapeHtml(s.apiVersion || '-')}</span></td>
-                          <td class="nsft-sr-runs" data-sr-runs-for="${escapeHtml(s.deploymentId || '')}" data-sr-runs-type="${escapeHtml(String(type || '').toUpperCase())}" data-sr-owner="${escapeHtml(s.owner || '')}"><span class="nsft-scripted-rec-owner-inline">…</span></td>
-                          <td style="text-align:center;">
-                            <button type="button" class="nsft-sr-logs-btn nsft-scripted-rec-info-container" data-sr-action="view-logs" data-sr-script-id="${escapeHtml(s.scriptId || '')}" data-sr-script-name="${escapeHtml(s.name || '')}" data-sr-script-url="${escapeHtml(s.url || '')}" data-sr-script-file="${escapeHtml(s.scriptFile || '')}" data-tooltip="${escapeHtml(chrome.i18n.getMessage('sr_logs_view_tooltip') || 'Ver últimas 100 entradas de log')}" style="background:none; border:0; padding:2px; cursor:pointer; color:#6b7280; display:inline-flex;">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                            </button>
-                          </td>
-                          <td style="text-align:center;">
-                            ${s.scriptFile ? `<a href="${escapeHtml(s.scriptFile)}" target="_blank" class="nsft-scripted-rec-info-container" data-tooltip="${escapeHtml(chrome.i18n.getMessage('sr_view_code'))}" style="color: #6b7280; display: inline-flex; cursor: pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></a>` : '-'}
-                          </td>
-                      </tr>`;
-                    }).join('')}</tbody></table>`;
-
-                    const rawType = String(type || '').toUpperCase();
-                    if (rawType === 'USEREVENT') {
-                        userScriptsHtml += createCard(table);
-                        userCount += scripts.length;
-                    } else if (rawType === 'CLIENT') {
-                        clientScriptsHtml += createCard(table);
-                        clientCount += scripts.length;
-                    }
-                });
-            }
-
-            contentUser.innerHTML = userScriptsHtml || `<div style="padding:20px; text-align:center; color:#9ca3af;">${chrome.i18n.getMessage('sr_no_scripts_found')}</div>`;
-            contentClient.innerHTML = clientScriptsHtml || `<div style="padding:20px; text-align:center; color:#9ca3af;">${chrome.i18n.getMessage('sr_no_scripts_found')}</div>`;
-
-            _srCounts.user = userCount;
-            _srCounts.client = clientCount;
-            _srSetTabLabel('nsft-scripted-rec-tab-user', 'sr_tab_user', userCount);
-            _srSetTabLabel('nsft-scripted-rec-tab-client', 'sr_tab_client', clientCount);
-
-            let wfCount = 0;
-            if (data.workflows && data.workflows.length > 0) {
-                wfCount = data.workflows.length;
-                const table = `<table class="nsft-scripted-rec-table"><thead><tr><th>${chrome.i18n.getMessage('sr_workflow')}</th><th>${chrome.i18n.getMessage('sr_status')}</th></tr></thead><tbody>${data.workflows.map(w => {
-                    let rSt = (w.releasestatus || '').toUpperCase();
-                    let rC = (rSt === 'RELEASED') ? 'nsft-scripted-rec-badge-released' : (rSt === 'TESTING' ? 'nsft-scripted-rec-badge-yellow' : 'nsft-scripted-rec-badge-gray');
-                    const wfInactive = (rSt === 'SUSPENDED' || rSt === 'NOTINITIATING') ? 'nsft-scripted-rec-row-inactive' : '';
-                    const wfSearch = srFold([w.name, w.owner, w.currentState, tStatus(w.releasestatus)]
-                        .filter(Boolean).join(' '));
-                    return `<tr class="${wfInactive}" data-sr-wf-release="${escapeHtml(rSt || 'UNKNOWN')}" data-sr-search="${escapeHtml(wfSearch)}"><td><div style="margin-bottom: 2px;"><a href="${escapeHtml(w.url)}" target="_blank" style="color:#0070f3; text-decoration:none; font-weight:600;">${escapeHtml(w.name)}</a></div><div class="nsft-scripted-rec-owner-inline">${chrome.i18n.getMessage('sr_propietario')}: ${escapeHtml(w.owner || '-')}</div>${w.currentState ? `<div style="font-size:9px; color:#4b5563; margin-top:2px;">${chrome.i18n.getMessage('sr_current_state')}: <span style="font-weight:600;">${escapeHtml(w.currentState)}</span></div>` : ''}</td><td><span class="nsft-scripted-rec-badge ${rC}">${escapeHtml(tStatus(w.releasestatus))}</span></td></tr>`;
-                }).join('')}</tbody></table>`;
-                contentWorkflow.innerHTML = createCard(table);
-            } else {
-                contentWorkflow.innerHTML = `<div style="padding:20px; text-align:center; color:#9ca3af;">${chrome.i18n.getMessage('sr_no_workflows_found')}</div>`;
-            }
-
-            _srCounts.workflow = wfCount;
-            _srSetTabLabel('nsft-scripted-rec-tab-workflow', 'sr_tab_workflow', wfCount);
+            const dep = data.scriptDeployments || {};
+            const deTipo = (tipo) => Object.keys(dep).filter((k) => String(k).toUpperCase() === tipo)
+                .reduce((acc, k) => acc.concat(dep[k] || []), []);
+            _sr.datos = { 0: deTipo('USEREVENT'), 1: deTipo('CLIENT'), 2: data.workflows || [] };
+            const vivos = new Set(srTodos().map((s) => String(s.deploymentId)));
+            Array.from(_sr.sel).forEach((id) => { if (!vivos.has(id)) _sr.sel.delete(id); });
+            srPinta();
+            updateBulkToolbarState();
         }
 
         let activeIndex = 0;
@@ -1315,7 +1438,6 @@
             activeIndex = parseInt(activeTab.dataset.index, 10);
         }
         animateTabContent(activeIndex);
-        if (_srRunsMap !== undefined) renderRunsForMe(_srRunsMap);
     }
 
     function srFold(s) {
@@ -1324,72 +1446,10 @@
     }
 
     function filterScripts(q) {
-        q = srFold((q || '').trim());
+        _sr.q = srFold((q || '').trim());
         const clearBtn = document.getElementById('nsft-scripted-rec-search-clear');
-        if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
-
-        const styleId = 'nsft-sr-global-search-style';
-        let style = document.getElementById(styleId);
-        if (!style) {
-            style = document.createElement('style');
-            style.id = styleId;
-            document.head.appendChild(style);
-            addCleanup(() => style.remove());
-        }
-        if (!q) {
-            style.textContent = '';
-            srDesmarca();
-            return;
-        }
-        const safe = _cssAttrEscape(q);
-        style.textContent = `#nsft-scripted-rec-modal .nsft-scripted-rec-table tr[data-sr-search]:not([data-sr-search*="${safe}"]) { display: none; }`;
-        srMarca(q);
-    }
-
-    const SR_HL = 'nsft-sr-hl';
-
-    function srDesmarca() {
-        const modal = document.getElementById('nsft-scripted-rec-modal');
-        if (!modal) return;
-        modal.querySelectorAll('mark.' + SR_HL).forEach((mk) => {
-            const p = mk.parentNode;
-            if (!p) return;
-            p.replaceChild(document.createTextNode(mk.textContent), mk);
-            p.normalize();
-        });
-    }
-
-    function srMarca(q) {
-        srDesmarca();
-        const TS = window.NSFT_TextSearch;
-        const modal = document.getElementById('nsft-scripted-rec-modal');
-        if (!TS || !modal || !q) return;
-        modal.querySelectorAll('tr[data-sr-search]').forEach((tr) => {
-            if ((tr.getAttribute('data-sr-search') || '').indexOf(q) === -1) return;
-            const walker = document.createTreeWalker(tr, NodeFilter.SHOW_TEXT);
-            const hits = [];
-            let node;
-            while ((node = walker.nextNode())) {
-                if (node.nodeValue && TS.ranges(node.nodeValue, q).length) hits.push(node);
-            }
-            hits.forEach((tn) => {
-                const t = tn.nodeValue;
-                const tramos = TS.ranges(t, q);
-                if (!tramos.length || !tn.parentNode) return;
-                const frag = document.createDocumentFragment();
-                let from = 0;
-                tramos.forEach((r) => {
-                    if (r.start > from) frag.appendChild(document.createTextNode(t.slice(from, r.start)));
-                    const mk = document.createElement('mark');
-                    mk.className = SR_HL;
-                    mk.textContent = t.slice(r.start, r.end);
-                    frag.appendChild(mk);
-                    from = r.end;
-                });
-                if (from < t.length) frag.appendChild(document.createTextNode(t.slice(from)));
-                tn.parentNode.replaceChild(frag, tn);
-            });
-        });
+        if (clearBtn) clearBtn.style.display = _sr.q ? 'block' : 'none';
+        srPinta();
     }
 
     const getLoadingHtml = (text) => {
@@ -1398,92 +1458,30 @@
         return `<div class="nsft-loading-text">${spans}</div>`;
     };
 
-    const buildScriptFiltersHtml = (tabIndex) => {
-        const t = (k, f) => chrome.i18n.getMessage(k) || f;
-        return `
-            <div class="nsft-sr-filter-row" data-sr-tab-filter="${tabIndex}" style="display:${tabIndex === 0 ? 'flex' : 'none'};">
-                <label class="nsft-sr-filter-group">
-                    <span>${t('sr_filter_active', 'Activo')}</span>
-                    <select data-sr-filter-field="active" data-sr-filter-tab="${tabIndex}">
-                        <option value="__all__">${t('sr_opt_all', 'Todos')}</option>
-                        <option value="active">${t('sr_opt_active', 'Activo')}</option>
-                        <option value="inactive">${t('sr_opt_inactive', 'Inactivo')}</option>
-                    </select>
-                </label>
-                <label class="nsft-sr-filter-group">
-                    <span>${t('sr_filter_deployed', 'Desplegado')}</span>
-                    <select data-sr-filter-field="deployed" data-sr-filter-tab="${tabIndex}">
-                        <option value="__all__">${t('sr_opt_all', 'Todos')}</option>
-                        <option value="deployed">${t('sr_opt_yes', 'Sí')}</option>
-                        <option value="notdeployed">${t('sr_opt_no', 'No')}</option>
-                    </select>
-                </label>
-                <label class="nsft-sr-filter-group">
-                    <span>${t('sr_filter_release', 'Estado')}</span>
-                    <select data-sr-filter-field="release" data-sr-filter-tab="${tabIndex}">
-                        <option value="__all__">${t('sr_opt_all', 'Todos')}</option>
-                        <option value="RELEASED">${t('sr_opt_released', 'Liberado')}</option>
-                        <option value="TESTING">${t('sr_opt_testing', 'En pruebas')}</option>
-                        <option value="NOTSCHEDULED">${t('sr_opt_not_scheduled', 'No programado')}</option>
-                        <option value="SUSPENDED">${t('sr_opt_suspended', 'Suspendido')}</option>
-                    </select>
-                </label>
-                <label class="nsft-sr-filter-group">
-                    <span>${t('sr_filter_api', 'API')}</span>
-                    <select data-sr-filter-field="api" data-sr-filter-tab="${tabIndex}">
-                        <option value="__all__">${t('sr_opt_all', 'Todos')}</option>
-                        <option value="1.0">1.0</option>
-                        <option value="2.0">2.0</option>
-                        <option value="2.1">2.1</option>
-                    </select>
-                </label>
-                <button type="button" class="nsft-sr-filter-reset" data-sr-reset-filters data-sr-filter-tab="${tabIndex}" title="${t('sr_filter_reset', 'Restablecer filtros')}" aria-label="${t('sr_filter_reset', 'Restablecer filtros')}">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-            </div>`;
-    };
-
-    const buildWorkflowFiltersHtml = (tabIndex) => {
-        const t = (k, f) => chrome.i18n.getMessage(k) || f;
-        return `
-            <div class="nsft-sr-filter-row" data-sr-tab-filter="${tabIndex}" style="display:none;">
-                <label class="nsft-sr-filter-group">
-                    <span>${t('sr_filter_release', 'Estado')}</span>
-                    <select data-sr-filter-field="wf-release" data-sr-filter-tab="${tabIndex}">
-                        <option value="__all__">${t('sr_opt_all', 'Todos')}</option>
-                        <option value="RELEASED">${t('sr_opt_released', 'Liberado')}</option>
-                        <option value="TESTING">${t('sr_opt_testing', 'En pruebas')}</option>
-                        <option value="SUSPENDED">${t('sr_opt_suspended', 'Suspendido')}</option>
-                        <option value="NOTINITIATING">${t('sr_opt_not_initiating', 'No inicia')}</option>
-                    </select>
-                </label>
-                <button type="button" class="nsft-sr-filter-reset" data-sr-reset-filters data-sr-filter-tab="${tabIndex}" title="${t('sr_filter_reset', 'Restablecer filtros')}" aria-label="${t('sr_filter_reset', 'Restablecer filtros')}">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path></svg>
-                </button>
-            </div>`;
-    };
+    const buildFilterRowHtml = (tabIndex) =>
+        `<div class="nsft-sr-filter-row" data-sr-tab-filter="${tabIndex}" style="display:${tabIndex === 0 ? 'flex' : 'none'};"></div>`;
 
     const getHtmlTemplate = () => `
-       <div class="nsft-scripted-rec-modal" id="nsft-scripted-rec-modal" data-state="maximised" style="display: none;">
-         <div class="nsft-sr-header">
-             <span id="nsft-sr-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>${chrome.i18n.getMessage('sr_title')}</span>
-             <span class="nsft-header-actions">
-               <span id="nsft-sr-reload" title="${chrome.i18n.getMessage('sr_reload')}">
-                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-               </span>
-               <span id="nsft-sr-minimise" title="${chrome.i18n.getMessage('sr_minimise')}"></span>
-               <span id="nsft-sr-maximise" title="${chrome.i18n.getMessage('sr_maximise')}"></span>
-               <span id="nsft-sr-close" title="${chrome.i18n.getMessage('sr_close')}">✕</span>
+       <div class="nsft-modal nsft-modal--panel nsft-scripted-rec-modal" id="nsft-scripted-rec-modal" data-state="maximised" style="display: none;">
+         <div class="nsft-modal-header nsft-sr-header">
+             <span id="nsft-sr-title" class="nsft-modal-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>${chrome.i18n.getMessage('sr_title')}</span>
+             <div class="nsft-modal-tools nsft-modal-hide-min">
+              <span id="nsft-sr-reload" class="nsft-modal-tool" title="${chrome.i18n.getMessage('sr_reload')}"><span class="nsft-modal-tc nsft-c2"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="nsft-no-events"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></span><span>${chrome.i18n.getMessage('ro_tool_reload') || 'Reload'}</span></span>
+            </div>
+            <span class="nsft-header-actions">
+               <span id="nsft-sr-minimise" class="nsft-modal-btn-minimise" title="${chrome.i18n.getMessage('sr_minimise')}"></span>
+               <span id="nsft-sr-maximise" class="nsft-modal-btn-maximise" title="${chrome.i18n.getMessage('sr_maximise')}"></span>
+               <span id="nsft-sr-close" class="nsft-modal-btn-close" title="${chrome.i18n.getMessage('sr_close')}">✕</span>
              </span>
-             <div class="nsft-sr-header-line"></div>
+             <div class="nsft-modal-header-line nsft-sr-header-line"></div>
          </div>
          <div class="nsft-sr-content">
              
              
-             <div class="nsft-sr-tabs-wrap" style="display: flex; border-bottom: 1px solid #e5e7eb; background-color: #fff; z-index: 2;">
-                <div class="nsft-scripted-rec-tab active" id="nsft-scripted-rec-tab-user" data-index="0" style="flex: 1; text-align: center; padding: 10px 0; cursor: pointer; font-size: 12px; font-weight: 600; color: #0070f3; border-bottom: 2px solid #0070f3;">${chrome.i18n.getMessage('sr_tab_user')}</div>
-                <div class="nsft-scripted-rec-tab" id="nsft-scripted-rec-tab-client" data-index="1" style="flex: 1; text-align: center; padding: 10px 0; cursor: pointer; font-size: 12px; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent;">${chrome.i18n.getMessage('sr_tab_client')}</div>
-                <div class="nsft-scripted-rec-tab" id="nsft-scripted-rec-tab-workflow" data-index="2" style="flex: 1; text-align: center; padding: 10px 0; cursor: pointer; font-size: 12px; font-weight: 500; color: #6b7280; border-bottom: 2px solid transparent;">${chrome.i18n.getMessage('sr_tab_workflow')}</div>
+             <div class="nsft-sr-tabs-wrap">
+                <div class="nsft-scripted-rec-tab active" id="nsft-scripted-rec-tab-user" data-index="0">${chrome.i18n.getMessage('sr_tab_user')}</div>
+                <div class="nsft-scripted-rec-tab" id="nsft-scripted-rec-tab-client" data-index="1">${chrome.i18n.getMessage('sr_tab_client')}</div>
+                <div class="nsft-scripted-rec-tab" id="nsft-scripted-rec-tab-workflow" data-index="2">${chrome.i18n.getMessage('sr_tab_workflow')}</div>
              </div>
              
              
@@ -1493,9 +1491,9 @@
                     <span id="nsft-scripted-rec-search-clear" title="${chrome.i18n.getMessage('sr_clear_search')}" class="nsft-clear-search">✕</span>
                   </div>
 
-                  ${buildScriptFiltersHtml(0)}
-                  ${buildScriptFiltersHtml(1)}
-                  ${buildWorkflowFiltersHtml(2)}
+                  ${buildFilterRowHtml(0)}
+                  ${buildFilterRowHtml(1)}
+                  ${buildFilterRowHtml(2)}
              </div>
 
              
@@ -1506,10 +1504,11 @@
              
              <div id="nsft-sr-bulk-toolbar" class="nsft-sr-bulk-toolbar" style="display: none;">
                 <span id="nsft-sr-bulk-count">${chrome.i18n.getMessage('sr_bulk_count_zero') || '0 seleccionados'}</span>
+                <button type="button" id="nsft-sr-bulk-all" class="nsft-sr-bulk-clear">${chrome.i18n.getMessage('sr_bulk_all_visible') || 'Select visible'}</button>
                 <button type="button" id="nsft-sr-bulk-enable" class="nsft-sr-bulk-action nsft-sr-bulk-enable">${chrome.i18n.getMessage('sr_bulk_enable') || 'Activar'}</button>
                 <button type="button" id="nsft-sr-bulk-disable" class="nsft-sr-bulk-action nsft-sr-bulk-disable">${chrome.i18n.getMessage('sr_bulk_disable') || 'Desactivar'}</button>
-                <button type="button" id="nsft-sr-bulk-clear" class="nsft-sr-bulk-clear">${chrome.i18n.getMessage('sr_bulk_clear') || 'Limpiar'}</button>
-                <span id="nsft-sr-bulk-status" class="nsft-sr-bulk-status"></span>
+                <button type="button" id="nsft-sr-bulk-clear" class="nsft-sr-bulk-clear" title="${escapeHtml(chrome.i18n.getMessage('sr_bulk_clear') || 'Clear')}" aria-label="${escapeHtml(chrome.i18n.getMessage('sr_bulk_clear') || 'Clear')}"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+                <span id="nsft-sr-bulk-status" class="nsft-sr-bulk-status nsft-estado is-warn"></span>
              </div>
 
              
@@ -1521,9 +1520,9 @@
              
              <div id="nsft-scripted-rec-container" style="flex: 1; overflow: hidden; position: relative;">
                   <div id="nsft-scripted-rec-slider" style="display: flex; width: 300%; height: 100%; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);">
-                      <div id="nsft-scripted-rec-content-user" class="nsft-scripted-rec-tab-content" style="flex: 0 0 33.333%; padding: 12px 12px 2px 12px; box-sizing: border-box;"></div>
-                      <div id="nsft-scripted-rec-content-client" class="nsft-scripted-rec-tab-content" style="flex: 0 0 33.333%; padding: 12px 12px 2px 12px; box-sizing: border-box;"></div>
-                      <div id="nsft-scripted-rec-content-workflow" class="nsft-scripted-rec-tab-content" style="flex: 0 0 33.333%; padding: 12px 12px 2px 12px; box-sizing: border-box;"></div>
+                      <div id="nsft-scripted-rec-content-user" class="nsft-scripted-rec-tab-content" style="flex: 0 0 33.333%; box-sizing: border-box;"></div>
+                      <div id="nsft-scripted-rec-content-client" class="nsft-scripted-rec-tab-content" style="flex: 0 0 33.333%; box-sizing: border-box;"></div>
+                      <div id="nsft-scripted-rec-content-workflow" class="nsft-scripted-rec-tab-content" style="flex: 0 0 33.333%; box-sizing: border-box;"></div>
                   </div>
 
                   

@@ -42,6 +42,10 @@
 
     function init() {
         injectCSSOnce();
+        if (window.NSFT_Herramientas && window.NSFT_Herramientas.vigila) {
+            window.NSFT_Herramientas.vigila('.nsft-lrc-modal-content[data-herr="ss1"]', 'ss1');
+            window.NSFT_Herramientas.vigila('.nsft-lrc-modal-content[data-herr="ss2"]', 'ss2');
+        }
         const coach = (id) => {
             if (window.NSFT_ShortcutCoach) window.NSFT_ShortcutCoach.hint(id);
         };
@@ -74,9 +78,34 @@
         if (e.source !== window) return;
         const d = e.data;
         if (!d || typeof d !== 'object' || d.dest !== 'extension_lrc') return;
-        if (d.type === 'success' && window.NSFT_Clipboard && window.NSFT_Clipboard.showToast) {
-            window.NSFT_Clipboard.showToast(d.text || '', { type: 'success' });
+        if (d.type === 'success') {
+            if (_aviso && _aviso.update) _aviso.update(d.text || '', { type: 'success' });
+            else if (window.NSFT_Clipboard && window.NSFT_Clipboard.showToast) {
+                window.NSFT_Clipboard.showToast(d.text || '', { type: 'success' });
+            }
+            sueltaAviso(false);
+        } else if (d.type === 'end') {
+            sueltaAviso(true);
         }
+    }
+
+    let _aviso = null;
+    let _avisoPlazo = null;
+
+    function abreAviso() {
+        const C = window.NSFT_Clipboard;
+        if (!C || !C.showToast) return;
+        if (_aviso) return;
+        const h = C.showToast(chrome.i18n.getMessage('lrc_loading') || 'Loading the record into the console…', { type: 'loading' });
+        _aviso = (h && h.update) ? h : null;
+        clearTimeout(_avisoPlazo);
+        _avisoPlazo = setTimeout(() => sueltaAviso(true), 30000);
+    }
+
+    function sueltaAviso(cerrar) {
+        clearTimeout(_avisoPlazo);
+        if (cerrar && _aviso) _aviso.close();
+        _aviso = null;
     }
 
     function getMessages() {
@@ -98,14 +127,17 @@
     }
 
     function requestLoad(mode) {
+        abreAviso();
         ensureFetcher(() => {
-            window.postMessage({
-                dest: 'fetcher_lrc',
-                type: 'load',
-                mode,
-                messages: getMessages(),
-                theme: resolveTheme()
-            }, '*');
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                window.postMessage({
+                    dest: 'fetcher_lrc',
+                    type: 'load',
+                    mode,
+                    messages: getMessages(),
+                    theme: resolveTheme()
+                }, '*');
+            }));
         });
     }
 
@@ -124,7 +156,7 @@
             _pendingCbs = [];
             cbs.forEach(fn => { try { fn(); } catch (e) { } });
         };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function injectCSSOnce() {
@@ -134,7 +166,7 @@
         link.rel = 'stylesheet';
         link.type = 'text/css';
         link.href = chrome.runtime.getURL(CSS_FILE);
-        (document.head || document.documentElement).appendChild(link);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(link) : (document.head || document.documentElement).appendChild(link));
         _cssInjected = true;
     }
 

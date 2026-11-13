@@ -1,0 +1,155 @@
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b) {
+    --nsft-cb-bd: var(--nsft-w-bd, #e2e2df);
+    --nsft-cb-s0: var(--nsft-w-s0, #ffffff);
+    --nsft-cb-hov: var(--nsft-w-hov, #f4f3ef);
+    --nsft-cb-t1: var(--nsft-w-t1, #1f2328);
+    --nsft-cb-t3: var(--nsft-w-t3, #5f5f5a);
+    --nsft-cb-t4: var(--nsft-w-t4, #8a8a85);
+    --nsft-cb-acc: var(--nsft-w-accent, var(--nsft-ns-accent, #2b4a8b));
+    appearance: base-select !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 0 8px 0 10px !important;
+    border: 1px solid var(--nsft-cb-bd) !important;
+    border-radius: 14px !important;
+    background: var(--nsft-cb-s0) !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    color: var(--nsft-cb-t1) !important;
+    font-family: inherit !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: normal;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    cursor: pointer;
+    outline: none !important;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b):hover {
+    border-color: var(--nsft-cb-t4) !important;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b):is(:focus-visible, :open) {
+    border-color: var(--nsft-cb-acc) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-cb-acc) 18%, transparent) !important;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b):disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b)::picker-icon {
+    content: '';
+    width: 10px;
+    height: 10px;
+    margin-left: auto;
+    background-color: var(--nsft-cb-t3);
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><path d='M4 6l4 4 4-4'/></svg>") center / contain no-repeat;
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><path d='M4 6l4 4 4-4'/></svg>") center / contain no-repeat;
+    transition: rotate 0.15s ease;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b):open::picker-icon {
+    rotate: 180deg;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b)::picker(select) {
+    appearance: base-select;
+    box-sizing: border-box;
+    min-width: max(170px, anchor-size(width));
+    max-height: min(320px, 60vh);
+    margin-top: 4px;
+    padding: 4px;
+    border: 1px solid var(--nsft-cb-bd);
+    border-radius: 6px;
+    background: var(--nsft-cb-s0);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    color: var(--nsft-cb-t1);
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b) option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    padding: 0 8px;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--nsft-cb-t1);
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b) option:is(:hover, :focus-visible, :checked) {
+    background: var(--nsft-cb-hov);
+    outline: none;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b) option:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b) option::checkmark {
+    content: '✓';
+    order: -1;
+    width: 12px;
+    color: var(--nsft-cb-acc);
+    font-weight: 600;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b) optgroup {
+    padding: 6px 0 2px;
+    color: var(--nsft-cb-t3);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+html[data-nsft-theme="dark"] .nsft-combos {
+    --nsft-w-s0: var(--nsft-dk-panel, #1b1e24);
+    --nsft-w-hov: var(--nsft-dk-hover, #262a32);
+    --nsft-w-bd: var(--nsft-dk-border, #323844);
+    --nsft-w-t1: #E6EBF2;
+    --nsft-w-t3: #9AA4B5;
+    --nsft-w-t4: #8A93A3;
+    --nsft-w-accent: var(--nsft-ns-accent-light, #60A5FA);
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    :is(.tabulator-footer, .nsft-sql-results-foot, .nsft-ssc-results-foot, .nsft-combo-sm) select:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b),
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select.nsft-combo-sm:not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b) {
+    height: 24px !important;
+    min-height: 24px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 6px 0 9px !important;
+    border-radius: 12px !important;
+    font-size: 11.5px !important;
+}
+
+:is(.nsft-w, .nsft-modal, .nsft-modal-backdrop, #nsft-sql-modal, #nsft-ssc-modal, .nsft-cmdp-overlay, .nsft-combos)
+    select:not(:has(option)):not([multiple]):not([size]):not([hidden]):not(.nsft-nativo):not(#nsft-a):not(#nsft-b) {
+    opacity: 0.55;
+    pointer-events: none;
+}

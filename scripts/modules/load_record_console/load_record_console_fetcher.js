@@ -6,6 +6,7 @@
 
     let MSG = {};
     let NSFT_THEME = 'light';
+    let MODO = 'ss1';
 
     window.addEventListener('message', function (e) {
         if (e.source !== window) return;
@@ -15,11 +16,12 @@
         if (d.type === 'load') {
             MSG = d.messages || {};
             NSFT_THEME = d.theme || 'light';
+            MODO = d.mode === 'ss2' ? 'ss2' : 'ss1';
             if (d.mode === 'ss1') runSS1();
             else if (d.mode === 'ss2') runSS2();
         } else if (d.type === 'theme') {
             NSFT_THEME = d.theme || NSFT_THEME;
-            document.querySelectorAll('.nsft-lrc-modal-overlay').forEach((el) => {
+            document.querySelectorAll('.nsft-lrc-modal-overlay, .nsft-lrc-modal-overlay [data-theme]').forEach((el) => {
                 el.setAttribute('data-theme', NSFT_THEME);
             });
         }
@@ -39,7 +41,7 @@
         let recordId = null;
 
         try {
-            if (typeof nlapiLoadRecord === 'undefined' || !nlapiLoadRecord) return;
+            if (typeof nlapiLoadRecord === 'undefined' || !nlapiLoadRecord) { notifyEnd(); return; }
 
             recordType = nlapiGetRecordType();
             recordId = nlapiGetRecordId();
@@ -69,7 +71,7 @@
     }
 
     function runSS2() {
-        if (typeof require === 'undefined' || !require) return;
+        if (typeof require === 'undefined' || !require) { notifyEnd(); return; }
         require(['N/record', 'N/currentRecord'], function (record, currentRecord) {
             try {
                 let objRecord = currentRecord.get();
@@ -81,6 +83,8 @@
                     outputRecord(recordType, recordId, objRecord, MSG.lrc_ss2_saved);
                 } else if (objRecord) {
                     outputRecord(objRecord.type, objRecord.id, objRecord, MSG.lrc_ss2_unsaved);
+                } else {
+                    notifyEnd();
                 }
             } catch (e) {
                 handleError(e);
@@ -118,6 +122,10 @@
         window.postMessage({ dest: 'extension_lrc', type: 'success', text: text || '' }, '*');
     }
 
+    function notifyEnd() {
+        window.postMessage({ dest: 'extension_lrc', type: 'end' }, '*');
+    }
+
     function handleError(e) {
         const errorMsg = MSG.lrc_fail_error || '$1';
         showModal(errorMsg.replace('$1', (e && e.message) || String(e)));
@@ -129,6 +137,7 @@
     }
 
     function showModal(message) {
+        notifyEnd();
         const modalId = `nsft-lrc-modal-${Date.now()}`;
         let countdown = 3;
 
@@ -137,11 +146,11 @@
         const btnOkText = escapeHtml(MSG.lrc_btn_ok);
 
         const html = `
-            <div id="${modalId}" class="nsft-lrc-modal-overlay" data-theme="${escapeHtml(NSFT_THEME)}">
-                <div class="nsft-lrc-modal-content">
-                    <div class="nsft-lrc-modal-header">
-                        <span class="nsft-lrc-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>${modalTitle}</span>
-                        <button id="${modalId}-close" class="nsft-lrc-close-btn">✕</button>
+            <div id="${modalId}" class="nsft-lrc-modal-overlay nsft-modal-backdrop" data-theme="${escapeHtml(NSFT_THEME)}">
+                <div class="nsft-lrc-modal-content nsft-modal nsft-modal--dialog" data-herr="${MODO}" data-theme="${escapeHtml(NSFT_THEME)}">
+                    <div class="nsft-modal-header nsft-lrc-modal-header">
+                        <span class="nsft-modal-title nsft-lrc-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>${modalTitle}</span>
+                        <div class="nsft-header-actions"><button id="${modalId}-close" class="nsft-modal-btn-close nsft-lrc-close-btn">✕</button></div>
                     </div>
                     <div class="nsft-lrc-modal-body">
                         ${escapeHtml(message)}

@@ -152,13 +152,13 @@
 
         const go = document.createElement('button');
         go.type = 'button';
-        go.className = 'nsft-rp-btn nsft-rp-btn-primary';
+        go.className = 'nsft-rp-btn nsft-rp-btn-primary nsft-dlg-btn nsft-dlg-btn-ok';
         go.textContent = t('rateCta', 'Calificar');
         go.addEventListener('click', () => { openTab(STORE_URL); });
 
         const coffee = document.createElement('button');
         coffee.type = 'button';
-        coffee.className = 'nsft-rp-btn nsft-rp-btn-coffee';
+        coffee.className = 'nsft-rp-btn nsft-rp-btn-coffee nsft-dlg-btn nsft-dlg-btn-cancel';
         coffee.textContent = t('rateCoffee', 'Invítame un café');
         coffee.addEventListener('click', () => { openTab(COFFEE_URL); });
 
@@ -178,7 +178,7 @@
 
         const close = document.createElement('button');
         close.type = 'button';
-        close.className = 'nsft-rp-close';
+        close.className = 'nsft-rp-close nsft-cerrar';
         close.title = t('rateCloseTitle', 'Ahora no');
         close.setAttribute('aria-label', t('rateCloseTitle', 'Ahora no'));
         close.textContent = '✕';

@@ -4,11 +4,11 @@
     margin-left: 10px;
     cursor: pointer;
     font-size: 11px;
-    color: #1a0dab;
+    color: var(--nsft-ns-accent, #1a0dab);
     text-decoration: underline;
 }
 
 .nsft-new-tab-btn:hover,
 .nsft-adv-editor-btn:hover {
-    color: #f58220;
+    color: var(--nsft-ns-accent-bd, #f58220);
 }

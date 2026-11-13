@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('#nsft-ghb-modal', 'github');
 
     const STORAGE_KEY = 'enableGithubBackup';
     const TOKEN_KEY = 'nsftGithubToken';
@@ -216,7 +217,7 @@
             s.src = chrome.runtime.getURL('scripts/modules/github_backup/github_backup_fetcher.js');
             s.onload = function () { this.remove(); resolve(); };
             s.onerror = function () { this.remove(); resolve(); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         });
         return _ghbFetcherReady;
     }
@@ -474,7 +475,7 @@
             '<div class="nsft-modal-header">' +
                 '<span class="nsft-modal-title">' +
                     '<span class="nsft-ghb-headicon">' + GH_ICON + '</span>' +
-                    'NetSuite Full Tools - ' + esc(msg('ghb_title', null, 'Respaldar SuiteScripts a GitHub')) +
+                    '' + esc(msg('ghb_title', null, 'Respaldar SuiteScripts a GitHub')) +
                 '</span>' +
                 '<div class="nsft-header-actions">' +
                     '<button type="button" class="nsft-ghb-x nsft-modal-btn-close" title="' + esc(msg('ghb_close', null, 'Cerrar')) + '">✕</button>' +
@@ -754,7 +755,10 @@
                 _scripts = await listScriptFiles();
                 if (!_scripts.length) {
                     _scripts = null;
-                    $('nsft-ghb-types-list').innerHTML = '<div class="nsft-ghb-loading">' + esc(msg('ghb_none', null, 'No se encontraron scripts.')) + '</div>';
+                    const sinScripts = msg('ghb_none', null, 'No se encontraron scripts.');
+                    $('nsft-ghb-types-list').innerHTML = window.NSFT_Herramientas
+                        ? window.NSFT_Herramientas.vacio('bandeja', sinScripts)
+                        : '<div class="nsft-ghb-loading">' + esc(sinScripts) + '</div>';
                     return false;
                 }
                 computeCounts(); renderList();

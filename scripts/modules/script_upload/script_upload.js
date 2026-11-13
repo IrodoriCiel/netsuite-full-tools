@@ -77,7 +77,7 @@
             d.async = false;
             d.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_diff.js');
             d.onload = function () { this.remove(); };
-            (document.head || document.documentElement).appendChild(d);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(d) : (document.head || document.documentElement).appendChild(d));
         }
         const s = document.createElement('script');
         s.async = false;
@@ -88,7 +88,7 @@
             this.remove();
             fetcherInjected = true;
         };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function postReinitMessage() {

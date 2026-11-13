@@ -171,7 +171,7 @@
 
         const copiar = document.createElement('button');
         copiar.type = 'button';
-        copiar.className = 'nsft-shr-btn nsft-shr-copy';
+        copiar.className = 'nsft-shr-btn nsft-shr-copy nsft-dlg-btn nsft-dlg-btn-ok';
         copiar.innerHTML = ICONS.copy + '<span>' + t('shareCopy', 'Copiar enlace') + '</span>';
         copiar.title = t('shareCopyTitle', 'Copiar el enlace de la Chrome Web Store');
         copiar.addEventListener('click', () => {
@@ -241,7 +241,7 @@
 
         const close = document.createElement('button');
         close.type = 'button';
-        close.className = 'nsft-shr-close';
+        close.className = 'nsft-shr-close nsft-cerrar';
         close.title = t('shareCloseTitle', 'Ahora no');
         close.setAttribute('aria-label', t('shareCloseTitle', 'Ahora no'));
         close.textContent = '✕';

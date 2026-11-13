@@ -22,6 +22,35 @@
         } catch (e) { return 'light'; }
     }
 
+    const ICONOS = {
+        prompt: '<path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="M13 7l4 4"></path>',
+        confirm: '<circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 2.2-2.4 3.8M12 17.2v.1"></path>',
+        alert: '<circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.8v.1"></path>',
+        rename: '<path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="M13 7l4 4"></path>',
+        folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>',
+        file: '<path d="M6 3h8l4 4v14H6zM14 3v4h4"></path>',
+        upload: '<path d="M12 20V9M7 14l5-5 5 5M5 4h14"></path>',
+        download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path>',
+        save: '<path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"></path>',
+        link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path>'
+    };
+    function icono(clave) {
+        const c = ICONOS[clave];
+        if (!c) return null;
+        const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        s.setAttribute('viewBox', '0 0 24 24');
+        s.setAttribute('width', '16');
+        s.setAttribute('height', '16');
+        s.setAttribute('aria-hidden', 'true');
+        s.setAttribute('fill', 'none');
+        s.setAttribute('stroke', 'currentColor');
+        s.setAttribute('stroke-width', '1.8');
+        s.setAttribute('stroke-linecap', 'round');
+        s.setAttribute('stroke-linejoin', 'round');
+        s.innerHTML = c;
+        return s;
+    }
+
     function el(tag, clase, txt) {
         const n = document.createElement(tag);
         if (clase) n.className = clase;
@@ -55,13 +84,24 @@
             caja.setAttribute('role', tipo === 'alert' ? 'alertdialog' : 'dialog');
             caja.setAttribute('aria-modal', 'true');
 
-            const cab = el('div', 'nsft-modal-header');
+            const cab = el('div', 'nsft-modal-header nsft-dlg-head');
             const titulo = el('span', 'nsft-modal-title',
                 texto(op.title, 'dlg_title_' + tipo,
                     tipo === 'alert' ? 'Notice' : (tipo === 'prompt' ? 'Enter a value' : 'Confirm')));
+            if (op.danger) titulo.classList.add('is-danger');
+            else {
+                const ico = icono(op.icon) || icono(tipo);
+                if (ico) titulo.insertBefore(ico, titulo.firstChild);
+            }
             cab.appendChild(titulo);
+            const acciones = el('span', 'nsft-header-actions');
+            const equis = el('button', 'nsft-modal-btn-close');
+            equis.type = 'button';
+            equis.title = texto(null, 'sqlai_close', 'Close');
+            equis.setAttribute('aria-label', equis.title);
+            acciones.appendChild(equis);
+            cab.appendChild(acciones);
             caja.appendChild(cab);
-            caja.appendChild(el('div', 'nsft-modal-header-line'));
 
             const cuerpoEl = cuerpo(op.body);
 
@@ -137,6 +177,7 @@
             document.addEventListener('keydown', teclas, true);
 
             aceptar.addEventListener('click', pasar);
+            equis.addEventListener('click', vetar);
             if (cancelar) cancelar.addEventListener('click', vetar);
             telon.addEventListener('mousedown', (e) => { if (e.target === telon) vetar(); });
         });

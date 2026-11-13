@@ -128,7 +128,7 @@
 
         const label = chrome.i18n.getMessage('fcr_rename_tooltip') || 'Rename';
         const btn = document.createElement('a');
-        btn.className = BTN_CLASS;
+        btn.className = BTN_CLASS + ' nsft-pastilla is-fila';
         btn.href = '#';
         btn.title = label;
         btn.innerHTML = svgRename() + '<span class="nsft-fcr-label">' + label + '</span>';

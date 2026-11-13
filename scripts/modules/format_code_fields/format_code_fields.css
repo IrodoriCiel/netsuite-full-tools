@@ -12,7 +12,7 @@
     align-items: center;
     gap: 6px;
     padding: 4px 10px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     color: #374151;
     border: 1px solid #e5e7eb;
     border-radius: 4px;

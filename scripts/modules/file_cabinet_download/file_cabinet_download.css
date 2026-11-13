@@ -1,42 +1,3 @@
-.nsft-fcdl-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px !important;
-    margin-left: 10px;
-    height: 21px;
-    vertical-align: middle;
-    cursor: pointer;
-    color: #1d4ed8;
-    background: #eff6ff;
-    border: 1px solid #93c5fd;
-    border-radius: 999px;
-    font-size: 11px !important;
-    line-height: 1 !important;
-    text-decoration: none !important;
-    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-    user-select: none;
-}
-
-.nsft-fcdl-btn:hover {
-    color: #1e40af;
-    background: #dbeafe;
-    border-color: #2563eb;
-}
-
-.nsft-fcdl-btn svg {
-    width: 12px;
-    height: 12px;
-    flex-shrink: 0;
-}
-
-.nsft-fcdl-label {
-    font-weight: 600;
-    font-size: 11px !important;
-    line-height: 1 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
 
 .nsft-fcdl-panel {
     position: absolute;
@@ -44,7 +5,7 @@
     min-width: 240px;
     max-width: 320px;
     padding: 12px 14px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border: 1px solid #d1d5db;
     border-radius: 6px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
@@ -53,12 +14,6 @@
     color: #374151;
 }
 
-.nsft-fcdl-title {
-    font-size: 12.5px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #111827;
-}
 
 .nsft-fcdl-check {
     display: flex;
@@ -92,48 +47,16 @@
 .nsft-fcdl-bar-fill {
     height: 100%;
     width: 0;
-    background: #2563eb;
+    background: var(--nsft-ns-primary, var(--nsft-ns-button, #2563eb));
     border-radius: 3px;
     transition: width 0.2s ease;
 }
 
-.nsft-fcdl-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
 
-.nsft-fcdl-actions button {
-    padding: 4px 12px;
-    border-radius: 4px;
-    border: 1px solid #d1d5db;
-    background: #f9fafb;
-    font-size: 11.5px;
-    cursor: pointer;
-    color: #374151;
-}
 
-.nsft-fcdl-actions button:hover:not(:disabled) {
-    background: #f3f4f6;
-    border-color: #9ca3af;
-}
 
-.nsft-fcdl-actions button.nsft-fcdl-go {
-    background: #2563eb;
-    border-color: #2563eb;
-    color: #ffffff;
-    font-weight: 600;
-}
 
-.nsft-fcdl-actions button.nsft-fcdl-go:hover:not(:disabled) {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
-}
 
-.nsft-fcdl-actions button:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
 
 
 .nsft-fcdl-panel[data-theme="dark"] {
@@ -143,9 +66,6 @@
     color: #C6CEDB;
 }
 
-.nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-title {
-    color: #E6EBF2;
-}
 
 .nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-check input {
     accent-color: var(--nsft-ns-accent-light, #7FB0FF);
@@ -160,27 +80,46 @@
 }
 
 .nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-bar-fill {
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
 }
 
-.nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-actions button {
-    background: var(--nsft-dk-surface);
-    border-color: var(--nsft-dk-border);
-    color: #C6CEDB;
+.nsft-fcdl-panel.nsft-w:not(#nsft-x) {
+    width: 280px;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+    overflow: hidden;
+    background: var(--nsft-w-s0);
+    border: 1px solid var(--nsft-w-bd);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+    color: var(--nsft-w-t2);
+    font-family: var(--nsft-w-ui);
+    font-size: 13px;
 }
 
-.nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-actions button:hover:not(:disabled) {
-    background: var(--nsft-dk-hover);
-    border-color: var(--nsft-dk-border2);
+.nsft-fcdl-panel.nsft-w:not(#nsft-x) .nsft-fcdl-body {
+    padding: 12px 14px 4px;
 }
 
-.nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-actions button.nsft-fcdl-go {
-    background: var(--nsft-ns-accent, #3b82f6);
-    border-color: var(--nsft-ns-accent-light, #7FB0FF);
-    color: #ffffff;
+.nsft-fcdl-panel.nsft-w:not(#nsft-x) .nsft-fcdl-check {
+    margin-bottom: 8px;
+    color: var(--nsft-w-t1);
 }
 
-.nsft-fcdl-panel[data-theme="dark"] .nsft-fcdl-actions button.nsft-fcdl-go:hover:not(:disabled) {
-    background: var(--nsft-ns-accent-hover, #2563eb);
-    border-color: var(--nsft-ns-accent-light-hover, #93C5FD);
+.nsft-fcdl-panel.nsft-w:not(#nsft-x) .nsft-fcdl-status {
+    color: var(--nsft-w-t3);
+}
+
+.nsft-fcdl-panel.nsft-w:not(#nsft-x) .nsft-fcdl-bar {
+    background: var(--nsft-w-bd);
+}
+
+.nsft-fcdl-panel.nsft-w:not(#nsft-x) .nsft-dlg-foot {
+    padding: 8px 14px 12px;
+}
+
+.nsft-fcdl-panel.nsft-w:not(#nsft-x) .nsft-dlg-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }

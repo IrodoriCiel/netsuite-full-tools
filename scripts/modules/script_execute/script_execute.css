@@ -6,49 +6,6 @@
     flex-direction: column;
 }
 
-.nsft-sx-top {
-    flex: none;
-    padding: 10px 14px;
-}
-
-.nsft-sx-searchbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    padding: 0 8px 0 10px;
-    border: 1px solid var(--nsft-border, #e5e7eb);
-    border-radius: 9px;
-    background: var(--nsft-surface-2, #f3f4f6);
-    transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.nsft-sx-searchbar:focus-within {
-    border-color: var(--nsft-ns-accent, #3b82f6);
-    box-shadow: 0 0 0 3px var(--nsft-ns-accent-soft, #dbeafe);
-}
-
-.nsft-sx-searchicon { display: inline-flex; flex: none; color: var(--nsft-text-3, #9ca3af); }
-.nsft-sx-searchicon svg { width: 14px; height: 14px; }
-
-.nsft-sx-searchbar input.nsft-sx-q {
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    height: auto !important;
-    border-radius: 0 !important;
-    flex: 1;
-    min-width: 0;
-    border: 0 !important;
-    outline: none !important;
-    background: transparent !important;
-    padding: 9px 0 !important;
-    margin: 0 !important;
-    font: inherit !important;
-    font-size: 13px !important;
-    color: var(--nsft-text-1, #111827) !important;
-    box-shadow: none !important;
-}
-
 .nsft-sx-clearbtn {
     display: none;
     align-items: center;
@@ -80,7 +37,6 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    border-top: 1px solid var(--nsft-border, #e5e7eb);
 }
 
 .nsft-sx-row {
@@ -98,6 +54,10 @@
 .nsft-sx-row.is-active {
     background: var(--nsft-ns-accent-soft, #dbeafe);
     box-shadow: inset 3px 0 0 var(--nsft-ns-accent, #3b82f6);
+}
+.nsft-paleta .nsft-sx-row.is-active:not(#nsft-x) {
+    background: color-mix(in srgb, var(--nsft-cat) 8%, transparent);
+    box-shadow: inset 3px 0 0 var(--nsft-cat);
 }
 
 .nsft-sx-type {
@@ -122,7 +82,7 @@
 }
 
 .nsft-sx-name {
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     color: var(--nsft-text-1, #111827);
     overflow: hidden;
@@ -131,7 +91,7 @@
 }
 
 .nsft-sx-sub {
-    font-size: 11.5px;
+    font-size: 12.5px;
     color: var(--nsft-text-2, #4b5563);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -139,8 +99,8 @@
 }
 
 .nsft-sx-id {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 11px;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
     color: var(--nsft-text-3, #9ca3af);
 }
 
@@ -189,25 +149,11 @@
     white-space: pre-line;
 }
 .nsft-sx-empty.is-error { font-style: normal; color: var(--nsft-danger, #dc2626); }
+.nsft-sx-empty:has(> .nsft-vacio) { padding: 0; font-style: normal; white-space: normal; }
 
-.nsft-sx-statusbar {
-    flex: none;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 16px;
-    background: var(--nsft-surface-1, #f9fafb);
-    border-top: 1px solid var(--nsft-border, #e5e7eb);
-}
 .nsft-sx-spacer { flex: 1; }
-.nsft-sx-statusline { font-size: 11px; color: var(--nsft-text-2, #4b5563); }
-.nsft-sx-hints {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 10px;
-    color: var(--nsft-text-3, #9ca3af);
-    white-space: nowrap;
-}
+.nsft-sx-statusline { color: var(--nsft-w-t2, #4b5563); }
+.nsft-sx-statusline:empty { display: none; }
 
 mark.nsft-sx-hl {
     background: var(--nsft-hl-bg, rgba(234, 179, 8, 0.42));
@@ -311,7 +257,7 @@ mark.nsft-sx-hl {
     display: block;
     height: 100%;
     width: 0;
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
     transition: width 0.4s ease;
 }
 
@@ -330,7 +276,7 @@ mark.nsft-sx-hl {
 .nsft-sx-card.is-processing { border-left-color: var(--nsft-ns-accent, #3b82f6); }
 .nsft-sx-card.is-sending .nsft-sx-card-dot,
 .nsft-sx-card.is-processing .nsft-sx-card-dot {
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
     animation: nsft-sx-pulse 1.2s ease-in-out infinite;
 }
 .nsft-sx-card.is-done { border-left-color: var(--nsft-success, #16a34a); }
@@ -351,9 +297,6 @@ mark.nsft-sx-hl {
 
 html[data-nsft-theme="dark"] .nsft-sx .nsft-sx-row.is-active {
     background: var(--nsft-ns-accent-darksoft, rgba(59, 130, 246, 0.16));
-}
-html[data-nsft-theme="dark"] .nsft-sx-searchbar:focus-within {
-    box-shadow: 0 0 0 3px var(--nsft-ns-accent-darksoft, rgba(59, 130, 246, 0.25));
 }
 html[data-nsft-theme="dark"] .nsft-sx-go:hover,
 html[data-nsft-theme="dark"] .nsft-sx-row.is-active .nsft-sx-go,

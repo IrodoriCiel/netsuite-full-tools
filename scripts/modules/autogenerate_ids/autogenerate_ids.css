@@ -54,11 +54,11 @@
 }
 
 .nsft-autogenerate-switch input:checked+.nsft-autogenerate-slider {
-    background-color: #607799;
+    background-color: var(--nsft-ns-primary, var(--nsft-ns-button, #607799));
 }
 
 .nsft-autogenerate-switch input:focus+.nsft-autogenerate-slider {
-    box-shadow: 0 0 1px #607799;
+    box-shadow: 0 0 1px var(--nsft-ns-accent, #607799);
 }
 
 .nsft-autogenerate-switch input:checked+.nsft-autogenerate-slider:before {

@@ -35,16 +35,11 @@
     to   { opacity: 1; transform: translateY(0)     scale(1);   }
 }
 
-.nsft-cheatsheet-print,
-.nsft-cheatsheet-reset {
-    font-size: 14px;
-}
-
 .nsft-cheatsheet-search {
     position: relative;
     padding: 10px 18px;
     border-bottom: 1px solid #e5e7eb;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
 }
 
 .nsft-cheatsheet-search-input {
@@ -56,15 +51,15 @@
     font-size: 12.5px;
     font-family: inherit;
     color: #111827;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     outline: none;
     transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .nsft-cheatsheet-search-input:focus {
-    border-color: #3b82f6;
-    background: #ffffff;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    border-color: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-w-s0, #fff);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 15%, transparent);
 }
 
 .nsft-cheatsheet-search-clear {
@@ -113,13 +108,12 @@
     padding: 18px 0;
     font-style: italic;
 }
+.nsft-cheatsheet-empty:has(> .nsft-vacio) { padding: 0; }
 
 .nsft-cheatsheet-group h3 {
     margin: 0 0 8px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
+    font-size: 12px;
+    font-weight: 600;
     color: #6b7280;
 }
 
@@ -152,18 +146,8 @@
 }
 
 .nsft-cheatsheet-ctx-badge {
-    display: inline-block;
     margin-left: 6px;
-    padding: 1px 6px;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.2px;
-    color: #4b5563;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 9999px;
     vertical-align: middle;
-    white-space: nowrap;
 }
 
 .nsft-cheatsheet-keys {
@@ -204,7 +188,7 @@
 }
 
 .nsft-cheatsheet-row-actionable:hover .nsft-cheatsheet-try {
-    background: #3b82f6;
+    background: var(--nsft-ns-primary-hover, color-mix(in srgb, var(--nsft-ns-button, #3b82f6) 85%, #000000));
     color: #ffffff;
 }
 
@@ -242,15 +226,15 @@
     width: 220px;
     box-sizing: border-box;
     padding: 4px 8px;
-    border: 1px solid #3b82f6;
+    border: 1px solid var(--nsft-ns-accent, #3b82f6);
     border-radius: 4px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     color: #111827;
     font-family: inherit;
     font-size: 11px;
     text-align: center;
     outline: none;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 15%, transparent);
 }
 
 .nsft-cheatsheet-keys kbd {
@@ -276,7 +260,7 @@
 .nsft-cheatsheet-footer {
     padding: 10px 18px;
     border-top: 1px solid #f3f4f6;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     font-size: 11px;
     color: #6b7280;
     text-align: center;
@@ -285,7 +269,7 @@
 .nsft-cheatsheet-footer kbd {
     display: inline-block;
     padding: 1px 6px;
-    background: #fff;
+    background: var(--nsft-w-s0, #fff);
     border: 1px solid #d1d5db;
     border-radius: 3px;
     font-family: 'SF Mono', Consolas, monospace;
@@ -334,7 +318,7 @@
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-search-input:focus {
     background: var(--nsft-dk-surface);
     border-color: var(--nsft-ns-accent-light, #7FB0FF);
-    box-shadow: 0 0 0 2px rgba(110, 124, 245, 0.18);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 18%, transparent);
 }
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-search-clear {
     color: #9AA4B5;
@@ -349,11 +333,6 @@
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-row[data-ctx]:not([data-ctx="global"]) .nsft-cheatsheet-label {
     color: #9AA4B5;
 }
-.nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-ctx-badge {
-    color: #C6CEDB;
-    background: var(--nsft-dk-hover);
-    border-color: var(--nsft-dk-border2);
-}
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-row-actionable:hover td {
     background: var(--nsft-dk-hover);
 }
@@ -361,7 +340,7 @@
     color: #9AA4B5;
 }
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-row-actionable:hover .nsft-cheatsheet-try {
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
     color: #ffffff;
 }
 .nsft-cheatsheet-overlay[data-theme="dark"] .nsft-cheatsheet-edit {
@@ -376,7 +355,7 @@
     background: var(--nsft-dk-surface);
     color: #E6EBF2;
     border-color: var(--nsft-ns-accent-light, #7FB0FF);
-    box-shadow: 0 0 0 2px rgba(110, 124, 245, 0.18);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 18%, transparent);
 }
 
 @media print {

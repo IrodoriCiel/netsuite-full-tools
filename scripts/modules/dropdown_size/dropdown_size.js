@@ -23,16 +23,21 @@
         });
     });
 
+    let bridgePendientes = null;
     function ensureBridge(cb) {
         if (bridgeInjected) { cb(); return; }
+        if (bridgePendientes) { bridgePendientes.push(cb); return; }
+        bridgePendientes = [cb];
         const s = document.createElement('script');
         s.src = chrome.runtime.getURL('scripts/modules/dropdown_size/dropdown_size_fetcher.js');
         s.onload = function () {
             this.remove();
             bridgeInjected = true;
-            cb();
+            const cola = bridgePendientes || [];
+            bridgePendientes = null;
+            cola.forEach((fn) => { try { fn(); } catch (e) { } });
         };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function applySize(px) {

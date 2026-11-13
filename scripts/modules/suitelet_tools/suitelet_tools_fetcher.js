@@ -450,7 +450,10 @@
         addClick('nsft-suitelet-tools-edit-script-file', async () => {
             await ensureScriptRecordResolved(scriptId, deployParam, state);
             if (state.scriptFileId) {
-                window.open(`${APP_BASE}/app/common/record/edittextmediaitem.nl?id=${state.scriptFileId}&e=T&l=T&target=filesize&syntaxHighlighting=T`);
+                const adv = document.documentElement.getAttribute('data-nsft-adv-editor') !== 'off';
+                window.open(adv
+                    ? `${APP_BASE}/app/common/record/edittextmediaitem.nl?id=${state.scriptFileId}&e=T&nsft-advanced-editor=T`
+                    : `${APP_BASE}/app/common/record/edittextmediaitem.nl?id=${state.scriptFileId}&e=T&l=T&target=filesize&syntaxHighlighting=T`);
             } else {
                 window.open(scriptRecordUrl());
             }

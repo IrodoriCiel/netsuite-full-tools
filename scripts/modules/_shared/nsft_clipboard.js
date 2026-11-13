@@ -23,8 +23,7 @@
 
     function applyThemeToContainer(c) {
         if (!c) return;
-        if (_theme === 'light' || _theme === 'dark') c.setAttribute('data-theme', _theme);
-        else c.removeAttribute('data-theme');
+        c.setAttribute('data-theme', _theme === 'dark' ? 'dark' : 'light');
     }
 
     function copy(text, options) {
@@ -83,42 +82,65 @@
         });
     }
 
-    function showToast(message, options) {
-        options = options || {};
-        const duration = options.duration || DEFAULT_DURATION;
-        const type = options.type || 'success';
-        const preview = typeof options.preview === 'string' ? options.preview : '';
+    const ICONOS = {
+        error: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+        info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
+        loading: `<svg class="nsft-clipboard-toast-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9" opacity="0.22"></circle><path d="M21 12a9 9 0 0 0-9-9"></path></svg>`,
+        success: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+    };
 
-        const container = ensureContainer();
-        const toast = document.createElement('div');
-        toast.className = 'nsft-clipboard-toast nsft-clipboard-toast-' + type;
-
-        const iconHtml = type === 'error'
-            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`
-            : type === 'info'
-                ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
-                : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-
+    function pintaToast(toast, message, type, preview) {
+        toast.className = 'nsft-clipboard-toast nsft-clipboard-toast-' + type
+            + (toast.classList.contains('is-visible') ? ' is-visible' : '');
         const previewHtml = preview
             ? `<div class="nsft-clipboard-toast-preview" title="${escapeAttr(preview)}">${escapeHtml(truncate(preview, 48))}</div>`
             : '';
-
         toast.innerHTML = `
-            <span class="nsft-clipboard-toast-icon">${iconHtml}</span>
+            <span class="nsft-clipboard-toast-icon">${ICONOS[type] || ICONOS.success}</span>
             <div class="nsft-clipboard-toast-body">
                 <div class="nsft-clipboard-toast-title">${escapeHtml(message)}</div>
                 ${previewHtml}
             </div>`;
+    }
 
+    function showToast(message, options) {
+        options = options || {};
+        const type = options.type || 'success';
+
+        const container = ensureContainer();
+        const toast = document.createElement('div');
+        pintaToast(toast, message, type, typeof options.preview === 'string' ? options.preview : '');
         container.appendChild(toast);
 
         requestAnimationFrame(() => toast.classList.add('is-visible'));
 
-        setTimeout(() => {
+        let timer = null;
+        let cerrado = false;
+        const close = () => {
+            if (cerrado) return;
+            cerrado = true;
+            clearTimeout(timer);
             toast.classList.remove('is-visible');
             toast.addEventListener('transitionend', () => toast.remove(), { once: true });
             setTimeout(() => { if (toast.parentNode) toast.remove(); }, 500);
-        }, duration);
+        };
+        const programa = (t, ms) => {
+            clearTimeout(timer);
+            if (t !== 'loading') timer = setTimeout(close, ms || DEFAULT_DURATION);
+        };
+        programa(type, options.duration);
+
+        return {
+            update(msg, o) {
+                if (cerrado) return;
+                o = o || {};
+                const t = o.type || 'success';
+                pintaToast(toast, msg, t, typeof o.preview === 'string' ? o.preview : '');
+                toast.classList.add('is-cambio');
+                programa(t, o.duration);
+            },
+            close
+        };
     }
 
     function truncate(s, max) {
@@ -142,7 +164,7 @@
         if (c) return c;
         c = document.createElement('div');
         c.id = TOAST_CONTAINER_ID;
-        c.className = 'nsft-clipboard-toast-container';
+        c.className = 'nsft-clipboard-toast-container nsft-w';
         applyThemeToContainer(c);
         document.body.appendChild(c);
         return c;

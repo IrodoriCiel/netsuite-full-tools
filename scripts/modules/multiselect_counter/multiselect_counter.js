@@ -57,7 +57,7 @@
             s.async = false;
             s.onload = function () { this.remove(); _puenteListo = true; vaciarCola(); };
             s.onerror = function () { this.remove(); fallarTodo(); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         } catch (e) { _puente = false; fallarTodo(); }
     }
 

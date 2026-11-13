@@ -22,13 +22,13 @@
     --group-l: 90%;
     --group-color: hsl(var(--h), var(--s-group), var(--group-l));
 
-    --on-base: hsl(0 0% calc((55 - var(--l-val)) * 100%));
+    --on-base: hsl(0 0% clamp(0%, calc((55 - var(--l-val)) * 100%), 100%));
 
     --btn-bg: hsl(var(--h), var(--s-vibrant), 42%);
     --btn-border: hsl(var(--h), var(--s-vibrant), 40%);
 
-    --on-vibrant: oklch(from var(--btn-bg) calc((0.65 - l) * 1000) 0 0);
-    --btn-text-shadow-color: oklch(from var(--btn-bg) calc((l - 0.65) * 1000) 0 0 / 0.25);
+    --on-vibrant: oklch(from var(--btn-bg) clamp(0, calc((0.65 - l) * 1000), 1) 0 0);
+    --btn-text-shadow-color: oklch(from var(--btn-bg) clamp(0, calc((l - 0.65) * 1000), 1) 0 0 / 0.25);
 }
 
  border-*/link-* duplican el rgb en LITERAL (no
@@ -239,7 +239,7 @@ html.nsft-ct-enabled .uir-page-title-record .uir-record-type {
 
 html.nsft-ct-enabled .uir-hoverable-anchor,
 html.nsft-ct-enabled .dottedlink,
-html.nsft-ct-enabled .ns-portlet-wrapper .ns-portlet-content> :not(.ns-dashboard-form) a,
+html.nsft-ct-enabled .ns-portlet-wrapper .ns-portlet-content> :not(.ns-dashboard-form) a:not([class*="button"]):not([class*="btn"]),
 html.nsft-ct-enabled .ns-link-button,
 html.nsft-ct-enabled .ns-portlet-wrapper .ns-portlet-content .ns-dashboard-action,
 html.nsft-ct-enabled .ns-portlet-wrapper .ns-portlet-content .ns-portlet-action {
@@ -257,29 +257,37 @@ html.nsft-ct-enabled .uir-multibutton .pgBntB .bntBgB {
     text-shadow: 0 1px 0 var(--btn-text-shadow-color);
 }
 
-html.nsft-ct-enabled button.uir-button[data-button-type="primary"] {
-    background: hsl(var(--h), var(--s), calc((var(--l-val) - 12) * 1%)) !important;
-    background-image: none !important;
-    border-color: hsl(var(--h), var(--s), calc((var(--l-val) - 18) * 1%)) !important;
-    color: var(--on-base) !important;
-    box-shadow: none !important;
+html.nsft-ct-enabled button.uir-button[data-button-type="primary"],
+html.nsft-ct-enabled .uir-multibutton :is(.uir-multibutton-button--primary, .uir-multibutton-arrow--primary) {
+    --nsn-uif-redwood-color-light-brand-120: hsl(var(--h), var(--s), calc(var(--l-val) * 1%));
+    --nsn-uif-redwood-color-light-text-inverse: var(--on-base);
 }
 
-html.nsft-ct-enabled button.uir-button[data-button-type="primary"] .uir-button-label,
-html.nsft-ct-enabled button.uir-button[data-button-type="primary"] span {
-    color: var(--on-base) !important;
+html.nsft-ct-enabled .uir-machine-table .uir-machine-row-focused,
+html.nsft-ct-enabled div.machineButtonRow {
+    background-color: color-mix(in srgb, var(--base-color) 6%, #ffffff) !important;
 }
-
-html.nsft-ct-enabled button.uir-button[data-button-type="primary"]:hover {
-    background: hsl(var(--h), var(--s), calc((var(--l-val) - 22) * 1%)) !important;
-    background-image: none !important;
-    border-color: hsl(var(--h), var(--s), calc((var(--l-val) - 28) * 1%)) !important;
+html.nsft-ct-enabled .uir-machine-table .uir-machine-row-focused > td {
+    border-top-color: var(--base-color) !important;
+    border-bottom-color: var(--base-color) !important;
 }
-
-html.nsft-ct-enabled button.uir-button[data-button-type="primary"]:active {
-    background: hsl(var(--h), var(--s), calc((var(--l-val) - 32) * 1%)) !important;
-    background-image: none !important;
-    border-color: hsl(var(--h), var(--s), calc((var(--l-val) - 38) * 1%)) !important;
+html.nsft-ct-enabled .uir-machine-table .uir-machine-row-focused > td:first-child,
+html.nsft-ct-enabled div.machineButtonRow {
+    border-left-color: var(--base-color) !important;
+}
+html.nsft-ct-enabled .uir-machine-table .uir-machine-row-focused > td:last-child,
+html.nsft-ct-enabled div.machineButtonRow {
+    border-right-color: var(--base-color) !important;
+}
+html.nsft-ct-enabled div.machineButtonRow {
+    border-bottom-color: var(--base-color) !important;
+}
+html.nsft-ct-enabled td:is(.listinlinefocusedrow, .listinlinefocusedrowleft) {
+    border-top-color: var(--base-color) !important;
+    border-bottom-color: var(--base-color) !important;
+}
+html.nsft-ct-enabled td.listinlinefocusedrowleft {
+    border-left-color: var(--base-color) !important;
 }
 
 html.nsft-ct-enabled .machineButtonRow td:first-child+td .machBnt .bntBg {
@@ -330,3 +338,35 @@ html.nsft-ct-enabled.nsft-ct-base-clara [data-widget="MenuBar"] [role="menuitem"
 html.nsft-ct-enabled.nsft-ct-base-clara [data-widget="MenuBar"] [role="menuitem"][data-widget="MenuItem"] img {
     filter: invert(1) hue-rotate(180deg);
 }
+
+html.nsft-ct-enabled .treeNodeRow.uir-tree-node-parent-focused {
+    background-color: var(--hover-color) !important;
+}
+
+html.nsft-ct-enabled #div__medialisthdr .uir-rightpaneentryform-header > span.text,
+html.nsft-ct-enabled #div__medialisthdr .uir-rightpaneentryform-header > span.text > a:not(.nsft-pastilla) {
+    color: var(--hover-color) !important;
+}
+
+html.nsft-ct-enabled :is(.pgBntB, .pgBntB_sel):active,
+html.nsft-ct-enabled :is(.pgBntB, .pgBntB_sel):active .bntBgB {
+    background-color: hsl(var(--h), var(--s-vibrant), 34%) !important;
+}
+
+html.nsft-ct-enabled :is(.pgBntY, .pgBntY_sel, .pgBntG, .pgBntG_sel, .tabBnt, .tabBnt_sel):active,
+html.nsft-ct-enabled .machineButtonRow .machBnt .bntBg:not(.uir-disabled):active {
+    box-shadow: 0 0 2px 2px hsla(var(--h), var(--s-vibrant), 50%, 0.6) !important;
+}
+
+html.nsft-ct-enabled:not([data-nsft-redwood]) [data-widget="Modal"] [data-widget="WindowTitleBar"],
+html.nsft-ct-enabled[data-nsft-redwood] [data-widget="Modal"]:has(iframe) [data-widget="WindowTitleBar"] {
+    background-color: var(--base-color) !important;
+    border-color: var(--base-color) !important;
+}
+
+html.nsft-ct-enabled:not([data-nsft-redwood]) [data-widget="Modal"] [data-widget="WindowTitleBar"] :is([data-window-section="title"], button),
+html.nsft-ct-enabled[data-nsft-redwood] [data-widget="Modal"]:has(iframe) [data-widget="WindowTitleBar"] :is([data-window-section="title"], button) {
+    color: var(--on-base) !important;
+    fill: var(--on-base) !important;
+}
+

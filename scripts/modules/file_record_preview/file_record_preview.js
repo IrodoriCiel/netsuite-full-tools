@@ -8,6 +8,13 @@
     const THEME_STYLE_ID = 'nsft-frp-theme';
     const MAX_SIZE = 500 * 1024;
 
+    const HEIGHT_KEY = 'nsftFrpHeight';
+    const AUTO_MARGIN = 140;
+    const BASE_EMBED = 720;
+    const BASE_CODE = 560;
+    const MIN_MANUAL = 200;
+    let _manualH = 0;
+
     const LANG_MAP = {
         js: 'javascript', mjs: 'javascript', cjs: 'javascript',
         jsx: 'javascript', ts: 'typescript', tsx: 'typescript',
@@ -44,8 +51,9 @@
     }
     if (!isApplicablePage()) return;
 
-    chrome.storage.local.get({ [STORAGE_KEY]: false, [THEME_KEY]: DEFAULT_THEME }, (items) => {
+    chrome.storage.local.get({ [STORAGE_KEY]: false, [THEME_KEY]: DEFAULT_THEME, [HEIGHT_KEY]: 0 }, (items) => {
         enabled = !!items[STORAGE_KEY];
+        _manualH = Math.max(0, parseInt(items[HEIGHT_KEY], 10) || 0);
         if (enabled) {
             loadTheme(items[THEME_KEY] || DEFAULT_THEME);
             init();
@@ -72,9 +80,14 @@
         if (changes[THEME_KEY]) {
             loadTheme(changes[THEME_KEY].newValue || DEFAULT_THEME);
         }
+        if (changes[HEIGHT_KEY]) {
+            _manualH = Math.max(0, parseInt(changes[HEIGHT_KEY].newValue, 10) || 0);
+            sizePreview();
+        }
         if (changes.nsftTheme && _requestedTheme === 'auto') {
             setTimeout(() => loadTheme('auto'), 60);
         }
+        if (changes.nsftTheme) setTimeout(() => stampTheme(), 60);
     });
 
     let _requestedTheme = null;
@@ -175,6 +188,60 @@
             showMessage(container,
                 (chrome.i18n.getMessage('frp_fetch_err') || 'Could not load preview') + ': ' + err.message);
         }
+        sizePreview();
+    }
+
+    function sizePreview() {
+        const c = document.getElementById(PREVIEW_ID);
+        if (!c) return;
+        const body = c.querySelector('.nsft-frp-body');
+        const esCodigo = !!body && !body.classList.contains('nsft-frp-body-embed')
+            && !body.classList.contains('nsft-frp-body-image');
+        const base = esCodigo ? BASE_CODE : BASE_EMBED;
+        const h = _manualH > 0 ? _manualH : Math.max(base, window.innerHeight - AUTO_MARGIN);
+        c.style.setProperty('--nsft-frp-h', h + 'px');
+        c.classList.toggle('is-manual', _manualH > 0);
+    }
+
+    let _resizeRaf = 0;
+    window.addEventListener('resize', () => {
+        if (_manualH > 0 || _resizeRaf) return;
+        _resizeRaf = requestAnimationFrame(() => { _resizeRaf = 0; sizePreview(); });
+    });
+
+    function wireGrip(container) {
+        const grip = container.querySelector('.nsft-frp-grip');
+        const body = container.querySelector('.nsft-frp-body');
+        if (!grip || !body) return;
+        let y0 = 0, h0 = 0, arrastrando = false;
+        grip.addEventListener('pointerdown', (e) => {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            arrastrando = true;
+            y0 = e.clientY;
+            h0 = body.getBoundingClientRect().height;
+            grip.setPointerCapture(e.pointerId);
+            container.classList.add('is-dragging');
+        });
+        grip.addEventListener('pointermove', (e) => {
+            if (!arrastrando) return;
+            _manualH = Math.max(MIN_MANUAL, Math.round(h0 + e.clientY - y0));
+            sizePreview();
+        });
+        const suelta = (e) => {
+            if (!arrastrando) return;
+            arrastrando = false;
+            container.classList.remove('is-dragging');
+            try { grip.releasePointerCapture(e.pointerId); } catch (_) { }
+            chrome.storage.local.set({ [HEIGHT_KEY]: _manualH });
+        };
+        grip.addEventListener('pointerup', suelta);
+        grip.addEventListener('pointercancel', suelta);
+        grip.addEventListener('dblclick', () => {
+            _manualH = 0;
+            sizePreview();
+            chrome.storage.local.remove(HEIGHT_KEY);
+        });
     }
 
     async function renderTextFromUrl(container, fileUrl, lang) {
@@ -280,23 +347,46 @@
     function mountContainer(filename, ext) {
         const container = document.createElement('div');
         container.id = PREVIEW_ID;
+        container.className = 'nsft-w';
+        stampTheme(container);
         container.innerHTML =
-            '<div class="nsft-frp-head">' +
-                '<span class="nsft-frp-title">' +
-                (chrome.i18n.getMessage('frp_title') || 'Preview') +
-                (filename ? ': ' + escapeHtml(filename) : '') + '</span>' +
-                (ext ? '<span class="nsft-frp-badge">' + escapeHtml(ext.toUpperCase()) + '</span>' : '') +
-                '<button type="button" class="nsft-frp-copy" aria-label="Copy">' +
+            '<div class="nsft-frp-head nsft-barra-titulo">' +
+                '<span class="nsft-frp-title nsft-titulo">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+                        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+                        '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/>' +
+                        '<circle cx="12" cy="12" r="3"/></svg>' +
+                    (chrome.i18n.getMessage('frp_title') || 'Preview') + '</span>' +
+                (filename || ext
+                    ? '<span class="nsft-cab-sep" aria-hidden="true"></span>' +
+                      '<span class="nsft-cab-ctx">' +
+                        (filename ? '<span class="nsft-cab-txt">' + escapeHtml(filename) + '</span>' : '') +
+                        (ext ? '<span class="nsft-frp-badge nsft-tipo">' + escapeHtml(ext) + '</span>' : '') +
+                      '</span>'
+                    : '') +
+                '<button type="button" class="nsft-frp-copy nsft-dlg-btn nsft-dlg-btn-cancel">' +
                     (chrome.i18n.getMessage('frp_copy') || 'Copy') + '</button>' +
             '</div>' +
             '<div class="nsft-frp-body">' +
                 '<pre class="nsft-frp-pre"><code class="nsft-frp-code">' +
                 (chrome.i18n.getMessage('frp_loading') || 'Loading…') + '</code></pre>' +
-            '</div>';
+            '</div>' +
+            '<div class="nsft-frp-grip" role="separator" aria-orientation="horizontal" title="' +
+                escapeHtml(chrome.i18n.getMessage('frp_grip_title') || 'Drag to change the height · double-click: automatic') +
+            '"></div>';
 
         const host = document.querySelector('#main_form') || document.body;
         host.appendChild(container);
+        wireGrip(container);
+        sizePreview();
         return container;
+    }
+
+    function stampTheme(el) {
+        const node = el || document.getElementById(PREVIEW_ID);
+        if (!node) return;
+        const dark = document.documentElement.getAttribute('data-nsft-theme') === 'dark';
+        node.setAttribute('data-theme', dark ? 'dark' : 'light');
     }
 
     function renderContent(container, text, lang) {
@@ -304,12 +394,15 @@
         if (!code) return;
         code.textContent = text;
         code.className = 'nsft-frp-code language-' + lang;
-        if (window.hljs && typeof window.hljs.highlightElement === 'function') {
+        const colorea = () => {
+            if (!window.hljs || typeof window.hljs.highlightElement !== 'function') return;
             try {
                 delete code.dataset.highlighted;
                 window.hljs.highlightElement(code);
             } catch (e) { }
-        }
+        };
+        if (window.hljs || !window.NSFT_Libs) colorea();
+        else window.NSFT_Libs.listas().then(colorea);
         const btn = container.querySelector('.nsft-frp-copy');
         if (btn) {
             btn.addEventListener('click', () => {

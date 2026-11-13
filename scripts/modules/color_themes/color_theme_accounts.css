@@ -845,24 +845,21 @@ header p {
 
 .modal-card--wide { max-width: 560px; }
 
-.modal-head {
+.modal-card.nsft-caja-barra {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 16px;
+    flex-direction: column;
 }
 
-.modal-head > div { flex: 1 1 auto; min-width: 0; }
+.modal-card.nsft-caja-barra > .nsft-barra-titulo { flex: none; }
 
-.modal-card h3 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+.modal-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .modal-help {
-    margin: 3px 0 0;
+    margin: 0 0 14px;
     font-size: 12.5px;
     color: var(--text-muted);
 }

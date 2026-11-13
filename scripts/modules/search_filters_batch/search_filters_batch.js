@@ -128,7 +128,7 @@
 
     function vistePronto(btn) {
         let vueltas = 0;
-        const raf = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+        const raf = (window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null) || ((cb) => setTimeout(cb, 16));
         const intenta = () => {
             if (visteComoNativo(btn) || ++vueltas > 90) {
                 btn.classList.remove('is-sin-traje');

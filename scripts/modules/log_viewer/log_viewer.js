@@ -436,7 +436,16 @@
         caja.setAttribute('aria-modal', 'true');
 
         const cab = el('div', 'nsft-modal-header');
-        cab.appendChild(el('span', 'nsft-modal-title', i18n('lv_exp_title', 'Export the log to ' + formato.toUpperCase(), [formato.toUpperCase()])));
+        const tit = el('span', 'nsft-modal-title', i18n('lv_exp_title', 'Export the log to ' + formato.toUpperCase(), [formato.toUpperCase()]));
+        if (window.NSFT_Herramientas && window.NSFT_Herramientas.tituloDialogo) tit.innerHTML = window.NSFT_Herramientas.tituloDialogo('exportar', tit.textContent, 'ambar');
+        cab.appendChild(tit);
+        const acciones = el('span', 'nsft-header-actions');
+        const xCerrar = el('button', 'nsft-modal-btn-close', '✕');
+        xCerrar.type = 'button';
+        xCerrar.title = i18n('dlg_cancel', 'Cancel');
+        xCerrar.setAttribute('aria-label', xCerrar.title);
+        acciones.appendChild(xCerrar);
+        cab.appendChild(acciones);
         caja.appendChild(cab);
         caja.appendChild(el('div', 'nsft-modal-header-line'));
 
@@ -578,6 +587,7 @@
         };
         document.addEventListener('keydown', teclas, true);
         cancelar.addEventListener('click', detener);
+        xCerrar.addEventListener('click', detener);
         telon.addEventListener('mousedown', (e) => { if (e.target === telon && !viaje) cerrar(); });
         ok.addEventListener('click', () => lanzar());
         _exp = { cerrar: () => { if (viaje) viaje.cancela(); viaje = null; cerrar(); } };

@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('#nsft-rlv-modal', 'logs', { contextoEl: '.nsft-rlv-ctx' });
 
     const STORAGE_KEY = 'enableRecordLogsViewer';
     const THEME_KEY = 'nsftTheme';
@@ -68,7 +69,7 @@
         PROMOTIONCODE: 'Promotion Code', PRICINGGROUP: 'Pricing Group'
     };
 
-    const PANEL_MODE = location.protocol === 'chrome-extension:';
+    const PANEL_MODE = /^(chrome|moz)-extension:$/.test(location.protocol);
 
     if (!PANEL_MODE && !/\.app\.netsuite\.com$/.test(location.hostname)) return;
 
@@ -312,7 +313,7 @@
         t.async = false;
         t.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
         t.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(t);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(t) : (document.head || document.documentElement).appendChild(t));
     }
 
     function injectFetcher(onReady) {
@@ -327,7 +328,7 @@
             _fetcherInjected = true;
             onReady();
         };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     let _tabWatchBound = false;
@@ -809,6 +810,11 @@
         const title = qs('#nsft-rlv-title');
         if (!modal || !title) return;
         const min = modal.dataset.state === 'minimised';
+        if (window.NSFT_Herramientas) {
+            if (min) setTimeout(() => snapToEdge(modal), 10);
+            else refreshHeaderCtx();
+            return;
+        }
         title.innerHTML = TITLE_ICON + '<span>'
             + (min ? i18n('rlv_title_min', 'Logs') : i18n('enableRecordLogsViewerLabel', 'Ver Logs del Registro'))
             + '</span>'
@@ -852,6 +858,21 @@
             clearField: i18n('rlv_clear_search', 'Borrar la búsqueda')
         };
 
+        const HERR = window.NSFT_Herramientas;
+        const herr = HERR && HERR.de ? HERR.de('logs') : null;
+        const SCOPE_TONO = herr
+            ? ` data-cat="${herr.cat}"${herr.tono ? ` data-tono="${herr.tono}"` : ''}`
+            : '';
+        const scopeKeys = [
+            ['↵', i18n('pal_k_choose', 'choose')],
+            ['Esc', i18n('pal_k_clear_close', 'clear or close')]
+        ];
+        const SCOPE_TECLAS = (HERR && HERR.teclas)
+            ? HERR.teclas(scopeKeys)
+            : '<span class="nsft-paleta-teclas">'
+                + scopeKeys.map(([k, t]) => '<kbd>' + k + '</kbd> ' + t).join(' ')
+                + '</span>';
+
 
         const rangeBtns = [
             ['1h', i18n('rlv_range_1h', '1 h')],
@@ -865,11 +886,11 @@
         const html = `
         <div id="${MODAL_ID}" class="nsft-modal nsft-modal--window" ${PANEL_MODE ? 'data-panelmode="1"' : ''} data-theme="${resolveTheme()}" data-state="maximised" tabindex="-1" role="dialog" aria-modal="true" aria-label="${T.title}">
             <div class="nsft-rlv-header nsft-modal-header">
-                <span id="nsft-rlv-title">${TITLE_ICON}<span>${T.title}</span>${CTX_HTML}</span>
+                <span id="nsft-rlv-title" class="nsft-modal-title">${TITLE_ICON}<span>${T.title}</span></span>${CTX_HTML}
                 <span class="nsft-header-actions">
                     ${PANEL_MODE
-        ? `<span id="nsft-rlv-undock" class="nsft-rlv-dock nsft-modal-hide-min" title="${T.undock}">${UNDOCK_ICON}</span>`
-        : `<span id="nsft-rlv-dock" class="nsft-rlv-dock nsft-modal-hide-min" title="${T.dock}">${DOCK_ICON}</span>`}
+        ? `<span id="nsft-rlv-undock" class="nsft-modal-btn-dock nsft-rlv-dock nsft-modal-hide-min" title="${T.undock}">${UNDOCK_ICON}</span>`
+        : `<span id="nsft-rlv-dock" class="nsft-modal-btn-dock nsft-rlv-dock nsft-modal-hide-min" title="${T.dock}">${DOCK_ICON}</span>`}
                     <span id="nsft-rlv-minimise" class="nsft-modal-btn-minimise"></span>
                     <span id="nsft-rlv-fullscreen" class="nsft-modal-btn-fullscreen" title="${i18n('sql_fullscreen_enter', 'Pantalla completa')}"></span>
                     <span id="nsft-rlv-maximise" class="nsft-modal-btn-maximise"></span>
@@ -878,13 +899,14 @@
                 <div class="nsft-modal-header-line"></div>
             </div>
 
-            <div class="nsft-rlv-ctxpop" id="nsft-rlv-ctxpop" hidden>
-                <div class="nsft-rlv-searchwrap is-sm is-flush">
-                    ${SEARCH_ICON}
-                    <input type="text" id="nsft-rlv-ctxsearch" spellcheck="false" autocomplete="off" placeholder="${T.scopeSearch}">
+            <div class="nsft-rlv-ctxpop nsft-paleta" id="nsft-rlv-ctxpop"${SCOPE_TONO} hidden>
+                <div class="nsft-paleta-barra">
+                    <span class="nsft-paleta-ico">${SEARCH_ICON.replace(' class="nsft-rlv-searchicon"', '')}</span>
+                    <input type="text" id="nsft-rlv-ctxsearch" class="nsft-paleta-input" spellcheck="false" autocomplete="off" placeholder="${T.scopeSearch}">
                     <button type="button" class="nsft-rlv-clearbtn" id="nsft-rlv-ctxclear" hidden title="${T.clearField}" aria-label="${T.clearField}">${CLEAR_ICON}</button>
                 </div>
                 <div class="nsft-rlv-ctxlist" id="nsft-rlv-ctxlist" role="listbox"></div>
+                <div class="nsft-paleta-pie"><span class="nsft-paleta-cuenta" id="nsft-rlv-ctxcuenta"></span>${SCOPE_TECLAS}</div>
             </div>
 
             <div class="nsft-rlv-toolbar">
@@ -1239,7 +1261,7 @@
     }
 
     function wireContent(modal) {
-        qs('#nsft-rlv-title').addEventListener('click', (e) => {
+        (qs('#' + MODAL_ID + ' .nsft-modal-header') || qs('#nsft-rlv-title')).addEventListener('click', (e) => {
             if (!e.target.closest('.nsft-rlv-ctx')) return;
             const pop = qs('#nsft-rlv-ctxpop');
             if (pop && !pop.hidden) closeScopePicker();
@@ -1258,6 +1280,14 @@
             renderScopeList('');
         });
         scopeSearch.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && scopeSearch.value) {
+                e.preventDefault();
+                e.stopPropagation();
+                scopeSearch.value = '';
+                syncClearBtn(scopeSearch, '#nsft-rlv-ctxclear');
+                renderScopeList('');
+                return;
+            }
             if (e.key !== 'Enter') return;
             const first = qs('#nsft-rlv-ctxlist .nsft-rlv-ctxitem');
             if (first) first.click();
@@ -1482,6 +1512,15 @@
     }
 
     function renderScopeList(filterText) {
+        fillScopeList(filterText);
+        const c = qs('#nsft-rlv-ctxcuenta');
+        if (!c) return;
+        const host = qs('#nsft-rlv-ctxlist');
+        const n = host ? host.querySelectorAll('.nsft-rlv-ctxitem').length : 0;
+        c.textContent = n ? i18n('pal_resultados', n + ' results', [String(n)]) : '';
+    }
+
+    function fillScopeList(filterText) {
         const host = qs('#nsft-rlv-ctxlist');
         if (!host) return;
         const search = qs('#nsft-rlv-ctxsearch');
@@ -1510,7 +1549,9 @@
         const list = scopeCatalogue().filter((t) => textHit(t.rt, q)
             || (t.name && textHit(t.name, q)));
         if (!list.length) {
-            host.appendChild(scopeNote(i18n('rlv_scope_empty', 'Ningún tipo de registro coincide.')));
+            const txt = i18n('rlv_scope_empty', 'Ningún tipo de registro coincide.');
+            if (window.NSFT_Herramientas) host.insertAdjacentHTML('beforeend', window.NSFT_Herramientas.vacio('buscar', txt, '', '', { linea: true }));
+            else host.appendChild(scopeNote(txt));
             return;
         }
         list.forEach((t) => host.appendChild(scopeRow(t.rt, t.name, t.rt.toLowerCase(), t.n, q)));
@@ -1554,7 +1595,7 @@
 
         if (esScript || (type && type === S.homeType)) {
             const tag = document.createElement('span');
-            tag.className = 'nsft-rlv-ctxtag';
+            tag.className = 'nsft-rlv-ctxtag nsft-tipo';
             tag.textContent = i18n('rlv_scope_current', 'actual');
             row.appendChild(tag);
         }
@@ -1773,6 +1814,12 @@
         addGroup(ofRecord.length
             ? i18n('rlv_scripts_rest', 'Todos los demás')
             : i18n('rlv_all_scripts', 'Todos los scripts'), rest);
+
+        if (!host.firstChild && q.trim()) {
+            const txt = i18n('rlv_scripts_none', 'No script matches');
+            if (window.NSFT_Herramientas) host.insertAdjacentHTML('beforeend', window.NSFT_Herramientas.vacio('buscar', txt, '', '', { linea: true }));
+            else host.appendChild(scopeNote(txt));
+        }
     }
 
     const CHECK_SVG = '<svg viewBox="0 0 12 12" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"><path d="M2 6.4l2.6 2.6L10 3.4"/></svg>';
@@ -1911,7 +1958,9 @@
                     : i18n('rlv_err_generic', 'No se pudieron cargar los logs.') + (err.message ? ' — ' + err.message : '');
         } else if (!S.rows.length) {
             box.className = 'is-empty';
-            box.textContent = i18n('rlv_empty', 'Sin logs que coincidan con los filtros.');
+            const txt = i18n('rlv_empty', 'Sin logs que coincidan con los filtros.');
+            if (window.NSFT_Herramientas) box.innerHTML = window.NSFT_Herramientas.vacio('buscar', txt);
+            else box.textContent = txt;
         }
 
         if (more) {
@@ -2005,8 +2054,8 @@
         const level = document.createElement('div');
         const pill = document.createElement('span');
         const lvl = String(r.loglevel || '').toUpperCase();
-        pill.className = 'nsft-rlv-pill nsft-rlv-lvl-' + lvl.toLowerCase();
-        pill.textContent = lvl;
+        pill.className = 'nsft-rlv-pill nsft-estado nsft-rlv-lvl-' + lvl.toLowerCase();
+        pill.textContent = LEVEL_LABEL[lvl] || lvl;
         level.appendChild(pill);
 
         const script = document.createElement('div');
@@ -2093,8 +2142,8 @@
         head.className = 'nsft-rlv-dhead';
         const lvl = String(r.loglevel || '').toUpperCase();
         const pill = document.createElement('span');
-        pill.className = 'nsft-rlv-pill nsft-rlv-lvl-' + lvl.toLowerCase();
-        pill.textContent = lvl;
+        pill.className = 'nsft-rlv-pill nsft-estado nsft-rlv-lvl-' + lvl.toLowerCase();
+        pill.textContent = LEVEL_LABEL[lvl] || lvl;
         const title = document.createElement('b');
         title.className = 'nsft-rlv-dtitle';
         title.textContent = r.title || '';
@@ -2114,7 +2163,12 @@
         close.setAttribute('aria-label', i18n('rlv_close', 'Cerrar'));
         close.textContent = '✕';
         close.addEventListener('click', closeDetail);
-        head.append(pill, title, stamp, spacer, copy, close);
+        const explica = window.NSFT_AiExplain
+            ? window.NSFT_AiExplain.button({ detail: r.detail, title: r.title, script: r.scriptname, level: lvl })
+            : null;
+        head.append(pill, title, stamp, spacer);
+        if (explica) head.appendChild(explica);
+        head.append(copy, close);
 
         const msg = document.createElement('div');
         msg.className = 'nsft-rlv-dmsg';
@@ -2123,8 +2177,8 @@
         const mtext = document.createElement('span');
         mtext.textContent = i18n('rlv_message', 'Mensaje');
         const kind = document.createElement('span');
-        kind.className = 'nsft-rlv-dkind';
-        kind.textContent = i18n('rlv_col_detail', 'Detalle').toUpperCase();
+        kind.className = 'nsft-rlv-dkind nsft-tipo';
+        kind.textContent = i18n('rlv_col_detail', 'Detalle');
         mlabel.append(mtext, kind);
 
         const pre = document.createElement('div');
@@ -2282,7 +2336,8 @@
         }
         if (target.btns && target.btns.isConnected && data.fileId != null) {
             const a = document.createElement('a');
-            a.href = '/app/common/record/edittextmediaitem.nl?id=' + encodeURIComponent(data.fileId)
+            a.href = window.NSFT_CodeLink ? window.NSFT_CodeLink.url(data.fileId)
+                : '/app/common/record/edittextmediaitem.nl?id=' + encodeURIComponent(data.fileId)
                 + '&e=T&l=T&target=filesize&syntaxHighlighting=T';
             a.target = '_blank';
             a.rel = 'noopener';

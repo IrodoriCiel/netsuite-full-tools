@@ -16,7 +16,7 @@
         var mods = Array.prototype.slice.call(arguments);
         return new Promise(function (ok, ko) {
             if (!hayRequire()) {
-                ko(new Error(L('Esta p\u00e1gina no tiene SuiteScript 2.x (require).', 'This page has no SuiteScript 2.x (require).')));
+                ko(new Error(L('Esta p\u00e1gina no tiene SuiteScript 2.1 (require).', 'This page has no SuiteScript 2.1 (require).')));
                 return;
             }
             var rutas = mods.map(function (m) { m = String(m); return m.indexOf('N/') === 0 ? m : 'N/' + m; });
@@ -368,7 +368,7 @@
         ['NSFT.watch(id) / NSFT.unwatch()', L('Vigila un campo: cada cambio, en la consola (y qui\u00e9n lo hace).', 'Watches a field: every change in the console (and who makes it).')],
         ['await NSFT.url(tipo, id) / NSFT.open(tipo, id)', L('La URL de un registro / abrirlo en otra pesta\u00f1a.', 'A record\u2019s URL / open it in another tab.')],
         ['NSFT.csv(filas, nombre?)', L('Descarga filas como CSV que Excel abre bien.', 'Downloads rows as a CSV that Excel opens correctly.')],
-        ['await NSFT.N(\'record\', \u2026)', L('M\u00f3dulos N de SuiteScript 2.x.', 'SuiteScript 2.x N modules.')],
+        ['await NSFT.N(\'record\', \u2026)', L('M\u00f3dulos N de SuiteScript 2.1.', 'SuiteScript 2.1 N modules.')],
         ['await NSFT.load(tipo?, id?)', L('record.load del registro abierto (o del que digas).', 'record.load of the open record (or the one you name).')],
         ['await NSFT.sql(consulta) / NSFT.table(consulta)', L('SuiteQL: las filas / pintadas con console.table.', 'SuiteQL: the rows / printed with console.table.')],
         ['NSFT.toast(texto)', L('Un aviso abajo en la p\u00e1gina.', 'A notice at the bottom of the page.')],

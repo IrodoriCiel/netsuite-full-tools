@@ -25,7 +25,7 @@
             try { s.dataset.lang = String(chrome.i18n.getUILanguage() || 'en').slice(0, 2); } catch (e) { }
             s.onload = () => { s.remove(); resolver(); };
             s.onerror = () => { listo = null; rechazar(new Error('console_utils')); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         });
         return listo;
     }
@@ -63,7 +63,7 @@
         if (!r) { avisa(t('cu_ss_unknown', 'Could not check this page.'), 'error'); return; }
         const si = t('cu_yes', 'yes');
         const no = t('cu_no', 'no');
-        let msg = t('cu_ss_result', 'SuiteScript 2.x: $1 · SuiteScript 1.0: $2', [r.ss2 ? si : no, r.ss1 ? si : no]);
+        let msg = t('cu_ss_result', 'SuiteScript 2.1: $1 · SuiteScript 1.0: $2', [r.ss2 ? si : no, r.ss1 ? si : no]);
         if (!r.ss2 && !r.ss1) msg += ' — ' + t('cu_ss_none', 'this page does not load SuiteScript: scripts and the console will not find require or nlapi here.');
         if (encendido) msg += '\n' + t('cu_ss_hint', 'In the browser console, NSFT.help() lists the shortcuts.');
         avisa(msg, (r.ss2 || r.ss1) ? 'success' : 'info');

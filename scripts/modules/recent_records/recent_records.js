@@ -40,6 +40,7 @@
         _cacheTtlMs = Math.max(0, (parseInt(items[TTL_KEY], 10) || 0)) * 1000;
         _pinned = Array.isArray(items[PINNED_KEY]) ? items[PINNED_KEY] : [];
         _history = (items[HISTORY_KEY] && typeof items[HISTORY_KEY] === 'object') ? items[HISTORY_KEY] : {};
+        adoptLegacyPins(items[SNAPSHOT_KEY]);
         const snap = items[SNAPSHOT_KEY] && items[SNAPSHOT_KEY][location.host];
         if (snap && Array.isArray(snap.items)) {
             _cache = { ts: snap.ts || 0, items: snap.items, error: null };
@@ -72,7 +73,12 @@
         if (_inited) return;
         _inited = true;
         document.documentElement.classList.add('nsft-rr-arm');
-        injectFetcher();
+        leeFormatoCacheado((ok) => {
+            if (ok) return;
+            const pide = () => injectFetcher();
+            const ya = () => (window.requestIdleCallback ? requestIdleCallback(pide, { timeout: 2000 }) : setTimeout(pide, 0));
+            if (document.readyState === 'complete') ya(); else window.addEventListener('load', ya, { once: true });
+        });
         document.addEventListener('mouseover', onMouseOver, true);
         document.addEventListener('focusin', onMouseOver, true);
         document.addEventListener('visibilitychange', onVisibilityChange);
@@ -255,7 +261,7 @@
         const allLabel = allLink ? (allLink.getAttribute('aria-label') || allLink.textContent.trim()) : i18n('rr_view_all', 'Todos los registros recientes');
 
         const panel = document.createElement('div');
-        panel.className = 'nsft-rr-panel';
+        panel.className = 'nsft-rr-panel nsft-w';
         panel.setAttribute('data-theme', resolveTheme(popover));
         panel.innerHTML = panelShellHtml(allHref, allLabel);
 
@@ -273,7 +279,7 @@
         const list = panel.querySelector('[data-role="list"]');
         if (!list) return;
         list.addEventListener('mousedown', (e) => {
-            if (e.target.closest && e.target.closest('.nsft-rr-action-pin')) {
+            if (e.target.closest && e.target.closest('.nsft-rr-action-pin, .nsft-rr-action-copy')) {
                 e.preventDefault();
             }
         });
@@ -284,6 +290,20 @@
                 e.stopPropagation();
                 const row = pinBtn.closest('.nsft-rr-row');
                 if (row) togglePin(row);
+                return;
+            }
+            const copyBtn = e.target.closest && e.target.closest('.nsft-rr-action-copy');
+            if (copyBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                const row = copyBtn.closest('.nsft-rr-row');
+                const u = row && row.getAttribute('data-url');
+                if (u && u !== '#') {
+                    const abs = new URL(u, location.origin).href;
+                    const toast = i18n('rr_link_copied', 'Enlace copiado');
+                    if (window.NSFT_Clipboard) window.NSFT_Clipboard.copy(abs, { toast });
+                    else if (navigator.clipboard) navigator.clipboard.writeText(abs).catch(() => {});
+                }
                 return;
             }
             if (e.target.closest && e.target.closest('a')) {
@@ -313,7 +333,7 @@
     function panelShellHtml(allHref, allLabel) {
         return `
             <div class="nsft-rr-header">
-                <div class="nsft-rr-title">${escapeHtml(i18n('rr_title', 'Registros recientes'))}</div>
+                <div class="nsft-rr-title nsft-titulo"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg>${escapeHtml(i18n('rr_title', 'Registros recientes'))}</div>
                 <div class="nsft-rr-search-wrap">
                     <svg class="nsft-rr-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="11" cy="11" r="7"></circle>
@@ -324,21 +344,15 @@
                     <span class="nsft-rr-count" data-role="count"></span>
                 </div>
             </div>
-            <div class="nsft-rr-allbar">
-                <a class="nsft-rr-allbtn" href="${escapeHtml(allHref)}" target="_self">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="8" y1="6" x2="21" y2="6"></line>
-                        <line x1="8" y1="12" x2="21" y2="12"></line>
-                        <line x1="8" y1="18" x2="21" y2="18"></line>
-                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                    </svg>
-                    <span>${escapeHtml(allLabel)}</span>
-                </a>
-            </div>
             <div class="nsft-rr-list" role="list" data-role="list">
                 <div class="nsft-rr-loading">${escapeHtml(i18n('rr_loading', 'Cargando registros recientes…'))}</div>
+            </div>
+            <div class="nsft-rr-foot">
+                <a class="nsft-rr-allbtn" data-role="all" href="${escapeHtml(allHref)}" target="_self" title="${escapeHtml(allLabel)}">${escapeHtml(allLabel)}</a>
+                <span class="nsft-rr-keys" aria-hidden="true">
+                    <kbd>↵</kbd> ${escapeHtml(i18n('rr_key_open', 'abrir'))}
+                    <kbd>Ctrl</kbd><kbd>↵</kbd> ${escapeHtml(i18n('rr_key_newtab', 'otra pestaña'))}
+                </span>
             </div>
         `;
     }
@@ -372,7 +386,11 @@
                 if (row) {
                     const a = row.querySelector('a.nsft-rr-rowmain');
                     const href = a && a.getAttribute('href');
-                    if (href && href !== '#') { e.preventDefault(); window.location.href = href; }
+                    if (href && href !== '#') {
+                        e.preventDefault();
+                        if (e.ctrlKey || e.metaKey) window.open(href, '_blank', 'noopener');
+                        else window.location.href = href;
+                    }
                 }
                 return;
             }
@@ -385,9 +403,10 @@
         if (!list) return;
 
         const items = buildMergedItems();
-        const pinnedUrls = new Set(_pinned.map((p) => p && p.url).filter(Boolean));
+        const pins = pinsHere();
+        const pinnedUrls = new Set(pins.map((p) => p && p.url).filter(Boolean));
 
-        if (!items.length && !_pinned.length) {
+        if (!items.length && !pins.length) {
             if (_fetching || !_cache) {
                 list.innerHTML = `<div class="nsft-rr-loading">${escapeHtml(i18n('rr_loading', 'Cargando registros recientes…'))}</div>`;
                 updateCount(panel, 0, 0);
@@ -401,9 +420,9 @@
         }
 
         let html = '';
-        if (_pinned.length) {
+        if (pins.length) {
             html += sectionHeaderHtml(i18n('rr_pinned', 'Fijados'), { pinned: true });
-            html += _pinned.map((it) => rowHtml(it, true)).join('');
+            html += pins.map((it) => rowHtml(it, true)).join('');
         }
 
         const serverItems = items.filter((it) => !pinnedUrls.has(it.viewUrl || it.editUrl || ''));
@@ -416,7 +435,8 @@
         });
 
         if (!html) {
-            list.innerHTML = `<div class="nsft-rr-empty">${escapeHtml(i18n('rr_empty', 'No hay registros recientes.'))}</div>`;
+            const txt = i18n('rr_empty', 'No hay registros recientes.');
+            list.innerHTML = `<div class="nsft-rr-empty">${window.NSFT_Herramientas ? window.NSFT_Herramientas.vacio('reloj', txt) : escapeHtml(txt)}</div>`;
             updateCount(panel, 0, 0);
             return;
         }
@@ -549,6 +569,7 @@
             _history[location.host] = arr.slice(0, HISTORY_MAX);
             pruneHosts(_history, (a) => (a && a[0] && a[0].ts) || 0);
             chrome.storage.local.set({ [HISTORY_KEY]: _history });
+            claimLegacyPin(viewUrl, name);
         } catch (e) { }
     }
 
@@ -630,8 +651,24 @@
             s.id = 'nsft-rr-fetcher';
             s.src = chrome.runtime.getURL('scripts/modules/recent_records/recent_records_fetcher.js');
             s.onload = function () { this.remove(); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         } catch (e) { }
+    }
+
+    const FMT_CACHE_KEY = 'nsftUserDateFormats';
+    const FMT_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+    function claveUsuarioFmt() {
+        const m = /(?:^|;\s*)lastUser=([^;]*)/.exec(document.cookie || '');
+        return location.host + '|' + (m ? m[1] : '');
+    }
+    function leeFormatoCacheado(cb) {
+        try {
+            chrome.storage.local.get({ [FMT_CACHE_KEY]: {} }, (st) => {
+                const c = st && st[FMT_CACHE_KEY] && st[FMT_CACHE_KEY][claveUsuarioFmt()];
+                if (c && c.date && (Date.now() - (c.ts || 0)) < FMT_CACHE_TTL) { _dateFormat = c.date; cb(true); }
+                else cb(false);
+            });
+        } catch (e) { cb(false); }
     }
 
     window.addEventListener('message', (e) => {
@@ -640,6 +677,14 @@
         if (!d || typeof d !== 'object' || d.dest !== 'extension_rr') return;
         if (d.type === 'dateformat' && d.payload && d.payload.format) {
             _dateFormat = d.payload.format;
+            try {
+                chrome.storage.local.get({ [FMT_CACHE_KEY]: {} }, (st) => {
+                    const all = (st[FMT_CACHE_KEY] && typeof st[FMT_CACHE_KEY] === 'object') ? st[FMT_CACHE_KEY] : {};
+                    const k = claveUsuarioFmt();
+                    all[k] = Object.assign({}, all[k], { date: _dateFormat, ts: Date.now() });
+                    chrome.storage.local.set({ [FMT_CACHE_KEY]: all });
+                });
+            } catch (err) { }
         }
     });
 
@@ -697,18 +742,58 @@
         return bucketForDate(parseNsDate(dateStr));
     }
 
-    const RR_STAR_SVG = '<svg class="nsft-rr-section-star" viewBox="0 0 24 24" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
-
     function sectionHeaderHtml(label, opts) {
         if (opts && opts.pinned) {
-            return `<div class="nsft-rr-section nsft-rr-section--pinned" role="presentation">${RR_STAR_SVG}${escapeHtml(label)}</div>`;
+            return `<div class="nsft-rr-section nsft-rr-section--pinned" role="presentation">${escapeHtml(label)}</div>`;
         }
         return `<div class="nsft-rr-section" role="presentation">${escapeHtml(label)}</div>`;
     }
 
+    const KINDS_CON_ID = new Set(['employee', 'customer', 'vendor', 'contact', 'partner', 'entity', 'customrecord']);
+    function repartir(name, secondary, kind, url) {
+        let n = String(name || '').trim();
+        let s = String(secondary || '').trim();
+        const m = kind === 'transaction' ? /^(.+?)\s+#(\S+)$/.exec(n) : null;
+        if (m) {
+            n = m[2];
+            if (s.toLowerCase() !== m[1].toLowerCase()) s = s ? m[1] + ' \u00b7 ' + s : m[1];
+        } else if (KINDS_CON_ID.has(kind)) {
+            const id = /[?&]id=(\d+)/.exec(url || '');
+            if (id) s = s ? s + ' \u00b7 #' + id[1] : '#' + id[1];
+        }
+        return [n, s];
+    }
+
+    function cuandoFue(item) {
+        const t = itemTime(item);
+        const crudo = String((item && item.date) || '').trim();
+        if (!t) return crudo ? { txt: crudo, full: '' } : null;
+        const d = new Date(t);
+        const conHora = (typeof item.ts === 'number' && item.ts > 0) || /^\d{1,2}:\d{2}/.test(crudo);
+        let full = '';
+        try { full = conHora ? d.toLocaleString() : d.toLocaleDateString(); } catch (e) { }
+        if (conHora) {
+            const hoy = startOfDay(new Date());
+            if (startOfDay(d) === hoy) {
+                const min = Math.max(0, Math.floor((Date.now() - t) / 60000));
+                if (min < 1) return { txt: i18n('rr_ago_now', 'ahora'), full };
+                if (min < 60) return { txt: i18nSub('rr_ago_min', [String(min)], 'hace ' + min + ' min'), full };
+                const h = Math.floor(min / 60);
+                return { txt: i18nSub('rr_ago_h', [String(h)], 'hace ' + h + ' h'), full };
+            }
+            if (startOfDay(d) === hoy - DAY_MS) {
+                try { return { txt: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }), full }; } catch (e) { }
+            }
+            try { return { txt: d.toLocaleDateString(), full }; } catch (e) { }
+        }
+        return { txt: crudo, full };
+    }
+
     function rowHtml(item, isPinned) {
         let url = item.url || item.viewUrl || item.editUrl || '#';
-        const kind = item.kind || 'file';
+        const kindUrl = url !== '#' ? kindForUrl(url) : 'file';
+        const kind = kindUrl !== 'file' ? kindUrl : (item.kind || 'file');
+        const tx = kind === 'transaction' ? (/\/transactions\/([a-z]+)\.nl/i.exec(url) || [])[1] || '' : '';
         const isSaved = isSavedSearchUrl(url);
         let secondary = item.secondary && item.secondary !== ' ' ? item.secondary : '';
         if (!secondary) {
@@ -733,11 +818,14 @@
             viewUrl = editUrl;
         }
         const runUrl = isSaved ? savedSearchRunUrl(url) : '';
-        const date = isPinned ? '' : (item.date || '');
+        const [nombre, sub] = repartir(item.name || '', secondary, kind, url);
+        const cuando = isPinned ? null : cuandoFue(item);
+        const date = cuando ? cuando.txt : '';
         const viewTitle = i18n('rr_action_open', 'Abrir');
         const editTitle = i18n('rr_action_edit', 'Editar');
         const runTitle = i18n('rr_action_run', 'Ejecutar búsqueda');
         const pinTitle = isPinned ? i18n('rr_unpin', 'Quitar de fijados') : i18n('rr_pin', 'Fijar');
+        const copyTitle = i18n('rr_action_copy', 'Copiar enlace');
         return `
             <div class="nsft-rr-row" role="listitem"
                  data-href="${escapeHtml(url)}"
@@ -747,16 +835,22 @@
                  data-name="${escapeHtml(item.name || '')}"
                  data-kind="${escapeHtml(kind)}"
                  data-secondary="${escapeHtml(secondary)}"
-                 data-haystack="${escapeHtml(rrFold((item.name || '') + ' ' + secondary))}">
+                 data-haystack="${escapeHtml(rrFold((item.name || '') + ' ' + nombre + ' ' + sub))}">
                 <a class="nsft-rr-rowmain" href="${escapeHtml(url)}">
-                    <span class="nsft-rr-icon nsft-rr-icon-${escapeHtml(kind)}">${iconSvg(kind)}</span>
+                    <span class="nsft-rr-icon nsft-rr-icon-${escapeHtml(kind)}${tx ? ' nsft-rr-tx-' + escapeHtml(tx.toLowerCase()) : ''}">${iconSvg(kind, tx.toLowerCase())}</span>
                     <span class="nsft-rr-body">
-                        <span class="nsft-rr-name">${escapeHtml(item.name || '')}</span>
-                        ${secondary ? `<span class="nsft-rr-secondary">${escapeHtml(secondary)}</span>` : ''}
+                        <span class="nsft-rr-name">${escapeHtml(nombre)}</span>
+                        ${sub ? `<span class="nsft-rr-secondary">${escapeHtml(sub)}</span>` : ''}
                     </span>
                 </a>
-                ${date ? `<span class="nsft-rr-date">${escapeHtml(date)}</span>` : ''}
+                ${date ? `<span class="nsft-rr-date"${cuando.full ? ` title="${escapeHtml(cuando.full)}"` : ''}>${escapeHtml(date)}</span>` : ''}
                 <span class="nsft-rr-actions">
+                    <button type="button" class="nsft-rr-action nsft-rr-action-copy" title="${escapeHtml(copyTitle)}" aria-label="${escapeHtml(copyTitle)}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+                            <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"></path>
+                        </svg>
+                    </button>
                     <a class="nsft-rr-action nsft-rr-action-view" href="${escapeHtml(viewUrl)}" target="_blank" rel="noopener" title="${escapeHtml(viewTitle)}" aria-label="${escapeHtml(viewTitle)}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -779,7 +873,8 @@
                     </a>` : ''}
                     <button type="button" class="nsft-rr-action nsft-rr-action-pin${isPinned ? ' is-pinned' : ''}" title="${escapeHtml(pinTitle)}" aria-label="${escapeHtml(pinTitle)}" aria-pressed="${isPinned ? 'true' : 'false'}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            <path d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"></path>
+                            <path d="M12 15v6"></path>
                         </svg>
                     </button>
                 </span>
@@ -787,10 +882,49 @@
         `;
     }
 
+    function pinsHere() {
+        return _pinned.filter((p) => p && (!p.host || p.host === location.host));
+    }
+
+    function adoptLegacyPins(snapshots) {
+        const sueltos = _pinned.filter((p) => p && !p.host && p.url);
+        if (!sueltos.length) return;
+        const snaps = (snapshots && typeof snapshots === 'object') ? snapshots : {};
+        const hosts = new Set(Object.keys(_history).concat(Object.keys(snaps)));
+        let cambio = false;
+        const nombre = (x) => String((x && x.name) || '').trim().toLowerCase();
+        sueltos.forEach((p) => {
+            const key = urlKey(p.url);
+            const porUrl = [];
+            const porNombre = [];
+            hosts.forEach((h) => {
+                const filas = (_history[h] || []).map((v) => [v, v && v.url])
+                    .concat(((snaps[h] && snaps[h].items) || []).map((it) => [it, it && (it.viewUrl || it.editUrl)]))
+                    .filter(([x, u]) => x && urlKey(u) === key);
+                if (!filas.length) return;
+                porUrl.push(h);
+                if (filas.some(([x]) => nombre(x) && nombre(x) === nombre(p))) porNombre.push(h);
+            });
+            const donde = porNombre.length ? porNombre : porUrl;
+            if (donde.length === 1) { p.host = donde[0]; cambio = true; }
+        });
+        if (cambio) chrome.storage.local.set({ [PINNED_KEY]: _pinned });
+    }
+
+    function claimLegacyPin(viewUrl, name) {
+        const key = urlKey(viewUrl);
+        const n = String(name || '').trim().toLowerCase();
+        const p = _pinned.find((x) => x && !x.host && urlKey(x.url) === key
+            && n && String(x.name || '').trim().toLowerCase() === n);
+        if (!p) return;
+        p.host = location.host;
+        chrome.storage.local.set({ [PINNED_KEY]: _pinned });
+    }
+
     function togglePin(row) {
         const url = row.getAttribute('data-url');
         if (!url || url === '#') return;
-        const idx = _pinned.findIndex((p) => p && p.url === url);
+        const idx = _pinned.findIndex((p) => p && p.url === url && (!p.host || p.host === location.host));
         if (idx >= 0) {
             _pinned.splice(idx, 1);
         } else {
@@ -800,7 +934,8 @@
                 editUrl: row.getAttribute('data-editurl') || '',
                 name: row.getAttribute('data-name') || url,
                 secondary: row.getAttribute('data-secondary') || '',
-                kind: row.getAttribute('data-kind') || 'file'
+                kind: row.getAttribute('data-kind') || 'file',
+                host: location.host
             });
         }
         chrome.storage.local.set({ [PINNED_KEY]: _pinned });
@@ -893,7 +1028,9 @@
             if (!emptyMsg) {
                 emptyMsg = document.createElement('div');
                 emptyMsg.className = 'nsft-rr-no-match';
-                emptyMsg.textContent = i18n('rr_no_match', 'Ningún registro coincide con la búsqueda.');
+                const txt = i18n('rr_no_match', 'Ningún registro coincide con la búsqueda.');
+                if (window.NSFT_Herramientas) emptyMsg.innerHTML = window.NSFT_Herramientas.vacio('buscar', txt);
+                else emptyMsg.textContent = txt;
                 list.appendChild(emptyMsg);
             }
         } else if (emptyMsg) {
@@ -902,6 +1039,12 @@
     }
 
     function updateCount(panel, shown, total) {
+        const todos = panel.querySelector('[data-role="all"]');
+        if (todos) {
+            todos.textContent = total
+                ? i18nSub('rr_view_all_n', [String(total)], 'Ver los ' + total) + ' \u2192'
+                : (todos.getAttribute('title') || '');
+        }
         const el = panel.querySelector('[data-role="count"]');
         if (!el) return;
         if (shown === total) {
@@ -916,12 +1059,15 @@
         const u = url.toLowerCase();
         if (u.includes('/app/common/entity/employee')) return 'employee';
         if (u.includes('/app/common/entity/customer')) return 'customer';
+        if (u.includes('/app/common/entity/custjob')) return 'customer';
         if (u.includes('/app/common/entity/vendor')) return 'vendor';
         if (u.includes('/app/common/entity/contact')) return 'contact';
         if (u.includes('/app/common/entity/partner')) return 'partner';
         if (u.includes('/app/common/entity/')) return 'entity';
         if (u.includes('/app/common/item/')) return 'item';
         if (u.includes('/app/common/media/mediaitem')) return 'media';
+        if (u.includes('/app/common/record/edittextmediaitem')) return 'media';
+        if (u.includes('/app/common/custom/customtransaction')) return 'customtrantype';
         if (u.includes('/app/accounting/transactions/')) return 'transaction';
         if (u.includes('/app/common/custom/custrecord.nl')) return 'customrecord_type';
         if (u.includes('/app/common/custom/custrecordentry')) return 'customrecord';
@@ -932,6 +1078,7 @@
         if (u.includes('/app/common/custom/columncustfield')) return 'customfield';
         if (u.includes('/app/common/custom/custform')) return 'form';
         if (u.includes('/app/setup/role.nl')) return 'role';
+        if (u.includes('/app/common/scripting/scriptrecord')) return 'deployment';
         if (u.includes('/app/common/scripting/')) return 'script';
         if (u.includes('/app/common/workflow/')) return 'workflow';
         if (u.includes('/app/common/search/')) return 'search';
@@ -956,6 +1103,8 @@
         form: ['rr_kind_form', 'Formulario'],
         role: ['rr_kind_role', 'Rol'],
         script: ['rr_kind_script', 'Script'],
+        deployment: ['rr_kind_deployment', 'Despliegue de script'],
+        customtrantype: ['rr_kind_customtrantype', 'Tipo de transacción personalizada'],
         workflow: ['rr_kind_workflow', 'Flujo de trabajo'],
         search: ['rr_kind_search', 'Búsqueda'],
         crm: ['rr_kind_crm', 'CRM'],
@@ -970,13 +1119,19 @@
     const RR_ICON_ENTITY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
     const RR_ICON_CUSTOMREC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="4" x2="9" y2="20"/></svg>';
     const RR_ICON_FILE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    const RR_SVG = (d) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
     const RR_ICONS = {
-        employee: RR_ICON_ENTITY, customer: RR_ICON_ENTITY, vendor: RR_ICON_ENTITY,
-        contact: RR_ICON_ENTITY, partner: RR_ICON_ENTITY, entity: RR_ICON_ENTITY,
+        employee: RR_ICON_ENTITY, entity: RR_ICON_ENTITY,
+        customer: RR_SVG('<circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 11l2 2 4-4"/>'),
+        vendor: RR_SVG('<rect x="1.5" y="6" width="13" height="10" rx="1"/><path d="M14.5 9h4l3 3v4h-7"/><circle cx="6" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/>'),
+        contact: RR_SVG('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a3.5 3.5 0 0 1 7 0M15 9h3M15 13h3"/>'),
+        partner: RR_SVG('<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5a5 5 0 0 1 5 5"/>'),
+        customtrantype: RR_SVG('<path d="M4 8h14l-3-3M20 16H6l3 3"/>'),
         item: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
         transaction: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
         media: RR_ICON_FILE,
         customrecord: RR_ICON_CUSTOMREC, customrecord_type: RR_ICON_CUSTOMREC,
+        deployment: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg>',
         customfield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
         form: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>',
         role: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1l9 4v6c0 5.55-3.84 10.74-9 12-5.16-1.26-9-6.45-9-12V5l9-4z"/></svg>',
@@ -986,13 +1141,41 @@
         crm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
         config: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.22 4.22l4.24 4.24m7.08 7.08l4.24 4.24M1 12h6m10 0h6M4.22 19.78l4.24-4.24m7.08-7.08l4.24-4.24"/></svg>'
     };
-    function iconSvg(kind) {
-        return RR_ICONS[kind] || RR_ICON_FILE;
+    const RR_TX_ICONS = (() => {
+        const portapapeles = RR_SVG('<path d="M9 3h6v3H9z"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2M9 12h6M9 16h4"/>');
+        const carrito = RR_SVG('<circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M3 4h2l2.5 11h11L21 7H6.2"/>');
+        const recibo = RR_SVG('<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>');
+        const cobro = RR_SVG('<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5v11"/>');
+        const devolucion = RR_SVG('<path d="M9 14l-5-5 5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>');
+        const caja = RR_SVG('<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>');
+        const libro = RR_SVG('<path d="M4 19V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2zM20 19v2H6"/>');
+        return {
+            estimate: portapapeles, opprtnty: portapapeles, purchreq: portapapeles,
+            salesord: carrito, purchord: carrito,
+            custinvc: recibo, cashsale: recibo, cutrsale: recibo, vendbill: recibo, exprept: recibo,
+            custpymt: cobro, custdep: cobro, depappl: cobro, vendpymt: cobro,
+            custcred: devolucion, rtnauth: devolucion, custrfnd: devolucion, vendcred: devolucion,
+            invadjst: caja, invtrnfr: caja, trnfrord: caja, itemship: caja, itemrcpt: caja,
+            journal: libro
+        };
+    })();
+
+    function iconSvg(kind, tx) {
+        return (tx && RR_TX_ICONS[tx]) || RR_ICONS[kind] || RR_ICON_FILE;
     }
 
     function resolveTheme(popover) {
         if (popover && popover.closest('[data-color-mode="dark"]')) return 'dark';
         return 'light';
+    }
+
+    function i18nSub(key, subs, fallback) {
+        try {
+            const msg = chrome.i18n.getMessage(key, subs);
+            return msg || fallback;
+        } catch (_) {
+            return fallback;
+        }
     }
 
     function i18n(key, fallback) {

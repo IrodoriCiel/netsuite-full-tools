@@ -244,3 +244,72 @@ html[data-nsft-theme="dark"] .nsft-logfmt-telon {
     width: 15px;
     height: 15px;
 }
+
+.nsft-aiexp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    height: 22px;
+    min-width: 22px;
+    padding: 0 4px;
+    border: 1px solid rgba(155, 110, 245, 0.35);
+    border-radius: 6px;
+    background: var(--nsft-w-s0, #fff);
+    color: var(--nsft-ai-text, #6D28D9);
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, gap 0.2s ease, padding 0.2s ease;
+}
+.nsft-aiexp-btn > span {
+    display: inline-block;
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-width 0.2s ease, opacity 0.15s ease;
+}
+.nsft-aiexp-btn[hidden] { display: none; }
+.nsft-aiexp-btn:hover,
+.nsft-aiexp-btn:focus-visible {
+    gap: 4px;
+    padding: 0 8px 0 6px;
+    background: rgba(155, 110, 245, 0.14);
+    border-color: transparent;
+    color: #5B21B6;
+}
+.nsft-aiexp-btn:hover > span,
+.nsft-aiexp-btn:focus-visible > span { max-width: 90px; opacity: 1; }
+.nsft-aiexp-btn:focus-visible { outline: 2px solid rgba(155, 110, 245, 0.55); outline-offset: 1px; }
+.nsft-aiexp-btn svg { width: 12px; height: 12px; flex: none; }
+html[data-nsft-theme="dark"] .nsft-aiexp-btn {
+    background: transparent;
+    border-color: rgba(155, 110, 245, 0.45);
+    color: var(--nsft-ai-text-dark, #D6C6FB);
+}
+html[data-nsft-theme="dark"] .nsft-aiexp-btn:hover,
+html[data-nsft-theme="dark"] .nsft-aiexp-btn:focus-visible {
+    background: rgba(155, 110, 245, 0.26);
+    border-color: transparent;
+    color: #EAE0FE;
+}
+@media (prefers-reduced-motion: reduce) {
+    .nsft-aiexp-btn, .nsft-aiexp-btn > span { transition: none; }
+}
+
+.nsft-aiexp-float {
+    float: right;
+    margin: 0 0 2px 10px;
+}
+
+.nsft-codecard-bar .nsft-aiexp-btn.is-en-barra {
+    margin-left: auto;
+    height: 20px;
+    min-width: 20px;
+    font-size: 11px;
+}
+.nsft-codecard-bar .nsft-aiexp-btn.is-en-barra ~ .nsft-logfmt-cerrar { margin-left: 4px; }

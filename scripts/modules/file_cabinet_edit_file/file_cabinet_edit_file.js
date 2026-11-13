@@ -132,9 +132,10 @@
 
         const label = chrome.i18n.getMessage('fcef_edit_btn') || 'Editar archivo';
         const btn = document.createElement('a');
-        btn.className = BTN_CLASS;
-        btn.href = '/app/common/record/edittextmediaitem.nl?id=' +
-                   encodeURIComponent(info.fileId) + '&e=T&l=T&target=filesize';
+        btn.className = BTN_CLASS + ' nsft-pastilla is-fila';
+        const cl = window.NSFT_CodeLink;
+        btn.href = (cl && cl.activo()) ? cl.url(info.fileId)
+            : '/app/common/record/edittextmediaitem.nl?id=' + encodeURIComponent(info.fileId) + '&e=T&l=T&target=filesize';
         btn.target = '_blank';
         btn.rel = 'noopener noreferrer';
         btn.title = (chrome.i18n.getMessage('fcef_edit_tooltip') || 'Edit this file') +

@@ -324,7 +324,7 @@
             s.src = chrome.runtime.getURL(FETCHER_PATH);
             s.onload = function () { this.remove(); finish(); };
             s.onerror = function () { this.remove(); finish(); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         } catch (e) {
             finish();
         }

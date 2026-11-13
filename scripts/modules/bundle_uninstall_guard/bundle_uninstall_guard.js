@@ -34,7 +34,7 @@
         s.id = 'nsft-bundle-guard-fetcher';
         s.src = chrome.runtime.getURL(FETCHER_PATH);
         s.onload = enviaEstado;
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function enviaEstado() {

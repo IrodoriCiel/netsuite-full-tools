@@ -133,7 +133,7 @@ mark.nsft-lv-hl {
     display: block;
     height: 100%;
     width: 0;
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
     transition: width 0.2s ease;
 }
 

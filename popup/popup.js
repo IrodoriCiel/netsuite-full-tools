@@ -279,6 +279,26 @@ const NSFT_DEV_TAP_WINDOW_MS = 3000;
         });
     }
 
+    const reinstall = document.getElementById('nsftDevReinstall');
+    if (reinstall) {
+        reinstall.addEventListener('click', () => {
+            showConfirmDialog({
+                title: chrome.i18n.getMessage('devReinstallConfirmTitle') || '¿Reinstalar desde cero?',
+                body: chrome.i18n.getMessage('devReinstallConfirmBody') || '',
+                confirmLabel: chrome.i18n.getMessage('devReinstallConfirmBtn') || 'Reinstalar',
+                danger: true
+            }).then((ok) => {
+                if (!ok) return;
+                try { localStorage.clear(); } catch (e) { }
+                try { sessionStorage.clear(); } catch (e) { }
+                chrome.runtime.sendMessage({ nsftDev: 'reinstalar' }, () => {
+                    void chrome.runtime.lastError;
+                    window.location.reload();
+                });
+            });
+        });
+    }
+
     const resetRate = document.getElementById('nsftDevResetRate');
     if (resetRate) {
         resetRate.addEventListener('click', () => {
@@ -508,88 +528,7 @@ function wireBooleanRadioGroups(items) {
     });
 }
 
-function populateEditorFontSelect() {
-    const sel = document.getElementById('editorFontFamily');
-    if (!sel || sel.dataset.nsftPopulated === '1') return;
-    sel.dataset.nsftPopulated = '1';
-    const porDefecto = document.createElement('option');
-    porDefecto.value = 'default';
-    porDefecto.textContent = chrome.i18n.getMessage('editorFontFamilyDefaultOption') || 'Default (NetSuite’s)';
-    sel.appendChild(porDefecto);
-    const stacks = (globalThis.NSFT_EditorThemeTransform && globalThis.NSFT_EditorThemeTransform.FONT_STACKS)
-        || { 'JetBrains Mono': '', 'Consolas': '' };
-    Object.keys(stacks).forEach((name) => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        sel.appendChild(opt);
-    });
-}
-
-function applyEditorFontToPreview(fontFamily) {
-    const pre = document.getElementById('editor-theme-preview');
-    if (!pre) return;
-    const stacks = (globalThis.NSFT_EditorThemeTransform && globalThis.NSFT_EditorThemeTransform.FONT_STACKS) || {};
-    if (!fontFamily || fontFamily === 'default') {
-        pre.style.removeProperty('font-family');
-        pre.querySelectorAll('code, span').forEach((el) => el.style.removeProperty('font-family'));
-        return;
-    }
-    const stack = stacks[fontFamily] || stacks['JetBrains Mono'] || 'monospace';
-    pre.style.setProperty('font-family', stack, 'important');
-    pre.querySelectorAll('code, span').forEach((el) => {
-        el.style.setProperty('font-family', stack, 'important');
-    });
-}
-
-function applyEditorFontSizeToPreview(fontSize) {
-    const pre = document.getElementById('editor-theme-preview');
-    if (!pre) return;
-    if (!fontSize || parseInt(fontSize, 10) <= 0) {
-        pre.style.removeProperty('font-size');
-        pre.querySelectorAll('code, span').forEach((el) => el.style.removeProperty('font-size'));
-        return;
-    }
-    const n = Math.max(11, Math.min(22, parseInt(fontSize, 10) || 14));
-    const px = `${n}px`;
-    pre.style.setProperty('font-size', px, 'important');
-    pre.querySelectorAll('code, span').forEach((el) => {
-        el.style.setProperty('font-size', px, 'important');
-    });
-}
-
-let _popupFontsLoaded = false;
-function ensurePopupEditorFonts() {
-    if (_popupFontsLoaded) return;
-    _popupFontsLoaded = true;
-    if (typeof FontFace === 'undefined' || !document.fonts) return;
-    const FONTS = [
-        { family: 'JetBrains Mono', weight: '400', file: 'jetbrains-mono-400.woff2' },
-        { family: 'JetBrains Mono', weight: '700', file: 'jetbrains-mono-700.woff2' },
-        { family: 'Fira Code', weight: '400', file: 'fira-code-400.woff2' },
-        { family: 'Fira Code', weight: '700', file: 'fira-code-700.woff2' },
-        { family: 'Cascadia Code', weight: '400', file: 'cascadia-code-400.woff2' },
-        { family: 'Cascadia Code', weight: '700', file: 'cascadia-code-700.woff2' },
-        { family: 'Source Code Pro', weight: '400', file: 'source-code-pro-400.woff2' },
-        { family: 'Source Code Pro', weight: '700', file: 'source-code-pro-700.woff2' }
-    ];
-    const base = (chrome.runtime && chrome.runtime.getURL)
-        ? chrome.runtime.getURL('scripts/libs/fonts/')
-        : '../scripts/libs/fonts/';
-    const loads = FONTS.map((f) => fetch(base + f.file)
-        .then((r) => r.arrayBuffer())
-        .then((buf) => new FontFace(f.family, buf, { weight: f.weight, style: 'normal', display: 'swap' }).load())
-        .then((face) => { document.fonts.add(face); })
-        .catch(() => { }));
-    Promise.all(loads).then(() => {
-        const sel = document.getElementById('editorFontFamily');
-        if (sel) applyEditorFontToPreview(sel.value);
-    }).catch(() => { });
-}
-
-
 function applyStoredSettings(items) {
-    populateEditorFontSelect();
     Object.keys(DEFAULTS).forEach(key => {
         const element = document.getElementById(key);
         if (element) {
@@ -628,6 +567,10 @@ function applyStoredSettings(items) {
                     const container = document.getElementById('theme-container-frp');
                     if (container) container.style.display = element.checked ? 'block' : 'none';
                 }
+                if (key === 'enableFileCabinetFavorites') {
+                    const container = document.getElementById('fcfav-layout-container');
+                    if (container) container.style.display = element.checked ? 'block' : 'none';
+                }
                 if (key === 'enableLiveMode') {
                     const container = document.getElementById('live-mode-container');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
@@ -639,10 +582,6 @@ function applyStoredSettings(items) {
                 if (key === 'enableScriptExecute') {
                     const container = document.getElementById('script-execute-container');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
-                }
-                if (key === 'enableEditorTheme') {
-                    const container = document.getElementById('theme-container-editor');
-                    if (container) container.style.display = element.checked ? 'block' : 'none';
                 }
                 if (key === 'enableSuiteQLRunner') {
                     const container = document.getElementById('theme-container-suiteql');
@@ -657,6 +596,8 @@ function applyStoredSettings(items) {
                     if (container) container.style.display = element.checked ? 'block' : 'none';
                     const regla = document.getElementById('ruler-container-adv');
                     if (regla) regla.style.display = element.checked ? 'block' : 'none';
+                    const raiz = document.getElementById('treeroot-container-adv');
+                    if (raiz) raiz.style.display = element.checked ? 'block' : 'none';
                 }
                 if (key === 'enableExportSearch') {
                     const container = document.getElementById('theme-container-es');
@@ -798,11 +739,6 @@ function applyStoredSettings(items) {
                 }
                 const newValue = element.type === 'checkbox' ? element.checked : element.value;
 
-                if (key === 'editorTheme') updateEditorThemePreview(newValue);
-                if (key === 'editorFontFamily') applyEditorFontToPreview(newValue);
-                if (key === 'editorFontSize') applyEditorFontSizeToPreview(newValue);
-                if (key.indexOf('editorCustom') === 0) updateEditorThemePreview('custom');
-
                 const overrideKey = CODE_THEME_OVERRIDE[key];
                 let extraPayload = {};
                 let valorAGuardar = newValue;
@@ -830,28 +766,6 @@ function applyStoredSettings(items) {
                 };
                 element.addEventListener('input', updateLabel);
                 updateLabel();
-            }
-
-            if (key === 'editorFontSize') {
-                const updateLabel = () => applyEditorFontSizeToPreview(element.value);
-                element.addEventListener('input', updateLabel);
-                element.addEventListener('change', updateLabel);
-                updateLabel();
-            }
-
-            if (key === 'editorTheme') {
-                const soloPersonalizado = () => {
-                    const esCustom = element.value === 'custom';
-                    ['custom-theme-editor', 'editor-theme-preview', 'editor-theme-io'].forEach((id) => {
-                        const el = document.getElementById(id);
-                        if (!el) return;
-                        el.hidden = !esCustom;
-                        if (esCustom && el.style.display === 'none') el.style.removeProperty('display');
-                    });
-                };
-                element.addEventListener('change', soloPersonalizado);
-                setTimeout(soloPersonalizado, 0);
-                soloPersonalizado();
             }
 
             if (key === 'colorThemeHue' || key === 'colorThemeSat' || key === 'colorThemeLig') {
@@ -1203,193 +1117,6 @@ function applyStoredSettings(items) {
 
     if (typeof updateTileCounts === 'function') updateTileCounts();
     if (typeof refreshDetailCount === 'function') refreshDetailCount();
-
-    if (items && items.editorTheme) updateEditorThemePreview(items.editorTheme);
-
-    ensurePopupEditorFonts();
-    applyEditorFontToPreview(items && items.editorFontFamily);
-    applyEditorFontSizeToPreview(items && items.editorFontSize);
-
-    wireEditorThemeExportImport();
-}
-
-const NSFT_THEME_EXPORT_KEYS = [
-    'editorTheme', 'editorFontFamily', 'editorFontSize',
-    'editorCustomBg', 'editorCustomFg',
-    'editorCustomKeyword', 'editorCustomLiteral',
-    'editorCustomNumber', 'editorCustomString',
-    'editorCustomVariable', 'editorCustomProperty',
-    'editorCustomComment'
-];
-
-function wireEditorThemeExportImport() {
-    const btnExport = document.getElementById('editorThemeExport');
-    const btnImport = document.getElementById('editorThemeImport');
-    const fileInput = document.getElementById('editorThemeImportFile');
-    if (!btnExport || !btnImport || !fileInput) return;
-    if (btnExport.dataset.nsftWired === '1') return;
-    btnExport.dataset.nsftWired = '1';
-
-    btnExport.addEventListener('click', () => {
-        chrome.storage.local.get(NSFT_THEME_EXPORT_KEYS, (items) => {
-            const payload = { schema: 'nsft-editor-theme/1' };
-            NSFT_THEME_EXPORT_KEYS.forEach(k => { if (items[k] !== undefined) payload[k] = items[k]; });
-            const json = JSON.stringify(payload, null, 2);
-            const blob = new Blob([json], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const themeId = (items.editorTheme || 'editor').replace(/[^a-z0-9-]/gi, '');
-            a.download = `nsft-theme-${themeId}.nsft-theme.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-    });
-
-    btnImport.addEventListener('click', () => fileInput.click());
-
-    const btnReset = document.getElementById('editorThemeReset');
-    if (btnReset && btnReset.dataset.nsftWired !== '1') {
-        btnReset.dataset.nsftWired = '1';
-        btnReset.addEventListener('click', () => resetEditorThemeToDefaults());
-    }
-
-    fileInput.addEventListener('change', () => {
-        const file = fileInput.files && fileInput.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-            try {
-                const parsed = JSON.parse(reader.result || '{}');
-                if (!parsed || parsed.schema !== 'nsft-editor-theme/1') {
-                    showAlertDialog(chrome.i18n.getMessage('editorThemeImportInvalid') || 'Invalid theme file');
-                    return;
-                }
-                applyImportedTheme(parsed);
-            } catch (e) {
-                showAlertDialog(chrome.i18n.getMessage('editorThemeImportInvalid') || 'Invalid theme file');
-            } finally {
-                fileInput.value = '';
-            }
-        };
-        reader.readAsText(file);
-    });
-}
-
-function applyImportedTheme(parsed) {
-    NSFT_THEME_EXPORT_KEYS.forEach((key) => {
-        const val = parsed[key];
-        if (val === undefined) return;
-        if (!isValidThemeValue(key, val)) return;
-        const el = document.getElementById(key);
-        if (!el) return;
-        el.value = String(val);
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-}
-
-function resetEditorThemeToDefaults() {
-    const D = (typeof DEFAULTS !== 'undefined' && DEFAULTS) || globalThis.NSFT_DEFAULTS || {};
-    const obj = {};
-    NSFT_THEME_EXPORT_KEYS.forEach((k) => { if (D[k] !== undefined) obj[k] = D[k]; });
-    applyImportedTheme(obj);
-
-    const fs = document.getElementById('editorFontSize');
-    if (fs) applyEditorFontSizeToPreview(fs.value);
-    const ff = document.getElementById('editorFontFamily');
-    if (ff) applyEditorFontToPreview(ff.value);
-}
-
-function isValidThemeValue(key, val) {
-    if (key === 'editorFontSize') return Number.isFinite(+val) && (+val === 0 || (+val >= 11 && +val <= 22));
-    if (key === 'editorTheme' || key === 'editorFontFamily') return typeof val === 'string' && val.length < 64;
-    if (key.indexOf('editorCustom') === 0) return typeof val === 'string' && /^#[0-9a-f]{3,8}$/i.test(val);
-    return false;
-}
-
-const NSFT_EDITOR_THEME_PREVIEW_CACHE = new Map();
-const NSFT_PREVIEW_STYLE_ID = 'nsft-popup-theme-preview-style';
-const NSFT_PREVIEW_FALLBACK_BG = '#1e1e1e';
-
-function scopePreviewCss(mappedCss) {
-    return mappedCss.replace(/(^|[},])(\s*)(\.cm-content)/g, '$1$2#editor-theme-preview $3');
-}
-
-function injectPreviewStyle(scopedCss) {
-    let el = document.getElementById(NSFT_PREVIEW_STYLE_ID);
-    if (!el) {
-        el = document.createElement('style');
-        el.id = NSFT_PREVIEW_STYLE_ID;
-        document.head.appendChild(el);
-    }
-    el.textContent = scopedCss;
-}
-
-function updateEditorThemePreview(themeName) {
-    if (!themeName) return;
-    const root = document.getElementById('editor-theme-preview');
-    if (!root) return;
-
-    if (themeName === 'custom') {
-        chrome.storage.local.get({
-            editorCustomBg: '#1e1e1e',
-            editorCustomFg: '#d4d4d4',
-            editorCustomKeyword: '#569cd6',
-            editorCustomLiteral: '#569cd6',
-            editorCustomNumber: '#b5cea8',
-            editorCustomString: '#ce9178',
-            editorCustomVariable: '#9cdcfe',
-            editorCustomProperty: '#9cdcfe',
-            editorCustomComment: '#6a9955'
-        }, (items) => {
-            const tx = globalThis.NSFT_EditorThemeTransform;
-            if (!tx || !tx.buildCustomThemeCss) {
-                root.style.backgroundColor = items.editorCustomBg;
-                return;
-            }
-            const customTheme = {
-                bg: items.editorCustomBg, fg: items.editorCustomFg,
-                keyword: items.editorCustomKeyword, literal: items.editorCustomLiteral,
-                number: items.editorCustomNumber, string: items.editorCustomString,
-                variable: items.editorCustomVariable, property: items.editorCustomProperty,
-                comment: items.editorCustomComment
-            };
-            const mapped = tx.buildCustomThemeCss(customTheme, { tokensOnly: true });
-            const scoped = scopePreviewCss(mapped);
-            injectPreviewStyle(scoped);
-            root.style.backgroundColor = customTheme.bg;
-        });
-        return;
-    }
-
-    const cached = NSFT_EDITOR_THEME_PREVIEW_CACHE.get(themeName);
-    if (cached) {
-        injectPreviewStyle(cached.css);
-        root.style.backgroundColor = cached.bg;
-        return;
-    }
-
-    const url = chrome.runtime.getURL('scripts/libs/highlight/themes/' + themeName + '.css');
-    fetch(url).then((r) => r.ok ? r.text() : '').then((cssText) => {
-        if (!cssText) { root.style.backgroundColor = NSFT_PREVIEW_FALLBACK_BG; return; }
-        const transform = globalThis.NSFT_EditorThemeTransform;
-        let mapped = cssText;
-        let bg = NSFT_PREVIEW_FALLBACK_BG;
-        if (transform && typeof transform.applyClassMapping === 'function') {
-            mapped = transform.applyImportance(transform.applyClassMapping(cssText));
-            const palette = transform.extractColors(cssText, transform.isLightTheme(themeName));
-            bg = palette.sbBg || bg;
-        }
-        const scoped = scopePreviewCss(mapped);
-        const entry = { css: scoped, bg: bg };
-        NSFT_EDITOR_THEME_PREVIEW_CACHE.set(themeName, entry);
-        injectPreviewStyle(scoped);
-        root.style.backgroundColor = bg;
-    }).catch(() => {
-        root.style.backgroundColor = NSFT_PREVIEW_FALLBACK_BG;
-    });
 }
 
 const CMDP_DEFAULT_SHORTCUT = { ctrlKey: true, shiftKey: true, altKey: false, code: 'Space' };
@@ -1554,16 +1281,16 @@ function initCommandPaletteCustomUrls(items) {
 }
 
 const NSFT_CATEGORIES = [
-    { key: 'all',          i18n: 'tabAll',          icon: '<line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line>', virtual: true },
-    { key: 'essentials',   i18n: 'tabEssentials',   icon: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>' },
-    { key: 'records',      i18n: 'tabRecords',      icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>' },
-    { key: 'dev',          i18n: 'tabDev',          icon: '<polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline>' },
-    { key: 'search',       i18n: 'tabSearch',       icon: '<circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>' },
-    { key: 'layout',       i18n: 'tabLayout',       icon: '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line>' },
-    { key: 'productivity', i18n: 'tabProductivity', icon: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>' },
-    { key: 'fileCabinet',  i18n: 'tabFileCabinet',  icon: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line>' },
-    { key: 'pdf',          i18n: 'tabPdf',          icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><line x1="9" y1="18" x2="15" y2="18"></line>' },
-    { key: 'workflow',     i18n: 'tabWorkflow',     icon: '<line x1="3" y1="7" x2="18" y2="7"></line><polyline points="15 4 18 7 15 10"></polyline><line x1="21" y1="17" x2="6" y2="17"></line><polyline points="9 14 6 17 9 20"></polyline>' }
+    { key: 'all',          i18n: 'tabAll',          icon: '<rect class="g g1" x="3" y="3" width="7" height="7" rx="1.5"></rect><rect class="g g2" x="14" y="3" width="7" height="7" rx="1.5"></rect><rect class="g g3" x="3" y="14" width="7" height="7" rx="1.5"></rect><rect class="g g4" x="14" y="14" width="7" height="7" rx="1.5"></rect>', virtual: true },
+    { key: 'essentials',   i18n: 'tabEssentials',   icon: '<polygon class="g g1" points="12 2.5 15 8.6 21.5 9.5 16.8 14.1 17.9 20.6 12 17.5 6.1 20.6 7.2 14.1 2.5 9.5 9 8.6 12 2.5"></polygon><path class="g spark" d="M20 2v3M18.5 3.5h3"></path>' },
+    { key: 'records',      i18n: 'tabRecords',      icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><line class="ln" x1="8" y1="13" x2="16" y2="13"></line><line class="ln" x1="8" y1="17" x2="13" y2="17"></line>' },
+    { key: 'dev',          i18n: 'tabDev',          icon: '<polyline class="g g1" points="7 8 3 12 7 16"></polyline><polyline class="g g2" points="17 8 21 12 17 16"></polyline><line class="g g3" x1="14" y1="5" x2="10" y2="19"></line>' },
+    { key: 'search',       i18n: 'tabSearch',       icon: '<g class="g g1"><circle cx="11" cy="11" r="7"></circle><line x1="20.5" y1="20.5" x2="16" y2="16"></line></g><path class="g spark" d="M11 8v2M10 9h2"></path>' },
+    { key: 'layout',       i18n: 'tabLayout',       icon: '<path d="M12 2.5a9.5 9.5 0 1 0 0 19c1.1 0 1.9-.8 1.9-1.9 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.3 0-1.1.8-1.9 1.9-1.9h2.2a5 5 0 0 0 5-5c0-4.2-4.3-7.6-10-7.6z"></path><circle class="dot" cx="7.5" cy="11" r="1.2"></circle><circle class="dot" cx="10" cy="7" r="1.2"></circle><circle class="dot" cx="14.5" cy="7" r="1.2"></circle>' },
+    { key: 'productivity', i18n: 'tabProductivity', icon: '<polygon class="g g1" points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"></polygon>' },
+    { key: 'fileCabinet',  i18n: 'tabFileCabinet',  icon: '<path d="M3 7V5a2 2 0 0 1 2-2h4l2 3h8a2 2 0 0 1 2 2v1"></path><path class="g flap" d="M3 20h15.5a2 2 0 0 0 1.9-1.4L22 11H6.4a2 2 0 0 0-1.9 1.4L3 18z"></path><line x1="3" y1="7" x2="3" y2="20"></line>' },
+    { key: 'pdf',          i18n: 'tabPdf',          icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><g class="g g1"><line x1="12" y1="11" x2="12" y2="17"></line><polyline points="9 14.5 12 17.5 15 14.5"></polyline></g>' },
+    { key: 'workflow',     i18n: 'tabWorkflow',     icon: '<rect class="g g1" x="3" y="3" width="8" height="8" rx="2"></rect><path class="wire" d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect class="g g2" x="13" y="13" width="8" height="8" rx="2"></rect>' }
 ];
 
 const NSFTRouter = (() => {
@@ -1986,7 +1713,7 @@ function showCategoryInDetail(categoryKey) {
     if (iconEl) {
         if (cat) {
             iconEl.setAttribute('data-category', cat.key);
-            iconEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            iconEl.innerHTML = `<svg class="nsft-cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg>`;
         } else {
             iconEl.removeAttribute('data-category');
@@ -2024,7 +1751,7 @@ function initializeHome() {
         const label = chrome.i18n.getMessage(cat.i18n) || cat.key;
         tile.innerHTML = `
           <span class="nsft-tile-icon-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            <svg class="nsft-cat-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg>
           </span>
           <span class="nsft-tile-text">
@@ -2047,7 +1774,17 @@ function initializeHome() {
         grid.appendChild(tile);
     });
 
+    _nsftCountFx.intro = !_nsftCountFx.reduce();
     _nsftPaintInitialCounts();
+    if (_nsftCountFx.intro) _nsftRunCountIntro();
+
+    grid.addEventListener('pointermove', (e) => {
+        const t = e.target.closest('.nsft-tile');
+        if (!t) return;
+        const r = t.getBoundingClientRect();
+        t.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        t.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
 
     document.addEventListener('change', (e) => {
         if (e.target && e.target.matches('.option-row label.switch > input[type="checkbox"]')) {
@@ -2074,12 +1811,71 @@ function escapeTileText(s) {
 function _nsftPaintTile(tile, on, total) {
     const onEl = tile.querySelector('.nsft-tile-on');
     const totalEl = tile.querySelector('.nsft-tile-total');
-    if (onEl) onEl.textContent = String(on);
     if (totalEl) totalEl.textContent = '/ ' + total;
     tile.classList.toggle('has-active', on > 0);
     tile.dataset.enabled = on > 0 ? 'true' : 'false';
+    tile._nsftTarget = { on, total };
+    if (_nsftCountFx.intro) return;
+    _nsftCountTo(onEl, on, 400, true);
     const fill = tile.querySelector('.nsft-tile-meter > span');
-    if (fill) fill.style.width = (total > 0 ? Math.round((on / total) * 100) : 0) + '%';
+    if (fill) fill.style.width = _nsftPct(on, total);
+}
+
+const _nsftCountFx = {
+    intro: false,
+    global: null,
+    reduce: () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+};
+
+function _nsftPct(on, total) {
+    return (total > 0 ? Math.round((on / total) * 100) : 0) + '%';
+}
+
+function _nsftCountTo(el, to, ms, bump) {
+    if (!el) return;
+    if (el._nsftRaf) cancelAnimationFrame(el._nsftRaf);
+    const prev = el._nsftTo;
+    el._nsftTo = to;
+    const parsed = parseInt(el.textContent, 10);
+    const from = isNaN(parsed) ? 0 : parsed;
+    if (_nsftCountFx.reduce() || from === to) {
+        el.textContent = String(to);
+        el._nsftRaf = 0;
+    } else {
+        const t0 = performance.now();
+        const step = (now) => {
+            const k = Math.min(1, (now - t0) / ms);
+            const e = 1 - Math.pow(1 - k, 3);
+            el.textContent = String(Math.round(from + (to - from) * e));
+            el._nsftRaf = k < 1 ? requestAnimationFrame(step) : 0;
+        };
+        el._nsftRaf = requestAnimationFrame(step);
+    }
+    if (bump && prev !== undefined && prev !== to && !_nsftCountFx.reduce()) {
+        el.classList.remove('nsft-fx-bump');
+        void el.offsetWidth;
+        el.classList.add('nsft-fx-bump');
+    }
+}
+
+function _nsftRunCountIntro() {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        _nsftCountFx.intro = false;
+        document.querySelectorAll('.nsft-tile').forEach((tile, i) => {
+            const t = tile._nsftTarget;
+            if (!t) return;
+            const fill = tile.querySelector('.nsft-tile-meter > span');
+            if (fill) fill.style.width = _nsftPct(t.on, t.total);
+            const onEl = tile.querySelector('.nsft-tile-on');
+            setTimeout(() => _nsftCountTo(onEl, tile._nsftTarget.on, 700, false), 120 + i * 30);
+        });
+        const g = _nsftCountFx.global;
+        if (g) {
+            const fillEl = document.getElementById('nsftStatsFill');
+            if (fillEl) fillEl.style.width = _nsftPct(g.on, g.total);
+            _nsftCountTo(document.getElementById('nsftStatsOn'), g.on, 900, false);
+        }
+    }));
 }
 
 function updateTileCounts() {
@@ -2118,12 +1914,14 @@ function updateGlobalStats(on, total) {
     const fillEl = document.getElementById('nsftStatsFill');
     const btn = document.getElementById('nsftStatsToggleAll');
 
-    if (onEl) onEl.textContent = String(on);
+    _nsftCountFx.global = { on, total };
+    const live = !_nsftCountFx.intro;
+    if (live) _nsftCountTo(onEl, on, 400, true);
     if (restEl) {
         restEl.textContent = chrome.i18n.getMessage('popupStatsRest', [String(total)])
             || ('de ' + total + ' funciones activas');
     }
-    if (fillEl) fillEl.style.width = (total > 0 ? Math.round((on / total) * 100) : 0) + '%';
+    if (fillEl && live) fillEl.style.width = _nsftPct(on, total);
 
     if (btn) {
         const allOff = on === 0;
@@ -2593,6 +2391,7 @@ function showConfirmDialog(opts) {
         const bodyEl = document.getElementById('nsftConfirmBody');
         const okBtn = document.getElementById('nsftConfirmOk');
         const cancelBtn = document.getElementById('nsftConfirmCancel');
+        const closeBtn = document.getElementById('nsftConfirmClose');
         if (!root || !titleEl || !bodyEl || !okBtn || !cancelBtn) {
             resolve(window.confirm(o.body || ''));
             return;
@@ -2602,7 +2401,16 @@ function showConfirmDialog(opts) {
         bodyEl.textContent = o.body || '';
         okBtn.textContent = o.confirmLabel || 'OK';
         cancelBtn.textContent = chrome.i18n.getMessage('bulkConfirmCancel') || 'Cancelar';
-        okBtn.classList.toggle('is-danger', !!o.danger);
+        titleEl.classList.toggle('is-danger', !!o.danger);
+        titleEl.classList.toggle('is-aviso', !o.danger && !!o.alertOnly);
+        titleEl.classList.toggle('is-pregunta', !o.danger && !o.alertOnly);
+        okBtn.classList.toggle('nsft-dlg-btn-danger', !!o.danger);
+        const box = root.querySelector('.nsft-w');
+        if (box) {
+            box.setAttribute('data-theme',
+                document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+        }
+        if (closeBtn) closeBtn.setAttribute('aria-label', chrome.i18n.getMessage('closeModal') || 'Close');
         cancelBtn.hidden = !!o.alertOnly;
 
         let done = false;
@@ -2615,6 +2423,7 @@ function showConfirmDialog(opts) {
             document.removeEventListener('keydown', onKey, true);
             okBtn.removeEventListener('click', onOk);
             cancelBtn.removeEventListener('click', onCancel);
+            if (closeBtn) closeBtn.removeEventListener('click', onCancel);
             root.removeEventListener('click', onBackdrop);
             resolve(result);
         };
@@ -2630,6 +2439,7 @@ function showConfirmDialog(opts) {
 
         okBtn.addEventListener('click', onOk);
         cancelBtn.addEventListener('click', onCancel);
+        if (closeBtn) closeBtn.addEventListener('click', onCancel);
         root.addEventListener('click', onBackdrop);
         document.addEventListener('keydown', onKey, true);
 
@@ -3214,9 +3024,33 @@ chrome.storage.local.get(null, (rawLocalItems) => {
     });
 });
 
+function pideDibujos() {
+    if (window.NSFT_PV) return Promise.resolve(window.NSFT_PV);
+    if (window.__nsftPvPromesa) return window.__nsftPvPromesa;
+    window.__nsftPvPromesa = new Promise((resolve) => {
+        let pedido = false;
+        const carga = () => {
+            if (pedido) return;
+            pedido = true;
+            const s = document.createElement('script');
+            s.src = '../welcome/welcome_previews.js';
+            s.onload = () => resolve(window.NSFT_PV || null);
+            s.onerror = () => resolve(null);
+            document.head.appendChild(s);
+        };
+        try { requestAnimationFrame(() => setTimeout(carga, 0)); } catch (e) { }
+        setTimeout(carga, 600);
+    });
+    return window.__nsftPvPromesa;
+}
+
 function wireTabPreview(panel, caja, tituloEl, replayEl) {
     const pv = window.NSFT_PV;
-    if (!pv || !pv.pintar || !caja) return;
+    if (!pv) {
+        pideDibujos().then((p) => { if (p) wireTabPreview(panel, caja, tituloEl, replayEl); });
+        return;
+    }
+    if (!pv.pintar || !caja) return;
 
     const rotulos = {};
     document.querySelectorAll('[id^="label_enable"]').forEach((el) => {
@@ -3371,4 +3205,249 @@ function wireTabPreview(panel, caja, tituloEl, replayEl) {
     }
 
     window.NSFTRecordOptionsDeps = { revisar: arrancar };
+})();
+
+(function iconoYVistaDeModulo() {
+    'use strict';
+    const ANCHO_DIBUJO = 720;
+    const MARGEN = 8;
+    const ESPERA_HOVER = 500;
+    const QUIETO_TRAS_SCROLL = 400;
+    const SVG = (cuerpo, cls) => '<svg class="' + cls + '" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" '
+        + 'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + cuerpo + '</svg>';
+    const OJO = '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+    const txt = (k, fb) => (chrome.i18n && chrome.i18n.getMessage(k)) || fb;
+    const modoPestana = () => document.documentElement.getAttribute('data-view') === 'tab';
+
+    const MIN_LADO = 15;
+    let medidor = null;
+    const encuadres = {};
+
+    const CLAVE_ENCUADRES = 'nsftIconosEncuadre';
+    const huella = (txt) => {
+        let h = 5381;
+        for (let i = 0; i < txt.length; i++) h = ((h * 33) ^ txt.charCodeAt(i)) >>> 0;
+        return h.toString(36) + '.' + txt.length.toString(36);
+    };
+    const deCaja = (b) => {
+        if (!b || !(b.width > 0) || !(b.height > 0)) return '0 0 24 24';
+        const lado = Math.max(b.width, b.height, MIN_LADO) + 2;
+        const cx = b.x + b.width / 2;
+        const cy = b.y + b.height / 2;
+        return [cx - lado / 2, cy - lado / 2, lado, lado].map((n) => Math.round(n * 100) / 100).join(' ');
+    };
+    function precalculaEncuadres(cuerpos) {
+        let guardados = {};
+        try { guardados = JSON.parse(localStorage.getItem(CLAVE_ENCUADRES) || '{}') || {}; } catch (e) { guardados = {}; }
+        const vigentes = {};
+        const faltan = [];
+        cuerpos.forEach((c) => {
+            const k = huella(c);
+            if (guardados[k]) { encuadres[c] = guardados[k]; vigentes[k] = guardados[k]; }
+            else if (faltan.indexOf(c) < 0) faltan.push(c);
+        });
+        if (faltan.length) {
+            try {
+                const m = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                m.setAttribute('width', '24');
+                m.setAttribute('height', '24');
+                m.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none';
+                m.innerHTML = faltan.map((c) => '<g>' + c + '</g>').join('');
+                document.body.appendChild(m);
+                const grupos = m.children;
+                faltan.forEach((c, i) => {
+                    let vb = '0 0 24 24';
+                    try { vb = deCaja(grupos[i].getBBox()); } catch (e) { }
+                    encuadres[c] = vb;
+                    vigentes[huella(c)] = vb;
+                });
+                m.remove();
+            } catch (e) { }
+        }
+        if (faltan.length || Object.keys(vigentes).length !== Object.keys(guardados).length) {
+            try { localStorage.setItem(CLAVE_ENCUADRES, JSON.stringify(vigentes)); } catch (e) { }
+        }
+    }
+
+    function encuadre(cuerpo) {
+        if (encuadres[cuerpo]) return encuadres[cuerpo];
+        let vb = '0 0 24 24';
+        try {
+            if (!medidor) {
+                medidor = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                medidor.setAttribute('width', '24');
+                medidor.setAttribute('height', '24');
+                medidor.style.cssText = 'position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none';
+                document.body.appendChild(medidor);
+            }
+            medidor.innerHTML = '<g>' + cuerpo + '</g>';
+            vb = deCaja(medidor.firstChild.getBBox());
+        } catch (e) { }
+        encuadres[cuerpo] = vb;
+        return vb;
+    }
+
+    const iconoDeCategoria = (row) => {
+        const panel = row.closest('.nsft-panel');
+        const clave = panel && panel.getAttribute('data-panel');
+        const cats = (typeof NSFT_CATEGORIES !== 'undefined') ? NSFT_CATEGORIES : [];
+        const cat = cats.find((c) => c.key === clave);
+        return cat ? cat.icon : '';
+    };
+
+    let flotante = null;
+    let actual = null;
+
+    function cierra() {
+        if (flotante) flotante.remove();
+        flotante = null;
+        if (actual) actual.classList.remove('is-on');
+        actual = null;
+    }
+
+    const AIRE_DIBUJO = 10;
+    function recorte(lienzo) {
+        const base = lienzo.getBoundingClientRect();
+        let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+        lienzo.querySelectorAll('*').forEach((el) => {
+            const r = el.getBoundingClientRect();
+            if (r.width < 1 || r.height < 1) return;
+            const cs = getComputedStyle(el);
+            if (cs.display === 'none' || cs.visibility === 'hidden') return;
+            const fondo = cs.backgroundColor && !/rgba?\(0, 0, 0, 0\)|transparent/.test(cs.backgroundColor);
+            const borde = ['Top', 'Right', 'Bottom', 'Left'].some((l) => parseFloat(cs['border' + l + 'Width']) > 0);
+            const hoja = !el.firstElementChild && (el.textContent || '').trim();
+            const grafico = /^(svg|img|canvas)$/i.test(el.tagName) || cs.backgroundImage !== 'none';
+            if (!(fondo || borde || hoja || grafico)) return;
+            x1 = Math.min(x1, r.left); y1 = Math.min(y1, r.top);
+            x2 = Math.max(x2, r.right); y2 = Math.max(y2, r.bottom);
+        });
+        if (!isFinite(x1)) return { x: 0, y: 0, w: ANCHO_DIBUJO, h: lienzo.offsetHeight };
+        const x = Math.max(0, x1 - base.left - AIRE_DIBUJO);
+        const y = Math.max(0, y1 - base.top - AIRE_DIBUJO);
+        return {
+            x: x, y: y,
+            w: Math.min(base.width, x2 - base.left + AIRE_DIBUJO) - x,
+            h: Math.min(base.height, y2 - base.top + AIRE_DIBUJO) - y
+        };
+    }
+
+    function abre(boton, key, nombre) {
+        const pv = window.NSFT_PV;
+        if (!pv || !pv.pintar || modoPestana()) return;
+        if (actual === boton) return;
+        cierra();
+        flotante = document.createElement('div');
+        flotante.className = 'nsft-mod-pv';
+        flotante.setAttribute('role', 'tooltip');
+        const lienzo = document.createElement('div');
+        lienzo.className = 'nsft-mod-pv-lienzo';
+        lienzo.style.width = ANCHO_DIBUJO + 'px';
+        flotante.appendChild(lienzo);
+        const titulo = document.createElement('span');
+        pv.pintar(lienzo, { key: key, label: nombre, desc: '' },
+            { respaldo: key, rotulos: { [key]: nombre }, titulo: titulo });
+
+        flotante.style.left = '-9999px';
+        flotante.style.top = '0';
+        flotante.style.visibility = 'hidden';
+        document.body.appendChild(flotante);
+        const caja = recorte(lienzo);
+        const disponible = Math.max(220, document.documentElement.clientWidth - MARGEN * 2);
+        const z = Math.min(1, (disponible - 2) / caja.w);
+        lienzo.style.zoom = String(z);
+        lienzo.style.marginLeft = (-caja.x) + 'px';
+        lienzo.style.marginTop = (-caja.y) + 'px';
+        flotante.style.width = Math.round(caja.w * z + 2) + 'px';
+        flotante.style.height = Math.round(caja.h * z + 2) + 'px';
+        flotante.style.visibility = '';
+        const r = boton.getBoundingClientRect();
+        const alto = flotante.offsetHeight;
+        const vh = document.documentElement.clientHeight;
+        const AIRE = 12;
+        let top = r.bottom + AIRE;
+        if (top + alto > vh - MARGEN && r.top - AIRE - alto >= MARGEN) top = r.top - AIRE - alto;
+        flotante.style.top = Math.max(MARGEN, Math.min(top, vh - alto - MARGEN)) + 'px';
+        const ancho = flotante.offsetWidth;
+        const vw = document.documentElement.clientWidth;
+        const izq = r.left + r.width / 2 - ancho / 2;
+        flotante.style.left = Math.max(MARGEN, Math.min(izq, vw - ancho - MARGEN)) + 'px';
+
+        actual = boton;
+        boton.classList.add('is-on');
+    }
+
+    const etiquetas = Array.prototype.filter.call(
+        document.querySelectorAll('.option-row span[id^="label_enable"]'),
+        (span) => span.closest('.option-row') && !span.parentElement.classList.contains('nsft-mod-head'));
+    const cuerpoDe = (span) => (window.NSFT_MODULE_ICONS && window.NSFT_MODULE_ICONS[span.id.slice(6)])
+        || iconoDeCategoria(span.closest('.option-row'));
+    precalculaEncuadres(etiquetas.map(cuerpoDe).filter(Boolean));
+    const cabeceras = [];
+
+    etiquetas.forEach((span) => {
+        const key = span.id.slice(6);
+        const row = span.closest('.option-row');
+
+        const cab = document.createElement('span');
+        cab.className = 'nsft-mod-head';
+        span.before(cab);
+
+        const cuerpo = cuerpoDe(span);
+        if (cuerpo) {
+            const ico = document.createElement('span');
+            ico.className = 'nsft-mod-ico';
+            ico.innerHTML = '<svg class="nsft-mod-ico-svg" viewBox="' + encuadre(cuerpo) + '" fill="none" stroke="currentColor" '
+                + 'stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + cuerpo + '</svg>';
+            cab.appendChild(ico);
+        }
+        const obsoleto = span.nextElementSibling && span.nextElementSibling.classList.contains('nsft-deprecated') ? span.nextElementSibling : null;
+        cab.appendChild(span);
+        if (obsoleto) cab.appendChild(obsoleto);
+        cabeceras.push([span, key, cab]);
+    });
+
+    if (!modoPestana()) {
+        pideDibujos().then((pv) => {
+            if (!pv || !pv.html) return;
+            cabeceras.forEach(([span, key, cab]) => { if (pv.html[key]) ponOjo(span, key, cab); });
+        });
+    }
+
+    function ponOjo(span, key, cab) {
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'nsft-mod-pvbtn';
+        boton.title = txt('previewPanelTitle', 'Preview');
+        boton.innerHTML = SVG(OJO, 'nsft-mod-pvbtn-svg');
+        cab.appendChild(boton);
+        const nombre = () => (span.textContent || '').trim() || key;
+
+        let espera = null;
+        const programa = () => {
+            clearTimeout(espera);
+            espera = setTimeout(() => {
+                if (Date.now() - ultimoScroll < QUIETO_TRAS_SCROLL || !boton.matches(':hover')) return;
+                boton.setAttribute('aria-label', boton.title + ': ' + nombre());
+                abre(boton, key, nombre());
+            }, ESPERA_HOVER);
+        };
+        boton.addEventListener('mouseenter', programa);
+        boton.addEventListener('mousemove', () => { if (actual !== boton) programa(); });
+        boton.addEventListener('mouseleave', () => { clearTimeout(espera); if (actual === boton) cierra(); });
+        boton.addEventListener('focus', () => { if (boton.matches(':focus-visible')) abre(boton, key, nombre()); });
+        boton.addEventListener('blur', () => { if (actual === boton) cierra(); });
+        boton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            clearTimeout(espera);
+            if (actual === boton) cierra();
+            else abre(boton, key, nombre());
+        });
+    }
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cierra(); });
+    let ultimoScroll = 0;
+    document.addEventListener('scroll', () => { ultimoScroll = Date.now(); cierra(); }, true);
+    document.addEventListener('wheel', () => { ultimoScroll = Date.now(); }, { passive: true, capture: true });
 })();

@@ -34,7 +34,7 @@
 }
 
 .nsft-san-regenerate-btn:hover {
-    color: #1e3a5f;
+    color: var(--nsft-ns-accent, #1e3a5f);
     background: rgba(241, 245, 249, 0.85);
     border-color: rgba(203, 213, 225, 0.7);
     opacity: 1;
@@ -47,7 +47,7 @@
 }
 
 .nsft-san-regenerate-btn:focus-visible {
-    outline: 1.5px solid rgba(59, 130, 246, 0.65);
+    outline: 1.5px solid color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 65%, transparent);
     outline-offset: 1px;
     opacity: 1;
 }

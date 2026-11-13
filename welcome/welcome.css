@@ -154,12 +154,6 @@ img, svg { display: block; max-width: 100%; }
     opacity: 0.28;
 }
 
-html.nsft-wizard-pending .hero-shell,
-html.nsft-wizard-pending .hero-scroll-hint {
-    opacity: 0;
-    pointer-events: none;
-}
-
 .hero-shell {
     position: relative;
     z-index: 2;
@@ -207,12 +201,10 @@ html.wizard-on .hero-tagline {
 }
 
 html.wizard-on .hero-notice { margin-top: 18px; }
-html.wizard-on .early-notice,
-html.wizard-on .redwood-notice { max-width: none; margin-left: 0; margin-right: 0; }
+html.wizard-on .early-notice { max-width: none; margin-left: 0; margin-right: 0; }
 html.wizard-on .early-notice { padding: 12px 16px; gap: 12px; }
-html.wizard-on .redwood-notice { margin-top: 12px; padding: 10px 14px; }
-html.wizard-on .early-notice-text span,
-html.wizard-on .redwood-notice-text { font-size: 13.5px; line-height: 1.45; }
+
+html.wizard-on .early-notice-text span { font-size: 13.5px; line-height: 1.45; }
 html.wizard-on .early-notice-cta { margin-top: 6px; }
 
 html.wizard-step .hero-tagline,
@@ -494,62 +486,6 @@ html.wizard-on .hero-scroll-hint { margin-top: auto; padding-top: 28px; }
 }
 .early-notice-cta:active {
     transform: translateY(0);
-}
-
-.redwood-notice {
-    max-width: 720px;
-    margin: 16px auto 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    background: linear-gradient(135deg, #fdecec 0%, #f9dcd9 100%);
-    border: 1.5px solid #c95d52;
-    border-left: 5px solid #a8392f;
-    border-radius: 14px;
-    padding: 12px 18px;
-    box-shadow: 0 4px 12px -4px rgba(168, 57, 47, 0.28);
-    text-align: left;
-}
-.redwood-notice-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #a8392f;
-    color: #fff;
-}
-.redwood-notice-icon svg { width: 16px; height: 16px; }
-.redwood-notice-text {
-    flex: 1;
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--text-secondary);
-}
-.redwood-notice-text strong {
-    color: #7a261d;
-    font-weight: 700;
-}
-.redwood-notice-cta {
-    display: inline-block;
-    margin-top: 6px;
-    font-weight: 700;
-    color: #a8392f;
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 2px;
-}
-
-.redwood-notice-cta:hover { color: #7a261d; }
-
-.redwood-notice-text .redwood-notice-emphasis {
-    text-decoration: underline;
-    text-decoration-color: rgba(168, 57, 47, 0.55);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 2px;
 }
 
 .pitch {
@@ -1087,25 +1023,6 @@ html[data-nsft-theme="dark"] .early-notice {
 html[data-nsft-theme="dark"] .early-notice strong,
 html[data-nsft-theme="dark"] .early-notice b {
     color: #E8B979;
-}
-
-html[data-nsft-theme="dark"] .redwood-notice {
-    background: rgba(201, 93, 82, 0.14);
-    border-color: rgba(201, 93, 82, 0.5);
-    border-left-color: #C95D52;
-    box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.5);
-}
-
-html[data-nsft-theme="dark"] .redwood-notice-text { color: #C6CEDB; }
-
-html[data-nsft-theme="dark"] .redwood-notice-text strong,
-html[data-nsft-theme="dark"] .redwood-notice-text a {
-    color: #E89A90;
-}
-
-html[data-nsft-theme="dark"] .redwood-notice-icon {
-    background: #C95D52;
-    color: #1A1210;
 }
 
 html[data-nsft-theme="dark"] .grain {

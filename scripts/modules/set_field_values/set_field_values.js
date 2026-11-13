@@ -1,5 +1,8 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('#nsft-sfv-modal', 'sfv', {
+        contexto: (raiz) => ({ txt: raiz.dataset.campo || '', id: raiz.dataset.campoId || '' })
+    });
 
     function ensureTextSearch() {
         if (document.getElementById("nsft-text-search-mw")) return;
@@ -8,7 +11,7 @@
         s.src = chrome.runtime.getURL("scripts/modules/_shared/nsft_text_search.js");
         s.async = false;
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function ensureSqlTransport() {
@@ -27,7 +30,7 @@
         s.src = chrome.runtime.getURL("scripts/modules/_shared/nsft_code_search.js");
         s.async = false;
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function ensureDialog() {
@@ -37,7 +40,7 @@
         s.src = chrome.runtime.getURL("scripts/modules/_shared/nsft_dialog.js");
         s.async = false;
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     const STORAGE_KEY = 'enableSetFieldValues';
@@ -205,8 +208,28 @@
     });
 
 
+    const HAY_CAMPOS = '.uir-field-wrapper, .uir-machine-table, [data-nsps-layer]';
+    function cuandoHayaCampos(fn) {
+        if (document.querySelector(HAY_CAMPOS)) { fn(); return; }
+        if (!window.NSFT_Observer || !window.NSFT_Observer.subscribe) { fn(); return; }
+        let fuera = null;
+        let hecho = false;
+        const una = () => {
+            if (hecho) return;
+            hecho = true;
+            if (fuera) { fuera(); fuera = null; }
+            fn();
+        };
+        fuera = window.NSFT_Observer.subscribe(() => {
+            if (document.querySelector(HAY_CAMPOS)) una();
+        }, { throttle: 400 });
+        const corta = () => setTimeout(() => { if (!hecho && fuera) { fuera(); fuera = null; } }, 5000);
+        if (document.readyState === 'complete') corta();
+        else window.addEventListener('load', corta, { once: true });
+    }
+
     function init(items) {
-        injectScript();
+        cuandoHayaCampos(() => injectScript());
         window.addEventListener('nsft-enable-all-fields', () => {
             window.postMessage({ type: 'nsft-set-field-values-enable-all' }, '*');
         });
@@ -316,6 +339,8 @@
                 sfv_list_empty: chrome.i18n.getMessage("sfv_list_empty"),
                 sfv_list_error: chrome.i18n.getMessage("sfv_list_error"),
                 sfv_find_clear: chrome.i18n.getMessage("sql_find_clear"),
+                pal_k_search: chrome.i18n.getMessage("pal_k_search"),
+                pal_k_clear: chrome.i18n.getMessage("pal_k_clear"),
                 sfv_view_confirm_title: chrome.i18n.getMessage("sfv_view_confirm_title"),
                 sfv_view_confirm_body: chrome.i18n.getMessage("sfv_view_confirm_body"),
                 sfv_view_confirm_ok: chrome.i18n.getMessage("sfv_view_confirm_ok"),
@@ -349,9 +374,11 @@
                 sfv_null_error: chrome.i18n.getMessage("sfv_null_error"),
                 sfv_copied: chrome.i18n.getMessage("sfv_copied"),
                 maximizeModal: chrome.i18n.getMessage("maximizeModal"),
+                minimizeModal: chrome.i18n.getMessage("minimizeModal"),
                 closeModal: chrome.i18n.getMessage("closeModal"),
                 fav_loading: chrome.i18n.getMessage("fav_loading"),
                 fav_no_history: chrome.i18n.getMessage("fav_no_history"),
+                fav_hist_nomatch: chrome.i18n.getMessage("fav_hist_nomatch"),
                 fav_no_history_std: chrome.i18n.getMessage("fav_no_history_std"),
                 fav_error: chrome.i18n.getMessage("fav_error"),
                 fav_old_value: chrome.i18n.getMessage("fav_old_value"),
@@ -378,7 +405,7 @@
                 rectypes: _rectypes
             }, '*');
         };
-        (document.head || document.documentElement).appendChild(script);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
     }
 
 })();
@@ -386,14 +413,11 @@
 (function () {
     'use strict';
 
-    const COACH_KEY = 'nsftSfvSectionsCoachSeen';
-
     window.addEventListener('message', (event) => {
         if (event.source !== window) return;
         const d = event.data;
         if (!d || d.dest !== 'extension_sfv') return;
         if (d.type === 'openSettings') abrirAjustes();
-        else if (d.type === 'coach') quizaCoach();
         else if (d.type === 'ctx-applies') avisaSiAplica(d.applies === true);
     });
 
@@ -410,6 +434,45 @@
     });
 
     function abrirAjustes() {
+        const A = window.NSFT_Ajustes;
+        if (A) {
+            const tx = (k, f) => { try { return chrome.i18n.getMessage(k) || f; } catch (e) { return f; } };
+            const icono = '<circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M11 12h1v4h1"></path>';
+            const sw = (clave, k, f) => ({ tipo: 'switch', clave, titulo: tx(k, f), defecto: true });
+            A.abre({ tono: 'cielo',
+                raiz: document.getElementById('nsft-sfv-modal'),
+                modulo: tx('enableSetFieldValuesLabel', 'Field information'),
+                icono,
+                categorias: [{
+                    id: 'general', titulo: tx('set_cat_general', 'General'), icono,
+                    secciones: [{
+                        titulo: tx('sfvModeTitle', 'How to open the panel'),
+                        filas: [{ tipo: 'select', clave: 'setFieldValuesNoIcon', titulo: tx('sfvModeTitle', 'How to open the panel'), defecto: true,
+                            opciones: [[false, tx('setFieldValuesWithIconLabel', 'With info icons')], [true, tx('setFieldValuesNoIconLabel', 'Without info icons')]] }]
+                    }, {
+                        titulo: tx('sfvLineModeTitle', 'On a sublist line'),
+                        filas: [{ tipo: 'seg', clave: 'setFieldValuesLineMode', titulo: tx('sfvLineModeTitle', 'On a sublist line'),
+                            ayuda: tx('sfvLineModeDesc', ''), defecto: 'direct',
+                            opciones: [['direct', tx('sfvLineModeDirectLabel', 'Right click')], ['menu', tx('sfvLineModeMenuLabel', 'Context menu')]] }]
+                    }]
+                }, {
+                    id: 'secciones', titulo: tx('sfvSectionsTitle', 'What to show'),
+                    icono: '<rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 10h18"></path>',
+                    secciones: [
+                        { filas: [sw('setFieldValuesShowHelp', 'sfvShowHelpLabel', 'Field help')] },
+                        { titulo: tx('sfv_tab_value', 'Value'), filas: [sw('setFieldValuesShowText', 'sfvShowTextLabel', 'Text'),
+                            sw('setFieldValuesShowValue', 'sfvShowValueLabel', 'Value'), sw('setFieldValuesShowSetter', 'sfvShowSetterLabel', 'Setter'),
+                            sw('setFieldValuesShowOptions', 'sfvShowOptionsLabel', 'Options')] },
+                        { titulo: tx('sfv_tab_definition', 'Definition'), filas: [sw('setFieldValuesShowId', 'sfvShowIdLabel', 'ID'),
+                            sw('setFieldValuesShowType', 'sfvShowTypeLabel', 'Type'), sw('setFieldValuesShowFlags', 'sfvShowFlagsLabel', 'Flags'),
+                            sw('setFieldValuesShowEdit', 'sfvShowEditLabel', 'Edit')] },
+                        { titulo: tx('sfv_tab_history', 'History'), filas: [sw('enableFieldAuditQuickView', 'sfvShowHistoryLabel', 'Field history')] },
+                        { titulo: tx('sfv_tab_code', 'In scripts'), filas: [sw('setFieldValuesShowCode', 'sfvShowCodeLabel', 'In scripts')] }
+                    ]
+                }]
+            });
+            return;
+        }
         try {
             chrome.runtime.sendMessage({
                 action: 'nsftOpenSettings',
@@ -418,70 +481,4 @@
         } catch (e) { }
     }
 
-    function quizaCoach() {
-        if (document.getElementById('nsft-sfv-coach')) return;
-        chrome.storage.local.get([COACH_KEY], (items) => {
-            if (items && items[COACH_KEY]) return;
-            pintarCoach();
-        });
-    }
-
-    function t(clave, porDefecto) {
-        try { return chrome.i18n.getMessage(clave) || porDefecto; }
-        catch (e) { return porDefecto; }
-    }
-
-    function pintarCoach() {
-        const wrap = document.createElement('div');
-        wrap.id = 'nsft-sfv-coach';
-        wrap.className = 'nsft-coach';
-        wrap.setAttribute('data-nsft-ui', '');
-        wrap.setAttribute('role', 'status');
-
-        const body = document.createElement('div');
-        body.className = 'nsft-coach-body';
-
-        const title = document.createElement('div');
-        title.className = 'nsft-coach-title';
-        title.textContent = t('sfvCoachTitle', 'Ahora eliges qué ves');
-
-        const text = document.createElement('div');
-        text.className = 'nsft-coach-text';
-        text.textContent = t('sfvCoachBody', '');
-
-        const actions = document.createElement('div');
-        actions.className = 'nsft-coach-actions';
-
-        const never = document.createElement('button');
-        never.type = 'button';
-        never.className = 'nsft-coach-never';
-        never.textContent = t('sfvCoachDismiss', 'No volver a mostrar');
-        never.addEventListener('click', () => {
-            wrap.remove();
-            try { chrome.storage.local.set({ [COACH_KEY]: true }); } catch (e) { }
-        });
-
-        const cfg = document.createElement('button');
-        cfg.type = 'button';
-        cfg.className = 'nsft-coach-never';
-        cfg.textContent = t('coach_open_settings', 'Abrir configuración');
-        cfg.addEventListener('click', () => { abrirAjustes(); wrap.remove(); });
-
-        actions.appendChild(cfg);
-        actions.appendChild(never);
-        body.appendChild(title);
-        body.appendChild(text);
-        body.appendChild(actions);
-
-        const close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'nsft-coach-close';
-        close.setAttribute('aria-label', t('coach_close', 'Cerrar'));
-        close.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>';
-        close.addEventListener('click', () => wrap.remove());
-
-        wrap.appendChild(body);
-        wrap.appendChild(close);
-        document.body.appendChild(wrap);
-    }
 })();

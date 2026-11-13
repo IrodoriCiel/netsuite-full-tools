@@ -79,7 +79,7 @@
 
     const I18N_KEYS = [
         'ro_clear_search',
-        'wfs_stage_workflow', 'wfs_states', 'wfs_actions', 'wfs_transitions', 'wfs_progress_title', 'wfs_loading', 'wfs_title', 'wfs_search_ph', 'wfs_all_types', 'wfs_all_triggers', 'wfs_all_states', 'wfs_only_active', 'wfs_result_one', 'wfs_result_many', 'wfs_empty', 'wfs_no_type', 'wfs_inactive', 'wfs_lbl_state', 'wfs_lbl_trigger', 'wfs_lbl_field', 'wfs_lbl_value', 'wfs_lbl_button', 'wfs_lbl_formula', 'wfs_lbl_condition', 'wfs_lbl_contexts', 'wfs_lbl_actions', 'wfs_lbl_key', 'wfs_lbl_flow', 'wfs_minimize', 'wfs_maximize', 'wfs_close'
+        'wfs_stage_workflow', 'wfs_states', 'wfs_actions', 'wfs_transitions', 'wfs_progress_title', 'wfs_loading', 'wfs_title', 'wfs_search_ph', 'wfs_all_types', 'wfs_all_triggers', 'wfs_all_states', 'wfs_only_active', 'wfs_result_one', 'wfs_result_many', 'wfs_empty', 'wfs_no_type', 'wfs_inactive', 'wfs_start_state', 'wfs_lbl_state', 'wfs_lbl_trigger', 'wfs_lbl_field', 'wfs_lbl_value', 'wfs_lbl_button', 'wfs_lbl_formula', 'wfs_lbl_condition', 'wfs_lbl_contexts', 'wfs_lbl_actions', 'wfs_lbl_key', 'wfs_lbl_flow', 'wfs_minimize', 'wfs_maximize', 'wfs_close'
     ];
 
     let _i18nCache = null;
@@ -101,7 +101,7 @@
         s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
         s.async = false;
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function injectFetcher(workflowId) {
@@ -112,6 +112,6 @@
         s.dataset.nsftI18n = JSON.stringify(getMessages());
         s.async = false;
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 })();

@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('#nsft-cheatsheet-modal', 'cheatsheet');
 
     const STORAGE_KEY = 'enableShortcutsCheatsheet';
     const THEME_KEY = 'nsftTheme';
@@ -49,7 +50,8 @@
                 { labelKey: 'cheatsheet_item_export',       labelFallback: 'Export queries',         combo: 'Mod+Shift+Y', context: 'sql-runner', action: 'nsft-show-suiteql-runner' },
                 { labelKey: 'cheatsheet_item_exit',         labelFallback: 'Close runner',           combo: 'Mod+Shift+X', context: 'sql-runner', action: 'nsft-show-suiteql-runner' },
                 { labelKey: 'cheatsheet_item_hide_editor',  labelFallback: 'Toggle editor panel',    combo: 'Mod+Shift+1', context: 'sql-runner', action: 'nsft-show-suiteql-runner' },
-                { labelKey: 'cheatsheet_item_hide_results', labelFallback: 'Toggle results panel',   combo: 'Mod+Shift+2', context: 'sql-runner', action: 'nsft-show-suiteql-runner' }
+                { labelKey: 'cheatsheet_item_hide_results', labelFallback: 'Toggle results panel',   combo: 'Mod+Shift+2', context: 'sql-runner', action: 'nsft-show-suiteql-runner' },
+                { labelKey: 'cheatsheet_item_ai_inline',    labelFallback: 'Ask the AI to change the selected lines', combo: 'Mod+I', context: 'sql-runner', action: 'nsft-show-suiteql-runner' }
             ]
         },
         {
@@ -409,7 +411,7 @@
                             const ctx = context || 'global';
                             const badge = contextBadgeText(ctx);
                             const badgeHtml = badge
-                                ? ` <span class="nsft-cheatsheet-ctx-badge" data-ctx="${escapeHtml(ctx)}">${escapeHtml(badge)}</span>`
+                                ? ` <span class="nsft-cheatsheet-ctx-badge nsft-tipo" data-ctx="${escapeHtml(ctx)}">${escapeHtml(badge)}</span>`
                                 : '';
                             const rowClass = action ? 'nsft-cheatsheet-row nsft-cheatsheet-row-actionable' : 'nsft-cheatsheet-row';
                             const tryBtn = action
@@ -442,14 +444,17 @@
         return `
             <div class="nsft-cheatsheet-panel nsft-modal nsft-modal--dialog" data-theme="${escapeHtml(resolveTheme())}" role="dialog" aria-modal="true" aria-labelledby="nsft-cheatsheet-title" tabindex="-1">
                 <header class="nsft-cheatsheet-header nsft-modal-header">
-                    <h2 id="nsft-cheatsheet-title" class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><line x1="6" y1="10" x2="6.01" y2="10"></line><line x1="10" y1="10" x2="10.01" y2="10"></line><line x1="14" y1="10" x2="14.01" y2="10"></line><line x1="18" y1="10" x2="18.01" y2="10"></line><line x1="8" y1="14" x2="16" y2="14"></line></svg>NetSuite Full Tools - ${escapeHtml(i18n('cheatsheet_title', 'Keyboard shortcuts'))}</h2>
-                    <div class="nsft-cheatsheet-header-actions nsft-header-actions">
-                        <button type="button" class="nsft-cheatsheet-reset"
+                    <h2 id="nsft-cheatsheet-title" class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"></rect><line x1="6" y1="10" x2="6.01" y2="10"></line><line x1="10" y1="10" x2="10.01" y2="10"></line><line x1="14" y1="10" x2="14.01" y2="10"></line><line x1="18" y1="10" x2="18.01" y2="10"></line><line x1="8" y1="14" x2="16" y2="14"></line></svg>${escapeHtml(i18n('cheatsheet_title', 'Keyboard shortcuts'))}</h2>
+                    
+                    <div class="nsft-modal-tools">
+                        <button type="button" class="nsft-modal-tool nsft-modal-tool--icono nsft-cheatsheet-reset"
                                 title="${escapeHtml(i18n('cheatsheet_reset_title', 'Restore default shortcuts'))}"
-                                aria-label="${escapeHtml(i18n('cheatsheet_reset_title', 'Restore default shortcuts'))}">⟲</button>
-                        <button type="button" class="nsft-cheatsheet-print"
+                                aria-label="${escapeHtml(i18n('cheatsheet_reset_title', 'Restore default shortcuts'))}"><span class="nsft-modal-tc"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"></path><path d="M3 3v5h5"></path></svg></span></button>
+                        <button type="button" class="nsft-modal-tool nsft-modal-tool--icono nsft-cheatsheet-print"
                                 title="${escapeHtml(i18n('cheatsheet_print_title', 'Print / Save as PDF'))}"
-                                aria-label="${escapeHtml(i18n('cheatsheet_print_title', 'Print / Save as PDF'))}">⎙</button>
+                                aria-label="${escapeHtml(i18n('cheatsheet_print_title', 'Print / Save as PDF'))}"><span class="nsft-modal-tc"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"></path><rect x="3" y="9" width="18" height="8" rx="2"></rect><path d="M7 14h10v7H7z"></path></svg></span></button>
+                    </div>
+                    <div class="nsft-cheatsheet-header-actions nsft-header-actions">
                         <button type="button" class="nsft-cheatsheet-close nsft-modal-btn-close" aria-label="${escapeHtml(i18n('cheatsheet_close', 'Close'))}">✕</button>
                     </div>
                 </header>
@@ -463,9 +468,9 @@
                 </div>
                 <div class="nsft-cheatsheet-body">
                     ${groupsHtml}
-                    <div class="nsft-cheatsheet-empty" style="display:none;">
-                        ${escapeHtml(i18n('cheatsheet_no_results', 'No matches'))}
-                    </div>
+                    <div class="nsft-cheatsheet-empty" style="display:none;">${window.NSFT_Herramientas
+                        ? window.NSFT_Herramientas.vacio('buscar', i18n('cheatsheet_no_results', 'No matches'))
+                        : escapeHtml(i18n('cheatsheet_no_results', 'No matches'))}</div>
                 </div>
                 <footer class="nsft-cheatsheet-footer">
                     <kbd>Esc</kbd> ${escapeHtml(i18n('cheatsheet_close_hint', 'to close'))}

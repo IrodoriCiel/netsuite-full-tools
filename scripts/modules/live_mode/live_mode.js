@@ -65,7 +65,18 @@
         _intervalo = acota(it[KEY_INTERVAL]);
         _sublistas = !!it[KEY_SUBLISTS];
         _autoStart = !!it[KEY_AUTOSTART];
-        activa(_autoStart || (esDeEstado() && !!it[KEY_STATUS]));
+        let hecho = false;
+        const va = () => {
+            if (hecho) return;
+            hecho = true;
+            if (!_activo) activa(_autoStart || (esDeEstado() && !!it[KEY_STATUS]));
+        };
+        const trasPintar = () => {
+            try { window.requestAnimationFrame(() => setTimeout(va, 0)); } catch (e) { }
+            setTimeout(va, 1500);
+        };
+        if (document.readyState === 'complete') trasPintar();
+        else window.addEventListener('load', trasPintar, { once: true });
     });
 
     function esDeEstado() {
@@ -350,7 +361,9 @@
         const top = document.querySelector('table.uir-list-top-button-bar')
             || document.querySelector('table.uir-list-filter-bar');
         const fila = top ? top.querySelector(SEL) : null;
-        return fila && fila.getClientRects().length ? fila : null;
+        if (!fila) return null;
+        const ve = typeof fila.checkVisibility === 'function' ? fila.checkVisibility() : fila.getClientRects().length > 0;
+        return ve ? fila : null;
     }
 
     function montaPagina(encender) {
@@ -519,7 +532,7 @@
         const s = document.createElement('script');
         s.id = 'nsft-live-mode-fetcher';
         s.src = chrome.runtime.getURL('scripts/modules/refresh_sublist/refresh_sublist_fetcher.js');
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function onRespuestaSublista(ev) {

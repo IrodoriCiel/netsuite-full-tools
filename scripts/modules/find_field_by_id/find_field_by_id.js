@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('.nsft-ffi-modal-content', 'findfield', { filas: '.nsft-ffi-result' });
 
     const STORAGE_KEY = 'enableFindFieldById';
     const SHORTCUT_KEY = 'findFieldByIdShortcut';
@@ -106,7 +107,7 @@
         s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_field_nav.js');
         s.async = false;
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function injectTextSearch() {
@@ -116,7 +117,7 @@
         s.src = chrome.runtime.getURL('scripts/modules/_shared/nsft_text_search.js');
         s.async = false;
         s.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(s);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
     }
 
     function injectScript() {
@@ -131,7 +132,8 @@
             const translations = {
                 ffi_prompt_generic: chrome.i18n.getMessage("ffi_prompt_generic"),
                 ffi_modal_title: chrome.i18n.getMessage("ffi_modal_title"),
-                ffi_field_not_found: chrome.i18n.getMessage("ffi_field_not_found"),
+                ffi_field_not_found: chrome.i18n.getMessage("ffi_field_not_found", ["$1"]),
+                ffi_field_not_found_hint: chrome.i18n.getMessage("ffi_field_not_found_hint"),
                 ffi_copy_manual: chrome.i18n.getMessage("ffi_copy_manual"),
                 ffi_placeholder: chrome.i18n.getMessage("ffi_placeholder"),
                 ffi_clear: chrome.i18n.getMessage("ffi_clear"),
@@ -149,6 +151,6 @@
                 highlightPersist: _hlPersist
             }, '*');
         };
-        (document.head || document.documentElement).appendChild(script);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
     }
 })();

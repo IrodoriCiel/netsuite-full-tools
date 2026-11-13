@@ -16,7 +16,9 @@ const STORAGE_KEY = 'groupedTabsConfig';
 
 (function nsftStampUnifiedTheme() {
     const stamp = (mode) => {
-        document.documentElement.setAttribute('data-nsft-theme', mode === 'dark' ? 'dark' : 'light');
+        const tema = mode === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-nsft-theme', tema);
+        document.querySelectorAll('.nsft-w').forEach((el) => el.setAttribute('data-theme', tema));
     };
     try {
         chrome.storage.local.get({ nsftTheme: 'light' }, (it) => stamp(it.nsftTheme));
@@ -88,6 +90,14 @@ function loadI18n() {
         const key = el.getAttribute('data-i18n-placeholder');
         el.setAttribute('placeholder', chrome.i18n.getMessage(key));
     });
+
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const msg = chrome.i18n.getMessage(el.getAttribute('data-i18n-title'));
+        if (msg) {
+            el.setAttribute('title', msg);
+            el.setAttribute('aria-label', msg);
+        }
+    });
 }
 
 function persistConfig() {
@@ -137,23 +147,27 @@ function showConfirmModal(messageKey, onConfirm, opts) {
         if (t) cancelBtn.textContent = t;
     }
 
+    const xBtn = overlay.querySelector('[data-nsft-cerrar]');
     const close = () => {
         overlay.hidden = true;
         okBtn.onclick = null;
         cancelBtn.onclick = null;
+        if (xBtn) xBtn.onclick = null;
         overlay.onclick = null;
         document.removeEventListener('keydown', onKey);
         okBtn.textContent = origOkText;
         cancelBtn.textContent = origCancelText;
     };
     const fireCancel = () => { close(); if (opts.onCancel) opts.onCancel(); };
+    const fireDismiss = () => { close(); };
     const onKey = (e) => {
-        if (e.key === 'Escape') fireCancel();
+        if (e.key === 'Escape') fireDismiss();
         else if (e.key === 'Enter') { close(); onConfirm(); }
     };
     okBtn.onclick = () => { close(); onConfirm(); };
     cancelBtn.onclick = fireCancel;
-    overlay.onclick = (e) => { if (e.target === overlay) fireCancel(); };
+    if (xBtn) xBtn.onclick = fireDismiss;
+    overlay.onclick = (e) => { if (e.target === overlay) fireDismiss(); };
     document.addEventListener('keydown', onKey);
     okBtn.focus();
 }
@@ -678,11 +692,19 @@ function openModal(modalId, focusElId, cancelHandler) {
         const el = document.getElementById(focusElId);
         if (el) setTimeout(() => el.focus(), 30);
     }
+    const xBtn = overlay.querySelector('[data-nsft-cerrar]');
     const close = () => {
         overlay.hidden = true;
         document.removeEventListener('keydown', onKey);
         overlay.onclick = null;
+        if (xBtn) xBtn.onclick = null;
     };
+    if (xBtn) {
+        xBtn.onclick = () => {
+            close();
+            if (cancelHandler) cancelHandler();
+        };
+    }
     const onKey = (e) => {
         if (e.key === 'Escape') {
             close();

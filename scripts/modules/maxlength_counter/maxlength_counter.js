@@ -67,8 +67,15 @@
         document.querySelectorAll(FIELD_SELECTOR).forEach(hookField);
     }
 
+    function esBuscador(field) {
+        return field.type === 'search'
+            || /srch|search/i.test(field.id || '')
+            || !!(field.closest && field.closest('.uir-nav-search'));
+    }
+
     function hookField(field) {
         if (_applied.has(field)) return;
+        if (esBuscador(field)) return;
         const max = getMaxLength(field);
         if (!max || max <= 0) return;
         _applied.add(field);

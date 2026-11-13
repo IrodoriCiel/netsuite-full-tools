@@ -135,18 +135,18 @@
                             const modalId = 'nsft-ffi-' + Date.now();
                             const html = `
                                 <div id="${modalId}" class="nsft-ffi-modal-overlay nsft-modal-backdrop" data-theme="${NSFT_THEME}" role="dialog" aria-modal="true" aria-label="${esc(TRANSLATIONS.ffi_prompt_generic)}">
-                                    <div class="nsft-ffi-modal-content nsft-modal nsft-modal--dialog" data-theme="${NSFT_THEME}">
+                                    <div class="nsft-ffi-modal-content nsft-modal nsft-modal--dialog nsft-paleta" data-theme="${NSFT_THEME}">
                                         <div class="nsft-modal-header">
-                                            <span class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>NetSuite Full Tools - ${esc(TRANSLATIONS.ffi_modal_title || 'Buscar Campo por ID')}</span>
+                                            <span class="nsft-modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>${esc(TRANSLATIONS.ffi_modal_title || 'Buscar Campo por ID')}</span>
                                             <div class="nsft-header-actions">
                                                 <button id="${modalId}-close" class="nsft-modal-btn-close" aria-label="${esc(TRANSLATIONS.ffi_btn_cancel)}">✕</button>
                                             </div>
                                         </div>
-                                        <div class="nsft-ffi-modal-body">
-                                            <div class="nsft-ffi-input-wrap">
-                                                <input type="text" id="${modalId}-input" class="nsft-ffi-modal-input" placeholder="${esc(TRANSLATIONS.ffi_placeholder)}" role="combobox" aria-controls="${modalId}-list" aria-expanded="true" autocomplete="off" />
+                                        <div class="nsft-ffi-input-wrap nsft-paleta-barra">
+                                                <input type="text" id="${modalId}-input" class="nsft-ffi-modal-input nsft-paleta-input" placeholder="${esc(TRANSLATIONS.ffi_placeholder)}" role="combobox" aria-controls="${modalId}-list" aria-expanded="true" autocomplete="off" />
                                                 <button type="button" id="${modalId}-clear" class="nsft-ffi-input-clear" aria-label="${esc(TRANSLATIONS.ffi_clear || 'Clear')}" title="${esc(TRANSLATIONS.ffi_clear || '')}" hidden>✕</button>
-                                            </div>
+                                        </div>
+                                        <div class="nsft-ffi-modal-body">
                                             <ul id="${modalId}-list" class="nsft-ffi-results" role="listbox"></ul>
                                         </div>
                                     </div>
@@ -221,7 +221,13 @@
                                 }
                                 if (!current.length) {
                                     active = -1;
-                                    $list.html(`<li class="nsft-ffi-empty">${esc((TRANSLATIONS.ffi_field_not_found || '$1').replace('$1', needle))}</li>`);
+                                    const vacioTit = String((TRANSLATIONS.ffi_field_not_found || '$1').replace('$1', needle)).trim().replace(/\.$/, '');
+                                    $list.html('<li class="nsft-ffi-empty"><div class="nsft-vacio">'
+                                        + '<svg class="nsft-vacio-ico" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+                                        + '<circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>'
+                                        + '<span class="nsft-vacio-tit">' + esc(vacioTit) + '</span>'
+                                        + (TRANSLATIONS.ffi_field_not_found_hint ? '<span class="nsft-vacio-txt">' + esc(TRANSLATIONS.ffi_field_not_found_hint) + '</span>' : '')
+                                        + '</div></li>');
                                     return;
                                 }
                                 active = 0;

@@ -37,15 +37,15 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     color: #111827;
     outline: none;
     transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 .nsft-gtr-input:focus {
     border-color: var(--nsft-ns-accent, #3b82f6);
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background: var(--nsft-w-s0, #fff);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 15%, transparent);
 }
 
 .nsft-gtr-clear {
@@ -73,12 +73,12 @@
 .nsft-gtr-clear[hidden] { display: none; }
 
 .nsft-gtr-clear:hover {
-    background: rgba(48, 115, 77, 0.12);
+    background: color-mix(in srgb, var(--nsft-ns-accent, #30734D) 12%, transparent);
     color: #1f2a23;
 }
 
 .nsft-gtr-clear:focus-visible {
-    outline: 2px solid #30734D;
+    outline: 2px solid var(--nsft-ns-accent, #30734D);
     outline-offset: 1px;
 }
 
@@ -90,7 +90,7 @@
     overflow-y: auto;
     border: 1px solid #dce5df;
     border-radius: 10px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     box-shadow: 0 6px 14px -8px rgba(17, 24, 19, 0.18);
 }
 .nsft-gtr-suggestions[hidden] {
@@ -132,7 +132,7 @@
 }
 .nsft-gtr-suggest-selected,
 .nsft-gtr-suggest-item:hover {
-    background: #eef5f1;
+    background: color-mix(in srgb, var(--nsft-ns-accent, #30734D) 8%, transparent);
 }
 .nsft-gtr-suggest-defn {
     border-bottom: 1px solid #dce5df;
@@ -141,7 +141,7 @@
 }
 .nsft-gtr-suggest-defn .nsft-gtr-suggest-name {
     font-style: italic;
-    color: #30734D;
+    color: var(--nsft-ns-accent, #30734D);
 }
 
 .nsft-gtr-hint {
@@ -170,7 +170,7 @@
 .nsft-gtr-overlay[data-theme="dark"] .nsft-gtr-input:focus {
     border-color: var(--nsft-ns-accent-light, #7FB0FF);
     background: var(--nsft-dk-panel);
-    box-shadow: 0 0 0 3px rgba(110, 124, 245, 0.22);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 22%, transparent);
 }
 .nsft-gtr-overlay[data-theme="dark"] .nsft-gtr-clear {
     color: #9AA4B5;
@@ -207,14 +207,14 @@
     background: var(--nsft-dk-hover);
 }
 .nsft-gtr-overlay[data-theme="dark"] .nsft-gtr-suggest-selected {
-    background: rgba(110, 124, 245, 0.18);
+    background: color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 18%, transparent);
     box-shadow: inset 3px 0 0 var(--nsft-ns-accent-light, #7FB0FF);
 }
 .nsft-gtr-overlay[data-theme="dark"] .nsft-gtr-suggest-defn {
     border-bottom-color: var(--nsft-dk-border);
 }
 .nsft-gtr-overlay[data-theme="dark"] .nsft-gtr-suggest-defn .nsft-gtr-suggest-name {
-    color: #B3C1FF;
+    color: var(--nsft-ns-accent-light, var(--nsft-ns-accent, #B3C1FF));
 }
 
 html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-input {
@@ -236,13 +236,13 @@ html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-sugge
     background: var(--nsft-dk-hover);
 }
 html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-suggest-selected {
-    background: rgba(110, 124, 245, 0.18);
+    background: color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 18%, transparent);
     box-shadow: inset 3px 0 0 var(--nsft-ns-accent-light, #7FB0FF);
 }
 html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-input:focus {
     border-color: var(--nsft-ns-accent-light, #7FB0FF);
     background: var(--nsft-dk-panel);
-    box-shadow: 0 0 0 3px rgba(110, 124, 245, 0.22);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 22%, transparent);
 }
 html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-clear {
     color: #9AA4B5;
@@ -264,7 +264,7 @@ html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-sugge
     border-bottom-color: var(--nsft-dk-border);
 }
 html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) .nsft-gtr-suggest-defn .nsft-gtr-suggest-name {
-    color: #B3C1FF;
+    color: var(--nsft-ns-accent-light, var(--nsft-ns-accent, #B3C1FF));
 }
 
 .nsft-gtr-overlay mark.nsft-gtr-hl {
@@ -280,3 +280,10 @@ html[data-nsft-theme="dark"] .nsft-gtr-overlay:not([data-theme]) mark.nsft-gtr-h
     background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
     color: var(--nsft-hl-fg-dark, #0D1410);
 }
+
+.nsft-paleta .nsft-gtr-body { padding: 6px; }
+.nsft-paleta .nsft-gtr-suggestions { max-height: 320px; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.nsft-paleta .nsft-gtr-suggest-item { padding: 8px; border-radius: 4px; }
+.nsft-paleta :is(.nsft-gtr-suggest-selected, .nsft-gtr-suggest-item:hover):not(#nsft-x) { background: color-mix(in srgb, var(--nsft-cat) 8%, transparent); }
+.nsft-paleta .nsft-gtr-hint { margin: 6px 8px; font-size: 12px; }
+.nsft-paleta .nsft-gtr-status:empty { display: none; }

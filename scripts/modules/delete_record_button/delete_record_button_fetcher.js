@@ -39,15 +39,19 @@
         return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    function temaActual() {
+        return document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light';
+    }
+
     function showModal(title, message) {
         const modalId = `nsft-del-error-modal-${Date.now()}`;
         const btnOkText = escapeHtml(TXT.BTN_OK);
         const html = `
-            <div id="${modalId}" class="nsft-del-modal-overlay">
-                <div class="nsft-del-modal-content">
-                    <div class="nsft-del-modal-header">
-                        <span class="nsft-del-modal-title">${escapeHtml(title)}</span>
-                        <button id="${modalId}-close" class="nsft-del-close-btn">✕</button>
+            <div id="${modalId}" class="nsft-del-modal-overlay nsft-modal-backdrop" data-theme="${temaActual()}">
+                <div class="nsft-del-modal-content nsft-modal nsft-modal--dialog" data-theme="${temaActual()}">
+                    <div class="nsft-modal-header nsft-del-modal-header">
+                        <span class="nsft-modal-title is-danger nsft-del-modal-title">${escapeHtml(title)}</span>
+                        <div class="nsft-header-actions"><button id="${modalId}-close" class="nsft-modal-btn-close nsft-del-close-btn">✕</button></div>
                     </div>
                     <div class="nsft-del-modal-body">${escapeHtml(message).replace(/\n/g, '<br>')}</div>
                     <div class="nsft-del-modal-footer">
@@ -105,11 +109,11 @@
             : '';
         const nameRow = info.name ? `<div><b>${escapeHtml(TXT.LABEL_NAME)}:</b> ${escapeHtml(info.name)}</div>` : '';
         const html = `
-            <div id="${modalId}" class="nsft-del-modal-overlay">
-                <div class="nsft-del-modal-content">
-                    <div class="nsft-del-modal-header">
-                        <span class="nsft-del-modal-title">⚠ ${escapeHtml(TXT.CONFIRM_TITLE)}</span>
-                        <button id="${modalId}-close" class="nsft-del-close-btn">✕</button>
+            <div id="${modalId}" class="nsft-del-modal-overlay nsft-modal-backdrop" data-theme="${temaActual()}">
+                <div class="nsft-del-modal-content nsft-modal nsft-modal--dialog" data-theme="${temaActual()}">
+                    <div class="nsft-modal-header nsft-del-modal-header">
+                        <span class="nsft-modal-title is-danger nsft-del-modal-title">${escapeHtml(TXT.CONFIRM_TITLE)}</span>
+                        <div class="nsft-header-actions"><button id="${modalId}-close" class="nsft-modal-btn-close nsft-del-close-btn">✕</button></div>
                     </div>
                     <div class="nsft-del-modal-body">
                         <div>${escapeHtml(TXT.CONFIRM_DELETE)}</div>

@@ -4,22 +4,8 @@
  * Colores del tema de VS Code de Robb Owen (github.com/robb0wen/synthwave-vscode,
  * MIT), portados a las clases de highlight.js.
  *
- * ESTE ARCHIVO HACE DOBLE TURNO. Lo usan los visores tal cual, y ademas
- * `build.js` lo pasa por `theme_transform.js` para sacar de el la version de
- * CodeMirror 6 que se usa en los campos de codigo. Ese transformador saca de
- * aqui, por expresion regular, el fondo y el texto de la regla base, el color
- * de los comentarios (que reusa para la barra de desplazamiento) y el de la
- * seleccion. Si esas tres reglas cambian de forma, el tema derivado sale con
- * los colores por defecto y nadie avisa.
- *
- * Y OJO CON ESCRIBIR ESOS PATRONES EN UN COMENTARIO: el transformador no sabe
- * que es un comentario y se queda con la PRIMERA coincidencia del archivo.
- * Este mismo bloque los citaba de ejemplo y el tema derivado salio con el
- * fondo puesto a los puntos suspensivos del ejemplo. Se cuentan con palabras,
- * no con codigo.
- *
- * El nombre no lleva «light» ni «github», que es como el transformador
- * decide si un tema es claro; correcto, este es oscuro y no tiene hermano.
+ * Lo usan tal cual los visores y editores de la extension. (Antes tambien lo
+ * transformaba el Tema del Editor de codigo, ya retirado.)
  */
 
 pre code.hljs { display: block; overflow-x: auto; padding: 1em; }

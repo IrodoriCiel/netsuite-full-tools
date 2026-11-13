@@ -9,6 +9,7 @@
 
     if (window.location.search.match(/[?&]e=[Tt]/)) return;
     if (!/\.nl$/.test(location.pathname)) return;
+    if (/(?:list|searchresults|card|dash)\.nl$/i.test(location.pathname)) return;
     try {
         if (window.NSFT_RecordButtons && NSFT_RecordButtons.isExcludedPage && NSFT_RecordButtons.isExcludedPage()) return;
     } catch (e) { }
@@ -352,7 +353,21 @@
         return group;
     }
 
+    const _esperandoLibs = new WeakSet();
     function formatElement(span, type, content, rawSource) {
+        if (window.NSFT_Libs && !(window.hljs && window.sqlFormatter)) {
+            if (_esperandoLibs.has(span)) return;
+            _esperandoLibs.add(span);
+            window.NSFT_Libs.listas().then(() => {
+                _esperandoLibs.delete(span);
+                if (span.isConnected) pintaElemento(span, type, content, rawSource);
+            });
+            return;
+        }
+        pintaElemento(span, type, content, rawSource);
+    }
+
+    function pintaElemento(span, type, content, rawSource) {
         const wrapper = document.createElement('div');
         wrapper.className = WRAPPER_CLASS;
 
@@ -461,8 +476,13 @@
             const next = showingCode ? previewLabel : codeLabel;
             btnLabel(toggleBtn).textContent = next;
             toggleBtn.title = next;
-            if (showingCode && !highlighted && window.hljs) {
-                try { window.hljs.highlightElement(codeEl); highlighted = true; } catch (err) { }
+            if (showingCode && !highlighted) {
+                const pinta = () => {
+                    if (highlighted || !window.hljs) return;
+                    try { window.hljs.highlightElement(codeEl); highlighted = true; } catch (err) { }
+                };
+                if (window.hljs || !window.NSFT_Libs) pinta();
+                else window.NSFT_Libs.listas().then(pinta);
             }
         });
 
@@ -537,12 +557,20 @@
     const VALOR_SEL = 'span.input, span.uir-field-input, span[data-nsps-type="field_input"]';
     const ETIQUETA_SEL = '.uir-label, .smallgraytextnolink, label, [id$="_lbl"]';
 
+    const _descartados = new WeakSet();
+
     function scanSpans(root = document) {
         const selector = 'span.input, span.uir-field-input, div.uir-field-wrapper, td.uir-field, span[data-nsps-type="field_input"]';
         const candidates = Array.from(root.querySelectorAll(selector));
 
         candidates.forEach(span => {
             if (span.dataset && span.dataset.nsftPrettierDone) return;
+            if (_descartados.has(span)) return;
+            const tc = (span.textContent || '').trim();
+            const puedeSer = tc.length >= 2 && (
+                /^[{[<]/.test(tc) || tc.includes('&lt;') || tc.includes('&quot;')
+                || looksLikeFreeMarker(tc) || looksLikeSQL(tc));
+            if (!puedeSer) { _descartados.add(span); return; }
 
             if (span.querySelector(VALOR_SEL)) return;
             if (span.querySelector(ETIQUETA_SEL)) return;
@@ -628,7 +656,7 @@
         };
 
         if (window.NSFT_Observer && typeof window.NSFT_Observer.subscribe === 'function') {
-            _unsub = window.NSFT_Observer.subscribe(handler);
+            _unsub = window.NSFT_Observer.subscribe(handler, { throttle: 250 });
             return;
         }
 

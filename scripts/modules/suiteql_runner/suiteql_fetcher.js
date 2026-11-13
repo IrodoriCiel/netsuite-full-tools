@@ -24,8 +24,50 @@
             resolveScriptId(event.data.payload);
         } else if (event.data.dest === 'fetcher_sql' && event.data.type === 'update_record') {
             updateRecord(event.data.payload, event.data.reqId);
+        } else if (event.data.dest === 'fetcher_sql' && event.data.type === 'load_search') {
+            loadSearch(event.data.payload, event.data.reqId);
+        } else if (event.data.dest === 'fetcher_sql' && event.data.type === 'ping') {
+            window.postMessage({
+                dest: 'extension_sql_ai', type: 'results', reqId: event.data.reqId,
+                payload: { hasRequire: typeof require !== 'undefined' }
+            }, '*');
         }
     });
+
+    function loadSearch(payload, reqId) {
+        try {
+            if (typeof require === 'undefined') {
+                sendError("'require' is not defined. Ensure you are on a NetSuite page.", reqId);
+                return;
+            }
+            require(['N/search'], function (search) {
+                try {
+                    const s = search.load({ id: String((payload && payload.id) || '').trim() });
+                    let title = '';
+                    try { title = s.title || ''; } catch (e) { }
+                    const def = JSON.parse(JSON.stringify({
+                        id: s.id,
+                        title: title,
+                        searchType: s.searchType,
+                        filterExpression: s.filterExpression || [],
+                        columns: (s.columns || []).map(function (c) {
+                            return {
+                                name: c.name || null, join: c.join || null, summary: c.summary || null,
+                                formula: c.formula || null, label: c.label || null,
+                                sort: c.sortdir || null, fn: c['function'] || null
+                            };
+                        }),
+                        settings: s.settings || []
+                    }));
+                    sendResults(def, 1, 0, null, reqId);
+                } catch (e) {
+                    sendError(e.name + ': ' + e.message, reqId);
+                }
+            });
+        } catch (e) {
+            sendError(e.name + ': ' + e.message, reqId);
+        }
+    }
 
     function updateRecord(payload, reqId) {
         try {

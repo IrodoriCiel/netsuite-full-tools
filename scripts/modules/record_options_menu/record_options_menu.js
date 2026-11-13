@@ -29,7 +29,7 @@
     let _saeEnabled = false, _saeMode = 'button';
     let _rtrailEnabled = false;
 
-    const ITEM_KEYS = ['recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowGenericUrl', 'recordOptionsMenuShowMenuPath', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'];
+    const ITEM_KEYS = ['recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowGenericUrl', 'recordOptionsMenuShowMenuPath', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowPdf', 'recordOptionsMenuShowXml'];
     const _items = {};
     function ver(k) { return _items[k] !== false; }
 
@@ -50,6 +50,7 @@
         recordOptionsMenuShowGenericUrl: true,
         recordOptionsMenuShowMenuPath: true,
         recordOptionsMenuShowOpenInEnv: true,
+        recordOptionsMenuShowPdf: true,
         recordOptionsMenuShowXml: true,
         recordOptionsMenuShowRunSuiteQL: true,
         recordOptionsMenuShowLoadConsole: true,
@@ -82,7 +83,7 @@
         'enableScriptExecute', 'scriptExecuteMode',
         'enableRecordTrail',
         'enableSuiteQLRunner', 'enableSuiteScriptConsole', 'enableOpenInOtherEnv',
-        'recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowGenericUrl', 'recordOptionsMenuShowMenuPath', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowXml'
+        'recordOptionsMenuShowOpenCustom', 'recordOptionsMenuShowAddField', 'recordOptionsMenuShowAddColumn', 'recordOptionsMenuShowRunSuiteQL', 'recordOptionsMenuShowLoadConsole', 'recordOptionsMenuShowDependents', 'recordOptionsMenuShowCopyUrl', 'recordOptionsMenuShowGenericUrl', 'recordOptionsMenuShowMenuPath', 'recordOptionsMenuShowOpenInEnv', 'recordOptionsMenuShowPdf', 'recordOptionsMenuShowXml'
     ];
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -132,7 +133,6 @@
         if (/\/app\/center\//.test(path) || /\/(dashboard|card)\.nl(\?|$)/.test(path)) return;
 
         _enabled = true;
-        injectIconStyles();
 
         if (!_copyHandler) {
             _copyHandler = function () {
@@ -165,29 +165,6 @@
         _cachedUrl = null;
     }
 
-    function injectIconStyles() {
-        if (document.getElementById('nsft-record-options-icon-css')) return;
-        const style = document.createElement('style');
-        style.id = 'nsft-record-options-icon-css';
-        style.textContent = `
-            #${MENU_ID} .ns-menuitem-link .nsft-tools-icon {
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                width: 16px !important;
-                height: 16px !important;
-                flex: 0 0 16px !important;
-            }
-            #${MENU_ID} .ns-menuitem-link .nsft-tools-icon svg {
-                width: 14px !important;
-                height: 14px !important;
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
 
     function getButtonsRow() {
         if (DOM) {
@@ -329,6 +306,7 @@
 
     const ICON_ATTRS = 'xmlns="http://www.w3.org/2000/svg" width="14" height="14" style="width:14px!important;height:14px!important;display:block!important;flex:0 0 14px;" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
     const ICONS = {
+        pdf: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 17v-4h1.5a1.25 1.25 0 0 1 0 2.5H8"/><path d="M12.5 13v4h1a2 2 0 0 0 0-4z"/><path d="M17.5 13H16v4M16 15h1.3"/></svg>`,
         settings: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
         plus_circle: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
         columns: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>`,
@@ -482,6 +460,18 @@
         if (_envEnabled) {
             if (ver("recordOptionsMenuShowOpenInEnv")) items.push(createActionMenuItem(chrome.i18n.getMessage('recordOptionOpenInEnv'), 'open_in_env',
                 `window.dispatchEvent(new CustomEvent('nsft-show-env-picker', { detail: { x: event.clientX, y: event.clientY } })); return false;`));
+        }
+
+        if (context.isStandardTransaction && context.id && ver("recordOptionsMenuShowPdf")) {
+            const pagina = (window.location.pathname.split('/').pop() || '').replace(/\.nl$/i, '');
+            if (/^[a-z]+$/i.test(pagina)) {
+                const form = document.querySelector('input[name="customform"], select[name="customform"]');
+                const formnumber = form && /^\d+$/.test(String(form.value || '')) ? form.value : '';
+                const pdfUrl = '/app/accounting/print/hotprint.nl?regular=T&sethotprinter=T&printtype=transaction'
+                    + '&trantype=' + encodeURIComponent(pagina) + '&id=' + encodeURIComponent(context.id)
+                    + (formnumber ? '&formnumber=' + encodeURIComponent(formnumber) : '');
+                items.push(createMenuItem(chrome.i18n.getMessage('recordOptionViewPdf') || 'View PDF', pdfUrl, 'pdf'));
+            }
         }
 
         const xmlUrl = window.location.href + (window.location.search ? '&' : '?') + 'xml=t';

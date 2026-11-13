@@ -11,6 +11,8 @@
 
     if (/\/(?:print\/|NLSPrintForm|hotprint|barcodeprinter)/i.test(location.pathname)) return;
 
+    if (/\/app\/login\/|\/(?:enterprise|customer)login|\/loginform/i.test(location.pathname)) return;
+
     if (document.contentType && !/html/i.test(document.contentType)) return;
 
     const IS_SUITELET = /\/app\/site\/hosting\/scriptlet\.nl/i.test(location.pathname);

@@ -54,7 +54,7 @@
         if (subscribers.size === 0) { pendingMutations.length = 0; return; }
         if (rafScheduled) return;
         rafScheduled = true;
-        const rAF = window.requestAnimationFrame || ((cb) => setTimeout(cb, 16));
+        const rAF = (window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : null) || ((cb) => setTimeout(cb, 16));
         rAF(dispatch);
     }
 

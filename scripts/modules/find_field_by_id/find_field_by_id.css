@@ -56,8 +56,8 @@
 }
 
 .nsft-ffi-modal-input:focus {
-    border-color: #607799;
-    box-shadow: 0 0 0 2px rgba(96, 119, 153, 0.1);
+    border-color: var(--nsft-ns-accent, #607799);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-ns-accent, #607799) 12%, transparent);
 }
 
 .nsft-ffi-input-clear {
@@ -172,11 +172,6 @@ html[data-nsft-theme="dark"] .nsft-ffi-hl-pink   { --ffi-c: #ffa5ff; --ffi-g: rg
 }
 .nsft-ffi-empty {
     list-style: none;
-    padding: 10px;
-    text-align: center;
-    font-size: 12px;
-    color: #888;
-    font-style: italic;
 }
 
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-results { border-color: var(--nsft-dk-border); }
@@ -186,10 +181,9 @@ html[data-nsft-theme="dark"] .nsft-ffi-hl-pink   { --ffi-c: #ffa5ff; --ffi-g: rg
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-result-label { color: #E6EBF2; }
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-result-id { color: #9AA4B5; }
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-result.is-active {
-    background: rgba(110, 124, 245, 0.18);
+    background: color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 18%, transparent);
     box-shadow: inset 3px 0 0 var(--nsft-ns-accent-light, #7FB0FF);
 }
-.nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-empty { color: #9AA4B5; }
 
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-input {
     background: var(--nsft-dk-surface);
@@ -199,7 +193,7 @@ html[data-nsft-theme="dark"] .nsft-ffi-hl-pink   { --ffi-c: #ffa5ff; --ffi-g: rg
 
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-input:focus {
     border-color: var(--nsft-ns-accent-light, #7FB0FF);
-    box-shadow: 0 0 0 2px rgba(110, 124, 245, 0.2);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 20%, transparent);
 }
 
 .nsft-ffi-modal-overlay[data-theme="dark"] .nsft-ffi-modal-input::placeholder {
@@ -220,3 +214,8 @@ html[data-nsft-theme="dark"] .nsft-ffi-hl-pink   { --ffi-c: #ffa5ff; --ffi-g: rg
     background: var(--nsft-hl-bg-dark, rgba(234, 179, 8, 0.55));
     color: var(--nsft-hl-fg-dark, #0D1410);
 }
+
+.nsft-paleta .nsft-ffi-modal-body { padding: 6px; }
+.nsft-paleta .nsft-ffi-results:not(#nsft-x) { max-height: 340px; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.nsft-paleta .nsft-ffi-result { border-radius: 4px; }
+.nsft-paleta .nsft-ffi-result.is-active:not(#nsft-x) { background: color-mix(in srgb, var(--nsft-cat) 8%, transparent); }

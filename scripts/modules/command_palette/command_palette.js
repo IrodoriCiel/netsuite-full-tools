@@ -1,5 +1,6 @@
 (function () {
     'use strict';
+    if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('.nsft-cmdp-panel.nsft-paleta', 'palette', { filas: '.nsft-cmdp-item' });
 
     const STORAGE_KEY = 'enableCommandPalette';
     const SHORTCUT_KEY = 'commandPaletteShortcut';
@@ -10,6 +11,11 @@
     const OVERLAY_ID = 'nsft-cmdp-overlay';
     const MAX_RECENT = 5;
     const MAX_PINNED = 8;
+
+    const MENU_CACHE_KEY = 'nsftCmdpMenu';
+    const MENU_URL = '/app/center/NLNavMenuData.nl';
+    const MENU_TTL_MS = 12 * 60 * 60 * 1000;
+    const MENU_HOSTS_MAX = 6;
 
     const _i18nCache = new Map();
     function i18nMsg(key, fallback) {
@@ -35,7 +41,8 @@
         catNav: i18nMsg('cmdp_cat_navigation', 'Navigation'),
         catCustom: i18nMsg('cmdp_cat_customization', 'Customization'),
         catPage: i18nMsg('cmdp_cat_page', 'Current Page'),
-        catNsft: i18nMsg('cmdp_cat_nsft', 'NSFT Tools')
+        catNsft: i18nMsg('cmdp_cat_nsft', 'NSFT Tools'),
+        catMenu: i18nMsg('cmdp_cat_menu', 'NetSuite Menu')
     };
 
     let shortcut = { ctrlKey: true, shiftKey: true, altKey: false, code: 'Space' };
@@ -44,6 +51,11 @@
     let pinned = [];
     let customUrls = [];
     let theme = 'light';
+    const MAX_FILAS = 60;
+    let _rafLista = 0;
+    let menuItems = [];
+    let menuTs = 0;
+    let menuPidiendo = false;
     let overlayEl = null;
     let inputEl = null;
     let clearEl = null;
@@ -85,9 +97,11 @@
         enableConsoleUtils: true,
         [FRAGMENTOS_KEY]: [],
         [FRAGMENTOS_SQL_KEY]: [],
+        [MENU_CACHE_KEY]: {},
         enableAdvancedEditor: true
     }, (items) => {
         if (!items[STORAGE_KEY]) return;
+        tomaMenuDeCache(items[MENU_CACHE_KEY]);
         hasAiAssistant = items.enableAiAssistant !== false;
         hasGithubBackup = items.enableGithubBackup === true;
         hasScriptExecute = items.enableScriptExecute !== false;
@@ -158,7 +172,131 @@
             theme = changes[THEME_KEY].newValue || 'light';
             if (overlayEl) overlayEl.setAttribute('data-theme', resolveTheme());
         }
+        if (changes[MENU_CACHE_KEY] && tomaMenuDeCache(changes[MENU_CACHE_KEY].newValue)) {
+            actions = buildActions();
+            if (overlayEl) renderList(inputEl ? inputEl.value : '');
+        }
     });
+
+
+    function claveMenu() {
+        const m = /(?:^|;\s*)lastUser=([^;]*)/.exec(document.cookie || '');
+        let u = '';
+        try { u = m ? decodeURIComponent(m[1]) : ''; } catch (e) { u = m ? m[1] : ''; }
+        return location.host + (u ? '|' + u : '');
+    }
+
+    function tomaMenuDeCache(all) {
+        const mio = all && typeof all === 'object' ? all[claveMenu()] : null;
+        if (!mio || !Array.isArray(mio.items) || (mio.ts || 0) <= menuTs) return false;
+        menuItems = mio.items;
+        menuTs = mio.ts || 0;
+        return true;
+    }
+
+    function asegurarMenu() {
+        if (menuPidiendo || (menuTs && Date.now() - menuTs < MENU_TTL_MS)) return;
+        menuPidiendo = true;
+        fetch(MENU_URL, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => {
+                if (!Array.isArray(data)) return;
+                const items = aplanaMenu(data);
+                if (!items.length) return;
+                menuItems = items;
+                menuTs = Date.now();
+                actions = buildActions();
+                if (overlayEl) renderList(inputEl ? inputEl.value : '');
+                chrome.storage.local.get({ [MENU_CACHE_KEY]: {} }, (st) => {
+                    const all = (st[MENU_CACHE_KEY] && typeof st[MENU_CACHE_KEY] === 'object') ? st[MENU_CACHE_KEY] : {};
+                    all[claveMenu()] = { ts: menuTs, items };
+                    Object.keys(all).sort((a, b) => (all[b].ts || 0) - (all[a].ts || 0))
+                        .slice(MENU_HOSTS_MAX).forEach((h) => { delete all[h]; });
+                    chrome.storage.local.set({ [MENU_CACHE_KEY]: all });
+                });
+            })
+            .catch(() => { })
+            .then(() => { menuPidiendo = false; });
+    }
+
+    function aplanaMenu(data) {
+        const out = [];
+        const walk = (n, ruta, tarea) => {
+            if (!n || typeof n !== 'object') return;
+            const label = String(n.label || '').trim();
+            const url = typeof n.url === 'string' ? n.url : '';
+            let rutaHijos = ruta;
+            let tareaHijos = tarea;
+            if (n.type === 'TASK' || n.type === 'TASK_MODE') {
+                if (url && url.charAt(0) === '/' && label && !/\/reporting\/reportcomposer\.nl/i.test(url)) {
+                    const nombre = n.type === 'TASK_MODE' && tarea ? tarea + ' › ' + label : label;
+                    out.push([nombre, limpiaUrlMenu(url), ruta.join(' › ')]);
+                }
+                if (n.type === 'TASK') tareaHijos = label;
+            } else if (label && n.type !== 'OVERVIEW' && n.type !== 'SEPARATOR') {
+                rutaHijos = ruta.concat(label);
+            }
+            (n.submenu || []).forEach((c) => walk(c, rutaHijos, tareaHijos));
+        };
+        data.forEach((n) => walk(n, [], ''));
+        return out;
+    }
+
+    function limpiaUrlMenu(u) {
+        try {
+            const x = new URL(u, location.origin);
+            x.searchParams.delete('whence');
+            return x.pathname + (x.searchParams.toString() ? '?' + x.searchParams.toString() : '');
+        } catch (e) { return u; }
+    }
+
+    function menuKey(u) {
+        try {
+            const x = new URL(u, location.origin);
+            const ps = [];
+            x.searchParams.forEach((v, k) => {
+                if (!/^(whence|quicksort|sc)$/i.test(k)) ps.push(k.toLowerCase() + '=' + String(v).toLowerCase());
+            });
+            return x.pathname.toLowerCase() + '?' + ps.sort().join('&');
+        } catch (e) { return String(u || ''); }
+    }
+
+    function fusionaMenu(base) {
+        if (!menuItems.length) return base;
+        const porClave = new Map();
+        base.forEach((a) => {
+            if (typeof a.destino === 'string' && a.destino) porClave.set(menuKey(a.destino), a);
+        });
+        const vistas = new Set();
+        const delMenu = [];
+        menuItems.forEach((it) => {
+            if (!Array.isArray(it)) return;
+            const [nombre, url, ruta] = it;
+            if (!nombre || !url) return;
+            const clave = menuKey(url);
+            const nuestra = porClave.get(clave);
+            if (nuestra) {
+                if (!(' ' + nuestra.keywords + ' ').includes(' ' + nombre + ' ')) {
+                    nuestra.keywords = (nuestra.keywords || '') + ' ' + nombre;
+                }
+                return;
+            }
+            if (vistas.has(clave)) return;
+            vistas.add(clave);
+            delMenu.push({
+                id: 'menu:' + location.host + ':' + url,
+                label: nombre,
+                description: ruta || '',
+                category: T.catMenu,
+                iconKey: 'nav',
+                keywords: ruta || '',
+                fromMenu: true,
+                destino: url,
+                run: () => { window.location.href = url; }
+            });
+        });
+        return base.concat(delMenu);
+    }
 
     function resolveTheme() {
         return theme === 'dark' ? 'dark' : 'light';
@@ -204,37 +342,41 @@
             run: () => { window.location.href = path; }
         });
 
-        return [
-            nav('cmdp_act_script_list', 'Script List', '/app/common/scripting/scriptlist.nl?scripttype=', 'suitescript scripts'),
-            nav('cmdp_act_script_deployments', 'Script Deployments', '/app/common/scripting/scriptrecordlist.nl', 'deployment'),
+        return fusionaMenu([
+            nav('cmdp_act_script_list', 'Script List', '/app/common/scripting/scriptlist.nl?scripttype=', 'suitescript scripts secuencias de comando'),
+            nav('cmdp_act_script_deployments', 'Script Deployments', '/app/common/scripting/scriptrecordlist.nl', 'deployment despliegues implementaciones'),
             nav('cmdp_act_scripted_records', 'Scripted Records', '/app/common/scripting/scriptedrecords.nl', 'scripted records'),
             nav('cmdp_act_saved_searches', 'Saved Searches', '/app/common/search/savedsearchlist.nl', 'search list'),
             nav('cmdp_act_new_saved_search', 'New Saved Search', '/app/common/search/search.nl?cu=T&e=F', 'new search create'),
             nav('cmdp_act_workflows', 'Workflows', '/app/common/workflow/setup/workflowlist.nl', 'workflow list'),
             nav('cmdp_act_bundles_installed', 'Installed Bundles', '/app/bundler/bundlelist.nl?type=I', 'bundles suitebundler installed'),
-            nav('cmdp_act_bundles_search', 'Search & Install Bundles', '/app/bundler/bundlelist.nl?type=S', 'bundles suitebundler search'),
-            nav('cmdp_act_sdf_integrations', 'SuiteCloud Development Integrations', '/app/common/integration/integrappslist.nl', 'sdf sdk integration'),
-            nav('cmdp_act_script_queue', 'Script Queue Monitor', '/app/common/scripting/scriptstatus.nl', 'scheduled queue status'),
+            nav('cmdp_act_bundles_search', 'Search & Install Bundles', '/app/bundler/installbundle.nl', 'bundles suitebundler search install paquetes'),
+            nav('cmdp_act_sdf_integrations', 'Integrations', '/app/common/integration/integrapplist.nl', 'manage integrations integration records sdf suitecloud'),
+            nav('cmdp_act_script_queue', 'Scheduled Script Status', '/app/common/scripting/scriptstatus.nl', 'scheduled script status queue monitor estado programado'),
             nav('cmdp_act_mapreduce_status', 'Map/Reduce Script Status', '/app/common/scripting/mapreducescriptstatus.nl', 'map reduce mr status queue'),
-            nav('cmdp_act_ws_log', 'Web Services Log', '/app/webservices/wslog.nl', 'ws soap rest'),
+            nav('cmdp_act_ws_log', 'SOAP Web Services Usage Log', '/app/webservices/syncstatus.nl', 'ws soap web services log usage registro'),
+            nav('cmdp_act_script_notes', 'Script Execution Logs', '/app/common/scripting/scriptnotelist.nl', 'script notes execution logs log ejecución notas'),
+            nav('cmdp_act_script_note_search', 'Script Note Search', '/app/common/search/search.nl?searchtype=ScriptNote', 'server script log search anotación búsqueda'),
 
-            custom('cmdp_act_custom_records', 'Custom Records', '/app/common/custom/custrecords.nl', 'custom records list'),
+            custom('cmdp_act_custom_records', 'Record Types', '/app/common/custom/custrecords.nl', 'custom records record types list tipos registros personalizados'),
             custom('cmdp_act_custom_lists', 'Custom Lists', '/app/common/custom/custlists.nl', 'lists'),
             custom('cmdp_act_custom_segments', 'Custom Segments', '/app/common/custom/segments/segments.nl', 'segment'),
-            custom('cmdp_act_body_fields', 'Body Fields', '/app/common/custom/bodycustfields.nl', 'transaction body field'),
-            custom('cmdp_act_column_fields', 'Column Fields', '/app/common/custom/columncustfields.nl', 'transaction line column'),
+            custom('cmdp_act_body_fields', 'Transaction Body Fields', '/app/common/custom/bodycustfields.nl', 'transaction body fields custbody cuerpo'),
+            custom('cmdp_act_column_fields', 'Transaction Line Fields', '/app/common/custom/columncustfields.nl', 'transaction line column fields custcol línea columna'),
             custom('cmdp_act_entity_fields', 'Entity Fields', '/app/common/custom/entitycustfields.nl', 'customer vendor entity'),
             custom('cmdp_act_item_fields', 'Item Fields', '/app/common/custom/itemcustfields.nl', 'item field'),
-            custom('cmdp_act_item_option_fields', 'Item Option Fields', '/app/common/custom/itemoptions.nl', 'item option'),
+            custom('cmdp_act_item_option_fields', 'Item Options', '/app/common/custom/itemoptions.nl', 'item option fields opciones'),
             custom('cmdp_act_crm_fields', 'CRM Fields', '/app/common/custom/eventcustfields.nl', 'crm'),
-            custom('cmdp_act_other_fields', 'Other Custom Fields', '/app/common/custom/othercustfields.nl', 'other'),
+            custom('cmdp_act_other_fields', 'Other Record Fields', '/app/common/custom/othercustfields.nl', 'other custom record fields otros'),
             custom('cmdp_act_transaction_forms', 'Transaction Forms', '/app/common/custom/custforms.nl', 'form transaction'),
-            custom('cmdp_act_entry_forms', 'Entry Forms', '/app/common/custom/entryforms.nl', 'form entry'),
-            custom('cmdp_act_subtab_list', 'Subtab List', '/app/common/custom/subtablist.nl', 'subtabs tab'),
+            custom('cmdp_act_entry_forms', 'Entry Forms', '/app/common/custom/custentryforms.nl', 'custom entry forms formularios'),
+            custom('cmdp_act_subtab_list', 'Subtabs', '/app/common/custom/subtabs.nl', 'subtabs subtab list tabs subfichas subpestañas'),
             custom('cmdp_act_pdf_templates', 'Advanced PDF/HTML Templates', '/app/common/custom/pdftemplates.nl', 'pdf template html advanced'),
-            custom('cmdp_act_roles', 'Roles', '/app/setup/rolelist.nl', 'permissions role'),
-            custom('cmdp_act_mass_updates', 'Mass Updates', '/app/common/mrtask/massupdates.nl', 'mass update'),
-            custom('cmdp_act_translation_collections', 'Translation Collections', '/app/translations/collections.nl', 'i18n translations'),
+            custom('cmdp_act_roles', 'Manage Roles', '/app/setup/rolelist.nl', 'roles permissions role gestionar'),
+            custom('cmdp_act_mass_updates', 'Mass Updates', '/app/common/bulk/bulkops.nl', 'mass update actualización masiva'),
+            custom('cmdp_act_saved_mass_updates', 'Saved Mass Updates', '/app/common/bulk/savedbulkops.nl', 'saved mass update guardadas'),
+            custom('cmdp_act_email_templates', 'Email Templates', '/app/crm/common/merge/emailtemplates.nl', 'email templates plantillas correo'),
+            custom('cmdp_act_translation_collections', 'Manage Translations', '/app/translations/ui/managetranslations.nl', 'translation collections i18n translations traducciones colecciones'),
 
             nav('cmdp_act_tx_sales_orders', 'Sales Orders', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=SalesOrd&quicksort=Transaction_DATECREATED_raw', 'sales order list so transactions'),
             nav('cmdp_act_tx_new_sales_order', 'New Sales Order', '/app/accounting/transactions/salesord.nl', 'sales order new so'),
@@ -248,7 +390,7 @@
             nav('cmdp_act_tx_new_credit_memo', 'New Credit Memo', '/app/accounting/transactions/custcred.nl', 'credit memo new'),
             nav('cmdp_act_tx_customer_deposits', 'Customer Deposits', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=CustDep', 'customer deposit list'),
             nav('cmdp_act_tx_new_customer_deposit', 'New Customer Deposit', '/app/accounting/transactions/custdep.nl', 'customer deposit new'),
-            nav('cmdp_act_tx_item_fulfillments', 'Item Fulfillments', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=ItemShip', 'fulfillment ship'),
+            nav('cmdp_act_tx_item_fulfillments', 'Item Fulfillments', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=ItemShip', 'fulfillment ship ejecución de orden envío'),
             nav('cmdp_act_tx_item_receipts', 'Item Receipts', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=ItemRcpt', 'receipt item'),
             nav('cmdp_act_tx_work_orders', 'Work Orders', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=WorkOrd', 'work order list'),
             nav('cmdp_act_tx_new_work_order', 'New Work Order', '/app/accounting/transactions/workord.nl', 'work order new'),
@@ -257,35 +399,56 @@
             nav('cmdp_act_tx_weekly_time', 'Weekly Time', '/app/accounting/transactions/time/weeklytimebill.nl', 'timesheet time tracking'),
             nav('cmdp_act_tx_billing_events', 'Billing Events', '/app/billing/billingevents.nl', 'billing events'),
             nav('cmdp_act_tx_bom', 'Bills of Materials', '/app/accounting/manufacturing/bomlist.nl', 'bom manufacturing'),
+            nav('cmdp_act_tx_estimates', 'Estimates', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=Estimate', 'estimate quote quotes estimación cotización presupuesto'),
+            nav('cmdp_act_tx_opportunities', 'Opportunities', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=Opprtnty', 'opportunity crm oportunidad'),
+            nav('cmdp_act_tx_cash_sales', 'Cash Sales', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=CashSale', 'cash sale venta efectivo'),
+            nav('cmdp_act_tx_customer_payments', 'Customer Payments', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=CustPymt', 'customer payment pago cliente cobro'),
+            nav('cmdp_act_tx_return_auths', 'Return Authorizations', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=RtnAuth', 'return authorization rma devolución'),
+            nav('cmdp_act_tx_bill_payments', 'Bill Payments', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=VendPymt', 'bill payment vendor payment pago factura proveedor'),
+            nav('cmdp_act_tx_bill_credits', 'Bill Credits', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=VendCred', 'bill credit vendor credit crédito factura proveedor'),
+            nav('cmdp_act_tx_checks', 'Checks', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=Check', 'check cheque'),
+            nav('cmdp_act_tx_deposits', 'Deposits', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=Deposit', 'deposit depósito banco'),
+            nav('cmdp_act_tx_expense_reports', 'Expense Reports', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=ExpRept', 'expense report informe gastos'),
+            nav('cmdp_act_tx_inventory_adjustments', 'Inventory Adjustments', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=InvAdjst', 'inventory adjustment ajuste inventario'),
+            nav('cmdp_act_tx_transfer_orders', 'Transfer Orders', '/app/accounting/transactions/transactionlist.nl?Transaction_TYPE=TrnfrOrd', 'transfer order traslado transferencia'),
 
-            nav('cmdp_act_file_cabinet', 'File Cabinet', '/app/common/media/mediaitemfolders.nl?sc=-63', 'files documents'),
+            nav('cmdp_act_file_cabinet', 'File Cabinet', '/app/common/media/mediaitemfolders.nl?sc=-63', 'files documents archivador'),
             nav('cmdp_act_employees', 'Employees', '/app/common/entity/employeelist.nl', 'users people'),
             nav('cmdp_act_new_employee', 'New Employee', '/app/common/entity/employee.nl', 'employee new'),
             nav('cmdp_act_customers', 'Customers', '/app/common/entity/custjoblist.nl?searchtype=Customer&quicksort=Entity_DATECREATED_raw', 'customer list'),
             nav('cmdp_act_new_customer', 'New Customer', '/app/common/entity/custjob.nl', 'customer new'),
+            nav('cmdp_act_contacts', 'Contacts', '/app/common/entity/contactlist.nl', 'contacts contactos'),
             nav('cmdp_act_vendors', 'Vendors', '/app/common/entity/vendorlist.nl?searchtype=Vendor&quicksort=Entity_DATECREATED_raw', 'vendor list'),
             nav('cmdp_act_new_vendor', 'New Vendor', '/app/common/entity/vendor.nl', 'vendor new'),
+            nav('cmdp_act_partners', 'Partners', '/app/common/entity/partnerlist.nl', 'partners prm socios'),
             nav('cmdp_act_items', 'Items', '/app/common/item/itemlist.nl', 'items products'),
             nav('cmdp_act_new_item', 'New Item', '/app/common/item/item.nl', 'item new'),
-            nav('cmdp_act_list_users', 'Users List', '/app/setup/listusers.nl', 'users active'),
+            nav('cmdp_act_list_users', 'Manage Users', '/app/setup/listusers.nl', 'users list active usuarios gestionar'),
             nav('cmdp_act_subsidiaries', 'Subsidiaries', '/app/common/otherlists/subsidiarylist.nl', 'subsidiary'),
             nav('cmdp_act_departments', 'Departments', '/app/common/otherlists/departmentlist.nl', 'department'),
             nav('cmdp_act_locations', 'Locations', '/app/common/otherlists/locationlist.nl', 'location'),
             nav('cmdp_act_classes', 'Classes', '/app/common/otherlists/classlist.nl', 'class'),
             nav('cmdp_act_chart_of_accounts', 'Chart of Accounts', '/app/accounting/account/accounts.nl', 'accounts coa'),
-            nav('cmdp_act_fiscal_periods', 'Fiscal Periods', '/app/setup/period/fiscalperiods.nl', 'fiscal periods'),
-            nav('cmdp_act_tax_periods', 'Tax Periods', '/app/setup/period/taxperiods.nl', 'tax periods'),
+            nav('cmdp_act_fiscal_periods', 'Manage Accounting Periods', '/app/setup/period/fiscalperiods.nl', 'fiscal accounting periods períodos contables'),
+            nav('cmdp_act_tax_periods', 'Manage Tax Reporting Periods', '/app/setup/period/taxperiods.nl', 'tax reporting periods impuestos'),
             nav('cmdp_act_currencies', 'Currencies', '/app/common/multicurrency/currencylist.nl', 'currency'),
             nav('cmdp_act_currency_rates', 'Currency Exchange Rates', '/app/common/multicurrency/currencyratelist.nl', 'currency rate exchange'),
             nav('cmdp_act_import_assistant', 'Import Assistant (New)', '/app/setup/assistants/nsimport/importassistant.nl?new=T', 'import csv new'),
             nav('cmdp_act_saved_imports', 'Saved Imports', '/app/setup/assistants/nsimport/savedimports.nl', 'import csv saved'),
+            nav('cmdp_act_csv_status', 'CSV Import Job Status', '/app/setup/upload/csv/csvstatus.nl', 'csv import job status estado del trabajo importación'),
             nav('cmdp_act_sandbox_accounts', 'Sandbox Accounts', '/app/setup/sandboxaccounts.nl', 'sandbox'),
             nav('cmdp_act_enable_features', 'Enable Features', '/app/setup/features.nl', 'features enable'),
-            nav('cmdp_act_account_setup', 'Account Setup', '/app/setup/acctsetup.nl', 'account setup'),
+            nav('cmdp_act_accounting_prefs', 'Accounting Preferences', '/app/setup/acctsetup.nl', 'accounting preferences account setup contabilidad'),
             nav('cmdp_act_email_prefs', 'Email Preferences', '/app/setup/emailpreferences.nl', 'email preferences'),
-            nav('cmdp_act_audit_trail', 'Audit Trail (System Notes)', '/app/common/search/searchrecord.nl?type=systemnote', 'system notes audit'),
+            nav('cmdp_act_audit_trail', 'System Notes Search', '/app/common/search/search.nl?searchtype=SystemNote', 'system notes audit trail auditoría notas del sistema'),
+            nav('cmdp_act_deleted_records', 'Deleted Record Search', '/app/common/search/search.nl?searchtype=DeletedRecord', 'deleted records eliminados borrados'),
+            nav('cmdp_act_login_audit', 'Login Audit Trail', '/app/common/search/search.nl?searchtype=LoginAudit', 'login audit trail security inicios de sesión auditoría'),
+            nav('cmdp_act_access_tokens', 'Access Tokens', '/app/setup/accesstokens.nl', 'access tokens tba token based authentication'),
             nav('cmdp_act_company_info', 'Company Information', '/app/common/otherlists/company.nl', 'company info'),
             nav('cmdp_act_general_prefs', 'General Preferences', '/app/setup/general.nl', 'preferences settings'),
+            nav('cmdp_act_auto_numbers', 'Set Up Auto-Generated Numbers', '/app/setup/numbering.nl', 'auto generated numbers numbering numeración autogenerados'),
+            nav('cmdp_act_printing_prefs', 'Printing & Fax Preferences', '/app/setup/printing.nl', 'printing fax preferences imprimir enviar por fax impresión'),
+            nav('cmdp_act_saved_reports', 'Saved Reports', '/app/reporting/savedreports.nl', 'saved reports informes reportes guardados'),
             nav('cmdp_act_set_prefs', 'Set Preferences', '/app/center/userprefs.nl?sc=-29', 'user preferences personal'),
             nav('cmdp_act_home_dashboard', 'Home Dashboard', '/app/center/card.nl?sc=-29&whence=', 'home dashboard'),
 
@@ -383,7 +546,7 @@
             ...(hasConsoleUtils ? [{
                 id: 'page:suitescript',
                 label: i18n('cmdp_act_ss_version', 'Which SuiteScript does this page support?'),
-                description: i18n('cmdp_act_ss_version_desc', 'Whether SuiteScript 2.x (require) and 1.0 (nlapi) are available here'),
+                description: i18n('cmdp_act_ss_version_desc', 'Whether SuiteScript 2.1 (require) and 1.0 (nlapi) are available here'),
                 category: T.catPage,
                 iconKey: 'page',
                 keywords: 'suitescript version 2.x 1.0 require nlapi api disponible available pagina page soporta supports',
@@ -459,17 +622,62 @@
                 }
             },
             {
-                id: 'nsft:splitsearch',
-                label: i18n('cmdp_act_nsft_splitsearch', 'Split view: saved search'),
-                description: i18n('cmdp_act_nsft_splitsearch_desc', 'Open a saved search in a side panel next to this page'),
+                id: 'nsft:role-permissions',
+                label: i18n('enableRolePermissionsLabel', 'Your role permissions'),
+                description: i18n('cmdp_act_nsft_rperm_desc', 'Which permissions the tools need and which your role is missing'),
                 category: T.catNsft,
                 iconKey: 'nsft',
-                keywords: 'saved search split side panel results compare',
+                keywords: 'permisos rol role permissions acceso access administrador administrator falta missing suiteanalytics suitescript',
                 run: () => {
-                    if (window.NSFT_SavedSearchSplit && typeof window.NSFT_SavedSearchSplit.open === 'function') {
-                        window.NSFT_SavedSearchSplit.open();
+                    if (window.NSFT_RolePerms && typeof window.NSFT_RolePerms.open === 'function') {
+                        window.NSFT_RolePerms.open();
                     } else {
-                        toast(i18n('cmdp_splitsearch_disabled', 'Enable "Saved search split view" in NSFT settings'), 'error');
+                        toast(i18n('cmdp_rperm_disabled', 'Enable "Your role permissions" in NSFT settings'), 'error');
+                    }
+                }
+            },
+            {
+                id: 'nsft:record-history',
+                label: i18n('enableRecordHistoryLabel', 'Record history'),
+                description: i18n('cmdp_act_nsft_rhist_desc', 'Who changed this record, when and what'),
+                category: T.catNsft,
+                iconKey: 'nsft',
+                keywords: 'historial history notas sistema system notes cambios changes auditoria audit quien who',
+                run: () => {
+                    if (window.NSFT_RecordHistoryTool && typeof window.NSFT_RecordHistoryTool.open === 'function') {
+                        window.NSFT_RecordHistoryTool.open();
+                    } else {
+                        toast(i18n('cmdp_rhist_disabled', 'Enable "Record history" in NSFT settings'), 'error');
+                    }
+                }
+            },
+            {
+                id: 'nsft:csv-import-template',
+                label: i18n('enableCsvImportTemplateLabel', 'CSV import template'),
+                description: i18n('cmdp_act_nsft_csvt_desc', 'A CSV to import records like this one'),
+                category: T.catNsft,
+                iconKey: 'nsft',
+                keywords: 'plantilla template csv importar import importacion excel columnas columns',
+                run: () => {
+                    if (window.NSFT_CsvTemplate && typeof window.NSFT_CsvTemplate.open === 'function') {
+                        window.NSFT_CsvTemplate.open();
+                    } else {
+                        toast(i18n('cmdp_csvt_disabled', 'Enable "CSV import template" in NSFT settings'), 'error');
+                    }
+                }
+            },
+            {
+                id: 'nsft:record-attachments',
+                label: i18n('enableRecordAttachmentsLabel', 'Record attachments'),
+                description: i18n('cmdp_act_nsft_rattach_desc', 'Files attached to this record, with a preview'),
+                category: T.catNsft,
+                iconKey: 'nsft',
+                keywords: 'adjuntos attachments archivos files ficheros documentos documents pdf excel xlsx csv imagen image vista previa preview clip',
+                run: () => {
+                    if (window.NSFT_RecordAttachments && typeof window.NSFT_RecordAttachments.open === 'function') {
+                        window.NSFT_RecordAttachments.open();
+                    } else {
+                        toast(i18n('cmdp_rattach_disabled', 'Enable "Record attachments" in NSFT settings'), 'error');
                     }
                 }
             },
@@ -613,7 +821,7 @@
                 run: (term) => runGlobalSearch(term)
             },
             ...buildCustomUrlActions()
-        ];
+        ]);
     }
 
     function buildCustomUrlActions() {
@@ -698,27 +906,27 @@
 
     function openPalette() {
         if (hasSscConsole) actions = buildActions();
+        asegurarMenu();
         refreshContextBoosts();
         overlayEl = document.createElement('div');
         overlayEl.id = OVERLAY_ID;
         overlayEl.className = 'nsft-cmdp-overlay';
         overlayEl.setAttribute('data-theme', resolveTheme());
         overlayEl.innerHTML = `
-            <div class="nsft-cmdp-panel" role="dialog" aria-modal="true">
-                <div class="nsft-cmdp-input-wrap">
-                    <svg class="nsft-cmdp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input type="text" class="nsft-cmdp-input" autocomplete="off" spellcheck="false" />
+            <div class="nsft-cmdp-panel nsft-paleta" role="dialog" aria-modal="true">
+                <div class="nsft-cmdp-input-wrap nsft-paleta-barra">
+                    <input type="text" class="nsft-cmdp-input nsft-paleta-input" autocomplete="off" spellcheck="false" />
                     <button type="button" class="nsft-cmdp-clear" title="${escapeHtml(T.clear)}" aria-label="${escapeHtml(T.clear)}" hidden>✕</button>
                 </div>
                 <div class="nsft-cmdp-list" role="listbox"></div>
-                <div class="nsft-cmdp-footer">
-                    <span class="nsft-cmdp-hint"><kbd>↑</kbd><kbd>↓</kbd> ${escapeHtml(T.hintNav)}</span>
+                <div class="nsft-cmdp-footer nsft-paleta-pie">
+                    <span class="nsft-paleta-cuenta"></span>
+                    ${window.NSFT_Herramientas && window.NSFT_Herramientas.teclas
+                        ? window.NSFT_Herramientas.teclas([['↑↓', i18nMsg('tmm_k_nav', 'navigate')], ['↵', T.hintRun.toLowerCase()], [['Ctrl', '↵'], T.hintNewTab.toLowerCase()], ['Esc', i18nMsg('tmm_k_close', 'close')]])
+                        : `<span class="nsft-cmdp-hint"><kbd>↑</kbd><kbd>↓</kbd> ${escapeHtml(T.hintNav)}</span>
                     <span class="nsft-cmdp-hint"><kbd>↵</kbd> ${escapeHtml(T.hintRun)}</span>
                     <span class="nsft-cmdp-hint"><kbd>Ctrl</kbd><kbd>↵</kbd> ${escapeHtml(T.hintNewTab)}</span>
-                    <span class="nsft-cmdp-hint"><kbd>Esc</kbd> ${escapeHtml(T.hintClose)}</span>
+                    <span class="nsft-cmdp-hint"><kbd>Esc</kbd> ${escapeHtml(T.hintClose)}</span>`}
                 </div>
             </div>
         `;
@@ -729,7 +937,10 @@
         listEl = overlayEl.querySelector('.nsft-cmdp-list');
         inputEl.placeholder = T.placeholder;
 
-        inputEl.addEventListener('input', () => renderList(inputEl.value));
+        inputEl.addEventListener('input', () => {
+            if (_rafLista) cancelAnimationFrame(_rafLista);
+            _rafLista = requestAnimationFrame(() => { _rafLista = 0; renderList(inputEl.value); });
+        });
         inputEl.addEventListener('keydown', onInputKeydown);
 
         if (clearEl) {
@@ -762,6 +973,11 @@
     }
 
     function onInputKeydown(e) {
+        if (_rafLista) {
+            cancelAnimationFrame(_rafLista);
+            _rafLista = 0;
+            renderList(inputEl.value);
+        }
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             moveSelection(1);
@@ -883,6 +1099,7 @@
         nsft: { filter: (a) => a.iconKey === 'nsft', label: 'NSFT tools' },
         tx: { filter: (a) => /\/transactions\//i.test(a.id) || /Transaction_TYPE/i.test(a.id), label: 'Transactions' },
         user: { filter: (a) => String(a.id).startsWith('custom-url:'), label: 'My URLs' },
+        menu: { filter: (a) => !!a.fromMenu, label: 'NetSuite menu' },
         pinned: { filter: (a) => pinned.includes(a.id), label: 'Pinned' },
         recent: { filter: (a) => recent.includes(a.id), label: 'Recent' }
     };
@@ -920,16 +1137,17 @@
                 .filter(a => a && !slotById.has(a.id));
             recentActions.forEach(a => slotById.set(a.id, 'recent'));
 
-            const rest = actions.filter(a => !slotById.has(a.id));
+            const rest = actions.filter(a => !slotById.has(a.id) && !a.fromMenu);
             rest.sort((a, b) => contextBoost(b) - contextBoost(a));
             filteredActions = [...pinnedActions, ...recentActions, ...rest];
         } else if (!q && slashSpec) {
-            filteredActions = pool.slice().sort((a, b) => contextBoost(b) - contextBoost(a));
+            filteredActions = pool.slice().sort((a, b) => contextBoost(b) - contextBoost(a)).slice(0, 200);
         } else {
             filteredActions = pool
                 .map(a => ({ action: a, score: fuzzyScore(q, a) }))
                 .filter(x => x.score > 0)
                 .sort((a, b) => b.score - a.score)
+                .slice(0, MAX_FILAS)
                 .map(x => x.action);
         }
 
@@ -948,7 +1166,9 @@
         selectedIndex = 0;
 
         if (filteredActions.length === 0) {
-            listEl.innerHTML = `<div class="nsft-cmdp-empty">${escapeHtml(T.empty)}</div>`;
+            listEl.innerHTML = `<div class="nsft-cmdp-empty">${window.NSFT_Herramientas
+                ? window.NSFT_Herramientas.vacio('buscar', T.empty)
+                : escapeHtml(T.empty)}</div>`;
             return;
         }
 
@@ -982,7 +1202,7 @@
             <span class="nsft-cmdp-item-body">
                 <span class="nsft-cmdp-item-label"></span>
             </span>
-            <span class="nsft-cmdp-item-cat"></span>
+            <span class="nsft-cmdp-item-cat nsft-tipo"></span>
         `;
         return div;
     }
@@ -1110,7 +1330,7 @@
                         <span class="nsft-cmdp-item-label">&gt;${escapeHtml(prefix)}</span>
                         <span class="nsft-cmdp-item-desc">${escapeHtml(spec.label)}</span>
                     </span>
-                    <span class="nsft-cmdp-item-cat">${count}</span>
+                    <span class="nsft-cmdp-item-cat nsft-tipo">${count}</span>
                 </div>
             `;
         }).join('');
@@ -1119,7 +1339,7 @@
                 .replace('$1', typedPrefix)
             : i18nMsg('cmdp_slash_pick', 'Pick a category to filter');
         listEl.innerHTML = `
-            <div class="nsft-cmdp-slash-header">${escapeHtml(headerTxt)}</div>
+            <div class="nsft-paleta-sec">${escapeHtml(headerTxt)}</div>
             ${items}
         `;
         listEl.querySelectorAll('.nsft-cmdp-slash-help').forEach(el => {
@@ -1147,13 +1367,19 @@
 
     function fuzzyScore(query, action) {
         query = foldText(query);
-        const haystack = foldText(action.label + ' ' + (action.keywords || '') + ' ' + action.category);
+        const firma = action.label + '\u0001' + (action.keywords || '') + '\u0001' + action.category;
+        if (action._foldFirma !== firma) {
+            action._foldFirma = firma;
+            action._foldHay = foldText(action.label + ' ' + (action.keywords || '') + ' ' + action.category);
+            action._foldLabel = foldText(action.label);
+        }
+        const haystack = action._foldHay;
         let score = contextBoost(action);
         let qi = 0;
         let streak = 0;
 
         if (haystack.includes(query)) score += 50;
-        if (foldText(action.label).startsWith(query)) score += 30;
+        if (action._foldLabel.startsWith(query)) score += 30;
 
         for (let i = 0; i < haystack.length && qi < query.length; i++) {
             if (haystack[i] === query[qi]) {
@@ -1475,44 +1701,104 @@
         const names = Object.keys(templates).sort();
         const titleTxt = escapeHtml(i18nMsg('cmdp_tpl_pick_title', 'Select a template to apply'));
         const deleteTxt = escapeHtml(i18nMsg('sql_fav_delete', 'Delete'));
+        const clearTxt = escapeHtml(i18nMsg('sql_find_clear', 'Clear search'));
+        const applyTxt = i18nMsg('cmdp_tpl_k_apply', 'apply');
+        const H = window.NSFT_Herramientas;
 
         overlay.innerHTML = `
-            <div class="nsft-cmdp-panel">
-                <div class="nsft-cmdp-input-wrap" style="font-size: 13px; font-weight: 600; color: var(--cmdp-text-primary, #111827);">
-                    ${titleTxt}
+            <div class="nsft-cmdp-panel nsft-paleta" role="dialog" aria-modal="true">
+                <div class="nsft-cmdp-input-wrap nsft-paleta-barra">
+                    <input type="text" class="nsft-cmdp-input nsft-paleta-input" autocomplete="off" spellcheck="false" placeholder="${titleTxt}" aria-label="${titleTxt}" />
+                    <button type="button" class="nsft-cmdp-clear" title="${clearTxt}" aria-label="${clearTxt}" hidden>✕</button>
                 </div>
-                <div class="nsft-cmdp-list" role="listbox">
-                    ${names.map(n => {
-            const tpl = templates[n];
-            const count = (tpl.fields || []).length;
-            const safeName = escapeHtml(n);
-            const safeType = escapeHtml(tpl.recordType || '');
-            return `<div class="nsft-cmdp-item" data-tpl="${safeName}" role="option">
-                                    <span class="nsft-cmdp-item-label">${safeName}</span>
-                                    <span class="nsft-cmdp-item-cat">${count} ${safeType ? '· ' + safeType : ''}</span>
-                                    <span class="nsft-cmdp-item-delete" data-tpl-delete="${safeName}" title="${deleteTxt}" style="margin-left: 8px; cursor: pointer; opacity: 0.6;">&times;</span>
-                                </div>`;
-        }).join('')}
-                </div>
-                <div class="nsft-cmdp-footer">
-                    <span class="nsft-cmdp-hint"><kbd>↵</kbd> ${escapeHtml(i18nMsg('cmdp_hint_run', 'Apply'))}</span>
-                    <span class="nsft-cmdp-hint"><kbd>Esc</kbd> ${escapeHtml(i18nMsg('cmdp_hint_close', 'Close'))}</span>
+                <div class="nsft-cmdp-list" role="listbox"></div>
+                <div class="nsft-cmdp-footer nsft-paleta-pie">
+                    <span class="nsft-paleta-cuenta"></span>
+                    ${H && H.teclas
+                        ? H.teclas([['↑↓', i18nMsg('tmm_k_nav', 'navigate')], ['↵', applyTxt], ['Esc', i18nMsg('pal_k_clear_close', 'clear or close')]])
+                        : `<span class="nsft-cmdp-hint"><kbd>↵</kbd> ${escapeHtml(applyTxt)}</span>
+                    <span class="nsft-cmdp-hint"><kbd>Esc</kbd> ${escapeHtml(i18nMsg('cmdp_hint_close', 'Close'))}</span>`}
                 </div>
             </div>
         `;
         document.body.appendChild(overlay);
-        const onEsc = (e) => {
-            if (e.key === 'Escape') { e.preventDefault(); close(); }
+        const input = overlay.querySelector('.nsft-cmdp-input');
+        const clearBtn = overlay.querySelector('.nsft-cmdp-clear');
+        const list = overlay.querySelector('.nsft-cmdp-list');
+
+        let shown = [];
+        let sel = 0;
+        const casa = (hay, q) => (TS ? TS.match(hay, q) : foldText(hay).indexOf(foldText(q)) !== -1);
+        const marcaTxt = (s, q) => (TS && q ? TS.markHtml(s, q, 'nsft-cmdp-match') : escapeHtml(s));
+        const marcaSel = () => {
+            list.querySelectorAll('.nsft-cmdp-item').forEach((el, i) => {
+                el.classList.toggle('nsft-cmdp-selected', i === sel);
+                if (i === sel) el.scrollIntoView({ block: 'nearest' });
+            });
+        };
+        const pinta = () => {
+            const q = input.value.trim();
+            clearBtn.hidden = !input.value.length;
+            shown = names.filter((n) => !q || casa(n + ' ' + (templates[n].recordType || ''), q));
+            sel = 0;
+            if (!shown.length) {
+                const vacioTxt = i18nMsg('cmdp_tpl_no_match', 'No template matches the search');
+                list.innerHTML = `<div class="nsft-cmdp-empty">${H ? H.vacio('buscar', vacioTxt) : escapeHtml(vacioTxt)}</div>`;
+                return;
+            }
+            list.innerHTML = shown.map((n, i) => {
+                const tpl = templates[n];
+                const count = (tpl.fields || []).length;
+                const type = tpl.recordType || '';
+                return `<div class="nsft-cmdp-item${i === sel ? ' nsft-cmdp-selected' : ''}" data-i="${i}" role="option">
+                    <span class="nsft-cmdp-item-label">${marcaTxt(n, q)}</span>
+                    <span class="nsft-cmdp-item-cat nsft-tipo">${count}${type ? ' · ' + marcaTxt(type, q) : ''}</span>
+                    <span class="nsft-cmdp-item-delete" data-tpl-delete="${i}" title="${deleteTxt}" aria-label="${deleteTxt}">&times;</span>
+                </div>`;
+            }).join('');
+        };
+        const onKey = (e) => {
+            if (!overlay.contains(e.target) && e.target !== document.body && e.target !== document.documentElement) return;
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (input.value) { input.value = ''; pinta(); input.focus(); } else close();
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!shown.length) return;
+                sel = (sel + (e.key === 'ArrowDown' ? 1 : -1) + shown.length) % shown.length;
+                marcaSel();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const name = shown[sel];
+                if (name) { close(); cb(name); }
+            }
         };
         const close = () => {
-            document.removeEventListener('keydown', onEsc);
+            document.removeEventListener('keydown', onKey);
             overlay.remove();
         };
+        input.addEventListener('input', pinta);
+        clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            input.value = '';
+            pinta();
+            input.focus();
+        });
+        list.addEventListener('mouseover', (e) => {
+            const item = e.target.closest('.nsft-cmdp-item');
+            if (!item) return;
+            const i = parseInt(item.dataset.i, 10);
+            if (Number.isInteger(i) && i !== sel) { sel = i; marcaSel(); }
+        });
+        pinta();
+        setTimeout(() => input.focus(), 0);
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) { close(); return; }
             if (e.target.hasAttribute('data-tpl-delete')) {
                 e.stopPropagation();
-                const name = e.target.getAttribute('data-tpl-delete');
+                const name = shown[parseInt(e.target.getAttribute('data-tpl-delete'), 10)];
+                if (!name) return;
                 const pregunta = `${i18nMsg('cmdp_tpl_delete_confirm', 'Delete template')} "${name}"?`;
                 const borrar = () => loadFieldTemplates((all) => {
                     delete all[name];
@@ -1532,12 +1818,12 @@
                 return;
             }
             const item = e.target.closest('.nsft-cmdp-item');
-            if (item) {
-                const name = item.getAttribute('data-tpl');
+            const name = item ? shown[parseInt(item.dataset.i, 10)] : null;
+            if (name) {
                 close();
                 cb(name);
             }
         });
-        document.addEventListener('keydown', onEsc);
+        document.addEventListener('keydown', onKey);
     }
 })();

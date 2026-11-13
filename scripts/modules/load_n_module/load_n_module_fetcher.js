@@ -43,6 +43,7 @@
         lnm_pick_badge: 'Ya cargado',
         lnm_pick_count: '$1 de $2 seleccionados',
         lnm_pick_search: 'Buscar módulo… p. ej. record, https',
+        lnm_pick_nomatch: 'Sin coincidencias',
         ro_clear_search: 'Limpiar búsqueda',
         lnm_pick_foot: 'Los módulos elegidos quedan disponibles en la consola sin el prefijo «N.».',
         lnm_btn_load: 'Cargar ($1)',
@@ -71,7 +72,10 @@
             const newTheme = data.payload && data.payload.theme;
             if (newTheme) {
                 currentTheme = newTheme;
-                if (activeModal) activeModal.setAttribute('data-theme', newTheme);
+                if (activeModal) {
+                    activeModal.setAttribute('data-theme', newTheme);
+                    activeModal.querySelectorAll('[data-theme]').forEach((n) => n.setAttribute('data-theme', newTheme));
+                }
             }
         } else if (data.type === 'teardown') {
             closeActiveModal();
@@ -187,17 +191,16 @@
         const preset = Array.isArray(savedAliases) ? savedAliases : DEFAULT_ALIASES;
         const chosen = new Set(preset.filter((name) => available.indexOf(name) !== -1));
 
-        const overlay = el('div', { class: 'nsft-lrc-modal-overlay', 'data-theme': currentTheme });
-        const content = el('div', { class: 'nsft-lrc-modal-content nsft-lnm-picker' });
+        const overlay = el('div', { class: 'nsft-lrc-modal-overlay nsft-modal-backdrop', 'data-theme': currentTheme });
+        const content = el('div', { class: 'nsft-lrc-modal-content nsft-lnm-picker nsft-modal nsft-modal--dialog', 'data-theme': currentTheme });
 
-        const header = el('div', { class: 'nsft-lrc-modal-header' });
-        const titleEl = el('span', { class: 'nsft-lrc-modal-title' });
+        const header = el('div', { class: 'nsft-modal-header nsft-lrc-modal-header' });
+        const titleEl = el('span', { class: 'nsft-modal-title nsft-lrc-modal-title' });
         titleEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>';
-        titleEl.append('NetSuite Full Tools - ' + MSG.lnm_modal_title);
-        header.append(
-            titleEl,
-            el('button', { class: 'nsft-lrc-close-btn', text: '✕', type: 'button' })
-        );
+        titleEl.append(MSG.lnm_modal_title);
+        const acciones = el('div', { class: 'nsft-header-actions' });
+        acciones.append(el('button', { class: 'nsft-modal-btn-close nsft-lrc-close-btn', text: '✕', type: 'button' }));
+        header.append(titleEl, acciones);
         const closeBtn = header.querySelector('.nsft-lrc-close-btn');
 
         const body = el('div', { class: 'nsft-lrc-modal-body' });
@@ -245,7 +248,7 @@
                 el('span', { class: 'nsft-lnm-name', text: name }),
                 el('span', { class: 'nsft-lnm-path', text: 'N/' + name })
             );
-            if (taken) head.append(el('span', { class: 'nsft-lnm-badge', text: MSG.lnm_pick_badge }));
+            if (taken) head.append(el('span', { class: 'nsft-lnm-badge nsft-alerta is-aviso', text: MSG.lnm_pick_badge }));
 
             const col = el('div', { class: 'nsft-lnm-body' });
             col.append(head);
@@ -263,6 +266,13 @@
 
             list.append(label);
         });
+
+        const vacio = el('div', { class: 'nsft-vacio nsft-lnm-vacio' });
+        vacio.innerHTML = '<svg class="nsft-vacio-ico" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+            + '<circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>';
+        vacio.append(el('span', { class: 'nsft-vacio-tit', text: String(MSG.lnm_pick_nomatch || 'Sin coincidencias').replace(/\.$/, '') }));
+        vacio.hidden = true;
+        list.append(vacio);
 
         body.append(list);
 
@@ -315,6 +325,7 @@
                 markNode(r.label.querySelector('.nsft-lnm-desc'), show ? raw : '');
             });
             list.classList.toggle('is-empty', visible === 0);
+            vacio.hidden = visible !== 0;
         }
 
         const setMany = (names) => {

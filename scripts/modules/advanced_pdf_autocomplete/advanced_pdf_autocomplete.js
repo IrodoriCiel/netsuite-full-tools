@@ -56,6 +56,6 @@
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL(FETCHER_PATH);
         script.onload = function () { this.remove(); };
-        (document.head || document.documentElement).appendChild(script);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
     }
 })();

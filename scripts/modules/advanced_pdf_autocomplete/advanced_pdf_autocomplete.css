@@ -21,11 +21,11 @@
 }
 
 .CodeMirror-hint:hover {
-    background: #f0f5fa !important;
-    color: #1e3a5f !important;
+    background: color-mix(in srgb, var(--nsft-ns-accent, #4c87b3) 9%, #ffffff) !important;
+    color: var(--nsft-ns-accent-bd, #1e3a5f) !important;
 }
 
 .CodeMirror-hint-active {
-    background: #4c87b3 !important;
+    background: var(--nsft-ns-primary, var(--nsft-ns-button, #4c87b3)) !important;
     color: #ffffff !important;
 }

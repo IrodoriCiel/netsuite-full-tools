@@ -182,14 +182,20 @@
         return modalActive() || insideModal(event);
     }
 
-    function bind(moduleId, opts) {
-        const o = opts || {};
-        if (!moduleId || !o.label || !o.defaultCombo) return;
-        let combo = o.defaultCombo;
+    const _binds = new Map();
 
-        const publish = () => {
+    function bind(moduleId, opts) {
+        if (!moduleId || !opts || !opts.label || !opts.defaultCombo) return;
+        const prev = _binds.get(moduleId);
+        if (prev) { prev.o = opts; prev.publish(); return; }
+
+        const st = { o: opts, combo: opts.defaultCombo, publish: null };
+        _binds.set(moduleId, st);
+
+        const publish = st.publish = () => {
+            const o = st.o;
             unregisterModule(moduleId);
-            register(moduleId, o.label, combo, {
+            register(moduleId, o.label, st.combo, {
                 group: o.group,
                 configurable: true,
                 storageKey: o.storageKey || null,
@@ -199,31 +205,34 @@
         };
 
         const fire = () => {
+            const o = st.o;
             if (typeof o.onFire === 'function') { o.onFire(); return; }
             if (o.event) window.dispatchEvent(new CustomEvent(o.event));
         };
 
+        const o0 = opts;
         document.addEventListener('keydown', (e) => {
+            const o = st.o;
             if (typeof o.isEnabled === 'function' && !o.isEnabled()) return;
             if (o.skipWhenModalOpen && pageShortcutBlocked(e)) return;
-            if (!matches(e, combo)) return;
+            if (!matches(e, st.combo)) return;
             e.preventDefault();
             e.stopPropagation();
             if (window.NSFT_ShortcutCoach) window.NSFT_ShortcutCoach.noteUsed(moduleId);
             fire();
         }, true);
 
-        if (o.storageKey) {
+        if (o0.storageKey) {
             try {
-                chrome.storage.local.get({ [o.storageKey]: null }, (items) => {
-                    const saved = items && items[o.storageKey];
-                    if (saved && typeof saved === 'object') combo = saved;
+                chrome.storage.local.get({ [o0.storageKey]: null }, (items) => {
+                    const saved = items && items[o0.storageKey];
+                    if (saved && typeof saved === 'object') st.combo = saved;
                     publish();
                 });
                 chrome.storage.onChanged.addListener((changes, area) => {
-                    if (area !== 'local' || !changes[o.storageKey]) return;
-                    const v = changes[o.storageKey].newValue;
-                    combo = (v && typeof v === 'object') ? v : o.defaultCombo;
+                    if (area !== 'local' || !changes[o0.storageKey]) return;
+                    const v = changes[o0.storageKey].newValue;
+                    st.combo = (v && typeof v === 'object') ? v : st.o.defaultCombo;
                     publish();
                 });
             } catch (e) { publish(); }

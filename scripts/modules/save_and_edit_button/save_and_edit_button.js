@@ -71,7 +71,7 @@
         link.rel = 'stylesheet';
         link.type = 'text/css';
         link.href = chrome.runtime.getURL(CSS_FILE);
-        (document.head || document.documentElement).appendChild(link);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(link) : (document.head || document.documentElement).appendChild(link));
     }
 
     function removeButtons() {
@@ -98,7 +98,7 @@
         msgData.id = 'nsft-sae-messages';
         msgData.type = 'application/json';
         msgData.textContent = JSON.stringify(messages);
-        (document.head || document.documentElement).appendChild(msgData);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(msgData) : (document.head || document.documentElement).appendChild(msgData));
 
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL(FETCHER_PATH);
@@ -106,7 +106,7 @@
             this.remove();
             msgData.remove();
         };
-        (document.head || document.documentElement).appendChild(script);
+        (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(script) : (document.head || document.documentElement).appendChild(script));
     }
 
     function addButtons() {

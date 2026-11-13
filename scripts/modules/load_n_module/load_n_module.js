@@ -1,4 +1,5 @@
 'use strict';
+if (window.NSFT_Herramientas) window.NSFT_Herramientas.vigila('.nsft-lnm-picker', 'lnm');
 
 (function () {
     const STORAGE_KEY = 'enableLoadNModule';
@@ -125,8 +126,8 @@
     }
 
     const MODULE_KEYS = [
-        'action', 'auth', 'bignumber', 'cache', 'config', 'crypto', 'currency',
-        'currentRecord', 'dataset', 'datasetLink', 'email', 'encode', 'error', 'file',
+        'action', 'askOracle', 'auth', 'bignumber', 'cache', 'config', 'crypto', 'currency',
+        'currentRecord', 'dataset', 'datasetLink', 'dynamicData', 'email', 'encode', 'error', 'file',
         'format', 'http', 'https', 'log', 'plugin', 'portlet', 'query', 'record',
         'recordContext', 'redirect', 'render', 'runtime', 'search', 'sftp', 'sso',
         'suiteAppInfo', 'task', 'transaction', 'translation', 'ui', 'url', 'util',
@@ -170,6 +171,7 @@
                     lnm_pick_badge: chrome.i18n.getMessage('lnm_pick_badge'),
                     lnm_pick_count: chrome.i18n.getMessage('lnm_pick_count', ['$1', '$2']),
                     lnm_pick_search: chrome.i18n.getMessage('lnm_pick_search'),
+                    lnm_pick_nomatch: chrome.i18n.getMessage('adv_find_none'),
                     ro_clear_search: chrome.i18n.getMessage('ro_clear_search'),
                     lnm_pick_foot: chrome.i18n.getMessage('lnm_pick_foot'),
                     lnm_btn_load: chrome.i18n.getMessage('lnm_btn_load', ['$1']),

@@ -1,12 +1,6 @@
 (function () {
     const STORAGE_KEY = 'enableCopyAccountId';
 
-    const cssUrl = chrome.runtime.getURL("scripts/modules/copy_account_id/copy_account_id.css");
-    const link = document.createElement("link");
-    link.href = cssUrl;
-    link.type = "text/css";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
 
     function isApplicablePage() {
         try {

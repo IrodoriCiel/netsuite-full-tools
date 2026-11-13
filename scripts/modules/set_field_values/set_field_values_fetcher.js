@@ -49,6 +49,29 @@
         if (v === null || v === undefined) return '';
         return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
+    const VACIO_ICONOS = {
+        buscar: '<circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/>',
+        reloj: '<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/>',
+        bandeja: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>'
+    };
+    function vacioHtml(icono, texto, linea) {
+        let t = String(texto || '').trim();
+        let f = '';
+        let p = t.indexOf('. ');
+        if (p < 0) p = t.indexOf(': ');
+        if (p > 0) {
+            f = t.slice(p + 2).trim();
+            f = f.charAt(0).toUpperCase() + f.slice(1);
+            t = t.slice(0, p);
+        }
+        t = t.replace(/\.$/, '');
+        const lado = linea ? 15 : 20;
+        return '<div class="nsft-vacio' + (linea ? ' is-linea' : '') + '">'
+            + '<svg class="nsft-vacio-ico" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="' + lado + '" height="' + lado + '" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (VACIO_ICONOS[icono] || VACIO_ICONOS.bandeja) + '</svg>'
+            + '<span class="nsft-vacio-tit">' + escapeHtml(t) + '</span>'
+            + (f ? '<span class="nsft-vacio-txt">' + escapeHtml(f) + '</span>' : '')
+            + '</div>';
+    }
     function escapeJsString(v) {
         if (v === null || v === undefined) return '';
         return String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/</g, '\\u003c');
@@ -452,8 +475,17 @@
     }
 
     function observeDomChanges() {
-        const observer = new MutationObserver((mutations) => {
-            runAll();
+        let pendiente = false;
+        let ultimo = 0;
+        const observer = new MutationObserver(() => {
+            if (!moduleEnabled || pendiente) return;
+            pendiente = true;
+            const espera = Math.max(0, 200 - (performance.now() - ultimo));
+            setTimeout(() => {
+                pendiente = false;
+                ultimo = performance.now();
+                runAll();
+            }, espera);
         });
 
         observer.observe(document.body, {
@@ -802,6 +834,11 @@
             const modal = document.getElementById(NSFT.MODAL);
             const titleEl = document.getElementById(NSFT.TITLE);
             if (titleEl) titleEl.innerText = translations.sfv_title;
+            const etqCampo = String((triggerEl && triggerEl.textContent) || '').replace(/\s+/g, ' ').trim();
+            modal.dataset.campo = etqCampo.length <= 60 ? etqCampo : '';
+            modal.dataset.campoId = fieldName || '';
+            const tituloCab = modal.querySelector('.nsft-sfv-title');
+            if (tituloCab && tituloCab.querySelector('.nsft-cab-herr')) tituloCab.textContent = translations.sfv_title;
 
             modal.style.display = "flex";
             modal.dataset.state = "maximised";
@@ -839,18 +876,20 @@
             if (document.getElementById(NSFT.MODAL)) return;
 
             const html = `
-                <div id="${NSFT.MODAL}" data-state="maximised" data-theme="${NSFT_THEME}">
-                    <div class="${NSFT.HEADER}">
-                        <span class="${"nsft-sfv-title"}">
+                <div id="${NSFT.MODAL}" class="nsft-modal" data-state="maximised" data-theme="${NSFT_THEME}">
+                    <div class="nsft-modal-header ${NSFT.HEADER}">
+                        <span class="nsft-modal-title nsft-sfv-title">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:16px; height:16px; margin-right:6px; color:#333;"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm.75 12.75a.75.75 0 01-1.5 0v-6a.75.75 0 011.5 0v6zm-1.5-9a1 1 0 112 0 1 1 0 01-2 0z" clip-rule="evenodd" /></svg>
                             <span id="${NSFT.TITLE}">${translations.sfv_title}</span>
                         </span>
                         <div class="nsft-header-actions">
-                            <span id="${NSFT.CFG_BTN}" class="nsft-header-btn nsft-modal-hide-min" title="${escapeHtml(translations.sfv_open_settings || "")}" role="button">
+                            <span id="${NSFT.CFG_BTN}" class="nsft-header-btn nsft-modal-btn-ajustes nsft-modal-hide-min" title="${escapeHtml(translations.sfv_open_settings || "")}" role="button">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:14px;height:14px;vertical-align:-2px;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                             </span>
-                            <span id="${NSFT.MAX_BTN}" class="nsft-header-btn" title="${translations.maximizeModal || 'Maximize'}">▢</span>
-                            <span id="${NSFT.CLOSE_BTN}" class="nsft-header-btn nsft-btn-close" title="${translations.closeModal || 'Close'}">✕</span>
+                            
+                            <span class="nsft-header-btn nsft-modal-btn-minimise" role="button" title="${translations.minimizeModal || 'Minimize'}"></span>
+                            <span id="${NSFT.MAX_BTN}" class="nsft-header-btn nsft-modal-btn-maximise" title="${translations.maximizeModal || 'Maximize'}"></span>
+                            <span id="${NSFT.CLOSE_BTN}" class="nsft-header-btn nsft-btn-close nsft-modal-btn-close" title="${translations.closeModal || 'Close'}">✕</span>
                         </div>
                     </div>
                     <div id="${NSFT.CONTENT}" class="nsft-sfv-content">
@@ -860,7 +899,6 @@
             `;
             document.body.insertAdjacentHTML("beforeend", html);
             addModalListeners();
-            try { window.postMessage({ dest: 'extension_sfv', type: 'coach' }, '*'); } catch (e) { }
             watchModalSize(document.getElementById(NSFT.MODAL));
         }
 
@@ -1157,7 +1195,7 @@
 
             html += `<div id="${NSFT.CUSTOM_FIELDS_CONTAINER}" class="nsft-sfv-origin">
                         <div class="nsft-sfv-ribbon">
-                            <span class="nsft-sfv-chip${isCustomInfo ? "" : " is-native"}">${escapeHtml(typeText)}</span>
+                            <span class="nsft-sfv-chip nsft-tipo${isCustomInfo ? "" : " is-native"}">${escapeHtml(typeText)}</span>
                             <span class="nsft-sfv-ribbon-spacer"></span>
                             ${botonAyuda}
                             ${botonNativa}
@@ -2017,7 +2055,7 @@
             } catch (_) { }
 
             if (!recordType || !recordId) {
-                list.innerHTML = `<div class="nsft-fav-empty">${escapeHtml(translations.fav_no_history || 'Sin cambios registrados')}</div>`;
+                list.innerHTML = vacioHtml('reloj', translations.fav_no_history || 'Sin cambios registrados');
                 return;
             }
 
@@ -2120,6 +2158,17 @@
                 renderFieldHistory(filtered, isCustom);
             };
 
+            const comprobarTipo = function () {
+                const sqlB = 'SELECT COUNT(*) AS n FROM systemnote WHERE recordid = ? AND recordtypeid = ?';
+                const sqlR = 'SELECT COUNT(*) AS n FROM systemnote WHERE recordid = ' + Number(recordId)
+                    + ' AND recordtypeid = ' + Number(rectypeParam);
+                T.run({ rest: sqlR, sql: sqlB, params: [Number(recordId), Number(rectypeParam)], limit: 1 }, function (err, rows) {
+                    const n = (!err && rows && rows[0]) ? Number(rows[0].n) : 0;
+                    if (n > 0) entregar([]);
+                    else lanzar(false);
+                });
+            };
+
             const lanzar = function (conTipo) {
                 const bound = build(false, conTipo);
                 const inlined = build(true, conTipo);
@@ -2131,7 +2180,7 @@
                 }, function (err, rows) {
                     if (err) { onFail(err); return; }
                     const deducido = (rectypeParam !== null && !rectypeUrl);
-                    if (conTipo && deducido && (!rows || !rows.length)) { lanzar(false); return; }
+                    if (conTipo && deducido && (!rows || !rows.length)) { comprobarTipo(); return; }
                     entregar(rows);
                 });
             };
@@ -2264,7 +2313,7 @@
                 const vacio = (fiable === false)
                     ? (translations.fav_no_history_std || translations.fav_no_history)
                     : translations.fav_no_history;
-                list.innerHTML = `<div class="nsft-fav-empty">${escapeHtml(vacio || 'Sin cambios registrados')}</div>`;
+                list.innerHTML = vacioHtml('reloj', vacio || 'Sin cambios registrados');
                 return;
             }
 
@@ -2331,7 +2380,7 @@
         function renderAuditRows(box, rows) {
             if (!box) return;
             if (!rows.length) {
-                box.innerHTML = `<div class="nsft-fav-empty">${escapeHtml(translations.fav_no_history || 'Sin cambios registrados')}</div>`;
+                box.innerHTML = vacioHtml('buscar', translations.fav_hist_nomatch || translations.fav_no_history || 'Sin cambios registrados');
                 return;
             }
             const oldLbl = translations.fav_old_value || 'Antes';
@@ -2351,11 +2400,11 @@
                         <span class="nsft-fav-copy" role="button" tabindex="0" title="${escapeHtml(copyTip)}" data-copy="${escapeHtml(copyText)}">${FAV_COPY_ICON}</span>
                     </div>
                     <div class="nsft-fav-line nsft-fav-line-old">
-                        <span class="nsft-fav-tag">${escapeHtml(oldLbl)}</span>
+                        <span class="nsft-fav-tag nsft-tipo">${escapeHtml(oldLbl)}</span>
                         <span class="nsft-fav-val">${diff.oldHtml}</span>
                     </div>
                     <div class="nsft-fav-line nsft-fav-line-new">
-                        <span class="nsft-fav-tag">${escapeHtml(newLbl)}</span>
+                        <span class="nsft-fav-tag nsft-tipo">${escapeHtml(newLbl)}</span>
                         <span class="nsft-fav-val">${diff.newHtml}</span>
                     </div>
                 </div>`;
@@ -2717,7 +2766,8 @@
             return html;
         }
         function listSlotHtml(linkUrl) {
-            return `<div id="${NSFT.LIST_SLOT}" class="nsft-sfv-list-slot">
+            const kbd = function (k, txt) { return "<kbd>" + k + "</kbd> " + escapeHtml(txt || ""); };
+            return `<div id="${NSFT.LIST_SLOT}" class="nsft-sfv-list-slot nsft-paleta">
                         <div class="nsft-sfv-list-head">
                             <span class="nsft-sfv-list-title">${escapeHtml(translations.sfv_list || "List")}:</span>
                             <span id="${NSFT.LIST_COUNT}" class="nsft-sfv-list-count"></span>
@@ -2725,8 +2775,8 @@
                             ${listOpenLinkHtml(linkUrl)}
                         </div>
                         <div class="nsft-sfv-list-barwrap">
-                        <div id="${NSFT.LIST_BAR}" class="nsft-sfv-bar nsft-sfv-list-bar">
-                            <input type="text" id="${NSFT.LIST_SEARCH}" class="nsft-sfv-field nsft-sfv-list-search"
+                        <div id="${NSFT.LIST_BAR}" class="nsft-paleta-barra nsft-sfv-list-bar">
+                            <input type="text" id="${NSFT.LIST_SEARCH}" class="nsft-paleta-input nsft-sfv-field nsft-sfv-list-search"
                                    placeholder="${escapeHtml(translations.sfv_list_search || "")}" autocomplete="off">
                             <button type="button" id="${NSFT.LIST_CLEAR}" class="nsft-sfv-list-clear"
                                     title="${escapeHtml(translations.sfv_find_clear || "")}"
@@ -2747,7 +2797,10 @@
                         <div class="nsft-sfv-list-scroll">
                             <div id="${NSFT.LIST_BODY}" class="nsft-sfv-optlist" role="listbox"></div>
                         </div>
-                        <div id="${NSFT.LIST_FOOT}" class="nsft-sfv-list-foot">${escapeHtml(translations.sfv_list_loading || "")}</div>
+                        <div class="nsft-paleta-pie nsft-sfv-list-pie">
+                            <span id="${NSFT.LIST_FOOT}" class="nsft-paleta-cuenta nsft-sfv-list-estado">${escapeHtml(translations.sfv_list_loading || "")}</span>
+                            <span class="nsft-paleta-teclas">${kbd("↵", translations.pal_k_search || "search")} ${kbd("Esc", translations.pal_k_clear || "clear")}</span>
+                        </div>
                      </div>`;
         }
 
@@ -2958,18 +3011,102 @@
         }
 
         function fillViewValue(vc, fieldName) {
-            requestAnimationFrame(function () {
-                setTimeout(function () {
-                    if (!_lastRenderCtx || _lastRenderCtx.fieldName !== fieldName) return;
-                    const v = lookupViewValue(vc, fieldName);
-                    if (!v) return;
-                    const txt = lookupViewText(vc, fieldName);
-                    if (!_lastRenderCtx || _lastRenderCtx.fieldName !== fieldName) return;
-                    try { refreshValueInPlace(fieldName, v, txt); }
-                    catch (e) { }
-                }, 0);
+            const vigente = function () { return _lastRenderCtx && _lastRenderCtx.fieldName === fieldName; };
+            const pinta = function (v, txt) {
+                if (!vigente()) return;
+                try { refreshValueInPlace(fieldName, v, txt); }
+                catch (e) { }
+            };
+
+            let enPagina = "";
+            try {
+                const caja = document.querySelector('[data-field-name="' + CSS.escape(fieldName) + '"]');
+                const esLista = caja && /select/i.test(caja.getAttribute("data-field-type") || "");
+                const celda = esLista ? caja.querySelector(".uir-field") : null;
+                enPagina = celda ? celda.textContent.replace(/\s+/g, " ").trim() : "";
+            } catch (e) { }
+            const vs = document.getElementById(NSFT.VALUE_SLOT);
+            if (vs) vs.innerHTML = '<b class="nsft-sfv-espera">…</b>';
+            const tr = document.getElementById(NSFT.TEXT_ROW);
+            const ts = document.getElementById(NSFT.TEXT_SLOT);
+            if (enPagina && tr && ts) { ts.textContent = enPagina; tr.hidden = false; }
+
+            pideValorVista(vc, fieldName).then(function (r) {
+                return r || pideValorVista(vc, fieldName);
+            }).then(function (r) {
+                pinta(r.v, r.v ? r.txt : (r.txt || enPagina));
             });
         }
+
+        const _vv = Object.create(null);
+        const VV_TTL = 60000;
+
+        function pideValorVista(vc, fieldName, soloAsync) {
+            const k = vc.tipo + "|" + vc.id + "|" + fieldName;
+            const hay = _vv[k];
+            if (hay && Date.now() - hay.t < VV_TTL) return hay.p;
+            const p = new Promise(function (resolver) {
+                const viaVieja = soloAsync ? function () {
+                    setTimeout(function () {
+                        if (_vv[k] && _vv[k].p === p) delete _vv[k];
+                        resolver(null);
+                    }, 0);
+                } : function () {
+                    requestAnimationFrame(function () {
+                        setTimeout(function () {
+                            const v = lookupViewValue(vc, fieldName);
+                            resolver({ v: v, txt: v ? lookupViewText(vc, fieldName) : "" });
+                        }, 0);
+                    });
+                };
+                if (typeof require !== "function") { viaVieja(); return; }
+                try {
+                    require(["N/search"], function (search) {
+                        if (!search || !search.lookupFields || !search.lookupFields.promise) { viaVieja(); return; }
+                        search.lookupFields.promise({ type: vc.tipo, id: vc.id, columns: [fieldName] })
+                            .then(function (r) {
+                                const x = r ? r[fieldName] : undefined;
+                                let v = "", txt = "";
+                                if (Array.isArray(x)) {
+                                    v = x.map(function (o) { return o && o.value; }).filter(Boolean).join(",");
+                                    txt = x.map(function (o) { return o && o.text; }).filter(Boolean).join(", ");
+                                } else if (typeof x === "boolean") {
+                                    v = x ? "T" : "F";
+                                } else if (x && typeof x === "object") {
+                                    v = x.value != null ? String(x.value) : "";
+                                    txt = x.text != null ? String(x.text) : "";
+                                } else if (x != null) {
+                                    v = String(x);
+                                }
+                                resolver({ v: v, txt: txt });
+                            })
+                            .catch(viaVieja);
+                    }, viaVieja);
+                } catch (e) { viaVieja(); }
+            });
+            _vv[k] = { t: Date.now(), p: p };
+            return p;
+        }
+
+        (function adelantaValorVista() {
+            try {
+                const p = new URLSearchParams(window.location.search);
+                if (p.get("e") === "T" || !p.has("id") || typeof require !== "function") return;
+            } catch (e) { return; }
+            let reloj = 0, ultimo = "";
+            document.addEventListener("mouseover", function (ev) {
+                const caja = ev.target && ev.target.closest ? ev.target.closest('[data-field-name][data-mode="view"]') : null;
+                const f = caja ? caja.getAttribute("data-field-name") : "";
+                if (f === ultimo) return;
+                ultimo = f;
+                clearTimeout(reloj);
+                if (!f) return;
+                reloj = setTimeout(function () {
+                    const vc = viewCtx(f);
+                    if (vc) pideValorVista(vc, f, true);
+                }, 150);
+            }, true);
+        })();
 
         let animAlto = null;
 
@@ -3272,7 +3409,13 @@
             const resumen = n
                 ? t("sfv_code_found", "In {n} of {total} files", { n: n, total: st.hechos })
                 : t("sfv_code_none", "Not found in {total} files", { total: st.hechos });
-            status.textContent = resumen + (st.estado === "parado" ? " · " + t("sfv_code_stopped", "stopped") : "") + cola;
+            const parado = st.estado === "parado" ? " · " + t("sfv_code_stopped", "stopped") : "";
+            if (!n) {
+                status.textContent = (parado + cola).replace(/^ · /, "");
+                lista.innerHTML = vacioHtml("buscar", resumen);
+                return;
+            }
+            status.textContent = resumen + parado + cola;
 
             if (!CS) { lista.innerHTML = ""; return; }
             const regla = CS.regla(st.term, st.regex, { comillas: st.comillas });
@@ -3285,9 +3428,9 @@
                     ? h.scripts.map(function (s) {
                         return '<a href="/app/common/scripting/script.nl?id=' + encodeURIComponent(s.id) + '" target="_blank" rel="noopener">' + escapeHtml(s.name) + "</a>";
                     }).join(", ")
-                    : '<span class="nsft-sfv-code-lib">' + escapeHtml(t("sfv_code_library", "Library")) + "</span>";
+                    : '<span class="nsft-sfv-code-lib nsft-tipo">' + escapeHtml(t("sfv_code_library", "Library")) + "</span>";
                 const lineas = h.lineas.map(function (x) {
-                    const etiqueta = x.tipo ? '<span class="nsft-sfv-code-tag is-' + x.tipo + '">' + escapeHtml(TIPOS[x.tipo]) + "</span>" : "";
+                    const etiqueta = x.tipo ? '<span class="nsft-sfv-code-tag nsft-tipo is-' + x.tipo + '">' + escapeHtml(TIPOS[x.tipo]) + "</span>" : "";
                     return '<div class="nsft-sfv-code-line"><span class="nsft-sfv-code-ln">' + x.n + "</span>" + etiqueta
                         + '<code class="nsft-sfv-code-src">' + CS.trozoHtml(x.l, regla, "nsft-sfv-list-hl") + "</code></div>";
                 }).join("");
@@ -3421,7 +3564,14 @@
         function pintarPieDeLista(opts, ctx, term) {
             setListCount(opts.length);
             if (!opts.length) {
-                setListFoot(term ? translations.sfv_list_none : translations.sfv_list_empty, false);
+                const body = document.getElementById(NSFT.LIST_BODY);
+                const txt = term ? translations.sfv_list_none : translations.sfv_list_empty;
+                if (body) {
+                    body.innerHTML = vacioHtml(term ? 'buscar' : 'bandeja', txt, true);
+                    setListFoot("", false);
+                } else {
+                    setListFoot(txt, false);
+                }
                 return;
             }
             setListFoot((opts.length >= LIST_PAGE && !ctx.domOpts)

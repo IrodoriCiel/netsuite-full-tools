@@ -3,9 +3,9 @@
     position: fixed;
     inset: 0;
     z-index: 2147483646;
-    background: rgba(59, 130, 246, 0.12);
+    background: color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 12%, transparent);
     backdrop-filter: blur(2px);
-    border: 3px dashed #2563eb;
+    border: 3px dashed var(--nsft-ns-accent, #2563eb);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -20,10 +20,10 @@
 
 #nsft-fcdd-overlay .nsft-fcdd-message {
     padding: 28px 36px;
-    background: #ffffff;
-    border: 1px solid #bfdbfe;
+    background: var(--nsft-w-s0, #fff);
+    border: 1px solid color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 32%, #ffffff);
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--nsft-ns-accent, #2563eb) 20%, transparent);
     text-align: center;
     max-width: 420px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -33,7 +33,7 @@
 #nsft-fcdd-overlay .nsft-fcdd-icon {
     font-size: 56px;
     line-height: 1;
-    color: #2563eb;
+    color: var(--nsft-ns-accent, #2563eb);
     margin-bottom: 10px;
 }
 
@@ -49,14 +49,14 @@
 }
 
 #nsft-fcdd-overlay .nsft-fcdd-sub.nsft-fcdd-sub-target {
-    color: #1d4ed8;
+    color: var(--nsft-ns-accent, #1d4ed8);
     font-weight: 600;
 }
 
 .nsft-fcdd-drop-target {
-    outline: 2px solid #2563eb !important;
+    outline: 2px solid var(--nsft-ns-accent, #2563eb) !important;
     outline-offset: 2px !important;
-    background-color: rgba(59, 130, 246, 0.15) !important;
+    background-color: color-mix(in srgb, var(--nsft-ns-accent, #3b82f6) 15%, transparent) !important;
     border-radius: 3px;
     transition: outline-color 0.1s ease, background-color 0.1s ease;
 }
@@ -68,7 +68,7 @@
     z-index: 2147483647;
     width: 320px;
     padding: 12px 14px;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     box-shadow: 0 8px 24px rgba(16, 24, 40, 0.15);
@@ -91,7 +91,7 @@
 #nsft-fcdd-progress .nsft-fcdd-prog-pct {
     font-variant-numeric: tabular-nums;
     font-weight: 700;
-    color: #2563eb;
+    color: var(--nsft-ns-accent, #2563eb);
 }
 
 #nsft-fcdd-progress .nsft-fcdd-prog-track {
@@ -104,7 +104,7 @@
 #nsft-fcdd-progress .nsft-fcdd-prog-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(to right, #3b82f6, #2563eb);
+    background: linear-gradient(to right, var(--nsft-ns-primary, var(--nsft-ns-button, #3b82f6)), var(--nsft-ns-primary, var(--nsft-ns-button, #2563eb)));
     border-radius: 3px;
     transition: width 0.2s ease;
 }
@@ -147,7 +147,7 @@
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border-radius: 12px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
@@ -229,17 +229,17 @@
 }
 
 .nsft-fcdd-modal-btn.nsft-fcdd-modal-reload {
-    background: #2563eb;
+    background: var(--nsft-ns-primary, var(--nsft-ns-button, #2563eb));
     color: #ffffff;
-    border: 1px solid #2563eb;
+    border: 1px solid var(--nsft-ns-accent, #2563eb);
 }
 
 .nsft-fcdd-modal-btn.nsft-fcdd-modal-reload:hover {
-    background: #1d4ed8;
+    background: var(--nsft-ns-primary-hover, color-mix(in srgb, var(--nsft-ns-button, #1d4ed8) 85%, #000000));
 }
 
 .nsft-fcdd-modal-btn.nsft-fcdd-modal-dismiss {
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     color: #374151;
     border: 1px solid #d1d5db;
 }
@@ -257,7 +257,7 @@
 }
 
 #nsft-fcdd-progress[data-theme="dark"] .nsft-fcdd-prog-pct {
-    color: #8FA3FF;
+    color: var(--nsft-ns-accent-light, var(--nsft-ns-accent, #8FA3FF));
 }
 
 #nsft-fcdd-progress[data-theme="dark"] .nsft-fcdd-prog-track {
@@ -338,7 +338,7 @@
 }
 
 .nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-modal-btn.nsft-fcdd-modal-reload {
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
     border-color: var(--nsft-ns-accent-light, #7FB0FF);
     color: #ffffff;
 }
@@ -450,4 +450,9 @@
 
 .nsft-fcdd-modal[data-theme="dark"] .nsft-fcdd-diff-link:hover:not(:disabled) {
     background: rgba(245, 158, 11, 0.24);
+}
+
+.nsft-modal:not(#nsft-x).nsft-fcdd-modal-box .nsft-fcdd-modal-foot {
+    background: var(--nsft-w-s1);
+    border-top: 1px solid var(--nsft-w-bd);
 }

@@ -1,6 +1,6 @@
 (function () {
     'use strict';
-    const STORAGE_KEY = ['enableViewRecordObject', 'enableViewScriptedRecord', 'enableRecordLogsViewer', 'enableSuiteQLRunner', 'enableExportSearch', 'enableLoadRecordConsole', 'enableLoadNModule', 'enableGoToRecord', 'enableCommandPalette', 'enableCustomizationFinder', 'enableDeletedRecords', 'enableScriptExecute', 'enableSuiteScriptConsole', 'enableAdvancedEditor', 'enableShortcutsCheatsheet', 'enableFindFieldById', 'enableOpenInOtherEnv', 'openInOtherEnvSandboxes', 'enableAiAssistant', 'aiAssistantPage', 'enableGithubBackup', 'enablePagePerformance', 'enableSetFieldValues', 'enableToolsMenuModal', 'nsftToolsMenuModeChosen'];
+    const STORAGE_KEY = ['enableViewRecordObject', 'enableViewScriptedRecord', 'enableRecordLogsViewer', 'enableSuiteQLRunner', 'enableExportSearch', 'enableLoadRecordConsole', 'enableLoadNModule', 'enableGoToRecord', 'enableCommandPalette', 'enableCustomizationFinder', 'enableDeletedRecords', 'enableScriptExecute', 'enableSuiteScriptConsole', 'enableAdvancedEditor', 'enableShortcutsCheatsheet', 'enableFindFieldById', 'enableOpenInOtherEnv', 'openInOtherEnvSandboxes', 'enableAiAssistant', 'aiAssistantPage', 'enableGithubBackup', 'enablePagePerformance', 'enableRolePermissions', 'enableRecordHistory', 'enableCsvImportTemplate', 'enableRecordAttachments', 'enableSetFieldValues', 'enableToolsMenuModal', 'nsftToolsMenuModeChosen'];
 
     const TOOLS_MENU_ID = 'nsft-tools-menu';
     const VIEW_RECORD_ITEM_ID = 'link_VerObjectRecord';
@@ -26,6 +26,10 @@
     const AI_TOP_ITEM_ID = 'nsft-ai-top-menuitem';
     const GITHUB_BACKUP_ITEM_ID = 'link_GithubBackup';
     const PAGE_PERF_ITEM_ID = 'link_PagePerformance';
+    const ROLE_PERMS_ITEM_ID = 'link_RolePermissions';
+    const RECORD_HISTORY_ITEM_ID = 'link_RecordHistory';
+    const CSV_TEMPLATE_ITEM_ID = 'link_CsvImportTemplate';
+    const RECORD_ATTACH_ITEM_ID = 'link_RecordAttachments';
 
 
     chrome.storage.local.get(STORAGE_KEY, (items) => {
@@ -37,7 +41,6 @@
     function init(items) {
         const RB = window.NSFT_RecordButtons;
         if (RB && RB.isExcludedPage && RB.isExcludedPage()) return;
-        injectMenuIconStyles();
         addToolsMenu(items);
         observeDomChanges();
         observeRedwoodMenuPopover();
@@ -84,56 +87,6 @@
         });
     }
 
-    function injectMenuIconStyles() {
-        if (document.getElementById('nsft-tools-icon-css')) return;
-        const style = document.createElement('style');
-        style.id = 'nsft-tools-icon-css';
-        style.textContent = `
-            #nsft-tools-menu .ns-menuitem-link .nsft-tools-icon,
-            #${AI_TOP_ITEM_ID} .ns-menuitem-link .nsft-tools-icon {
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                width: 16px !important;
-                height: 16px !important;
-                flex: 0 0 16px !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            #nsft-tools-menu .ns-menuitem-link .nsft-tools-icon svg,
-            #${AI_TOP_ITEM_ID} .ns-menuitem-link .nsft-tools-icon svg {
-                width: 14px !important;
-                height: 14px !important;
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
-            /* El asistente de IA conserva su morado (no hereda currentColor). */
-            #${AI_TOP_ITEM_ID} .nsft-tools-icon svg {
-                stroke: #7c3aed !important;
-            }
-
-            /* Popover de Redwood: dejar que el ancho crezca al contenido. NS lo
-               fija a 206px inline y los Text spans usan ellipsis; cuando el
-               decorator marca el popover como nuestro, sobreescribimos ambos. */
-            div[data-widget="Popover"][data-role="contextmenu"][data-nsft-icons-done] {
-                width: auto !important;
-                min-width: 220px !important;
-                max-width: 420px !important;
-            }
-            div[data-widget="Popover"][data-role="contextmenu"][data-nsft-icons-done] [data-widget="Text"],
-            div[data-widget="Popover"][data-role="contextmenu"][data-nsft-icons-done] [data-widget="MenuItemContent"],
-            div[data-widget="Popover"][data-role="contextmenu"][data-nsft-icons-done] [data-widget="MenuItemButton"],
-            div[data-widget="Popover"][data-role="contextmenu"][data-nsft-icons-done] [data-widget="Link"] {
-                max-width: none !important;
-                width: auto !important;
-                overflow: visible !important;
-                text-overflow: clip !important;
-                white-space: nowrap !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
 
 
     function addToolsMenu(items) {
@@ -144,6 +97,10 @@
         if (!headerMenu || isDashboard) return;
 
         const menuItemsToAppend = [];
+
+        if (!document.getElementById(EXPORT_SEARCH_ITEM_ID) && items.enableExportSearch && isSearchPage()) {
+            menuItemsToAppend.push(createExportSearchItem());
+        }
 
         if (!document.getElementById(VIEW_RECORD_ITEM_ID) && items.enableViewRecordObject && !isSearchAreaPage()) {
             menuItemsToAppend.push(createViewRecordItem());
@@ -174,8 +131,16 @@
             menuItemsToAppend.push(createRecordLogsItem());
         }
 
-        if (!document.getElementById(EXPORT_SEARCH_ITEM_ID) && items.enableExportSearch && isSearchPage()) {
-            menuItemsToAppend.push(createExportSearchItem());
+        if (!document.getElementById(RECORD_HISTORY_ITEM_ID) && items.enableRecordHistory && hayRegistroGuardado()) {
+            menuItemsToAppend.push(createRecordHistoryItem());
+        }
+
+        if (!document.getElementById(CSV_TEMPLATE_ITEM_ID) && items.enableCsvImportTemplate && hayRegistroGuardado() && !isSearchAreaPage()) {
+            menuItemsToAppend.push(createCsvTemplateItem());
+        }
+
+        if (!document.getElementById(RECORD_ATTACH_ITEM_ID) && items.enableRecordAttachments && hayRegistroGuardado()) {
+            menuItemsToAppend.push(createRecordAttachmentsItem());
         }
 
         if (!document.getElementById(LOAD_RECORD_SS1_ITEM_ID) && items.enableLoadRecordConsole) {
@@ -228,6 +193,10 @@
             menuItemsToAppend.push(createPagePerformanceItem());
         }
 
+        if (!document.getElementById(ROLE_PERMS_ITEM_ID) && items.enableRolePermissions) {
+            menuItemsToAppend.push(createRolePermissionsItem());
+        }
+
         if (items.enableOpenInOtherEnv) {
             const groupItem = createOpenInEnvSubmenu(items.openInOtherEnvSandboxes || '1,2');
             if (groupItem && !document.getElementById(groupItem.id)) {
@@ -254,7 +223,7 @@
 
         if (!toolsMenuItem) {
             toolsMenuItem = createMainToolsMenu(!!items.enableToolsMenuModal,
-                !items.nsftToolsMenuModeChosen && !tmcAplazado());
+                !items.nsftToolsMenuModeChosen);
             const menuItems = Array.from(headerMenu.querySelectorAll('li.ns-menuitem'));
             const listaItem = menuItems.find(li => ['lista', 'list', 'listas', 'lists'].includes(li.textContent.trim().toLowerCase()));
             if (listaItem) headerMenu.insertBefore(toolsMenuItem, listaItem);
@@ -314,6 +283,10 @@
         enableFindFieldById: [FIND_FIELD_ITEM_ID],
         enableGithubBackup: [GITHUB_BACKUP_ITEM_ID],
         enablePagePerformance: [PAGE_PERF_ITEM_ID],
+        enableRolePermissions: [ROLE_PERMS_ITEM_ID],
+        enableRecordHistory: [RECORD_HISTORY_ITEM_ID],
+        enableCsvImportTemplate: [CSV_TEMPLATE_ITEM_ID],
+        enableRecordAttachments: [RECORD_ATTACH_ITEM_ID],
         enableOpenInOtherEnv: ['link_OpenInEnv_group'],
         enableAiAssistant: [AI_TOP_ITEM_ID],
         aiAssistantPage: [AI_TOP_ITEM_ID],
@@ -341,43 +314,11 @@
     });
 
 
-    const ICON_ATTRS = 'xmlns="http://www.w3.org/2000/svg" width="14" height="14" style="width:14px!important;height:14px!important;display:block!important;flex:0 0 14px;" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
-    const TOOL_ICONS = {
-        suitescript_console: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><rect x="3" y="4" width="18" height="16" rx="2"/><polyline points="7 9 10 12 7 15"/><line x1="13" y1="15" x2="17" y2="15"/></svg>`,
-        customization_finder: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="11" cy="11" r="6"/><line x1="15.5" y1="15.5" x2="20" y2="20"/><line x1="9" y1="9" x2="13" y2="9"/><line x1="9" y1="12" x2="13" y2="12"/></svg>`,
-        script_execute: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`,
-        deleted_records: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
-        advanced_editor: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="10 12 8 14.5 10 17"/><polyline points="14 12 16 14.5 14 17"/></svg>`,
-        view_record: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>`,
-        scripted: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
-        record_logs: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
-        suiteql: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>`,
-        export_search: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
-        fragments: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polygon points="10 11 15 14 10 17 10 11"/></svg>`,
-        terminal: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
-        unlock: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`,
-        package: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
-        find_field: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
-        goto_record: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
-        command_palette: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>`,
-        ai_assistant: `<svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9.4l-4.7 1.8L12 16l-1.8-4.8L5.5 9.4l4.7-1.8z"/><path d="M19 14l.6 1.6 1.6.6-1.6.6L19 19l-.6-1.6-1.6-.6 1.6-.6z"/></svg>`,
-        github_backup: `<svg viewBox="0 0 24 24" width="14" height="14" style="width:14px!important;height:14px!important;display:block!important;flex:0 0 14px;" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14 0 1.55-.01 2.8-.01 3.18 0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>`,
-        open_in_env: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
-        page_perf: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
-        cheatsheet: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6.01" y2="10"/><line x1="10" y1="10" x2="10.01" y2="10"/><line x1="14" y1="10" x2="14.01" y2="10"/><line x1="18" y1="10" x2="18.01" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>`,
-        settings: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
-        plus_circle: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
-        columns: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>`,
-        dependents: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="6" cy="3" r="2"/><circle cx="6" cy="21" r="2"/><circle cx="18" cy="12" r="2"/><path d="M6 5v6a3 3 0 0 0 3 3h7"/><path d="M6 19v-6a3 3 0 0 1 3-3h7"/></svg>`,
-        xml: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="14 2 14 8 20 8"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="10 13 8 15 10 17"/><polyline points="14 13 16 15 14 17"/></svg>`,
-        link: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
-        globe: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
-        menu_path: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><polyline points="3 5 4.5 6 3 7"/><polyline points="3 11 4.5 12 3 13"/><polyline points="3 17 4.5 18 3 19"/></svg>`,
-        save: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
-        edit: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
-        trash: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
-        trail: `<svg viewBox="0 0 24 24" ${ICON_ATTRS}><circle cx="5" cy="19" r="2"/><circle cx="19" cy="5" r="2"/><path d="M5 17v-2a4 4 0 0 1 4-4h6a4 4 0 0 0 4-4V7"/></svg>`
-    };
+    const ICON_STYLE = 'style="width:14px!important;height:14px!important;display:block!important;flex:0 0 14px;"';
+    const TOOL_ICONS = new Proxy({}, {
+        get: (_, clave) => (window.NSFT_Herramientas && typeof clave === 'string'
+            ? window.NSFT_Herramientas.icono(clave, 14, ICON_STYLE) : '')
+    });
 
     function buildMenuLinkHtml(label, iconKey, eventName) {
         const safeLabel = escapeMenuHtml(label);
@@ -461,13 +402,16 @@
     const TMM_ID = 'nsft-toolsmenu-modal';
     const TMM_RECENT_KEY = 'nsftToolsMenuRecent';
     const TMM_RECENT_MAX = 4;
+    const tmmDeCat = (cat, respaldo) => (window.NSFT_Herramientas
+        ? window.NSFT_Herramientas.LISTA.filter((h) => h.cat === cat && h.item).map((h) => h.item)
+        : respaldo);
     const TMM_GRUPOS = [
         ['dev', 'tmm_grp_dev', 'Development', 0,
-            [SUITEQL_RUNNER_ITEM_ID, SSC_ITEM_ID, ADV_ITEM_ID, FRAG_ITEM_ID, LOAD_N_MODULE_ITEM_ID, SX_ITEM_ID, GITHUB_BACKUP_ITEM_ID]],
+            tmmDeCat('dev', [SUITEQL_RUNNER_ITEM_ID, SSC_ITEM_ID, ADV_ITEM_ID, FRAG_ITEM_ID, LOAD_N_MODULE_ITEM_ID, SX_ITEM_ID, GITHUB_BACKUP_ITEM_ID])],
         ['record', 'tmm_grp_record', 'Current record', 1,
-            [VIEW_RECORD_ITEM_ID, VIEW_SCRIPTED_RECORD_ITEM_ID, RECORD_LOGS_ITEM_ID, FIND_FIELD_ITEM_ID, ENABLE_ALL_ITEM_ID, LOAD_RECORD_SS1_ITEM_ID, LOAD_RECORD_SS2_ITEM_ID]],
+            tmmDeCat('record', [VIEW_RECORD_ITEM_ID, VIEW_SCRIPTED_RECORD_ITEM_ID, RECORD_LOGS_ITEM_ID, FIND_FIELD_ITEM_ID, ENABLE_ALL_ITEM_ID, LOAD_RECORD_SS1_ITEM_ID, LOAD_RECORD_SS2_ITEM_ID])],
         ['find', 'tmm_grp_find', 'Find & go', 2,
-            [GOTO_RECORD_ITEM_ID, COMMAND_PALETTE_ITEM_ID, CFIND_ITEM_ID, DELREC_ITEM_ID, EXPORT_SEARCH_ITEM_ID]],
+            tmmDeCat('find', [GOTO_RECORD_ITEM_ID, COMMAND_PALETTE_ITEM_ID, CFIND_ITEM_ID, DELREC_ITEM_ID, EXPORT_SEARCH_ITEM_ID])],
         ['more', 'tmm_grp_more', 'More', 2, []]
     ];
     const TMM_DESC = {
@@ -481,6 +425,9 @@
         [VIEW_RECORD_ITEM_ID]: 'tmm_d_vro',
         [VIEW_SCRIPTED_RECORD_ITEM_ID]: 'tmm_d_scripted',
         [RECORD_LOGS_ITEM_ID]: 'tmm_d_logs',
+        [RECORD_HISTORY_ITEM_ID]: 'tmm_d_history',
+        [CSV_TEMPLATE_ITEM_ID]: 'tmm_d_csvt',
+        [RECORD_ATTACH_ITEM_ID]: 'tmm_d_attach',
         [FIND_FIELD_ITEM_ID]: 'tmm_d_findfield',
         [ENABLE_ALL_ITEM_ID]: 'tmm_d_enableall',
         [LOAD_RECORD_SS1_ITEM_ID]: 'tmm_d_ss1',
@@ -491,11 +438,9 @@
         [DELREC_ITEM_ID]: 'tmm_d_delrec',
         [EXPORT_SEARCH_ITEM_ID]: 'tmm_d_exportsearch',
         [PAGE_PERF_ITEM_ID]: 'tmm_d_perf',
+        [ROLE_PERMS_ITEM_ID]: 'tmm_d_perms',
         link_OpenInEnv_group: 'tmm_d_env',
         [CHEATSHEET_ITEM_ID]: 'tmm_d_cheatsheet'
-    };
-    const TMM_NUEVO = {
-        [FRAG_ITEM_ID]: '7.4.0'
     };
     let _tmm = null;
     let _tmmActivo = -1;
@@ -523,43 +468,41 @@
         return escapeMenuHtml(s);
     }
 
-    function tmmVersion() {
-        try { return chrome.runtime.getManifest().version; } catch (e) { return ''; }
-    }
-
     function tmmCrea() {
         const el = document.createElement('div');
         el.id = TMM_ID;
         el.className = 'nsft-tmm-overlay';
         el.setAttribute('data-nsft-ui', '');
-        const k = (txt) => `<kbd>${txt}</kbd>`;
         el.innerHTML = `
-            <div class="nsft-tmm-box" role="dialog" aria-modal="true" aria-label="${tmmEsc(tmmTexto('menuTools', 'Tools'))}">
-                <div class="nsft-tmm-searchbar">
-                    <svg class="nsft-tmm-lupa" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" class="nsft-tmm-input" spellcheck="false" autocomplete="off"
+            <div class="nsft-tmm-box nsft-modal nsft-modal--dialog nsft-paleta" role="dialog" aria-modal="true" aria-label="${tmmEsc(tmmTexto('menuTools', 'Tools'))}">
+                <div class="nsft-tmm-searchbar nsft-paleta-barra">
+                    <input type="text" class="nsft-tmm-input nsft-paleta-input" spellcheck="false" autocomplete="off"
                         aria-label="${tmmEsc(tmmTexto('tmm_search_ph', 'Search a tool or action'))}"
                         placeholder="${tmmEsc(tmmTexto('tmm_search_ph', 'Search a tool or action'))}">
-                    <button type="button" class="nsft-tmm-clear" title="${tmmEsc(tmmTexto('sql_find_clear', 'Clear search'))}" aria-label="${tmmEsc(tmmTexto('sql_find_clear', 'Clear search'))}">&times;</button>
-                    <button type="button" class="nsft-tmm-esc" title="${tmmEsc(tmmTexto('tmm_close', 'Close'))}" aria-label="${tmmEsc(tmmTexto('tmm_close', 'Close'))}">Esc</button>
+                    <button type="button" class="nsft-tmm-clear" title="${tmmEsc(tmmTexto('sql_find_clear', 'Clear search'))}" aria-label="${tmmEsc(tmmTexto('sql_find_clear', 'Clear search'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+                    <button type="button" class="nsft-paleta-accion nsft-modal-btn-ajustes nsft-tmm-modo" title="${tmmEsc(tmmTexto('tmm_mode_tip', 'How the Tools menu opens'))}" aria-label="${tmmEsc(tmmTexto('tmm_mode_tip', 'How the Tools menu opens'))}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
                 </div>
                 <div class="nsft-tmm-body"></div>
-                <div class="nsft-tmm-foot">
-                    <span>${k('&#8593;&#8595;&#8592;&#8594;')} ${tmmEsc(tmmTexto('tmm_k_nav', 'navigate'))}</span>
-                    <span>${k('&#8629;')} ${tmmEsc(tmmTexto('tmm_k_open', 'open'))}</span>
-                    <span>${k('Esc')} ${tmmEsc(tmmTexto('tmm_k_close', 'close'))}</span>
-                    <span class="nsft-tmm-count"></span>
-                </div>
             </div>`;
         document.body.appendChild(el);
+        if (window.NSFT_Herramientas && window.NSFT_Herramientas.vigila) {
+            window.NSFT_Herramientas.vigila('#' + TMM_ID + ' .nsft-tmm-box', 'tools', {
+                filas: '.nsft-tmm-item',
+                teclas: [
+                    ['↑↓←→', tmmTexto('tmm_k_nav', 'navigate')],
+                    ['↵', tmmTexto('tmm_k_open', 'open')],
+                    ['Esc', tmmTexto('pal_k_clear_close', 'clear or close')]
+                ]
+            });
+        }
         const input = el.querySelector('.nsft-tmm-input');
         const body = el.querySelector('.nsft-tmm-body');
-        _tmm = { el, input, body, cuenta: el.querySelector('.nsft-tmm-count') };
+        _tmm = { el, input, body };
 
         el.addEventListener('mousedown', (ev) => {
             if (ev.target === el) tmmCierra();
         });
-        el.querySelector('.nsft-tmm-esc').addEventListener('click', tmmCierra);
+        el.querySelector('.nsft-tmm-modo').addEventListener('click', () => { tmmCierra(); abreElegirHerramientas(true); });
         el.querySelector('.nsft-tmm-clear').addEventListener('click', () => {
             input.value = '';
             _tmmActivo = 0;
@@ -671,15 +614,13 @@
     }
 
     function tmmTarjeta(e, grupo, m, tag) {
-        const nuevo = TMM_NUEVO[e.id] && TMM_NUEVO[e.id] === tmmVersion();
         return `<button type="button" class="nsft-tmm-item" data-id="${tmmEsc(e.id)}" data-grupo="${grupo}">
                 <span class="nsft-tmm-icon">${e.icono}</span>
                 <span class="nsft-tmm-txt">
                     <span class="nsft-tmm-label">${tmmMarcaHtml(e.label, m && m.tramos)}</span>
                     ${e.desc ? `<span class="nsft-tmm-desc">${tmmMarcaHtml(e.desc, m && m.tramosDesc)}</span>` : ''}
                 </span>
-                ${tag ? `<span class="nsft-tmm-tag">${tmmEsc(tag)}</span>` : ''}
-                ${nuevo ? `<span class="nsft-tmm-new" title="${tmmEsc(tmmTexto('tmm_new', 'New'))}"></span>` : ''}
+                ${tag ? `<span class="nsft-tmm-tag nsft-tipo">${tmmEsc(tag)}</span>` : ''}
             </button>`;
     }
 
@@ -747,13 +688,12 @@
             const msg = term
                 ? tmmTexto('tmm_empty', 'No tool matches') + ' «' + term + '»'
                 : tmmTexto('tmm_none', 'No tools are turned on');
-            html = `<div class="nsft-tmm-empty">${tmmEsc(msg)}</div>`;
+            html = `<div class="nsft-tmm-empty">${window.NSFT_Herramientas
+                ? window.NSFT_Herramientas.vacio(term ? 'buscar' : 'tools', msg)
+                : tmmEsc(msg)}</div>`;
         }
         body.innerHTML = html;
         body.classList.toggle('is-filtering', !!term);
-        _tmm.cuenta.textContent = total === 1
-            ? tmmTexto('tmm_count_one', '1 tool')
-            : (chrome.i18n.getMessage('tmm_count', [String(total)]) || (total + ' tools'));
         if (_tmmActivo < 0 || _tmmActivo >= total) _tmmActivo = 0;
         tmmMarcaActivo(false);
     }
@@ -799,6 +739,8 @@
     function abreVentanaHerramientas() {
         if (!_tmm || !_tmm.el.isConnected) tmmCrea();
         const { el, input } = _tmm;
+        const caja = el.querySelector('.nsft-tmm-box');
+        if (caja) caja.setAttribute('data-theme', document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light');
         el.classList.add('is-open');
         if (window.NSFT_ModalStack) window.NSFT_ModalStack.bringToFront(el);
         input.value = '';
@@ -816,12 +758,7 @@
     }
 
     const TMC_ID = 'nsft-toolschooser-modal';
-    const TMC_LATER = 'nsftToolsMenuChooserLater';
     let _tmc = null;
-
-    function tmcAplazado() {
-        try { return sessionStorage.getItem(TMC_LATER) === '1'; } catch (e) { return false; }
-    }
 
     const TMC_PUNTERO = '<span class="nsft-tmc-ptr" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff" stroke="#0f172a" stroke-width="1.6" stroke-linejoin="round"><path d="M5 3l14 8.5-6.2 1.3L10 20z"/></svg></span>';
 
@@ -858,13 +795,13 @@
         </div>`;
     }
 
-    function abreElegirHerramientas() {
+    function abreElegirHerramientas(forzar) {
         if (_tmc && _tmc.el.isConnected) {
             _tmc.el.classList.add('is-open');
             return;
         }
         chrome.storage.local.get({ enableToolsMenuModal: false, nsftToolsMenuModeChosen: false }, (it) => {
-            if (it.nsftToolsMenuModeChosen) return;
+            if (it.nsftToolsMenuModeChosen && !forzar) return;
             const logo = chrome.runtime.getURL('assets/img/logomini.png');
             const tools = tmmEsc(tmmTexto('menuTools', 'Tools'));
             const el = document.createElement('div');
@@ -872,14 +809,14 @@
             el.className = 'nsft-tmm-overlay nsft-tmc is-open';
             el.setAttribute('data-nsft-ui', '');
             el.innerHTML = `
-            <div class="nsft-tmc-box" role="dialog" aria-modal="true" aria-labelledby="nsft-tmc-title">
-                <div class="nsft-tmc-head">
-                    <img class="nsft-tmm-logo" src="${logo}" alt="">
-                    <div class="nsft-tmc-headtext">
-                        <strong id="nsft-tmc-title">${tmmEsc(tmmTexto('tmc_title', 'How do you want the Tools menu?'))}</strong>
-                        <small>${tmmEsc(tmmTexto('tmc_sub', 'You can change it any time in Settings > Preferences.'))}</small>
-                    </div>
+            <div class="nsft-tmc-box nsft-w nsft-caja-barra" role="dialog" aria-modal="true" aria-labelledby="nsft-tmc-title"
+                 data-theme="${document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light'}">
+                
+                <div class="nsft-tmc-head nsft-barra-titulo">
+                    <span class="nsft-titulo" id="nsft-tmc-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>${tmmEsc(tmmTexto('tmc_title', 'How do you want the Tools menu?'))}</span>
+                    <button type="button" class="nsft-cerrar nsft-tmc-x" title="${tmmEsc(tmmTexto('tmc_later', 'Not now'))}" aria-label="${tmmEsc(tmmTexto('tmc_later', 'Not now'))}">✕</button>
                 </div>
+                <p class="nsft-tmc-sub">${tmmEsc(tmmTexto('tmc_sub', 'You can change it any time in Settings > Preferences.'))}</p>
                 <div class="nsft-tmc-cards" role="radiogroup">
                     <button type="button" class="nsft-tmc-card" role="radio" data-modo="lista">
                         ${tmcDemoLista(logo, tools)}
@@ -897,8 +834,8 @@
                     </button>
                 </div>
                 <div class="nsft-tmc-foot">
-                    <button type="button" class="nsft-tmc-btn is-later">${tmmEsc(tmmTexto('tmc_later', 'Not now'))}</button>
-                    <button type="button" class="nsft-tmc-btn is-save">${tmmEsc(tmmTexto('tmc_save', 'Save'))}</button>
+                    <button type="button" class="nsft-dlg-btn nsft-dlg-btn-cancel is-later">${tmmEsc(tmmTexto('tmc_later', 'Not now'))}</button>
+                    <button type="button" class="nsft-dlg-btn nsft-dlg-btn-ok is-save">${tmmEsc(tmmTexto('tmc_save', 'Save'))}</button>
                 </div>
             </div>`;
             document.body.appendChild(el);
@@ -919,6 +856,7 @@
             });
             el.querySelector('.is-save').addEventListener('click', tmcGuarda);
             el.querySelector('.is-later').addEventListener('click', tmcAplaza);
+            el.querySelector('.nsft-tmc-x').addEventListener('click', tmcAplaza);
             el.addEventListener('mousedown', (ev) => { if (ev.target === el) tmcAplaza(); });
             el.addEventListener('keydown', (ev) => {
                 ev.stopPropagation();
@@ -960,11 +898,6 @@
 
     function tmcAplaza() {
         tmcCierra();
-        try { sessionStorage.setItem(TMC_LATER, '1'); } catch (e) { }
-        chrome.storage.local.get(STORAGE_KEY, (items) => {
-            removeToolsMenu();
-            addToolsMenu(items);
-        });
     }
 
     function tmmApuntaReciente(id) {
@@ -1009,6 +942,43 @@
         li.setAttribute('data-nsps-type', 'menu_item');
         li.setAttribute('data-nsps-label', label);
         li.innerHTML = buildMenuLinkHtml(label, 'scripted', 'nsft-show-scripted-record');
+        return li;
+    }
+
+    function hayRegistroGuardado() {
+        return /[?&]id=\d+/.test(window.location.search);
+    }
+
+    function createRecordHistoryItem() {
+        const label = chrome.i18n.getMessage('enableRecordHistoryLabel') || 'Historial del registro';
+        const li = document.createElement('li');
+        li.id = RECORD_HISTORY_ITEM_ID;
+        li.className = 'ns-menuitem';
+        li.setAttribute('data-nsps-type', 'menu_item');
+        li.setAttribute('data-nsps-label', label);
+        li.innerHTML = buildMenuLinkHtml(label, 'timeline', 'nsft-show-record-history');
+        return li;
+    }
+
+    function createCsvTemplateItem() {
+        const label = chrome.i18n.getMessage('enableCsvImportTemplateLabel') || 'Plantilla de importación CSV';
+        const li = document.createElement('li');
+        li.id = CSV_TEMPLATE_ITEM_ID;
+        li.className = 'ns-menuitem';
+        li.setAttribute('data-nsps-type', 'menu_item');
+        li.setAttribute('data-nsps-label', label);
+        li.innerHTML = buildMenuLinkHtml(label, 'csv_template', 'nsft-show-csv-import-template');
+        return li;
+    }
+
+    function createRecordAttachmentsItem() {
+        const label = chrome.i18n.getMessage('enableRecordAttachmentsLabel') || 'Adjuntos del registro';
+        const li = document.createElement('li');
+        li.id = RECORD_ATTACH_ITEM_ID;
+        li.className = 'ns-menuitem';
+        li.setAttribute('data-nsps-type', 'menu_item');
+        li.setAttribute('data-nsps-label', label);
+        li.innerHTML = buildMenuLinkHtml(label, 'paperclip', 'nsft-show-record-attachments');
         return li;
     }
 
@@ -1239,6 +1209,17 @@
         return li;
     }
 
+    function createRolePermissionsItem() {
+        const label = chrome.i18n.getMessage('enableRolePermissionsLabel') || 'Permisos de tu rol';
+        const li = document.createElement('li');
+        li.id = ROLE_PERMS_ITEM_ID;
+        li.className = 'ns-menuitem';
+        li.setAttribute('data-nsps-type', 'menu_item');
+        li.setAttribute('data-nsps-label', label);
+        li.innerHTML = buildMenuLinkHtml(label, 'shield', 'nsft-show-role-permissions');
+        return li;
+    }
+
     function createFindFieldItem() {
         const label = chrome.i18n.getMessage("enableFindFieldByIdLabel");
         const li = document.createElement('li');
@@ -1281,15 +1262,20 @@
     }
 
     function observeDomChanges() {
+        const nunca = /dash\.nl|card\.nl|list\.nl/.test(window.location.pathname);
+        let leyendo = false;
         const checkAndReinject = () => {
-            if (!document.getElementById(TOOLS_MENU_ID)) {
-                chrome.storage.local.get(STORAGE_KEY, (items) => {
-                    addToolsMenu(items);
-                });
-            }
+            if (nunca || leyendo || document.getElementById(TOOLS_MENU_ID)) return;
+            if (!document.querySelector('ul.ns-menu')) return;
+            leyendo = true;
+            chrome.storage.local.get(STORAGE_KEY, (items) => {
+                leyendo = false;
+                addToolsMenu(items);
+            });
         };
+        if (nunca) return;
         if (window.NSFT_Observer && typeof window.NSFT_Observer.subscribe === 'function') {
-            window.NSFT_Observer.subscribe(checkAndReinject);
+            window.NSFT_Observer.subscribe(checkAndReinject, { throttle: 300 });
             return;
         }
         const observer = new MutationObserver(checkAndReinject);
@@ -1308,6 +1294,9 @@
         set('enableRecordObjectLabel', 'view_record');
         set('enableScriptedRecordsLabel', 'scripted');
         set('enableRecordLogsViewerLabel', 'record_logs');
+        set('enableRecordHistoryLabel', 'timeline', 'Historial del registro');
+        set('enableCsvImportTemplateLabel', 'csv_template', 'Plantilla de importación CSV');
+        set('enableRecordAttachmentsLabel', 'paperclip', 'Adjuntos del registro');
         set('openSuiteQLRunnerLabel', 'suiteql');
         set('enableExportSearchLabel', 'export_search');
         set('lrc_menu_ss1', 'terminal');
@@ -1325,6 +1314,7 @@
         set('enableAiAssistantLabel', 'ai_assistant', 'Asistente de IA');
         set('enableGithubBackupLabel', 'github_backup', 'Respaldar a GitHub');
         set('pp_title', 'page_perf', 'Rendimiento de la página');
+        set('enableRolePermissionsLabel', 'shield', 'Permisos de tu rol');
         set('enableShortcutsCheatsheetLabel', 'cheatsheet');
         set('enableFindFieldByIdLabel', 'find_field');
         set('openInEnv_group', 'open_in_env', 'Abrir en otro entorno');
@@ -1333,6 +1323,7 @@
         set('recordOptionAddField', 'plus_circle');
         set('recordOptionAddColumn', 'columns');
         set('recordOptionViewDependentRecords', 'dependents');
+        set('recordOptionViewPdf', 'pdf', 'Ver PDF');
         set('recordOptionViewXml', 'xml', 'Ver XML');
         set('sx_title', 'script_execute', 'Ejecutar script');
         set('recordOptionRunSuiteQL', 'suiteql');

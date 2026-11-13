@@ -78,7 +78,7 @@
 }
 
 .nsft-pr-input {
-    background: #fff !important;
+    background: var(--nsft-w-s0, #fff) !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 12px !important;
     width: 40px !important;
@@ -93,6 +93,8 @@
     min-width: unset !important;
     min-height: unset !important;
     transition: border-color 0.2s, box-shadow 0.2s !important;
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
 }
 
 .nsft-pr-input:focus {
@@ -114,7 +116,7 @@
 
 .nsft-pr-now {
     border: 1px solid #cbd5e1;
-    background: #fff;
+    background: var(--nsft-w-s0, #fff);
     color: #4d5f79;
     border-radius: 6px;
     width: 24px;
@@ -148,3 +150,34 @@
 .nsft-pr-dot.is-on { opacity: 1; }
 .nsft-pr-dot.is-beat { animation: nsft-pr-pulse 0.6s ease-out; }
 
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-pr-container {
+    background: var(--nsft-dk-surface);
+    border-color: var(--nsft-dk-border);
+    color: #C6CEDB;
+}
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-pr-slider {
+    background-color: var(--nsft-dk-border2);
+}
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-pr-input {
+    background: var(--nsft-dk-panel) !important;
+    border-color: var(--nsft-dk-border) !important;
+    color: #E6EBF2 !important;
+}
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-pr-unit {
+    color: #9AA4B5;
+}
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-pr-now {
+    background: var(--nsft-dk-panel);
+    border-color: var(--nsft-dk-border);
+    color: #C6CEDB;
+}
+
+html[data-nsft-theme="dark"]:not(.nsft-dark-on) .nsft-pr-now:hover {
+    background: var(--nsft-dk-hover);
+    border-color: var(--nsft-dk-border2);
+}

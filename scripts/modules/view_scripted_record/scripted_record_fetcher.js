@@ -126,6 +126,18 @@
             }
 
             {
+                let _scripts = null, _wfs = null, _enviado = false;
+                const intentaEnviar = function () {
+                    if (_enviado || _scripts === null || _wfs === null) return;
+                    _enviado = true;
+                    sendMessageToExtension('success', translations.sr_data_retrieved || 'Data retrieved', {
+                        scriptDeployments: _scripts,
+                        workflows: _wfs,
+                        isCustomList: false
+                    });
+                };
+                fetchRunsForMe(recordType);
+                cargaWorkflows(recordType, recordId, company, function (lista) { _wfs = lista; intentaEnviar(); });
                 try {
                     const functionFields = [
                         'beforesubmitfunction', 'summarizefunction', 'mapfunction', 'getinputdatafunction',
@@ -160,6 +172,7 @@
                         limit: 1000
                     }, function (qErr, results) {
                         if (qErr) {
+                            _enviado = true;
                             sendMessageToExtension('error', (translations.sr_error_logic || 'SuiteQL/Logic Error: ') + (qErr.message || qErr.code || ''));
                             return;
                         }
@@ -202,73 +215,8 @@
                             });
                         });
 
-                        var workflowResults = [];
-                        try {
-                            if (typeof nlapiSearchRecord === 'function') {
-                                var workflowSearch = nlapiSearchRecord('workflow', null,
-                                    [['subrecordtype', 'anyof', recordType.toUpperCase()]],
-                                    [
-                                        new nlobjSearchColumn('name'),
-                                        new nlobjSearchColumn('releasestatus'),
-                                        new nlobjSearchColumn('owner'),
-                                    ]
-                                );
-
-                                let workflowMap = {};
-
-                                if (workflowSearch) {
-                                    workflowSearch.forEach(result => {
-                                        let workflowId = result.getId();
-                                        let wfObj = {
-                                            name: result.getValue('name'),
-                                            releasestatus: result.getValue('releasestatus'),
-                                            owner: result.getText('owner'),
-                                            id: workflowId,
-                                            url: `https://${company}.app.netsuite.com/app/common/workflow/setup/nextgen/workflowdesktop.nl?id=${workflowId}&e=T&whence=`,
-                                            currentState: ""
-                                        };
-                                        workflowResults.push(wfObj);
-                                        workflowMap[workflowId] = wfObj;
-                                    });
-                                }
-
-                                if (recordId && workflowResults.length > 0) {
-                                    var workflowStateSearch = nlapiSearchRecord(recordType, null,
-                                        [
-                                            ['internalid', 'anyof', recordId],
-                                            'AND',
-                                            ['workflow.workflow', 'anyof', Object.keys(workflowMap)],
-                                        ],
-                                        [
-                                            new nlobjSearchColumn('currentstate', 'workflow', null),
-                                            new nlobjSearchColumn('workflow', 'workflow', null)
-                                        ]
-                                    );
-                                    if (workflowStateSearch) {
-                                        workflowStateSearch.forEach(result => {
-                                            let workflowId = result.getValue('workflow', 'workflow');
-                                            let currentState = result.getText('currentstate', 'workflow');
-                                            if (workflowMap[workflowId]) {
-                                                workflowMap[workflowId].currentState = currentState;
-                                            }
-                                        });
-                                    }
-                                }
-                            }
-
-                        } catch (wfErr) {
-                            if (wfErr && wfErr.code !== 'SSS_INVALID_SRCH_COLUMN_JOIN') {
-                                console.warn('NSFT: Workflow Search Error', wfErr);
-                            }
-                        }
-
-                        sendMessageToExtension('success', translations.sr_data_retrieved || 'Data retrieved', {
-                            scriptDeployments: scriptDeploymentResults,
-                            workflows: workflowResults,
-                            isCustomList: false
-                        });
-
-                        fetchRunsForMe(recordType);
+                        _scripts = scriptDeploymentResults;
+                        intentaEnviar();
 
                         } catch (e) {
                             sendMessageToExtension('error', (translations.sr_error_logic || 'SuiteQL/Logic Error: ') + e.message);
@@ -282,6 +230,114 @@
         } catch (globalE) {
             sendMessageToExtension('error', (translations.sr_error_global || 'Global Fetch Error: ') + globalE.message);
         }
+    }
+
+    function cargaWorkflows(recordType, recordId, company, listo) {
+        const RT = String(recordType || '').toUpperCase();
+        const urlDe = (id) => `https://${company}.app.netsuite.com/app/common/workflow/setup/nextgen/workflowdesktop.nl?id=${id}&e=T&whence=`;
+        const viaVieja = function () {
+            var workflowResults = [];
+            try {
+                if (typeof nlapiSearchRecord === 'function') {
+                    var workflowSearch = nlapiSearchRecord('workflow', null,
+                        [['subrecordtype', 'anyof', recordType.toUpperCase()]],
+                        [
+                            new nlobjSearchColumn('name'),
+                            new nlobjSearchColumn('releasestatus'),
+                            new nlobjSearchColumn('owner'),
+                        ]
+                    );
+
+                    let workflowMap = {};
+
+                    if (workflowSearch) {
+                        workflowSearch.forEach(result => {
+                            let workflowId = result.getId();
+                            let wfObj = {
+                                name: result.getValue('name'),
+                                releasestatus: result.getValue('releasestatus'),
+                                owner: result.getText('owner'),
+                                id: workflowId,
+                                url: `https://${company}.app.netsuite.com/app/common/workflow/setup/nextgen/workflowdesktop.nl?id=${workflowId}&e=T&whence=`,
+                                currentState: ""
+                            };
+                            workflowResults.push(wfObj);
+                            workflowMap[workflowId] = wfObj;
+                        });
+                    }
+
+                    if (recordId && workflowResults.length > 0) {
+                        var workflowStateSearch = nlapiSearchRecord(recordType, null,
+                            [
+                                ['internalid', 'anyof', recordId],
+                                'AND',
+                                ['workflow.workflow', 'anyof', Object.keys(workflowMap)],
+                            ],
+                            [
+                                new nlobjSearchColumn('currentstate', 'workflow', null),
+                                new nlobjSearchColumn('workflow', 'workflow', null)
+                            ]
+                        );
+                        if (workflowStateSearch) {
+                            workflowStateSearch.forEach(result => {
+                                let workflowId = result.getValue('workflow', 'workflow');
+                                let currentState = result.getText('currentstate', 'workflow');
+                                if (workflowMap[workflowId]) {
+                                    workflowMap[workflowId].currentState = currentState;
+                                }
+                            });
+                        }
+                    }
+                }
+
+            } catch (wfErr) {
+                if (wfErr && wfErr.code !== 'SSS_INVALID_SRCH_COLUMN_JOIN') {
+                    console.warn('NSFT: Workflow Search Error', wfErr);
+                }
+            }
+            listo(workflowResults);
+        };
+        if (typeof require !== 'function') { try { viaVieja(); } catch (e) { listo([]); } return; }
+        try {
+            require(['N/search'], function (search) {
+                if (!search || !search.create) { try { viaVieja(); } catch (e) { listo([]); } return; }
+                search.create({
+                    type: 'workflow',
+                    filters: [['subrecordtype', 'anyof', RT]],
+                    columns: ['name', 'releasestatus', 'owner']
+                }).run().getRange.promise({ start: 0, end: 1000 }).then(function (res) {
+                    const lista = [];
+                    const mapa = {};
+                    (res || []).forEach(function (r) {
+                        const w = {
+                            name: r.getValue({ name: 'name' }),
+                            releasestatus: r.getValue({ name: 'releasestatus' }),
+                            owner: r.getText({ name: 'owner' }),
+                            id: r.id,
+                            url: urlDe(r.id),
+                            currentState: ''
+                        };
+                        lista.push(w);
+                        mapa[r.id] = w;
+                    });
+                    if (!recordId || !lista.length) { listo(lista); return; }
+                    search.create({
+                        type: recordType,
+                        filters: [['internalid', 'anyof', recordId], 'AND', ['workflow.workflow', 'anyof', Object.keys(mapa)]],
+                        columns: [
+                            search.createColumn({ name: 'currentstate', join: 'workflow' }),
+                            search.createColumn({ name: 'workflow', join: 'workflow' })
+                        ]
+                    }).run().getRange.promise({ start: 0, end: 1000 }).then(function (st) {
+                        (st || []).forEach(function (r) {
+                            const wid = r.getValue({ name: 'workflow', join: 'workflow' });
+                            if (mapa[wid]) mapa[wid].currentState = r.getText({ name: 'currentstate', join: 'workflow' });
+                        });
+                        listo(lista);
+                    }, function () { listo(lista); });
+                }, function () { try { viaVieja(); } catch (e) { listo([]); } });
+            }, function () { try { viaVieja(); } catch (e) { listo([]); } });
+        } catch (e) { try { viaVieja(); } catch (e2) { listo([]); } }
     }
 
     function fetchRunsForMe(recordType) {
@@ -341,7 +397,9 @@
                 const id = r.deployment_id != null ? r.deployment_id : r.DEPLOYMENT_ID;
                 if (id != null) map[String(id)] = String(r.runs || r.RUNS || '');
             });
-            sendMessageToExtension('runs_success', null, map);
+            let yo = '';
+            try { yo = ctx && typeof ctx.getName === 'function' ? String(ctx.getName() || '') : ''; } catch (e) { yo = ''; }
+            sendMessageToExtension('runs_success', null, map, { me: yo });
         });
     }
 

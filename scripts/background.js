@@ -3,10 +3,12 @@ try {
     importScripts('modules/_shared/nsft_defaults.js');
     importScripts('modules/_shared/nsft_grouped_tabs_colors.js');
     importScripts('modules/_shared/nsft_env.js');
+    importScripts('modules/_shared/nsft_suite_bundle.js');
 } catch (e) {
 }
 
-chrome.runtime.onInstalled.addListener(({ reason }) => {
+var nsftAlInstalar;
+chrome.runtime.onInstalled.addListener(nsftAlInstalar = ({ reason }) => {
     if (reason !== 'install' && reason !== 'update') return;
     const defaults = globalThis.NSFT_DEFAULTS;
 
@@ -50,6 +52,18 @@ chrome.runtime.onInstalled.addListener(({ reason }) => {
             }
         });
     });
+
+    if (reason === 'update') {
+        const RETIRADAS = [
+            'enableEditorTheme', 'editorTheme', 'editorFontFamily', 'editorFontSize',
+            'editorCustomBg', 'editorCustomFg', 'editorCustomKeyword', 'editorCustomLiteral',
+            'editorCustomNumber', 'editorCustomString', 'editorCustomVariable',
+            'editorCustomProperty', 'editorCustomComment', 'nsftEditorThemeCache',
+            'enableSavedSearchSplit'
+        ];
+        try { chrome.storage.local.remove(RETIRADAS, () => void chrome.runtime.lastError); } catch (e) { }
+        try { chrome.storage.sync.remove(RETIRADAS, () => void chrome.runtime.lastError); } catch (e) { }
+    }
 
     if (reason === 'update') {
         chrome.storage.local.get({ nsftMigTrustDeviceOn: false }, (m) => {
@@ -183,6 +197,54 @@ function nsftCrearMenuCampoSublista() {
 }
 
 chrome.runtime.onInstalled.addListener(nsftCrearMenuCampoSublista);
+
+function nsftLimpiaPaginaNetSuite() {
+    const RE = /^(nsft|shortcutKeyStyle$)/i;
+    [window.localStorage, window.sessionStorage].forEach((st) => {
+        try { Object.keys(st).forEach((k) => { if (RE.test(k)) st.removeItem(k); }); } catch (e) { }
+    });
+    try {
+        document.cookie.split(';').map((c) => c.split('=')[0].trim()).filter((n) => /^nsft/i.test(n)).forEach((n) => {
+            document.cookie = n + '=; path=/; max-age=0; SameSite=Lax; Secure';
+        });
+    } catch (e) { }
+}
+
+function nsftReinstalaDesdeCero(hecho) {
+    const limpiaPestanas = new Promise((resolve) => {
+        try {
+            chrome.tabs.query({ url: ['https://*.netsuite.com/*'] }, (tabs) => {
+                if (chrome.runtime.lastError || !tabs) { resolve(); return; }
+                Promise.all(tabs.map((t) => chrome.scripting.executeScript({
+                    target: { tabId: t.id, allFrames: true },
+                    func: nsftLimpiaPaginaNetSuite
+                }).catch(() => { }))).then(() => resolve());
+            });
+        } catch (e) { resolve(); }
+    });
+    limpiaPestanas.then(() => {
+        chrome.storage.local.clear(() => {
+            chrome.storage.sync.clear(() => {
+                const sigue = () => {
+                    try { nsftAlInstalar({ reason: 'install' }); } catch (e) { }
+                    hecho();
+                };
+                try {
+                    if (chrome.storage.session) chrome.storage.session.clear(sigue);
+                    else sigue();
+                } catch (e) { sigue(); }
+            });
+        });
+    });
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, responder) => {
+    if (!msg || msg.nsftDev !== 'reinstalar') return;
+    const pagina = chrome.runtime.getURL('');
+    if (!sender || sender.id !== chrome.runtime.id || !sender.url || sender.url.indexOf(pagina) !== 0) return;
+    nsftReinstalaDesdeCero(() => { try { responder({ ok: true }); } catch (e) { } });
+    return true;
+});
 chrome.runtime.onStartup.addListener(nsftCrearMenuCampoSublista);
 nsftCrearMenuCampoSublista();
 
@@ -196,6 +258,58 @@ if (chrome.contextMenus) {
                 void chrome.runtime.lastError;
             });
         } catch (e) { }
+    });
+}
+
+function nsftPanelFirefox(path, tabId, sendResponse) {
+    const sa = (typeof browser !== 'undefined' && browser.sidebarAction) || null;
+    if (!sa) return false;
+    const cajon = (motivo) => {
+        chrome.tabs.sendMessage(tabId, { nsftDrawer: 'open', path }, { frameId: 0 }, (r) => {
+            void chrome.runtime.lastError;
+            sendResponse(r && r.ok ? { ok: true, drawer: true } : { ok: false, reason: motivo || 'sidebar_failed' });
+        });
+    };
+    try {
+        sa.setPanel({ panel: path });
+        sa.open()
+            .then(() => sendResponse({ ok: true }))
+            .catch((e) => cajon(e && e.message));
+        return true;
+    } catch (e) {
+        cajon(e && e.message);
+        return true;
+    }
+}
+
+chrome.runtime.onMessage.addListener((msg, sender, responder) => {
+    if (!msg || msg.nsftCaptura !== 'atajo' || !chrome.commands) return undefined;
+    chrome.commands.getAll((cmds) => {
+        const c = (cmds || []).find((x) => x.name === 'nsft-captura-guiada');
+        responder({ atajo: (c && c.shortcut) || '' });
+    });
+    return true;
+});
+
+if (chrome.commands) {
+    chrome.commands.onCommand.addListener((command, tab) => {
+        if (command !== 'nsft-captura-guiada') return;
+        if (!tab || typeof tab.id !== 'number' || !/^https:\/\/[^/]*netsuite\.com\//.test(tab.url || '')) return;
+        const manda = (msg, cb) => {
+            try {
+                chrome.tabs.sendMessage(tab.id, msg, { frameId: 0 }, (r) => { void chrome.runtime.lastError; cb && cb(r); });
+            } catch (e) { cb && cb(null); }
+        };
+        manda({ nsftCaptura: 'prepara' }, (datos) => {
+            if (!datos || !datos.ok) return;
+            chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' }, (img) => {
+                if (chrome.runtime.lastError || !img) {
+                    manda({ nsftCaptura: 'error' });
+                    return;
+                }
+                manda({ nsftCaptura: 'abre', img, datos });
+            });
+        });
     });
 }
 
@@ -494,6 +608,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.nsftRlv === 'openPanel') {
         const tabId = sender && sender.tab ? sender.tab.id : null;
         if (typeof tabId !== 'number' || !chrome.sidePanel) {
+            if (typeof tabId === 'number' && nsftPanelFirefox('sidepanel/record_logs_panel.html', tabId, sendResponse)) return true;
             sendResponse({ ok: false, reason: 'no_side_panel' });
             return;
         }
@@ -509,6 +624,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
+    if (message.nsftLibs === 'load') {
+        const L = self.NSFT_CODE_LIBS;
+        const tabId = sender && sender.tab ? sender.tab.id : null;
+        if (!L || typeof tabId !== 'number' || !chrome.scripting) {
+            sendResponse({ ok: false, error: 'no_scripting' });
+            return;
+        }
+        const target = { tabId, frameIds: [typeof sender.frameId === 'number' ? sender.frameId : 0] };
+        chrome.scripting.executeScript({ target, files: L.slice(), injectImmediately: true })
+            .then(() => sendResponse({ ok: true }))
+            .catch((e) => sendResponse({ ok: false, error: (e && e.message) || 'inject_failed' }));
+        return true;
+    }
+
+    if (message.nsftSuite === 'load') {
+        const B = self.NSFT_SUITE_BUNDLE;
+        const tabId = sender && sender.tab ? sender.tab.id : null;
+        if (!B || typeof tabId !== 'number' || !chrome.scripting) {
+            sendResponse({ ok: false, error: 'no_scripting' });
+            return;
+        }
+        const target = { tabId, frameIds: [typeof sender.frameId === 'number' ? sender.frameId : 0] };
+        chrome.scripting.insertCSS({ target, files: B.css.slice() })
+            .then(() => chrome.scripting.executeScript({ target, files: B.js.slice(), injectImmediately: true }))
+            .then(() => sendResponse({ ok: true }))
+            .catch((e) => sendResponse({ ok: false, error: (e && e.message) || 'inject_failed' }));
+        return true;
+    }
+
     if (message.nsftPanel === 'open') {
         const PANEL_PATHS = {
             ro: 'sidepanel/record_object_panel.html',
@@ -517,6 +661,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const path = PANEL_PATHS[message.panel];
         const tabId = sender && sender.tab ? sender.tab.id : null;
         if (!path || typeof tabId !== 'number' || !chrome.sidePanel) {
+            if (path && typeof tabId === 'number' && nsftPanelFirefox(path, tabId, sendResponse)) return true;
             sendResponse({ ok: false, reason: 'no_side_panel' });
             return;
         }
@@ -601,6 +746,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (ac) { try { ac.abort(); } catch (e) { } }
         sendResponse({ ok: true, cancelled: !!ac });
         return false;
+    }
+
+    if (message.action === 'nsftAiHasPerm') {
+        const origin = String(message.origin || '');
+        if (!/^https?:\/\/[^/]+\/\*$/.test(origin) || !chrome.permissions) { sendResponse({ ok: true }); return; }
+        chrome.permissions.contains({ origins: [origin] }, (granted) => {
+            void chrome.runtime.lastError;
+            sendResponse({ ok: !!granted });
+        });
+        return true;
+    }
+    if (message.action === 'nsftAiAskPerm') {
+        const origin = String(message.origin || '');
+        if (!/^https?:\/\/[^/]+\/\*$/.test(origin)) { sendResponse({ ok: false }); return; }
+        const url = chrome.runtime.getURL('popup/ai_permission.html') + '?origin=' + encodeURIComponent(origin)
+            + '&name=' + encodeURIComponent(String(message.name || ''));
+        chrome.windows.create({ url, type: 'popup', width: 460, height: 340, focused: true }, () => {
+            void chrome.runtime.lastError;
+            sendResponse({ ok: true });
+        });
+        return true;
     }
 
     if (message.action === 'nsftAiChat') {
@@ -1169,6 +1335,10 @@ async function nsftAiChat(req) {
         req.__signal = ac.signal;
     }
     try {
+        if (req.__onDelta && provider !== 'gemini-interactions') {
+            const vivo = await nsftAiStream(req);
+            if (!vivo || !vivo.__fallback) return vivo;
+        }
         if (provider === 'claude') return await nsftAiClaude(req);
         if (provider === 'gemini-interactions') return await nsftAiGeminiInteractions(req);
         return await nsftAiOpenAICompat(req);
@@ -1185,8 +1355,8 @@ function nsftAiUsage(u) {
     const total = num(u.total_tokens) || (tin + tout);
     const det = u.prompt_tokens_details || u.input_tokens_details || {};
     const cached = num(u.cache_read_input_tokens)
-        + num(det.cached_tokens)
-        + num(u.prompt_cache_hit_tokens)
+        + Math.max(num(det.cached_tokens),
+            num(u.prompt_cache_hit_tokens))
         + num(u.cached_content_token_count);
     if (!tin && !tout && !total) return null;
     return { in: tin, out: tout, total: total, cached: cached };
@@ -1270,6 +1440,8 @@ async function nsftAiClaude(req) {
     if (req.system) {
         body.system = [{ type: 'text', text: req.system, cache_control: { type: 'ephemeral' } }];
     }
+    nsftAiCacheTail(body);
+    if (req.__build) return { url, headers, body };
 
     const r = await nsftAiFetchJson(url, headers, body, 0, req.__signal);
     if (!r.ok) return r;
@@ -1296,6 +1468,22 @@ async function nsftAiClaude(req) {
         truncated: nsftAiTruncated(r.data && r.data.stop_reason),
         usage: nsftAiUsage(r.data && r.data.usage)
     };
+}
+
+function nsftAiCacheTail(body) {
+    const msgs = body && body.messages;
+    if (!Array.isArray(msgs) || !msgs.length) return;
+    const i = msgs.length - 1;
+    const last = msgs[i] || {};
+    const bloques = Array.isArray(last.content)
+        ? last.content.slice()
+        : [{ type: 'text', text: String(last.content || '') }];
+    const j = bloques.length - 1;
+    const b = bloques[j];
+    if (!b || !/^(text|tool_result|tool_use|image)$/.test(b.type)) return;
+    if (b.type === 'text' && !String(b.text || '').trim()) return;
+    bloques[j] = Object.assign({}, b, { cache_control: { type: 'ephemeral' } });
+    body.messages = msgs.slice(0, i).concat([Object.assign({}, last, { content: bloques })]);
 }
 
 async function nsftAiOpenAICompat(req) {
@@ -1357,7 +1545,24 @@ async function nsftAiOpenAICompat(req) {
         body.parallel_tool_calls = false;
     }
 
-    const r = await nsftAiFetchJson(url, headers, body, 0, req.__signal);
+    const orAnthropic = /openrouter\.ai/i.test(url) && /^anthropic\//i.test(String(req.model || ''));
+    let sinMarcas = null;
+    if (orAnthropic) {
+        sinMarcas = JSON.parse(JSON.stringify(body));
+        const marca = (m) => { m.content = [{ type: 'text', text: m.content, cache_control: { type: 'ephemeral' } }]; };
+        const sys = body.messages[0];
+        if (sys && sys.role === 'system' && typeof sys.content === 'string' && sys.content) marca(sys);
+        for (let k = body.messages.length - 1; k > 0; k--) {
+            const m = body.messages[k];
+            if ((m.role === 'user' || m.role === 'tool') && typeof m.content === 'string' && m.content.trim()) { marca(m); break; }
+        }
+    }
+    if (req.__build) return { url, headers, body, sinMarcas };
+
+    let r = await nsftAiFetchJson(url, headers, body, 0, req.__signal);
+    if (!r.ok && sinMarcas && r.status === 400) {
+        r = await nsftAiFetchJson(url, headers, sinMarcas, 0, req.__signal);
+    }
     if (!r.ok) {
         let host = '';
         try { host = new URL(url).hostname; } catch (e) { host = ''; }
@@ -1384,6 +1589,161 @@ async function nsftAiOpenAICompat(req) {
         usage: nsftAiUsage(r.data && r.data.usage)
     };
 }
+
+async function nsftAiStream(req) {
+    const esClaude = (req.provider || 'claude') === 'claude';
+    const armada = esClaude
+        ? await nsftAiClaude(Object.assign({}, req, { __build: true }))
+        : await nsftAiOpenAICompat(Object.assign({}, req, { __build: true }));
+    if (!armada || !armada.body) return { __fallback: true };
+    const body = Object.assign({}, armada.body, { stream: true });
+    if (!esClaude) body.stream_options = { include_usage: true };
+
+    let res;
+    try {
+        res = await fetch(armada.url, { method: 'POST', headers: armada.headers, body: JSON.stringify(body), signal: req.__signal || undefined });
+    } catch (e) {
+        if (e && e.name === 'AbortError') return { ok: false, error: 'cancelada', cancelled: true };
+        return { __fallback: true };
+    }
+    if (!res.ok || !res.body) {
+        try { await res.text(); } catch (e) { }
+        return { __fallback: true };
+    }
+
+    const onDelta = req.__onDelta;
+    const onAlive = req.__onAlive || (() => {});
+    let text = '';
+    let stop = '';
+    let usage = null;
+    let refusal = null;
+    const bloques = [];
+    const llamadas = [];
+    let empezo = false;
+
+    const evento = (d) => {
+        if (esClaude) {
+            if (d.type === 'message_start') usage = Object.assign({}, (d.message && d.message.usage) || {});
+            else if (d.type === 'content_block_start') {
+                const b = d.content_block || {};
+                bloques[d.index] = { type: b.type, id: b.id, name: b.name, json: '' };
+            } else if (d.type === 'content_block_delta') {
+                const dl = d.delta || {};
+                if (dl.type === 'text_delta') { text += dl.text || ''; empezo = true; onDelta(text); }
+                else if (dl.type === 'input_json_delta') { if (bloques[d.index]) bloques[d.index].json += dl.partial_json || ''; onAlive(); }
+                else onAlive();
+            } else if (d.type === 'message_delta') {
+                if (d.delta && d.delta.stop_reason) stop = d.delta.stop_reason;
+                if (d.delta && d.delta.stop_details) refusal = d.delta.stop_details;
+                if (d.usage) usage = Object.assign(usage || {}, d.usage);
+            } else if (d.type === 'error') {
+                throw new Error((d.error && d.error.message) || 'stream_error');
+            }
+            return;
+        }
+        if (d.usage) usage = d.usage;
+        const ch = d.choices && d.choices[0];
+        if (!ch) return;
+        const dl = ch.delta || {};
+        if (typeof dl.content === 'string' && dl.content) { text += dl.content; empezo = true; onDelta(text); }
+        else if (dl.reasoning_content || dl.reasoning) onAlive();
+        (dl.tool_calls || []).forEach((tc) => {
+            const k = typeof tc.index === 'number' ? tc.index : llamadas.length;
+            const l = llamadas[k] || (llamadas[k] = { id: '', name: '', args: '' });
+            if (tc.id) l.id = tc.id;
+            if (tc.function && tc.function.name) l.name = tc.function.name;
+            if (tc.function && tc.function.arguments) l.args += tc.function.arguments;
+            onAlive();
+        });
+        if (ch.finish_reason) stop = ch.finish_reason;
+    };
+
+    try {
+        const lector = res.body.getReader();
+        const dec = new TextDecoder();
+        let resto = '';
+        for (;;) {
+            const { value, done } = await lector.read();
+            if (done) break;
+            resto += dec.decode(value, { stream: true });
+            let nl;
+            while ((nl = resto.indexOf('\n')) !== -1) {
+                const linea = resto.slice(0, nl).replace(/\r$/, '');
+                resto = resto.slice(nl + 1);
+                if (linea.indexOf('data:') !== 0) continue;
+                const dato = linea.slice(5).trim();
+                if (!dato || dato === '[DONE]') continue;
+                let d = null;
+                try { d = JSON.parse(dato); } catch (e) { continue; }
+                evento(d);
+            }
+        }
+    } catch (e) {
+        if (e && e.name === 'AbortError') return { ok: false, error: 'cancelada', cancelled: true };
+        if (empezo && req.__onReset) req.__onReset();
+        return { __fallback: true };
+    }
+
+    if (esClaude && stop === 'refusal') {
+        const cat = (refusal && refusal.category) || '—';
+        return {
+            ok: false,
+            error: chrome.i18n.getMessage('sqlai_err_refusal', [String(cat)])
+                || ('The model declined the request (' + cat + ').')
+        };
+    }
+
+    const toolCalls = [];
+    if (esClaude) {
+        bloques.forEach((b) => {
+            if (!b || b.type !== 'tool_use') return;
+            let input = {};
+            try { input = b.json ? JSON.parse(b.json) : {}; } catch (e) { input = { _raw: b.json }; }
+            toolCalls.push({ id: b.id, name: b.name, input });
+        });
+    } else {
+        llamadas.forEach((l) => {
+            if (!l || !l.name) return;
+            let input = {};
+            try { input = l.args ? JSON.parse(l.args) : {}; } catch (e) { input = { _raw: l.args }; }
+            toolCalls.push({ id: l.id, name: l.name, input });
+        });
+    }
+    return {
+        ok: true, text, toolCalls,
+        stopReason: toolCalls.length ? 'tool_use' : 'end',
+        truncated: nsftAiTruncated(stop),
+        usage: nsftAiUsage(usage),
+        streamed: true
+    };
+}
+
+chrome.runtime.onConnect.addListener((port) => {
+    if (port.name !== 'nsftAiStream') return;
+    const ac = new AbortController();
+    let abierto = true;
+    port.onDisconnect.addListener(() => { abierto = false; try { ac.abort(); } catch (e) { } });
+    const manda = (m) => { if (abierto) { try { port.postMessage(m); } catch (e) { abierto = false; } } };
+
+    port.onMessage.addListener((message) => {
+        if (!message || message.action !== 'nsftAiChat') return;
+        let ultimo = '', timer = 0, vivoTs = 0;
+        const vacia = () => { timer = 0; manda({ delta: ultimo }); };
+        const req = Object.assign({}, message, {
+            __signal: ac.signal,
+            __onDelta: (t) => { ultimo = t; if (!timer) timer = setTimeout(vacia, 50); },
+            __onAlive: () => { const n = Date.now(); if (n - vivoTs > 2000) { vivoTs = n; manda({ alive: 1 }); } },
+            __onReset: () => { if (timer) { clearTimeout(timer); timer = 0; } ultimo = ''; manda({ reset: 1 }); }
+        });
+        nsftAiChat(req)
+            .then((out) => {
+                if (timer) { clearTimeout(timer); vacia(); }
+                manda({ done: out });
+            })
+            .catch((err) => manda({ done: { ok: false, error: (err && err.message) || 'ai_fetch_failed' } }))
+            .finally(() => { if (abierto) { try { port.disconnect(); } catch (e) { } } });
+    });
+});
 
 
 function nsftAiToolNameFor(messages, toolUseId) {

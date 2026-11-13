@@ -12,9 +12,9 @@
     gap: 4px;
     padding: 1px 6px 1px 5px;
     margin-right: 6px;
-    color: #0369a1;
+    color: var(--nsft-ns-accent, #0369a1);
     background: transparent;
-    border: 1px solid #bae6fd;
+    border: 1px solid color-mix(in srgb, var(--nsft-ns-accent, #0ea5e9) 35%, #ffffff);
     border-radius: 3px;
     font-size: 11px;
     line-height: 1.3;
@@ -26,8 +26,8 @@
 
 .nsft-fcr-btn:hover {
     color: #ffffff;
-    background: #0ea5e9;
-    border-color: #0ea5e9;
+    background: var(--nsft-ns-primary, var(--nsft-ns-button, #0ea5e9));
+    border-color: var(--nsft-ns-primary, var(--nsft-ns-button, #0ea5e9));
 }
 
 .nsft-fcr-btn svg {

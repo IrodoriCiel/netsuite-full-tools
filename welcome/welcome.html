@@ -54,19 +54,6 @@
                 </div>
             </div>
 
-            <div class="redwood-notice hero-notice" id="redwoodNotice" role="note">
-                <span class="redwood-notice-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                </span>
-                <p class="redwood-notice-text">
-                    <strong data-i18n="welcomeRedwoodNoticeTag">Heads up:</strong>
-                    <span data-i18n="welcomeRedwoodNoticeBodyPre">NSFT is now compatible with Redwood, NetSuite's new interface.</span>
-                    <strong class="redwood-notice-emphasis" data-i18n="welcomeRedwoodNoticeBodyBold">Occasional issues may still appear</strong>
-                    <span data-i18n="welcomeRedwoodNoticeBodyPost">— if you spot one, please help us by reporting it through the "Report a bug" button so we can fix it as soon as possible.</span>
-                    <a class="redwood-notice-cta" href="https://forms.gle/6FPaQNjs6pUJu9WV8" target="_blank" rel="noopener" data-i18n="reportBugLink">Report a bug</a>
-                </p>
-            </div>
-
         </div>
 
         <aside class="hero-wizard" id="setupWizard" hidden aria-labelledby="wizTitle">
@@ -145,7 +132,6 @@
                     <li data-i18n="welcomeCatSqlItem3">Export Search (JSON / XML)</li>
                     <li data-i18n="welcomeCatSqlItem4">Quick Search creation + in-search preview</li>
                     <li data-i18n="welcomeCatSqlItem5">CSV response viewer</li>
-                    <li data-i18n="welcomeCatSqlItem6">Saved search split view</li>
                     <li class="is-featured" data-i18n="welcomeCatSqlItem7">AI Assistant for SuiteQL &amp; search</li>
                     <li data-i18n="welcomeCatSqlItem8">Records catalog + relationship diagram (ERD)</li>
                     <li data-i18n="welcomeCatSqlItem9">Reusable variables &amp; snippet library</li>
@@ -167,6 +153,9 @@
                     <li data-i18n="welcomeCatRecordItem4">Set Field Values templates &amp; record options menu</li>
                     <li data-i18n="welcomeCatRecordItem5">View Record Scripts</li>
                     <li data-i18n="welcomeCatRecordItem21">View Record Logs (filtered execution logs)</li>
+                    <li data-i18n="welcomeCatRecordItem26">Record history: who changed what, and when</li>
+                    <li data-i18n="welcomeCatRecordItem27">CSV import template from the open record</li>
+                    <li data-i18n="welcomeCatRecordItem28">Record attachments with a preview</li>
                     
                     <li data-i18n="welcomeCatRecordItem7">Load Record to Console</li>
                     <li data-i18n="welcomeCatRecordItem8">Go to record (Alt+Shift+G)</li>
@@ -183,6 +172,7 @@
                     <li data-i18n="welcomeCatRecordItem20">Refresh sublist button</li>
                     <li data-i18n="welcomeCatRecordItem22">Date format shown inside empty date fields</li>
                     <li data-i18n="welcomeCatRecordItem23">Shift to tick a whole range of checkboxes</li>
+                    <li data-i18n="welcomeCatRecordItem25">Lists that search by “contains”, not only “starts with”</li>
                     <li data-i18n="welcomeCatRecordItem24">Where a field is used in the script code</li>
                 </ul>
             </article>
@@ -198,14 +188,15 @@
                     <li data-i18n="welcomeCatScriptItem15">NSFT.* console utilities and which SuiteScript the page supports</li>
                     <li data-i18n="welcomeCatScriptItem1">Prettify logs with syntax highlighting</li>
                     <li data-i18n="welcomeCatScriptItem2">Live mode + Full logs button</li>
+                    <li data-i18n="welcomeCatScriptItem16">A deployment’s schedule as a table of settings and values</li>
                     <li class="is-featured" data-i18n="welcomeCatScriptItem3">Suitelet Tools &amp; Load N Module</li>
                     <li data-i18n="welcomeCatScriptItem4">Script auto-name &amp; upload helpers</li>
-                    <li data-i18n="welcomeCatScriptItem5">Code editor theme</li>
                     <li data-i18n="welcomeCatScriptItem6">Close editor on save</li>
                     <li data-i18n="welcomeCatScriptItem7">Open file in new tab</li>
                     <li data-i18n="welcomeCatScriptItem8">Searchable execution log</li>
                     <li data-i18n="welcomeCatScriptItem9">Beautify JSON from Suitelets &amp; RESTlets</li>
                     <li data-i18n="welcomeCatScriptItem10">Page performance panel</li>
+                    <li data-i18n="welcomeCatScriptItem17">Your role permissions: what’s missing and the request for your administrator</li>
                     <li data-i18n="welcomeCatScriptItem11">Backup SuiteScripts to GitHub</li>
                 </ul>
             </article>
@@ -249,6 +240,7 @@
                     <li data-i18n="welcomeCatFcItem5">File Cabinet utilities</li>
                     <li data-i18n="welcomeCatFcItem6">Download folder as ZIP</li>
                     <li data-i18n="welcomeCatFcItem7">Bundle names on folders</li>
+                    <li data-i18n="welcomeCatFcItem8">Favorite folders, per account</li>
                 </ul>
             </article>
 
@@ -287,6 +279,7 @@
                 <ul>
                     <li class="is-featured" data-i18n="welcomeCatPowerItem1">Command Palette (Ctrl+Shift+Space)</li>
                     <li data-i18n="welcomeCatPowerItem12">Customization finder (scripts, workflows, fields…)</li>
+                    <li class="is-featured" data-i18n="welcomeCatPowerItem18">Guided capture (Alt+Shift+M): the screenshot with the menu path or the field marked</li>
                     <li data-i18n="welcomeCatPowerItem14">Deleted records: who deleted a record, when and from where</li>
                     <li data-i18n="welcomeCatPowerItem2">Keyboard shortcuts cheat sheet (Ctrl+Shift+?)</li>
                     <li data-i18n="welcomeCatPowerItem3">JSON formatter, role finder, auto-refresh</li>

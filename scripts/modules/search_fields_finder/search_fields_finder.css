@@ -1,5 +1,5 @@
 .nsft-ff-div {
-    background-color: #ffffff;
+    background-color: var(--nsft-w-s0, #fff);
     position: sticky;
     top: 0;
     width: 100%;
@@ -64,7 +64,7 @@
     flex: 1 1 100%;
     width: 100%;
     color: #333 !important;
-    background-color: #ffffff !important;
+    background-color: var(--nsft-w-s0, #fff) !important;
     border: none !important;
     border-bottom: 1px solid #f0f0f0 !important;
     padding: 10px 30px 10px 12px !important;
@@ -219,7 +219,7 @@ select.nsft-ff-datatype-select:hover {
 
 
 .nsft-ff-footer {
-    background-color: #ffffff;
+    background-color: var(--nsft-w-s0, #fff);
     position: sticky;
     bottom: 0;
     width: 100%;

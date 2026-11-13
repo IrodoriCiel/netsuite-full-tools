@@ -12,8 +12,8 @@
     font-weight: 600;
     line-height: 1.3;
     color: var(--on-vibrant, #ffffff);
-    background: var(--btn-bg, #2563eb);
-    border: 1px solid var(--btn-border, #1d4ed8);
+    background: var(--btn-bg, var(--nsft-ns-primary, var(--nsft-ns-button, #2563eb)));
+    border: 1px solid var(--btn-border, color-mix(in srgb, var(--nsft-ns-primary, var(--nsft-ns-button, #2563eb)) 85%, #000000));
     border-radius: 4px;
     cursor: pointer;
     position: relative;

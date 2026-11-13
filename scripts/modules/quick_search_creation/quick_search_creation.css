@@ -74,7 +74,7 @@
     font-size: 14px;
     font-weight: 500;
     color: #0f172a;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border: 1px solid #e2e8f0;
     border-radius: 999px;
     outline: none;
@@ -105,7 +105,7 @@
 
 #nsft-find-search:focus {
     border-color: var(--nsft-ns-accent, #4c87b3);
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent, #4c87b3) 15%, transparent);
 }
 
@@ -114,7 +114,7 @@
     top: calc(100% + 6px);
     left: 0;
     right: 0;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     max-height: 320px;
@@ -155,12 +155,12 @@
 .nsft-qsc-suggestion:hover,
 .nsft-qsc-suggestion.is-focused {
     background: color-mix(in srgb, var(--nsft-ns-accent, #4c87b3) 7%, white);
-    color: #1e3a5f;
+    color: var(--nsft-ns-accent, #1e3a5f);
 }
 
 .nsft-qsc-suggestion:hover::before,
 .nsft-qsc-suggestion.is-focused::before {
-    background: var(--nsft-ns-accent, #4c87b3);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #4c87b3));
     transform: scale(1.35);
 }
 
@@ -235,6 +235,8 @@ mark.nsft-qsc-hl {
     font-style: italic;
 }
 
+.nsft-qsc-empty-row:has(> .nsft-vacio) { padding: 0; }
+
 .nsft-qsc-suggestions::-webkit-scrollbar { width: 8px; }
 .nsft-qsc-suggestions::-webkit-scrollbar-thumb {
     background: #e2e8f0;
@@ -256,10 +258,8 @@ mark.nsft-qsc-hl {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 10.5px;
+    font-size: 11.5px;
     font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: #64748b;
     margin-bottom: 6px;
 }
@@ -301,7 +301,7 @@ mark.nsft-qsc-hl {
     font-size: 11.5px;
     font-weight: 500;
     color: #334155;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     border: 1px solid #cbd5e1;
     border-radius: 5px;
     text-decoration: none;
@@ -402,7 +402,7 @@ mark.nsft-qsc-hl {
 #nsft-qsc-recents a.nsft-qsc-recent:hover {
     color: #0f172a;
     border-color: #94a3b8;
-    background: #ffffff;
+    background: var(--nsft-w-s0, #fff);
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
@@ -482,7 +482,7 @@ mark.nsft-qsc-hl {
 }
 
 #nsft-qsc-panel[data-theme="dark"] .nsft-qsc-combo:focus-within .nsft-qsc-search-icon {
-    color: #8FA3FF;
+    color: var(--nsft-ns-accent-light, var(--nsft-ns-accent, #8FA3FF));
 }
 
 #nsft-qsc-panel[data-theme="dark"] #nsft-find-search {
@@ -504,7 +504,7 @@ mark.nsft-qsc-hl {
 #nsft-qsc-panel[data-theme="dark"] #nsft-find-search:focus {
     border-color: var(--nsft-ns-accent-light, #7FB0FF);
     background: var(--nsft-dk-surface, #141519);
-    box-shadow: 0 0 0 3px rgba(110, 124, 245, 0.18);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nsft-ns-accent-light, var(--nsft-ns-accent, #6E7CF5)) 18%, transparent);
 }
 
 #nsft-qsc-panel[data-theme="dark"] .nsft-qsc-clear {
@@ -540,7 +540,7 @@ mark.nsft-qsc-hl {
 
 #nsft-qsc-panel[data-theme="dark"] .nsft-qsc-suggestion:hover::before,
 #nsft-qsc-panel[data-theme="dark"] .nsft-qsc-suggestion.is-focused::before {
-    background: var(--nsft-ns-accent, #3b82f6);
+    background: var(--nsft-ns-button, var(--nsft-ns-accent, #3b82f6));
 }
 
 #nsft-qsc-panel[data-theme="dark"] .nsft-qsc-suggestion mark,

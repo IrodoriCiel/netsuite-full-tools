@@ -23,7 +23,9 @@
     let listo = null;
 
     chrome.storage.local.get({ [STORAGE_KEY]: true }, (it) => {
-        if (it[STORAGE_KEY]) arranca();
+        if (!it[STORAGE_KEY]) return;
+        if (document.readyState === 'complete') arranca();
+        else window.addEventListener('load', arranca, { once: true });
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
@@ -76,12 +78,18 @@
         return out;
     }
 
+    let _arriba = null;
     function filaDeArriba() {
         const SEL = 'table.uir-list-buttonbar-left > tbody > tr';
         const top = document.querySelector('table.uir-list-top-button-bar')
             || document.querySelector('table.uir-list-filter-bar');
         const fila = top ? top.querySelector(SEL) : null;
-        return fila && fila.getClientRects().length ? fila : null;
+        if (!fila) return null;
+        if (!_arriba || _arriba.fila !== fila) {
+            const ve = typeof fila.checkVisibility === 'function' ? fila.checkVisibility() : fila.getClientRects().length > 0;
+            _arriba = { fila, ve };
+        }
+        return _arriba.ve ? fila : null;
     }
 
     function filaNativa(capa) {
@@ -165,7 +173,7 @@
             s.async = false;
             s.onload = () => resolver();
             s.onerror = () => { listo = null; rechazar(new Error('fetcher')); };
-            (document.head || document.documentElement).appendChild(s);
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
         });
         return listo;
     }

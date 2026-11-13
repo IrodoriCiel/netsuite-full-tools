@@ -9,6 +9,9 @@
         if (!document.body) return null;
         el = document.createElement('div');
         el.id = STACK_ID;
+        el.className = 'nsft-w';
+        el.setAttribute('data-theme',
+            document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light');
         document.body.appendChild(el);
         return el;
     }
