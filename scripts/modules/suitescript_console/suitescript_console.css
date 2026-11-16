@@ -2946,6 +2946,13 @@ body[data-nsft-ssc-theme="dark"] .CodeMirror-hint-active {
     transition: width var(--nsft-dur-base, 220ms) var(--nsft-ease, ease);
 }
 
+.nsft-ssc-boot-nota {
+    margin-top: 10px;
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: var(--nsft-text-3, #64748b);
+}
+
 html[data-nsft-theme="dark"] .nsft-ssc-boot {
     background: rgba(0, 0, 0, 0.45);
 }

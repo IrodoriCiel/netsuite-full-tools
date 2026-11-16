@@ -165,8 +165,94 @@
             electricChars: '{}()[]',
             lineComment: '//',
             blockCommentStart: '/*',
-            blockCommentEnd: '*/'
+            blockCommentEnd: '*/',
+            fold: 'nsft-brace'
         };
+    });
+
+    const _texto = new WeakMap();
+    function lineasDeTexto(cm) {
+        const gen = cm.changeGeneration();
+        const c = _texto.get(cm);
+        if (c && c.gen === gen) return c.lineas;
+        const lineas = [];
+        const pila = [];
+        let modo = 'code', cierre = '';
+        for (let n = cm.firstLine(), fin = cm.lastLine(); n <= fin; n++) {
+            const t = cm.getLine(n) || '';
+            const primero = t.search(/\S/);
+            lineas[n] = modo !== 'code' && primero >= 0;
+            if (modo === 'linea') modo = 'code';
+            for (let k = 0; k < t.length; k++) {
+                const ch = t[k];
+                if (modo === 'bloque') { if (ch === '*' && t[k + 1] === '/') { modo = 'code'; k++; } continue; }
+                if (modo === 'cadena') {
+                    if (ch === '\\') { k++; continue; }
+                    if (ch === cierre) modo = 'code';
+                    continue;
+                }
+                if (modo === 'plantilla') {
+                    if (ch === '\\') { k++; continue; }
+                    if (ch === '`') { modo = 'code'; continue; }
+                    if (ch === '$' && t[k + 1] === '{') { pila.push(0); modo = 'code'; k++; }
+                    continue;
+                }
+                if (modo === 'linea') break;
+                if (ch === '/' && t[k + 1] === '/') { modo = 'linea'; break; }
+                if (ch === '/' && t[k + 1] === '*') { modo = 'bloque'; k++; continue; }
+                if (ch === '/') {
+                    const previo = t.slice(0, k).replace(/\s+$/, '');
+                    if (!previo || /[(,=:[!&|?{};+\-*%<>~^]$/.test(previo) || /\b(return|typeof|case|in|of)$/.test(previo)) {
+                        let enClase = false;
+                        for (k++; k < t.length; k++) {
+                            const r = t[k];
+                            if (r === '\\') { k++; continue; }
+                            if (r === '[') enClase = true;
+                            else if (r === ']') enClase = false;
+                            else if (r === '/' && !enClase) break;
+                        }
+                        continue;
+                    }
+                }
+                if (ch === '"' || ch === "'") { modo = 'cadena'; cierre = ch; continue; }
+                if (ch === '`') { modo = 'plantilla'; continue; }
+                if (pila.length) {
+                    if (ch === '{') pila[pila.length - 1]++;
+                    else if (ch === '}') {
+                        if (pila[pila.length - 1] === 0) { pila.pop(); modo = 'plantilla'; }
+                        else pila[pila.length - 1]--;
+                    }
+                }
+            }
+            if (modo === 'cadena' || modo === 'linea') modo = 'code';
+        }
+        _texto.set(cm, { gen: gen, lineas: lineas });
+        return lineas;
+    }
+
+    CodeMirror.registerHelper('fold', 'nsft-brace', function (cm, start) {
+        const linea = cm.getLine(start.line) || '';
+        const abre = /[{[(]\s*$/.exec(linea);
+        if (abre) {
+            const sangra = (s) => (/^\s*/.exec(s) || [''])[0].replace(/\t/g, '    ').length;
+            const base = sangra(linea);
+            for (let i = start.line + 1, fin = cm.lastLine(); i <= fin; i++) {
+                const t = cm.getLine(i);
+                if (!/\S/.test(t)) continue;
+                const s = sangra(t);
+                if (s > base) continue;
+                if (lineasDeTexto(cm)[i]) continue;
+                if (s === base && /^\s*[}\])]/.test(t) && i > start.line + 1) {
+                    return {
+                        from: CodeMirror.Pos(start.line, abre.index + 1),
+                        to: CodeMirror.Pos(i, (/^\s*/.exec(t) || [''])[0].length)
+                    };
+                }
+                break;
+            }
+        }
+        const brace = CodeMirror.fold && CodeMirror.fold.brace;
+        return brace ? brace(cm, start) : null;
     });
 
     CodeMirror.defineMIME('text/nsft-javascript', 'nsft-javascript');

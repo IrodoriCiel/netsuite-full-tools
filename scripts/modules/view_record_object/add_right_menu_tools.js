@@ -42,6 +42,7 @@
         const RB = window.NSFT_RecordButtons;
         if (RB && RB.isExcludedPage && RB.isExcludedPage()) return;
         addToolsMenu(items);
+        bindHerramientas();
         observeDomChanges();
         observeRedwoodMenuPopover();
         interceptAdvancedEditorClick();
@@ -84,6 +85,24 @@
             order: 46,
             isEnabled: () => !!window.__nsftAdvActivo,
             onFire: abreEditorAvanzado
+        });
+    }
+
+    function bindHerramientas() {
+        if (window.__nsftTmmAtajo) return;
+        if (!window.NSFT_Shortcuts || !window.NSFT_Shortcuts.bind) return;
+        window.__nsftTmmAtajo = true;
+        window.NSFT_Shortcuts.bind('tools_menu', {
+            label: chrome.i18n.getMessage('tmm_shortcut_label') || 'Open the Tools menu',
+            defaultCombo: { ctrlKey: false, shiftKey: true, altKey: true, code: 'KeyT' },
+            storageKey: 'toolsMenuShortcut',
+            group: chrome.i18n.getMessage('cheatsheet_group_global') || 'Global',
+            order: 12,
+            isEnabled: () => !!document.getElementById(TOOLS_MENU_ID),
+            onFire: () => {
+                if (_tmm && _tmm.el.classList.contains('is-open')) tmmCierra();
+                else abreVentanaHerramientas();
+            }
         });
     }
 
@@ -394,6 +413,7 @@
                 ev.preventDefault();
                 ev.stopPropagation();
                 abreVentanaHerramientas();
+                if (window.NSFT_ShortcutCoach) window.NSFT_ShortcutCoach.hint('tools_menu');
             });
         }
         return toolsMenuItem;
@@ -455,7 +475,9 @@
             if (!li.id || !a) return null;
             const icono = li.querySelector('.nsft-tools-icon');
             const label = li.getAttribute('data-nsps-label') || a.textContent.trim();
-            const dk = TMM_DESC[li.id];
+            const h = window.NSFT_Herramientas && window.NSFT_Herramientas.porItem
+                ? window.NSFT_Herramientas.porItem(li.id) : null;
+            const dk = (h && h.desc) || TMM_DESC[li.id];
             return { id: li.id, label, desc: dk ? tmmTexto(dk, '') : '', icono: icono ? icono.innerHTML : '' };
         }).filter(Boolean);
     }

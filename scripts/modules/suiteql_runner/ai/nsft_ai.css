@@ -613,6 +613,167 @@ body[data-nsft-ssc-theme="light"] #nsft-ssc-modal .nsft-ai-hint-badge.nsft-ai-hi
     cursor: pointer !important;
 }
 .nsft-ai-hint-faq:hover { color: var(--ai-text) !important; }
+.nsft-ai-hint-faq:disabled { opacity: .5 !important; cursor: default !important; }
+
+.nsft-ai-hint.nsft-ai-hint-ns { max-width: 300px !important; }
+.nsft-ai-nspts {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    text-align: left !important;
+}
+.nsft-ai-nspts li {
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 0 0 20px !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    color: var(--ai-text) !important;
+    list-style: none !important;
+}
+.nsft-ai-nspts li::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 2px !important;
+    top: 4px !important;
+    width: 10px !important;
+    height: 5px !important;
+    border-left: 2px solid var(--ai-ok) !important;
+    border-bottom: 2px solid var(--ai-ok) !important;
+    transform: rotate(-45deg) !important;
+}
+.nsft-ai-hint-ns .nsft-ai-nspts { align-self: center !important; }
+.nsft-ai-hint-opt {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 12px !important;
+    border: 1px solid var(--ai-border) !important;
+    border-radius: 10px !important;
+    background: var(--ai-panel) !important;
+    text-align: left !important;
+}
+.nsft-ai-hint-opthead {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--ai-text) !important;
+}
+.nsft-ai-hint-logos { display: inline-flex !important; gap: 3px !important; flex: none !important; }
+.nsft-ai-hint-tag {
+    margin-left: auto !important;
+    padding: 1px 8px !important;
+    border: 1px solid var(--ai-ok) !important;
+    border-radius: 999px !important;
+    color: var(--ai-ok) !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+}
+.nsft-ai-hint-optdesc { font-size: 12px !important; line-height: 1.45 !important; color: var(--ai-muted) !important; }
+.nsft-ai-hint-opt .nsft-ai-nspts { align-self: stretch !important; }
+.nsft-ai-hint-opt .nsft-ai-hint-btns { justify-content: flex-start !important; }
+.nsft-ai-hint-opt .nsft-ai-hint-faq { margin-top: 0 !important; align-self: flex-start !important; text-align: left !important; }
+.nsft-ai-hint-what summary {
+    cursor: pointer !important;
+    font-size: 11.5px !important;
+    color: var(--ai-link, var(--ai-accent)) !important;
+}
+.nsft-ai-hint-what .nsft-ai-hint-note { margin-top: 6px !important; }
+.nsft-ai-hint-note p { margin: 0 0 6px !important; }
+.nsft-ai-hint-confirm,
+.nsft-ai-nsconfirm { white-space: normal !important; }
+.nsft-ai-hint-confirm p,
+.nsft-ai-nsconfirm p { margin: 0 0 6px !important; }
+.nsft-ai-hint-confirm p:last-child,
+.nsft-ai-nsconfirm p:last-child { margin-bottom: 0 !important; }
+.nsft-ai-hint-confirm ul,
+.nsft-ai-nsconfirm ul,
+.nsft-ai-hint-note ul {
+    margin: 0 0 8px !important;
+    padding: 0 0 0 18px !important;
+    list-style: disc !important;
+}
+.nsft-ai-hint-confirm li,
+.nsft-ai-nsconfirm li,
+.nsft-ai-hint-note li {
+    margin: 2px 0 !important;
+    list-style: disc !important;
+    display: list-item !important;
+}
+.nsft-ai-hint-notelinks {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+}
+.nsft-ai-hint-notelinks a {
+    color: var(--ai-link, var(--ai-accent)) !important;
+    text-decoration: none !important;
+}
+.nsft-ai-hint-notelinks a::before { content: '↗ ' !important; }
+.nsft-ai-hint-notelinks a:hover { text-decoration: underline !important; }
+.nsft-ai-hint-note {
+    padding: 8px 10px !important;
+    border: 1px solid var(--ai-border) !important;
+    border-radius: 6px !important;
+    background: var(--ai-panel) !important;
+    color: var(--ai-muted) !important;
+    font-size: 11.5px !important;
+    line-height: 1.5 !important;
+    text-align: left !important;
+    overflow-wrap: anywhere !important;
+}
+.nsft-ai-hint-confirm {
+    padding: 8px 10px !important;
+    border-left: 3px solid var(--ai-warn, #b45309) !important;
+    border-radius: 6px !important;
+    background: var(--ai-panel) !important;
+    color: var(--ai-text) !important;
+    font-size: 11.5px !important;
+    line-height: 1.5 !important;
+    text-align: left !important;
+    white-space: pre-line !important;
+}
+.nsft-ai-hint-prog {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--ai-working) !important;
+}
+.nsft-ai-hint-prog.nsft-ai-hint-prog-err { color: var(--ai-err) !important; font-weight: 500 !important; }
+.nsft-ai-hint-btns {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}
+.nsft-ai-hint-btns .nsft-ai-hint-cta { margin-top: 0 !important; }
+.nsft-ai-hint-cta:disabled { opacity: .6 !important; cursor: default !important; }
+.nsft-ai-hint-alt {
+    padding: 7px 14px !important;
+    border: 1px solid var(--ai-border) !important;
+    border-radius: 8px !important;
+    background: var(--ai-btn-bg) !important;
+    color: var(--ai-text) !important;
+    font-size: 12.5px !important;
+    cursor: pointer !important;
+}
+.nsft-ai-hint-alt:hover { background: var(--ai-btn-hover) !important; }
+.nsft-ai-hint-links {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 4px 14px !important;
+}
+.nsft-ai-hint-links .nsft-ai-hint-faq { margin-top: 0 !important; }
+.nsft-ai-hint-confirm[hidden],
+.nsft-ai-hint-prog[hidden],
+.nsft-ai-hint-alt[hidden] { display: none !important; }
 
 .nsft-ai-msg { display: flex !important; flex-direction: column !important; gap: 7px !important; }
 .nsft-ai-user { align-items: flex-end !important; }
@@ -804,6 +965,7 @@ body[data-nsft-ssc-theme="light"] #nsft-ssc-modal .nsft-ai-hint-badge.nsft-ai-hi
 .nsft-ai-workchev { display: inline-block !important; width: 10px !important; text-align: center !important; transition: transform .15s ease !important; }
 .nsft-ai-work.nsft-ai-workopen .nsft-ai-workchev { transform: rotate(90deg) !important; }
 .nsft-ai-work:not(.nsft-ai-workopen) > .nsft-ai-steps { display: none !important; }
+.nsft-ai-work.nsft-ai-workrun > .nsft-ai-steps > :not(:last-child) { display: none !important; }
 
 .nsft-ai-steps {
     display: flex !important;
@@ -1328,6 +1490,166 @@ body[data-nsft-ssc-theme="light"] #nsft-ssc-modal .nsft-ai-hint-badge.nsft-ai-hi
     color: var(--ai-accent) !important;
 }
 .nsft-ai-keyhint[hidden] { display: none !important; }
+
+.nsft-ai-connrow[hidden],
+.nsft-ai-nsbox[hidden],
+.nsft-ai-nsmeta[hidden],
+.nsft-ai-nsver[hidden],
+.nsft-ai-nsdesc[hidden],
+.nsft-ai-nsconfirm[hidden],
+.nsft-ai-nsacts[hidden],
+.nsft-ai-nsacts .nsft-ai-btn[hidden] { display: none !important; }
+.nsft-ai-nsbox {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin: 4px 0 10px !important;
+    padding: 12px 14px !important;
+    border: 1px solid var(--ai-border) !important;
+    border-radius: 10px !important;
+    background: var(--ai-hint-bg) !important;
+}
+.nsft-ai-nshead {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+}
+.nsft-ai-nsdot {
+    flex: 0 0 auto !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    background: var(--ai-muted) !important;
+}
+.nsft-ai-nsbox[data-state="ok"] .nsft-ai-nsdot { background: var(--ai-ok) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--ai-ok) 22%, transparent) !important; }
+.nsft-ai-nsbox[data-state="missing"] .nsft-ai-nsdot,
+.nsft-ai-nsbox[data-state="old"] .nsft-ai-nsdot { background: var(--ai-warn, #b45309) !important; }
+.nsft-ai-nsbox[data-state="error"] .nsft-ai-nsdot { background: var(--ai-err) !important; }
+.nsft-ai-nsbox[data-state="checking"] .nsft-ai-nsdot,
+.nsft-ai-nsbox[data-state="working"] .nsft-ai-nsdot { background: var(--ai-working) !important; animation: nsft-ai-nslatido 1s ease-in-out infinite !important; }
+@keyframes nsft-ai-nslatido { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) {
+    .nsft-ai-nsbox .nsft-ai-nsdot { animation: none !important; }
+}
+.nsft-ai-nsstate {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    color: var(--ai-text) !important;
+    overflow-wrap: anywhere !important;
+}
+.nsft-ai-nsbox[data-state="error"] .nsft-ai-nsstate { font-weight: 500 !important; }
+.nsft-ai-nsver {
+    flex: 0 0 auto !important;
+    padding: 1px 8px !important;
+    border-radius: 999px !important;
+    border: 1px solid var(--ai-border) !important;
+    background: var(--ai-panel) !important;
+    color: var(--ai-muted) !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 18px !important;
+}
+.nsft-ai-nsre {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 26px !important;
+    height: 26px !important;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 7px !important;
+    background: transparent !important;
+    color: var(--ai-muted) !important;
+    cursor: pointer !important;
+}
+.nsft-ai-nsre:hover { background: var(--ai-btn-hover) !important; color: var(--ai-text) !important; border-color: var(--ai-border) !important; }
+.nsft-ai-nsre:disabled { opacity: .45 !important; cursor: default !important; }
+.nsft-ai-nsbox[data-state="checking"] .nsft-ai-nsre svg,
+.nsft-ai-nsbox[data-state="working"] .nsft-ai-nsre svg { animation: nsft-ai-nsgiro 1s linear infinite !important; }
+@keyframes nsft-ai-nsgiro { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .nsft-ai-nsbox .nsft-ai-nsre svg { animation: none !important; }
+}
+.nsft-ai-nsmeta {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid var(--ai-border) !important;
+}
+.nsft-ai-nsrow {
+    display: grid !important;
+    grid-template-columns: 130px minmax(0, 1fr) !important;
+    column-gap: 12px !important;
+    align-items: baseline !important;
+}
+.nsft-ai-nslbl {
+    font-size: 12px !important;
+    color: var(--ai-muted) !important;
+}
+.nsft-ai-nsval {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: var(--ai-text) !important;
+    font-variant-numeric: tabular-nums !important;
+}
+.nsft-ai-nschips {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+}
+.nsft-ai-nschip {
+    padding: 2px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--ai-border) !important;
+    background: var(--ai-panel) !important;
+    color: var(--ai-text) !important;
+    font: 500 11px/16px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+    white-space: nowrap !important;
+}
+@media (max-width: 560px) {
+    .nsft-ai-nsrow { grid-template-columns: minmax(0, 1fr) !important; row-gap: 4px !important; }
+}
+.nsft-ai-nsdesc,
+.nsft-ai-nsconfirm {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    color: var(--ai-muted) !important;
+}
+.nsft-ai-nsconfirm {
+    padding: 8px 10px !important;
+    border-left: 3px solid var(--ai-warn, #b45309) !important;
+    border-radius: 6px !important;
+    background: var(--ai-panel) !important;
+    color: var(--ai-text) !important;
+    white-space: pre-line !important;
+}
+.nsft-ai-nsacts {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+.nsft-ai-nsacts .nsft-ai-btn:disabled { opacity: .55 !important; cursor: default !important; }
+.nsft-ai-nsacts .nsft-ai-nsquita {
+    color: var(--ai-err) !important;
+    border-color: var(--ai-err) !important;
+}
+.nsft-ai-nsacts { align-items: center !important; }
+.nsft-ai-nsfaq {
+    margin-left: auto !important;
+    padding: 0 !important;
+    border: none !important;
+    background: none !important;
+    color: var(--ai-link, var(--ai-accent)) !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+}
+.nsft-ai-nsfaq:hover { text-decoration: underline !important; color: var(--ai-link-hover, var(--ai-accent)) !important; }
 .nsft-ai-input-secret.nsft-ai-revealed {
     -webkit-text-security: none !important;
     letter-spacing: normal !important;
@@ -3574,3 +3896,45 @@ body[data-nsft-ssc-theme="light"] #nsft-ssc-tool-ai:hover {
     flex: none;
     color: var(--ai-accent, #7c3aed);
 }
+
+.nsft-ai-progbar { width: 100% !important; display: flex !important; flex-direction: column !important; gap: 5px !important; }
+.nsft-ai-progbar[hidden] { display: none !important; }
+.nsft-ai-progbar-top {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--ai-working) !important;
+    text-align: left !important;
+}
+.nsft-ai-progbar-n { color: var(--ai-muted) !important; font-weight: 500 !important; flex: none !important; }
+.nsft-ai-progbar-track {
+    height: 6px !important;
+    border-radius: 999px !important;
+    background: var(--ai-border) !important;
+    overflow: hidden !important;
+}
+.nsft-ai-progbar-fill {
+    height: 100% !important;
+    width: 0;
+    border-radius: 999px !important;
+    background-color: var(--ai-accent) !important;
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, .28) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .28) 50%, rgba(255, 255, 255, .28) 75%, transparent 75%) !important;
+    background-size: 12px 12px !important;
+    transition: width .4s ease !important;
+    animation: nsft-ai-progbar 0.8s linear infinite !important;
+}
+@keyframes nsft-ai-progbar { to { background-position: 12px 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .nsft-ai-progbar-fill { animation: none !important; transition: none !important; }
+}
+
+.nsft-ai-hint.nsft-ai-hint-ns { padding: 10px 12px !important; gap: 7px !important; }
+.nsft-ai-hint-ns .nsft-ai-hint-badge { width: 38px !important; height: 38px !important; border-radius: 12px !important; }
+.nsft-ai-hint-ns .nsft-ai-hint-title { font-size: 13.5px !important; }
+.nsft-ai-hint-ns .nsft-ai-hint-sub { font-size: 12px !important; line-height: 1.4 !important; }
+.nsft-ai-hint-opt { padding: 10px 11px !important; gap: 6px !important; }
+.nsft-ai-hint-opt .nsft-ai-nspts { gap: 3px !important; }
+.nsft-ai-hint-opt .nsft-ai-nspts li { font-size: 12px !important; line-height: 1.38 !important; }
+.nsft-ai-hint-opt .nsft-ai-hint-btns { align-items: center !important; gap: 6px 12px !important; }

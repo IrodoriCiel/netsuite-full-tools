@@ -26,4 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (titleMsg) {
         document.title = titleMsg;
     }
+
+    const ancla = location.hash ? document.getElementById(location.hash.slice(1)) : null;
+    if (ancla) ancla.scrollIntoView({ block: 'start' });
 });

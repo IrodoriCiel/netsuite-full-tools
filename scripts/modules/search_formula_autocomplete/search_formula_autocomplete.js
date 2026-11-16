@@ -2,7 +2,7 @@
     'use strict';
 
     const STORAGE_KEY = 'enableSearchFormulaAutocomplete';
-    const DEBOUNCE_MS = 500;
+    const DEBOUNCE_MS = 120;
     const DEFAULT_LIMIT = 200;
     const FETCH_CONCURRENCY = 5;
     const CACHE_KEY = 'nsftSfaJoinCache';
@@ -41,10 +41,19 @@
     });
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area !== 'local' || !changes[STORAGE_KEY]) return;
+        if (area !== 'local') return;
+        if (changes.nsftTheme) pintaTema(changes.nsftTheme.newValue);
+        if (!changes[STORAGE_KEY]) return;
         if (changes[STORAGE_KEY].newValue !== false) start();
         else stop();
     });
+
+    function pintaTema(tema) {
+        const el = document.querySelector(`.${CLASSES.CONTAINER}`);
+        if (!el) return;
+        const t = tema || document.documentElement.getAttribute('data-nsft-theme');
+        el.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+    }
 
     function start() {
         if (state.built) return;
@@ -185,13 +194,12 @@
         if (!entries.length) return;
 
         document.body.insertAdjacentHTML('afterbegin', `
-            <div class="${CLASSES.CONTAINER} ${CLASSES.HIDE}" data-nsft-ui data-nsft-autocomplete="name">
-                <div class="${CLASSES.SPINNER} ${CLASSES.HIDE}">
-                    <div class="nsft-ring"><div></div><div></div><div></div><div></div></div>
-                </div>
+            <div class="${CLASSES.CONTAINER} nsft-w ${CLASSES.HIDE}" data-nsft-ui data-nsft-autocomplete="name">
+                <div class="${CLASSES.SPINNER} ${CLASSES.HIDE}"></div>
                 <ul>${optionsHtml}</ul>
             </div>`);
 
+        pintaTema();
         attachListeners(formulaInput);
         renderSettings();
         positionContainer(formulaInput);
@@ -300,7 +308,7 @@
         const container = document.querySelector(`.${CLASSES.CONTAINER}`);
         if (!container) return;
         container.style.top = `${position.top}px`;
-        container.style.height = `${position.y}px`;
+        container.style.maxHeight = `${Math.max(120, Math.min(320, position.top - 12))}px`;
     }
 
     function handleAutocomplete() {
@@ -370,7 +378,11 @@
         e.stopPropagation();
 
         const items = container.querySelectorAll('ul li');
-        const selected = container.querySelector(`li.${CLASSES.SELECTED}`);
+        let selected = container.querySelector(`li.${CLASSES.SELECTED}`);
+        if (selected && selected.classList.contains(CLASSES.HIDE)) {
+            selected.classList.remove(CLASSES.SELECTED);
+            selected = null;
+        }
 
         if (e.key === 'ArrowDown') moveSelection(selected, items, 'next');
         else if (e.key === 'ArrowUp') moveSelection(selected, items, 'prev');

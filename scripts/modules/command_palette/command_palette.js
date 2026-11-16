@@ -820,8 +820,99 @@
                 },
                 run: (term) => runGlobalSearch(term)
             },
-            ...buildCustomUrlActions()
+            ...buildCustomUrlActions(),
+            ...buildMenuActions()
         ]);
+    }
+
+    const TOOLS_MENU_ID = 'nsft-tools-menu';
+    const REC_MENU_ID = 'nsft-record-options-menu';
+    const TOOLS_YA_EN_PALETA = new Set([
+        'link_CommandPalette', 'link_RecordHistory', 'link_CsvImportTemplate',
+        'link_RecordAttachments', 'link_RolePermissions', 'link_PagePerformance',
+        'link_GithubBackup', 'link_ScriptExecute', 'link_DeletedRecords',
+        'link_FindFieldById', 'link_EnableAllFields'
+    ]);
+
+    function pulsaEnlace(a, anclaSel) {
+        if (!a) return;
+        const ancla = document.querySelector(anclaSel);
+        const r = ancla ? ancla.getBoundingClientRect() : { left: 0, bottom: 0 };
+        a.dispatchEvent(new MouseEvent('click', {
+            bubbles: false, cancelable: true, view: window,
+            clientX: Math.round(r.left), clientY: Math.round(r.bottom)
+        }));
+    }
+
+    function iconoDe(li) {
+        const ic = li.querySelector('.nsft-tools-icon');
+        return ic && ic.querySelector('svg') ? ic.innerHTML : '';
+    }
+
+    function buildMenuActions() {
+        const out = [];
+        const H = window.NSFT_Herramientas;
+
+        const menu = document.getElementById(TOOLS_MENU_ID);
+        const ul = menu && menu.querySelector('ul.ns-menu');
+        if (ul) {
+            Array.from(ul.children).forEach((li) => {
+                const a = li.querySelector('a');
+                if (!li.id || !a || TOOLS_YA_EN_PALETA.has(li.id)) return;
+                if (li.querySelector('ul')) return;
+                const label = li.getAttribute('data-nsps-label') || a.textContent.trim();
+                if (!label) return;
+                const h = H && H.porItem ? H.porItem(li.id) : null;
+                const desc = h && h.desc ? i18nMsg(h.desc, '') : '';
+                const itemId = li.id;
+                out.push({
+                    id: 'tool:' + itemId,
+                    label,
+                    description: desc,
+                    category: T.catNsft,
+                    iconKey: 'nsft',
+                    iconHtml: iconoDe(li),
+                    keywords: (desc + ' herramienta herramientas tool tools').trim(),
+                    run: () => {
+                        const vivo = document.getElementById(itemId);
+                        pulsaEnlace(vivo && vivo.querySelector('a'), '#' + TOOLS_MENU_ID + ' > a');
+                    }
+                });
+            });
+        }
+
+        const rec = document.getElementById(REC_MENU_ID);
+        const sub = rec && rec.querySelector('ul.ns-menu ul.ns-menu');
+        if (sub) {
+            const yaEnPaleta = new Set(['recordOptionViewXml', 'recordOptionCopyGenericUrl', 'recordOptionCopyMenuPath']
+                .map((k) => i18nMsg(k, '')).filter(Boolean));
+            const cat = i18nMsg('recordOptionsTitle', 'Record options');
+            Array.from(sub.children).forEach((li) => {
+                const a = li.querySelector('a');
+                if (!a || li.querySelector('ul')) return;
+                const spans = a.querySelectorAll('span');
+                const label = (spans.length ? spans[spans.length - 1].textContent : a.textContent).trim();
+                if (!label || yaEnPaleta.has(label)) return;
+                out.push({
+                    id: 'recopt:' + label,
+                    label,
+                    category: cat,
+                    iconKey: 'page',
+                    iconHtml: iconoDe(li),
+                    keywords: cat + ' registro record opciones options',
+                    run: () => {
+                        const vivo = document.getElementById(REC_MENU_ID);
+                        const enlaces = vivo ? vivo.querySelectorAll('ul.ns-menu ul.ns-menu > li > a') : [];
+                        const a2 = Array.from(enlaces).find((x) => {
+                            const sp = x.querySelectorAll('span');
+                            return (sp.length ? sp[sp.length - 1].textContent : x.textContent).trim() === label;
+                        });
+                        pulsaEnlace(a2, '#' + REC_MENU_ID + ' a');
+                    }
+                });
+            });
+        }
+        return out;
     }
 
     function buildCustomUrlActions() {
@@ -905,7 +996,7 @@
     }
 
     function openPalette() {
-        if (hasSscConsole) actions = buildActions();
+        actions = buildActions();
         asegurarMenu();
         refreshContextBoosts();
         overlayEl = document.createElement('div');
@@ -1220,7 +1311,7 @@
         node.classList.toggle('nsft-cmdp-selected', idx === 0);
 
         const iconEl = node.querySelector('.nsft-cmdp-item-icon');
-        iconEl.innerHTML = ICONS[iconKey] || '';
+        iconEl.innerHTML = (slot !== 'pinned' && slot !== 'recent' && action.iconHtml) || ICONS[iconKey] || '';
 
         const bodyEl = node.querySelector('.nsft-cmdp-item-body');
         const labelEl = bodyEl.querySelector('.nsft-cmdp-item-label');

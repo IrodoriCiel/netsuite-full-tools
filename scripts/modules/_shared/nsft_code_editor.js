@@ -2783,6 +2783,50 @@
         return (_keymap === 'webstorm') ? atajosWebStorm() : atajosVsCode();
     }
 
+    function rangosPlegables(cm) {
+        const finder = CodeMirror.fold && CodeMirror.fold.auto;
+        if (!finder) return [];
+        const out = [];
+        for (let i = cm.firstLine(), fin = cm.lastLine(); i <= fin; i++) {
+            let r = null;
+            try { r = finder(cm, CodeMirror.Pos(i, 0)); } catch (e) { r = null; }
+            if (r && r.to.line > r.from.line) out.push({ desde: i, hasta: r.to.line });
+        }
+        const pila = [];
+        out.forEach((r) => {
+            while (pila.length && pila[pila.length - 1].hasta < r.desde) pila.pop();
+            r.nivel = pila.length + 1;
+            pila.push(r);
+        });
+        return out;
+    }
+    function plegado(cm, accion, nivel) {
+        if (!cm || typeof cm.foldCode !== 'function') return;
+        const pos = cm.getCursor();
+        if (accion === 'fold' || accion === 'unfold' || accion === 'toggle') {
+            cm.foldCode(pos, { scanUp: true }, accion === 'toggle' ? undefined : accion);
+            return;
+        }
+        cm.operation(() => {
+            const rangos = rangosPlegables(cm);
+            rangos.forEach((r) => cm.foldCode(CodeMirror.Pos(r.desde, 0), { scanUp: false }, 'unfold'));
+            if (accion === 'none') return;
+            let elegidos;
+            if (accion === 'level') {
+                elegidos = rangos.filter((r) => r.nivel === nivel);
+            } else {
+                const ultima = (() => { let l = cm.lastLine(); while (l > 0 && !/\S/.test(cm.getLine(l))) l--; return l; })();
+                const primera = (() => { let l = cm.firstLine(); while (l < ultima && !/\S/.test(cm.getLine(l))) l++; return l; })();
+                const envoltorio = rangos.find((r) => r.nivel === 1 && r.hasta >= ultima - 1
+                    && (r.hasta - r.desde) >= (ultima - primera) * 0.8);
+                elegidos = rangos.filter((r) => r !== envoltorio);
+            }
+            elegidos.slice().reverse().forEach((r) => {
+                try { cm.foldCode(CodeMirror.Pos(r.desde, 0), { scanUp: false }, 'fold'); } catch (e) { }
+            });
+        });
+    }
+
     function mezclaTeclas(propios) {
         const mapa = Object.assign({}, atajosEdicion(), propios || {});
         try { return CodeMirror.normalizeKeyMap(mapa); } catch (err) { return mapa; }
@@ -3103,6 +3147,19 @@
                 ? ['CodeMirror-foldgutter']
                 : ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'];
             conf.extraKeys['Ctrl-Q'] = (c) => c.foldCode(c.getCursor());
+            const p = (accion, nivel) => (c) => plegado(c, accion, nivel);
+            const pliegue = {
+                'Shift-Ctrl-[': p('fold'), 'Shift-Ctrl-]': p('unfold'),
+                'Cmd-Alt-[': p('fold'), 'Cmd-Alt-]': p('unfold'),
+                'Ctrl-K Ctrl-L': p('toggle'), 'Cmd-K Cmd-L': p('toggle'),
+                'Ctrl-K Ctrl-0': p('all'), 'Cmd-K Cmd-0': p('all'),
+                'Ctrl-K Ctrl-J': p('none'), 'Cmd-K Cmd-J': p('none')
+            };
+            for (let n = 1; n <= 7; n++) {
+                pliegue['Ctrl-K Ctrl-' + n] = p('level', n);
+                pliegue['Cmd-K Cmd-' + n] = p('level', n);
+            }
+            if (!pideCm6) { try { Object.assign(conf.extraKeys, CodeMirror.normalizeKeyMap(pliegue)); } catch (err) { } }
         }
 
         let cm = null;
@@ -3265,6 +3322,7 @@
     window.NSFT_CodeEditor = Object.freeze({
         CANDIDATOS,
         atajosEdicion,
+        plegado,
         registraEditor,
         ratonMultiCursor,
         attach,

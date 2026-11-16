@@ -748,6 +748,13 @@
         return '';
     }
 
+    function pliega(accion, nivel) {
+        const E = window.NSFT_CodeEditor;
+        if (!_cm || !E || typeof E.plegado !== 'function') return;
+        E.plegado(_cm, accion, nivel);
+        try { _cm.focus(); } catch (e) { }
+    }
+
     function menus() {
         return [
             { id: 'archivo', et: i18n('adv_menu_file', 'File'), items: [
@@ -784,6 +791,13 @@
                   marca: () => encendido('#nsft-adv-wrap'), fn: () => pulsa('#nsft-adv-wrap') },
                 { et: i18n('adv_minimapa', 'Minimap'),
                   marca: () => minimapaPuesto(), fn: () => alternaMinimapa() },
+                { sep: true },
+                { et: i18n('adv_fold_all', 'Fold all'), tecla: 'Ctrl+K Ctrl+0',
+                  si: () => !!(_cm && !_sinArchivo), fn: () => pliega('all') },
+                { et: i18n('adv_fold_level2', 'Fold level 2'), tecla: 'Ctrl+K Ctrl+2',
+                  si: () => !!(_cm && !_sinArchivo), fn: () => pliega('level', 2) },
+                { et: i18n('adv_unfold_all', 'Unfold all'), tecla: 'Ctrl+K Ctrl+J',
+                  si: () => !!(_cm && !_sinArchivo), fn: () => pliega('none') },
                 { sep: true },
                 { et: i18n('adv_ghost_title', 'AI suggestions while you type'),
                   marca: () => encendido('#nsft-adv-ghost'), fn: () => pulsa('#nsft-adv-ghost') },

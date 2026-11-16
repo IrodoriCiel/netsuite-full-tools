@@ -3,6 +3,18 @@
 
     const STACK_ID = 'nsft-notice-stack';
 
+    function pintaTema(el, tema) {
+        if (!el) return;
+        const t = tema || document.documentElement.getAttribute('data-nsft-theme');
+        el.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+    }
+    try {
+        chrome.storage.onChanged.addListener((changes, area) => {
+            if (area !== 'local' || !changes.nsftTheme) return;
+            pintaTema(document.getElementById(STACK_ID), changes.nsftTheme.newValue || 'light');
+        });
+    } catch (e) { }
+
     function stack() {
         let el = document.getElementById(STACK_ID);
         if (el) return el;
@@ -10,8 +22,7 @@
         el = document.createElement('div');
         el.id = STACK_ID;
         el.className = 'nsft-w';
-        el.setAttribute('data-theme',
-            document.documentElement.getAttribute('data-nsft-theme') === 'dark' ? 'dark' : 'light');
+        pintaTema(el);
         document.body.appendChild(el);
         return el;
     }

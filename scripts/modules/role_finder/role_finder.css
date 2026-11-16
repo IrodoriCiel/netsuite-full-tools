@@ -97,3 +97,9 @@
     outline-offset: -2px;
     border-radius: 6px;
 }
+
+.nsft-role-ent {
+    font-weight: 400 !important;
+    color: #64748b !important;
+    white-space: nowrap;
+}

@@ -4061,7 +4061,7 @@ ${CODIGO_JS}`;
     function menuRolesNS(o) {
         const rol = (n, on, guarda) => `
                     <span class="nsft-pv-rrow${on ? ' is-on' : ''}${o.buscador ? (guarda ? ' nsft-pv-rf is-keep' : ' nsft-pv-rf') : ''}">
-                        <span class="nsft-pv-grow">${n}</span>${on ? ICONO_VISTO : ''}</span>`;
+                        <span class="nsft-pv-grow">${n}${o.nombre ? ` <span class="nsft-pv-rname">&#183; ${o.nombre}</span>` : ''}</span>${on ? ICONO_VISTO : ''}</span>`;
         const cuenta = (n, id, prod) => `
                     <span class="nsft-pv-rrow is-acct${o.buscador ? ' nsft-pv-rf' : ''}">
                         <span class="nsft-pv-grow">${n}</span>
@@ -4126,6 +4126,35 @@ ${CODIGO_JS}`;
                         <tr><td>{{edit}}</td><td class="nsft-pv-mono">28/10/2026</td><td>Demo Admin</td><td>{{pvTrailImp}}</td></tr>`,
         perfil: menuRolesNS({ buscador: true }),
         extra: floatLay(ICONO_LUPA)
+    });
+
+    P.roleFinderEmployeeNames = ventanaNS({
+        clase: 'nsft-pv-prod is-rolef is-rolefn',
+        sublista: true,
+        sublistaFilas: `
+                        <tr><td>{{edit}}</td><td class="nsft-pv-mono">16/11/2026</td><td>{{user}}</td><td>{{pvTrailRev}}</td></tr>
+                        <tr><td>{{edit}}</td><td class="nsft-pv-mono">02/11/2026</td><td>{{user}}</td><td>{{pvTrailNew}}</td></tr>
+                        <tr><td>{{edit}}</td><td class="nsft-pv-mono">28/10/2026</td><td>Demo Admin</td><td>{{pvTrailImp}}</td></tr>`,
+        perfil: menuRolesNS({ nombre: '{{user}}' }),
+        extra: `
+                <div class="nsft-pv-float is-rfn">
+                    <span class="nsft-pv-float-title">{{@roleFinderEmployeeNamesLabel}}</span>
+                    <div class="nsft-pv-float-row">
+                        <span class="nsft-pv-select nsft-pv-grow is-opts">
+                            <span class="nsft-pv-optwrap">
+                                <span class="nsft-pv-opt o1">{{@roleFinderEmployeeNamesDistinct}}</span>
+                                <span class="nsft-pv-opt o2">{{@roleFinderEmployeeNamesAlways}}</span>
+                            </span>
+                            &#9662;
+                            <span class="nsft-pv-tap is-sc" aria-hidden="true"></span>
+                            <span class="nsft-pv-cursor is-sc" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="#fff" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+                                    <path d="M5 3l14 8.5-6.2 1.3L10 20z"/>
+                                </svg>
+                            </span>
+                        </span>
+                    </div>
+                </div>`
     });
 
     function loginNS(o) {

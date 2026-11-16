@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "NetSuite Full Tools",
-    "version": "8.0.0",
+    "version": "8.1.0",
     "description": "__MSG_extDescription__",
     "default_locale": "en",
     "icons": {
@@ -1508,6 +1508,8 @@
                 "scripts/modules/view_scripted_record/scripted_record_fetcher.js",
                 "scripts/modules/suiteql_runner/suiteql_fetcher.js",
                 "scripts/modules/file_cabinet_drag_drop/file_cabinet_drag_drop_fetcher.js",
+                "scripts/modules/role_finder/role_finder_fetcher.js",
+                "scripts/netsuite/nsft_ai_netsuite_rl.js",
                 "scripts/modules/view_scripted_record/scripted_record_fetcher.js",
                 "scripts/modules/suiteql_runner/suiteql_fetcher.js",
                 "popup/ai_faq.html",

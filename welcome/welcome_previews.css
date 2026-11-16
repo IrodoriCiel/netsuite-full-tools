@@ -10110,3 +10110,11 @@ html[data-theme="dark"] .nsft-pv-pdfpcap { background: var(--nsft-dk-hover, #333
     .nsft-pv-cgshot .m { animation: none; outline-color: var(--nsft-ns-accent, #2C7E52); }
     .nsft-pv-cgshot .m > b { animation: none; opacity: 1; }
 }
+
+.nsft-pv-rname { color: var(--nsft-pv-ink2); font-weight: 400; }
+.nsft-pv-prod.is-rolefn .nsft-pv-rname { animation: nsftPvScopeO2 3.5s steps(1, end) infinite; }
+.nsft-pv-float.is-rfn { left: 3%; right: auto; width: 40%; min-width: 150px; z-index: 7; }
+
+@media (prefers-reduced-motion: reduce) {
+    .nsft-pv-prod.is-rolefn .nsft-pv-rname { animation: none; opacity: 1; }
+}

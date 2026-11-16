@@ -3,82 +3,103 @@
     position: absolute;
     top: 213px;
     left: 50%;
-    translate: -50% -100%;
-    min-width: 520px;
+    translate: -50% calc(-100% - 6px);
+    min-width: 480px;
     max-width: 620px;
     max-height: 320px;
     overflow: hidden;
-    background: var(--nsft-surface-0);
-    border: 1px solid var(--nsft-border);
-    border-radius: var(--nsft-radius-lg);
-    box-shadow: var(--nsft-shadow-lg);
-    font-family: var(--nsft-font);
+    background: var(--nsft-w-s0, #fdfcfa);
+    border: 1px solid var(--nsft-w-bd, #e7e5e4);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(28, 25, 23, 0.14), 0 2px 6px rgba(28, 25, 23, 0.06);
+    font-family: var(--nsft-w-ui, var(--nsft-font));
+    color: var(--nsft-w-t1, #1c1917);
     z-index: var(--nsft-z-popup);
     animation: nsft-slide-up var(--nsft-dur-base) var(--nsft-ease-spring);
+}
+.nsft-search-autocomplete-container[data-theme="dark"] {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .nsft-search-autocomplete-container > ul {
     list-style: none;
-    padding: 6px;
+    box-sizing: border-box;
+    padding: 4px;
     margin: 0;
-    max-height: 300px;
+    max-height: inherit;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: var(--nsft-border-strong) transparent;
+    scrollbar-color: var(--nsft-w-t4, #a8a29e) transparent;
 }
-
-.nsft-search-autocomplete-container > ul::-webkit-scrollbar { width: 10px; }
-.nsft-search-autocomplete-container > ul::-webkit-scrollbar-thumb { background: var(--nsft-border-strong); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
 
 .nsft-search-autocomplete-container li {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    border-radius: var(--nsft-radius-md);
+    gap: 8px;
+    min-height: 30px;
+    padding: 4px 10px 4px 6px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
-    color: var(--nsft-text-1);
-    transition: background var(--nsft-dur-fast) var(--nsft-ease);
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: var(--nsft-w-t1, #1c1917);
+    transition: background var(--nsft-dur-fast) var(--nsft-ease), color var(--nsft-dur-fast) var(--nsft-ease);
 }
+.nsft-search-autocomplete-container li + li { margin-top: 1px; }
 
 .nsft-search-autocomplete-container li::before {
     content: '{}';
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
     flex-shrink: 0;
     font-family: var(--nsft-font-mono);
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
-    color: var(--nsft-accent);
-    background: var(--nsft-accent-soft);
-    border-radius: var(--nsft-radius-sm);
+    color: var(--nsft-w-t3, #78716c);
+    background: var(--nsft-w-s2, #f5f5f4);
+    border-radius: 5px;
+    transition: inherit;
 }
 
 .nsft-search-autocomplete-container li:hover {
-    background: var(--nsft-surface-1);
+    background: var(--nsft-w-hov, #f5f5f4);
+}
+
+.nsft-search-autocomplete-container li b {
+    font-weight: 600;
+    color: var(--nsft-w-t3, #78716c);
 }
 
 .nsft-search-autocomplete-container li span {
     pointer-events: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .nsft-search-autocomplete-container li .nsft-formula-name,
-.nsft-search-autocomplete-container li .nsft-formula-id { flex: 1; }
+.nsft-search-autocomplete-container li .nsft-formula-id { flex: 1; min-width: 0; }
 
 .nsft-hide { display: none !important; }
 .nsft-show { display: block !important; }
 
 .nsft-search-autocomplete-container li.nsft-selected {
-    background: linear-gradient(90deg, var(--nsft-accent), var(--nsft-accent-hover));
-    color: #fff;
+    background: color-mix(in srgb, var(--nsft-w-accent, #3b82f6) 10%, transparent);
+    color: var(--nsft-w-accent, #3b82f6);
 }
 .nsft-search-autocomplete-container li.nsft-selected::before {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.22);
+    color: var(--nsft-w-accent, #3b82f6);
+    background: color-mix(in srgb, var(--nsft-w-accent, #3b82f6) 16%, transparent);
+}
+.nsft-search-autocomplete-container li.nsft-selected b {
+    color: inherit;
+    opacity: 0.75;
+}
+.nsft-search-autocomplete-container[data-theme="dark"] li.nsft-selected {
+    background: color-mix(in srgb, var(--nsft-w-accent, #60a5fa) 18%, transparent);
 }
 
 .nsft-formula-name, .nsft-formula-id { display: none; }
@@ -138,28 +159,36 @@
 
 .nsft-search-autocomplete-spinner {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
     z-index: 1;
-    background: var(--nsft-surface-glass);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--nsft-w-accent, #3b82f6) 14%, transparent);
 }
-
-.nsft-search-autocomplete-spinner > .nsft-ring {
-    width: 28px;
-    height: 28px;
-    border: 3px solid var(--nsft-accent-soft);
-    border-top-color: var(--nsft-accent);
-    border-radius: 50%;
-    animation: nsft-spin 0.7s linear infinite;
-    position: static;
-    display: inline-block;
+.nsft-search-autocomplete-spinner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 35%;
+    border-radius: 2px;
+    background: var(--nsft-w-accent, #3b82f6);
+    animation: nsft-sfa-barrita 0.9s ease-in-out infinite;
 }
-
-.nsft-search-autocomplete-spinner > .nsft-ring div { display: none; }
+@keyframes nsft-sfa-barrita {
+    from { left: -35%; }
+    to { left: 100%; }
+}
+.nsft-search-autocomplete-container > ul { transition: opacity 120ms ease; }
+.nsft-search-autocomplete-container:has(> .nsft-search-autocomplete-spinner.nsft-show) > ul {
+    opacity: 0.55;
+}
+@media (prefers-reduced-motion: reduce) {
+    .nsft-search-autocomplete-spinner::after { animation: none; left: 0; width: 100%; opacity: 0.6; }
+}
 
 textarea.nsft-sfc-on {
     color: transparent !important;

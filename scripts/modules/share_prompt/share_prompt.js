@@ -129,6 +129,7 @@
 
     const ICONS = {
         copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+        linkedin: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3.5a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4zM3.1 9.4h3.8V21H3.1zM9.4 9.4H13v1.6h.1c.5-.9 1.7-1.9 3.6-1.9 3.8 0 4.5 2.5 4.5 5.8V21h-3.8v-5.4c0-1.3 0-2.9-1.8-2.9s-2.1 1.4-2.1 2.8V21H9.4z"></path></svg>',
         facebook: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 3H13a3.5 3.5 0 0 0-3.5 3.5V9H7.5v3h2v9h3v-9h2.4l.6-3h-3V6.8c0-.5.3-.8.8-.8h2.2V3z"></path></svg>',
         x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h4.9l4.3 5.9L17.4 3H21l-6.9 7.9L21.4 21h-4.9l-4.6-6.3L6.4 21H2.8l7.2-8.2L3 3zm3.1 1.7 9.9 14.6h1.7L7.8 4.7H6.1z"></path></svg>',
         whatsapp: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 2a8 8 0 1 1-4.1 14.9l-.4-.2-2.6.7.7-2.5-.2-.4A8 8 0 0 1 12 4zm-3.1 3.6c-.2 0-.4 0-.6.1-.2.1-.6.3-.9.9-.3.6-.4 1.4-.1 2.2.3.8 1.4 2.7 3.4 3.9 1.7 1 2.3 1 2.9.9.6-.1 1.4-.6 1.6-1.2.2-.6.2-1 .1-1.1l-.4-.2-1.5-.7c-.2-.1-.4-.1-.5.1l-.6.8c-.1.2-.3.2-.5.1a6 6 0 0 1-1.8-1.1 6.6 6.6 0 0 1-1.2-1.5c-.1-.2 0-.3.1-.4l.4-.5c.1-.1.1-.2.2-.4v-.4l-.6-1.4c-.1-.4-.3-.4-.5-.4z"></path></svg>',
@@ -199,6 +200,8 @@
 
         const iconos = document.createElement('div');
         iconos.className = 'nsft-shr-iconos';
+        iconos.appendChild(red('is-li', ICONS.linkedin, t('shareLinkedin', 'Compartir en LinkedIn'),
+            'https://www.linkedin.com/sharing/share-offsite/?url=' + u));
         iconos.appendChild(red('is-fb', ICONS.facebook, t('shareFacebook', 'Compartir en Facebook'),
             'https://www.facebook.com/sharer/sharer.php?u=' + u));
         iconos.appendChild(red('is-x', ICONS.x, t('shareX', 'Compartir en X'),

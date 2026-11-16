@@ -13,13 +13,16 @@
     const DEFAULT_QUERY = [
         '// ' + (chrome.i18n.getMessage('ssc_tpl_1')
             || 'The N/* modules are ready: record, search, query, runtime…'),
+        '// ' + (chrome.i18n.getMessage('ssc_tpl_2')
+            || 'And the NSFT.* helpers: me, rec, sql, search, csv… (NSFT.help() lists them all)'),
         '',
         '({',
         '  hello: \'world\',',
         '  account: runtime.accountId,',
         '  env: runtime.envType,',
-        '  user: runtime.getCurrentUser().name,',
-        '  role: runtime.getCurrentUser().role',
+        '  me: await NSFT.me(),',
+        '  record: NSFT.rec(),',
+        '  lastTransactions: await NSFT.sql(\'SELECT TOP 5 id, tranid, trandate FROM transaction ORDER BY id DESC\')',
         '})'
     ].join('\n');
 
@@ -898,7 +901,9 @@
                 editor.focus();
             };
 
-            if (window.NSFT_ShortcutCoach) window.NSFT_ShortcutCoach.hint('suitescript_console');
+            const pideAtajo = () => {
+                if (window.NSFT_ShortcutCoach) window.NSFT_ShortcutCoach.hint('suitescript_console');
+            };
 
             const modal = document.getElementById('nsft-ssc-modal');
             if (!modal || _sqlBooting) {
@@ -906,9 +911,10 @@
                     showBootOverlay();
                     initModal();
                 }
-                _sqlBootQueue.push(applyPrefill);
+                _sqlBootQueue.push(applyPrefill, pideAtajo);
                 return;
             }
+            pideAtajo();
 
             modal.style.display = 'flex';
             if (modal.dataset.state !== 'fullscreen') {
@@ -2177,9 +2183,12 @@
                 '</div>' +
                 '<div class="nsft-ssc-boot-step"></div>' +
                 '<div class="nsft-ssc-boot-bar"><span></span></div>' +
+                '<div class="nsft-ssc-boot-nota"></div>' +
             '</div>';
         el.querySelector('.nsft-ssc-boot-title').textContent =
             chrome.i18n.getMessage('ssc_title') || 'SuiteScript Console';
+        el.querySelector('.nsft-ssc-boot-nota').textContent =
+            chrome.i18n.getMessage('adv_velo_primera') || 'The first time takes a little longer. After that it opens right away.';
         document.body.appendChild(el);
         setBootStep('ssc_boot_step_shell', 'Preparando la consola…', 1);
         clearTimeout(_bootWatchdog);

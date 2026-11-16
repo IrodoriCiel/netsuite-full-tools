@@ -96,6 +96,7 @@
 }
 
 #nsft-share-prompt .nsft-shr-icon:hover { background: var(--nsft-w-hov, #f9fafb); }
+#nsft-share-prompt .nsft-shr-icon.is-li:hover { color: #0A66C2; border-color: #0A66C2; }
 #nsft-share-prompt .nsft-shr-icon.is-fb:hover { color: #1877F2; border-color: #1877F2; }
 #nsft-share-prompt .nsft-shr-icon.is-x:hover { color: var(--nsft-w-t1, #111827); border-color: var(--nsft-w-t1, #111827); }
 #nsft-share-prompt .nsft-shr-icon.is-wa:hover { color: #25D366; border-color: #25D366; }

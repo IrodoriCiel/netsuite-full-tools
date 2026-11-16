@@ -84,6 +84,7 @@
         const search = document.getElementById(IDS.SEARCH);
         if (search) { const c = search.closest('.nsft-role-search-container'); (c || search).remove(); }
         document.querySelectorAll('[data-nsft-role-finder-init]').forEach(el => { delete el.dataset.nsftRoleFinderInit; });
+        document.querySelectorAll('.nsft-role-ent').forEach(el => el.remove());
     }
 
     function init() {
@@ -130,6 +131,7 @@
 
                     menuOption.parentNode.insertBefore(buildSearchEl(), menuOption);
                     attachSearchHandler(entries);
+                    ponNombresDeEmpleado(entries);
 
                     _innerIntervals.forEach(i => clearInterval(i));
                     _innerIntervals.length = 0;
@@ -297,7 +299,13 @@
                 applyHighlight(e, q);
                 if (match) visible.push(e);
             }
-            setSelected(visible.length ? 0 : -1);
+            let elegida = visible.length ? 0 : -1;
+            if (q && visible.length > 1) {
+                const fq = TS ? TS.fold(q) : q.toUpperCase();
+                const i = visible.findIndex(e => (TS ? TS.fold(e.key) : e.key).includes(fq));
+                if (i > 0) elegida = i;
+            }
+            setSelected(elegida);
         }
 
         input.addEventListener('keyup', (evt) => {
@@ -337,6 +345,120 @@
         input.addEventListener('input', syncClear);
         syncClear();
     }
+
+    const ENT_KEY = 'nsftRoleEntNames';
+    const MODO_KEY = 'roleFinderEmployeeNames';
+    let _modoNombres = 'distinct';
+    chrome.storage.local.get({ [MODO_KEY]: 'distinct' }, (st) => { _modoNombres = st[MODO_KEY] || 'distinct'; });
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes[MODO_KEY]) _modoNombres = changes[MODO_KEY].newValue || 'distinct';
+    });
+    const ENT_TIMEOUT_MS = 5000;
+    let _entPuente = false;
+    let _entListo = false;
+    const _entCola = [];
+    const _entPendientes = new Map();
+    let _entToken = 0;
+
+    function cuentaActual() {
+        return (location.hostname.split('.')[0] || '').replace(/-/g, '_').toUpperCase();
+    }
+
+    function partesDelEnlace(link) {
+        const m = /[?&]id=([^&]+)/.exec(link.getAttribute('href') || '');
+        if (!m) return null;
+        let id;
+        try { id = decodeURIComponent(m[1]); } catch (e) { id = m[1]; }
+        const seg = id.split('~');
+        if (seg.length < 3 || !/^\d+$/.test(seg[1])) return null;
+        return { cuenta: seg[0].toUpperCase(), empleado: seg[1] };
+    }
+
+    function ponNombresDeEmpleado(entries) {
+        const actual = cuentaActual();
+        const filas = [];
+        entries.forEach((e) => {
+            if (!e.link || !/changerole\.nl/.test(e.link.getAttribute('href') || '')) return;
+            const p = partesDelEnlace(e.link);
+            if (p && p.cuenta === actual) filas.push({ entry: e, id: p.empleado });
+        });
+        const ids = [...new Set(filas.map(f => f.id))];        if (!ids.length) return;
+        if (ids.length < 2 && _modoNombres !== 'always') return;
+
+        chrome.storage.local.get({ [ENT_KEY]: {} }, (st) => {
+            const todas = st[ENT_KEY] || {};
+            const deEsta = Object.assign({}, todas[actual] || {});
+            pinta(filas, deEsta);
+            pideNombres(ids, (err, nombres) => {
+                if (err || !nombres) return;
+                Object.assign(deEsta, nombres);
+                pinta(filas, deEsta);
+                todas[actual] = deEsta;
+                chrome.storage.local.set({ [ENT_KEY]: todas });
+            });
+        });
+    }
+
+    function pinta(filas, nombres) {
+        filas.forEach(({ entry, id }) => {
+            const nombre = nombres[id];
+            if (!nombre || !entry.link.isConnected) return;
+            let span = entry.link.querySelector('.nsft-role-ent');
+            if (!span) {
+                const walker = document.createTreeWalker(entry.link, NodeFilter.SHOW_TEXT, null);
+                let mejor = null, n;
+                while ((n = walker.nextNode())) {
+                    if (n.nodeValue.trim().length > (mejor ? mejor.nodeValue.trim().length : 0)) mejor = n;
+                }
+                if (!mejor) return;
+                span = document.createElement('span');
+                span.className = 'nsft-role-ent';
+                mejor.parentNode.insertBefore(span, mejor.nextSibling);
+            }
+            span.textContent = ' · ' + nombre;
+            entry.key = (entry.linkText + ' ' + nombre).toUpperCase();
+        });
+    }
+
+    function pideNombres(ids, cb) {
+        if (!_entPuente) {
+            _entPuente = true;
+            if (window.NSFT_SuiteQLRest && window.NSFT_SuiteQLRest.ensureTransport) {
+                window.NSFT_SuiteQLRest.ensureTransport();
+            }
+            const s = document.createElement('script');
+            s.id = 'nsft-rolef-fetcher';
+            s.async = false;
+            s.src = chrome.runtime.getURL('scripts/modules/role_finder/role_finder_fetcher.js');
+            s.onload = function () { this.remove(); };
+            (window.NSFT_AfterLoad ? window.NSFT_AfterLoad.append(s) : (document.head || document.documentElement).appendChild(s));
+        }
+        const token = ++_entToken;
+        const timer = setTimeout(() => {
+            if (_entPendientes.delete(token)) cb({ code: 'timeout' }, null);
+        }, ENT_TIMEOUT_MS);
+        _entPendientes.set(token, (err, nombres) => { clearTimeout(timer); cb(err, nombres); });
+        const enviar = () => window.postMessage({ dest: 'fetcher_rolef', type: 'entityNames', payload: { token, ids } }, '*');
+        if (_entListo) enviar(); else _entCola.push(enviar);
+    }
+
+    window.addEventListener('message', (event) => {
+        if (event.source !== window) return;
+        const d = event.data;
+        if (!d || d.dest !== 'extension_rolef') return;
+        if (d.type === 'ready') {
+            _entListo = true;
+            while (_entCola.length) _entCola.shift()();
+            return;
+        }
+        if (d.type !== 'entityNames') return;
+        const p = d.payload || {};
+        const cb = _entPendientes.get(p.token);
+        if (!cb) return;
+        _entPendientes.delete(p.token);
+        if (p.error) cb({ code: p.error }, null);
+        else cb(null, p.names || {});
+    });
 
     function findElement(theme, key) {
         const candidates = SELECTORS[theme]?.[key];

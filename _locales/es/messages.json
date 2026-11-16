@@ -3370,6 +3370,9 @@
   "tmm_d_cheatsheet": {
     "message": "Todos los atajos"
   },
+  "tmm_shortcut_label": {
+    "message": "Abrir el menú Herramientas"
+  },
   "tmc_title": {
     "message": "¿Cómo quieres el menú Herramientas?"
   },
@@ -4041,6 +4044,9 @@
   },
   "ssc_tpl_1": {
     "message": "Los módulos N/* están listos: record, search, query, runtime…"
+  },
+  "ssc_tpl_2": {
+    "message": "Y los ayudantes NSFT.*: me, rec, sql, search, csv… (NSFT.help() los lista todos)"
   },
   "ssc_running": {
     "message": "Ejecutando…"
@@ -10984,6 +10990,15 @@
   "enableRoleFinderDesc": {
     "message": "Agrega un input en el menú de cuenta para filtrar roles y cuentas al escribir."
   },
+  "roleFinderEmployeeNamesLabel": {
+    "message": "Nombre del empleado:"
+  },
+  "roleFinderEmployeeNamesDistinct": {
+    "message": "Sólo si los roles son de empleados distintos"
+  },
+  "roleFinderEmployeeNamesAlways": {
+    "message": "Siempre"
+  },
   "rolefTitle": {
     "message": "BUSCAR ROL"
   },
@@ -12665,6 +12680,33 @@
       }
     }
   },
+  "sqlai_turn_secs": {
+    "message": " · $1 s",
+    "placeholders": {
+      "seg": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_turn_cost_one": {
+    "message": " · $1 s · 1 paso",
+    "placeholders": {
+      "secs": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_turn_ns": {
+    "message": " · en NetSuite $1 s",
+    "placeholders": {
+      "secs": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_turn_ns_title": {
+    "message": "Tiempo dentro de NetSuite: el RESTlet y la respuesta de N/llm. El resto del total es la red y el navegador."
+  },
   "sqlai_copied": {
     "message": "Copiado ✓"
   },
@@ -12682,6 +12724,250 @@
   },
   "sqlai_key_needed_hint": {
     "message": "Pega aquí tu API key: sin ella este proveedor no responde."
+  },
+  "sqlai_ns_checking": {
+    "message": "Comprobando la cuenta…"
+  },
+  "sqlai_ns_pt_key": {
+    "message": "La IA de tu cuenta de NetSuite, sin API key"
+  },
+  "sqlai_ns_pt_models": {
+    "message": "Con los modelos y el cupo gratuito de la cuenta"
+  },
+  "sqlai_ns_pt_once": {
+    "message": "Se instala un puente en cada cuenta (producción y cada sandbox)"
+  },
+  "sqlai_ns_note_what": {
+    "message": "· Un RESTlet, «NSFT · NetSuite AI», con su archivo en SuiteScripts.\n· Sólo le pasa la conversación a N/llm, la IA de NetSuite, y te devuelve su respuesta.\n· No ejecuta código, no lee ni cambia registros y no guarda nada."
+  },
+  "sqlai_ns_note_repo": {
+    "message": "Repositorio en GitHub"
+  },
+  "sqlai_ns_note_file": {
+    "message": "El archivo en GitHub"
+  },
+  "sqlai_ns_note_local": {
+    "message": "Ver el archivo que se instala"
+  },
+  "sqlai_ns_faq_link": {
+    "message": "Preguntas frecuentes de NetSuite AI"
+  },
+  "sqlai_ns_use": {
+    "message": "Usar NetSuite AI"
+  },
+  "sqlai_ns_ph_missing": {
+    "message": "Instala NetSuite AI en esta cuenta para empezar"
+  },
+  "sqlai_ns_hint_title_none": {
+    "message": "Dos formas de usar el asistente"
+  },
+  "sqlai_ns_hint_sub_none": {
+    "message": "Elige una opción, o las dos: cambias entre ellas en el menú de modelos."
+  },
+  "sqlai_ns_hint_title_missing": {
+    "message": "Todavía no hay ninguna IA conectada"
+  },
+  "sqlai_ns_hint_sub_missing": {
+    "message": "Elige una opción, o las dos: cambias entre ellas en el menú de modelos."
+  },
+  "sqlai_ns_hint_title_missing_otros": {
+    "message": "NetSuite AI no está instalado en esta cuenta"
+  },
+  "sqlai_ns_hint_sub_missing_otros": {
+    "message": "Puedes instalarlo aquí, o seguir con uno de los proveedores que ya tienes con tu API key: elígelo en el menú de modelos."
+  },
+  "sqlai_opt_ns_tag": {
+    "message": "Gratis"
+  },
+  "sqlai_opt_faq": {
+    "message": "Preguntas frecuentes"
+  },
+  "sqlai_opt_ns_what": {
+    "message": "Qué se instala en la cuenta"
+  },
+  "sqlai_opt_key_title": {
+    "message": "Tu propia API key"
+  },
+  "sqlai_opt_key_pt_what": {
+    "message": "La clave de un servicio de IA (Claude, Gemini, OpenAI…), que creas en su web"
+  },
+  "sqlai_opt_key_pt_all": {
+    "message": "Una sola clave para todas tus cuentas, sin instalar nada"
+  },
+  "sqlai_opt_key_pt_cost": {
+    "message": "Cada servicio cobra según su tarifa"
+  },
+  "sqlai_opt_key_cta": {
+    "message": "Conectar con tu API key"
+  },
+  "sqlai_ns_hint_title_old": {
+    "message": "Hay una versión nueva de NetSuite AI"
+  },
+  "sqlai_ns_hint_sub_old": {
+    "message": "Esta cuenta tiene una versión anterior del puente. Actualízala para seguir usándolo."
+  },
+  "sqlai_ns_ok_title": {
+    "message": "Instalado en esta cuenta"
+  },
+  "sqlai_ns_bridge": {
+    "message": "Puente v$1",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_ns_free_lbl": {
+    "message": "Cupo gratuito"
+  },
+  "sqlai_ns_models_lbl": {
+    "message": "Modelos de la cuenta"
+  },
+  "sqlai_ns_old": {
+    "message": "Esta cuenta tiene una versión anterior del puente (v$1). Actualízala para usar NetSuite AI.",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_ns_missing": {
+    "message": "Sin instalar en esta cuenta"
+  },
+  "sqlai_ns_install": {
+    "message": "Instalar en esta cuenta"
+  },
+  "sqlai_ns_update": {
+    "message": "Actualizar el puente"
+  },
+  "sqlai_ns_recheck": {
+    "message": "Volver a comprobar"
+  },
+  "sqlai_ns_cancel": {
+    "message": "Cancelar"
+  },
+  "sqlai_ns_confirm_yes": {
+    "message": "Sí, instalar"
+  },
+  "sqlai_ns_confirm_install": {
+    "message": "Se va a crear en la cuenta $1:\n· el archivo nsft_ai_netsuite_rl.js en SuiteScripts,\n· el script «NSFT · NetSuite AI» (RESTlet),\n· su despliegue, publicado para todos los roles.",
+    "placeholders": {
+      "account": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_ns_confirm_update": {
+    "message": "Se va a reemplazar el archivo nsft_ai_netsuite_rl.js de SuiteScripts en la cuenta $1 por la versión de esta extensión. El script y su despliegue no cambian.",
+    "placeholders": {
+      "account": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_ns_inst_file": {
+    "message": "Subiendo el archivo a SuiteScripts…"
+  },
+  "sqlai_ns_inst_script": {
+    "message": "Creando el script…"
+  },
+  "sqlai_ns_inst_deploy": {
+    "message": "Creando el despliegue…"
+  },
+  "sqlai_ns_inst_check": {
+    "message": "Comprobando que responde…"
+  },
+  "sqlai_ns_installing": {
+    "message": "Instalando NetSuite AI"
+  },
+  "sqlai_ns_updating": {
+    "message": "Actualizando el puente"
+  },
+  "sqlai_ns_uninstalling": {
+    "message": "Desinstalando NetSuite AI"
+  },
+  "sqlai_ns_inst_noform": {
+    "message": "NetSuite no devolvió el formulario: comprueba que la sesión sigue abierta y que tu rol puede crear scripts."
+  },
+  "sqlai_ns_inst_fail_file": {
+    "message": "NetSuite no guardó el archivo en SuiteScripts."
+  },
+  "sqlai_ns_inst_fail_script": {
+    "message": "NetSuite no creó el script."
+  },
+  "sqlai_ns_inst_fail_deploy": {
+    "message": "NetSuite no creó el despliegue."
+  },
+  "sqlai_ns_inst_dep_off": {
+    "message": "El despliegue «NSFT · NetSuite AI» ya existe pero está desactivado o en pruebas. Ábrelo en NetSuite (Personalización → Scripting → Despliegues de scripts), márcalo como desplegado, con estado Liberado, y vuelve a comprobar."
+  },
+  "sqlai_ns_inst_fail": {
+    "message": "No se pudo instalar: $1",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_ns_uninstall": {
+    "message": "Desinstalar de esta cuenta"
+  },
+  "sqlai_ns_uninstall_yes": {
+    "message": "Sí, desinstalar"
+  },
+  "sqlai_ns_confirm_uninstall": {
+    "message": "Se va a borrar de la cuenta $1:\n· el despliegue del script «NSFT · NetSuite AI»,\n· el script,\n· el archivo nsft_ai_netsuite_rl.js de SuiteScripts.\nNadie en esta cuenta podrá usar NetSuite AI hasta que se vuelva a instalar. No se puede deshacer, pero se puede instalar de nuevo cuando quieras.",
+    "placeholders": {
+      "account": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_ns_un_deploy": {
+    "message": "Borrando el despliegue…"
+  },
+  "sqlai_ns_un_script": {
+    "message": "Borrando el script…"
+  },
+  "sqlai_ns_un_file": {
+    "message": "Borrando el archivo de SuiteScripts…"
+  },
+  "sqlai_ns_un_fail": {
+    "message": "No se pudo desinstalar: $1",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  },
+  "sqlai_ns_un_fail_deploy": {
+    "message": "NetSuite no borró el despliegue."
+  },
+  "sqlai_ns_un_fail_script": {
+    "message": "NetSuite no borró el script."
+  },
+  "sqlai_ns_un_fail_file": {
+    "message": "NetSuite no borró el archivo de SuiteScripts."
+  },
+  "sqlai_ns_err_missing": {
+    "message": "NetSuite AI no está instalado en esta cuenta. Instálalo en Ajustes → Conexión, eligiendo NetSuite AI como proveedor."
+  },
+  "sqlai_ns_err_notab": {
+    "message": "NetSuite AI responde desde la cuenta: abre una pestaña de NetSuite."
+  },
+  "sqlai_ns_err_session": {
+    "message": "NetSuite no respondió como se esperaba: comprueba que la sesión sigue abierta."
+  },
+  "sqlai_ns_err_timeout": {
+    "message": "NetSuite AI tardó demasiado en responder. Prueba otra vez o con otro modelo."
+  },
+  "sqlai_ns_err_generic": {
+    "message": "NetSuite AI devolvió un error: $1",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
   },
   "sqlai_f_baseurl": {
     "message": "Base URL (endpoint)"
@@ -13519,6 +13805,42 @@
   "aifaq_outro": {
     "message": "¿Prefieres no usar IA en tu organización? Deja el asistente **sin configurar** (queda inerte) o usa la opción de **Ollama** para un montaje **100 % local**. Gracias por usar la extensión."
   },
+  "aifaq_ns_q1": {
+    "message": "¿Qué es NetSuite AI?"
+  },
+  "aifaq_ns_a1": {
+    "message": "Es un proveedor más del asistente que usa la **IA de tu propia cuenta de NetSuite** (el módulo N/llm de Oracle). No pide clave de API ni cuenta en otro servicio, y **las preguntas y los datos no salen de Oracle**."
+  },
+  "aifaq_ns_q2": {
+    "message": "¿Qué se instala en mi cuenta?"
+  },
+  "aifaq_ns_a2": {
+    "message": "Tres cosas, y sólo cuando pulsas **Instalar** y lo confirmas: el archivo **nsft_ai_netsuite_rl.js** en SuiteScripts, el script **NSFT · NetSuite AI** (un RESTlet, customscript_nsft_ai_netsuite) y su despliegue, publicado para todos los roles internos. El script **sólo pasa la conversación a la IA de NetSuite**: no ejecuta código, no lee ni cambia registros y no guarda nada. Las consultas que hace el asistente siguen corriendo en tu navegador, con tus permisos. Su código se puede revisar antes en GitHub (github.com/IrodoriCiel/netsuite-full-tools, scripts/netsuite/nsft_ai_netsuite_rl.js) o, una vez instalado, en SuiteScripts."
+  },
+  "aifaq_ns_q3": {
+    "message": "¿Quién puede instalarlo, y cuántas veces?"
+  },
+  "aifaq_ns_a3": {
+    "message": "Hace falta un rol que pueda crear scripts y subir archivos al Archivador, como un administrador o un desarrollador. Se instala **una vez por cuenta** —el sandbox y producción van aparte— y desde entonces lo puede usar cualquier usuario de esa cuenta."
+  },
+  "aifaq_ns_q4": {
+    "message": "¿Cuánto cuesta?"
+  },
+  "aifaq_ns_a4": {
+    "message": "NetSuite incluye un **cupo gratuito** de su IA por cuenta; en Ajustes → Conexión se ve cuánto queda. Cada respuesta gasta además unidades de gobernanza del script, como cualquier SuiteScript. Si el cupo se agota, NetSuite devuelve un error y el asistente lo muestra tal cual."
+  },
+  "aifaq_ns_q5": {
+    "message": "¿Qué modelos puedo usar?"
+  },
+  "aifaq_ns_a5": {
+    "message": "Los que ofrezca tu cuenta, que dependen de su región de NetSuite: por ejemplo Gemini, GPT-OSS o Cohere Command. Ajustes → Conexión lista los disponibles. De fábrica se usa **Gemini 3.8 Flash**, que dio las mejores respuestas en las pruebas."
+  },
+  "aifaq_ns_q6": {
+    "message": "¿Cómo se actualiza o se quita?"
+  },
+  "aifaq_ns_a6": {
+    "message": "Cuando la extensión trae una versión nueva del puente, Ajustes y el chat lo avisan con el botón **Actualizar el puente**, que sólo reemplaza el archivo. Para quitarlo, en Ajustes → Conexión pulsa **Desinstalar de esta cuenta**: borra el despliegue, el script y el archivo de SuiteScripts, y pide confirmación antes. Hace falta el mismo rol que para instalarlo."
+  },
   "aiFaqLink": {
     "message": "FAQ del asistente de IA"
   },
@@ -14307,34 +14629,25 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "La extensión estrena **diseño nuevo**: todas sus ventanas, diálogos y buscadores comparten el mismo aspecto compacto, en claro y en oscuro, y el **popup** se renueva con iconos animados por categoría."
+    "message": "Usa **NetSuite AI** en el **Asistente de IA**: la IA de tu propia cuenta, sin necesidad de API key."
   },
   "un_hl_2": {
-    "message": "!NetSuite carga **más rápido** con la extensión. Para lograrlo pide un permiso nuevo, **scripting**: solo se usa en NetSuite, para cargar las herramientas cuando las abres."
+    "message": "Abre desde la **Paleta de Comandos** cualquier herramienta del menú Herramientas —el **SuiteQL Runner**, **Ver Objeto**, **Ver scripts**…— y las **opciones del registro**."
   },
   "un_hl_3": {
-    "message": "*Marca **carpetas favoritas** en el Archivador y tenlas a mano."
+    "message": "Abre el **menú Herramientas** con **Alt+Shift+T**, sin ir al ratón."
   },
   "un_hl_4": {
-    "message": "***Ver scripts**, en el aviso de **SuiteScript 2.1**, te dice cuáles migrar primero, y la programación de un despliegue se ve como una **tabla de ajuste y valor**."
+    "message": "Distingue en el **menú de roles** a qué empleado pertenece cada rol cuando tienes varios usuarios de prueba con tu correo."
   },
   "un_hl_5": {
-    "message": "*Con **Captura guiada** enseñas dónde está algo: deja el ratón sobre un menú o un campo, pulsa **Alt+Shift+M** y sale la captura con cada paso marcado y el camino escrito."
+    "message": "Pliega y despliega los bloques de código del **Editor Avanzado**, uno a uno o todos a la vez, con los atajos de **VS Code**."
   },
   "un_hl_6": {
-    "message": "El **SuiteQL Runner** y la **Consola de SuiteScript** estrenan un **diseño más compacto** y sus **ajustes** ya se abren dentro de la propia ventana."
+    "message": "Usa NSFT también en **Firefox**: ya está disponible en **Firefox Add-ons**."
   },
   "un_hl_7": {
-    "message": "El **Asistente de IA** trae muchas mejoras y funciones nuevas en el chat, los editores y las páginas de NetSuite."
-  },
-  "un_hl_8": {
-    "message": "**Rendimiento de la página** te dice qué la hace lenta, **Permisos de tu rol** te dice qué permisos te faltan y la **Paleta de Comandos** busca en todo el menú de NetSuite."
-  },
-  "un_hl_9": {
-    "message": "Los botones y elementos destacados ahora siguen el **color de tu NetSuite** o de tu **Color Theme**."
-  },
-  "un_hl_10": {
-    "message": "**Scripts del registro** te dice si cada script **se ejecuta para ti**, el **rastro del registro** sigue la **cadena entera** de documentos y avisa de lo que no cuadra, y llegan su **historial de cambios**, sus **adjuntos con vista previa** y una **plantilla de importación CSV**."
+    "message": "Y arreglos en la **Consola de SuiteScript** y en la **caja de fórmulas** de las búsquedas. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -14640,6 +14953,72 @@
   },
   "cl_6_2_2_sfv_lang_desc": {
     "message": "Se arregló que las etiquetas del panel de información del campo salieran siempre en español."
+  },
+  "cl_ver_8_1_0": {
+    "message": "v8.1.0"
+  },
+  "cl_date_8_1_0": {
+    "message": "2026-11-16"
+  },
+  "cl_8_1_0_firefox_title": {
+    "message": "Versión para Firefox"
+  },
+  "cl_8_1_0_firefox_desc": {
+    "message": "Se agregó la versión para Firefox, ya disponible en Firefox Add-ons."
+  },
+  "cl_8_1_0_cmdp_tools_title": {
+    "message": "Todas las herramientas en la Paleta"
+  },
+  "cl_8_1_0_cmdp_tools_desc": {
+    "message": "Se agregaron a la Paleta de Comandos todas las herramientas del menú Herramientas y las opciones del registro."
+  },
+  "cl_8_1_0_tmm_key_title": {
+    "message": "Atajo para el menú Herramientas"
+  },
+  "cl_8_1_0_tmm_key_desc": {
+    "message": "Se agregó el atajo Alt+Shift+T para abrir el menú Herramientas desde el teclado."
+  },
+  "cl_8_1_0_ssc_coach_title": {
+    "message": "Sugerencia del atajo en la Consola"
+  },
+  "cl_8_1_0_ssc_coach_desc": {
+    "message": "Se arregló que la sugerencia del atajo de la Consola de SuiteScript quedara oculta tras la pantalla de carga."
+  },
+  "cl_8_1_0_sfc_caret_title": {
+    "message": "Cursor en la caja de fórmulas"
+  },
+  "cl_8_1_0_sfc_caret_desc": {
+    "message": "Se arregló que la caja de fórmulas de una búsqueda guardada no mostrara el cursor con el resaltado encendido."
+  },
+  "cl_8_1_0_sfa_menu_title": {
+    "message": "Menú del autocompletado de fórmulas"
+  },
+  "cl_8_1_0_sfa_menu_desc": {
+    "message": "Se renovó el menú de campos de la caja de fórmulas: sigue el tema y el color de NetSuite y se ajusta a su lista."
+  },
+  "cl_8_1_0_rolef_emp_title": {
+    "message": "Nombre del empleado en el menú de roles"
+  },
+  "cl_8_1_0_rolef_emp_desc": {
+    "message": "Se agregó el nombre del empleado junto a cada rol cuando una cuenta tiene varios usuarios con tu correo, o siempre si se elige."
+  },
+  "cl_8_1_0_share_li_title": {
+    "message": "Compartir en LinkedIn"
+  },
+  "cl_8_1_0_share_li_desc": {
+    "message": "Se agregó LinkedIn a las opciones para compartir la extensión."
+  },
+  "cl_8_1_0_nsai_title": {
+    "message": "NetSuite AI en el Asistente de IA"
+  },
+  "cl_8_1_0_nsai_desc": {
+    "message": "Se agregó NetSuite AI como proveedor del Asistente de IA: responde con la IA de la propia cuenta, sin necesidad de API key."
+  },
+  "cl_8_1_0_adv_fold_title": {
+    "message": "Plegar y desplegar en el Editor Avanzado"
+  },
+  "cl_8_1_0_adv_fold_desc": {
+    "message": "Se agregó al Editor Avanzado el plegado de bloques de código, con Plegar todo, Plegar el nivel 2, Desplegar todo y los atajos de VS Code."
   },
   "cl_ver_8_0_0": {
     "message": "v8.0.0"
@@ -16851,6 +17230,15 @@
   "adv_minimapa": {
     "message": "Minimapa"
   },
+  "adv_fold_all": {
+    "message": "Plegar todo"
+  },
+  "adv_fold_level2": {
+    "message": "Plegar el nivel 2"
+  },
+  "adv_unfold_all": {
+    "message": "Desplegar todo"
+  },
   "adv_crumb_lista": {
     "message": "Otros elementos al nivel de $1",
     "placeholders": {
@@ -16954,6 +17342,9 @@
   },
   "shareWhatsapp": {
     "message": "Compartir por WhatsApp"
+  },
+  "shareLinkedin": {
+    "message": "Compartir en LinkedIn"
   },
   "shareMore": {
     "message": "Más opciones para compartir"
@@ -17343,12 +17734,6 @@
   },
   "sr_bulk_all_visible": {
     "message": "Seleccionar los visibles"
-  },
-  "un_hl_11": {
-    "message": "En las **búsquedas guardadas**, **Exportar Búsquedas** te avisa si una búsqueda **cuenta doble**, el **editor de fórmulas** marca sus errores y, si la activas, las **listas buscan por «contiene»**."
-  },
-  "un_hl_12": {
-    "message": "Se retiran el **Tema del Editor de código**, relevado por el **Editor Avanzado**, y la **Vista dividida de búsquedas**, relevada por la **Preview inline**. Y varios arreglos en la **Paleta**, **Recientes**, el **Archivador**, el **Color Theme**, el **Asistente**, **Buscar campo**, el **Historial del campo**, el **popup** y **Pestañas agrupadas**. Más detalles en el changelog."
   },
   "cl_8_0_0_sr_ui_title": {
     "message": "Scripts del registro renovado"

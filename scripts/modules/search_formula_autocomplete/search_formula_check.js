@@ -225,14 +225,15 @@
         mir.setAttribute('aria-hidden', 'true');
         COPIA.forEach((p) => { mir.style[p] = cs[p]; });
         mir.style.background = cs.backgroundColor;
-        mir.style.color = cs.color;
+        const tinta = cs.color;
+        mir.style.color = tinta;
         padre.insertBefore(mir, ta);
         estado.espejo = mir;
         estado.colorTa = { color: ta.style.color, bg: ta.style.backgroundColor, caret: ta.style.caretColor, pos: ta.style.position, z: ta.style.zIndex };
         ta.classList.add('nsft-sfc-on');
         estado.colorTa.spell = ta.spellcheck;
         ta.spellcheck = false;
-        ta.style.caretColor = cs.color;
+        ta.style.caretColor = tinta;
         ta.style.position = 'relative';
         ta.style.zIndex = '1';
         coloca();

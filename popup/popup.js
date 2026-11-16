@@ -683,6 +683,10 @@ function applyStoredSettings(items) {
                     const container = document.getElementById('container_enableCopyAccountId');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
                 }
+                if (key === 'enableRoleFinder') {
+                    const container = document.getElementById('container_enableRoleFinder');
+                    if (container) container.style.display = element.checked ? 'flex' : 'none';
+                }
                 if (key === 'enableFieldInlinePreview') {
                     const container = document.getElementById('field-inline-preview-container');
                     if (container) container.style.display = element.checked ? 'flex' : 'none';
@@ -3418,7 +3422,8 @@ function wireTabPreview(panel, caja, tituloEl, replayEl) {
         const boton = document.createElement('button');
         boton.type = 'button';
         boton.className = 'nsft-mod-pvbtn';
-        boton.title = txt('previewPanelTitle', 'Preview');
+        const etiqueta = txt('previewPanelTitle', 'Preview');
+        boton.setAttribute('aria-label', etiqueta);
         boton.innerHTML = SVG(OJO, 'nsft-mod-pvbtn-svg');
         cab.appendChild(boton);
         const nombre = () => (span.textContent || '').trim() || key;
@@ -3428,7 +3433,7 @@ function wireTabPreview(panel, caja, tituloEl, replayEl) {
             clearTimeout(espera);
             espera = setTimeout(() => {
                 if (Date.now() - ultimoScroll < QUIETO_TRAS_SCROLL || !boton.matches(':hover')) return;
-                boton.setAttribute('aria-label', boton.title + ': ' + nombre());
+                boton.setAttribute('aria-label', etiqueta + ': ' + nombre());
                 abre(boton, key, nombre());
             }, ESPERA_HOVER);
         };

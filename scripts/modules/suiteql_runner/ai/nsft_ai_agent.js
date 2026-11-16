@@ -86,7 +86,8 @@
         openai: 'gpt-4o-mini',
         openrouter: 'deepseek/deepseek-v4.1-flash',
         mistral: 'mistral-small-2603',
-        opencodezen: 'deepseek-v4.1-flash'
+        opencodezen: 'deepseek-v4.1-flash',
+        netsuite: 'openai.gpt-oss-120b'
     };
     const MID_MODELS = {
         claude: 'claude-sonnet-5-5',
@@ -128,6 +129,9 @@
     const CELL_CAP = 240;
 
     const PROVIDERS = {
+        netsuite:  { label: 'NetSuite AI',                   kind: 'netsuite',      baseUrl: '', model: 'google.gemini-3.8-flash', needsKey: false,
+                     models: ['google.gemini-3.8-flash', 'openai.gpt-oss-120b', 'cohere.command-a-03-2025', 'google.gemini-3.1-flash-lite'],
+                     help: { site: '', keys: '', docs: '', models: '' } },
         claude:    { label: 'Claude',                        kind: 'claude',        baseUrl: 'https://api.anthropic.com/v1/messages', model: 'claude-opus-5-5', needsKey: true,
                      models: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5', 'claude-fable-5-1', 'claude-opus-5', 'claude-opus-4-8'],
                      help: { site: 'https://console.anthropic.com/', keys: 'https://console.anthropic.com/settings/keys', docs: 'https://platform.claude.com/docs/en/api/messages', models: 'https://platform.claude.com/docs/en/about-claude/models/overview' } },
@@ -169,9 +173,13 @@
                      help: { site: '', keys: '', docs: '', models: '' } }
     };
 
+    const ACCT_LEGADO = PANEL_MODE ? String((chrome.runtime && chrome.runtime.id) || '').toLowerCase() : '';
     function getNsAccountId() {
-        const m = location.hostname.match(/^([a-z0-9]+(?:[-_][a-z0-9]+)*)\./i);
-        return m ? m[1].toLowerCase() : location.hostname.toLowerCase();
+        let host = location.hostname;
+        try { const o = pageOrigin(); if (o) host = new URL(o).hostname; } catch (e) { }
+        if (!/\.netsuite\.com$/i.test(host)) return '';
+        const m = host.match(/^([a-z0-9]+(?:[-_][a-z0-9]+)*)\./i);
+        return m ? m[1].toLowerCase() : host.toLowerCase();
     }
 
     function nsftAiOriginPattern(url) {
@@ -502,7 +510,7 @@
     function chatList(mode) {
         const acct = getNsAccountId();
         return chatIndex().then((idx) => idx
-            .filter((c) => c && c.acct === acct && c.mode === mode)
+            .filter((c) => c && (c.acct === acct || (ACCT_LEGADO && c.acct === ACCT_LEGADO)) && c.mode === mode)
             .sort((a, b) => (b.touched || 0) - (a.touched || 0)));
     }
 
@@ -606,7 +614,8 @@
             try {
                 chrome.storage.local.get([SCHEMA_INDEX_KEY], (items) => {
                     const accountId = getNsAccountId();
-                    const index = ((items && items[SCHEMA_INDEX_KEY]) || {})[accountId] || {};
+                    const todos = (items && items[SCHEMA_INDEX_KEY]) || {};
+                    const index = todos[accountId] || (ACCT_LEGADO && todos[ACCT_LEGADO]) || {};
                     const tables = Object.keys(index);
                     if (!tables.length) { resolve(''); return; }
 
@@ -1146,6 +1155,517 @@
         return { raw: s };
     }
 
+    const NS_AI = {
+        script: 'customscript_nsft_ai_netsuite',
+        deploy: 'customdeploy_nsft_ai_netsuite',
+        scriptIdShort: '_nsft_ai_netsuite',
+        file: 'nsft_ai_netsuite_rl.js',
+        path: 'scripts/netsuite/nsft_ai_netsuite_rl.js',
+        folder: -15,
+        timeoutMs: 180000
+    };
+
+    let _nsAiVerLocal = null;
+    function nsAiVersionLocal() {
+        if (!_nsAiVerLocal) {
+            _nsAiVerLocal = fetch(chrome.runtime.getURL(NS_AI.path))
+                .then((r) => r.text())
+                .then((t) => { const m = /const VERSION = (\d+);/.exec(t); return m ? Number(m[1]) : 1; })
+                .catch(() => 1);
+        }
+        return _nsAiVerLocal;
+    }
+    const NS_AI_MAXTOK = { 'openai.gpt-oss-120b': 16000 };
+    const NS_AI_MAXTOK_DEF = 4000;
+
+    function nsAiUrl() {
+        const base = pageOrigin();
+        if (!base) return null;
+        return base + '/app/site/hosting/restlet.nl?script=' + NS_AI.script + '&deploy=' + NS_AI.deploy;
+    }
+
+    async function nsAiCall(body) {
+        const url = nsAiUrl();
+        if (!url) return { ok: false, code: 'no_tab' };
+        let res;
+        try {
+            res = await Promise.race([
+                nsFetch(url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                }),
+                new Promise((_, ko) => setTimeout(() => ko(new Error('timeout')), NS_AI.timeoutMs))
+            ]);
+        } catch (e) {
+            const m = String((e && e.message) || e);
+            return { ok: false, code: /no_netsuite_tab/.test(m) ? 'no_tab' : (m === 'timeout' ? 'timeout' : 'net'), message: m };
+        }
+        let txt = '';
+        try { txt = await res.text(); } catch (e) { }
+        if (/SSS_INVALID_SCRIPTLET_ID/.test(txt) || res.status === 404) return { ok: false, code: 'missing' };
+        let j = null;
+        try { j = JSON.parse(txt); } catch (e) { }
+        if (!j) return { ok: false, code: /<html|<!doctype/i.test(txt) ? 'session' : 'http', status: res.status, message: txt.slice(0, 300) };
+        if (j.error && j.error.code) return { ok: false, code: 'http', status: res.status, message: j.error.code + ': ' + (j.error.message || '') };
+        if (!j.ok) return Object.assign({ code: 'llm', message: ((j.error && (j.error.name + ': ' + j.error.message)) || '') }, j);
+        return j;
+    }
+
+    function nsAiErrorText(r) {
+        const t = (k, sust) => chrome.i18n.getMessage(k, sust) || k;
+        switch (r && r.code) {
+            case 'missing': return t('sqlai_ns_err_missing');
+            case 'no_tab': return t('sqlai_ns_err_notab');
+            case 'session': return t('sqlai_ns_err_session');
+            case 'timeout': return t('sqlai_ns_err_timeout');
+            default: return t('sqlai_ns_err_generic', [String((r && r.message) || (r && r.status) || '?')]);
+        }
+    }
+
+    function nsAiTools(tools) {
+        const tipos = {};
+        const defs = (tools || []).map((t) => {
+            const sch = t.input_schema || {};
+            const props = sch.properties || {};
+            const req = Array.isArray(sch.required) ? sch.required : [];
+            tipos[t.name] = {};
+            const parameters = Object.keys(props).map((k) => {
+                const p = props[k] || {};
+                const tipo = String(p.type || 'string');
+                tipos[t.name][k] = tipo;
+                let d = String(p.description || '');
+                if (Array.isArray(p.enum)) d += ' One of: ' + p.enum.join(', ') + '.';
+                if (tipo === 'object' || tipo === 'array') {
+                    d += ' Pass it as a JSON-encoded ' + tipo + ' inside this string.';
+                    if (p.items) d += ' Item shape: ' + JSON.stringify(p.items).slice(0, 1500);
+                } else if (tipo !== 'string') {
+                    d += ' (' + tipo + ')';
+                }
+                d += req.indexOf(k) !== -1 ? ' Required.' : ' Optional.';
+                return { name: k, description: d.trim(), type: 'STRING' };
+            });
+            return { name: t.name, description: String(t.description || ''), parameters: parameters };
+        });
+        return { defs: defs, tipos: tipos };
+    }
+
+    function nsAiDecode(tipos, name, params) {
+        const t = tipos[name] || {};
+        const out = {};
+        Object.keys(params || {}).forEach((k) => {
+            let v = params[k];
+            const tipo = t[k];
+            if (typeof v === 'string') {
+                const s = v.trim();
+                if (tipo && tipo !== 'string' && !s) return;
+                if (tipo === 'object' || tipo === 'array') {
+                    try { v = JSON.parse(s); } catch (e) { }
+                } else if (tipo === 'integer' || tipo === 'number') {
+                    const n = Number(s);
+                    if (isFinite(n)) v = (tipo === 'integer') ? Math.round(n) : n;
+                } else if (tipo === 'boolean') {
+                    if (/^(true|false)$/i.test(s)) v = /^true$/i.test(s);
+                }
+            }
+            out[k] = v;
+        });
+        return out;
+    }
+
+    function nsAiEncode(input) {
+        const out = {};
+        Object.keys(input || {}).forEach((k) => {
+            const v = input[k];
+            out[k] = (v != null && typeof v === 'object') ? JSON.stringify(v) : String(v == null ? '' : v);
+        });
+        return out;
+    }
+
+    function nsAiBlocks(m) {
+        return Array.isArray(m && m.content) ? m.content : [{ type: 'text', text: String((m && m.content) || '') }];
+    }
+    function nsAiResultText(b) {
+        const c = typeof b.content === 'string' ? b.content : JSON.stringify(b.content);
+        return (b.is_error ? 'ERROR: ' : '') + c;
+    }
+    const nsAiTexto = (bl) => bl.filter((b) => b.type === 'text').map((b) => b.text || '').join('');
+
+    function nsAiMessages(messages, aplanarTodo) {
+        const msgs = messages || [];
+        const esPregunta = (m) => m.role === 'user' && !nsAiBlocks(m).some((b) => b.type === 'tool_result');
+        let corte = -1;
+        for (let i = msgs.length - 1; i >= 0; i--) { if (esPregunta(msgs[i])) { corte = i; break; } }
+        const hist = [];
+        const aBot = (text) => {
+            if (!text) return;
+            const last = hist[hist.length - 1];
+            if (last && last.role === 'CHATBOT' && !last.toolCalls) last.text += '\n\n' + text;
+            else hist.push({ role: 'CHATBOT', text: text });
+        };
+        const hasta = Math.max(corte, 0);
+        for (let i = 0; i < hasta; i++) {
+            const m = msgs[i];
+            if (m.role === 'assistant') aBot(nsAiTexto(nsAiBlocks(m)).trim());
+            else if (esPregunta(m)) hist.push({ role: 'USER', text: nsAiTexto(nsAiBlocks(m)) });
+        }
+        if (corte < 0) {
+            return { prompt: 'Answer the user\'s last request now.', chatHistory: hist, toolResults: [] };
+        }
+        if (aplanarTodo) {
+            const datos = msgs.slice(corte + 1)
+                .filter((m) => m.role === 'user')
+                .map((m) => nsAiBlocks(m).filter((b) => b.type === 'tool_result' && !b.is_error).map((b) => nsAiResultText(b).slice(0, 6000)).join('\n'))
+                .filter(Boolean);
+            let prompt = nsAiTexto(nsAiBlocks(msgs[corte]));
+            if (datos.length) prompt += '\n\nData already retrieved from the account for this question, as JSON. Answer with it:\n' + datos.join('\n');
+            return { prompt: prompt, chatHistory: hist, toolResults: [] };
+        }
+        const pregunta = nsAiTexto(nsAiBlocks(msgs[corte]));
+        const resto = msgs.slice(corte + 1);
+        if (!resto.length) return { prompt: pregunta, chatHistory: hist, toolResults: [] };
+        hist.push({ role: 'USER', text: pregunta });
+        const llamadas = {};
+        let toolResults = [];
+        resto.forEach((m, idx) => {
+            const bl = nsAiBlocks(m);
+            if (m.role === 'assistant') {
+                const tc = bl.filter((b) => b.type === 'tool_use').map((b) => {
+                    const c = { id: b.id, name: b.name, parameters: nsAiEncode(b.input) };
+                    llamadas[b.id] = c;
+                    return c;
+                });
+                const e = { role: 'CHATBOT', text: nsAiTexto(bl) };
+                if (tc.length) e.toolCalls = tc;
+                hist.push(e);
+            } else {
+                const tr = bl.filter((b) => b.type === 'tool_result').map((b) => ({
+                    call: llamadas[b.tool_use_id] || { id: b.tool_use_id, name: '', parameters: {} },
+                    outputs: [{ result: nsAiResultText(b) }]
+                }));
+                if (idx === resto.length - 1) toolResults = tr;
+                else hist.push({ role: 'TOOL', text: '', toolResults: tr });
+            }
+        });
+        return { prompt: '', chatHistory: hist, toolResults: toolResults };
+    }
+
+    const _nsTiempo = { ms: 0 };
+    async function askNetSuite(payload) {
+        const cuenta = (res) => { if (!payload.reqId && res && Number(res.ms) > 0) _nsTiempo.ms += Number(res.ms); };
+        const herr = nsAiTools(payload.tools);
+        const conv = nsAiMessages(payload.messages, false);
+        const techo = NS_AI_MAXTOK[payload.model] || NS_AI_MAXTOK_DEF;
+        const base = {
+            modelFamily: payload.model,
+            preamble: payload.system || '',
+            modelParameters: { maxTokens: Math.min(techo, Math.max(1500, payload.maxTokens || 4000)) },
+            timeout: 150000
+        };
+        const opts = Object.assign({}, base, { prompt: conv.prompt, chatHistory: conv.chatHistory });
+        if (herr.defs.length) opts.tools = herr.defs;
+        if (conv.toolResults.length) opts.toolResults = conv.toolResults;
+
+        let r = await nsAiCall({ op: 'chat', options: opts });
+        cuenta(r);
+        let data = r.ok ? r.data : null;
+        const conocidas = new Set(herr.defs.map((d) => d.name));
+        let llamadas = data ? (data.toolCalls || []).filter((c) => conocidas.has(c.name)) : [];
+
+        const sinNada = data && !llamadas.length && !String(data.text || '').trim();
+        const rotoConHerr = !r.ok && r.code === 'llm' && herr.defs.length;
+        if (sinNada || rotoConHerr) {
+            const plano = nsAiMessages(payload.messages, true);
+            const r2 = await nsAiCall({ op: 'chat', options: Object.assign({}, base, { prompt: plano.prompt, chatHistory: plano.chatHistory }) });
+            cuenta(r2);
+            if (r2.ok) { r = r2; data = r2.data; llamadas = []; }
+        }
+        if (!r.ok) return { ok: false, error: nsAiErrorText(r), status: r.status };
+
+        const u = data.usage || {};
+        const toolCalls = llamadas.map((c, i) => ({
+            id: c.id || ('nsai_' + Date.now().toString(36) + '_' + i),
+            name: c.name,
+            input: nsAiDecode(herr.tipos, c.name, c.parameters)
+        }));
+        return {
+            ok: true,
+            text: String(data.text || ''),
+            toolCalls: toolCalls,
+            stopReason: toolCalls.length ? 'tool_use' : 'end',
+            truncated: false,
+            usage: { in: u.promptTokens || 0, out: u.completionTokens || 0, total: u.totalTokens || ((u.promptTokens || 0) + (u.completionTokens || 0)) }
+        };
+    }
+
+    let _nsAiCache = null;
+    const _nsAiOyentes = [];
+    async function nsAiStatus() {
+        const r = await nsAiCall({ op: 'info' });
+        let st;
+        if (r.ok) {
+            const d = r.data || {};
+            const modelos = Object.keys(d.models || {}).map((k) => d.models[k]).filter((v, i, a) => a.indexOf(v) === i);
+            const local = await nsAiVersionLocal();
+            st = { state: (r.version || 0) < local ? 'old' : 'ok', version: r.version, latest: local, models: modelos, free: d.freeUsage };
+        } else {
+            st = { state: r.code === 'missing' ? 'missing' : 'error', code: r.code, message: nsAiErrorText(r) };
+        }
+        if (st.code !== 'no_tab') {
+            const antes = _nsAiCache && _nsAiCache.origin === pageOrigin() ? _nsAiCache.st.state : null;
+            _nsAiCache = { origin: pageOrigin(), st: st, ts: Date.now() };
+            if (antes !== st.state) _nsAiOyentes.forEach((fn) => { try { fn(st); } catch (e) { } });
+        }
+        return st;
+    }
+    function nsAiStatusReciente(maxMs) {
+        const c = _nsAiCache;
+        if (c && c.origin === pageOrigin() && Date.now() - c.ts < maxMs) return Promise.resolve(c.st);
+        return nsAiStatus();
+    }
+    function abrirFaqIa(ancla) {
+        const url = chrome.runtime.getURL('popup/ai_faq.html') + (typeof ancla === 'string' && ancla ? '#' + ancla : '');
+        try { window.open(url, '_blank', 'noopener'); } catch (e) { }
+    }
+
+    function nsAiPuntos(claves) {
+        const ul = document.createElement('ul');
+        ul.className = 'nsft-ai-nspts';
+        (claves || ['sqlai_ns_pt_key', 'sqlai_ns_pt_models', 'sqlai_ns_pt_once']).forEach((k) => {
+            const li = document.createElement('li');
+            li.textContent = chrome.i18n.getMessage(k) || k;
+            ul.appendChild(li);
+        });
+        return ul;
+    }
+
+    const NS_AI_REPO = 'https://github.com/IrodoriCiel/netsuite-full-tools';
+    function nsAiNota() {
+        const m = (k) => chrome.i18n.getMessage(k) || k;
+        const caja = document.createElement('div');
+        caja.className = 'nsft-ai-hint-note';
+        const lista = document.createElement('div');
+        nsAiPintaConfirma(lista, m('sqlai_ns_note_what'));
+        const enlaces = document.createElement('div');
+        enlaces.className = 'nsft-ai-hint-notelinks';
+        const enlace = (texto, url) => {
+            const a = document.createElement('a');
+            a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+            a.textContent = texto;
+            enlaces.appendChild(a);
+        };
+        enlace(m('sqlai_ns_note_repo'), NS_AI_REPO);
+        enlace(m('sqlai_ns_note_file'), NS_AI_REPO + '/blob/main/' + NS_AI.path);
+        enlace(m('sqlai_ns_note_local'), chrome.runtime.getURL(NS_AI.path));
+        caja.appendChild(lista); caja.appendChild(enlaces);
+        return caja;
+    }
+
+    function nsAiPintaConfirma(caja, texto) {
+        caja.textContent = '';
+        let ul = null;
+        String(texto || '').split('\n').forEach((linea) => {
+            const viñeta = /^\s*·\s*/.exec(linea);
+            if (viñeta) {
+                if (!ul) { ul = document.createElement('ul'); caja.appendChild(ul); }
+                const li = document.createElement('li');
+                li.textContent = linea.slice(viñeta[0].length);
+                ul.appendChild(li);
+                return;
+            }
+            ul = null;
+            if (!linea.trim()) return;
+            const p = document.createElement('p');
+            p.textContent = linea;
+            caja.appendChild(p);
+        });
+    }
+
+    function nsAiBarra() {
+        const caja = document.createElement('div');
+        caja.className = 'nsft-ai-progbar';
+        caja.hidden = true;
+        const arriba = document.createElement('div');
+        arriba.className = 'nsft-ai-progbar-top';
+        const texto = document.createElement('span');
+        const cuenta = document.createElement('span');
+        cuenta.className = 'nsft-ai-progbar-n';
+        arriba.appendChild(texto); arriba.appendChild(cuenta);
+        const pista = document.createElement('div');
+        pista.className = 'nsft-ai-progbar-track';
+        pista.setAttribute('role', 'progressbar');
+        pista.setAttribute('aria-valuemin', '0');
+        const relleno = document.createElement('div');
+        relleno.className = 'nsft-ai-progbar-fill';
+        pista.appendChild(relleno);
+        caja.appendChild(arriba); caja.appendChild(pista);
+        return {
+            el: caja,
+            set(txt, n, total) {
+                if (!txt) { caja.hidden = true; return; }
+                caja.hidden = false;
+                texto.textContent = txt;
+                const ok = n > 0 && total > 0;
+                cuenta.textContent = ok ? n + '/' + total : '';
+                const pct = ok ? Math.min(100, ((n - 0.5) / total) * 100) : 10;
+                relleno.style.width = pct + '%';
+                pista.setAttribute('aria-valuemax', String(total || 1));
+                pista.setAttribute('aria-valuenow', String(n || 0));
+                pista.setAttribute('aria-valuetext', txt);
+            }
+        };
+    }
+
+    function nsAiActivar() {
+        return loadAll().then((a) => {
+            if (a.configs && a.configs.netsuite) return setActiveProvider('netsuite');
+            const p = PROVIDERS.netsuite;
+            return saveProviderConfig('netsuite', { model: p.model, models: p.models.slice(), hidden: [], disabled: false });
+        });
+    }
+
+    async function nsAiForm(path) {
+        const res = await nsFetch(pageOrigin() + path, { credentials: 'same-origin' });
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const f = doc.forms.main_form || doc.querySelector('form[name="main_form"]');
+        if (!f) throw new Error(chrome.i18n.getMessage('sqlai_ns_inst_noform') || 'NetSuite did not return the form.');
+        const fields = [];
+        let submitter = 'Save';
+        const botones = {};
+        for (const e of f.elements) {
+            if (!e.name || e.disabled) continue;
+            const t = String(e.type || '').toLowerCase();
+            if (t === 'submit') { if (e.name === 'submitter') submitter = e.value || submitter; else botones[e.name] = e.value || ''; continue; }
+            if (t === 'file' || t === 'button' || t === 'reset' || t === 'image') continue;
+            if ((t === 'checkbox' || t === 'radio') && !e.checked) continue;
+            if (e.tagName === 'SELECT') { Array.from(e.selectedOptions).forEach((o) => fields.push([e.name, o.value])); continue; }
+            fields.push([e.name, e.value]);
+        }
+        fields.push(['submitter', submitter]);
+        return {
+            action: f.getAttribute('action') || path.split('?')[0],
+            fields: fields,
+            botones: botones,
+            multipart: /multipart/i.test(f.getAttribute('enctype') || ''),
+            set(name, value) {
+                for (let i = fields.length - 1; i >= 0; i--) if (fields[i][0] === name) fields.splice(i, 1);
+                fields.push([name, String(value)]);
+            }
+        };
+    }
+    async function nsAiPostForm(form, archivo, multipart) {
+        let body, tipo;
+        if (archivo || multipart) {
+            const b = '----nsft' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+            const partes = form.fields.map(([k, v]) => '--' + b + '\r\nContent-Disposition: form-data; name="' + k + '"\r\n\r\n' + v + '\r\n');
+            if (archivo) partes.push('--' + b + '\r\nContent-Disposition: form-data; name="mediafile"; filename="' + archivo.name + '"\r\nContent-Type: application/javascript\r\n\r\n' + archivo.text + '\r\n');
+            body = partes.join('') + '--' + b + '--\r\n';
+            tipo = 'multipart/form-data; boundary=' + b;
+        } else {
+            body = new URLSearchParams(form.fields).toString();
+            tipo = 'application/x-www-form-urlencoded';
+        }
+        const res = await nsFetch(pageOrigin() + form.action, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': tipo }, body: body });
+        const html = await res.text();
+        const m = /<div[^>]+class="[^"]*(?:uir-message-text|errorbox|uir-alert-text)[^"]*"[^>]*>([\s\S]{0,400}?)<\/div>/i.exec(html);
+        return m ? m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+    }
+    async function nsAiOne(sql) {
+        const r = await runSuiteQL(sql, 1);
+        const filas = (r && (r.data || r.rows)) || [];
+        return filas[0] || null;
+    }
+    async function nsAiInstall(onStep) {
+        const PASOS = ['sqlai_ns_inst_file', 'sqlai_ns_inst_script', 'sqlai_ns_inst_deploy', 'sqlai_ns_inst_check'];
+        const paso = (k) => { try { onStep && onStep(chrome.i18n.getMessage(k) || k, PASOS.indexOf(k) + 1, PASOS.length); } catch (e) { } };
+        if (!pageOrigin()) throw new Error(chrome.i18n.getMessage('sqlai_ns_err_notab'));
+        const src = await fetch(chrome.runtime.getURL(NS_AI.path)).then((r) => r.text());
+
+        paso('sqlai_ns_inst_file');
+        let fila = await nsAiOne("SELECT id FROM file WHERE name = '" + NS_AI.file + "' AND folder = " + NS_AI.folder);
+        const fForm = await nsAiForm(fila ? '/app/common/media/mediaitem.nl?id=' + fila.id + '&e=T' : '/app/common/media/mediaitem.nl?folder=' + NS_AI.folder);
+        fForm.set('folder', NS_AI.folder);
+        fForm.set('name', NS_AI.file);
+        let aviso = await nsAiPostForm(fForm, { name: NS_AI.file, text: src });
+        fila = await nsAiOne("SELECT id FROM file WHERE name = '" + NS_AI.file + "' AND folder = " + NS_AI.folder);
+        if (!fila) throw new Error(aviso || chrome.i18n.getMessage('sqlai_ns_inst_fail_file'));
+        const fileId = fila.id;
+
+        paso('sqlai_ns_inst_script');
+        let script = await nsAiOne("SELECT id FROM script WHERE LOWER(scriptid) = '" + NS_AI.script + "'");
+        if (!script) {
+            const sForm = await nsAiForm('/app/common/scripting/script.nl?scriptfile=' + fileId + '&scripttype=RESTLET&apiversion=2.1');
+            sForm.set('name', 'NSFT · NetSuite AI');
+            sForm.set('scriptid', NS_AI.scriptIdShort);
+            sForm.set('scriptfile', fileId);
+            sForm.set('postfunction', 'post');
+            sForm.set('description', 'NetSuite Full Tools: N/llm bridge for the AI Assistant. Read-only, runs no code.');
+            aviso = await nsAiPostForm(sForm);
+            script = await nsAiOne("SELECT id FROM script WHERE LOWER(scriptid) = '" + NS_AI.script + "'");
+            if (!script) throw new Error(aviso || chrome.i18n.getMessage('sqlai_ns_inst_fail_script'));
+        }
+
+        paso('sqlai_ns_inst_deploy');
+        let dep = await nsAiOne("SELECT scriptid, isdeployed, status FROM scriptdeployment WHERE LOWER(scriptid) = '" + NS_AI.deploy + "'");
+        if (dep && (String(dep.isdeployed).toUpperCase() !== 'T' || String(dep.status).toUpperCase() !== 'RELEASED')) {
+            throw new Error(chrome.i18n.getMessage('sqlai_ns_inst_dep_off'));
+        }
+        if (!dep) {
+            const dForm = await nsAiForm('/app/common/scripting/scriptrecord.nl?script=' + script.id);
+            dForm.set('title', 'NSFT · NetSuite AI');
+            dForm.set('scriptid', NS_AI.scriptIdShort);
+            dForm.set('isdeployed', 'T');
+            dForm.set('status', 'RELEASED');
+            dForm.set('loglevel', 'ERROR');
+            dForm.set('allroles', 'T');
+            aviso = await nsAiPostForm(dForm);
+            dep = await nsAiOne("SELECT scriptid FROM scriptdeployment WHERE LOWER(scriptid) = '" + NS_AI.deploy + "'");
+            if (!dep) throw new Error(aviso || chrome.i18n.getMessage('sqlai_ns_inst_fail_deploy'));
+        }
+
+        paso('sqlai_ns_inst_check');
+        return nsAiStatus();
+    }
+
+    async function nsAiBorraFicha(path, boton, multipart) {
+        const f = await nsAiForm(path);
+        if (!(boton in f.botones)) throw new Error(chrome.i18n.getMessage('sqlai_ns_inst_noform') || 'NetSuite did not return the form.');
+        for (let i = f.fields.length - 1; i >= 0; i--) if (f.fields[i][0] === 'submitter') f.fields.splice(i, 1);
+        f.fields.push([boton, f.botones[boton]]);
+        return nsAiPostForm(f, null, multipart && f.multipart);
+    }
+    async function nsAiUninstall(onStep) {
+        const PASOS = ['sqlai_ns_un_deploy', 'sqlai_ns_un_script', 'sqlai_ns_un_file', 'sqlai_ns_inst_check'];
+        const paso = (k) => { try { onStep && onStep(chrome.i18n.getMessage(k) || k, PASOS.indexOf(k) + 1, PASOS.length); } catch (e) { } };
+        if (!pageOrigin()) throw new Error(chrome.i18n.getMessage('sqlai_ns_err_notab'));
+        const qDep = "SELECT primarykey AS id FROM scriptdeployment WHERE LOWER(scriptid) = '" + NS_AI.deploy + "'";
+        const qScript = "SELECT id FROM script WHERE LOWER(scriptid) = '" + NS_AI.script + "'";
+        const qFile = "SELECT id FROM file WHERE name = '" + NS_AI.file + "' AND folder = " + NS_AI.folder;
+
+        paso('sqlai_ns_un_deploy');
+        let fila = await nsAiOne(qDep);
+        if (fila) {
+            const aviso = await nsAiBorraFicha('/app/common/scripting/scriptrecord.nl?id=' + fila.id + '&e=T', 'delete');
+            if (await nsAiOne(qDep)) throw new Error(aviso || chrome.i18n.getMessage('sqlai_ns_un_fail_deploy'));
+        }
+        paso('sqlai_ns_un_script');
+        fila = await nsAiOne(qScript);
+        if (fila) {
+            const aviso = await nsAiBorraFicha('/app/common/scripting/script.nl?id=' + fila.id + '&e=T', 'delete');
+            if (await nsAiOne(qScript)) throw new Error(aviso || chrome.i18n.getMessage('sqlai_ns_un_fail_script'));
+        }
+        paso('sqlai_ns_un_file');
+        fila = await nsAiOne(qFile);
+        if (fila) {
+            const aviso = await nsAiBorraFicha('/app/common/media/mediaitem.nl?id=' + fila.id + '&e=T', 'delete_media', true);
+            if (await nsAiOne(qFile)) throw new Error(aviso || chrome.i18n.getMessage('sqlai_ns_un_fail_file'));
+        }
+        paso('sqlai_ns_inst_check');
+        return nsAiStatus();
+    }
+
     function sendToBackground(message) {
         return new Promise((resolve) => {
             let done = false;
@@ -1168,6 +1688,7 @@
     }
 
     async function askAI(payload) {
+        if (payload.kind === 'netsuite') return askNetSuite(payload);
         const message = {
             action: 'nsftAiChat',
             provider: payload.kind,
@@ -1467,6 +1988,14 @@
         if (!isFinite(n)) return CTX_MIN;
         return Math.min(CTX_MAX, Math.max(CTX_MIN, n));
     }
+
+    const CTX_SMALLTALK = [
+        '=== Greetings and small talk (overrides everything above) ===',
+        '- If the message is ONLY a greeting, thanks, a farewell or small talk with no question or task',
+        '  (e.g. "hola", "hi", "gracias", "ok", "buenos días"), reply in ONE or TWO short lines in the',
+        '  user\'s language and STOP. Call NO tools, do not look up the open page or the open record, and',
+        '  add no <sql> block or code. Do not volunteer data the user did not ask for.'
+    ].join('\n');
 
     const CTX_FINAL_FORMAT = [
         '=== Final answer format (important) ===',
@@ -1939,7 +2468,8 @@
                 'Active account: ' + getNsAccountId() + '.',
                 advFileContext(),
                 (canAsk ? CTX_ASK_LITE : ''),
-                CTX_FINAL_FORMAT_SSC
+                CTX_FINAL_FORMAT_SSC,
+                CTX_SMALLTALK
             ].filter(Boolean).join(SALTO_CTX);
         }
         if (_sscTurn) {
@@ -1950,7 +2480,8 @@
                 sscModulesContext(),
                 (schemaHint ? schemaHint : ''),
                 (canAsk ? (level <= 2 ? CTX_ASK_LITE : CTX_ASK) : ''),
-                CTX_FINAL_FORMAT_SSC
+                CTX_FINAL_FORMAT_SSC,
+                CTX_SMALLTALK
             ].filter(Boolean).join('\n');
         }
         const body = (customBody || '').trim() || defaultLevelBody(level);
@@ -1967,7 +2498,8 @@
             (_chatMode ? CTX_PAGE_CHAT : ''),
             (schemaHint ? schemaHint : ''),
             (canAsk ? (level <= 2 ? CTX_ASK_LITE : CTX_ASK) : ''),
-            (_chatMode ? CTX_FINAL_FORMAT_CHAT : CTX_FINAL_FORMAT)
+            (_chatMode ? CTX_FINAL_FORMAT_CHAT : CTX_FINAL_FORMAT),
+            CTX_SMALLTALK
         ].filter(Boolean).join('\n');
     }
 
@@ -2222,7 +2754,7 @@
             try {
                 chrome.storage.local.get({ [ACCT_NOTES_KEY]: {} }, (it) => {
                     const m = (it && it[ACCT_NOTES_KEY]) || {};
-                    resolve(String(m[getNsAccountId()] || '').trim());
+                    resolve(String(m[getNsAccountId()] || (ACCT_LEGADO && m[ACCT_LEGADO]) || '').trim());
                 });
             } catch (e) { resolve(''); }
         });
@@ -2233,6 +2765,7 @@
                 chrome.storage.local.get({ [ACCT_NOTES_KEY]: {} }, (it) => {
                     const m = (it && it[ACCT_NOTES_KEY]) || {};
                     const k = getNsAccountId();
+                    if (!k) { resolve(false); return; }
                     if (String(txt || '').trim()) m[k] = String(txt).slice(0, 4000); else delete m[k];
                     chrome.storage.local.set({ [ACCT_NOTES_KEY]: m }, () => resolve(true));
                 });
@@ -2911,6 +3444,7 @@
     }
 
     const PROVIDER_LOGOS = {
+        netsuite:   { color: '#125580', text: 'NS' },
         claude:     { color: '#d97757', text: 'C' },
         gemini:     { color: '#4285f4', text: 'G' },
         groq:       { color: '#f55036', text: 'gq' },
@@ -3130,6 +3664,7 @@
         const history = [];
 
         let hasProvider = null;
+        let hayOtrosProv = false;
 
         let activeBaseUrl = '';
 
@@ -3143,9 +3678,7 @@
         let showTokens = false;
         let askFirst = true;
 
-        function openFaq() {
-            try { window.open(chrome.runtime.getURL('popup/ai_faq.html'), '_blank', 'noopener'); } catch (e) { }
-        }
+        function openFaq() { abrirFaqIa(); }
 
         const head = el('div', NS + '-dock-head');
         const dockTitle = el('div', NS + '-dock-title');
@@ -3189,9 +3722,126 @@
             return wrap;
         }
 
+        let nsFalta = false;
+        function pintaNsCard(wrap, modo) {
+            const m = (k, s) => chrome.i18n.getMessage(k, s) || k;
+            wrap.innerHTML = '';
+            wrap.classList.add(NS + '-hint-ns');
+            const badge = el('div', NS + '-hint-badge');
+            badge.innerHTML = SPARK_SVG;
+            wrap.appendChild(badge);
+            const sinPuente = !!(_nsAiCache && _nsAiCache.origin === pageOrigin() && _nsAiCache.st.state === 'missing');
+            const caso = (modo === 'missing' && hayOtrosProv) ? 'missing_otros'
+                : ((modo === 'none' && sinPuente) ? 'missing' : modo);
+            wrap.appendChild(el('div', NS + '-hint-title', m('sqlai_ns_hint_title_' + caso)));
+            wrap.appendChild(el('div', NS + '-hint-sub', m('sqlai_ns_hint_sub_' + caso)));
+            const optNs = el('div', NS + '-hint-opt');
+            const headNs = el('div', NS + '-hint-opthead');
+            headNs.appendChild(makeLogo('netsuite'));
+            headNs.appendChild(el('span', null, 'NetSuite AI'));
+            headNs.appendChild(el('span', NS + '-hint-tag', m('sqlai_opt_ns_tag')));
+            optNs.appendChild(headNs);
+            optNs.appendChild(nsAiPuntos());
+            if (modo !== 'old') {
+                const que = document.createElement('details');
+                que.className = NS + '-hint-what';
+                que.appendChild(el('summary', null, m('sqlai_opt_ns_what')));
+                que.appendChild(nsAiNota());
+                optNs.appendChild(que);
+            }
+            wrap.appendChild(optNs);
+            const aviso = el('div', NS + '-hint-confirm');
+            aviso.hidden = true;
+            const barra = nsAiBarra();
+            const prog = el('div', NS + '-hint-prog');
+            prog.hidden = true;
+            const botones = el('div', NS + '-hint-btns');
+            const ctaTxt = m(modo === 'old' ? 'sqlai_ns_update' : (modo === 'none' ? 'sqlai_ns_use' : 'sqlai_ns_install'));
+            const cta = el('button', NS + '-hint-cta', ctaTxt); cta.type = 'button';
+            const no = el('button', NS + '-hint-alt', m('sqlai_ns_cancel')); no.type = 'button'; no.hidden = true;
+            botones.appendChild(cta); botones.appendChild(no);
+            const faq = el('button', NS + '-hint-faq', m('sqlai_opt_faq')); faq.type = 'button';
+            faq.addEventListener('click', () => abrirFaqIa('netsuite-ai'));
+            botones.appendChild(faq);
+            optNs.appendChild(aviso); optNs.appendChild(barra.el); optNs.appendChild(prog); optNs.appendChild(botones);
+
+            const otro = el('button', NS + '-hint-cta', m('sqlai_opt_key_cta')); otro.type = 'button';
+            otro.addEventListener('click', openSettings);
+            if (modo !== 'old') {
+                const optKey = el('div', NS + '-hint-opt');
+                const headKey = el('div', NS + '-hint-opthead');
+                const logos = el('span', NS + '-hint-logos');
+                ['claude', 'gemini', 'openai', 'deepseek'].forEach((pk) => logos.appendChild(makeLogo(pk)));
+                headKey.appendChild(logos);
+                headKey.appendChild(el('span', null, m('sqlai_opt_key_title')));
+                optKey.appendChild(headKey);
+                optKey.appendChild(nsAiPuntos(['sqlai_opt_key_pt_what', 'sqlai_opt_key_pt_all', 'sqlai_opt_key_pt_cost']));
+                const btnsKey = el('div', NS + '-hint-btns');
+                btnsKey.appendChild(otro);
+                const faqKey = el('button', NS + '-hint-faq', m('sqlai_opt_faq')); faqKey.type = 'button';
+                faqKey.addEventListener('click', openFaq);
+                btnsKey.appendChild(faqKey);
+                optKey.appendChild(btnsKey);
+                wrap.appendChild(optKey);
+            }
+
+            let pidiendo = false;
+            const muestra = (txt, error) => { prog.textContent = txt; prog.hidden = !txt; prog.classList.toggle(NS + '-hint-prog-err', !!error); };
+            no.addEventListener('click', () => { pidiendo = false; aviso.hidden = true; no.hidden = true; cta.textContent = ctaTxt; });
+            cta.addEventListener('click', async () => {
+                if (!pidiendo) {
+                    if (modo === 'none') {
+                        cta.disabled = true;
+                        muestra(m('sqlai_ns_checking'));
+                        const st = await nsAiStatus();
+                        cta.disabled = false;
+                        if (st.state === 'ok') { muestra(''); await nsAiActivar(); refreshBar(); return; }
+                        if (st.state !== 'missing' && st.state !== 'old') { muestra(st.message || m('sqlai_ns_err_generic', ['?']), true); return; }
+                        muestra('');
+                    }
+                    pidiendo = true;
+                    nsAiPintaConfirma(aviso, m(modo === 'old' ? 'sqlai_ns_confirm_update' : 'sqlai_ns_confirm_install', [getNsAccountId() || '']));
+                    aviso.hidden = false;
+                    no.hidden = false;
+                    cta.textContent = m('sqlai_ns_confirm_yes');
+                    return;
+                }
+                cta.disabled = true; no.disabled = true; otro.disabled = true;
+                aviso.hidden = true;
+                botones.hidden = true;
+                let st;
+                try {
+                    muestra('');
+                    st = await nsAiInstall((txt, n, total) => barra.set(txt, n, total));
+                } catch (e) {
+                    st = { state: 'error', message: m('sqlai_ns_inst_fail', [String((e && e.message) || e)]) };
+                }
+                cta.disabled = false; no.disabled = false; otro.disabled = false;
+                barra.set('');
+                botones.hidden = false;
+                if (st && st.state === 'ok') { muestra(''); await nsAiActivar(); refreshBar(); return; }
+                pidiendo = false; no.hidden = true; cta.textContent = ctaTxt;
+                muestra((st && st.message) || m('sqlai_ns_err_generic', ['?']), true);
+            });
+        }
+
         function paintHint(wrap) {
             wrap.innerHTML = '';
+            wrap.classList.remove(NS + '-hint-ns');
+            nsFalta = false;
             if (hasProvider === null) return;
+            if (!hasProvider && pageOrigin()) { pintaNsCard(wrap, 'none'); return; }
+            if (hasProvider && activeProvKey === 'netsuite' && pageOrigin()) {
+                nsAiStatusReciente(60000).then((st) => {
+                    if (!wrap.isConnected || activeProvKey !== 'netsuite') return;
+                    if (st.state !== 'missing' && st.state !== 'old') return;
+                    pintaNsCard(wrap, st.state);
+                    nsFalta = true;
+                    ta.disabled = true;
+                    send.disabled = true;
+                    ta.placeholder = chrome.i18n.getMessage('sqlai_ns_ph_missing');
+                }).catch(() => { });
+            }
             const badge = el('div', NS + '-hint-badge' + (hasProvider ? '' : ' ' + NS + '-hint-warn'));
             badge.innerHTML = hasProvider ? SPARK_SVG : PLUG_SVG;
             wrap.appendChild(badge);
@@ -4209,6 +4859,16 @@
         footbar.appendChild(menu); footbar.appendChild(cfgMenu);
         d.appendChild(footbar);
 
+        let nsMenuPreguntado = false;
+        function nsEstadoMenu() {
+            const c = _nsAiCache;
+            if (c && c.origin === pageOrigin()) return c.st.state;
+            if (!nsMenuPreguntado && PROVIDERS.netsuite) {
+                nsMenuPreguntado = true;
+                nsAiStatusReciente(10 * 60 * 1000).then(() => { if (_nsAiCache) refreshBar(); }, () => {});
+            }
+            return null;
+        }
         function refreshBar() {
             loadAll().then((a) => {
                 showSteps = a.showSteps;
@@ -4216,9 +4876,14 @@
                 askFirst = a.askFirst;
                 curLevel = clampCtxLevel(a.ctxLevel);
                 paintCfg();
-                const configured = Object.keys(PROVIDERS).filter((pk) => isConfigured(pk, a.configs));
+                const nsEstado = nsEstadoMenu();
+                const nsInstalado = nsEstado === 'ok' || nsEstado === 'old';
+                const configured = Object.keys(PROVIDERS).filter((pk) => (pk === 'netsuite')
+                    ? (nsInstalado || (nsEstado !== 'missing' && isConfigured(pk, a.configs)))
+                    : isConfigured(pk, a.configs));
                 const enabled = configured.filter((pk) => !((a.configs[pk] || {}).disabled));
                 hasProvider = enabled.length > 0;
+                hayOtrosProv = enabled.some((pk) => pk !== 'netsuite');
                 combo.innerHTML = '';
                 combo.className = NS + '-provpick' + (hasProvider ? '' : ' ' + NS + '-provpick-warn');
                 if (!hasProvider) {
@@ -4233,6 +4898,10 @@
                 }
                 if ((a.configs[a.active] || {}).disabled) {
                     setActiveProvider(enabled[0]).then(refreshBar);
+                    return;
+                }
+                if (enabled.indexOf(a.active) === -1 && !(a.active === 'netsuite' && nsEstado === 'missing')) {
+                    (enabled[0] === 'netsuite' ? nsAiActivar() : setActiveProvider(enabled[0])).then(refreshBar);
                     return;
                 }
                 const cfg = resolveCfg(a.active, a.configs, a.maxRows);
@@ -4263,7 +4932,8 @@
                         item.appendChild(el('span', NS + '-menucheck', '✓'));
                         item.addEventListener('click', () => {
                             menu.style.display = 'none';
-                            setActiveProvider(pk)
+                            const activa = (pk === 'netsuite' && !(a.configs || {}).netsuite) ? nsAiActivar() : setActiveProvider(pk);
+                            activa
                                 .then(() => setActiveModel(pk, m))
                                 .then(refreshBar);
                         });
@@ -4293,6 +4963,7 @@
         });
         document.addEventListener('click', closeMenus);
         refreshBar();
+        _nsAiOyentes.push(() => { if (combo.isConnected) refreshBar(); });
         refreshProviderBar = refreshBar;
 
         function scrollDown() { conv.scrollTop = conv.scrollHeight; }
@@ -4369,7 +5040,7 @@
         }
 
         function seccionTrabajo(abierta) {
-            const work = el('div', NS + '-work' + (abierta ? ' ' + NS + '-workopen' : ''));
+            const work = el('div', NS + '-work' + (abierta ? ' ' + NS + '-workopen ' + NS + '-workrun' : ''));
             const head = el('button', NS + '-workhead');
             head.type = 'button';
             head.appendChild(el('span', NS + '-workchev', '›'));
@@ -4378,6 +5049,7 @@
             const steps = el('div', NS + '-steps');
             work.appendChild(head); work.appendChild(steps);
             head.addEventListener('click', () => {
+                if (work.classList.contains(NS + '-workrun')) { work.classList.remove(NS + '-workrun'); return; }
                 const abre = !work.classList.contains(NS + '-workopen');
                 work.classList.toggle(NS + '-workopen', abre);
                 head.setAttribute('aria-expanded', abre ? 'true' : 'false');
@@ -4397,7 +5069,10 @@
                     work.classList.add(NS + '-workopen');
                     head.setAttribute('aria-expanded', 'true');
                 },
+                suelta: () => { work.classList.remove(NS + '-workrun'); },
+                pasos: () => cuenta(),
                 cierra: (seg, plegar) => {
+                    work.classList.remove(NS + '-workrun');
                     rotula(seg);
                     if (plegar) { work.classList.remove(NS + '-workopen'); head.setAttribute('aria-expanded', 'false'); }
                 }
@@ -4498,6 +5173,7 @@
 
         function makeCb(refs) {
             const t0 = Date.now();
+            _nsTiempo.ms = 0;
             let esperaUsuario = 0;
             const cronoUsuario = () => {
                 const desde = Date.now();
@@ -4984,8 +5660,18 @@
                     setRunning(false);
                     refs.statusEl.textContent = '● ' + chrome.i18n.getMessage('sqlai_done');
                     const seg = Math.max(1, Math.round((Date.now() - t0 - esperaUsuario) / 1000));
-                    refs.statusEl.appendChild(el('span', NS + '-turncost',
-                        chrome.i18n.getMessage('sqlai_turn_cost', [String(seg), String(pasos || 1)])));
+                    const nPasos = refs.work ? refs.work.pasos() : 0;
+                    refs.statusEl.appendChild(el('span', NS + '-turncost', !nPasos
+                        ? chrome.i18n.getMessage('sqlai_turn_secs', [String(seg)])
+                        : (nPasos === 1
+                            ? chrome.i18n.getMessage('sqlai_turn_cost_one', [String(seg)])
+                            : chrome.i18n.getMessage('sqlai_turn_cost', [String(seg), String(nPasos)]))));
+                    if (_nsTiempo.ms > 0) {
+                        const segNs = (_nsTiempo.ms / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 });
+                        const nsEl = el('span', NS + '-turncost', chrome.i18n.getMessage('sqlai_turn_ns', [segNs]));
+                        nsEl.title = chrome.i18n.getMessage('sqlai_turn_ns_title');
+                        refs.statusEl.appendChild(nsEl);
+                    }
                     if (refs.work) refs.work.cierra(seg, !showSteps);
                     refs.statusEl.className = NS + '-turnstatus ' + NS + '-done';
                     if (showTokens && usage && usage.total) {
@@ -5002,6 +5688,7 @@
                 stopped: () => {
                     if (yaParado) return;
                     yaParado = true;
+                    if (refs.work) refs.work.suelta();
                     if (vivo) {
                         if (vivoRaf) { cancelAnimationFrame(vivoRaf); vivoRaf = 0; }
                         vivo.innerHTML = '';
@@ -5020,9 +5707,10 @@
                         chrome.i18n.getMessage('sqlai_stopped_kept')));
                     persistChat();
                 },
-                error: (msg) => { quitaVivo(); stopStatus(); setRunning(false); paintTokChip(); showError(refs, msg); persistChat(); },
+                error: (msg) => { quitaVivo(); stopStatus(); setRunning(false); if (refs.work) refs.work.suelta(); paintTokChip(); showError(refs, msg); persistChat(); },
                 limitReached: (max, resume) => {
                     stopStatus();
+                    if (refs.work) refs.work.suelta();
                     setRunning(false);
                     paintTokChip();
                     refs.statusEl.innerHTML = '';
@@ -5677,7 +6365,7 @@
                 fila.appendChild(izq);
                 fila.appendChild(ctl);
                 paneConn.appendChild(fila);
-                return { slot: slot, ctl: ctl };
+                return { slot: slot, ctl: ctl, fila: fila };
             }
             const connRotulo = (texto) => el('span', NS + '-connt', texto);
 
@@ -5762,6 +6450,151 @@
             const urlInput = el('input', NS + '-input'); urlInput.type = 'text';
             noAutofill(urlInput);
             filaUrl.ctl.appendChild(urlInput);
+
+            const msg = (k, sust) => chrome.i18n.getMessage(k, sust) || k;
+            const nsBox = el('div', NS + '-nsbox');
+            nsBox.hidden = true;
+            const nsHead = el('div', NS + '-nshead');
+            nsHead.appendChild(el('span', NS + '-nsdot'));
+            const nsEstado = el('div', NS + '-nsstate');
+            nsHead.appendChild(nsEstado);
+            const nsVer = el('span', NS + '-nsver');
+            nsVer.hidden = true;
+            nsHead.appendChild(nsVer);
+            const nsRe = el('button', NS + '-nsre'); nsRe.type = 'button';
+            nsRe.title = msg('sqlai_ns_recheck');
+            nsRe.setAttribute('aria-label', nsRe.title);
+            nsRe.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"></path></svg>';
+            nsHead.appendChild(nsRe);
+            const nsMeta = el('div', NS + '-nsmeta');
+            nsMeta.hidden = true;
+            const nsDesc = el('div', NS + '-nsdesc');
+            nsDesc.appendChild(nsAiPuntos());
+            const nsQue = document.createElement('details');
+            nsQue.className = NS + '-hint-what';
+            nsQue.appendChild(el('summary', null, msg('sqlai_opt_ns_what')));
+            nsQue.appendChild(nsAiNota());
+            nsDesc.appendChild(nsQue);
+            const nsConfirma = el('div', NS + '-nsconfirm');
+            nsConfirma.hidden = true;
+            const nsActs = el('div', NS + '-nsacts');
+            const nsBtn = el('button', NS + '-btn ' + NS + '-primary'); nsBtn.type = 'button';
+            const nsNo = el('button', NS + '-btn', msg('sqlai_ns_cancel')); nsNo.type = 'button'; nsNo.hidden = true;
+            const nsQuita = el('button', NS + '-btn ' + NS + '-nsquita', msg('sqlai_ns_uninstall')); nsQuita.type = 'button'; nsQuita.hidden = true;
+            const nsFaq = el('button', NS + '-nsfaq', msg('sqlai_ns_faq_link')); nsFaq.type = 'button';
+            nsFaq.addEventListener('click', () => abrirFaqIa('netsuite-ai'));
+            nsActs.appendChild(nsBtn); nsActs.appendChild(nsQuita); nsActs.appendChild(nsNo); nsActs.appendChild(nsFaq);
+            const nsBarra = nsAiBarra();
+            nsBox.appendChild(nsHead); nsBox.appendChild(nsBarra.el); nsBox.appendChild(nsMeta); nsBox.appendChild(nsDesc); nsBox.appendChild(nsConfirma); nsBox.appendChild(nsActs);
+            filaProv.fila.after(nsBox);
+
+            function nsFilaMeta(rotulo, valor) {
+                const f = el('div', NS + '-nsrow');
+                f.appendChild(el('span', NS + '-nslbl', rotulo));
+                f.appendChild(valor);
+                nsMeta.appendChild(f);
+            }
+
+            let nsSeq = 0;
+            let nsAccion = '';
+            let nsPidiendo = false;
+            let nsQuitando = false;
+            function pintaNs(st) {
+                nsBox.dataset.state = st.state;
+                nsPidiendo = false;
+                nsQuitando = false;
+                nsConfirma.hidden = true;
+                nsNo.hidden = true;
+                nsMeta.innerHTML = '';
+                nsMeta.hidden = true;
+                nsVer.hidden = true;
+                let txt = '';
+                nsAccion = '';
+                nsBarra.set(st.state === 'working' ? (st.text || msg('sqlai_ns_checking')) : '', st.n, st.total);
+                if (st.state === 'checking') txt = msg('sqlai_ns_checking');
+                else if (st.state === 'working') txt = st.titulo || st.text || msg('sqlai_ns_checking');
+                else if (st.state === 'ok') {
+                    txt = msg('sqlai_ns_ok_title');
+                    nsVer.textContent = msg('sqlai_ns_bridge', [String(st.version)]);
+                    nsVer.hidden = false;
+                    if (st.free != null) nsFilaMeta(msg('sqlai_ns_free_lbl'), el('span', NS + '-nsval', Number(st.free).toLocaleString()));
+                    if (st.models && st.models.length) {
+                        const chips = el('span', NS + '-nschips');
+                        st.models.forEach((m) => chips.appendChild(el('span', NS + '-nschip', m)));
+                        nsFilaMeta(msg('sqlai_ns_models_lbl'), chips);
+                    }
+                    nsMeta.hidden = !nsMeta.childNodes.length;
+                } else if (st.state === 'old') { txt = msg('sqlai_ns_old', [String(st.version || 0)]); nsAccion = 'update'; }
+                else if (st.state === 'missing') { txt = msg('sqlai_ns_missing'); nsAccion = 'install'; }
+                else txt = st.message || msg('sqlai_ns_err_generic', ['?']);
+                nsEstado.textContent = txt;
+                nsDesc.hidden = st.state === 'ok';
+                nsActs.hidden = st.state === 'checking' || st.state === 'working';
+                nsBtn.hidden = !nsAccion;
+                nsBtn.textContent = msg(nsAccion === 'update' ? 'sqlai_ns_update' : 'sqlai_ns_install');
+                nsQuita.hidden = !(st.state === 'ok' || st.state === 'old');
+                nsQuita.textContent = msg('sqlai_ns_uninstall');
+                const ocupado = st.state === 'checking' || st.state === 'working';
+                nsBtn.disabled = ocupado;
+                nsQuita.disabled = ocupado;
+                nsRe.disabled = ocupado;
+            }
+            async function compruebaNs() {
+                const mio = ++nsSeq;
+                pintaNs({ state: 'checking' });
+                let st;
+                try { st = await nsAiStatus(); } catch (e) { st = { state: 'error', message: String((e && e.message) || e) }; }
+                if (mio === nsSeq) pintaNs(st);
+            }
+            nsRe.addEventListener('click', compruebaNs);
+            nsNo.addEventListener('click', () => {
+                nsPidiendo = false; nsQuitando = false;
+                nsConfirma.hidden = true; nsNo.hidden = true;
+                nsBtn.hidden = !nsAccion;
+                nsBtn.textContent = msg(nsAccion === 'update' ? 'sqlai_ns_update' : 'sqlai_ns_install');
+                nsQuita.textContent = msg('sqlai_ns_uninstall');
+            });
+            nsQuita.addEventListener('click', async () => {
+                if (!nsQuitando) {
+                    nsQuitando = true;
+                    nsAiPintaConfirma(nsConfirma, msg('sqlai_ns_confirm_uninstall', [getNsAccountId() || '']));
+                    nsConfirma.hidden = false;
+                    nsNo.hidden = false;
+                    nsBtn.hidden = true;
+                    nsQuita.textContent = msg('sqlai_ns_uninstall_yes');
+                    return;
+                }
+                const mio = ++nsSeq;
+                const tituloUn = msg('sqlai_ns_uninstalling');
+                pintaNs({ state: 'working', titulo: tituloUn, text: msg('sqlai_ns_un_deploy'), n: 1, total: 4 });
+                let st;
+                try {
+                    st = await nsAiUninstall((txt, n, total) => { if (mio === nsSeq) pintaNs({ state: 'working', titulo: tituloUn, text: txt, n: n, total: total }); });
+                } catch (e) {
+                    st = { state: 'error', message: msg('sqlai_ns_un_fail', [String((e && e.message) || e)]) };
+                }
+                if (mio === nsSeq) pintaNs(st);
+            });
+            nsBtn.addEventListener('click', async () => {
+                if (!nsPidiendo) {
+                    nsPidiendo = true;
+                    nsAiPintaConfirma(nsConfirma, msg(nsAccion === 'update' ? 'sqlai_ns_confirm_update' : 'sqlai_ns_confirm_install', [getNsAccountId() || '']));
+                    nsConfirma.hidden = false;
+                    nsNo.hidden = false;
+                    nsBtn.textContent = msg('sqlai_ns_confirm_yes');
+                    return;
+                }
+                const mio = ++nsSeq;
+                const tituloIn = msg(nsAccion === 'update' ? 'sqlai_ns_updating' : 'sqlai_ns_installing');
+                pintaNs({ state: 'working', titulo: tituloIn, text: msg('sqlai_ns_inst_file'), n: 1, total: 4 });
+                let st;
+                try {
+                    st = await nsAiInstall((txt, n, total) => { if (mio === nsSeq) pintaNs({ state: 'working', titulo: tituloIn, text: txt, n: n, total: total }); });
+                } catch (e) {
+                    st = { state: 'error', message: msg('sqlai_ns_inst_fail', [String((e && e.message) || e)]) };
+                }
+                if (mio === nsSeq) pintaNs(st);
+            });
 
             const provHideChk = prefToggle(paneConn, 'sqlai_prov_hide', 'sqlai_prov_hide_hint', false).chk;
 
@@ -6036,6 +6869,11 @@
                     ? chrome.i18n.getMessage('sqlai_key_ph')
                     : chrome.i18n.getMessage('sqlai_key_ph_none');
                 marcaClave();
+                const esNs = preset.kind === 'netsuite';
+                filaKey.fila.hidden = esNs;
+                filaUrl.fila.hidden = esNs;
+                nsBox.hidden = !esNs;
+                if (esNs) compruebaNs(); else nsSeq++;
                 const eff = resolveCfg(pk, a.configs, a.maxRows);
                 models = eff.models.slice();
                 activeModel = eff.model || '';

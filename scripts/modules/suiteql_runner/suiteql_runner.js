@@ -15,7 +15,13 @@
     const FETCH_ALL_CEILING = 100000;
     const DEFAULT_QUERY = [
         'SELECT',
-        '  TOP 10 *',
+        '  TOP 5 t.id,',
+        '  t.tranid,',
+        '  t.trandate,',
+        '  t.type,',
+        '  BUILTIN.DF(t.entity) AS entity,',
+        '  BUILTIN.DF(t.status) AS status,',
+        '  t.foreigntotal',
         'FROM',
         '  transaction t',
         'ORDER BY',
