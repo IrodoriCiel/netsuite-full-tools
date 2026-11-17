@@ -18562,5 +18562,85 @@
   },
   "cl_8_0_0_rrblanco_desc": {
     "message": "Se arregló que Registros recientes se viera amarillento; ahora es blanco como los demás menús de NetSuite."
+  },
+  "ro_allow_changes_label": {
+    "message": "Permitir cambios"
+  },
+  "ro_allow_changes_title": {
+    "message": "Pulsa un valor del cuerpo o de una sublista para editarlo y luego guarda el registro"
+  },
+  "ro_discard": {
+    "message": "Descartar"
+  },
+  "ro_save": {
+    "message": "Guardar"
+  },
+  "ro_saving": {
+    "message": "Guardando…"
+  },
+  "ro_changes_one": {
+    "message": "1 cambio"
+  },
+  "ro_changes_many": {
+    "message": "$COUNT$ cambios",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "ro_change_line_label": {
+    "message": "$SUBLIST$ línea $LINE$ · $FIELD$",
+    "placeholders": {
+      "sublist": {
+        "content": "$1"
+      },
+      "line": {
+        "content": "$2"
+      },
+      "field": {
+        "content": "$3"
+      }
+    }
+  },
+  "ro_save_more": {
+    "message": "…y $COUNT$ más",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "ro_save_warning": {
+    "message": "Se carga y guarda el registro completo, así que se ejecutarán los user event scripts y workflows. La página se recarga después."
+  },
+  "ro_save_edit_mode_warning": {
+    "message": "Esta página está en modo edición: se perderá todo lo que no se haya guardado en el formulario."
+  },
+  "ro_save_confirm_one": {
+    "message": "¿Guardar 1 cambio?"
+  },
+  "ro_save_confirm_many": {
+    "message": "¿Guardar $COUNT$ cambios?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "ro_save_failed_title": {
+    "message": "No se guardó nada"
+  },
+  "ro_save_unknown_error": {
+    "message": "Error desconocido"
+  },
+  "ro_save_no_record": {
+    "message": "No se pudo determinar el tipo o el id del registro."
+  },
+  "ro_save_no_response": {
+    "message": "La página no respondió. Recarga el registro para comprobar si se guardó."
+  },
+  "ro_saved_reloading": {
+    "message": "Guardado. Recargando la página…"
   }
 }

@@ -18562,5 +18562,85 @@
   },
   "cl_8_0_0_rrblanco_desc": {
     "message": "Fixed Recent records looking yellowish; it is now white like the other NetSuite menus."
+  },
+  "ro_allow_changes_label": {
+    "message": "Allow Changes"
+  },
+  "ro_allow_changes_title": {
+    "message": "Click a body or sublist value to edit it, then save the record"
+  },
+  "ro_discard": {
+    "message": "Discard"
+  },
+  "ro_save": {
+    "message": "Save"
+  },
+  "ro_saving": {
+    "message": "Saving…"
+  },
+  "ro_changes_one": {
+    "message": "1 change"
+  },
+  "ro_changes_many": {
+    "message": "$COUNT$ changes",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "ro_change_line_label": {
+    "message": "$SUBLIST$ line $LINE$ · $FIELD$",
+    "placeholders": {
+      "sublist": {
+        "content": "$1"
+      },
+      "line": {
+        "content": "$2"
+      },
+      "field": {
+        "content": "$3"
+      }
+    }
+  },
+  "ro_save_more": {
+    "message": "…and $COUNT$ more",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "ro_save_warning": {
+    "message": "This loads and saves the whole record, so user event scripts and workflows will run. The page reloads afterwards."
+  },
+  "ro_save_edit_mode_warning": {
+    "message": "This page is in edit mode: anything not yet saved on the form will be lost."
+  },
+  "ro_save_confirm_one": {
+    "message": "Save 1 change?"
+  },
+  "ro_save_confirm_many": {
+    "message": "Save $COUNT$ changes?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "ro_save_failed_title": {
+    "message": "Nothing was saved"
+  },
+  "ro_save_unknown_error": {
+    "message": "Unknown error"
+  },
+  "ro_save_no_record": {
+    "message": "Could not determine the record type or id."
+  },
+  "ro_save_no_response": {
+    "message": "No response from the page. Reload the record to check whether it saved."
+  },
+  "ro_saved_reloading": {
+    "message": "Saved. Reloading the page…"
   }
 }
