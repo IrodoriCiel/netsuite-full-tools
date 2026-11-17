@@ -2398,6 +2398,7 @@
 
     const justRebuilt = rebuildIfDataChanged(container);
 
+    if (searchTerm) expandToMatches(container, searchTerm, _hideEmptyFields);
     applyVisibilityFilter(container, searchTerm, _hideEmptyFields);
 
     clearSearchHighlights(container);
@@ -2418,7 +2419,6 @@
         }
       });
     }
-    if (searchTerm) autoExpandVisibleAncestors(container);
   };
 
   const rebuildIfDataChanged = (container) => {
@@ -2486,16 +2486,19 @@
     });
   };
 
-  const autoExpandVisibleAncestors = (container) => {
-    const visibleRows = container.querySelectorAll('.nsft-fmt-row[data-path]:not(.nsft-fmt-hidden)');
-    visibleRows.forEach(row => {
-      if (!row.querySelector(':scope > .nsft-fmt-children')) return;
-      const hasVisibleChild = row.querySelector(':scope > .nsft-fmt-children > .nsft-fmt-row[data-path]:not(.nsft-fmt-hidden)');
-      if (hasVisibleChild && !row.classList.contains('nsft-fmt-open')) {
+  const expandToMatches = (container, searchTerm, hideEmpty) => {
+    const visible = buildVisibleSet(STATE.nsftRecordObject, searchTerm, hideEmpty);
+    const parents = new Set(Array.from(visible, (p) => JSON.stringify(JSON.parse(p).slice(0, -1))));
+    let opened = true;
+    while (opened) {
+      opened = false;
+      container.querySelectorAll('.nsft-fmt-row[data-path]:not(.nsft-fmt-open)').forEach((row) => {
+        if (!parents.has(row.getAttribute('data-path'))) return;
         const tl = row.querySelector(':scope > .nsft-fmt-toggler-link');
         if (tl) tl.click();
-      }
-    });
+        if (row.classList.contains('nsft-fmt-open')) opened = true;
+      });
+    }
   };
 
   const clearSearchHighlights = (container) => {
