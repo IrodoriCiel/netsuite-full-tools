@@ -20,6 +20,10 @@
   let lastMaximizedTop = null;
   let _nsftTheme = 'light';
   let _hideEmptyFields = false;
+  let _allowChanges = false;
+  let _xmlFields = null;
+  const _pendingEdits = new Map();
+  let _saving = false;
   let _firstSnapshot = null;
   let _lastLoadedAt = null;
   let _stalenessTimer = null;
@@ -348,6 +352,22 @@
         renderRecord();
       });
     }
+
+    const allowChanges = document.getElementById('rec-obj-allow-changes');
+    if (allowChanges) {
+      allowChanges.addEventListener('change', (e) => {
+        _allowChanges = !!e.target.checked;
+        if (!_allowChanges) discardPendingEdits();
+        const c = document.getElementById('nsft-record-object-container');
+        if (c) c.classList.toggle('nsft-ro-allow-changes', _allowChanges);
+        _lastRenderedSource = null;
+        renderRecord();
+      });
+    }
+    const saveBtn = document.getElementById('nsft-ro-save');
+    if (saveBtn) saveBtn.addEventListener('click', savePendingEdits);
+    const discardBtn = document.getElementById('nsft-ro-discard');
+    if (discardBtn) discardBtn.addEventListener('click', discardPendingEdits);
 
     const viewJsonBtn = document.getElementById('rec-obj-view-json');
     const viewFriendlyBtn = document.getElementById('rec-obj-view-friendly');
@@ -737,6 +757,8 @@
   }
 
   function updateStatus(status, isError) {
+    _pendingEdits.clear();
+    updateSaveBar();
     const container = document.getElementById('nsft-record-object-container');
     if (isError) {
       container.innerHTML = status;
@@ -791,6 +813,10 @@
                          <input type="checkbox" id="rec-obj-hide-empty">
                          <span>${chrome.i18n.getMessage('ro_hide_empty_label') || 'Ocultar vacíos'}</span>
                        </label>
+                       <label id="rec-obj-allow-changes-label" class="nsft-rec-obj-hide-empty" title="${fvI18n('ro_allow_changes_title', 'Click a body or sublist value to edit it, then save the record')}">
+                         <input type="checkbox" id="rec-obj-allow-changes">
+                         <span>${fvI18n('ro_allow_changes_label', 'Allow Changes')}</span>
+                       </label>
                        
                        <button type="button" id="rec-obj-fv-tech" class="nsft-ro-fv-toggle" style="display:none"></button>
                        
@@ -806,6 +832,11 @@
          <div class="nsft-rec-obj-footer">
              <span id="nsft-rec-obj-legend">${chrome.i18n.getMessage('ro_legend')}</span>
              <span id="nsft-rec-obj-staleness" class="nsft-rec-obj-staleness nsft-estado" style="display: none;"></span>
+         </div>
+         <div id="nsft-ro-savebar" class="nsft-ro-savebar" hidden>
+             <span id="nsft-ro-savebar-count"></span>
+             <button type="button" id="nsft-ro-discard" class="nsft-ro-savebar-btn">${fvI18n('ro_discard', 'Discard')}</button>
+             <button type="button" id="nsft-ro-save" class="nsft-ro-savebar-btn is-primary">${fvI18n('ro_save', 'Save')}</button>
          </div>
          <div id="nsft-toast" class="nsft-toast-notification"></div>
        </div>`;
@@ -938,6 +969,7 @@
       });
 
       recordObject.lineFields = sublistData;
+      _xmlFields = xmlFieldSets(recordObject);
       updateStatus(chrome.i18n.getMessage('ro_loading_record'));
 
       await enrichRecordObject(recordObject, noneEdit);
@@ -1442,6 +1474,8 @@
     if (jsonBtn) jsonBtn.classList.toggle('is-on', !friendly);
     if (fvBtn) fvBtn.classList.toggle('is-on', friendly);
     if (hideEmptyLbl) hideEmptyLbl.style.display = friendly ? 'none' : '';
+    const allowChangesLbl = document.getElementById('rec-obj-allow-changes-label');
+    if (allowChangesLbl) allowChangesLbl.style.display = friendly ? 'none' : '';
     if (fvTechBtn) fvTechBtn.style.display = friendly ? '' : 'none';
 
     if (modal && !PANEL_MODE) {
@@ -2426,13 +2460,14 @@
 
     STATE.loadedRecord = null;
     const config = { ...DEFAULT_CONFIG, exposePath: true };
-    const formatter = new NetSuiteFullToolsJSONFormatter(STATE.nsftRecordObject, 1, config);
+    const formatter = new NetSuiteFullToolsJSONFormatter(_allowChanges ? xmlOnlyRecord(STATE.nsftRecordObject) : STATE.nsftRecordObject, 1, config);
     container.innerHTML = '';
     container.appendChild(formatter.render());
     _lastRenderedSource = STATE.nsftRecordObject;
 
     if (!container.dataset.nsftCtrlClickBound) {
       container.addEventListener('click', findNetSuiteField);
+      container.addEventListener('click', startInlineEdit);
       container.dataset.nsftCtrlClickBound = '1';
     }
     return true;
@@ -2678,6 +2713,218 @@
     }
 
     setTimeout(() => highlightTarget.classList.remove('nsft-ffi-highlight', 'nsft-ffi-hl-green'), 4000);
+  }
+
+  function xmlFieldSets(recordObject) {
+    const lines = {};
+    Object.entries(recordObject.lineFields).forEach(([sublistId, rows]) => {
+      lines[sublistId] = new Set(rows.flatMap((row) => Object.keys(row)));
+    });
+    return { body: new Set(Object.keys(recordObject.bodyFields)), lines };
+  }
+
+  function xmlOnlyRecord(rec) {
+    if (!_xmlFields) return rec;
+    const pick = (obj, keys) => Object.fromEntries(Object.entries(obj).filter(([k]) => keys.has(k)));
+    const lineFields = {};
+    Object.entries(rec.lineFields).forEach(([sublistId, rows]) => {
+      const cols = _xmlFields.lines[sublistId];
+      if (cols) lineFields[sublistId] = rows.map((row) => pick(row, cols));
+    });
+    return { ...rec, bodyFields: pick(rec.bodyFields, _xmlFields.body), lineFields };
+  }
+
+  function isEditablePath(path) {
+    if (!path || !path.length) return false;
+    if (path[0] === 'bodyFields') return path.length === 2;
+    if (path[0] === 'lineFields') return path.length === 4 && /^\d+$/.test(String(path[2]));
+    return false;
+  }
+
+  function valueAtPath(path) {
+    let v = STATE.nsftRecordObject;
+    for (const k of path) {
+      if (v == null) return undefined;
+      v = v[k];
+    }
+    return v;
+  }
+
+  function changeFromPath(path, value) {
+    return path[0] === 'lineFields'
+      ? { sublistId: path[1], line: Number(path[2]), fieldId: path[3], value }
+      : { sublistId: null, line: null, fieldId: path[1], value };
+  }
+
+  function startInlineEdit(evt) {
+    if (!_allowChanges || _saving || evt.ctrlKey || evt.metaKey) return;
+    const row = evt.target.closest ? evt.target.closest('.nsft-fmt-row[data-path]') : null;
+    if (!row || row.classList.contains('is-editing')) return;
+    const line = row.firstElementChild;
+    if (!line || !line.contains(evt.target) || evt.target.closest('.nsft-fmt-key')) return;
+
+    const pathKey = row.getAttribute('data-path');
+    const path = JSON.parse(pathKey);
+    if (!isEditablePath(path)) return;
+    const original = valueAtPath(path);
+    if (original !== null && typeof original === 'object') return;
+    evt.preventDefault();
+    const pending = _pendingEdits.get(pathKey);
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'nsft-ro-edit-input';
+    input.value = pending ? pending.value : (original == null ? '' : String(original));
+    line.appendChild(input);
+    row.classList.add('is-editing');
+    input.focus();
+    input.select();
+
+    let done = false;
+    const finish = (commit) => {
+      if (done) return;
+      done = true;
+      input.remove();
+      row.classList.remove('is-editing');
+      if (commit) recordPendingEdit(row, pathKey, path, original, input.value);
+    };
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(false); }
+    });
+    input.addEventListener('blur', () => finish(true));
+  }
+
+  function recordPendingEdit(row, pathKey, path, original, raw) {
+    const originalText = original == null ? '' : String(original);
+    if (raw === originalText) _pendingEdits.delete(pathKey);
+    else _pendingEdits.set(pathKey, { path, original: originalText, value: raw });
+    markEditedRow(row, _pendingEdits.get(pathKey));
+    updateSaveBar();
+  }
+
+  function markEditedRow(row, edit) {
+    const line = row.firstElementChild;
+    if (!line) return;
+    let shown = line.querySelector(':scope > .nsft-ro-new-value');
+    row.classList.toggle('nsft-fmt-edited', !!edit);
+    if (!edit) {
+      if (shown) shown.remove();
+      return;
+    }
+    if (!shown) {
+      shown = document.createElement('span');
+      shown.className = 'nsft-ro-new-value';
+      line.appendChild(shown);
+    }
+    shown.textContent = JSON.stringify(edit.value);
+  }
+
+  function updateSaveBar() {
+    const bar = document.getElementById('nsft-ro-savebar');
+    if (!bar) return;
+    const n = _pendingEdits.size;
+    bar.hidden = n === 0;
+    const count = document.getElementById('nsft-ro-savebar-count');
+    if (count) count.textContent = fvPlural(n, 'ro_changes_one', '1 change', 'ro_changes_many', '$1 changes');
+    const save = document.getElementById('nsft-ro-save');
+    const discard = document.getElementById('nsft-ro-discard');
+    if (save) { save.disabled = _saving; save.textContent = _saving ? fvI18n('ro_saving', 'Saving…') : fvI18n('ro_save', 'Save'); }
+    if (discard) discard.disabled = _saving;
+  }
+
+  function discardPendingEdits() {
+    if (_saving) return;
+    _pendingEdits.clear();
+    document.querySelectorAll('#nsft-record-object-container .nsft-fmt-edited')
+      .forEach((row) => markEditedRow(row, null));
+    updateSaveBar();
+  }
+
+  function describeChange(edit) {
+    const c = changeFromPath(edit.path, edit.value);
+    const where = c.sublistId ? fvI18n('ro_change_line_label', '$1 line $2 · $3', [c.sublistId, String(c.line + 1), c.fieldId]) : c.fieldId;
+    return `• ${where}: ${JSON.stringify(edit.original)} → ${JSON.stringify(edit.value)}`;
+  }
+
+  async function confirmSave(edits) {
+    const MAX_LISTED = 15;
+    const lines = edits.slice(0, MAX_LISTED).map(describeChange);
+    if (edits.length > MAX_LISTED) lines.push(fvI18n('ro_save_more', '…and $1 more', [String(edits.length - MAX_LISTED)]));
+    const warnings = [fvI18n('ro_save_warning', 'This loads and saves the whole record, so user event scripts and workflows will run. The page reloads afterwards.')];
+    if (/[?&]e=T\b/.test(pageHref() || '')) {
+      warnings.push(fvI18n('ro_save_edit_mode_warning', 'This page is in edit mode: anything not yet saved on the form will be lost.'));
+    }
+    const body = warnings.join('\n\n') + '\n\n' + lines.join('\n');
+    const dlg = window.NSFT_Dialog;
+    if (dlg && dlg.confirm) {
+      return !!(await dlg.confirm({
+        title: fvPlural(edits.length, 'ro_save_confirm_one', 'Save 1 change?', 'ro_save_confirm_many', 'Save $1 changes?'),
+        body, danger: true, ok: fvI18n('ro_save', 'Save'), cancel: fvI18n('btn_cancel', 'Cancel')
+      }));
+    }
+    return window.confirm(body);
+  }
+
+  function showSaveErrors(errors) {
+    const body = (errors && errors.length ? errors : [fvI18n('ro_save_unknown_error', 'Unknown error')]).join('\n');
+    const title = fvI18n('ro_save_failed_title', 'Nothing was saved');
+    const dlg = window.NSFT_Dialog;
+    if (dlg && dlg.alert) dlg.alert({ title, body });
+    else window.alert(title + '\n\n' + body);
+  }
+
+  const SAVE_TIMEOUT_MS = 120000;
+
+  const saveViaFetcher = (type, id, changes) => new Promise((resolve) => {
+    injectRoFetcher();
+    const reqId = ++_sqlReqSeq;
+    const onMsg = (e) => {
+      if (e.source !== window) return;
+      const d = e.data;
+      if (!d || d.dest !== 'extension_ro' || d.type !== 'saved') return;
+      if (!d.payload || d.payload.reqId !== reqId) return;
+      cleanup();
+      resolve(d.payload);
+    };
+    const cleanup = () => {
+      window.removeEventListener('message', onMsg);
+      clearTimeout(timer);
+    };
+    window.addEventListener('message', onMsg);
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve({ ok: false, timedOut: true, errors: [fvI18n('ro_save_no_response', 'No response from the page. Reload the record to check whether it saved.')] });
+    }, SAVE_TIMEOUT_MS);
+    const send = () => roPost({ dest: 'fetcher_ro', type: 'save', payload: { reqId, type, id, changes } });
+    send();
+    setTimeout(send, 350);
+  });
+
+  async function savePendingEdits() {
+    if (_saving || !_pendingEdits.size) return;
+    const rec = STATE.nsftRecordObject;
+    const type = rec && rec.recordType;
+    const id = rec && rec.id;
+    if (!type || !id) {
+      showToast(fvI18n('ro_save_no_record', 'Could not determine the record type or id.'));
+      return;
+    }
+    const edits = Array.from(_pendingEdits.values());
+    if (!(await confirmSave(edits))) return;
+
+    _saving = true;
+    updateSaveBar();
+    const res = await saveViaFetcher(type, id, edits.map((e) => changeFromPath(e.path, e.value)));
+    _saving = false;
+    if (res.ok || res.timedOut) discardPendingEdits();
+    else updateSaveBar();
+    if (res.ok) {
+      showToast(fvI18n('ro_saved_reloading', 'Saved. Reloading the page…'), 5000);
+      if (PANEL_MODE) setTimeout(loadRecordXml, 3000);
+      return;
+    }
+    showSaveErrors(res.errors);
   }
 
   const getObjectPath = (keyEl) => {

@@ -1809,3 +1809,102 @@
     color: var(--nsft-w-accent);
     text-decoration: underline;
 }
+
+.nsft-ro-allow-changes .nsft-fmt-row:is([data-path^='["bodyFields",'], [data-path^='["lineFields",']) > span:first-child > :not(.nsft-fmt-key) {
+    cursor: text;
+    border-radius: 3px;
+}
+
+.nsft-ro-allow-changes .nsft-fmt-row:is([data-path^='["bodyFields",'], [data-path^='["lineFields",']) > span:first-child > :not(.nsft-fmt-key):not(.nsft-ro-edit-input):hover {
+    outline: 1px dashed var(--nsft-ns-accent, #0070f3);
+    outline-offset: 1px;
+}
+
+.nsft-fmt-row.is-editing > span:first-child > :not(.nsft-fmt-key):not(.nsft-ro-edit-input) {
+    display: none;
+}
+
+.nsft-ro-edit-input {
+    font: inherit;
+    font-size: 12px;
+    min-width: 220px;
+    padding: 1px 6px;
+    border: 1px solid var(--nsft-ns-accent, #0070f3);
+    border-radius: 4px;
+    background: var(--nsft-w-s0, #fff);
+    color: inherit;
+    outline: none;
+}
+
+.nsft-fmt-edited > span:first-child > :not(.nsft-fmt-key):not(.nsft-ro-new-value):not(.nsft-ro-edit-input) {
+    text-decoration: line-through;
+    opacity: 0.55;
+}
+
+.nsft-ro-new-value {
+    margin-left: 6px;
+    color: #c2410c;
+    font-weight: 600;
+}
+
+.nsft-ro-savebar {
+    position: absolute;
+    right: 14px;
+    bottom: 58px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 12px;
+    font-size: 12px;
+    color: #374151;
+    background: var(--nsft-w-s0, #fff);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.nsft-ro-savebar[hidden] {
+    display: none;
+}
+
+.nsft-ro-savebar-btn {
+    font: inherit;
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.nsft-ro-savebar-btn.is-primary {
+    border-color: #c2410c;
+    background: #c2410c;
+    color: #fff;
+    font-weight: 600;
+}
+
+.nsft-ro-savebar-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.nsft-rec-obj-modal[data-theme="dark"] .nsft-ro-edit-input {
+    background: var(--nsft-dk-surface);
+    border-color: #fbbf24;
+}
+
+.nsft-rec-obj-modal[data-theme="dark"] .nsft-ro-new-value {
+    color: #fbbf24;
+}
+
+.nsft-rec-obj-modal[data-theme="dark"] .nsft-ro-savebar {
+    color: #E6EBF2;
+    background: var(--nsft-dk-surface);
+    border-color: var(--nsft-dk-border);
+}
+
+.nsft-rec-obj-modal[data-theme="dark"] .nsft-ro-savebar-btn {
+    border-color: var(--nsft-dk-border);
+}
