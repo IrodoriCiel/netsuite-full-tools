@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Versión en la Chrome Web Store" src="https://img.shields.io/chrome-web-store/v/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store&color=4285F4"></a>
+  <a href="https://addons.mozilla.org/firefox/addon/netsuite-full-tools/"><img alt="Versión en Firefox Add-ons" src="https://img.shields.io/amo/v/netsuite-full-tools?style=for-the-badge&logo=firefoxbrowser&logoColor=white&label=Firefox%20Add-ons&color=E8590C"></a>
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Usuarios" src="https://img.shields.io/chrome-web-store/users/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&color=2C6E4E&label=Usuarios"></a>
   <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc"><img alt="Valoración" src="https://img.shields.io/chrome-web-store/rating/fgldkomofdfcmkccjgalihlollndjmcc?style=for-the-badge&color=F59E0B&label=Rating"></a>
 </p>
@@ -20,7 +21,7 @@
   <a href="https://irodoriciel.github.io/nsft-tablero/"><img alt="Tablero público: estado de los errores reportados y las mejoras pedidas" src="https://img.shields.io/badge/Tablero%20·%20Board-bugs%20y%20mejoras-1A73E8?style=for-the-badge"></a>
 </p>
 
-<p align="center"><a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc">Chrome Web Store</a> · <a href="https://netsuitefulltools.com/">netsuitefulltools.com</a> · <a href="https://irodoriciel.github.io/nsft-tablero/">Tablero de avance / Progress board</a> · <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc/support">Soporte / Support</a></p>
+<p align="center"><a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc">Chrome Web Store</a> · <a href="https://addons.mozilla.org/firefox/addon/netsuite-full-tools/">Firefox Add-ons</a> · <a href="https://netsuitefulltools.com/">netsuitefulltools.com</a> · <a href="https://irodoriciel.github.io/nsft-tablero/">Tablero de avance / Progress board</a> · <a href="https://chromewebstore.google.com/detail/netsuite-full-tools/fgldkomofdfcmkccjgalihlollndjmcc/support">Soporte / Support</a></p>
 
 ---
 
@@ -63,6 +64,8 @@ Las únicas diferencias entre este repositorio y el paquete publicado son **esa 
 The only differences between this repository and the published package are **that minification** and the removal of comments. When this mirror is generated, it is verified **byte-for-byte** that minifying each file here produces the same output as the published build — functional equivalence is not a promise, it is an automated check on every release.
 
 ## Firefox
+
+Publicada en **[Firefox Add-ons](https://addons.mozilla.org/firefox/addon/netsuite-full-tools/)** · Published on **[Firefox Add-ons](https://addons.mozilla.org/firefox/addon/netsuite-full-tools/)**.
 
 `node tools/firefox/build.mjs` genera `dist/firefox/` y un ZIP listo para [addons.mozilla.org](https://addons.mozilla.org/developers/). Para probarlo: `about:debugging` → *Este Firefox* → *Cargar complemento temporal* → `dist/firefox/manifest.json`. Requiere Firefox 140+. El panel lateral de Chrome no existe en Firefox; esas vistas se abren dentro de la página. Contribución de [iyari-fiesco](https://github.com/iyari-fiesco) ([PR #2](https://github.com/IrodoriCiel/netsuite-full-tools/pull/2)).
 
