@@ -2852,6 +2852,10 @@
     const lines = edits.slice(0, MAX_LISTED).map(describeChange);
     if (edits.length > MAX_LISTED) lines.push(fvI18n('ro_save_more', '…and $1 more', [String(edits.length - MAX_LISTED)]));
     const warnings = [fvI18n('ro_save_warning', 'This loads and saves the whole record, so user event scripts and workflows will run. The page reloads afterwards.')];
+    try {
+      const env = window.NSFT_ENV && window.NSFT_ENV.envFromUrl(pageHref() || location.href);
+      if (env && env.code === 'PRD') warnings.unshift(fvI18n('ro_save_prod_warning', 'This record is in PRODUCTION.'));
+    } catch (e) { }
     if (/[?&]e=T\b/.test(pageHref() || '')) {
       warnings.push(fvI18n('ro_save_edit_mode_warning', 'This page is in edit mode: anything not yet saved on the form will be lost.'));
     }

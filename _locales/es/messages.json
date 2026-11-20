@@ -4959,6 +4959,9 @@
   "fip_not_found": {
     "message": "No se encontró metadata del campo"
   },
+  "fip_no_perm": {
+    "message": "Tu rol no tiene permiso para ver la definición de los campos personalizados."
+  },
   "fip_type": {
     "message": "Tipo"
   },
@@ -14629,25 +14632,10 @@
     "message": "Lo más destacado desde tu última versión:"
   },
   "un_hl_1": {
-    "message": "Usa **NetSuite AI** en el **Asistente de IA**: la IA de tu propia cuenta, sin necesidad de API key."
+    "message": "Edita y guarda valores del cuerpo y de las sublistas desde **Ver Objeto**, con **Permitir cambios**."
   },
   "un_hl_2": {
-    "message": "Abre desde la **Paleta de Comandos** cualquier herramienta del menú Herramientas —el **SuiteQL Runner**, **Ver Objeto**, **Ver scripts**…— y las **opciones del registro**."
-  },
-  "un_hl_3": {
-    "message": "Abre el **menú Herramientas** con **Alt+Shift+T**, sin ir al ratón."
-  },
-  "un_hl_4": {
-    "message": "Distingue en el **menú de roles** a qué empleado pertenece cada rol cuando tienes varios usuarios de prueba con tu correo."
-  },
-  "un_hl_5": {
-    "message": "Pliega y despliega los bloques de código del **Editor Avanzado**, uno a uno o todos a la vez, con los atajos de **VS Code**."
-  },
-  "un_hl_6": {
-    "message": "Usa NSFT también en **Firefox**: ya está disponible en **Firefox Add-ons**."
-  },
-  "un_hl_7": {
-    "message": "Y arreglos en la **Consola de SuiteScript** y en la **caja de fórmulas** de las búsquedas. Más detalles en el changelog."
+    "message": "Arreglos en el **menú de roles**, que ahora enseña el nombre del empleado también con roles de **Employee Center**, en la búsqueda de **Ver Objeto**, que ya encuentra lo que hay en secciones sin abrir, en la **vista previa de campos** con roles sin permiso y en **Pestañas Agrupadas**, que ya no se lleva las pestañas que están en el grupo de otro. Más detalles en el changelog."
   },
   "un_thanks": {
     "message": "Gracias a quienes reportan errores y proponen mejoras. Escribe desde el sobre ✉ del popup — y ahí mismo puedes seguir el avance de cada reporte."
@@ -14959,6 +14947,42 @@
   },
   "cl_date_8_1_0": {
     "message": "2026-11-16"
+  },
+  "cl_ver_8_1_1": {
+    "message": "v8.1.1"
+  },
+  "cl_date_8_1_1": {
+    "message": "2026-11-20"
+  },
+  "cl_8_1_1_fip_perm_title": {
+    "message": "Vista previa de campos con roles sin permiso"
+  },
+  "cl_8_1_1_fip_perm_desc": {
+    "message": "Se arregló que la vista previa de un campo personalizado mostrara un error de búsqueda con roles que no pueden ver las definiciones de campos."
+  },
+  "cl_8_1_1_grouped_ajenos_title": {
+    "message": "Pestañas Agrupadas respeta los grupos de otros"
+  },
+  "cl_8_1_1_grouped_ajenos_desc": {
+    "message": "Se arregló que Pestañas Agrupadas sacara de su grupo las pestañas de NetSuite que otra herramienta o el usuario habían agrupado."
+  },
+  "cl_8_1_1_rolef_always_title": {
+    "message": "Nombre del empleado en el menú de roles"
+  },
+  "cl_8_1_1_rolef_always_desc": {
+    "message": "Se arregló que el nombre del empleado no saliera en el menú de roles al entrar con un rol de Employee Center."
+  },
+  "cl_8_1_1_ro_buscar_title": {
+    "message": "Búsqueda de Ver Objeto en secciones plegadas"
+  },
+  "cl_8_1_1_ro_buscar_desc": {
+    "message": "Se arregló que la búsqueda de Ver Objeto no mostrara las coincidencias de las secciones que aún no se habían abierto."
+  },
+  "cl_8_1_1_ro_editar_title": {
+    "message": "Editar valores desde Ver Objeto"
+  },
+  "cl_8_1_1_ro_editar_desc": {
+    "message": "Se agregó «Permitir cambios» en Ver Objeto para editar valores del cuerpo y de las sublistas y guardar el registro."
   },
   "cl_8_1_0_firefox_title": {
     "message": "Versión para Firefox"
@@ -18613,6 +18637,9 @@
   },
   "ro_save_warning": {
     "message": "Se carga y guarda el registro completo, así que se ejecutarán los user event scripts y workflows. La página se recarga después."
+  },
+  "ro_save_prod_warning": {
+    "message": "Este registro está en PRODUCCIÓN."
   },
   "ro_save_edit_mode_warning": {
     "message": "Esta página está en modo edición: se perderá todo lo que no se haya guardado en el formulario."

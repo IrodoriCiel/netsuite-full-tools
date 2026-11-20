@@ -185,8 +185,14 @@
             _cache.set(scriptid, {
                 rows: payload.rows || [],
                 error: payload.error || null,
+                code: payload.code || null,
                 ts: Date.now()
             });
+            if (payload.code === 'no_perm' &&
+                _currentScriptId && _currentScriptId.toLowerCase() === scriptid &&
+                (_currentContext === 'body' || _currentContext === 'sublistcol')) {
+                tipoSinPermiso(scriptid, _currentContext, _currentSublistId || '');
+            }
 
             if (
                 _currentScriptId && _currentScriptId.toLowerCase() === scriptid &&
@@ -412,13 +418,17 @@
             _currentSublistId = sublistId || null;
             _currentLabelEl = labelEl;
             const isCustom = CUSTOM_FIELD_RE.test(scriptid);
-            if ((context === 'body' || context === 'sublistcol') && !isCustom && domType) {
+            if ((context === 'body' || context === 'sublistcol') && domType) {
                 _typeCache.set(typeKey(scriptid, context, sublistId || ''), domType);
             }
             renderTooltip(scriptid, context);
             positionTooltipAtCursor();
             if (context === 'body' || context === 'sublistcol') {
-                if (isCustom) ensureFetched(scriptid);
+                if (isCustom) {
+                    ensureFetched(scriptid);
+                    const c = getFreshCache(scriptid.toLowerCase());
+                    if (c && c.code === 'no_perm') tipoSinPermiso(scriptid, context, sublistId);
+                }
                 else if (!domType) ensureFieldType(scriptid, context, sublistId);
             }
         }, yaAbierto ? 0 : _showDelayMs);
@@ -488,6 +498,15 @@
 
     function typeKey(scriptid, context, sublistId) {
         return (context || 'body') + '|' + (sublistId || '') + '|' + String(scriptid).toLowerCase();
+    }
+
+    function tipoSinPermiso(scriptid, context, sublistId) {
+        if (_typeCache.has(typeKey(scriptid, context, sublistId || ''))) return;
+        let editable = false;
+        try {
+            editable = !!document.querySelector('input[name="' + CSS.escape(scriptid) + '"]:not([type="hidden"]), select[name="' + CSS.escape(scriptid) + '"], textarea[name="' + CSS.escape(scriptid) + '"]');
+        } catch (_) { editable = false; }
+        if (editable) ensureFieldType(scriptid, context, sublistId);
     }
 
     function ensureFieldType(scriptid, context, sublistId) {
@@ -630,6 +649,15 @@
             return `
                 <div class="nsft-fip-loading">${escapeHtml(i18n('fip_loading', 'Loading…'))}</div>
                 ${renderSublistLine(context)}
+                ${renderCopyHint()}
+            `;
+        }
+
+        if (cached.code === 'no_perm') {
+            return `
+                ${renderTypeLine(scriptid, context)}
+                ${renderSublistLine(context)}
+                <div class="nsft-fip-empty">${escapeHtml(i18n('fip_no_perm', 'Your role is not allowed to view custom field definitions.'))}</div>
                 ${renderCopyHint()}
             `;
         }

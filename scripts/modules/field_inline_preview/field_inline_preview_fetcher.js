@@ -84,7 +84,9 @@
             fallback: { rest: baseQuery, sql: baseQuery, limit: 5 }
         }, function (err, rows) {
             if (err) {
-                reply(scriptid, [], err.message || err.code || 'query');
+                const msg = err.message || err.code || 'query';
+                const sinPermiso = /Record '[^']+' was not found|INSUFFICIENT_PERMISSION|permission/i.test(String(msg));
+                reply(scriptid, [], msg, sinPermiso ? 'no_perm' : null);
                 return;
             }
             reply(scriptid, (rows || []).map(function (r) {
@@ -100,11 +102,11 @@
         });
     }
 
-    function reply(scriptid, rows, error) {
+    function reply(scriptid, rows, error, code) {
         window.postMessage({
             dest: 'extension_fip',
             type: 'fieldInfoResult',
-            payload: { scriptid, rows, error }
+            payload: { scriptid, rows, error, code: code || null }
         }, '*');
     }
 })();

@@ -231,7 +231,7 @@ globalThis.NSFT_DEFAULTS = {
     portletRefresherInterval: 600,
     portletRefresherAutoStart: false,
     enableRoleFinder: true,
-    roleFinderEmployeeNames: 'distinct',
+    roleFinderEmployeeNames: 'always',
     enableScriptUpload: true,
     enableGithubBackup: true,
     githubBackupBranch: 'main',

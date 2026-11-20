@@ -72,6 +72,13 @@ chrome.runtime.onInstalled.addListener(nsftAlInstalar = ({ reason }) => {
         });
     }
 
+    if (reason === 'update') {
+        chrome.storage.local.get({ nsftMigRoleNamesAlways: false }, (m) => {
+            if (chrome.runtime.lastError || m.nsftMigRoleNamesAlways) return;
+            chrome.storage.local.set({ roleFinderEmployeeNames: 'always', nsftMigRoleNamesAlways: true });
+        });
+    }
+
     chrome.storage.local.get({ nsftTheme: 'light', enableDarkMode: false }, (t) => {
         if (chrome.runtime.lastError) return;
         const isDark = t.enableDarkMode === true || t.nsftTheme === 'dark';
@@ -911,18 +918,12 @@ function handleTabGrouping(tabId, tab) {
             }
         } else {
             if (tab.groupId && tab.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE) {
-                chrome.tabGroups.get(tab.groupId, (group) => {
+                _gruposPropiosListos.then(() => chrome.tabGroups.get(tab.groupId, (group) => {
                     if (chrome.runtime.lastError || !group) return;
-
-                    const isNSGroup =
-                        _nsftCreatedGroups.has(tab.groupId) ||
-                        (group.title && items.groupedTabsConfig.some(c => c.label === group.title || c.id === group.title)) ||
-                        (group.title && (group.title.includes('_PRD') || group.title.includes('_SB')));
-
-                    if (isNSGroup) {
+                    if (esGrupoNsft(group, items.groupedTabsConfig)) {
                         safeTabsUngroup(tabId);
                     }
-                });
+                }));
             }
         }
     });
@@ -963,12 +964,69 @@ function pTabsQueryByGroupId(groupId) {
 
 const _nsftCreatedGroups = new Set();
 
+const GRUPOS_PROPIOS_KEY = 'nsftGroupedTabsOwnGroups';
+const _gruposPropiosListos = new Promise((resolve) => {
+    try {
+        if (!chrome.storage.session) return resolve();
+        chrome.storage.session.get(GRUPOS_PROPIOS_KEY, (r) => {
+            const ids = (!chrome.runtime.lastError && r && r[GRUPOS_PROPIOS_KEY]) || [];
+            ids.forEach((id) => _nsftCreatedGroups.add(id));
+            resolve();
+        });
+    } catch (e) { resolve(); }
+});
+
+function recordarGrupoPropio(groupId) {
+    if (groupId == null || _nsftCreatedGroups.has(groupId)) return;
+    _nsftCreatedGroups.add(groupId);
+    try {
+        if (chrome.storage.session) {
+            chrome.storage.session.set({ [GRUPOS_PROPIOS_KEY]: [..._nsftCreatedGroups] }, () => void chrome.runtime.lastError);
+        }
+    } catch (e) { }
+}
+
+try {
+    chrome.tabGroups.onRemoved.addListener((group) => {
+        if (!_nsftCreatedGroups.delete(group.id)) return;
+        try {
+            if (chrome.storage.session) {
+                chrome.storage.session.set({ [GRUPOS_PROPIOS_KEY]: [..._nsftCreatedGroups] }, () => void chrome.runtime.lastError);
+            }
+        } catch (e) { }
+    });
+} catch (e) { }
+
+const RE_TITULO_GRUPO_NSFT = /[ _](?:PRD|SB\d*|RP\d*)$/i;
+function esGrupoNsft(group, configs) {
+    if (!group) return false;
+    if (_nsftCreatedGroups.has(group.id)) return true;
+    const t = group.title || '';
+    if (!t) return false;
+    if ((configs || []).some(c => c && (c.label === t || c.id === t))) return true;
+    return t.includes('_PRD') || t.includes('_SB') || RE_TITULO_GRUPO_NSFT.test(t);
+}
+
+function pTabGroupsGet(groupId) {
+    return new Promise((r) => chrome.tabGroups.get(groupId, (g) =>
+        r(chrome.runtime.lastError ? null : g)));
+}
+
 async function placeTabAndDedupe(tabId, groupTitle, color) {
     const fresh = await pTabsGet(tabId);
     if (!fresh) return;
 
     const win = await pWindowsGet(fresh.windowId);
     if (!win || win.type !== 'normal') return;
+
+    if (fresh.groupId != null && fresh.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE) {
+        await _gruposPropiosListos;
+        const actual = await pTabGroupsGet(fresh.groupId);
+        if (actual && actual.title !== groupTitle) {
+            const ajustes = await getGroupingSettings();
+            if (!esGrupoNsft(actual, ajustes.groupedTabsConfig)) return;
+        }
+    }
 
     const allWithTitle = await pTabGroupsQueryByTitle(groupTitle);
     const sameWindow = allWithTitle.filter(g => g.windowId === fresh.windowId);
@@ -977,14 +1035,14 @@ async function placeTabAndDedupe(tabId, groupTitle, color) {
         const groupId = await safeTabsGroup({ tabIds: tabId, createProperties: { windowId: fresh.windowId } });
         if (groupId == null) return;
         await safeTabGroupsUpdate(groupId, { title: groupTitle, color });
-        _nsftCreatedGroups.add(groupId);
+        recordarGrupoPropio(groupId);
         return;
     }
 
     sameWindow.sort((a, b) => a.id - b.id);
     const canonical = sameWindow[0];
     const duplicates = sameWindow.slice(1);
-    _nsftCreatedGroups.add(canonical.id);
+    recordarGrupoPropio(canonical.id);
 
     if (canonical.color !== color) {
         await safeTabGroupsUpdate(canonical.id, { color });
@@ -1072,9 +1130,12 @@ async function consolidateDuplicateGroups() {
     const groups = await pTabGroupsQueryAll();
     if (groups.length < 2) return 0;
 
+    await _gruposPropiosListos;
+    const { groupedTabsConfig } = await getGroupingSettings();
+
     const byKey = new Map();
     for (const g of groups) {
-        if (!g.title) continue;
+        if (!g.title || !esGrupoNsft(g, groupedTabsConfig)) continue;
         const k = `${g.windowId}|${g.title}`;
         if (!byKey.has(k)) byKey.set(k, []);
         byKey.get(k).push(g);

@@ -348,10 +348,10 @@
 
     const ENT_KEY = 'nsftRoleEntNames';
     const MODO_KEY = 'roleFinderEmployeeNames';
-    let _modoNombres = 'distinct';
-    chrome.storage.local.get({ [MODO_KEY]: 'distinct' }, (st) => { _modoNombres = st[MODO_KEY] || 'distinct'; });
+    let _modoNombres = 'always';
+    chrome.storage.local.get({ [MODO_KEY]: 'always' }, (st) => { _modoNombres = st[MODO_KEY] || 'always'; });
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === 'local' && changes[MODO_KEY]) _modoNombres = changes[MODO_KEY].newValue || 'distinct';
+        if (area === 'local' && changes[MODO_KEY]) _modoNombres = changes[MODO_KEY].newValue || 'always';
     });
     const ENT_TIMEOUT_MS = 5000;
     let _entPuente = false;
@@ -385,18 +385,37 @@
         const ids = [...new Set(filas.map(f => f.id))];        if (!ids.length) return;
         if (ids.length < 2 && _modoNombres !== 'always') return;
 
+        const propio = nombrePropio(filas);
         chrome.storage.local.get({ [ENT_KEY]: {} }, (st) => {
             const todas = st[ENT_KEY] || {};
             const deEsta = Object.assign({}, todas[actual] || {});
-            pinta(filas, deEsta);
+            pinta(filas, Object.assign({}, propio, deEsta));
             pideNombres(ids, (err, nombres) => {
-                if (err || !nombres) return;
+                if (err || !nombres) {
+                    const respaldo = {};
+                    ids.forEach((id) => { respaldo[id] = '#' + id; });
+                    pinta(filas, Object.assign(respaldo, propio, deEsta));
+                    return;
+                }
                 Object.assign(deEsta, nombres);
-                pinta(filas, deEsta);
+                pinta(filas, Object.assign({}, propio, deEsta));
                 todas[actual] = deEsta;
                 chrome.storage.local.set({ [ENT_KEY]: todas });
             });
         });
+    }
+
+    function nombrePropio(filas) {
+        try {
+            const actual = filas.find(({ entry }) => entry.link.parentElement && entry.link.parentElement.querySelector('svg'));
+            if (!actual) return {};
+            const theme = document.body.dataset.header || 'refreshed';
+            const btn = findElement(theme, 'navbarAccount');
+            const linea = btn ? (btn.innerText || '').split('\n').map(s => s.trim()).filter(Boolean)[0] : '';
+            return linea ? { [actual.id]: linea } : {};
+        } catch (e) {
+            return {};
+        }
     }
 
     function pinta(filas, nombres) {

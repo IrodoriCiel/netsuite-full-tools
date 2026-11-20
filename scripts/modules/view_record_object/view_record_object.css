@@ -1816,7 +1816,7 @@
 }
 
 .nsft-ro-allow-changes .nsft-fmt-row:is([data-path^='["bodyFields",'], [data-path^='["lineFields",']) > span:first-child > :not(.nsft-fmt-key):not(.nsft-ro-edit-input):hover {
-    outline: 1px dashed var(--nsft-ns-accent, #0070f3);
+    outline: 1px dashed var(--nsft-w-accent, #0070f3);
     outline-offset: 1px;
 }
 
@@ -1829,7 +1829,7 @@
     font-size: 12px;
     min-width: 220px;
     padding: 1px 6px;
-    border: 1px solid var(--nsft-ns-accent, #0070f3);
+    border: 1px solid var(--nsft-w-accent, #0070f3);
     border-radius: 4px;
     background: var(--nsft-w-s0, #fff);
     color: inherit;
@@ -1857,9 +1857,9 @@
     gap: 8px;
     padding: 6px 8px 6px 12px;
     font-size: 12px;
-    color: #374151;
+    color: var(--nsft-w-t1, #374151);
     background: var(--nsft-w-s0, #fff);
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--nsft-w-bd, #e5e7eb);
     border-radius: 8px;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
@@ -1872,17 +1872,26 @@
     font: inherit;
     padding: 4px 12px;
     border-radius: 6px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--nsft-w-bd, #d1d5db);
     background: transparent;
     color: inherit;
     cursor: pointer;
 }
 
+.nsft-ro-savebar-btn:not(.is-primary):not(:disabled):hover {
+    background: var(--nsft-w-hov, #f5f5f4);
+}
+
 .nsft-ro-savebar-btn.is-primary {
-    border-color: #c2410c;
-    background: #c2410c;
+    border-color: var(--nsft-w-run, #3b82f6);
+    background: var(--nsft-w-run, #3b82f6);
     color: #fff;
     font-weight: 600;
+}
+
+.nsft-ro-savebar-btn.is-primary:not(:disabled):hover {
+    border-color: var(--nsft-w-run-h, #2563eb);
+    background: var(--nsft-w-run-h, #2563eb);
 }
 
 .nsft-ro-savebar-btn:disabled {
@@ -1900,7 +1909,7 @@
 }
 
 .nsft-rec-obj-modal[data-theme="dark"] .nsft-ro-savebar {
-    color: #E6EBF2;
+    color: var(--nsft-w-t1, #E6EBF2);
     background: var(--nsft-dk-surface);
     border-color: var(--nsft-dk-border);
 }

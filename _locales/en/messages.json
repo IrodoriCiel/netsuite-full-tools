@@ -4959,6 +4959,9 @@
   "fip_not_found": {
     "message": "No field metadata found"
   },
+  "fip_no_perm": {
+    "message": "Your role is not allowed to view custom field definitions."
+  },
   "fip_type": {
     "message": "Type"
   },
@@ -14629,25 +14632,10 @@
     "message": "Highlights since your last version:"
   },
   "un_hl_1": {
-    "message": "Use **NetSuite AI** in the **AI Assistant**: your own account's AI, with no API key needed."
+    "message": "Edit and save body and sublist values from **View Record Object**, with **Allow Changes**."
   },
   "un_hl_2": {
-    "message": "Open any tool from the Tools menu —the **SuiteQL Runner**, **View Record Object**, **Record Scripts**…— and the **record options** from the **Command Palette**."
-  },
-  "un_hl_3": {
-    "message": "Open the **Tools menu** with **Alt+Shift+T**, without reaching for the mouse."
-  },
-  "un_hl_4": {
-    "message": "Tell apart in the **role menu** which employee each role belongs to when you have several test users with your email."
-  },
-  "un_hl_5": {
-    "message": "Fold and unfold code blocks in the **Advanced Editor**, one at a time or all at once, with the **VS Code** shortcuts."
-  },
-  "un_hl_6": {
-    "message": "Use NSFT in **Firefox** too: it is now available on **Firefox Add-ons**."
-  },
-  "un_hl_7": {
-    "message": "And fixes in the **SuiteScript Console** and the **formula box** of saved searches. More details in the changelog."
+    "message": "Fixes in the **role menu**, which now shows the employee name with **Employee Center** roles too, in the **View Record Object** search, which now finds what is in unopened sections, in the **field preview** with restricted roles, and in **Grouped Tabs**, which no longer takes tabs that are in someone else's group. More details in the changelog."
   },
   "un_thanks": {
     "message": "Thanks to everyone who reports bugs and suggests improvements. Write from the envelope ✉ in the popup — and follow each report's progress right there."
@@ -14962,6 +14950,42 @@
   },
   "cl_date_8_1_0": {
     "message": "2026-11-16"
+  },
+  "cl_ver_8_1_1": {
+    "message": "v8.1.1"
+  },
+  "cl_date_8_1_1": {
+    "message": "2026-11-20"
+  },
+  "cl_8_1_1_fip_perm_title": {
+    "message": "Field preview with restricted roles"
+  },
+  "cl_8_1_1_fip_perm_desc": {
+    "message": "Fixed the custom field preview showing a search error with roles that cannot view field definitions."
+  },
+  "cl_8_1_1_grouped_ajenos_title": {
+    "message": "Grouped Tabs respects other groups"
+  },
+  "cl_8_1_1_grouped_ajenos_desc": {
+    "message": "Fixed Grouped Tabs taking NetSuite tabs out of a group made by another tool or by the user."
+  },
+  "cl_8_1_1_rolef_always_title": {
+    "message": "Employee name in the role menu"
+  },
+  "cl_8_1_1_rolef_always_desc": {
+    "message": "Fixed the employee name not showing in the role menu when logged in with an Employee Center role."
+  },
+  "cl_8_1_1_ro_buscar_title": {
+    "message": "View Record Object search in collapsed sections"
+  },
+  "cl_8_1_1_ro_buscar_desc": {
+    "message": "Fixed View Record Object search not showing matches in sections that had not been opened yet."
+  },
+  "cl_8_1_1_ro_editar_title": {
+    "message": "Edit values from View Record Object"
+  },
+  "cl_8_1_1_ro_editar_desc": {
+    "message": "Added «Allow Changes» to View Record Object to edit body and sublist values and save the record."
   },
   "cl_8_1_0_firefox_title": {
     "message": "Firefox version"
@@ -18613,6 +18637,9 @@
   },
   "ro_save_warning": {
     "message": "This loads and saves the whole record, so user event scripts and workflows will run. The page reloads afterwards."
+  },
+  "ro_save_prod_warning": {
+    "message": "This record is in PRODUCTION."
   },
   "ro_save_edit_mode_warning": {
     "message": "This page is in edit mode: anything not yet saved on the form will be lost."
